@@ -187,11 +187,9 @@ export default {
 					{ colName: 'userno', ruleType: 'like', value: this.loginUserInfo.user_no },
 					{ colName: 'user_name', ruleType: 'like', value: uni.getStorageSync('current_user') }
 				],
-				page: { pageNo: 1, rownumber: 10 },
 				order: []
 			};
 			let res = await this.$http.post(url, req);
-			console.log('00000000000000');
 			if (res.data.state === 'SUCCESS') {
 				this.getSportsAllRecord(res.data.data);
 			}
@@ -206,7 +204,6 @@ export default {
 					{ colName: 'userno', ruleType: 'like', value: this.loginUserInfo.user_no },
 					{ colName: 'user_name', ruleType: 'like', value: uni.getStorageSync('current_user') }
 				],
-				page: { pageNo: 1, rownumber: 10 },
 				order: []
 			};
 			let res = await this.$http.post(url, req);
@@ -216,7 +213,6 @@ export default {
 				arr.forEach(item => {
 					timeArr.push(item.hdate);
 				});
-
 				let allRecord = Array.from(new Set(timeArr));
 				this.markDays = allRecord;
 			}
@@ -338,8 +334,8 @@ export default {
 				// #ifdef H5
 				// this.getSignature();
 				// #endif
-			}else{
-				// 没有用户信息 
+			} else {
+				// 没有用户信息
 			}
 		},
 		clickUserMenu(e) {
@@ -373,21 +369,21 @@ export default {
 				uni.setStorageSync('current_user', e.name);
 				uni.setStorageSync('current_user_info', e);
 				this.userInfo = e;
-				this.$refs.diet.resetRadioArr();
-				this.$refs.diet.changeSub(4);
-				this.$refs.diet.getDietRecord();
-				this.$refs.diet.getSportsRecord();
+				// this.$refs.diet.resetRadioArr();
+				// this.$refs.diet.changeSub(4);
+				// this.$refs.diet.getDietRecord();
+				// this.$refs.diet.getSportsRecord();
 			}
 			this.showUserList = false;
 		}
 	},
 	created() {
-		uni.$on('dietInChange',(dietIn)=>{
-			this.dietIn = dietIn
-		})
-		uni.$on('sportOutChange',(sportOut)=>{
-			this.dietIn = dietIn
-		})
+		uni.$on('dietInChange', dietIn => {
+			this.dietIn = dietIn;
+		});
+		uni.$on('sportOutChange', sportOut => {
+			this.sportOut = sportOut;
+		});
 	},
 	onShow() {
 		self = this;
@@ -407,7 +403,7 @@ export default {
 					}
 				}
 			});
-			this.getDietAllRecord();
+			// this.getDietAllRecord();
 		}
 	}
 };

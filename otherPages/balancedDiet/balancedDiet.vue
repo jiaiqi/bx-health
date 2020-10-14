@@ -1712,6 +1712,7 @@ export default {
 					item['editable'] = false;
 				});
 				this.sportOut = sportOut;
+				uni.$emit('sportOutChange',sportOut)
 			} else if (res.data.state === 'SUCCESS' && res.data.data.length === 0) {
 				this.sportsRecord = [];
 				this.sportOut = 0;
