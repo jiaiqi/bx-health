@@ -1,0 +1,209 @@
+{
+	"pages": [
+		{
+			"path": "pages/accountExec/accountExec",
+			"style": {
+				"navigationBarTitleText": "微信登录",
+				"navigationBarBackgroundColor": "#0055ff"
+			}
+		},
+		{
+			"path": "pages/pedia/pedia",
+			"style": {
+				// "navigationStyle": "custom",
+				"navigationBarTitleText": "健康科普",
+				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		}, {
+			"path": "pages/store/store",
+			"style": {
+				"navigationBarTitleText": "生活圈",
+				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		},
+		{
+			"path": "pages/home/home",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "健康档案",
+				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		}
+	],
+	"subPackages": [{
+			"root": "otherPages",
+			"pages": [{
+					"path": "index/index",
+					"style": {
+						"navigationBarTitleText": "工具",
+						"navigationBarBackgroundColor": "#0bc99d"
+					}
+				},
+				{
+					"path": "balancedDiet/balancedDiet",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "今日概览",
+						"navigationBarBackgroundColor": "#0bc99d"
+					}
+				},
+				{
+					"path": "mineSelf/mineSelf",
+					"style": {}
+				}, {
+					"path": "tool/toolOne/toolOne",
+					"style": {
+						"navigationBarTitleText": "卡路里计算"
+					}
+				},
+				{
+					"path": "tool/toolTwo/toolTwo",
+					"style": {
+						"navigationBarTitleText": "BMI计算"
+					}
+				},
+				{
+					"path": "tool/toolThree/toolThree",
+					"style": {
+						"navigationBarTitleText": "婴儿发育查询"
+					}
+				},
+				{
+					"path": "tool/toolFour/toolFour",
+					"style": {
+						"navigationBarTitleText": "食品查询"
+					}
+				},
+				{
+					"path": "tool/toolFive/toolFive",
+					"style": {
+						"navigationBarTitleText": "营养素介绍"
+					}
+				},
+				{
+					"path": "tool/toolSix/toolSix",
+					"style": {
+						"navigationBarTitleText": "运动查询"
+					}
+				}, {
+					"path": "foodDetail/foodDetail",
+					"style": {
+						"navigationBarTitleText": "食物详情"
+					}
+				}, {
+					"path": "sportsDetail/sportsDetail",
+					"style": {
+						"navigationBarTitleText": "运动详情"
+					}
+				}, {
+					"path": "otherIndicator/otherIndicator",
+					"style": {
+						"navigationBarTitleText": "身体指标"
+					}
+				}, {
+					"path": "personalDetail/personalDetail",
+					"style": {
+						"navigationBarTitleText": "身体指标"
+					}
+				}, {
+					"path": "elementDetail/elementDetail",
+					"style": {}
+				},
+				{
+					"path": "symptomSelect/symptomSelect3",
+					"style": {
+						"navigationBarTitleText": "症状选择"
+					}
+				},
+				{
+					"path": "indicatorsDetails/dietUp/dietUp",
+					"style": {}
+				},
+				{
+					"path": "foodSelect/foodSelect",
+					"style": {}
+				}, {
+					"path": "record/record",
+					"style": {}
+				},
+				{
+					"path": "sportDetail/sportDetail",
+					"style": {}
+				}, {
+					"path": "dietSelect/dietSelect",
+					"style": {}
+				}, {
+					"path": "articleList/articleList",
+					"style": {}
+				}, {
+					"path": "articleDetail/articleDetail",
+					"style": {}
+				}, {
+					"path": "article/article",
+					"style": {}
+				},
+				{
+					"path": "failpage/failpage",
+					"style": {}
+				},
+				{
+					"path": "healthQuestionnaire/healthQuestionnaire",
+					"style": {}
+				},
+				{
+					"path": "indicatorsDetails/dietDetail/dietDetail",
+					"style": {}
+				}, {
+					"path": "healthNav/healthNav",
+					"style": {}
+				}
+			]
+		},
+		{
+			"root": "publicPages",
+			"pages": [{
+				"path": "list/list",
+				"style": {}
+			}, {
+				"path": "form/form",
+				"style": {}
+			}, {
+				"path": "home/home",
+				"style": {
+					"navigationBarTitleText": "首页"
+				}
+			}]
+		}
+	],
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#0bc99d",
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [{
+			"pagePath": "pages/pedia/pedia",
+			"iconPath": "static/icon/find.png",
+			"selectedIconPath": "static/icon/find_active.png",
+			"text": "健康科普"
+		}, {
+			"pagePath": "pages/home/home",
+			"iconPath": "static/icon/health.png",
+			"selectedIconPath": "static/icon/health_active.png",
+			"text": "健康档案"
+		}, {
+			"pagePath": "pages/store/store",
+			"iconPath": "static/icon/live.png",
+			"selectedIconPath": "static/icon/live_active.png",
+			"text": "生活"
+		}]
+	},
+	"easycom": {
+		"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue"
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "",
+		"navigationBarBackgroundColor": "#1abc9c",
+		"backgroundColor": "#F8F8F8"
+	}
+}
