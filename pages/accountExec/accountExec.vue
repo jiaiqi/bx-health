@@ -7,7 +7,9 @@
 			<view class="wrapper">
 				<!-- <view class="left-top-sign">LOGIN</view> -->
 				<view class="welcome">
+					<!-- #ifdef H5 -->
 					欢迎回来！
+					<!-- #endif -->
 					<text v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin">请授权微信登录</text>
 				</view>
 				<view class="input-content" v-if="client_env === 'web' || client_env === 'app' || isShowUserLogin">

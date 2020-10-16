@@ -156,6 +156,14 @@
 				}, {
 					"path": "healthNav/healthNav",
 					"style": {}
+				},
+				{
+					"path": "shop/shopHome",
+					"style": {}
+				},
+				{
+					"path": "shop/shopDetail",
+					"style": {}
 				}
 			]
 		},

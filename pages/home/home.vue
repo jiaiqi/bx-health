@@ -390,19 +390,21 @@ export default {
 		uni.setStorageSync('activeApp', 'health');
 		let userInfo = uni.getStorageSync('login_user_info');
 		if (userInfo && userInfo.user_no) {
-			this.getUserInfo();
-			this.loginUserInfo = userInfo;
-			this.getCurrUserInfo().then(_ => {
-				if (uni.getStorageSync('current_user_info')) {
-					this.userInfo = uni.getStorageSync('current_user_info');
-				} else {
-					let userList = uni.getStorageSync('user_info_list');
-					if (Array.isArray(userList) && userList.length > 0) {
-						this.userInfo = userList[0];
-						uni.setStorageSync('current_user_info', userList[0]);
+			this.getUserInfo().then(_=>{
+				this.getCurrUserInfo().then(_ => {
+					if (uni.getStorageSync('current_user_info')) {
+						this.userInfo = uni.getStorageSync('current_user_info');
+					} else {
+						let userList = uni.getStorageSync('user_info_list');
+						if (Array.isArray(userList) && userList.length > 0) {
+							this.userInfo = userList[0];
+							uni.setStorageSync('current_user_info', userList[0]);
+						}
 					}
-				}
-			});
+				});
+			})
+			this.loginUserInfo = userInfo;
+			
 			// this.getDietAllRecord();
 		}
 	}

@@ -25,11 +25,29 @@
 				</view>
 			</view>
 		</view>
-		<view class=""><sl-filter ref="filter" :color="titleColor" :themeColor="themeColor" :menuList.sync="menuList" @result="result"></sl-filter></view>
-		<view class="panelHmh">
-			<!-- <drawer-filter-panel :filterShow="filterShow" :submenu="submenu" @sureFilter="onSureFilter" @resetFilter="onResetFilter" @hideFilter="onHideFilter"></drawer-filter-panel> -->
+		<view class="filtrate-wrap">
+			<view v-if="childChooseArr.length > 0" class="filtrate-choose">
+				<text>已选择：</text>
+				<view v-for="(item,index) in childChooseArr" class="filtrate-choose-item">
+					<u-tag :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"/>
+				</view>
+			</view>
+			<view class="filtrate-item-wrap">
+				<view v-for="(item,index) in menuAgList" :key="index" class="filtrate-item">
+					<view class="filtrate-item-left">
+						{{item.classify_name}}
+					</view>
+					<view v-for="(cate,i) in item.children" :class="cate.choose?'cate-active':''" class="filtrate-item-right">
+						<text @click="chooseMenu(item,cate)">{{cate.title}}</text>
+						<!-- arrow-down-fill -->
+						<u-icon size="24" v-show="cate.current_num == 1 && item.type ==='capacity'" name="arrow-up"></u-icon>
+						<u-icon size="24" v-show="cate.current_num == 2 && item.type ==='capacity'" name="arrow-down"></u-icon>
+						<text v-show="cate.current_num == 1 && item.type !=='food' && item.type !=='capacity'">(高)</text>
+						<text v-show="cate.current_num == 2 && item.type !=='food' && item.type !=='capacity'">(低)</text>
+					</view>
+				</view>
+			</view>
 		</view>
-		<!-- <scroll-view :scroll-y="true"> -->
 		<sPullScroll
 			ref="pullScroll"
 			:heightStyle="heightStyle"
@@ -37,7 +55,7 @@
 			:pullUp="loadData"
 			:enablePullDown="true"
 			:enablePullUp="true"
-			:top="100"
+			:top="topNum"
 			:fixed="true"
 			:bottom="0"
 			finishText="我是有底线的..."
@@ -45,9 +63,6 @@
 			<view class="cu-list menu-avatar contentList">
 				<view
 					@click.stop="chooseFood(food)"
-					@touchstart="ListTouchStart"
-					@touchmove="ListTouchMove"
-					@touchend="ListTouchEnd"
 					:data-target="'move-box-' + idx"
 					:class="modalName == 'move-box-' + idx ? 'move-cur' : ''"
 					class="cu-item boxfood"
@@ -57,18 +72,22 @@
 					<!-- <view class="cu-item boxfood-item" :class="modalName=='move-box-'+ idx?'move-cur':''" :key="idx"
 						 @touchstart="ListTouchStart" @touchmove="ListTouchMove" @touchend="ListTouchEnd" :data-target="'move-box-' + idx"> -->
 					<view class="smallbox">
-						<image v-if="food.imgurl" :src="food.imgurl" mode="scaleToFill"></image>
-						<image v-else src="/otherPages/static/img/none.png" mode="scaleToFill"></image>
+						<view class="smallbox-img">
+							<u-image width="100%" height="100%" v-if="!food.imgurl" src="/otherPages/static/img/none.png"></u-image>
+							<u-image width="100%" height="100%" v-else :src="food.imgurl"></u-image>
+						</view>
+						
 						<view class="textbox">
 							<view class="title-food">
 								{{ food.name }}
-								<view v-if="lockEledata" class="lock-ele">
-									(
-									<text>{{ lockEledata.label }}:</text>
-									<text class="second-lock">{{ food[lockEledata.key] }}</text>
-									<text class="second-lock">{{ lockEledata.units ? lockEledata.units.split('/')[0] : '' }}</text>
-									)
-								</view>
+								
+							</view>
+							<view v-if="lockEledata " class="lock-ele">
+								(
+								<text>{{ lockEledata.label }}:</text>
+								<text class="second-lock">{{ food[lockEledata.key] }}</text>
+								<text class="second-lock">{{ lockEledata.units ? lockEledata.units.split('/')[0] : '' }}</text>
+								)
 							</view>
 							<view class="food-utis">
 								<text class="number" style="margin-right: 5px;">{{ food.unit_energy }}千卡</text>
@@ -76,18 +95,18 @@
 							</view>
 						</view>
 					</view>
-					<view @click.stop="toFoodsDetail(food)" class="relian">
+					<!-- <view @click.stop="toFoodsDetail(food)" class="relian">
 						<text class="status" :style="{ background: food.number > 200 ? '#fdc627' : '#00da43' }"></text>
 						<uni-text class="lg text-gray cuIcon-right"><span></span></uni-text>
-					</view>
-					<view class="move foods-move"><view @click.stop="toFoodsDetail(food)" class="bg-grey">详情</view></view>
+					</view> -->
+					<!-- <view class="move foods-move"><view @click.stop="toFoodsDetail(food)" class="bg-grey">详情</view></view> -->
 					<!-- </view> -->
 				</view>
 			</view>
 		</sPullScroll>
 		<!-- </scroll-view> -->
 		<view class="cu-modal bottom-modal" :class="{ show: showBottomModal }">
-			<view class="cu-dialog">
+			<view class="cu-dialog" :class="pageType === 'sport'?'sport-dialog':''">
 				<view class="cu-bar bg-white">
 					<view class=" text-cyan button" @tap="showBottomModal = false">取消</view>
 					<view class="date-time">
@@ -109,10 +128,10 @@
 									千卡/{{ currFood.unit_amount + currFood.unit }}
 								</text>
 							</view>
-							<view class="status bg-green"></view>
+							<view class="calorie">{{ heatNum ? heatNum.toFixed(1) :''}}千卡</view>
 						</view>
 					</view>
-					<view class="ele-text-wrap">
+					<view v-if="pageType==='food'" class="ele-text-wrap">
 						<view class="ele-text-top">主要维生素含量如下：</view>
 						<view class="ele-text-cen">
 							<view class="ele-text-cen-item">
@@ -122,12 +141,12 @@
 								<view class="ele-text-cen-item-cen">
 									<view class="ele-text">
 										<text>VA:</text>
-										<text>{{ currFood.vitamin_a && currFood.vitamin_a.toFixed(1) }}ug</text>
+										<text>{{ currFood.vitamin_a ? currFood.vitamin_a.toFixed(1):'' }}ug</text>
 										<text style="color: red;">({{ currFood.vitamin_a>=450?'高':currFood.vitamin_a>=100&&currFood.vitamin_a<450?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>VE:</text>
-										<text>{{ currFood.vitamin_e && currFood.vitamin_e.toFixed(1) }}mg</text>
+										<text>{{ currFood.vitamin_e ? currFood.vitamin_e.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.vitamin_e>=35?'高':currFood.vitamin_e>=15&&currFood.vitamin_e<35?'较高':'低' }})</text>
 									</view>
 								</view>
@@ -139,7 +158,7 @@
 								<view class="ele-text-cen-item-cen">
 									<view class="ele-text">
 										<text>蛋白质:</text>
-										<text>{{ currFood.protein && currFood.protein.toFixed(1) }}g</text>
+										<text>{{ currFood.protein ? currFood.protein.toFixed(1) :"" }}g</text>
 										<text style="color: red;">({{ currFood.protein>=35?'高':currFood.protein>=15&&currFood.protein<35?'较高':'低' }})</text>
 									</view>								
 								</view>
@@ -151,22 +170,22 @@
 								<view class="ele-text-cen-item-cen">
 									<view class="ele-text">
 										<text>VB1:</text>
-										<text>{{ currFood.vitamin_b1 && currFood.vitamin_b1.toFixed(1) }}mg</text>
+										<text>{{ currFood.vitamin_b1 ? currFood.vitamin_b1.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.vitamin_b1>=0.15?'高':currFood.vitamin_b1>=0.1&&currFood.vitamin_b1<0.15?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>VB2:</text>
-										<text>{{ currFood.vitamin_b2 && currFood.vitamin_b2.toFixed(1) }}mg</text>
+										<text>{{ currFood.vitamin_b2 ? currFood.vitamin_b2.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.vitamin_b2>=0.15?'高':currFood.vitamin_b2>=0.1&&currFood.vitamin_b2<0.15?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>VB3:</text>
-										<text>{{ currFood.vitamin_b3 && currFood.vitamin_b3.toFixed(1) }}mg</text>
+										<text>{{ currFood.vitamin_b3 ? currFood.vitamin_b3.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.vitamin_b3>=5?'高':currFood.vitamin_b3>=3.5&&currFood.vitamin_b3<5?'较高':'低' }})</text>
 									</view>		
 									<view class="ele-text">
 										<text>VC:</text>
-										<text>{{ currFood.vitamin_c && currFood.vitamin_c.toFixed(1) }}mg</text>
+										<text>{{ currFood.vitamin_c ? currFood.vitamin_c.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.vitamin_c>=50?'高':currFood.vitamin_c>=35&&currFood.vitamin_c<50?'较高':'低' }})</text>
 									</view>
 								</view>
@@ -178,22 +197,22 @@
 								<view class="ele-text-cen-item-cen">
 									<view class="ele-text">
 										<text>钙:</text>
-										<text>{{ currFood.vitamin_a && currFood.element_ca.toFixed(1) }}mg/</text>
+										<text>{{ currFood.element_ca ? currFood.element_ca.toFixed(1):'' }}mg/</text>
 										<text style="color: red;">({{ currFood.element_ca>=450?'高':currFood.element_ca>=200&&currFood.element_ca<450?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>镁:</text>
-										<text>{{ currFood.element_mg && currFood.element_mg.toFixed(1) }}mg</text>
+										<text>{{ currFood.element_mg ? currFood.element_mg.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.element_mg>=150?'高':currFood.element_mg>=80&&currFood.element_mg<150?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>磷:</text>
-										<text>{{ currFood.element_p && currFood.element_p.toFixed(1) }}mg</text>
+										<text>{{ currFood.element_p ? currFood.element_p.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.element_p>=250?'高':currFood.element_p>=150&&currFood.element_p<250?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>钾:</text>
-										<text>{{ currFood.element_k && currFood.element_k.toFixed(1) }}mg</text>
+										<text>{{ currFood.element_k ? currFood.element_k.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.element_k>=500?'高':currFood.element_k>=200&&currFood.element_k<500?'较高':'低' }})</text>
 									</view>
 								</view>
@@ -206,55 +225,68 @@
 								<view class="ele-text-cen-item-cen">
 									<view class="ele-text">
 										<text>铁:</text>
-										<text>{{ currFood.element_fe && currFood.element_fe.toFixed(1) }}mg</text>
+										<text>{{ currFood.element_fe ? currFood.element_fe.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.element_fe>=8?'高':currFood.element_fe>=4&&currFood.element_fe<8?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>锌:</text>
-										<text>{{ currFood.element_zn && currFood.element_zn.toFixed(1) }}mg</text>
+										<text>{{ currFood.element_zn ? currFood.element_zn.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.element_zn>=7?'高':currFood.element_zn>=4&&currFood.element_zn<7?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>硒:</text>
-										<text>{{ currFood.element_se && currFood.element_se.toFixed(1) }}mg</text>
+										<text>{{ currFood.element_se ? currFood.element_se.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.element_se>=20?'高':currFood.element_se>=10&&currFood.element_se<20?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>铜:</text>
-										<text>{{ currFood.element_cu && currFood.element_cu.toFixed(1) }}mg</text>
+										<text>{{ currFood.element_cu ? currFood.element_cu.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.element_cu>=1.5?'高':currFood.element_cu>=1&&currFood.element_cu<1.5?'较高':'低' }})</text>
 									</view>
 									<view class="ele-text">
 										<text>锰:</text>
-										<text>{{ currFood.element_mn && currFood.element_mn.toFixed(1) }}mg</text>
+										<text>{{ currFood.element_mn ? currFood.element_mn.toFixed(1):'' }}mg</text>
 										<text style="color: red;">({{ currFood.element_mn>=5?'高':currFood.element_mn>=2.5&&currFood.element_mn<5?'较高':'低' }})</text>
 									</view>
 								</view>
-							</view>
+							</view>																											
 						</view>
 					</view>
 					<view class="calculate">
-						<view class="calorie">{{ heatNum.toFixed(1) }}千卡</view>
 						<view class="amount">
-							<view class="number">{{ choiceNum ? choiceNum : defultChoiceNum }}</view>
+							<!-- <view class="number">{{ choiceNum ? choiceNum : defultChoiceNum }}</view> -->
+							<view class="input-box">
+								<view class="key-left">
+									<text @click="countDietNum('-1')">-1</text>
+									<text @click="countDietNum('-0.5')">-0.5</text>
+								</view>
+								<u-input placeholder=" " :border="true" maxlength="20" v-model="choiceNum" type="number"   />
+								<view class="key-right">
+									<text @click="countDietNum('+1')"> +1 </text>
+									<text @click="countDietNum('+0.5')"> +0.5 </text>
+								</view>					
+							</view>
 						</view>
-						<view class="weight">
+						<view @click="changeUnit(currFood)" class="weight">
 							<!-- <view class="unit">{{ currFood.unit }}</view> -->
-							<view class="unit">{{ radioLabel?(radioLabel.unit_amount?radioLabel.unit_amount+radioLabel.unit:radioLabel.unit):currFood.unit_amount+currFood.unit }}</view>
-							<!-- <view class="unit-change"> -->
-								<image @click="changeUnit(currFood)" src="/otherPages/static/img/change.png" mode=""></image>
-							<!-- </view> -->
+							<view style="padding-right: 8upx;" class="unit">{{ radioLabel?(radioLabel.unit_amount?radioLabel.unit_amount+radioLabel.unit:radioLabel.unit):currFood.unit_amount+currFood.unit }}</view>
+							<view class="unit-change">
+							<!-- <image @click="changeUnit(currFood)" src="/otherPages/static/img/change1.png" mode=""></image> -->
+							<u-icon size="24" name="arrow-down-fill"></u-icon>
+							</view>
 							<!-- 300
 							<text class="unit">克</text> -->
 						</view>
 						<!-- <view class="calorie">{{ heatNum.toFixed(1) }}千卡</view> -->
 					</view>
-					<view class="input-box">
-						<div @click="keyboardDown(item)" v-for="(item, index) in keyboardCont" :key="index" class="digit">
-							<text v-if="item.type === 'num'">{{ item.value }}</text>
-							<text :class="item.value" v-else></text>
-						</div>
-					</view>
+					<!-- <u-tabs class="change-tab" active-color="#009688" name="unit" :list="list" bg-color="transparent" :show-bar="false" :item-width="150" :is-scroll="false" :current="radioIndex" @change="change"></u-tabs> -->
+					<!-- <scroll-view scroll-x class="bg-white nav text-center">
+						<view class="cu-item" :class="index==TabCur?'text-blue cur':''" v-for="(item,index) in 3" :key="index" @tap="tabSelect" :data-id="index">
+							Tab{{index}}
+						</view>
+					</scroll-view> -->
+					
+					
 				</view>
 			</view>
 		</view>
@@ -275,6 +307,7 @@
 									<text class="number" style="margin-right: 5px;">{{ food.energy }}千卡</text>
 									<text class="utis">/ {{ food.unit_weight_g?food.amount * food.unit_weight_g:food.amount  + food.unit }}</text>
 								</view>
+								
 							</view>
 						</view>
 						<view class="relian">
@@ -318,25 +351,21 @@
 		/>
 		<!-- <flyInCart ref="inCart" :cartBasketRect="cartBasketRect"></flyInCart> -->
 		<jumpBall :backgroundImage="currFood.imgurl" :start.sync="num" :element.sync="element" @msg="jbMsg" />
-		<view class="public-button-box">
-			<view @click="openCar" class="lg text-gray cuIcon-cart add-button">
-				<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>
+		<view class="public-button-box add-button">
+			<view @click="openCar" class="lg text-gray cuIcon-cart add-button-wrap">
+					<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>				
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-import slFilter from '@/components/sl-filter/sl-filter.vue';
-// import drawerFilterPanel from '@/components/ypeng-drawer-filter-panel/index';
 import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
 import jumpBall from '@/components/hx-jump-ball/hx-jump-ball.vue';
 import sPullScroll from '@/components/s-pull-scroll';
 export default {
 	components: {
-		sPullScroll,
-		slFilter,
-		// drawerFilterPanel,
+		sPullScroll,			
 		MxDatePicker,
 		jumpBall
 	},
@@ -368,6 +397,10 @@ export default {
 		return {
 			heightStyle: 'calc(100vh-200upx)',
 			chooseFoods: [],
+			value1:0,
+			list: [],
+			current: 0,
+			topNum:400,
 			colData: [],
 			currFoodLabel: {},
 			listTouchStart: 0,
@@ -565,6 +598,20 @@ export default {
 					]
 				}
 			],
+			/**
+			 * [{
+				classify_name:'宏量成分',
+				type:'capacity',
+				
+				children:[{
+					{
+						title: '默认',
+						value: 'default'
+					}
+				}]
+			}]
+			 * */
+			menuAgList:[],
 			menuList: [
 				{
 					title: '宏量成分',
@@ -735,12 +782,16 @@ export default {
 			foodDoubleList: [],
 			pageInfo: {
 				total: 0,
-				rownumber: 10,
+				rownumber: 20,
 				pageNo: 1
 			},
 			lockEledata: null,
 			radioIndex: 0,
 			radioLabel: '',
+			TabCur: 0,
+			scrollLeft: 0,
+			pageType:'',
+			childChooseArr:[]
 		};
 	},
 	onLoad(option) {
@@ -750,82 +801,151 @@ export default {
 			this.lockEledata = query.lackEle;
 		}
 		let singleType = '';
+		this.pageType = query.type
 		if (query.type === 'food') {
-			singleType = [
+			let menuData = [
 				{
-					title: '热量',
-					value: 'unit_energy'
-				},
-				{
-					title: '蛋白质',
-					value: 'protein'
-				},
-				{
-					title: '脂肪',
-					value: 'axunge'
-				},
-				{
-					title: '碳水化合物',
-					value: 'carbohydrate'
-				}
-			];
-			let submenu = [
-				{
-					name: '蔬菜',
-					value: '蔬菜',
-					filterList: [
+					classify_name:'分类',
+					type:"food",
+					children:[
 						{
-							title: '蔬菜',
-							type: 'fltd_type',
-
-							items: [
-								{
-									value: '野生蔬菜',
-									name: '野生蔬菜'
-								},
-								{
-									value: '谷薯类',
-									name: '谷薯类'
-								},
-								{
-									value: '藻类',
-									name: '藻类'
-								},
-								{
-									value: '菌藻类',
-									name: '菌藻类'
-								},
-								{
-									value: '干豆类',
-									name: '干豆类'
-								},
-								{
-									value: '豆制品',
-									name: '豆制品'
-								},
-								{
-									value: '水果',
-									name: '水果'
-								},
-								{
-									value: '坚果',
-									name: '坚果'
-								},
-								{
-									value: '小麦',
-									name: '小麦'
-								},
-								{
-									value: '薯类',
-									name: '薯类'
-								}
-							]
+							title: '食材',
+							value: 'matter',
+							choose:true
+						},
+					{
+						title: '食物',
+						value: 'foods',
+						choose:false
+					}]
+				},
+				{
+				classify_name:'宏量成分',
+				type:'capacity',				
+				children:[
+					{
+						title: '默认',
+						value: 'default',
+						choose:true,
+						current_num:0
+					},
+					{
+						title: '热量',
+						value: 'unit_energy',
+						choose:false,
+						current_num:0
+					},
+					{
+						title: '蛋白质',
+						value: 'protein',
+						choose:false,
+						current_num:0
+					},
+					{
+						title: '脂肪',
+						value: 'axunge',
+						choose:false,
+						current_num:0
+					},
+					{
+						title: '碳水化合物',
+						value: 'carbohydrate',
+						choose:false,
+						current_num:0
+					}
+				]
+			},{
+				classify_name:'维生素',
+				type:'vitamin',				
+				children:[{
+							title: '不限',
+							value: '不限',
+							choose:true,
+							current_num:0
+						},
+						{
+							title: 'VA',
+							value: 'vitamin_a',
+							choose:false,
+							num: 20,
+							current_num:0
+						},
+						{
+							title: 'VC',
+							value: 'vitamin_c',
+							choose:false,
+							num: 25,
+							current_num:0
+						}]
+				},{
+				classify_name:'矿物质',
+				type:'mineral',				
+				children:[
+						{
+							title: '不限',
+							value: '不限',
+							choose:true,
+							current_num:0
+							
+						},
+						{
+							title: '钙',
+							value: 'element_ca',
+							choose:false,
+							num: 56,
+							current_num:0
+						},
+						{
+							title: '镁',
+							value: 'element_m',
+							choose:false,
+							num: 50,
+							current_num:0
+						},
+						{
+							title: '钾',
+							value: 'element_k',
+							choose:false,
+							num: 200,
+							current_num:0
 						}
 					]
-				}
-			];
-			this.submenu = submenu;
-			this.menuList[0].detailList = [...this.menuList[0].detailList, ...singleType];
+				},{
+				classify_name:'其他',
+				type:'mingle',				
+				children:[
+						{
+							title: '不限',
+							value: '不限',
+							choose:true,
+							current_num:0
+						},
+						{
+							title: '硫胺素',
+							value: 'thiamine',
+							num: 0.2,
+							choose:false,
+							current_num:0
+						},
+						{
+							title: '核黄素',
+							value: 'riboflavin',
+							num: 0.1,
+							choose:false,
+							current_num:0
+						},
+						{
+							title: '烟酸',
+							value: 'element_k',
+							num: 2,
+							choose:false,
+							current_num:0
+						}
+					]
+				}]
+				this.menuAgList = menuData
+			// this.submenu = submenu;
+			// this.menuList[0].detailList = [...this.menuList[0].detailList, ...singleType];
 			if (query.order) {
 				this.order = query.order;
 			}
@@ -833,26 +953,41 @@ export default {
 			this.getElementLabel();
 			this.onRefresh();
 		} else if (query.type === 'sport') {
-			singleType = [
-				{
-					title: '运动',
-					detailTitle: '请选择一项进行排序',
-					isMutiple: false,
-					key: 'jobType',
-					reflexTitle: true,
-					isSort: true,
-					detailList: [
-						{
-							title: '默认',
-							value: 'default'
-						},
-						{
-							title: '卡路里',
-							value: 'unit_energy'
-						}
-					]
-				}
-			];
+			let menuData = [{
+				classify_name:'运动',
+				type:'capacity',
+				children:[{
+					title: '默认',
+					value: 'default',
+					choose:true,
+					current_num:0
+				},{
+					title: '卡路里',
+					value: 'unit_energy',
+					choose:false,
+					current_num:0
+				}]
+			}]
+			// singleType = [
+			// 	{
+			// 		title: '运动',
+			// 		detailTitle: '请选择一项进行排序',
+			// 		isMutiple: false,
+			// 		key: 'jobType',
+			// 		reflexTitle: true,
+			// 		isSort: true,
+			// 		detailList: [
+			// 			{
+			// 				title: '默认',
+			// 				value: 'default'
+			// 			},
+			// 			{
+			// 				title: '卡路里',
+			// 				value: 'unit_energy'
+			// 			}
+			// 		]
+			// 	}
+			// ];
 			let submenu = [
 				{
 					name: '跑步',
@@ -874,7 +1009,8 @@ export default {
 			];
 
 			this.submenu = submenu;
-			this.menuList = singleType;
+			this.menuAgList = menuData;
+			this.topNum = 160
 			// submenu.
 			this.getChooseSportList();
 		}
@@ -885,7 +1021,366 @@ export default {
 		// if(query.type === 'food'){
 		// }
 	},
+	watch: {
+		childChooseArr(newValue, oldValue) {
+			console.log("-------------",newValue)
+			
+			if(newValue.length > 0){
+				if(this.pageType == 'food'){
+					this.topNum = 450
+				}else if(this.pageType== 'sport'){
+					this.topNum = 240
+				}
+			}else{
+				if(this.pageType == 'food'){
+					this.topNum = 400
+				}else if(this.pageType== 'sport'){
+					this.topNum = 180
+				}
+			}
+		}
+	},
 	methods: {
+		countDietNum(num){
+			let value = this.value1
+			if(value >= 0){				
+				if(num === '-0.5'){
+					if(value > 0){
+						value = value - 0.5
+					}else{
+						value = 0
+					}
+				}else if(num === '-1'){
+					if(value >= 1){
+						value = value - 1
+					}
+				}else if(num === '+1'){
+					value = value + 1
+					
+				}else if(num === '+0.5'){
+					value = value + 0.5
+				}
+				this.value1 = value
+				this.choiceNum = value
+				if (Number(this.choiceNum) && !this.radioLabel) {
+					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
+				}else if(Number(this.choiceNum) && this.radioLabel){
+					if(this.radioLabel.unit_amount){
+						this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
+					}else{						
+						this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount/100) * this.currFood.unit_energy)
+					}
+				}
+				if(value == 0){
+					this.heatNum = 0
+				}
+			}
+		},
+		/*标签关闭事件**/
+		tagClick(item){
+			let cond = {
+				relation: 'AND',
+				data: []
+			};
+			let order = ""
+			let childChooseArr = this.childChooseArr
+			childChooseArr.forEach((ch,i)=>{
+				if(ch.title === item.title){
+					childChooseArr.splice(i,1)
+				}
+			})
+			let menuData = this.menuAgList
+			let hasChild = false
+			menuData.forEach(m=>{
+				m.children.forEach(c=>{
+					if(c.title === item.title){
+						c.choose = false
+						c.current_num = 0
+						if(childChooseArr.length <= 0){
+							m.children[0].choose = true
+						}						
+					}
+					
+				})
+			})
+			
+			
+			if(childChooseArr.length === 0){
+				this.getFoodsList()
+			}else{
+				childChooseArr.forEach(son=>{
+					
+					let obj = {
+						colName:son.value,
+						ruleType: 'ge',
+						value:son.num
+					}
+					cond.data.push(obj)
+				})
+				if (cond.data.length === 1) {
+					order = {
+						col: cond.data[0].colName,
+						type: 'desc'
+					};
+				}
+				if(cond.data.length === 0){
+					cond = null
+				}
+				
+				this.getFoodsList(order, cond, 'filtrate');
+			}
+			console.log("--标签--")
+		},
+		/* 顶部菜单点击**/
+		chooseMenu(parent,child){
+			this.pageInfo.pageNo = 1
+			if(child.value!='不限' && child.value != 'default'){
+				child.current_num += 1
+				if(child.current_num == 4){
+					child.current_num  = 0
+				}
+				// if(child.current_num != 0){
+				// 	child.choose = true
+				// }else{
+				// 	child.choose = false
+				// }
+			}else{
+				child.choose = !child.choose
+			}
+			let menuData = this.menuAgList
+			let order = ''
+			/* 宏量成分---排序**/
+			if(parent.type==='capacity'){
+				if(child.value != 'default'){
+					 if(child.current_num == 1){
+						 order = {
+						 	col: child.value,
+						 	type: 'asc'
+						 };	
+					 }else if(child.current_num == 2){
+						 order = {
+						 	col: child.value,
+						 	type: 'desc'
+						 };	
+					 }else if(child.current_num == 3){
+						 child.current_num = 0
+					 }														
+				}
+				menuData.forEach(par=>{
+					if(par.type === parent.type){
+						par.children.forEach(p=>{
+							p.choose = false
+							if(child.current_num != 0 && p.value == child.value){
+								p.choose = true
+								let child_h = false
+								this.childChooseArr.forEach(H=>{
+									if(H.value === child.value){
+										child_h = true
+									}
+								})
+								if(!child_h){
+									this.childChooseArr.push(child)
+								}
+							}
+							if(!p.choose){
+								this.childChooseArr.forEach((Ix,s)=>{
+									/* 当点击某个菜单3次之后删除**/
+									if(Ix.value === p.value){
+										p.current_num = 0
+										this.childChooseArr.splice(s,1)
+									}
+									
+								})
+							}
+							if(p.value == child.value && !p.choose){
+								
+								this.childChooseArr.forEach((I,x)=>{
+									/* 当点击某个菜单3次之后删除**/
+									if(I.value === child.value){
+										this.childChooseArr.splice(x,1)
+									}
+									
+								})
+								
+								par.children[0].choose = true
+								p.choose = false
+								order = ''
+							}
+						})
+					}
+				})
+				this.order = order
+				this.onRefresh();
+				this.getFoodsList(order, this.condObj);
+			}
+			if(parent.type==='food'){
+				child.choose = !child.choose
+				menuData.forEach(par=>{
+					if(par.type === parent.type){
+						par.children.forEach(p=>{
+							if(p.value !== child.value){
+								p.choose = false
+							}
+							if(!child.choose){
+								par.children[0].choose = true
+								this.getFoodsList()
+							}
+						})
+					}
+				})				
+			}
+			if(child.value === 'foods' && menuData[0].children[1].choose){
+				this.getFoodsList(null,null,null,'srvhealth_mixed_food_nutrition_contents_select')
+			}else if(child.value === 'matter' && menuData[0].children[0].choose) {
+				this.getFoodsList()
+				console.log("点击素材")
+			}
+			if(parent.type === 'vitamin' || parent.type === 'mineral' ||parent.type === 'mingle'){
+				let isHas = false
+				this.childChooseArr.forEach(hdel=>{
+					if(hdel.title === child.title){
+						isHas = true
+					}
+				})
+				if(child.value != '不限' && !isHas){
+					this.childChooseArr.push(child)
+				}
+				let childChooseArr = this.childChooseArr
+				if(child.current_num === 3){
+					childChooseArr.forEach((del,index)=>{
+						if(del.title === child.title){
+							childChooseArr.splice(index,1)
+						}
+					})
+				}
+				let hasChild = false
+				menuData.forEach(par=>{
+					if(par.type === parent.type){
+						par.children.forEach(p=>{
+							this.childChooseArr.forEach(chos=>{
+								if(chos.title === p.title){
+									hasChild = true
+								}
+							})
+							if(child.value !== '不限' && child.value ===p.value&& child.current_num == 3){
+								child.current_num = 0
+								p.choose = false
+								// par.children[0].choose = true
+							}else if(child.value !== '不限' && child.value ===p.value&& child.current_num != 0){
+								p.choose = true
+								par.children[0].choose = false
+							}else if(child.value === '不限'){
+								if(p.value === '不限'){
+									p.choose = true
+								}else {
+									p.choose = false
+								}
+								
+							}
+							
+						})
+						if(!hasChild){
+							par.children.forEach(bpar=>{
+								if(bpar.value === '不限'){
+									bpar.choose = true
+								}
+							})
+						}
+					}
+					// if(par.type == 'capacity'){
+					// 	par.children.forEach(alone=>{
+					// 		alone.choose = false
+					// 		alone.current_num = 0
+					// 		par.children[0].choose = true
+					// 		this.childChooseArr.forEach((c,i)=>{
+					// 			if(alone.value === c.value){
+					// 				this.childChooseArr.splice(i,1)
+					// 			}
+					// 		})
+					// 	})
+						
+					// }
+				})
+				
+				let cond = {
+					relation: 'AND',
+					data: []
+				};
+				if(child.value === '不限'){
+					childChooseArr = []
+				}
+				if(childChooseArr.length > 0 ){
+					childChooseArr.forEach(son=>{
+						
+						let obj = {
+							colName:son.value,
+							ruleType: 'ge',
+							value:son.num
+						}
+						if(son.current_num == 2){
+							obj.ruleType = 'le'
+						}
+						cond.data.push(obj)
+					})
+					
+				}
+				
+				if (cond.data.length === 1) {
+					order = {
+						col: cond.data[0].colName,
+						type: 'desc'
+					};
+				}
+				if(cond.data.length === 0){
+					cond = null
+				}
+				this.childChooseArr = childChooseArr
+				this.condObj =cond
+				this.onRefresh();
+				this.getFoodsList(this.order?this.order:order, cond, 'filtrate');
+				console.log('childChooseArr-----',cond)
+			}
+			console.log("parent:",parent,"child",child)
+		},
+		/*-------**/
+		/*获取混合食物**/
+		getMixFoodsList(){
+			// let self = this;
+			// let url = this.getServiceUrl('health', 'srvhealth_food_unit_amount_estimate_select', 'select');
+			// let req = {
+			// 	serviceName: 'srvhealth_food_unit_amount_estimate_select',
+			// 	colNames: ['*'],
+			// 	condition: [
+			// 		{ colName: 'food_no', ruleType: 'eq', value: item.food_no }
+			// 	],
+			// 	page: { pageNo: 1, rownumber: 10 }
+			// };
+			// let res = await this.$http.post(url, req);
+		},
+		tabSelect(e) {
+			this.TabCur = e.currentTarget.dataset.id;
+			this.scrollLeft = (e.currentTarget.dataset.id - 1) * 60
+		},
+		change(index) {
+			// this.current = index;
+			this.radioIndex = index
+			console.log("点击单位",index)
+			this.list.forEach((item,i)=>{
+				let unitLabel = ''
+				if(i == this.radioIndex){
+					this.radioLabel = item
+				}
+			})
+			if (Number(this.choiceNum) && !this.radioLabel) {
+				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
+			}else if(Number(this.choiceNum) && this.radioLabel){
+				if(this.radioLabel.unit_amount){
+					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
+				}else{						
+					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount/100) * this.currFood.unit_energy)
+				}
+			}
+		},
 		/* 选择单位**/
 		changeUnit(item){
 			this.modalName = 'RadioModal'
@@ -932,6 +1427,7 @@ export default {
 			if(res.data.state === 'SUCCESS'){
 				unitList = [...unitList,...res.data.data]
 				this.unitList = unitList
+				this.list = unitList
 			}
 			console.log("食物选择单位===>>>",res)
 		},
@@ -1023,11 +1519,11 @@ export default {
 			if (this.searchArg.type === 'food') {
 				uni.navigateTo({
 					url:
-						'/pages/foodDetail/foodDetail?foods=' + encodeURIComponent(JSON.stringify(itemFood)) + '&filters=' + encodeURIComponent(JSON.stringify(this.filterArr))
+						'/pages/specific/health/foodDetail/foodDetail?foods=' + encodeURIComponent(JSON.stringify(itemFood)) + '&filters=' + encodeURIComponent(JSON.stringify(this.filterArr))
 				});
 			} else if (this.searchArg.type === 'sport') {
 				uni.navigateTo({
-					url: '/pages/sportsDetail/sportsDetail?sport=' + encodeURIComponent(JSON.stringify(itemFood))
+					url: '/pages/specific/health/sportsDetail/sportsDetail?sport=' + encodeURIComponent(JSON.stringify(itemFood))
 				});
 				console.log('点击运动详情');
 			}
@@ -1206,9 +1702,13 @@ export default {
 						unit_weight_g:this.radioLabel?this.radioLabel.amount:100
 					};
 					if (this.searchArg.type === 'food') {
-						// if (item.unit === 'g') {
-						// 	obj.unit_weight_g = item.unit_amount;
-						// }
+						if(item.classify && item.classify === 'mixed_food'){
+							obj['mixed_food_no'] = item.meal_no
+							obj['diret_type'] = item.classify
+						}else {
+							obj['diet_contents_no'] = item.food_no
+							obj['diret_type'] = 'diet_contents'
+						}
 					}
 					arr.push(obj);
 				});
@@ -1263,11 +1763,11 @@ export default {
 			// chooseFoodArr.push(this.currFood)
 		},
 
-		async getFoodsList(order = null, cond = null, type = null) {
+		async getFoodsList(order = null, cond = null, type = null,serviceName=null) {
 			let self = this;
-			let url = this.getServiceUrl('health', this.searchArg.serviceName, 'select');
+			let url = this.getServiceUrl('health', serviceName?serviceName:this.searchArg.serviceName, 'select');
 			let req = {
-				serviceName: this.searchArg.serviceName,
+				serviceName: serviceName?serviceName:this.searchArg.serviceName,
 				colNames: ['*'],
 				// condition: [],
 				relation_condition: {
@@ -1519,6 +2019,7 @@ export default {
 					};
 				}
 				this.order = order;
+				this.onRefresh();
 				this.getFoodsList(order, this.condObj);
 			}
 			if (val[1].title === 'salary' || val[1].title === 'single' || val[1].title === 'sort') {
@@ -1581,6 +2082,39 @@ export default {
 	.flexSelece {
 	}
 }
+.filtrate-wrap{
+	.filtrate-choose{
+		display: flex;
+		align-items: center;
+		padding-left: 20upx;
+		.filtrate-choose-item{
+			padding: 10upx;
+		}
+	}
+	.filtrate-item-wrap{
+		background-color: white;
+		.filtrate-item{
+			display: flex;
+			.filtrate-item-left{
+				padding: 10upx 20upx;
+			}
+			.filtrate-item-right{
+				// padding: 10upx 20upx;
+				display: flex;
+				margin: 0 10upx;
+				align-items: center;
+			}
+			.cate-active{
+				color: red;
+				/deep/ .u-icon{
+					display: flex;
+					padding-bottom: 8upx;
+					padding-left: 2upx;
+				}
+			}
+		}
+	}
+}
 .food-list {
 	display: flex;
 	flex-direction: column;
@@ -1633,66 +2167,98 @@ export default {
 	width: 100%;
 }
 .contentList {
+	display: flex;
+	flex-wrap: wrap;
 	overflow-y: scroll;
 	// height: calc(100vh - 300upx) !important;
 }
 .boxfood {
-	width: 100%;
-	margin: 0 auto;
 	border-top: 1upx solid #e8e8e8;
-	padding: 25upx 0;
+	// padding: 25upx 0;
 	background: #ffffff;
+	width: 23%;
+	// flex:1;
+	margin: 20upx 10upx 0 0;
+	height: 100%!important;
 	display: flex;
-	justify-content: space-between !important;
 	align-items: center;
 	position: relative;
+	flex-wrap: wrap;
+	padding-right: 0!important;
+	border-radius: 20upx;
+	&:nth-child(4n + 1){
+		margin-left: 14upx;
+	}
 	.boxfood-item {
 		width: 100%;
 		justify-content: space-between;
 		display: flex;
 	}
-	.relian {
-		// position: absolute;
-		// right: 40px;
-		// top: 0;
-		// bottom: 0;
-		display: flex;
-		margin-right: 20upx;
-		align-items: center;
-		font-size: 12px;
-		.status {
-			display: block;
-			height: 20upx;
-			width: 20upx;
-			border-radius: 50%;
-			margin-right: 10upx;
-		}
-	}
+	// .relian {
+	// 	// position: absolute;
+	// 	// right: 40px;
+	// 	// top: 0;
+	// 	// bottom: 0;
+	// 	display: flex;
+	// 	margin-right: 20upx;
+	// 	align-items: center;
+	// 	font-size: 12px;
+	// 	.status {
+	// 		display: block;
+	// 		height: 20upx;
+	// 		width: 20upx;
+	// 		border-radius: 50%;
+	// 		margin-right: 10upx;
+	// 	}
+	// }
 	.smallbox {
-		display: flex;
 		align-items: center;
-		image {
-			width: 80upx;
-			height: 80upx;
-			margin-right: 20upx;
-			border-radius: 8upx;
-			margin-left: 20upx;
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		.smallbox-img{
+			width: 100%;
+			height: 100upx;
+			image {
+				width: 100%;
+				height: 100upx;
+				border-radius: 8upx;
+			}
+			/deep/ .u-image__image{
+				div{
+					background-size:100% 100%!important;
+				}
+			}
 		}
+		
 		.textbox {
+			width: 100%;
+			padding: 10upx 4upx;
 			.title-food {
 				font-weight: bold;
 				font-size: 30upx;
 				display: flex;
-				.lock-ele {
-					margin-left: 5px;
-					.second-lock {
-						color: #dc2a26;
-					}
+				justify-content: center;
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
+				-webkit-line-clamp: 1;
+				overflow: hidden;
+				text-align: center;
+				
+			}
+			.lock-ele {
+				margin-left: 5px;
+				.second-lock {
+					color: #dc2a26;
 				}
 			}
 			.food-utis {
 				margin-top: 6upx;
 				font-size: 24upx;
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
+				-webkit-line-clamp: 1;
+				overflow: hidden;
 				.utis {
 					color: #807d7d;
 				}
@@ -1703,9 +2269,10 @@ export default {
 		}
 	}
 }
+
 .bottom-modal {
 	.cu-dialog {
-		height: 1290rpx;
+		height: 100vh;
 		.cu-bar {
 			padding: 0 50upx;
 		}
@@ -1729,28 +2296,30 @@ export default {
 			align-items: center;
 			color: #999;
 			.calorie{
-				min-width: 100upx;
+				min-width: 115upx;
 			}
 			.amount {
 				color: #009688;
 				font-weight: 800;
-				max-width: 200rpx;
-				margin-left: 4rem;
+				// max-width: 200rpx;
+				
+				// margin-left: 4rem;
 				.number {
 					padding: 0 20upx;
 					font-size: 34upx;
-					border-bottom: 5upx solid #009688;
+					// border-bottom: 5upx solid #009688;
 				}
 				.unit {
 					text-align: center;
-					padding: 10upx 0;
+					padding: 10upx 0upx;
+					
 				}
 			}
 			.weight{
 				display: flex;
 				align-items: center;
 				justify-content: flex-end;
-				min-width: 220upx;
+				// min-width: 220upx;
 				image{
 					width: 40upx;
 					height: 40upx;
@@ -1759,11 +2328,28 @@ export default {
 			}
 		}
 	}
+	.sport-dialog{
+		height: 710upx;
+	}
 }
 .input-box {
 	display: flex;
-	flex-wrap: wrap;
-	border-top: 1px solid #cccccc;
+	// flex-wrap: wrap;
+	align-items: center;
+	// justify-content: center;
+	/deep/ input{
+		width: 50upx!important;
+	}
+	.key-left{
+		text{
+			padding: 0 10upx;
+		}
+	}
+	.key-right{
+		text{
+			padding: 0 10upx;
+		}
+	}
 	.digit {
 		width: 33%;
 		padding: 20rpx 0;
@@ -1791,6 +2377,9 @@ export default {
 		}
 	}
 }
+.public-button-box{
+	position: relative;
+}
 .add-button {
 	position: fixed;
 	bottom: 20upx;
@@ -1805,20 +2394,33 @@ export default {
 	align-items: center;
 	font-size: 24px;
 	color: white;
-	.add-button-num {
-		position: absolute;
-		right: -4px;
-		top: 1px;
-		height: 18px;
-		width: 18px;
-		background-color: #ff4000;
-		color: #ffffff;
-		border-radius: 50%;
-		z-index: 1;
-		font-size: 10px;
-		text-align: center;
-		line-height: 18px;
+	.add-button-wrap{
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+		color: white;
+			.add-button-num {
+				display: flex;
+				justify-content: center;
+				position: absolute;
+				right: -4px;
+				top: 1px;
+				height: 18px;
+				width: 18px;
+				background-color: #ff4000;
+				color: #ffffff;
+				border-radius: 50%;
+				z-index: 1;
+				font-size: 10px;
+				text-align: center;
+				line-height: 18px;
+			}
 	}
+	
+	
 }
 .car-model {
 	display: flex;
@@ -1903,5 +2505,13 @@ export default {
 }
 .radio-modal /deep/ uni-radio::before{
 	right:20upx;
+}
+.change-tab{
+	width: 100px;
+	margin: 0 0 0 auto;
+	margin-top: -20px;
+}
+.change-tab /deep/ .u-tab-item{
+	padding: 0 10rpx;
 }
 </style>
