@@ -49,18 +49,32 @@
 				</view>
 			</view>
 		</view>
-		<view class="chart-box">
-			<view class="qiun-charts"><canvas canvas-id="canvasLineA" id="canvasLineA" class="charts-line" @touchstart="touchLineA"></canvas></view>
+		<view class="main-box column">
+			<view class="main-box-title">近期趋势</view>
+			<view class="menu-box">
+				<view class="box-item" :class="{ active: currentChart === 'canvasLineA' }" @click="showCanvas('weight')">体重</view>
+				<view class="box-item" :class="{ active: currentChart === 'canvasLineB' }" @click="showCanvas('BP')">血压</view>
+				<view class="box-item" :class="{ active: currentChart === 'canvasLineC' }" @click="showCanvas('sleep')">睡眠</view>
+				<view class="box-item" :class="{ active: currentChart === 'canvasColumnD' }" @click="showCanvas('calories')">热量</view>
+			</view>
+			<view class="chart-box" :class="{ 'max-height': currentChart }">
+				<canvas v-show="currentChart === 'canvasLineA'" canvas-id="canvasLineA" id="canvasLineA" class="charts-line" @touchstart="touchLineA"></canvas>
+				<canvas v-show="currentChart === 'canvasLineB'" canvas-id="canvasLineB" id="canvasLineB" class="charts-line" @touchstart="touchLineB"></canvas>
+				<canvas v-show="currentChart === 'canvasLineC'" canvas-id="canvasLineC" id="canvasLineC" class="charts-line" @touchstart="touchLineC"></canvas>
+				<canvas v-show="currentChart === 'canvasColumnD'" canvas-id="canvasColumnD" id="canvasColumnD" class="charts-line" @touchstart="touchColumnD"></canvas>
+			</view>
 		</view>
-		<view class="chart-box">
-			<view class="qiun-charts"><canvas canvas-id="canvasLineB" id="canvasLineB" class="charts-line" @touchstart="touchLineB"></canvas></view>
+		<view class="main-box">
+			<view class="main-box-title">基本信息</view>
+			<view class="menu-box">
+				<view class="box-item">基本信息</view>
+				<view class="box-item">疾病史</view>
+				<view class="box-item">遗传史</view>
+			</view>
 		</view>
-		<view class="chart-box">
-			<view class="qiun-charts"><canvas canvas-id="canvasLineC" id="canvasLineC" class="charts-line" @touchstart="touchLineC"></canvas></view>
-		</view>
-		<view class="chart-box">
-			<view class="qiun-charts"><canvas canvas-id="canvasColumnD" id="canvasColumnD" class="charts-line" @touchstart="touchColumnD"></canvas></view>
-		</view>
+		<view class="main-box"><view class="main-box-title">饮食营养</view></view>
+		<view class="main-box"><view class="main-box-title">运动健康</view></view>
+		<view class="main-box"><view class="main-box-title">慢性疾病</view></view>
 	</view>
 </template>
 <script>
@@ -75,6 +89,7 @@ var dayjs = require('dayjs');
 export default {
 	data() {
 		return {
+			currentChart: '', //当前chart id
 			isLogin: false, // 是否已经登录
 			loginUserInfo: {},
 			serviceLog: {}, // 服务记录
@@ -211,6 +226,51 @@ export default {
 		}
 	},
 	methods: {
+		showCanvas(type) {
+			// 显示图表
+			this.cWidth = uni.upx2px(690);
+			this.cHeight = uni.upx2px(300);
+			switch (type) {
+				case 'weight':
+					if (this.currentChart === 'canvasLineA') {
+						this.currentChart = '';
+					} else {
+						this.currentChart = 'canvasLineA';
+						this.getChartData('weight').then(_ => {
+							this.showLineA('canvasLineA', this.weightChartData, 'kg');
+						}); // 体重
+					}
+					break;
+				case 'BP':
+					if (this.currentChart === 'canvasLineB') {
+						this.currentChart = '';
+					} else {
+						this.currentChart = 'canvasLineB';
+						this.getChartData('bloodPressure').then(_ => {
+							this.showLineB('canvasLineB', this.BPChartData, 'mmHg');
+						}); // 血压
+					}
+					break;
+				case 'sleep':
+					if (this.currentChart === 'canvasLineC') {
+						this.currentChart = '';
+					} else {
+						this.currentChart = 'canvasLineC';
+						this.showLineC('canvasLineC', this.sleepChartData, '小时');
+					}
+					break;
+				case 'calories':
+					if (this.currentChart === 'canvasColumnD') {
+						this.currentChart = '';
+					} else {
+						this.currentChart = 'canvasColumnD';
+						this.getDietSportRecordList().then(_ => {
+							this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
+						});
+					}
+					break;
+			}
+		},
 		async selectServiceLog() {
 			// 查找服务记录编号
 			let serviceName = 'srvhealth_service_record_select';
@@ -265,7 +325,7 @@ export default {
 				order: [
 					{
 						colName: 'create_time',
-						orderType: 'desc' // asc升序  desc降序
+						orderType: 'asc' // asc升序  desc降序
 					}
 				],
 				page: {
@@ -377,7 +437,7 @@ export default {
 				return item;
 			});
 			this.caloriesChartData.series = series;
-			this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
+			// this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
 		},
 		toToday() {
 			uni.navigateTo({
@@ -717,34 +777,6 @@ export default {
 			canvaColumnD.touchLegend(e);
 		}
 	},
-	onTabItemTap(e) {
-		let userInfo = uni.getStorageSync('login_user_info');
-		if (!userInfo) {
-			// 未登录， 提示跳转
-			this.isLogin = false;
-			uni.showModal({
-				title: '提示',
-				content: '未登录,是否跳转到登录页面?',
-				confirmText: '去登录',
-				confirmColor: '#02D199',
-				success(res) {
-					if (res.confirm) {
-						// 确认 跳转到登录页
-						uni.redirectTo({
-							url: '/pages/accountExec/accountExec'
-						});
-					} else if (res.cancel) {
-						// 取消 返回首页
-						uni.switchTab({
-							url: '/pages/pedia/pedia'
-						});
-					}
-				}
-			});
-		} else {
-			this.isLogin = true;
-		}
-	},
 	created() {
 		let userInfo = uni.getStorageSync('login_user_info');
 		if (!userInfo) {
@@ -759,7 +791,7 @@ export default {
 					if (res.confirm) {
 						// 确认 跳转到登录页
 						uni.redirectTo({
-							url: '/pages/accountExec/accountExec'
+							url: '/publicPages/accountExec/accountExec'
 						});
 					} else if (res.cancel) {
 						// 取消 返回首页
@@ -785,14 +817,12 @@ export default {
 			console.log('onLoad-未登录');
 			return;
 		}
-		this.cWidth = uni.upx2px(730);
-		this.cHeight = uni.upx2px(300);
-		this.$nextTick(function() {
-			this.showLineA('canvasLineA', this.weightChartData, 'kg');
-			this.showLineB('canvasLineB', this.BPChartData, 'mmHg');
-			this.showLineC('canvasLineC', this.sleepChartData, '小时');
-			this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
-		});
+		// this.$nextTick(function() {
+		// 	this.showLineA('canvasLineA', this.weightChartData, 'kg');
+		// 	this.showLineB('canvasLineB', this.BPChartData, 'mmHg');
+		// 	this.showLineC('canvasLineC', this.sleepChartData, '小时');
+		// 	this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
+		// });
 	},
 	onShow() {
 		if (!this.isLogin) {
@@ -816,10 +846,7 @@ export default {
 							uni.setStorageSync('current_user_info', userList[0]);
 						}
 					}
-					this.selectServiceLog().then(_ => {
-						this.getChartData('weight'); // 体重
-						this.getChartData('bloodPressure'); // 血压
-					});
+					this.selectServiceLog().then(_ => {});
 				});
 			});
 			this.loginUserInfo = userInfo;
@@ -838,16 +865,6 @@ export default {
 	position: relative;
 	/deep/ .u-navbar {
 		border-bottom: 1px solid #f1f1f1;
-	}
-	.chart-box {
-		border-radius: 2px;
-		background-color: #fff;
-		margin: 10rpx;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-		.charts-line {
-			width: 730rpx;
-			height: 300rpx;
-		}
 	}
 }
 
@@ -945,8 +962,76 @@ export default {
 	padding: 10rpx;
 	border-radius: 2px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	min-height: 150rpx;
 	.main-box-title {
 		width: 100%;
+		font-weight: bold;
+		letter-spacing: 5px;
+		margin: 0 auto 20rpx;
+		position: relative;
+		max-height: 40rpx;
+		&::after {
+			position: absolute;
+			content: '';
+			width: 100%;
+			height: 2rpx;
+			border-bottom: 1px dotted #f1f1f1;
+			bottom: -10rpx;
+			left: 0;
+			// left: calc(50% - 50rpx);
+		}
+	}
+	&.column {
+		flex-direction: column;
+		flex-wrap: nowrap;
+		.chart-box {
+			border-radius: 2px;
+			background-color: #fff;
+			margin: 10rpx;
+			height: 0;
+			transition: all 1s;
+			&.max-height {
+				height: 280rpx;
+			}
+			.charts-line {
+				width: 690rpx;
+				height: 300rpx;
+			}
+		}
+	}
+	.menu-box {
+		display: flex;
+		flex-wrap: wrap;
+		width: 100%;
+		.box-item {
+			width: calc(50% - 10rpx);
+			margin: 5rpx;
+			height: 80rpx;
+			color: #fff;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			letter-spacing: 10rpx;
+			font-size: 32rpx;
+			border-radius: 5rpx;
+			opacity: 0.6;
+			transition: opacity 1s;
+			&.active {
+				opacity: 1;
+			}
+			&:nth-child(1) {
+				background-color: #3498db;
+			}
+			&:nth-child(2) {
+				background-color: #e74c3c;
+			}
+			&:nth-child(3) {
+				background-color: #8e44ad;
+			}
+			&:nth-child(4) {
+				background-color: #e67e22;
+			}
+		}
 	}
 	.energy-item {
 		color: #333;

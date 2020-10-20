@@ -20,13 +20,14 @@
 				"navigationBarTitleText": "健康档案",
 				"navigationBarBackgroundColor": "#0bc99d"
 			}
-		}, {
-			"path": "pages/accountExec/accountExec",
-			"style": {
-				"navigationBarTitleText": "微信登录",
-				"navigationBarBackgroundColor": "#0055ff"
-			}
 		}
+		// , {
+		// 	"path": "pages/accountExec/accountExec",
+		// 	"style": {
+		// 		"navigationBarTitleText": "微信登录",
+		// 		"navigationBarBackgroundColor": "#0055ff"
+		// 	}
+		// }
 	],
 	"subPackages": [{
 			"root": "otherPages",
@@ -182,15 +183,10 @@
 		{
 			"root": "publicPages",
 			"pages": [{
-				"path": "list/list",
-				"style": {}
-			}, {
-				"path": "form/form",
-				"style": {}
-			}, {
-				"path": "home/home",
+				"path": "accountExec/accountExec",
 				"style": {
-					"navigationBarTitleText": "首页"
+					"navigationBarTitleText": "登录",
+					"navigationBarBackgroundColor": "#0055ff"
 				}
 			}]
 		},

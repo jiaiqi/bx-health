@@ -88,14 +88,14 @@ fly.interceptors.response.use(
 					// uni.setStorageSync('backUrl',res.request.headers.requrl)
 					let requestUrl = decodeURIComponent(res.request.headers.requrl)
 					if (res.request.headers.requrl && res.request.headers.requrl !== '/' && res.request.headers.requrl.indexOf("code") ===
-						-1) {
+						-1 && res.request.headers.requrl.indexOf('accountExec/accountExec') === -1) {
 						//  过滤无效的url
 						uni.setStorageSync("backUrl", requestUrl)
 					}
 					try {
 						console.log("backUrl:", requestUrl, encodeURIComponent(requestUrl))
 						uni.redirectTo({
-							url: '/pages/accountExec/accountExec'
+							url: '/publicPages/accountExec/accountExec'
 						})
 					} catch (e) {
 						console.error('请求失败', e)
@@ -103,7 +103,7 @@ fly.interceptors.response.use(
 					}
 				} else {
 					uni.redirectTo({
-						url: '/pages/accountExec/accountExec'
+						url: '/publicPages/accountExec/accountExec'
 					})
 				}
 			}

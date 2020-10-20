@@ -24,13 +24,13 @@ let ENV = {
   backEndAddress:"https://login.100xsys.cn",//后台管理系统地址
 	frontEndAddress: remoteAddress.frontEndAddress, //前端线上地址
 	appNo: {
-		// wxmp: 'APPNO20200214122021', // 百想ai
-		wxmp: 'APPNO20201014091746', // 百想健康助理
+		wxmp: 'APPNO20200214122021', // 百想软件ai平台
+		// wxmp: 'APPNO20201014091746', // 百想健康助理
 		wxh5: 'APPNO20200107181133', //微信公众号
 	},
 	appID: {
-		// wxmp: 'wx8e6f993081f6e979', // 百想ai
-		wxmp: 'wxe928b7923b7dacb9', // 百想健康助理
+		wxmp: 'wx8e6f993081f6e979', // 百想软件ai平台
+		// wxmp: 'wxe928b7923b7dacb9', // 百想健康助理
 		wxh5: 'wx78d1d4139f97ffca' //百想助理公众号
 	},
 	isThirdParty:remoteAddress.isThirdParty,
