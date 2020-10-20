@@ -35,7 +35,7 @@
 					v-if="(pageItem.buttons && pageItem.buttons.length === 1) || !pageItem.buttons || pageItem.buttons.length === 0"
 				>
 					<view class="swiper-item" v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
-						<view class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
+						<view @click="skip(btn)" class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
 							<u-image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></u-image>
 							<text class="btn-name">{{ btn.dest_menu_no }}</text>
 						</view>
@@ -43,8 +43,8 @@
 				</view>
 				<swiper class="swiper item-box" :indicator-dots="true" :autoplay="false" :interval="3000" :duration="500" v-if="pageItem.buttons && pageItem.buttons.length > 1">
 					<swiper-item v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
-						<view class="swiper-item">
-							<view class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
+						<view  class="swiper-item">
+							<view  class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
 								<u-image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></u-image>
 								<text class="btn-name">{{ btn.dest_menu_no }}</text>
 							</view>
@@ -66,6 +66,14 @@ export default {
 		};
 	},
 	methods: {
+		skip(item){
+			if(item.dest_page){
+				uni.navigateTo({
+					url:item.dest_page
+				})
+			}
+			console.log("点击跳转=====",item)
+		},
 		getMenuImagePath(btn) {
 			return this.$api.backEndAddress + '/main/images/appicon/' + btn.icon;
 		},

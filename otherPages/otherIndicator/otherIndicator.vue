@@ -79,7 +79,7 @@
 			<view v-else-if="type && type === 'glucose'" class="item-wrap">
 				<!-- 血糖 -->
 				<u-select v-model="showSelect" :list="glucose_time_option" @confirm="confirmSelect"></u-select>
-				<view class="item-list" @click="showSelect = true" >
+				<view class="item-list" @click="showSelect = true">
 					<text>测量时机</text>
 					<input type="text" value="" disabled v-model="inputVal.glucose_time" />
 				</view>
@@ -94,8 +94,9 @@
 			</view>
 		</view>
 		<view class="other-bot">
-			<uni-button class="cu-btn bg-blue lg btn" :disabled="canSave" @click="save" v-if="!isSubmit">保存</uni-button>
-			<uni-button class="cu-btn bg-blue lg btn" @click="back" v-if="isSubmit">返回</uni-button>
+			<button class="cu-btn lg btn" :class="{ disabled: !canSave }"  
+			@click="submitRecord" v-if="!isSubmit">保存</button>
+			<button class="cu-btn lg btn" @click="back" v-if="isSubmit">返回</button>
 		</view>
 		<mx-date-picker
 			style="z-index: 1290;"
@@ -156,37 +157,33 @@ export default {
 			let result = true;
 			switch (this.type) {
 				case 'weight':
-					result = this.inputVal.weight && this.inputVal.body_fat_rate ? false : true;
+					result = this.inputVal.weight && this.inputVal.body_fat_rate ? true : false;
 					break;
 				case 'sleep':
 					break;
 				case 'heartRate':
 					break;
 				case 'pressure':
-					result = this.inputVal.systolic_pressure && this.inputVal.diastolic_pressure ? false : true;
+					result = this.inputVal.systolic_pressure && this.inputVal.diastolic_pressure ? true : false;
 					break;
 				case 'oxygen':
 					result =
-						this.inputVal.start_time &&
-						this.inputVal.start_time &&
-						this.inputVal.oxygen_saturation_max &&
-						this.inputVal.oxygen_saturation_min &&
-						this.inputVal.oxygen_saturation_avg
-							? false
-							: true;
+						this.inputVal.start_time && this.inputVal.end_time && this.inputVal.oxygen_saturation_max && this.inputVal.oxygen_saturation_min && this.inputVal.oxygen_saturation_avg
+							? true
+							: false;
 					break;
 				case 'glucose':
-					result = this.inputVal.glucose_time && this.inputVal.blood_glucose_val ? false : true;
+					result = this.inputVal.glucose_time && this.inputVal.blood_glucose_val ? true : false;
 					break;
 			}
 			return result;
 		}
 	},
 	methods: {
-		confirmSelect(e){
-			console.log(e)
-			if(Array.isArray(e)&&e.length>0){
-				this.inputVal.glucose_time = e[0].value
+		confirmSelect(e) {
+			console.log(e);
+			if (Array.isArray(e) && e.length > 0) {
+				this.inputVal.glucose_time = e[0].value;
 			}
 		},
 		async addServiceLog() {
@@ -211,7 +208,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_service_record_select',
 				colNames: ['*'],
-				condition: [{ colName: 'user_info_no', ruleType: 'like', value: 'PB2020090118170040' }],
+				condition: [{ colName: 'user_info_no', ruleType: 'like', value: this.currentUserInfo.no }],
 				relation_condition: {},
 				page: { pageNo: 1, rownumber: 100 },
 				order: []
@@ -228,8 +225,12 @@ export default {
 				}
 			}
 		},
-		async save() {
+		async submitRecord() {
 			// 提交并保存身体数据
+			if (!this.canSave) {
+				return;
+			}
+			debugger;
 			let serviceName = '';
 			let req = [];
 			switch (this.type) {
@@ -403,11 +404,16 @@ export default {
 		.btn {
 			width: 70%;
 			height: 70upx;
-			// background-color: #b5b5b5;
+			color: #fff;
 			background-image: linear-gradient(90deg, #70c6ff, #0081ff);
 			border-radius: 50upx;
 			box-shadow: 3px 3px 4px rgba(10, 141, 255, 0.2);
+			&.disabled{
+				cursor: not-allowed;
+				opacity: 0.6;
+			}
 		}
+		
 	}
 }
 </style>

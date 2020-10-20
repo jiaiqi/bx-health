@@ -1,17 +1,9 @@
 {
-	"pages": [
-		{
-			"path": "pages/accountExec/accountExec",
-			"style": {
-				"navigationBarTitleText": "微信登录",
-				"navigationBarBackgroundColor": "#0055ff"
-			}
-		},
-		{
+	"pages": [{
 			"path": "pages/pedia/pedia",
 			"style": {
 				// "navigationStyle": "custom",
-				"navigationBarTitleText": "健康科普",
+				"navigationBarTitleText": "健康宝典",
 				"navigationBarBackgroundColor": "#0bc99d"
 			}
 		}, {
@@ -27,6 +19,12 @@
 				"navigationStyle": "custom",
 				"navigationBarTitleText": "健康档案",
 				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		}, {
+			"path": "pages/accountExec/accountExec",
+			"style": {
+				"navigationBarTitleText": "微信登录",
+				"navigationBarBackgroundColor": "#0055ff"
 			}
 		}
 	],
@@ -107,7 +105,9 @@
 					}
 				}, {
 					"path": "elementDetail/elementDetail",
-					"style": {}
+					"style": {
+						"navigationBarTitleText": "营养素详情"
+					}
 				},
 				{
 					"path": "symptomSelect/symptomSelect3",
@@ -164,6 +164,18 @@
 				{
 					"path": "shop/shopDetail",
 					"style": {}
+				},
+				{
+					"path": "chooseFood/chooseFood",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnant",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnantHome",
+					"style": {}
 				}
 			]
 		},
@@ -181,6 +193,10 @@
 					"navigationBarTitleText": "首页"
 				}
 			}]
+		},
+		{
+			"root": "storePages",
+			"pages": []
 		}
 	],
 	"tabBar": {
@@ -190,19 +206,19 @@
 		"backgroundColor": "#ffffff",
 		"list": [{
 			"pagePath": "pages/pedia/pedia",
-			"iconPath": "static/icon/find.png",
+			"iconPath": "/static/icon/find.png",
 			"selectedIconPath": "static/icon/find_active.png",
-			"text": "健康科普"
+			"text": "健康宝典"
 		}, {
 			"pagePath": "pages/home/home",
-			"iconPath": "static/icon/health.png",
+			"iconPath": "/static/icon/health.png",
 			"selectedIconPath": "static/icon/health_active.png",
 			"text": "健康档案"
 		}, {
 			"pagePath": "pages/store/store",
-			"iconPath": "static/icon/live.png",
+			"iconPath": "/static/icon/live.png",
 			"selectedIconPath": "static/icon/live_active.png",
-			"text": "生活"
+			"text": "健康生活"
 		}]
 	},
 	"easycom": {

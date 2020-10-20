@@ -44,19 +44,18 @@
 				</button>
 				<button
 					v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin"
-					class="confirm-btn bg-gray text-green"
+					class="confirm-btn text-green"
 					lang="zh_CN"
-					type="primary"
 					open-type="getUserInfo"
 					@getuserinfo="saveWxUser"
 					:withCredentials="false"
 					:disabled="disabled"
 				>
-					立即授权
+					微信登录
 				</button>
-				<button v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin" class="confirm-btn bg-grey text-black" type="default" @tap="navBack" :disabled="false">
+				<!-- 			<button v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin" class="confirm-btn bg-grey text-black" type="default" @tap="navBack" :disabled="false">
 					暂不授权
-				</button>
+				</button> -->
 			</view>
 		</view>
 	</view>
@@ -68,6 +67,7 @@ export default {
 	name: 'AccountExec',
 	data() {
 		return {
+			code: '',
 			disabled: !this.isWeixinClient(),
 			backUrl: '',
 			user: {
@@ -91,6 +91,9 @@ export default {
 	onLoad(option) {
 		this.judgeClientEnviroment();
 		let self = this;
+		// #ifdef MP-WEIXIN
+		this.getWxCode();
+		// #endif
 		if (uni.getStorageSync('isLogin')) {
 			console.log('已登录，不进行初始化授权', uni.getStorageSync('isLogin'));
 			if (uni.getStorageSync('backUrl') && uni.getStorageSync('backUrl') !== '/') {
@@ -223,77 +226,134 @@ export default {
 				}
 			});
 		},
-		saveWxUser() {
-			// 静默登录(验证登录)
+		async getWxCode() {
+			const result = await wx.login();
+			if (result.code) {
+				this.code = result.code;
+			}
+		},
+		async wxLogin(obj = {}) {
+			// 使用code向后端发送登录请求
 			let that = this;
-			const isWeixinClient = that.isWeixinClient();
+			let { code, user } = obj;
+			let rawData = {
+				nickname: user.userInfo.nickName,
+				sex: user.userInfo.gender,
+				country: user.userInfo.country,
+				province: user.userInfo.province,
+				city: user.userInfo.city,
+				headimgurl: user.userInfo.avatarUrl
+			};
+			uni.setStorageSync('wxUserInfo', rawData);
+			let url = this.$api.verifyLogin.url;
+			let req = [
+				{
+					data: [
+						{
+							code: code,
+							app_no: this.$api.appNo.wxmp
+						}
+					],
+					serviceName: 'srvwx_app_login_verify'
+				}
+			];
+			let res = await this.$http.post(url, req);
+			if (res.data.resultCode === 'SUCCESS') {
+				// 登录成功
+				let resData = res.data.response[0].response;
+				let loginMsg = {
+					bx_auth_ticket: resData.bx_auth_ticket,
+					expire_time: resData.expire_time
+				};
+				if (resData.login_user_info.user_no) {
+					uni.setStorageSync('login_user_info', resData.login_user_info);
+					console.log('resData.login_user_info', resData.login_user_info);
+				}
+				uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
+				this.setWxUserInfo(rawData);
+				if (resData.login_user_info.data) {
+					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
+				}
+				uni.setStorageSync('isLogin', true);
+			} else {
+				// 登录失败，显示提示信息
+				uni.showToast({
+					title: res.data.resultMessage
+				});
+			}
+		},
+		async saveWxUser(e) {
+			// 静默登录(验证登录)
+			const isWeixinClient = this.isWeixinClient();
 			if (isWeixinClient) {
 				const url = this.getServiceUrl('wx', 'srvwx_app_login_verify', 'operate');
 				// #ifdef MP-WEIXIN
-				wx.login({
-					// 获取小程序code
-					success(res) {
-						if (res.code) {
-							// that.checkAuthorization();
-							//验证登录
-							let url = that.$api.verifyLogin.url;
-							let req = [
-								{
-									data: [
-										{
-											code: res.code,
-											app_no: that.$api.appNo.wxmp
-										}
-									],
-									serviceName: 'srvwx_app_login_verify'
-								}
-							];
-							that.$http.post(url, req).then(response => {
-								if (response.data.resultCode === 'SUCCESS') {
-									uni.hideLoading();
-									console.log('授权成功', response);
-									let resData = response.data.response[0].response;
-									let loginMsg = {
-										bx_auth_ticket: resData.bx_auth_ticket,
-										expire_time: resData.expire_time
-									};
-									let expire_timestamp = parseInt(new Date().getTime() / 1000) + loginMsg.expire_time; //过期时间的时间戳(秒)
-									uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
-									uni.setStorageSync('expire_time', resData.expire_time); // 有效时间
-									uni.setStorageSync('expire_timestamp', expire_timestamp); // 过期时间
-									if (resData.login_user_info.user_no) {
-										uni.setStorageSync('login_user_info', resData.login_user_info);
-										console.log('resData.login_user_info', resData.login_user_info);
-									}
-									if (resData.login_user_info.data) {
-										uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
-									}
-									uni.setStorageSync('isLogin', true);
-									console.log('that.backUrl', that.backUrl);
-									// 获取用户微信信息
-									that.getUserInfo();
-									uni.redirectTo({
-										url: that.$api.homePath,
-										fail() {
-											uni.switchTab({
-												url: that.$api.homePath
-											});
-										}
-									});
-								} else if (response.data.resultCode === 'FAILURE') {
-									uni.setStorageSync('isLogin', false);
-									uni.showToast({
-										title: response.data.resultMessage,
-										icon: 'none'
-									});
-								}
-							});
-						} else {
-							uni.setStorageSync('isLogin', false); // 登录状态
-							console.log('登录失败！' + res.errMsg);
-						}
-					}
-				});
+				const user = e.mp.detail;
+				const result = await this.wxLogin({ code: this.code, user: user });
+				// wx.login({
+				// 	// 获取小程序code
+				// 	success(res) {
+				// 		if (res.code) {
+				// 			// that.checkAuthorization();
+				// 			//验证登录
+				// 			let url = that.$api.verifyLogin.url;
+				// 			let req = [
+				// 				{
+				// 					data: [
+				// 						{
+				// 							code: res.code,
+				// 							app_no: that.$api.appNo.wxmp
+				// 						}
+				// 					],
+				// 					serviceName: 'srvwx_app_login_verify'
+				// 				}
+				// 			];
+				// 			that.$http.post(url, req).then(response => {
+				// 				if (response.data.resultCode === 'SUCCESS') {
+				// 					uni.hideLoading();
+				// 					console.log('授权成功', response);
+				// 					let resData = response.data.response[0].response;
+				// 					let loginMsg = {
+				// 						bx_auth_ticket: resData.bx_auth_ticket,
+				// 						expire_time: resData.expire_time
+				// 					};
+				// 					let expire_timestamp = parseInt(new Date().getTime() / 1000) + loginMsg.expire_time; //过期时间的时间戳(秒)
+				// 					uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
+				// 					uni.setStorageSync('expire_time', resData.expire_time); // 有效时间
+				// 					uni.setStorageSync('expire_timestamp', expire_timestamp); // 过期时间
+				// 					if (resData.login_user_info.user_no) {
+				// 						uni.setStorageSync('login_user_info', resData.login_user_info);
+				// 						console.log('resData.login_user_info', resData.login_user_info);
+				// 					}
+				// 					if (resData.login_user_info.data) {
+				// 						uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
+				// 					}
+				// 					uni.setStorageSync('isLogin', true);
+				// 					console.log('that.backUrl', that.backUrl);
+				// 					// 获取用户微信信息
+				// 					that.getUserInfo();
+				// 					uni.redirectTo({
+				// 						url: that.$api.homePath,
+				// 						fail() {
+				// 							uni.switchTab({
+				// 								url: that.$api.homePath
+				// 							});
+				// 						}
+				// 					});
+				// 				} else if (response.data.resultCode === 'FAILURE') {
+				// 					uni.setStorageSync('isLogin', false);
+				// 					uni.showToast({
+				// 						title: response.data.resultMessage,
+				// 						icon: 'none'
+				// 					});
+				// 				}
+				// 			});
+				// 		} else {
+				// 			uni.setStorageSync('isLogin', false); // 登录状态
+				// 			console.log('登录失败！' + res.errMsg);
+				// 		}
+				// 	}
+				// });
 				// #endif
 				// #ifdef H5
 				// 公众号环境
@@ -720,6 +780,7 @@ page {
 	line-height: 76upx;
 	border-radius: 50px;
 	margin-top: 70upx;
+	background-color: #02d199;
 	/* background: $uni-color-primary; */
 	color: #fff;
 	/* font-size: $font-lg; */

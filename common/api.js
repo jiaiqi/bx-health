@@ -12,11 +12,11 @@ let remoteAddress = {
 	appName:"daq", //singleApp 为 true 时 必须配置
 	bx_auth_ticket: "e2cc16a3-6a87-42da-ae5f-99a6af84c5f8",
 	onTicket: false, // 是否使用配置的静态 bx_auth_ticket
-	// homePath:"/pages/public/home/home", // 首页路径，配置完整路径
-	homePath:"/pages/public/homePage/homePage?website_no=WS2020031216030001",
+	// homePath:"/pages/public/homePage/homePage?website_no=WS2020031216030001",
 	isThirdParty:true,  // 是否必须第三方认证登录
 	thirdPartyType:['WeChat'],// 第三方类型
-	homePath:"/pages/home/home", // 首页路径， 配置完整路径
+	// homePath:"/pages/home/home", // 首页路径， 配置完整路径
+	homePath:"/pages/pedia/pedia", // 首页路径，配置完整路径
 }
 
 

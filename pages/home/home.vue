@@ -1,5 +1,5 @@
 <template>
-	<view class="health-wrap" @click="clickPage">
+	<view class="health-wrap" @click="clickPage" v-if="isLogin">
 		<u-navbar back-text="返回" :back-text-style="backTextStyle" :back-icon-color="backTextStyle.color" :is-back="false" :border-bottom="true" :background="navBackground">
 			<view class="header-wrap">
 				<view class="title">{{ pageTitle }}</view>
@@ -49,14 +49,35 @@
 				</view>
 			</view>
 		</view>
+		<view class="chart-box">
+			<view class="qiun-charts"><canvas canvas-id="canvasLineA" id="canvasLineA" class="charts-line" @touchstart="touchLineA"></canvas></view>
+		</view>
+		<view class="chart-box">
+			<view class="qiun-charts"><canvas canvas-id="canvasLineB" id="canvasLineB" class="charts-line" @touchstart="touchLineB"></canvas></view>
+		</view>
+		<view class="chart-box">
+			<view class="qiun-charts"><canvas canvas-id="canvasLineC" id="canvasLineC" class="charts-line" @touchstart="touchLineC"></canvas></view>
+		</view>
+		<view class="chart-box">
+			<view class="qiun-charts"><canvas canvas-id="canvasColumnD" id="canvasColumnD" class="charts-line" @touchstart="touchColumnD"></canvas></view>
+		</view>
 	</view>
 </template>
 <script>
-let self;
+var self;
+import uCharts from '@/components/u-charts/u-charts.js';
+var _self;
+var canvaLineA = null;
+var canvaLineB = null;
+var canvaLineC = null;
+var canvaColumnD = null;
+var dayjs = require('dayjs');
 export default {
 	data() {
 		return {
+			isLogin: false, // 是否已经登录
 			loginUserInfo: {},
+			serviceLog: {}, // 服务记录
 			pageTitle: '健康档案',
 			showUserList: false,
 			backTextStyle: {
@@ -68,10 +89,85 @@ export default {
 			showTimeSignPicker: false,
 			userInfo: {},
 			selectDate: this.formateDate(new Date(), 'date'),
-			markDays: [],
 			userMenuList: [],
 			navBackground: {
 				backgroundColor: '#0bc99d'
+			},
+			cWidth: '',
+			cHeight: '',
+			pixelRatio: 1,
+			weightChartData: {
+				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
+				series: [
+					{
+						name: '体重',
+						data: [73, 75, 73.5, 74.5, 75, 73.5],
+						color: '#1890ff'
+					}
+					// {
+					// 	name: '基础代谢',
+					// 	data: [73, 75, 73.5, 74.5, 75, 73.5],
+					// 	color: '#ff9900'
+					// }
+				]
+			},
+			BPChartData: {
+				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
+				series: [
+					{
+						name: '收缩压',
+						data: [117, 115, 121, 105, 110, 115],
+						color: '#2fc25b'
+					},
+					{
+						name: '舒张压',
+						data: [71, 75, 73, 77, 79, 75],
+						color: '#facc14'
+					}
+				]
+			},
+			caloriesChartData: {
+				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
+				series: [
+					{
+						name: '饮食',
+						data: [1314, 1124, 1300, 1215, 1001, 1416],
+						color: '#ff9900'
+					},
+					{
+						name: '运动',
+						data: [234, 315, 517, 145, 357, 241],
+						color: '#8dc63f'
+					}
+				]
+			},
+			sleepChartData: {
+				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
+				series: [
+					{
+						name: '睡眠',
+						data: [7.5, 8, 7.5, 7, 6, 8.5],
+						color: '#8543e0'
+					}
+				]
+			},
+			chartData: {
+				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
+				series: [
+					{
+						name: '体重',
+						data: [35, 20, 25, 37, 4, 20],
+						color: '#000000'
+					},
+					{
+						name: '血压',
+						data: [70, 40, 65, 100, 44, 68]
+					},
+					{
+						name: '热量',
+						data: [100, 80, 95, 150, 112, 132]
+					}
+				]
 			}
 		};
 	},
@@ -115,6 +211,174 @@ export default {
 		}
 	},
 	methods: {
+		async selectServiceLog() {
+			// 查找服务记录编号
+			let serviceName = 'srvhealth_service_record_select';
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: 'srvhealth_service_record_select',
+				colNames: ['*'],
+				condition: [{ colName: 'user_info_no', ruleType: 'like', value: this.userInfo.no }],
+				page: { pageNo: 1, rownumber: 100 }
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				// 请求成功
+				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+					// 有记录
+					this.serviceLog = res.data.data[0];
+				} else {
+					// 没有记录，添加记录
+					await this.addServiceLog();
+				}
+			}
+		},
+		async addServiceLog() {
+			// 创建服务记录
+			let serviceName = 'srvhealth_service_record_add';
+			let url = this.getServiceUrl('health', serviceName, 'operate');
+			let req = [
+				{
+					serviceName: 'srvhealth_service_record_add',
+					condition: [],
+					data: [{ user_info_no: this.currentUserInfo.no, user_no: this.currentUserInfo.userno, name: this.currentUserInfo.name, time: this.formateDate(new Date(), 'dateTimes') }]
+				}
+			];
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				await this.selectServiceLog();
+			}
+		},
+		async getChartData(type) {
+			//
+			let serviceObj = {
+				weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
+				// bloodGlucose: '', // 血糖
+				bloodPressure: 'srvhealth_blood_pressure_record_select' // 血压
+			};
+			let serviceName = serviceObj[type];
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: serviceName,
+				colNames: ['*'],
+				condition: [{ colName: 'service_no', ruleType: 'like', value: this.serviceLog.no }],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'desc' // asc升序  desc降序
+					}
+				],
+				page: {
+					rownumber: 7
+				}
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
+				let series = [];
+				if (type === 'weight') {
+					series = this.weightChartData.series;
+					series[0].data = res.data.data.map(item => {
+						return item.weight;
+					});
+					this.weightChartData.series = series;
+					this.weightChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
+					this.showLineA('canvasLineA', this.weightChartData, 'kg');
+				} else if (type === 'bloodPressure') {
+					series = this.BPChartData.series;
+					series[0].data = res.data.data.map(item => {
+						return item.systolic_pressure;
+					});
+					series[1].data = res.data.data.map(item => item.diastolic_pressure);
+					this.BPChartData.series = series;
+					this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
+					this.showLineB('canvasLineB', this.BPChartData, 'mmHg');
+				}
+			}
+		},
+		async getDietSportRecordList() {
+			// 查找最近七天的饮食记录和运动记录，展示为柱状图
+			let serveList = [
+				'srvhealth_diet_record_select', //饮食
+				'srvhealth_body_activity_record_select' //运动
+			];
+			let resultData = {};
+			let timeRange = {
+				start: '',
+				end: ''
+			};
+			timeRange.end = dayjs()
+				.add(1, 'days')
+				.format('YYYY-MM-DD');
+			timeRange.start = dayjs()
+				.subtract(6, 'days')
+				.format('YYYY-MM-DD');
+			console.log('timeRange', timeRange);
+			for (let i in serveList) {
+				let serviceName = serveList[i];
+				let url = this.getServiceUrl('health', serviceName, 'select');
+				let req = {
+					serviceName: serviceName,
+					colNames: ['*'],
+					condition: [
+						{ colName: 'userno', ruleType: 'like', value: this.loginUserInfo.user_no },
+						{ colName: 'user_name', ruleType: 'like', value: this.userInfo.name },
+						{ colName: 'hdate', ruleType: 'gt', value: timeRange.start },
+						{ colName: 'hdate', ruleType: 'lt', value: timeRange.end }
+					]
+				};
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data)) {
+					resultData[serviceName] = res.data.data;
+				}
+			}
+			resultData = {
+				diet: resultData.srvhealth_diet_record_select,
+				sport: resultData.srvhealth_body_activity_record_select
+			};
+			let dateList = [];
+			let series = [
+				{
+					name: '饮食',
+					data: [0, 0, 0, 0, 0, 0, 0],
+					color: '#ff9900'
+				},
+				{
+					name: '运动',
+					data: [0, 0, 0, 0, 0, 0, 0],
+					color: '#8dc63f'
+				}
+			];
+			Object.keys(resultData).forEach(key => {
+				const data = resultData[key];
+				data.forEach(item => {
+					for (let i = 0; i < 7; i++) {
+						let day = dayjs()
+							.subtract(i, 'days')
+							.format('YYYY-MM-DD');
+						dateList[i] = day;
+						if (item.hdate === day) {
+							if (key === 'diet') {
+								series[0].data[i] += item.energy;
+							} else if (key === 'sport') {
+								series[1].data[i] += item.energy;
+							}
+						}
+					}
+				});
+			});
+			this.caloriesChartData.categories = dateList
+				.map(item => {
+					return item.slice(5);
+				})
+				.reverse();
+			console.log(series);
+			series = series.map(item => {
+				item.data = item.data.reverse();
+				return item;
+			});
+			this.caloriesChartData.series = series;
+			this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
+		},
 		toToday() {
 			uni.navigateTo({
 				url: '/otherPages/balancedDiet/balancedDiet'
@@ -159,24 +423,6 @@ export default {
 				});
 			}
 		},
-		changeSignDate() {
-			this.modalName = 'Modal';
-			let dietRecord = null;
-			this.showTimeSignPicker = !this.showTimeSignPicker;
-		},
-		closeDay(e) {
-			this.modalName = '';
-			this.showTimeSignPicker = false;
-		},
-		onDayClick(data) {
-			this.curDate = data.date;
-			this.showTimeSignPicker = false;
-			this.selectDate = data.date;
-			this.modalName = '';
-			this.$refs.diet.getDietRecord(this.selectDate);
-			this.$refs.diet.getSportsRecord(this.selectDate);
-			this.$refs.diet.changeSub(4);
-		},
 		async getDietAllRecord() {
 			//饮食记录
 			let url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
@@ -185,12 +431,17 @@ export default {
 				colNames: ['*'],
 				condition: [
 					{ colName: 'userno', ruleType: 'like', value: this.loginUserInfo.user_no },
-					{ colName: 'user_name', ruleType: 'like', value: uni.getStorageSync('current_user') }
-				],
-				order: []
+					{ colName: 'user_name', ruleType: 'like', value: this.userInfo.name },
+					{ colName: 'hdate', ruleType: 'like', value: this.selectDate.trim() }
+				]
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
+				let dietIn = 0;
+				res.data.data.forEach(item => {
+					dietIn += item.energy;
+				});
+				this.dietIn = dietIn;
 				this.getSportsAllRecord(res.data.data);
 			}
 		},
@@ -202,19 +453,18 @@ export default {
 				colNames: ['*'],
 				condition: [
 					{ colName: 'userno', ruleType: 'like', value: this.loginUserInfo.user_no },
-					{ colName: 'user_name', ruleType: 'like', value: uni.getStorageSync('current_user') }
+					{ colName: 'user_name', ruleType: 'like', value: this.userInfo.name },
+					{ colName: 'hdate', ruleType: 'like', value: this.selectDate.trim() }
 				],
 				order: []
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				let arr = [...data, ...res.data.data];
-				let timeArr = [];
-				arr.forEach(item => {
-					timeArr.push(item.hdate);
+				let sportOut = 0;
+				res.data.data.forEach(item => {
+					sportOut = item.energy + sportOut;
 				});
-				let allRecord = Array.from(new Set(timeArr));
-				this.markDays = allRecord;
+				this.sportOut = sportOut;
 			}
 		},
 		getSignature(formData) {
@@ -369,15 +619,159 @@ export default {
 				uni.setStorageSync('current_user', e.name);
 				uni.setStorageSync('current_user_info', e);
 				this.userInfo = e;
-				// this.$refs.diet.resetRadioArr();
-				// this.$refs.diet.changeSub(4);
-				// this.$refs.diet.getDietRecord();
-				// this.$refs.diet.getSportsRecord();
 			}
 			this.showUserList = false;
+		},
+		showLineA(canvasId, chartData, unit) {
+			let options = this.getChartOptions(canvasId, chartData, unit);
+			canvaLineA = new uCharts(options);
+		},
+		showLineB(canvasId, chartData, unit) {
+			let options = this.getChartOptions(canvasId, chartData, unit);
+			canvaLineB = new uCharts(options);
+		},
+		showLineC(canvasId, chartData, unit) {
+			let options = this.getChartOptions(canvasId, chartData, unit);
+			canvaLineC = new uCharts(options);
+		},
+		showColumnD(canvasId, chartData, unit) {
+			let options = this.getChartOptions(canvasId, chartData, unit, 'column');
+			canvaColumnD = new uCharts(options);
+		},
+		getChartOptions(canvasId, chartData, unit, type) {
+			return {
+				$this: _self,
+				colors: ['#1890ff', '#2fc25b', '#facc14', '#f04864', '#8543e0', '#90ed7d'],
+				canvasId: canvasId,
+				type: type ? type : 'line',
+				fontSize: 11,
+				// legend: { show: true },
+				dataLabel: false,
+				dataPointShape: true,
+				background: '#FFFFFF',
+				pixelRatio: _self.pixelRatio,
+				categories: chartData.categories,
+				series: chartData.series,
+				animation: true,
+				xAxis: {
+					type: 'grid',
+					gridColor: '#CCCCCC',
+					gridType: 'dash'
+					// dashLength: 8
+				},
+				yAxis: {
+					gridType: 'dash',
+					gridColor: '#CCCCCC',
+					// dashLength: 8,
+					// splitNumber: 5,
+					// min: 10,
+					// max: 180,
+					format: val => {
+						// y轴显示
+						return val.toFixed(0) + unit;
+					}
+				},
+				width: _self.cWidth * _self.pixelRatio,
+				height: _self.cHeight * _self.pixelRatio,
+				extra: {
+					column: {
+						type: 'stack',
+						width: 20
+					},
+					line: {
+						type: 'straight'
+					}
+				}
+			};
+		},
+		touchLineA(e) {
+			canvaLineA.showToolTip(e, {
+				format: function(item, category) {
+					return category + ' ' + item.name + ':' + item.data + 'kg';
+				}
+			});
+			canvaLineA.touchLegend(e);
+		},
+		touchLineB(e) {
+			canvaLineB.showToolTip(e, {
+				format: function(item, category) {
+					return category + ' ' + item.name + ':' + item.data + 'mmHg';
+				}
+			});
+			canvaLineB.touchLegend(e);
+		},
+		touchLineC(e) {
+			canvaLineC.showToolTip(e, {
+				format: function(item, category) {
+					return category + ' ' + item.name + ':' + item.data + '小时';
+				}
+			});
+			canvaLineC.touchLegend(e);
+		},
+		touchColumnD(e) {
+			canvaColumnD.showToolTip(e, {
+				format: function(item, category) {
+					return category + ' ' + item.name + ':' + item.data + '大卡';
+				}
+			});
+			canvaColumnD.touchLegend(e);
+		}
+	},
+	onTabItemTap(e) {
+		let userInfo = uni.getStorageSync('login_user_info');
+		if (!userInfo) {
+			// 未登录， 提示跳转
+			this.isLogin = false;
+			uni.showModal({
+				title: '提示',
+				content: '未登录,是否跳转到登录页面?',
+				confirmText: '去登录',
+				confirmColor: '#02D199',
+				success(res) {
+					if (res.confirm) {
+						// 确认 跳转到登录页
+						uni.redirectTo({
+							url: '/pages/accountExec/accountExec'
+						});
+					} else if (res.cancel) {
+						// 取消 返回首页
+						uni.switchTab({
+							url: '/pages/pedia/pedia'
+						});
+					}
+				}
+			});
+		} else {
+			this.isLogin = true;
 		}
 	},
 	created() {
+		let userInfo = uni.getStorageSync('login_user_info');
+		if (!userInfo) {
+			// 未登录， 提示跳转
+			this.isLogin = false;
+			uni.showModal({
+				title: '提示',
+				content: '未登录,是否跳转到登录页面?',
+				confirmText: '去登录',
+				confirmColor: '#02D199',
+				success(res) {
+					if (res.confirm) {
+						// 确认 跳转到登录页
+						uni.redirectTo({
+							url: '/pages/accountExec/accountExec'
+						});
+					} else if (res.cancel) {
+						// 取消 返回首页
+						uni.switchTab({
+							url: '/pages/pedia/pedia'
+						});
+					}
+				}
+			});
+		} else {
+			this.isLogin = true;
+		}
 		uni.$on('dietInChange', dietIn => {
 			this.dietIn = dietIn;
 		});
@@ -385,13 +779,34 @@ export default {
 			this.sportOut = sportOut;
 		});
 	},
+	onLoad() {
+		_self = this;
+		if (!this.isLogin) {
+			console.log('onLoad-未登录');
+			return;
+		}
+		this.cWidth = uni.upx2px(730);
+		this.cHeight = uni.upx2px(300);
+		this.$nextTick(function() {
+			this.showLineA('canvasLineA', this.weightChartData, 'kg');
+			this.showLineB('canvasLineB', this.BPChartData, 'mmHg');
+			this.showLineC('canvasLineC', this.sleepChartData, '小时');
+			this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
+		});
+	},
 	onShow() {
+		if (!this.isLogin) {
+			console.log('onShow-未登录');
+			return;
+		}
 		self = this;
 		uni.setStorageSync('activeApp', 'health');
 		let userInfo = uni.getStorageSync('login_user_info');
 		if (userInfo && userInfo.user_no) {
-			this.getUserInfo().then(_=>{
+			this.getUserInfo().then(_ => {
 				this.getCurrUserInfo().then(_ => {
+					this.getDietAllRecord();
+					this.getDietSportRecordList();
 					if (uni.getStorageSync('current_user_info')) {
 						this.userInfo = uni.getStorageSync('current_user_info');
 					} else {
@@ -401,11 +816,13 @@ export default {
 							uni.setStorageSync('current_user_info', userList[0]);
 						}
 					}
+					this.selectServiceLog().then(_ => {
+						this.getChartData('weight'); // 体重
+						this.getChartData('bloodPressure'); // 血压
+					});
 				});
-			})
+			});
 			this.loginUserInfo = userInfo;
-			
-			// this.getDietAllRecord();
 		}
 	}
 };
@@ -413,30 +830,27 @@ export default {
 
 <style lang="scss" scoped>
 .health-wrap {
-	background-color: #f1f1f1;
+	background-color: #fff;
+	width: 100vw;
 	height: 100vh;
+	overflow-y: scroll;
+	text-align: center;
+	position: relative;
 	/deep/ .u-navbar {
 		border-bottom: 1px solid #f1f1f1;
 	}
-	text-align: center;
-	position: relative;
-}
-.switch-date {
-	/* #ifdef MP-WEIXIN */
-	width: 100%;
-	/* #endif */
-	height: 50rpx;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	background-color: #fff;
-	color: #333;
-	.u-icon {
-		padding-left: 10rpx;
-		position: relative;
-		top: -2px;
+	.chart-box {
+		border-radius: 2px;
+		background-color: #fff;
+		margin: 10rpx;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		.charts-line {
+			width: 730rpx;
+			height: 300rpx;
+		}
 	}
 }
+
 .header-wrap {
 	// 顶部导航栏
 	color: #f1f1f1;
@@ -444,8 +858,9 @@ export default {
 	align-items: center;
 	justify-content: space-between;
 	flex: 1;
-	padding: 0 30rpx;
+	padding: 10rpx 30rpx;
 	position: relative;
+	background-color: #0bc99d;
 	/* #ifdef MP-WEIXIN */
 	width: 100vw;
 	justify-content: center;
@@ -457,17 +872,6 @@ export default {
 		position: absolute;
 		left: 10rpx;
 		/* #endif */
-	}
-	.switch-date {
-		height: 50rpx;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		background-color: #0bc99d;
-		color: #fff;
-		.u-icon {
-			padding-left: 10rpx;
-		}
 	}
 	.user-info {
 		display: flex;
@@ -531,19 +935,22 @@ export default {
 	}
 }
 .main-box {
-	width: 100%;
 	display: flex;
 	box-sizing: border-box;
-	width: 100%;
-	padding: 10rpx;
+	width: calc(100% - 20rpx);
 	flex-wrap: wrap;
 	background-color: #fff;
 	justify-content: space-between;
-	margin: 10rpx 0;
+	margin: 10rpx;
+	padding: 10rpx;
+	border-radius: 2px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	.main-box-title {
 		width: 100%;
 	}
 	.energy-item {
+		color: #333;
+		font-weight: bold;
 		min-height: 100upx;
 		display: flex;
 		flex-direction: column;

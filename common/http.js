@@ -23,7 +23,12 @@ let FormateDate = function(date) {
 fly.interceptors.request.use((request) => {
 	//给所有请求添加自定义header
 	console.log("request: ", request)
-	if (request.url.indexOf('srvfile_attachment_select') === -1&&request.url.indexOf('srvdaq_page_item_buttons_select') === -1) {
+	let ignoreUrlList = [
+		"srvfile_attachment_select",
+		// "srvdaq_page_item_buttons_select"
+	]
+	if (!ignoreUrlList.includes(request.url)) {
+		// if (request.url.indexOf('srvfile_attachment_select') === -1&&request.url.indexOf('srvdaq_page_item_buttons_select') === -1) {
 		uni.showLoading({
 			mask: true
 		})

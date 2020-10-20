@@ -105,7 +105,7 @@
 			</view>
 		</sPullScroll>
 		<!-- </scroll-view> -->
-		<view class="cu-modal bottom-modal" :class="{ show: showBottomModal }">
+		<view v-if="pageType === 'sport'" class="cu-modal bottom-modal" :class="{ show: showBottomModal }">
 			<view class="cu-dialog" :class="pageType === 'sport'?'sport-dialog':''">
 				<view class="cu-bar bg-white">
 					<view class=" text-cyan button" @tap="showBottomModal = false">取消</view>
@@ -130,131 +130,9 @@
 							</view>
 							<view class="calorie">{{ heatNum ? heatNum.toFixed(1) :''}}千卡</view>
 						</view>
-					</view>
-					<view v-if="pageType==='food'" class="ele-text-wrap">
-						<view class="ele-text-top">主要维生素含量如下：</view>
-						<view class="ele-text-cen">
-							<view class="ele-text-cen-item">
-								<view class="ele-text-cen-item-title">
-									脂溶性维生素
-								</view>
-								<view class="ele-text-cen-item-cen">
-									<view class="ele-text">
-										<text>VA:</text>
-										<text>{{ currFood.vitamin_a ? currFood.vitamin_a.toFixed(1):'' }}ug</text>
-										<text style="color: red;">({{ currFood.vitamin_a>=450?'高':currFood.vitamin_a>=100&&currFood.vitamin_a<450?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>VE:</text>
-										<text>{{ currFood.vitamin_e ? currFood.vitamin_e.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.vitamin_e>=35?'高':currFood.vitamin_e>=15&&currFood.vitamin_e<35?'较高':'低' }})</text>
-									</view>
-								</view>
-							</view>
-							<view class="ele-text-cen-item">
-								<view class="ele-text-cen-item-title">
-									有机物
-								</view>
-								<view class="ele-text-cen-item-cen">
-									<view class="ele-text">
-										<text>蛋白质:</text>
-										<text>{{ currFood.protein ? currFood.protein.toFixed(1) :"" }}g</text>
-										<text style="color: red;">({{ currFood.protein>=35?'高':currFood.protein>=15&&currFood.protein<35?'较高':'低' }})</text>
-									</view>								
-								</view>
-							</view>
-							<view class="ele-text-cen-item">
-								<view class="ele-text-cen-item-title">
-									水溶性维生素
-								</view>
-								<view class="ele-text-cen-item-cen">
-									<view class="ele-text">
-										<text>VB1:</text>
-										<text>{{ currFood.vitamin_b1 ? currFood.vitamin_b1.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.vitamin_b1>=0.15?'高':currFood.vitamin_b1>=0.1&&currFood.vitamin_b1<0.15?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>VB2:</text>
-										<text>{{ currFood.vitamin_b2 ? currFood.vitamin_b2.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.vitamin_b2>=0.15?'高':currFood.vitamin_b2>=0.1&&currFood.vitamin_b2<0.15?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>VB3:</text>
-										<text>{{ currFood.vitamin_b3 ? currFood.vitamin_b3.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.vitamin_b3>=5?'高':currFood.vitamin_b3>=3.5&&currFood.vitamin_b3<5?'较高':'低' }})</text>
-									</view>		
-									<view class="ele-text">
-										<text>VC:</text>
-										<text>{{ currFood.vitamin_c ? currFood.vitamin_c.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.vitamin_c>=50?'高':currFood.vitamin_c>=35&&currFood.vitamin_c<50?'较高':'低' }})</text>
-									</view>
-								</view>
-							</view>
-							<view class="ele-text-cen-item">
-								<view class="ele-text-cen-item-title">
-									常量矿物质
-								</view>
-								<view class="ele-text-cen-item-cen">
-									<view class="ele-text">
-										<text>钙:</text>
-										<text>{{ currFood.element_ca ? currFood.element_ca.toFixed(1):'' }}mg/</text>
-										<text style="color: red;">({{ currFood.element_ca>=450?'高':currFood.element_ca>=200&&currFood.element_ca<450?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>镁:</text>
-										<text>{{ currFood.element_mg ? currFood.element_mg.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.element_mg>=150?'高':currFood.element_mg>=80&&currFood.element_mg<150?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>磷:</text>
-										<text>{{ currFood.element_p ? currFood.element_p.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.element_p>=250?'高':currFood.element_p>=150&&currFood.element_p<250?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>钾:</text>
-										<text>{{ currFood.element_k ? currFood.element_k.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.element_k>=500?'高':currFood.element_k>=200&&currFood.element_k<500?'较高':'低' }})</text>
-									</view>
-								</view>
-							</view>
-							
-							<view class="ele-text-cen-item">
-								<view class="ele-text-cen-item-title">
-									微量元素
-								</view>
-								<view class="ele-text-cen-item-cen">
-									<view class="ele-text">
-										<text>铁:</text>
-										<text>{{ currFood.element_fe ? currFood.element_fe.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.element_fe>=8?'高':currFood.element_fe>=4&&currFood.element_fe<8?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>锌:</text>
-										<text>{{ currFood.element_zn ? currFood.element_zn.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.element_zn>=7?'高':currFood.element_zn>=4&&currFood.element_zn<7?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>硒:</text>
-										<text>{{ currFood.element_se ? currFood.element_se.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.element_se>=20?'高':currFood.element_se>=10&&currFood.element_se<20?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>铜:</text>
-										<text>{{ currFood.element_cu ? currFood.element_cu.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.element_cu>=1.5?'高':currFood.element_cu>=1&&currFood.element_cu<1.5?'较高':'低' }})</text>
-									</view>
-									<view class="ele-text">
-										<text>锰:</text>
-										<text>{{ currFood.element_mn ? currFood.element_mn.toFixed(1):'' }}mg</text>
-										<text style="color: red;">({{ currFood.element_mn>=5?'高':currFood.element_mn>=2.5&&currFood.element_mn<5?'较高':'低' }})</text>
-									</view>
-								</view>
-							</view>																											
-						</view>
-					</view>
+					</view>					
 					<view class="calculate">
 						<view class="amount">
-							<!-- <view class="number">{{ choiceNum ? choiceNum : defultChoiceNum }}</view> -->
 							<view class="input-box">
 								<view class="key-left">
 									<text @click="countDietNum('-1')">-1</text>
@@ -268,23 +146,12 @@
 							</view>
 						</view>
 						<view @click="changeUnit(currFood)" class="weight">
-							<!-- <view class="unit">{{ currFood.unit }}</view> -->
 							<view style="padding-right: 8upx;" class="unit">{{ radioLabel?(radioLabel.unit_amount?radioLabel.unit_amount+radioLabel.unit:radioLabel.unit):currFood.unit_amount+currFood.unit }}</view>
 							<view class="unit-change">
-							<!-- <image @click="changeUnit(currFood)" src="/otherPages/static/img/change1.png" mode=""></image> -->
 							<u-icon size="24" name="arrow-down-fill"></u-icon>
 							</view>
-							<!-- 300
-							<text class="unit">克</text> -->
 						</view>
-						<!-- <view class="calorie">{{ heatNum.toFixed(1) }}千卡</view> -->
 					</view>
-					<!-- <u-tabs class="change-tab" active-color="#009688" name="unit" :list="list" bg-color="transparent" :show-bar="false" :item-width="150" :is-scroll="false" :current="radioIndex" @change="change"></u-tabs> -->
-					<!-- <scroll-view scroll-x class="bg-white nav text-center">
-						<view class="cu-item" :class="index==TabCur?'text-blue cur':''" v-for="(item,index) in 3" :key="index" @tap="tabSelect" :data-id="index">
-							Tab{{index}}
-						</view>
-					</scroll-view> -->
 					
 					
 				</view>
@@ -298,14 +165,14 @@
 					<view class="action" @tap="hideModal"><text class="cuIcon-close text-red"></text></view>
 				</view>
 				<view class="padding-xl foods-cont">
-					<view class="boxfood" v-for="(food, idx) in chooseFoodArr" :key="idx">
-						<view class="smallbox">
+					<view class="boxfood_car" v-for="(food, idx) in chooseFoodArr" :key="idx">
+						<view class="smallbox_car">
 							<image :src="food.imgurl" mode="scaleToFill"></image>
-							<view class="textbox">
-								<view class="title-food">{{ food.name }}</view>
-								<view class="food-utis">
-									<text class="number" style="margin-right: 5px;">{{ food.energy }}千卡</text>
-									<text class="utis">/ {{ food.unit_weight_g?food.amount * food.unit_weight_g:food.amount  + food.unit }}</text>
+							<view class="textbox_car">
+								<view class="title-food_car">{{ food.name }}</view>
+								<view class="food-utis_car">
+									<text class="number_car" style="margin-right: 5px;">{{ food.energy }}千卡</text>
+									<text class="utis_car">/ {{ food.unit_weight_g?food.amount * food.unit_weight_g:food.amount  + food.unit }}</text>
 								</view>
 								
 							</view>
@@ -421,7 +288,6 @@ export default {
 			filterResult: '',
 			choiceNum: '',
 			currTime: '',
-			currDate: '',
 			unitList:[],
 			nowDate: this.formateDate(new Date(), 'date').replace(/\s*/g, ''),
 			nowDateTime: this.formateDate(new Date(), 'dateTime'),
@@ -794,8 +660,16 @@ export default {
 			childChooseArr:[]
 		};
 	},
+	onShow() {
+		this.getChooseFoodList();
+		this.getElementLabel();
+		this.onRefresh();
+	},
 	onLoad(option) {
 		let query = JSON.parse(decodeURIComponent(option.condType));
+		if(query.date){
+			this.selectDate = query.date
+		}
 		console.log('optionoptionoption', query);
 		if (query.lackEle) {
 			this.lockEledata = query.lackEle;
@@ -949,9 +823,6 @@ export default {
 			if (query.order) {
 				this.order = query.order;
 			}
-			this.getChooseFoodList();
-			this.getElementLabel();
-			this.onRefresh();
 		} else if (query.type === 'sport') {
 			let menuData = [{
 				classify_name:'运动',
@@ -1014,7 +885,6 @@ export default {
 			// submenu.
 			this.getChooseSportList();
 		}
-
 		this.searchArg = query;
 		// this.getFoodsList();
 		this.onRefresh();
@@ -1342,21 +1212,6 @@ export default {
 			}
 			console.log("parent:",parent,"child",child)
 		},
-		/*-------**/
-		/*获取混合食物**/
-		getMixFoodsList(){
-			// let self = this;
-			// let url = this.getServiceUrl('health', 'srvhealth_food_unit_amount_estimate_select', 'select');
-			// let req = {
-			// 	serviceName: 'srvhealth_food_unit_amount_estimate_select',
-			// 	colNames: ['*'],
-			// 	condition: [
-			// 		{ colName: 'food_no', ruleType: 'eq', value: item.food_no }
-			// 	],
-			// 	page: { pageNo: 1, rownumber: 10 }
-			// };
-			// let res = await this.$http.post(url, req);
-		},
 		tabSelect(e) {
 			this.TabCur = e.currentTarget.dataset.id;
 			this.scrollLeft = (e.currentTarget.dataset.id - 1) * 60
@@ -1547,13 +1402,11 @@ export default {
 			if (res.data.state === 'SUCCESS' && res.data.data.length >= 0) {
 				this.chooseFoodArr = res.data.data;
 				for (let i = 0; i < this.chooseFoodArr.length; i++) {
-					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +"thumbnailType=whsu_0.3";
 					this.$set(this.chooseFoodArr[i], 'imgurl', urls);
-					// self.getFilePath(this.chooseFoodArr[i].image).then(url => {
-					// 	let urls = self.$api.getFilePath + url[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-					// 	this.$set(this.chooseFoodArr[i], 'imgurl', urls);
-					// });
 				}
+			}else{
+				this.chooseFoodArr = []
 			}
 		},
 		/* 查询已经选择过得食物**/
@@ -1577,11 +1430,9 @@ export default {
 				for (let i = 0; i < this.chooseFoodArr.length; i++) {
 					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 					this.$set(this.chooseFoodArr[i], 'imgurl', urls);
-					// self.getFilePath(this.chooseFoodArr[i].image).then(url => {
-					// 	let urls = self.$api.getFilePath + url[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-					// 	this.$set(this.chooseFoodArr[i], 'imgurl', urls);
-					// });
 				}
+			}else{
+				this.chooseFoodArr = []
 			}
 		},
 		/* 已选食物的删除**/
@@ -1691,7 +1542,7 @@ export default {
 				this.chooseFoods.forEach(item => {
 					let obj = {
 						userno: uni.getStorageSync('login_user_info').user_no,
-						hdate: this.currDate ? this.currDate : this.nowDate,
+						hdate: this.selectDate ? this.selectDate : this.nowDate,
 						htime: this.currTime ? this.currTime : this.nowDateTime,
 						name: item.name,
 						amount: item.amount,
@@ -1699,12 +1550,12 @@ export default {
 						energy: item.heatNum,
 						user_name: uni.getStorageSync('current_user'),
 						image: item.image,
-						unit_weight_g:this.radioLabel?this.radioLabel.amount:100
 					};
 					if (this.searchArg.type === 'food') {
 						if(item.classify && item.classify === 'mixed_food'){
 							obj['mixed_food_no'] = item.meal_no
 							obj['diret_type'] = item.classify
+							obj['unit_weight_g'] = this.radioLabel?this.radioLabel.amount:100
 						}else {
 							obj['diet_contents_no'] = item.food_no
 							obj['diret_type'] = 'diet_contents'
@@ -1745,7 +1596,6 @@ export default {
 		confirms() {
 			this.$set(this.currFood, 'heatNum', this.heatNum);
 			this.$set(this.currFood, 'amount', this.choiceNum);
-			
 			if (this.currTime) {
 				this.$set(this.currFood, 'htime', this.currTime);
 			} else {
@@ -1873,10 +1723,10 @@ export default {
 		},
 		/* 点击选择食物**/
 		chooseFood(e) {
-			// this.isClickDot = false,
 			this.dotEndStr = '';
-			this.choiceNum = '';
+			this.choiceNum = 0;
 			this.heatNum = 0;
+			this.value1 = 0
 			this.showBottomModal = true;
 			let label_obj = {};
 			let colData = this.colData;
@@ -1889,7 +1739,13 @@ export default {
 			});
 			this.currFoodLabel = label_obj;
 			this.currFood = e;
-			
+			this.currFood.hdate = this.selectDate
+			if(this.pageType === 'food'){
+				let food = encodeURIComponent(JSON.stringify(this.currFood))
+				uni.navigateTo({
+					url:'/otherPages/chooseFood/chooseFood?currFood=' + food
+				})
+			}
 			this.selectCurrFoodUnit(e)
 			console.log('选择食物：', e);
 		},
@@ -2291,7 +2147,7 @@ export default {
 		.calculate {
 			display: flex;
 			justify-content: space-between;
-			padding: 20upx 50upx;
+			padding: 20upx 20upx;
 			min-height: 100upx;
 			align-items: center;
 			color: #999;
@@ -2342,12 +2198,28 @@ export default {
 	}
 	.key-left{
 		text{
-			padding: 0 10upx;
+			padding: 12upx 12upx;
+			background-color: #f2f3f5;
+			font-size: 30upx;
+			min-width: 60upx;
+			text-align: center;
+			display: inline-block;
+			&:first-child{
+				margin-right: 2px;
+			}
 		}
 	}
 	.key-right{
 		text{
-			padding: 0 10upx;
+			padding: 12upx 12upx;
+			background-color: #f2f3f5;
+			font-size: 30upx;
+			min-width: 60upx;
+			text-align: center;
+			display: inline-block;
+			&:first-child{
+				margin-right: 2px;
+			}
 		}
 	}
 	.digit {
@@ -2447,6 +2319,26 @@ export default {
 			overflow-y: scroll;
 			display: flex;
 			flex-direction: column;
+			.boxfood_car{
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin: 5px;
+				margin-bottom: 0;
+				background-color: white;
+				.smallbox_car{
+					display: flex;
+					align-items: center;
+					image{
+						width: 100upx;
+						height: 100upx;
+						margin: 10upx;
+					}
+				}
+				.relian{
+					margin-right: 10px;
+				}
+			}
 		}
 		.button-box {
 			display: flex;

@@ -69,7 +69,7 @@
 					@touchstart="ListTouchStart"
 					@touchmove="ListTouchMove"
 					@touchend="ListTouchEnd"
-					@click="clickDietItem"
+					@click="clickDietItem(item)"
 					:data-target="'move-box-' + index"
 					class="diet-item cu-item"
 					v-for="(item, index) in dietRecord"
@@ -497,7 +497,6 @@ export default {
 		_self = this;
 		this.cWidth = uni.upx2px(710);
 		this.cHeight = uni.upx2px(500);
-		// _self.showPie("canvasPie",this.chartData);
 		if (e.data) {
 			try {
 				this.elementData = JSON.parse(e.data);

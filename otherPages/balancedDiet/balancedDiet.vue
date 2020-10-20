@@ -1,6 +1,14 @@
 <template>
 	<view class="balanced-diet">
-		<u-navbar back-text="返回" :back-text-style="backTextStyle" :back-icon-color="backTextStyle.color" :is-back="true" :border-bottom="true" :background="navBackground">
+		<u-navbar
+			back-text="返回"
+			:back-text-style="backTextStyle"
+			:back-icon-color="backTextStyle.color"
+			:is-back="true"
+			:border-bottom="true"
+			:custom-back="backToHome"
+			:background="navBackground"
+		>
 			<view class="header-wrap">
 				<!-- <view class="title">{{ pageTitle }}</view> -->
 				<!-- #ifdef H5 -->
@@ -31,13 +39,13 @@
 		</view>
 		<!-- #endif -->
 		<view class="diet-wrap">
-			<view class="main-box symptom">
+			<!-- 			<view class="main-box symptom">
 				<view class="record-box page-top">
 					<view @click="toPersonal" class="record-item"><view class="label">基本信息</view></view>
 					<view class="record-item"><view class="label">遗传史</view></view>
 					<view class="record-item"><view class="label">疾病史</view></view>
 				</view>
-			</view>
+			</view> -->
 			<view class="main-box">
 				<view class="main-content main-content-t">
 					<view class="main-box-title">能量等式</view>
@@ -81,18 +89,22 @@
 					<!-- <view class="num">[{{sportsRecord.length}}]</view> -->
 				</view>
 				<view class="indicator">
-					<button
-						class="cu-btn text-white"
+					<view
+						class="btn"
+						v-for="(item, index) in radioArr"
+						:key="index"
 						:class="{
 							'active-btn': index === subIndex
 						}"
-						:style="{ 'background-color': index === 0 ? '#5098ff' : index === 1 ? '#999' : index === 2 ? 'rgb(141, 198, 63)' : index === 3 ? '#ff9900' : '' }"
-						v-for="(item, index) in radioArr"
-						@click="changeSub(index)"
-						:key="index"
 					>
-						{{ item.label }}
-					</button>
+						<button
+							class="cu-btn text-white"
+							:style="{ 'background-color': index === 0 ? '#5098ff' : index === 1 ? '#999' : index === 2 ? 'rgb(141, 198, 63)' : index === 3 ? '#ff9900' : '' }"
+							@click="changeSub(index)"
+						>
+							{{ item.label }}
+						</button>
+					</view>
 					<view class="tips" v-if="!hasRecord">请先添加您的饮食记录</view>
 				</view>
 				<view v-for="(item, index) in energyList" :key="index" class="main-box">
@@ -152,11 +164,14 @@
 			<view class="main-box symptom">
 				<view class="title">
 					<view class="label">饮食</view>
-					<view class="cuIcon-add" @click="toPages('food')"></view>
+					<!-- <view class="cuIcon-add" @click="toPages('food')"></view> -->
 				</view>
 				<view class="record-box" @click.self="clickDietBox" :class="{ showall: foodListDisplay, readmore: dietRecord.length > 3 }">
 					<view class="table" v-if="dietRecord">
-						<view class="no-data" v-if="!dietRecord || dietRecord.length === 0" @click="toPages('food')">点击添加饮食运动记录</view>
+						<view class="no-data" v-if="!dietRecord || dietRecord.length === 0" @click="toPages('food')">
+							<view class="cuIcon-add text-black" style="font-size: 38rpx;"></view>
+							点击添加饮食运动记录
+						</view>
 						<view class="row" v-for="(item, index) in dietRecord" :key="index">
 							<view class="readonly" @click="clickDietRecordItem(item)">
 								<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
@@ -180,11 +195,14 @@
 			<view class="main-box symptom">
 				<view class="title">
 					<view class="label">运动</view>
-					<view class="cuIcon-add" @click="toPages('sport')"></view>
+					<!-- <view class="cuIcon-add" @click="toPages('sport')"></view> -->
 				</view>
 				<view class="record-box" @click.self="clickSportBox" :class="{ showall: sportListDisplay, readmore: sportsRecord.length > 3 }">
 					<view class="table">
-						<view class="no-data" v-if="!sportsRecord || sportsRecord.length === 0" @click="toPages('sport')">点击添加饮食运动记录</view>
+						<view class="no-data" v-if="!sportsRecord || sportsRecord.length === 0" @click="toPages('sport')">
+							<view class="cuIcon-add text-black" style="font-size: 38rpx;"></view>
+							点击添加饮食运动记录
+						</view>
 						<view class="row" v-for="(item, index) in sportsRecord" :key="index">
 							<view class="readonly" @click="(showEditModal = true), (currentRecord = deepClone(item)), (currentRecordType = 'sport')">
 								<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
@@ -753,6 +771,7 @@ export default {
 				serviceName: 'srvhealth_diet_contents_select',
 				colName: 'name',
 				imgCol: 'image',
+				date: this.selectDate,
 				wordKey: {
 					title: 'name',
 					unit: 'unit',
@@ -1536,7 +1555,7 @@ export default {
 					dietIn += item.energy;
 				});
 				this.dietIn = dietIn;
-				uni.$emit('dietInChange',dietIn)
+				uni.$emit('dietInChange', dietIn);
 				this.dietRecord = res.data.data;
 				this.getChooseFood(str).then(a => {
 					if (Array.isArray(a) && a.length > 0) {
@@ -1712,7 +1731,7 @@ export default {
 					item['editable'] = false;
 				});
 				this.sportOut = sportOut;
-				uni.$emit('sportOutChange',sportOut)
+				uni.$emit('sportOutChange', sportOut);
 			} else if (res.data.state === 'SUCCESS' && res.data.data.length === 0) {
 				this.sportsRecord = [];
 				this.sportOut = 0;
@@ -1749,6 +1768,11 @@ export default {
 		},
 		NavChange(e) {
 			this.PageCur = e.currentTarget.dataset.cur;
+		},
+		backToHome() {
+			uni.switchTab({
+				url: '/pages/home/home'
+			});
 		},
 		resetRadioArr() {
 			this.radioArr = [
@@ -1803,6 +1827,7 @@ export default {
 				case 'food':
 					condType = {
 						type: 'food',
+						date: this.selectDate,
 						serviceName: 'srvhealth_diet_contents_select',
 						colName: 'name',
 						imgCol: 'image',
@@ -1818,6 +1843,7 @@ export default {
 				case 'sport':
 					condType = {
 						type: 'sport',
+						date: this.selectDate,
 						serviceName: 'srvhealth_body_activity_contents_select',
 						colName: 'name',
 						imgCol: 'image',
@@ -1831,8 +1857,8 @@ export default {
 					url = '/otherPages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
 					break;
 			}
+			this.showPopup = false;
 			if (e !== 'food' && e !== 'sport') {
-				this.showPopup = false;
 				uni.navigateTo({
 					url: '/otherPages/otherIndicator/otherIndicator?type=' + e
 				});
@@ -2159,17 +2185,14 @@ export default {
 		flex-direction: column;
 		box-sizing: border-box;
 		width: 100%;
-		border-top: 1px dashed #f1f1f1;
+		border-top: 3px solid #f1f1f1;
 		padding: 10rpx 0;
 		&.symptom {
 			background-color: #fff;
 			margin: 20rpx 0;
 			width: calc(100%);
-			// box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
-			// border-radius: 20rpx;
 			overflow: hidden;
 			&:first-child {
-				// margin-top: 0;
 				margin-bottom: 0;
 				box-shadow: none;
 				padding: 10rpx 0;
@@ -2254,7 +2277,8 @@ export default {
 						display: flex;
 						justify-content: center;
 						align-items: center;
-						color: #999;
+						color: #666;
+						font-size: 34rpx;
 					}
 					.row {
 						padding: 0 20rpx;
@@ -2565,10 +2589,6 @@ export default {
 			padding: 20rpx;
 			font-size: 17px;
 			font-weight: bold;
-			// border-radius: 20rpx;
-			margin: 20rpx 0;
-			// box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
-			// border-radius: 20rpx;
 			.number {
 				.units {
 					color: #000;
@@ -2765,21 +2785,22 @@ uni-checkbox::before {
 	font-size: 15px;
 	width: 100%;
 	padding: 10rpx 0;
-	.cu-btn {
+	.btn {
+		display: inline-flex;
 		margin-right: 10rpx;
+		&.active-btn {
+			// letter-spacing: 2px;
+			// font-size: 14px;
+			// margin: 0 10px;
+			padding-bottom: 10rpx;
+			border-bottom: 5px solid #2fc25b;
+		}
+	}
+	.cu-btn {
 		padding: 0 10px;
 		font-size: 12px;
 		&:last-child {
 			margin-right: 0rpx;
-		}
-		&.active-btn {
-			// font-weight: 700;
-			letter-spacing: 2px;
-			font-size: 14px;
-			padding: 0 20px;
-			// height: 40px;
-			margin: 0 10px;
-			// border-radius: 30px;
 		}
 	}
 	.tips {

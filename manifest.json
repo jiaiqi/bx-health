@@ -68,7 +68,8 @@
         "title" : "百想软件",
         "domain" : "wx2.100xsys.cn",
         "router" : {
-            "mode" : "history"
+            "mode" : "history",
+            "base" : "/health/"
         },
         "devServer" : {
             "disableHostCheck" : true

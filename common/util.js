@@ -816,13 +816,21 @@ export default {
 			}
 		}
 		Vue.prototype.setWxUserInfo = async function(e) {
-			let userInfo = JSON.parse(e)
+			let userInfo = e
+			if (typeof e === 'string') {
+				try {
+					userInfo = JSON.parse(e)
+				} catch (e) {
+					//TODO handle the exception
+					console.error(e)
+				}
+			}
 			console.log("setWxUserInfo", userInfo)
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_basic_user_info_save', 'operate')
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
 				"data": [{
-					"app_no": "APPNO20201014091746", //百想健康助理小程序
+					"app_no": Vue.prototype.$api.appID.wxmp, //百想健康助理小程序
 					"nickname": userInfo.nickname,
 					"sex": userInfo.sex,
 					"country": userInfo.country,
@@ -833,8 +841,6 @@ export default {
 			}]
 			if (e) {
 				let response = await this.$http.post(url, req);
-				debugger
-				console.log('srvfile_attachment_select', response);
 				if (response.data.state === 'SUCCESS' && response.data.data.length > 0) {
 					return response.data.data
 				}

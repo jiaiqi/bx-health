@@ -28,24 +28,7 @@
 				    <text>输入搜索关键词</text>
 				</view>
 			</view>
-		</view>
-		<!-- <view class="container">
-			<view class="hot-box">
-				<text class="item" v-for="(item,i) in hos_list" :key="i">{{item}}</text>
-			</view>
-		</view> -->
-		<!-- <mescroll-body ref="mescrollRef" :down="downOption" @down="downCallback" @up="upCallback"> -->
-
-		<!-- <view class="container menu-box" >
-			<view class="item-box" v-for="(item,i) in menuList" :key="i">
-				<image :src="item.img" mode=""></image>
-				<view class="tit">
-					<text>{{item.tit}}</text>
-				</view>
-			</view>
-		</view> -->
-		
-		
+		</view>		
 		<view class="container margin-top sort-box">
 			<view  class="item-box" v-for="(item,i) in sortList" :key="i">
 				<view class="tit" :class="{'active': sortIndex == i}">
@@ -53,39 +36,25 @@
 				</view>
 			</view>
 		</view>
-		<view class=" store-box" v-if="storeList">
+		<view @click="toShopDetail" class=" store-box" v-if="storeList">
 			<view class=" item-box" v-for="(store,i) in storeList" :key="i">
 				<view class="container top-box">
 					<view class="left" >
-						<image :src="store.avatar" mode="aspectFill"></image>
+						<image src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
 					</view>
-					<view @click="toShopDetail" class="right">
+					<view class="right">
 						
-						<text class="tit" >{{store.name}}（{{store.community}}）</text>
+						<text class="tit" >{{store.name}}</text>
 						<view class="row justify-content">
-							<view class="row-left">
-								<i class="hxicon-favorfill "></i>
-								<text class="t1">{{store.mark}}</text>
-								<text class="t2">月售{{store.monthly_sales}}</text>
-							</view>
 							<view class="row-right">
 								<i class="hxicon-locationfill"></i>
-								<text>{{store.distance}}</text>
 							</view>
 						</view>
-						<!-- <view class="row">
-							<text >起送￥{{store.starting_price}}</text>
-							<text class="t2" v-if="store.shipping_dees > 0">配送￥{{store.shipping_dees}} </text>
-							<text class="t2" v-else>免费配送</text>
-						</view> -->
-						<!-- <view class="row">
-							
-						</view> -->
 					</view>
 				</view>
 				<scroll-view scroll-x  class="bottom-box">
 					<view class="bottom-box-container">
-						<view class="goods-box" v-for="(goods,j) in store.goods" :key="j" @click="toStore(store,goods.id)">
+						<view class="goods-box" v-for="(goods,j) in shopList" :key="j" @click="toStore(store,goods.id)">
 							<view class="img-box">
 								<image :src="goods.main_pic" mode="aspectFit"></image>
 								<view class="tag">
@@ -98,7 +67,6 @@
 							<view class="price-box">
 								<text class="txt1">￥</text>
 								<text class="txt2">{{goods.price}}</text>
-								<text class="txt3">￥{{goods.old_price}}</text>
 							</view>
 						</view>
 					</view>
@@ -107,44 +75,21 @@
 			</view>
 		</view>
 		<!-- </mescroll-body> -->
-		<view class="foot" v-if="showFoot">
+		<!-- <view class="foot" v-if="showFoot">
 			<text>更多商家加入中，敬请期待</text>
-		</view>
+		</view -->
 		<view class="footzw"></view>
 	</view>
 	
 </template>
 
 <script>
-	// import MescrollBody from "@/components/mescroll-uni/mescroll-body.vue"
-	// import MescrollUni from "@/components/mescroll-uni/mescroll-uni.vue"
-	// import MescrollMixin from "@/components/mescroll-uni/mescroll-mixins.js";
 	
 	//引入测试数据
 	import testData from "@/common/testdata.js";
-	// const screenHeight = uni.getSystemInfoSync().screenHeight;
 	export default {
-		// mixins: [MescrollMixin], 
 		components:{
-			// MescrollBody
 		},
-		// onPageScroll(e){
-		// 	let that= this;
-		// 	if(e.scrollTop>10){
-		// 		let view = uni.createSelectorQuery().select(".search-box");
-		// 		view.fields({
-		// 			rect: true
-		// 		}, res => {
-		// 			if(res.top == 0){
-		// 				that.GDHEAD = 1;
-		// 			}else{
-		// 				that.GDHEAD = 0;
-		// 			}
-					
-		// 		}).exec();
-		// 	}
-			
-		// },
 		data() {
 			return {
 				MPPR: 0,
@@ -154,117 +99,72 @@
 				downOption: {
 					auto: false //是否在初始化后,自动执行downCallback; 默认true
 				},
-				menuList: [
-					
-					{
-						img: '/static/img/index/cs.png',
-						tit: '超市百货'
-					},
-					{
-						img: '/static/img/index/sc.png',
-						tit: '绿色果蔬'
-					},
-					{
-						img: '/static/img/index/sg.png',
-						tit: '生鲜鱼肉'
-					},
-					{
-						img: '/static/img/index/xh.png',
-						tit: '鲜花礼品'
-					},
-					{
-						img: '/static/img/index/yd.png',
-						tit: '送药到家'
-					}
-				],
 				sortIndex: 0,
 				sortList: [{tit:'商户'}, {tit:'评分'}],
-				//filterTagList: [{tit:'支持预定'}, {tit:'销量'}, {tit:'速度'}, {tit:'配送费'}] 
 				storeList: [],
-				bannerData:[
-					{page: '/pages/product/product?id=457', src: '//imgs.1op.cn/i/hxshop/banner/banner.jpg'},
-					{page: '/pages/product/product?id=57', src:'//imgs.1op.cn/i/hxshop/banner/banner.jpg'},
-					{page: '/pages/product/product?id=95', src:'//imgs.1op.cn/i/hxshop/banner/banner.jpg'},
-					{page: '/pages/product/product?id=45', src:'//imgs.1op.cn/i/hxshop/banner/banner.jpg'}
-				],
-				hos_list:[
-					'红烧排骨',
-					'飞过肉',
-					'野生大菠萝',
-					'红烧排骨',
-					'西红柿蛋汤'
-				]
+				shopList:[]
 				
 			}
 		},
 		onLoad() {
-			this.storeList = testData.storeList;
-			// let that = this;
-			// // #ifdef MP
-			// //小程序下空出胶囊距离
-			// let m = uni.getMenuButtonBoundingClientRect();
-			// that.MPPR = m.width + 8
+			this.shopList = testData.storeList[0].goods;
+			console.log("--------",this.shopList)
 			
-			// // #endif
+			this.getShopList()
 		},
 		mounted() {
 			let that = this;
 			
 		},
 		methods: {
+			/*跳转至商铺详情*/
 			toShopDetail(){
 				console.log("---------")
 				uni.navigateTo({
 					url:'/otherPages/shop/shopHome'
 				})
 			},
-			/*下拉刷新的回调 */
-			downCallback() {
-				let that = this;
-				//联网成功的回调,隐藏下拉刷新的状态
-				that.mescroll.endSuccess();
-				// setTimeout(()=>{
-				// 	that.mescroll.endSuccess();
-				// },1500)
-				//联网失败的回调,隐藏下拉刷新的状态
-				//this.mescroll.endErr();
-				
-			},
-			upCallback(page) {
-				let that = this;
-				//加载门店数据
-				that.storeList = testData.storeList;
-				//无更多商家
-				that.showFoot = true;
-				//隐藏加载
-				that.mescroll.endSuccess(10);
-				// setTimeout(()=>{
-				// 	//加载门店数据
-				// 	that.storeList = testData.storeList;
-				// 	//无更多商家
-				// 	that.showFoot = true;
-				// 	//隐藏加载
-				// 	that.mescroll.endSuccess(10);
-				// },1500)
-			},
-			toStore(store,goodsID){
-				let store_id = store.store_id
-				let parameter = `?sid=${store_id}`
-				
-				if(goodsID != null){
-					parameter += `&gid=${goodsID}`
+			/* 获取商户列表**/
+			async getShopList(){
+				let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
+				let req = {
+					serviceName: 'srvhealth_restaurant_mgmt_select',
+					colNames: ['*'],
+					condition:[],
+					order:[]
+				};
+				let res = await this.$http.post(url, req);
+				if(res.data.state === 'SUCCESS'){
+					console.log("商户列表-----",res.data.data)
+					this.storeList = res.data.data
 				}
-				uni.navigateTo({
-					url: '/pages/store/index' + parameter
-				})
-			},
-			//搜索
-			goSearch(){
-				uni.navigateTo({
-					url: '/pages/search/search?type=home'
-				})
 			}
-		}
+		},
+		onTabItemTap(e) {
+			let userInfo = uni.getStorageSync('login_user_info');
+			if (!userInfo) {
+				// 未登录， 提示跳转
+				uni.showModal({
+					title: '提示',
+					content: '未登录,是否跳转到登录页面?',
+					confirmText: '去登录',
+					confirmColor: '#02D199',
+					success(res) {
+						if (res.confirm) {
+							// 确认 跳转到登录页
+							uni.redirectTo({
+								url: '/pages/accountExec/accountExec'
+							});
+						} else if (res.cancel) {
+							// 取消 返回首页
+							uni.switchTab({
+								url: '/pages/pedia/pedia'
+							});
+						}
+					}
+				});
+			}
+		},
 	}
 </script>
 
