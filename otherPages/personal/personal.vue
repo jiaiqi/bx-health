@@ -61,19 +61,19 @@ export default {
 			switch (e) {
 				case 'pinggu':
 					uni.navigateTo({
-						url: '/pages/healthQuestionnaire/healthQuestionnaire'
+						url: '/otherPages/healthQuestionnaire/healthQuestionnaire'
 					});
 					break;
 				case 'yundong':
 					uni.navigateTo({
-						url: '/pages/sportDetail/sportDetail?title=运动'
+						url: '/otherPages/sportDetail/sportDetail?title=运动'
 					});
 					break;
 			}
 		},
 		toPersonDetail(type) {
 			uni.navigateTo({
-				url: '/pages/personalDetail/personalDetail?type=' + type
+				url: '/otherPages/personalDetail/personalDetail?type=' + type
 			});
 		}
 	},
@@ -98,10 +98,16 @@ export default {
 }
 .container-top {
 	width: 100%;
-	height: 350upx;
-	background-color: #00c4b2;
+	height: 350rpx;
+	/* #ifdef MP-WEIXIN */
+	height: 200rpx;
+	padding-top: 10rpx;
+	/* #endif */
+	background-color: #0bc99d;
 	display: flex;
+	/* #ifdef H5 */
 	align-items: center;
+	/* #endif */
 	.top-left {
 		height: 120upx;
 		/* border-radius: 50%; */

@@ -25,10 +25,11 @@ fly.interceptors.request.use((request) => {
 	console.log("request: ", request)
 	let ignoreUrlList = [
 		"srvfile_attachment_select",
-		// "srvdaq_page_item_buttons_select"
+		"srvdaq_page_item_buttons_select"
 	]
-	if (!ignoreUrlList.includes(request.url)) {
-		// if (request.url.indexOf('srvfile_attachment_select') === -1&&request.url.indexOf('srvdaq_page_item_buttons_select') === -1) {
+	// if (!ignoreUrlList.includes(request.url)) {
+	if (request.url.indexOf('srvfile_attachment_select') === -1 && request.url.indexOf('srvdaq_page_item_buttons_select') ===
+		-1) {
 		uni.showLoading({
 			mask: true
 		})
@@ -83,18 +84,19 @@ fly.interceptors.response.use(
 				})
 			} else {
 				// 确认未登录时再进行自动跳转到登录页面
-				if (res.request.headers.requrl) {
-					console.log('请求失败::', res.request.headers.requrl)
-					// uni.setStorageSync('backUrl',res.request.headers.requrl)
-					let requestUrl = decodeURIComponent(res.request.headers.requrl)
-					if (res.request.headers.requrl && res.request.headers.requrl !== '/' && res.request.headers.requrl.indexOf("code") ===
-						-1 && res.request.headers.requrl.indexOf('accountExec/accountExec') === -1) {
+				let requestUrl = decodeURIComponent(res.request.headers.requrl)
+				if (requestUrl) {
+					console.log('请求失败::', requestUrl)
+					if (requestUrl && requestUrl !== '/' && requestUrl.indexOf("code") ===
+						-1 && requestUrl.indexOf('/accountExec/accountExec') === -1) {
 						//  过滤无效的url
+						let index = requestUrl.indexOf('/pages/')
+						requestUrl = requestUrl.slice(index)
 						uni.setStorageSync("backUrl", requestUrl)
 					}
 					try {
 						console.log("backUrl:", requestUrl, encodeURIComponent(requestUrl))
-						uni.redirectTo({
+						uni.navigateTo({
 							url: '/publicPages/accountExec/accountExec'
 						})
 					} catch (e) {
@@ -102,7 +104,7 @@ fly.interceptors.response.use(
 						//TODO handle the exception
 					}
 				} else {
-					uni.redirectTo({
+					uni.navigateTo({
 						url: '/publicPages/accountExec/accountExec'
 					})
 				}
@@ -115,9 +117,7 @@ fly.interceptors.response.use(
 			})
 		} else {
 			uni.setStorageSync('stophttp', false)
-			// uni.removeStorageSync("backUrl")	
 		}
-		// return res.data
 	},
 	(err) => {
 		if (err.status === 429) {

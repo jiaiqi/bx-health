@@ -33,12 +33,12 @@
 							<view class="ele-text">
 								<text>VA:</text>
 								<text>{{ currFood.vitamin_a ? currFood.vitamin_a.toFixed(1) : '' }}ug</text>
-								<text style="color: red;">({{ currFood.vitamin_a >= 450 ? '高' : currFood.vitamin_a >= 100 && currFood.vitamin_a < 450 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.vitamin_a >= 915 ? '高' : currFood.vitamin_a >= 457 && currFood.vitamin_a < 915 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>VE:</text>
 								<text>{{ currFood.vitamin_e ? currFood.vitamin_e.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.vitamin_e >= 35 ? '高' : currFood.vitamin_e >= 15 && currFood.vitamin_e < 35 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.vitamin_e >= 27.9 ? '高' : currFood.vitamin_e >= 13.9 && currFood.vitamin_e < 27.9 ? '中' : '低' }})</text>
 							</view>
 						</view>
 					</view>
@@ -48,7 +48,7 @@
 							<view class="ele-text">
 								<text>蛋白质:</text>
 								<text>{{ currFood.protein ? currFood.protein.toFixed(1) : '' }}g</text>
-								<text style="color: red;">({{ currFood.protein >= 35 ? '高' : currFood.protein >= 15 && currFood.protein < 35 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.protein >= 30.1 ? '高' : currFood.protein >= 15.5 && currFood.protein < 30.1 ? '中' : '低' }})</text>
 							</view>
 						</view>
 					</view>
@@ -58,22 +58,22 @@
 							<view class="ele-text">
 								<text>VB1:</text>
 								<text>{{ currFood.vitamin_b1 ? currFood.vitamin_b1.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.vitamin_b1 >= 0.15 ? '高' : currFood.vitamin_b1 >= 0.1 && currFood.vitamin_b1 < 0.15 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.vitamin_b1 >= 0.61 ? '高' : currFood.vitamin_b1 >= 0.32 && currFood.vitamin_b1 < 0.61 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>VB2:</text>
 								<text>{{ currFood.vitamin_b2 ? currFood.vitamin_b2.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.vitamin_b2 >= 0.15 ? '高' : currFood.vitamin_b2 >= 0.1 && currFood.vitamin_b2 < 0.15 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.vitamin_b2 >= 0.79 ? '高' : currFood.vitamin_b2 >= 0.4 && currFood.vitamin_b2 < 0.79 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>VB3:</text>
 								<text>{{ currFood.vitamin_b3 ? currFood.vitamin_b3.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.vitamin_b3 >= 5 ? '高' : currFood.vitamin_b3 >= 3.5 && currFood.vitamin_b3 < 5 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.vitamin_b3 >= 4.52 ? '高' : currFood.vitamin_b3 >= 2.26 && currFood.vitamin_b3 < 4.52 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>VC:</text>
 								<text>{{ currFood.vitamin_c ? currFood.vitamin_c.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.vitamin_c >= 50 ? '高' : currFood.vitamin_c >= 35 && currFood.vitamin_c < 50 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.vitamin_c >= 61.2 ? '高' : currFood.vitamin_c >= 30.6 && currFood.vitamin_c < 61.2 ? '中' : '低' }})</text>
 							</view>
 						</view>
 					</view>
@@ -83,22 +83,22 @@
 							<view class="ele-text">
 								<text>钙:</text>
 								<text>{{ currFood.element_ca ? currFood.element_ca.toFixed(1) : '' }}mg/</text>
-								<text style="color: red;">({{ currFood.element_ca >= 450 ? '高' : currFood.element_ca >= 200 && currFood.element_ca < 450 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.element_ca >= 381 ? '高' : currFood.element_ca >= 190.5 && currFood.element_ca < 381 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>镁:</text>
 								<text>{{ currFood.element_mg ? currFood.element_mg.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_mg >= 150 ? '高' : currFood.element_mg >= 80 && currFood.element_mg < 150 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.element_mg >= 111.6 ? '高' : currFood.element_mg >= 55.8 && currFood.element_mg < 111.6 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>磷:</text>
 								<text>{{ currFood.element_p ? currFood.element_p.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_p >= 250 ? '高' : currFood.element_p >= 150 && currFood.element_p < 250 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.element_p >= 296.4 ? '高' : currFood.element_p >= 148.2 && currFood.element_p < 296.4 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>钾:</text>
 								<text>{{ currFood.element_k ? currFood.element_k.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_k >= 500 ? '高' : currFood.element_k >= 200 && currFood.element_k < 500 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.element_k >= 526.2 ? '高' : currFood.element_k >= 263.1 && currFood.element_k < 526.2 ? '中' : '低' }})</text>
 							</view>
 						</view>
 					</view>
@@ -109,27 +109,27 @@
 							<view class="ele-text">
 								<text>铁:</text>
 								<text>{{ currFood.element_fe ? currFood.element_fe.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_fe >= 8 ? '高' : currFood.element_fe >= 4 && currFood.element_fe < 8 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.element_fe >= 7.2 ? '高' : currFood.element_fe >= 3.6 && currFood.element_fe < 7.2 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>锌:</text>
 								<text>{{ currFood.element_zn ? currFood.element_zn.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_zn >= 7 ? '高' : currFood.element_zn >= 4 && currFood.element_zn < 7 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.element_zn >= 6 ? '高' : currFood.element_zn >= 3 && currFood.element_zn < 6 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>硒:</text>
 								<text>{{ currFood.element_se ? currFood.element_se.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_se >= 20 ? '高' : currFood.element_se >= 10 && currFood.element_se < 20 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.element_se >= 23.82 ? '高' : currFood.element_se >= 11.91 && currFood.element_se < 23.82 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>铜:</text>
 								<text>{{ currFood.element_cu ? currFood.element_cu.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_cu >= 1.5 ? '高' : currFood.element_cu >= 1 && currFood.element_cu < 1.5 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.element_cu >= 1.12 ? '高' : currFood.element_cu >= 0.56 && currFood.element_cu < 1.12 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>锰:</text>
 								<text>{{ currFood.element_mn ? currFood.element_mn.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_mn >= 5 ? '高' : currFood.element_mn >= 2.5 && currFood.element_mn < 5 ? '较高' : '低' }})</text>
+								<text style="color: red;">({{ currFood.element_mn >= 4.44 ? '高' : currFood.element_mn >= 2.22 && currFood.element_mn < 4.44 ? '中' : '低' }})</text>
 							</view>
 						</view>
 					</view>
@@ -571,27 +571,25 @@ export default {
 	.key-left {
 		text {
 			padding: 12upx 12upx;
-			background-color: #f2f3f5;
+			background-color: #d6e2eb;
 			font-size: 30upx;
 			min-width: 60upx;
 			text-align: center;
 			display: inline-block;
-			&:first-child {
-				margin-right: 2px;
-			}
+			margin-right: 2px;	
+			border-radius: 5px;
 		}
 	}
 	.key-right {
 		text {
 			padding: 12upx 12upx;
-			background-color: #f2f3f5;
+			background-color: #d6e2eb;
 			font-size: 30upx;
 			min-width: 60upx;
 			text-align: center;
 			display: inline-block;
-			&:first-child {
-				margin-right: 2px;
-			}
+			margin-left: 2px;		
+			border-radius: 5px;
 		}
 	}
 	.digit {

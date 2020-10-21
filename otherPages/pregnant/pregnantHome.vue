@@ -8,19 +8,19 @@
 				<view class="pregnant-status-top">
 					<image src="/otherPages/static/img/sj.png" mode=""></image>
 				</view>
-				<text>备孕中</text>
+				<text :class="current_type === 'prepare'?'active-pregnant':''">孕前</text>
 			</view>
 			<view @click="choseItem('family')" class="pregnant-status">
 				<view class="pregnant-status-top">
 					<image src="/otherPages/static/img/hy.png" mode=""></image>
 				</view>				
-				<text>已怀孕</text>
+				<text :class="current_type === 'family'?'active-pregnant':''">已怀孕</text>
 			</view>
 			<view @click="choseItem('baby')" class="pregnant-status">
 				<view class="pregnant-status-top">
 					<image src="/otherPages/static/img/son.png" mode=""></image>
 				</view>
-				<text>宝宝已出生</text>
+				<text :class="current_type === 'baby'?'active-pregnant':''">产后</text>
 			</view>
 		</view>
 		<view v-if="current_type === 'family'" class="pregant-home-main">
@@ -107,7 +107,7 @@
 			/* 点击前往首页**/
 			toPregant(){
 				uni.navigateTo({
-					url:'/pages/specific/health/pregnant/pregnant'
+					url:'/otherPages/pregnant/pregnant'
 				})
 			}
 		}
@@ -146,7 +146,10 @@
 						height: 100%;
 					}
 				}
-				
+				.active-pregnant{
+					color: #000000;
+					font-weight: 700;
+				}
 			}
 		}
 		.pregant-home-main{
@@ -199,4 +202,5 @@
 			border-radius: 20px;
 		}
 	}
+	
 </style>

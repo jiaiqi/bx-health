@@ -43,8 +43,8 @@
 				</view>
 				<swiper class="swiper item-box" :indicator-dots="true" :autoplay="false" :interval="3000" :duration="500" v-if="pageItem.buttons && pageItem.buttons.length > 1">
 					<swiper-item v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
-						<view  class="swiper-item">
-							<view  class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
+						<view class="swiper-item">
+							<view @click="skip(btn)" class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
 								<u-image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></u-image>
 								<text class="btn-name">{{ btn.dest_menu_no }}</text>
 							</view>
@@ -66,13 +66,22 @@ export default {
 		};
 	},
 	methods: {
-		skip(item){
-			if(item.dest_page){
-				uni.navigateTo({
-					url:item.dest_page
-				})
+		skip(item) {
+			if (item.dest_page && item.dest_page.indexOf('/pages/specific/health') !== -1) {
+				let index = item.dest_page.indexOf('/pages/specific/health');
+				item.dest_page = '/otherPages' + item.dest_page.slice(22);
+				console.log(item.dest_page);
 			}
-			console.log("点击跳转=====",item)
+			if (item.dest_page && typeof item.dest_page === 'string' && item.dest_page.indexOf('/pages/') !== -1) {
+				uni.switchTab({
+					url: item.dest_page
+				});
+			} else {
+				uni.navigateTo({
+					url: item.dest_page
+				});
+			}
+			console.log('点击跳转=====', item);
 		},
 		getMenuImagePath(btn) {
 			return this.$api.backEndAddress + '/main/images/appicon/' + btn.icon;
@@ -89,6 +98,7 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				// return res.data.data;
+				this.pageItemList = res.data.data;
 				for (let index in res.data.data) {
 					let result = await this.getItemDetail(res.data.data[index]);
 					switch (res.data.data[index].div_type) {
@@ -104,21 +114,16 @@ export default {
 								}
 							}
 							res.data.data[index]['buttons'] = swiperList;
-							// res.data.data[index]['swiperList'] = result.map(btn=>{
-							// 	debugger
-							// });
+							this.$set(this.pageItemList, index, res.data.data[index]);
 							break;
 						case 'carousel':
 							res.data.data[index]['carousel'] = result;
+							this.$set(this.pageItemList, index, res.data.data[index]);
 							break;
 					}
 				}
-				console.log(res.data.data);
-				this.pageItemList = res.data.data;
+				// this.pageItemList = res.data.data;
 				return res.data.data;
-				// res.data.data.forEach(item => {
-				// 	this.getItemDetail(item)
-				// });
 			}
 		},
 		async getItemDetail(item) {
@@ -145,7 +150,7 @@ export default {
 					let itemList = res.data.data.map((pageitem, index) => {
 						switch (item.div_type) {
 							case 'carousel':
-								pageitem['picUrl'] = this.$api.downloadFile + pageitem.carousel_image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+								pageitem['picUrl'] = this.$api.downloadFile + pageitem.carousel_image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 								break;
 							case 'buttons':
 								break;
@@ -168,7 +173,7 @@ export default {
 <style lang="scss" scoped>
 .page-wrap {
 	width: 100vw;
-	padding:20rpx;
+	padding: 20rpx;
 	box-sizing: border-box;
 	background-color: #fff;
 	min-height: 100vh;

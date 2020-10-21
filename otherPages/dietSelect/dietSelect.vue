@@ -37,13 +37,12 @@
 					<view class="filtrate-item-left">
 						{{item.classify_name}}
 					</view>
-					<view v-for="(cate,i) in item.children" :class="cate.choose?'cate-active':''" class="filtrate-item-right">
-						<text @click="chooseMenu(item,cate)">{{cate.title}}</text>
+					<view @click="chooseMenu(item,cate)" v-for="(cate,i) in item.children" :class="cate.choose?'cate-active':''" class="filtrate-item-right">
+						<text>{{cate.title}}</text>
 						<!-- arrow-down-fill -->
-						<u-icon size="24" v-show="cate.current_num == 1 && item.type ==='capacity'" name="arrow-up"></u-icon>
-						<u-icon size="24" v-show="cate.current_num == 2 && item.type ==='capacity'" name="arrow-down"></u-icon>
-						<text v-show="cate.current_num == 1 && item.type !=='food' && item.type !=='capacity'">(高)</text>
-						<text v-show="cate.current_num == 2 && item.type !=='food' && item.type !=='capacity'">(低)</text>
+						<text v-show="cate.current_num == 1 && item.type !=='food'">(高)</text>
+						<text v-show="cate.current_num == 2 && item.type !=='food'">(中)</text>
+						<text v-show="cate.current_num == 3 && item.type !=='food'">(低)</text>
 					</view>
 				</view>
 			</view>
@@ -267,7 +266,7 @@ export default {
 			value1:0,
 			list: [],
 			current: 0,
-			topNum:400,
+			topNum:350,
 			colData: [],
 			currFoodLabel: {},
 			listTouchStart: 0,
@@ -391,26 +390,6 @@ export default {
 								}
 							]
 						}
-						// ,
-						// {
-						// 	title: '蔬菜',
-						// 	type: 'bxlx',
-
-						// 	muti: true,
-						// 	items: [
-						// 		{ name: 'VA', value: 'value1' },
-						// 		{ name: 'VD', value: 'value2' },
-						// 		{ name: 'VE', value: 'value3' },
-						// 		{ name: 'VK', value: 'value4' },
-						// 		{ name: 'B1', value: 'value5' },
-						// 		{ name: 'B2', value: 'value6' },
-						// 		{ name: 'B3', value: 'value7' },
-						// 		{ name: 'B6', value: 'value8' },
-						// 		{ name: 'B12', value: 'value9' },
-						// 		{ name: '叶酸', value: 'value10' },
-						// 		{ name: '走路', value: '走路' }
-						// 	]
-						// }
 					]
 				},
 				{
@@ -464,19 +443,6 @@ export default {
 					]
 				}
 			],
-			/**
-			 * [{
-				classify_name:'宏量成分',
-				type:'capacity',
-				
-				children:[{
-					{
-						title: '默认',
-						value: 'default'
-					}
-				}]
-			}]
-			 * */
 			menuAgList:[],
 			menuList: [
 				{
@@ -677,214 +643,199 @@ export default {
 		let singleType = '';
 		this.pageType = query.type
 		if (query.type === 'food') {
-			let menuData = [
-				{
-					classify_name:'分类',
-					type:"food",
-					children:[
+					let menuData = [
 						{
-							title: '食材',
-							value: 'matter',
-							choose:true
-						},
-					{
-						title: '食物',
-						value: 'foods',
-						choose:false
-					}]
-				},
-				{
-				classify_name:'宏量成分',
-				type:'capacity',				
-				children:[
-					{
-						title: '默认',
-						value: 'default',
-						choose:true,
-						current_num:0
-					},
-					{
-						title: '热量',
-						value: 'unit_energy',
-						choose:false,
-						current_num:0
-					},
-					{
-						title: '蛋白质',
-						value: 'protein',
-						choose:false,
-						current_num:0
-					},
-					{
-						title: '脂肪',
-						value: 'axunge',
-						choose:false,
-						current_num:0
-					},
-					{
-						title: '碳水化合物',
-						value: 'carbohydrate',
-						choose:false,
-						current_num:0
-					}
-				]
-			},{
-				classify_name:'维生素',
-				type:'vitamin',				
-				children:[{
-							title: '不限',
-							value: '不限',
-							choose:true,
-							current_num:0
-						},
-						{
-							title: 'VA',
-							value: 'vitamin_a',
-							choose:false,
-							num: 20,
-							current_num:0
-						},
-						{
-							title: 'VC',
-							value: 'vitamin_c',
-							choose:false,
-							num: 25,
-							current_num:0
-						}]
-				},{
-				classify_name:'矿物质',
-				type:'mineral',				
-				children:[
-						{
-							title: '不限',
-							value: '不限',
-							choose:true,
-							current_num:0
-							
-						},
-						{
-							title: '钙',
-							value: 'element_ca',
-							choose:false,
-							num: 56,
-							current_num:0
-						},
-						{
-							title: '镁',
-							value: 'element_m',
-							choose:false,
-							num: 50,
-							current_num:0
-						},
-						{
-							title: '钾',
-							value: 'element_k',
-							choose:false,
-							num: 200,
-							current_num:0
-						}
-					]
-				},{
-				classify_name:'其他',
-				type:'mingle',				
-				children:[
-						{
-							title: '不限',
-							value: '不限',
-							choose:true,
-							current_num:0
-						},
-						{
-							title: '硫胺素',
-							value: 'thiamine',
-							num: 0.2,
-							choose:false,
-							current_num:0
-						},
-						{
-							title: '核黄素',
-							value: 'riboflavin',
-							num: 0.1,
-							choose:false,
-							current_num:0
-						},
-						{
-							title: '烟酸',
-							value: 'element_k',
-							num: 2,
-							choose:false,
-							current_num:0
-						}
-					]
-				}]
-				this.menuAgList = menuData
-			// this.submenu = submenu;
-			// this.menuList[0].detailList = [...this.menuList[0].detailList, ...singleType];
-			if (query.order) {
-				this.order = query.order;
-			}
-		} else if (query.type === 'sport') {
-			let menuData = [{
-				classify_name:'运动',
-				type:'capacity',
-				children:[{
-					title: '默认',
-					value: 'default',
-					choose:true,
-					current_num:0
-				},{
-					title: '卡路里',
-					value: 'unit_energy',
-					choose:false,
-					current_num:0
-				}]
-			}]
-			// singleType = [
-			// 	{
-			// 		title: '运动',
-			// 		detailTitle: '请选择一项进行排序',
-			// 		isMutiple: false,
-			// 		key: 'jobType',
-			// 		reflexTitle: true,
-			// 		isSort: true,
-			// 		detailList: [
-			// 			{
-			// 				title: '默认',
-			// 				value: 'default'
-			// 			},
-			// 			{
-			// 				title: '卡路里',
-			// 				value: 'unit_energy'
-			// 			}
-			// 		]
-			// 	}
-			// ];
-			let submenu = [
-				{
-					name: '跑步',
-					value: '跑步',
-					filterList: [
-						{
-							title: '跑步',
-							type: 'fltd_type',
-
-							items: [
+							classify_name:'分类',
+							type:"food",
+							children:[
 								{
-									value: '跑步',
-									name: '跑步'
+									title: '食材',
+									value: 'matter',
+									choose:true
+								},
+							{
+								title: '食物',
+								value: 'foods',
+								choose:false
+							}]
+						},
+						{
+						classify_name:'宏量成分',
+						type:'capacity',				
+						children:[
+							{
+								title: '默认',
+								value: 'default',
+								choose:true,
+								current_num:0
+							},
+							{
+								title: '热量',
+								value: 'unit_energy',
+								choose:false,
+								num: 646,
+								current_num:0
+							},
+							{
+								title: '蛋白质',
+								value: 'protein',
+								choose:false,
+								num: 51.6,
+								current_num:0
+							},
+							{
+								title: '脂肪',
+								value: 'axunge',
+								choose:false,
+								num: 58.8,
+								current_num:0
+							},
+							{
+								title: '碳水化合物',
+								value: 'carbohydrate',
+								choose:false,
+								num: 85.8,
+								current_num:0
+							}
+						]
+					},{
+						classify_name:'维生素',
+						type:'vitamin',				
+						children:[{
+									title: '不限',
+									value: '不限',
+									choose:true,
+									current_num:0
+								},
+								{
+									title: 'VA',
+									value: 'vitamin_a',
+									choose:false,
+									num: 20,
+									current_num:0
+								},
+								{
+									title: 'VC',
+									value: 'vitamin_c',
+									choose:false,
+									num: 25,
+									current_num:0
+								},{
+									title: 'VD',
+									value: 'vitamin_d',
+									choose:false,
+									num: 141,
+									current_num:0
+								},{
+									title: 'VE',
+									value: 'vitamin_e',
+									choose:false,
+									num: 46.55,
+									current_num:0
+								},{
+									title: 'B1',
+									value: 'vitamin_b1',
+									choose:false,
+									num: 1.01,
+									current_num:0
+								},{
+									title: 'B2',
+									value: 'vitamin_b2',
+									choose:false,
+									num: 1.32,
+									current_num:0
+								},{
+									title: 'B3',
+									value: 'vitamin_b3',
+									choose:false,
+									num: 7.54,
+									current_num:0
+								}
+								]
+						},{
+						classify_name:'矿物质',
+						type:'mineral',				
+						children:[
+								{
+									title: '不限',
+									value: '不限',
+									choose:true,
+									current_num:0
+									
+								},
+								{
+									title: '钙',
+									value: 'element_ca',
+									choose:false,
+									num: 635,
+									current_num:0
+								},
+								{
+									title: '镁',
+									value: 'element_m',
+									choose:false,
+									num: 186,
+									current_num:0
+								},
+								{
+									title: '钾',
+									value: 'element_k',
+									choose:false,
+									num: 877,
+									current_num:0
 								}
 							]
 						}
-					]
+						]
+						this.menuAgList = menuData
+					if (query.order) {
+						this.order = query.order;
+					}
+					this.getChooseFoodList();
+					this.getElementLabel();
+					this.onRefresh();
+				} else if (query.type === 'sport') {
+					let menuData = [{
+						classify_name:'运动',
+						type:'capacity',
+						children:[{
+							title: '默认',
+							value: 'default',
+							choose:true
+						},{
+							title: '卡路里',
+							value: 'unit_energy',
+							choose:false,
+							num: 880,
+							current_num:0
+						}]
+					}]
+					let submenu = [
+						{
+							name: '跑步',
+							value: '跑步',
+							filterList: [
+								{
+									title: '跑步',
+									type: 'fltd_type',
+		
+									items: [
+										{
+											value: '跑步',
+											name: '跑步'
+										}
+									]
+								}
+							]
+						}
+					];
+		
+					this.submenu = submenu;
+					this.menuAgList = menuData;
+					this.topNum = 160
+					// submenu.
+					this.getChooseSportList();
 				}
-			];
-
-			this.submenu = submenu;
-			this.menuAgList = menuData;
-			this.topNum = 160
-			// submenu.
-			this.getChooseSportList();
-		}
 		this.searchArg = query;
 		// this.getFoodsList();
 		this.onRefresh();
@@ -903,7 +854,7 @@ export default {
 				}
 			}else{
 				if(this.pageType == 'food'){
-					this.topNum = 400
+					this.topNum = 380
 				}else if(this.pageType== 'sport'){
 					this.topNum = 180
 				}
@@ -1006,83 +957,78 @@ export default {
 			this.pageInfo.pageNo = 1
 			if(child.value!='不限' && child.value != 'default'){
 				child.current_num += 1
-				if(child.current_num == 4){
+				if(child.current_num == 5){
 					child.current_num  = 0
 				}
-				// if(child.current_num != 0){
-				// 	child.choose = true
-				// }else{
-				// 	child.choose = false
-				// }
 			}else{
 				child.choose = !child.choose
 			}
 			let menuData = this.menuAgList
 			let order = ''
 			/* 宏量成分---排序**/
-			if(parent.type==='capacity'){
-				if(child.value != 'default'){
-					 if(child.current_num == 1){
-						 order = {
-						 	col: child.value,
-						 	type: 'asc'
-						 };	
-					 }else if(child.current_num == 2){
-						 order = {
-						 	col: child.value,
-						 	type: 'desc'
-						 };	
-					 }else if(child.current_num == 3){
-						 child.current_num = 0
-					 }														
-				}
-				menuData.forEach(par=>{
-					if(par.type === parent.type){
-						par.children.forEach(p=>{
-							p.choose = false
-							if(child.current_num != 0 && p.value == child.value){
-								p.choose = true
-								let child_h = false
-								this.childChooseArr.forEach(H=>{
-									if(H.value === child.value){
-										child_h = true
-									}
-								})
-								if(!child_h){
-									this.childChooseArr.push(child)
-								}
-							}
-							if(!p.choose){
-								this.childChooseArr.forEach((Ix,s)=>{
-									/* 当点击某个菜单3次之后删除**/
-									if(Ix.value === p.value){
-										p.current_num = 0
-										this.childChooseArr.splice(s,1)
-									}
+			// if(parent.type==='capacity'){
+			// 	if(child.value != 'default'){
+			// 		 if(child.current_num == 1){
+			// 			 order = {
+			// 			 	col: child.value,
+			// 			 	type: 'asc'
+			// 			 };	
+			// 		 }else if(child.current_num == 2){
+			// 			 order = {
+			// 			 	col: child.value,
+			// 			 	type: 'desc'
+			// 			 };	
+			// 		 }else if(child.current_num == 3){
+			// 			 child.current_num = 0
+			// 		 }														
+			// 	}
+			// 	menuData.forEach(par=>{
+			// 		if(par.type === parent.type){
+			// 			par.children.forEach(p=>{
+			// 				p.choose = false
+			// 				if(child.current_num != 0 && p.value == child.value){
+			// 					p.choose = true
+			// 					let child_h = false
+			// 					this.childChooseArr.forEach(H=>{
+			// 						if(H.value === child.value){
+			// 							child_h = true
+			// 						}
+			// 					})
+			// 					if(!child_h){
+			// 						this.childChooseArr.push(child)
+			// 					}
+			// 				}
+			// 				if(!p.choose){
+			// 					this.childChooseArr.forEach((Ix,s)=>{
+			// 						/* 当点击某个菜单3次之后删除**/
+			// 						if(Ix.value === p.value){
+			// 							p.current_num = 0
+			// 							this.childChooseArr.splice(s,1)
+			// 						}
 									
-								})
-							}
-							if(p.value == child.value && !p.choose){
+			// 					})
+			// 				}
+			// 				if(p.value == child.value && !p.choose){
 								
-								this.childChooseArr.forEach((I,x)=>{
-									/* 当点击某个菜单3次之后删除**/
-									if(I.value === child.value){
-										this.childChooseArr.splice(x,1)
-									}
+			// 					this.childChooseArr.forEach((I,x)=>{
+			// 						/* 当点击某个菜单3次之后删除**/
+			// 						if(I.value === child.value){
+			// 							this.childChooseArr.splice(x,1)
+			// 						}
 									
-								})
+			// 					})
 								
-								par.children[0].choose = true
-								p.choose = false
-								order = ''
-							}
-						})
-					}
-				})
-				this.order = order
-				this.onRefresh();
-				this.getFoodsList(order, this.condObj);
-			}
+			// 					par.children[0].choose = true
+			// 					p.choose = false
+			// 					order = ''
+			// 				}
+			// 			})
+			// 		}
+			// 	})
+			// 	this.order = order
+			// 	this.onRefresh();
+			// 	this.getFoodsList(order, this.condObj);
+			// }
 			if(parent.type==='food'){
 				child.choose = !child.choose
 				menuData.forEach(par=>{
@@ -1105,7 +1051,7 @@ export default {
 				this.getFoodsList()
 				console.log("点击素材")
 			}
-			if(parent.type === 'vitamin' || parent.type === 'mineral' ||parent.type === 'mingle'){
+			if(parent.type === 'capacity' || parent.type === 'vitamin' || parent.type === 'mineral' ||parent.type === 'mingle'){
 				let isHas = false
 				this.childChooseArr.forEach(hdel=>{
 					if(hdel.title === child.title){
@@ -1116,7 +1062,7 @@ export default {
 					this.childChooseArr.push(child)
 				}
 				let childChooseArr = this.childChooseArr
-				if(child.current_num === 3){
+				if(child.current_num === 4){
 					childChooseArr.forEach((del,index)=>{
 						if(del.title === child.title){
 							childChooseArr.splice(index,1)
@@ -1132,15 +1078,25 @@ export default {
 									hasChild = true
 								}
 							})
-							if(child.value !== '不限' && child.value ===p.value&& child.current_num == 3){
+							if(child.value !== '不限' && child.value !== 'default' && child.value ===p.value&& child.current_num == 4){
 								child.current_num = 0
 								p.choose = false
-								// par.children[0].choose = true
-							}else if(child.value !== '不限' && child.value ===p.value&& child.current_num != 0){
+								par.children[0].choose = true
+							}else if(child.value !== '不限' && child.value !== 'default' && child.value ===p.value&& child.current_num != 0){
 								p.choose = true
 								par.children[0].choose = false
-							}else if(child.value === '不限'){
-								if(p.value === '不限'){
+							}else if(child.value === '不限'|| child.value == 'default'){
+								p.current_num = 0
+								par.children.forEach(a=>{
+									this.childChooseArr.forEach((b,i)=>{
+										if(a.value != 'default' || a.value != '不限'){
+											if(a.value === b.value){
+												this.childChooseArr.splice(i,1)
+											}
+										}
+									})
+								})
+								if((p.value === '不限'|| p.value == 'default') && child.value === p.value){									
 									p.choose = true
 								}else {
 									p.choose = false
@@ -1157,40 +1113,42 @@ export default {
 							})
 						}
 					}
-					// if(par.type == 'capacity'){
-					// 	par.children.forEach(alone=>{
-					// 		alone.choose = false
-					// 		alone.current_num = 0
-					// 		par.children[0].choose = true
-					// 		this.childChooseArr.forEach((c,i)=>{
-					// 			if(alone.value === c.value){
-					// 				this.childChooseArr.splice(i,1)
-					// 			}
-					// 		})
-					// 	})
-						
-					// }
 				})
 				
 				let cond = {
 					relation: 'AND',
 					data: []
 				};
-				if(child.value === '不限'){
-					childChooseArr = []
-				}
+				// if(child.value === '不限'){
+				// 	childChooseArr = []
+				// }
 				if(childChooseArr.length > 0 ){
 					childChooseArr.forEach(son=>{
-						
-						let obj = {
+						if(son.value != '不限' && son.value != 'default' ){							
+						let min_num = (son.num * 0.3).toFixed(2)
+						let max_num = (son.num * 0.6).toFixed(2)
+						let obj = [{
 							colName:son.value,
 							ruleType: 'ge',
-							value:son.num
-						}
+							value:max_num
+						}]
 						if(son.current_num == 2){
-							obj.ruleType = 'le'
+							obj[0].ruleType = 'lt'
+							obj[1] = {
+								colName:son.value,
+								ruleType: 'gt',
+								value:min_num
+							}
+						}else if(son.current_num == 3){
+							obj = [{
+								colName:son.value,
+								ruleType: 'le',
+								value:min_num
+							}]
 						}
-						cond.data.push(obj)
+						// cond.data.push(obj)
+						cond.data = [...cond.data,...obj]
+						}
 					})
 					
 				}
@@ -1206,7 +1164,6 @@ export default {
 				}
 				this.childChooseArr = childChooseArr
 				this.condObj =cond
-				this.onRefresh();
 				this.getFoodsList(this.order?this.order:order, cond, 'filtrate');
 				console.log('childChooseArr-----',cond)
 			}
@@ -1402,7 +1359,7 @@ export default {
 			if (res.data.state === 'SUCCESS' && res.data.data.length >= 0) {
 				this.chooseFoodArr = res.data.data;
 				for (let i = 0; i < this.chooseFoodArr.length; i++) {
-					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +"thumbnailType=whsu_0.3";
+					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +"&thumbnailType=fwsu_100";
 					this.$set(this.chooseFoodArr[i], 'imgurl', urls);
 				}
 			}else{
@@ -1428,7 +1385,7 @@ export default {
 			if (res.data.state === 'SUCCESS' && res.data.data.length >= 0) {
 				this.chooseFoodArr = res.data.data;
 				for (let i = 0; i < this.chooseFoodArr.length; i++) {
-					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
 					this.$set(this.chooseFoodArr[i], 'imgurl', urls);
 				}
 			}else{
@@ -1508,7 +1465,7 @@ export default {
 			for (let i = 0; i < resData.length; i++) {
 				if (resData[i][self.searchArg.imgCol]) {
 					let fileDatas = await self.getFilePath(resData[i][self.searchArg.imgCol]);
-					url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+					url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
 					self.$set(resData[i], 'imgurl', url);
 				}
 			}
@@ -1682,7 +1639,7 @@ export default {
 						// let fileDatas = await self.getFilePath(data[i].image);
 						// console.log('img---', fileDatas);
 						// url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-						url = self.$api.downloadFile + data[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+						url = self.$api.downloadFile + data[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
 						// let url = this.$api.serverURL + '/file/download?filePath=' + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
 						self.$set(data[i], 'imgurl', url);
 					}

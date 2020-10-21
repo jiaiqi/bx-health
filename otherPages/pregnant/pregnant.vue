@@ -1,370 +1,737 @@
 <template>
 	<view class="pregnant_wrap">
-		<view class="cu-timeline pregnant-timeline">
-			<view class="cu-time">第一周</view>
-			<view class="cu-item">
-				<view class="content bg-green shadow-blur">
-					<text>第一天</text>
-					 <view class="cont-tit">
-						 <view class="tit-stature">
-						 	<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-					 	<view class="tit-weight">
-					 		<text>体重:</text>
-					 		<text>0kg</text>
-					 	</view>
-					 </view>
-					 <view class="cont-main">
-						 <view class="cont-main-mon">
-						 	<text>宝宝变化:</text>
-						 	<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-					 	<view class="cont-main-mon">
-					 		<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-					 	</view>						
-					 </view>
-				</view>
-			</view>
-			<view class="cu-item text-red">
-				<view class="content bg-red shadow-blur">
-					<text>第二天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
+		<u-collapse  :head-style="headStyle">
+				<u-collapse-item v-for="(item,index) in timeLienData" :key="index" :open="item.open" :title="item.name">
+					<view class="cu-timeline pregnant-timeline">					
+						<view v-for="(week,i) in item.child" class="cu-item">
+							<view class="content bg-cyan">
+								<text>{{week.title}}</text>
+							</view>
+							<view class="pre-chunk-wrap">
+								<view @click="openCont(con)" v-for="(con,k) in week.content" :class="con.isOk?'pass-pre-chunk':''" class="pre-chunk">
+									{{con.name}}
+								</view>
+							</view>
+							
 						</view>						
 					</view>
-				</view>
-			</view>
-			<view class="cu-item text-grey">
-				<view class="content bg-grey shadow-blur">
-					<text>第三天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
+				</u-collapse-item>
+			</u-collapse>
+			<u-popup v-model="show" mode="center" width="85%">
+				<view class="pre-model-wrap">
+					<view class="pre-top">
+						<text>确认下列注意事项是否进行?</text>
 					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
+					<view class="pre-content">
+						<view v-for="(curr,i) in current_pre.child" class="pre-content-item">
+							<view class="pre-content-top">
+								<view class="pre-left">
+									<image src="/otherPages/static/img/header.jpg" mode=""></image>
+								</view>
+								<view class="pre-right">
+									<text>{{curr.tit}}</text>
+									<view @click="selectDetail(curr)" class="details">
+										<text>查看详情</text>
+										<text v-if="!curr.isOpen" class="lg text-gray cuIcon-rounddown"><span></span></text>
+										<image v-else src="/otherPages/static/img/pretop.png" mode=""></image>
+									</view>
+								</view>
+							</view>
+							<view :class="curr.isOpen?'detail-show':''" class="pre-content-bot">
+								<text></text>
+								<text>{{curr.content}}</text>
+							</view>
 						</view>						
 					</view>
-				</view>
-			</view>
-			<view class="cu-item text-blue">
-				<view class="content bg-blue shadow-blur">
-					<text>第四天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
+					<view class="pre-bot">
+						<view @click="botBtn('true')" class="pre-bot-left">
+							是
+						</view>
+						<view @click="botBtn('false')" class="pre-bot-left">
+							否
 						</view>
 					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
-				</view>								
-			</view>
-			<view class="cu-item text-cyan">
-				<view class="content bg-cyan shadow-blur">
-					<text>第五天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
 				</view>
-			</view>
-			<view class="cu-item text-mauve">
-				<view class="content bg-mauve shadow-blur">
-					<text>第六条</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
-				</view>
-			</view>
-			<view class="cu-item text-red">
-				<view class="content bg-red shadow-blur">
-					<text>第七天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
-				</view>
-			</view>
-		</view>
-		
-		<view class="cu-timeline pregnant-timeline">
-			<view class="cu-time">第二周</view>
-			<view class="cu-item">
-				<view class="content bg-green shadow-blur">
-					<text>第一天</text>
-					 <view class="cont-tit">
-						 <view class="tit-stature">
-						 	<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-					 	<view class="tit-weight">
-					 		<text>体重:</text>
-					 		<text>0kg</text>
-					 	</view>
-					 </view>
-					 <view class="cont-main">
-						 <view class="cont-main-mon">
-						 	<text>宝宝变化:</text>
-						 	<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-					 	<view class="cont-main-mon">
-					 		<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-					 	</view>						
-					 </view>
-				</view>
-			</view>
-			<view class="cu-item text-red">
-				<view class="content bg-red shadow-blur">
-					<text>第二天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
-				</view>
-			</view>
-			<view class="cu-item text-grey">
-				<view class="content bg-grey shadow-blur">
-					<text>第三天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
-				</view>
-			</view>
-			<view class="cu-item text-blue">
-				<view class="content bg-blue shadow-blur">
-					<text>第四天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
-				</view>								
-			</view>
-			<view class="cu-item text-cyan">
-				<view class="content bg-cyan shadow-blur">
-					<text>第五天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
-				</view>
-			</view>
-			<view class="cu-item text-mauve">
-				<view class="content bg-mauve shadow-blur">
-					<text>第六条</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
-				</view>
-			</view>
-			<view class="cu-item text-red">
-				<view class="content bg-red shadow-blur">
-					<text>第七天</text>
-					<view class="cont-tit">
-						 <view class="tit-stature">
-							<text>顶臀长:</text>
-							<text>0cm</text>
-						 </view>
-						<view class="tit-weight">
-							<text>体重:</text>
-							<text>0kg</text>
-						</view>
-					</view>
-					<view class="cont-main">
-						 <view class="cont-main-mon">
-							<text>宝宝变化:</text>
-							<text>口腔发育很好，牙齿开始形成</text>
-						 </view>
-						<view class="cont-main-mon">
-							<text>妈妈变化:</text>
-							<text>你可能会情绪起伏比较大，包括易怒、不讲道理、无故流泪等</text>
-						</view>						
-					</view>
-				</view>
-			</view>
-		</view>
+			</u-popup>	
 	</view>
 </template>
 
 <script>
+	export default {
+		name:"pregnant",
+		data(){
+			return {
+				headStyle:{
+					paddingLeft:'18px'
+				},
+				current_pre:"",
+				show:false,
+				timeLienData:
+				 [
+					 {
+					 name:'早期',
+					 open:true,
+					 child:[
+						{
+						 title:"第一周",
+						 content:[{
+							 name:'饮食',
+							 isOk:false,							 
+							 child:[
+								 {
+									 tit:'啤酒',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'可乐',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'冰淇淋',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'咖啡',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'出行',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'坐动车',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'过安检',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'坐飞机',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'摔跤',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'娱乐',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'看电影',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'唱歌',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"烧烤",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"看恐怖片",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								}
+							 ]
+						 },{
+							 name:'运动',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:"滑雪",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"骑马",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"踢毽子",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"用跑步机",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }
+							 ]
+						 }]
+					 },
+					 {
+						 title:"第二周",
+						 content:[{
+							 name:'饮食',
+							 isOk:false,							 
+							 child:[
+								 {
+									 tit:'啤酒',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'可乐',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'冰淇淋',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'咖啡',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'出行',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'坐动车',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'过安检',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'坐飞机',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'摔跤',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'娱乐',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'看电影',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'唱歌',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"烧烤",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"看恐怖片",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								}
+							 ]
+						 },{
+							 name:'运动',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:"滑雪",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"骑马",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"踢毽子",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"用跑步机",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }
+							 ]
+						 }]
+					 },
+					 ]
+				 },
+				 {
+					 name:'中期',
+					 open:false,
+					 child:[
+						{
+						 title:"第三周",
+						 content:[{
+							 name:'饮食',
+							 isOk:false,							 
+							 child:[
+								 {
+									 tit:'啤酒',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'可乐',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'冰淇淋',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'咖啡',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'出行',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'坐动车',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'过安检',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'坐飞机',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'摔跤',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'娱乐',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'看电影',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'唱歌',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"烧烤",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"看恐怖片",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								}
+							 ]
+						 },{
+							 name:'运动',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:"滑雪",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"骑马",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"踢毽子",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"用跑步机",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }
+							 ]
+						 }]
+					 },
+					 {
+						 title:"第四周",
+						 content:[{
+							 name:'饮食',
+							 isOk:false,							 
+							 child:[
+								 {
+									 tit:'啤酒',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'可乐',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'冰淇淋',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'咖啡',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'出行',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'坐动车',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'过安检',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'坐飞机',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'摔跤',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'娱乐',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'看电影',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'唱歌',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"烧烤",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"看恐怖片",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								}
+							 ]
+						 },{
+							 name:'运动',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:"滑雪",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"骑马",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"踢毽子",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"用跑步机",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }
+							 ]
+						 }]
+					 },
+					 ]
+				 },
+				 {
+					 name:'晚期',
+					 open:false,
+					 child:[
+						{
+						 title:"第五周",
+						 content:[{
+							 name:'饮食',
+							 isOk:false,							 
+							 child:[
+								 {
+									 tit:'啤酒',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'可乐',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'冰淇淋',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'咖啡',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'出行',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'坐动车',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'过安检',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'坐飞机',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'摔跤',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'娱乐',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'看电影',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'唱歌',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"烧烤",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"看恐怖片",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								}
+							 ]
+						 },{
+							 name:'运动',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:"滑雪",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"骑马",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"踢毽子",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"用跑步机",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }
+							 ]
+						 }]
+					 },
+					 {
+						 title:"第六周",
+						 content:[{
+							 name:'饮食',
+							 isOk:false,							 
+							 child:[
+								 {
+									 tit:'啤酒',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'可乐',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'冰淇淋',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'咖啡',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'出行',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'坐动车',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'过安检',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'坐飞机',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'摔跤',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }]
+						 },{
+							 name:'娱乐',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:'看电影',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:'唱歌',
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"烧烤",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"看恐怖片",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								}
+							 ]
+						 },{
+							 name:'运动',
+							 isOk:false,
+							 child:[
+								 {
+									 tit:"滑雪",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"骑马",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"踢毽子",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 },
+								 {
+									 tit:"用跑步机",
+									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+									 isOpen:false
+								 }
+							 ]
+						 }]
+					 },
+					 ]
+				 },
+				 ],				
+			}
+		},
+		methods:{
+			/*点击小方块弹出模态框**/
+			openCont(item){
+				// item.open = true
+				this.show = true
+				this.current_pre = item
+				console.log("点击当前")
+			},
+			/* 点击注意事项中的查看详情**/
+			selectDetail(item){
+				item.isOpen = !item.isOpen
+				// this.current_pre.open = !this.current_pre.open
+			},
+			botBtn(type){
+				if(type === 'true'){
+					this.current_pre.isOk = false
+					console.log("点击是")
+				}else if(type === 'false'){
+					this.current_pre.isOk = true
+					console.log("点击否")
+				}
+				this.show = false
+			}
+		}
+	}
 </script>
 
 <style scoped lang="scss">
 	.pregnant_wrap{
+		min-height: 100vh;
+		background-color: white;
 		.pregnant-timeline{
 			.cu-time{
 				font-weight: 700;
@@ -373,15 +740,127 @@
 			}
 			.cu-item{				
 				.content{
+					font-size: 30upx;
+					font-weight: 700;
 					.cont-tit{
 						display: flex;
 						.tit-stature{
 							margin-right: 10upx;
 						}
 					}
-				}								
+				}
+				.pre-chunk-wrap{
+					display: flex;
+					margin-top: 20upx;
+					flex-wrap: wrap;
+					.pre-chunk{
+						width: 120upx;
+						height: 120upx;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						background-color: #e54d42;
+						box-shadow: 4px 3px 4px rgba(229, 77, 66, 0.2);
+						color: white;
+						border-radius: 5px;
+						margin-right: 20upx;
+						margin-bottom: 20upx;
+					}
+					.pass-pre-chunk{
+						background-color: #39b54a;
+						box-shadow: 4px 3px 4px rgba(57, 181, 74, 0.2);
+					}
+				}				
 			}
+			
 			
 		}
 	}
+	.pre-model-wrap{
+		.pre-top{
+			text-align: center;
+			font-size: 16px;
+			font-weight: 600;
+			padding: 10px
+		}
+		.pre-content{
+			display: flex;
+			flex-direction: column;
+			.pre-content-item{
+				.pre-content-top{
+					display: flex;
+					padding: 20upx;
+					.pre-left{
+						margin-right: 20upx;
+						image{
+							width: 100upx;
+							height: 100upx;
+						}
+					}
+					.pre-right{
+						display: flex;
+						flex-direction: column;
+						justify-content: space-around;
+						text{
+							&:first-child{
+								font-weight: 700;
+							}
+						}
+						.details{
+							display: flex;
+							align-items: center;
+							image{
+								width: 30upx;
+								height: 30upx;
+							}
+							text{
+								&:first-child{
+									margin-right: 8upx;
+									
+								}
+								&:last-child{
+									font-size: 30upx;
+									margin-top: 6upx;
+								}
+							}
+						}
+					}
+				}
+				.pre-content-bot{
+					padding: 0 20upx;
+					display: none;
+					text{
+						&:first-child{
+							width: 20upx;
+							height: 40upx;
+							background: chartreuse;
+							border-radius: 4upx;
+							margin-right: 10upx;
+						}
+					}
+				}
+				.detail-show{
+					display: flex;
+				}
+			}
+		}
+		.pre-bot{
+			display: flex;
+			justify-content: space-around;
+			border-top: 1px solid #f6f7f9;
+			.pre-bot-left{
+				text-align: center;
+				padding: 10px;
+				&:first-of-type{
+					color: #4e90ff;
+				}
+			}
+		}
+	}
+	// .pregnant_wrap{
+	// 	height: 100vh;
+	// 	.pregnant-timeline{
+	// 		height: 100%;
+	// 	}
+	// }
 </style>

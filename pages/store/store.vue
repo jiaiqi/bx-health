@@ -4,7 +4,7 @@
 			<view class="navbar"></view>
 			<view class="container">
 				<view class="left">
-					<view class="logo"><image src="/otherPages/static/img/logo96x96.png" mode="aspectFit"></image></view>
+					<!-- <view class="logo"><image src="/otherPages/static/img/logo96x96.png" mode="aspectFit"></image></view> -->
 				</view>
 				<view class="right" :style="'padding-right: ' + MPPR + 'px'">
 					<view class="address-box">
@@ -91,8 +91,8 @@ export default {
 	onLoad() {
 		this.shopList = testData.storeList[0].goods;
 		console.log('--------', this.shopList);
+		this.getShopList();
 		if (this.isLogin) {
-			this.getShopList();
 		}
 	},
 	methods: {

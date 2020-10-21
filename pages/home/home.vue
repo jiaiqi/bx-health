@@ -67,7 +67,7 @@
 		<view class="main-box">
 			<view class="main-box-title">基本信息</view>
 			<view class="menu-box">
-				<view class="box-item">基本信息</view>
+				<view class="box-item" @click="skip('basic')">基本数据</view>
 				<view class="box-item">疾病史</view>
 				<view class="box-item">遗传史</view>
 			</view>
@@ -226,6 +226,23 @@ export default {
 		}
 	},
 	methods: {
+		skip(item) {
+			// 跳转页面
+			debugger
+			let url = '';
+			switch (item) {
+				case 'basic':
+					url = '/otherPages/personal/personal';
+					break;
+				default:
+					break;
+			}
+			if (url) {
+				uni.navigateTo({
+					url: url
+				});
+			}
+		},
 		showCanvas(type) {
 			// 显示图表
 			this.cWidth = uni.upx2px(690);
@@ -817,14 +834,8 @@ export default {
 			console.log('onLoad-未登录');
 			return;
 		}
-		// this.$nextTick(function() {
-		// 	this.showLineA('canvasLineA', this.weightChartData, 'kg');
-		// 	this.showLineB('canvasLineB', this.BPChartData, 'mmHg');
-		// 	this.showLineC('canvasLineC', this.sleepChartData, '小时');
-		// 	this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
-		// });
 	},
-	onShow() {
+	async onShow() {
 		if (!this.isLogin) {
 			console.log('onShow-未登录');
 			return;
@@ -833,22 +844,22 @@ export default {
 		uni.setStorageSync('activeApp', 'health');
 		let userInfo = uni.getStorageSync('login_user_info');
 		if (userInfo && userInfo.user_no) {
-			this.getUserInfo().then(_ => {
-				this.getCurrUserInfo().then(_ => {
-					this.getDietAllRecord();
-					this.getDietSportRecordList();
-					if (uni.getStorageSync('current_user_info')) {
-						this.userInfo = uni.getStorageSync('current_user_info');
-					} else {
-						let userList = uni.getStorageSync('user_info_list');
-						if (Array.isArray(userList) && userList.length > 0) {
-							this.userInfo = userList[0];
-							uni.setStorageSync('current_user_info', userList[0]);
-						}
-					}
-					this.selectServiceLog().then(_ => {});
-				});
-			});
+			await this.getUserInfo();
+			await this.getCurrUserInfo();
+			await this.getDietAllRecord();
+			// this.getUserInfo().then(_ => {
+			// this.getCurrUserInfo().then(_ => {
+			// this.getDietSportRecordList();
+			if (uni.getStorageSync('current_user_info')) {
+				this.userInfo = uni.getStorageSync('current_user_info');
+			} else {
+				let userList = uni.getStorageSync('user_info_list');
+				if (Array.isArray(userList) && userList.length > 0) {
+					this.userInfo = userList[0];
+					uni.setStorageSync('current_user_info', userList[0]);
+				}
+			}
+			this.selectServiceLog();
 			this.loginUserInfo = userInfo;
 		}
 	}
