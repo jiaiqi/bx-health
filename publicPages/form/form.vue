@@ -1,9 +1,5 @@
 <template>
   <view>
-    <cu-custom bgColor="bg-gradual-blue" :isBack="true">
-      <!-- <block slot="backText">返回</block> -->
-      <block slot="content" v-if="colsV2Data && colsV2Data.service_view_name">{{ colsV2Data.service_view_name }}</block>
-    </cu-custom>
     <bxform ref="bxForm" :pageType="type" :BxformType="type" :fields="fields" :moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"></bxform>
     <bxButtons :buttons="buttons" @on-button-change="onButton($event)"></bxButtons>
   </view>

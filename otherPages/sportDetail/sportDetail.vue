@@ -1,7 +1,7 @@
 <template>
 	<view class="sport-wrap">
 		<view class="picker">
-			<picker class="date-picker" mode="date" :value="date" :start="startDate" :end="endDate" @change="bindDateChange">
+			<picker class="date-picker" mode="date" :value="date" :start="startDate" :end="endDate" @change="changeDate">
 				<view class="uni-input">
 					<text class="u-margin-10">{{ date }}</text>
 					<u-icon name="arrow-down-fill margin-left" color="#333" size="28"></u-icon>
@@ -12,12 +12,12 @@
 			<view class="title">步数</view>
 			<view class="content">
 				<view class="number">
-					<text class="actually">7452</text>
-					<text class="target">/6000步</text>
+					<text class="actually">{{ stepData.step }}</text>
+					<text class="target">/{{ targetStepNumbers }}步</text>
 				</view>
 				<view class="status">
 					<text class="cuIcon-check text-green" :style="{ borderColor: '#39b54a' }"></text>
-					<text class="text-green u-margin-10">完成度124%</text>
+					<text class="text-green u-margin-10">完成度{{ finishRatio }}</text>
 				</view>
 			</view>
 		</view>
@@ -48,7 +48,7 @@
 			<view class="record-item" v-for="(item, index) in stepRecord" :key="index">
 				<view class="column">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
 				<view class="column">{{ item.name }}</view>
-				<view class="column" >{{ item.amount + item.unit }}</view>
+				<view class="column">{{ item.amount + item.unit }}</view>
 				<view class="column">{{ item.energy }}千卡</view>
 			</view>
 		</view>
@@ -56,7 +56,6 @@
 </template>
 
 <script>
-// import 'static/icon/health/font/iconfont.css';
 export default {
 	data() {
 		return {
@@ -64,11 +63,19 @@ export default {
 			currentUser: null,
 			userInfo: null,
 			srvInfo: {},
-			stepRecord: [
-			]
+			stepRecord: [],
+			wxRunData: {},
+			stepInfoList: null,
+			targetStepNumbers: 6000, //目标步数
+			stepData: {
+				step: 0
+			}
 		};
 	},
 	computed: {
+		finishRatio() {
+			return this.stepData.step ? (this.stepData.step * 100) / this.targetStepNumbers + '%' : '0%';
+		},
 		startDate() {
 			return this.getDate('start');
 		},
@@ -77,6 +84,74 @@ export default {
 		}
 	},
 	methods: {
+		changeDate(e) {
+			// 切换日期
+			let date = e.detail.value;
+			this.date = date;
+			let stepData = this.getDayStepInfo(date);
+			if (stepData && stepData.step) {
+				this.stepData = stepData;
+			}
+		},
+		getDayStepInfo(date) {
+			let stepInfoList = this.stepInfoList;
+			if (Array.isArray(stepInfoList) && stepInfoList.length > 0) {
+				let stepData = {};
+				stepInfoList.forEach(item => {
+					if (date.indexOf(item.date) !== -1) {
+						stepData = item;
+					}
+				});
+				return stepData;
+			}
+		},
+		async getwxStepInfoList() {
+			// 获取微信运动记录
+			// #ifdef MP-WEIXIN
+			let result = await wx.getWeRunData();
+			if (result.errMsg === 'getWeRunData:ok') {
+				this.wxRunData = result;
+				this.decryptData(result);
+			}
+			// #endif
+		},
+		async decryptData(result) {
+			// 解密微信加密数据
+			if (result.encryptedData && result.iv) {
+				let url = this.getServiceUrl('wx', 'srvwx_app_data_decrypt', 'operate');
+				let req = [
+					{
+						data: [
+							{
+								encryptedData: result.encryptedData,
+								signature: result.iv
+							}
+						],
+						serviceName: 'srvwx_app_data_decrypt'
+					}
+				];
+				let res = await this.$http.post(url, req);
+				if (res.data.state == 'SUCCESS' && Array.isArray(res.data.response) && res.data.response.length > 0) {
+					let stepList = res.data.response[0].response.stepInfoList;
+					if (Array.isArray(stepList)) {
+						stepList = stepList.map(item => {
+							item.date = this.formateDate(item.timestamp * 1000);
+							return item;
+						});
+						console.log('stepList', this.deepClone(stepList));
+						this.stepInfoList = stepList;
+						let stepData = this.getDayStepInfo(this.date);
+						this.stepData = stepData;
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		},
 		getSportRecord() {
 			// 查找运动记录
 			let url = this.getServiceUrl('health', 'srvhealth_body_activity_record_select', 'select');
@@ -110,17 +185,15 @@ export default {
 			let year = date.getFullYear();
 			let month = date.getMonth() + 1;
 			let day = date.getDate();
-
+			month = month > 9 ? month : '0' + month;
+			day = day > 9 ? day : '0' + day;
 			if (type === 'start') {
 				year = year - 60;
 			} else if (type === 'end') {
-				year = year + 2;
+				// year = year + 2;
 			} else if (type === 'now') {
 				year = year;
 			}
-
-			month = month > 9 ? month : '0' + month;
-			day = day > 9 ? day : '0' + day;
 			return `${year}-${month}-${day}`;
 		}
 	},
@@ -146,6 +219,7 @@ export default {
 				title: option.title
 			});
 		}
+		this.getwxStepInfoList();
 	}
 };
 </script>
@@ -252,11 +326,10 @@ export default {
 			align-items: center;
 			justify-content: center;
 			padding: 20rpx;
-			&.record-detail{
-				
+			&.record-detail {
 			}
-			.column{
-				flex:1;
+			.column {
+				flex: 1;
 				text-align: center;
 				margin: 0;
 			}

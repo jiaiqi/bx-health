@@ -338,9 +338,9 @@ export default {
 				const result = await this.wxLogin({ code: this.code, user: user });
 				if (result.status === 'success') {
 					// 登录成功，返回上一页面
-					let num = getCurrentPages()
-					if(Array.isArray(num)&&num.length===1){
-						debugger
+					uni.$emit('loginStatusChange',true)
+					let num = getCurrentPages();
+					if (Array.isArray(num) && num.length === 1) {
 						if (self.$api.homePath.indexOf('/pages/') !== -1) {
 							uni.switchTab({
 								url: self.$api.homePath
@@ -350,7 +350,7 @@ export default {
 								url: self.$api.homePath
 							});
 						}
-					}else{
+					} else {
 						uni.navigateBack({
 							animationDuration: 500,
 							fail: function(err) {

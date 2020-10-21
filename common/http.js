@@ -96,17 +96,40 @@ fly.interceptors.response.use(
 					}
 					try {
 						console.log("backUrl:", requestUrl, encodeURIComponent(requestUrl))
+						// #ifdef H5
 						uni.navigateTo({
 							url: '/publicPages/accountExec/accountExec'
-						})
+						});
+						// #endif
+						// uni.showModal({
+						// 	title: '提示',
+						// 	content: '未登录,是否跳转到登录页面?',
+						// 	confirmText: '去登录',
+						// 	confirmColor: '#02D199',
+						// 	success(res) {
+						// 		if (res.confirm) {
+						// 			// 确认 跳转到登录页
+						// 			uni.navigateTo({
+						// 				url: '/publicPages/accountExec/accountExec'
+						// 			});
+						// 		} else if (res.cancel) {
+						// 			// 取消 返回首页
+						// 			uni.switchTab({
+						// 				url: '/pages/pedia/pedia'
+						// 			});
+						// 		}
+						// 	}
+						// });
 					} catch (e) {
 						console.error('请求失败', e)
 						//TODO handle the exception
 					}
 				} else {
+					// #ifdef H5
 					uni.navigateTo({
 						url: '/publicPages/accountExec/accountExec'
 					})
+					// #endif
 				}
 			}
 		} else if (res.data.resultCode === '0000' && res.data.state === 'FAILURE') {

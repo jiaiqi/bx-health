@@ -111,9 +111,10 @@
 					}
 				},
 				{
-					"path": "symptomSelect/symptomSelect3",
+					"path": "symptomSelect/symptomSelect",
 					"style": {
-						"navigationBarTitleText": "症状选择"
+						"navigationBarTitleText": "症状选择",
+						"navigationStyle": "custom"
 					}
 				},
 				{
@@ -205,6 +206,13 @@
 					"style": {
 						"navigationBarTitleText": "表单"
 					}
+				}, {
+					"path": "webviewPage/webviewPage",
+					"style": {
+						"navigationBarTitleText": "h5页面",
+						"enablePullDownRefresh": false
+					}
+
 				}
 			]
 		},

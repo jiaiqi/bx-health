@@ -53,13 +53,6 @@
     </view>
     <!-- #endif -->
     <view class="diet-wrap">
-      <!-- 			<view class="main-box symptom">
-				<view class="record-box page-top">
-					<view @click="toPersonal" class="record-item"><view class="label">基本信息</view></view>
-					<view class="record-item"><view class="label">遗传史</view></view>
-					<view class="record-item"><view class="label">疾病史</view></view>
-				</view>
-			</view> -->
       <view class="main-box">
         <view class="main-content main-content-t">
           <view class="main-box-title">能量等式</view>
@@ -1248,7 +1241,7 @@ export default {
           {
             colName: "user_name",
             ruleType: "like",
-            value: uni.getStorageSync("current_user"),
+            value: this.userInfo.name,
           },
         ],
         page: { pageNo: 1, rownumber: 10 },
@@ -1279,7 +1272,7 @@ export default {
           {
             colName: "user_name",
             ruleType: "like",
-            value: uni.getStorageSync("current_user"),
+            value: this.userInfo.name,
           },
         ],
         page: { pageNo: 1, rownumber: 10 },
@@ -1449,7 +1442,7 @@ export default {
       };
       uni.navigateTo({
         url:
-          "/pages/symptomSelect/symptomSelect3?term=" +
+          "/otherPages/symptomSelect/symptomSelect?term=" +
           encodeURIComponent(JSON.stringify(term)),
       });
     },
@@ -1465,36 +1458,6 @@ export default {
             alone["status"] = "regular";
           }
         });
-      });
-    },
-    getKeepDays() {
-      let url = this.getServiceUrl(
-        "health",
-        "srvhealth_diet_record_select",
-        "select"
-      );
-      let req = {
-        serviceName: "srvhealth_diet_record_select",
-        colNames: ["*"],
-        condition: [
-          {
-            colName: "userno",
-            ruleType: "like",
-            value: this.loginUserInfo.user_no,
-          },
-        ],
-        group: [
-          {
-            colName: "hdate",
-            type: "distinct_count",
-          },
-        ],
-      };
-      this.$http.post(url, req).then((res) => {
-        console.log(res.data.data);
-        if (res.data.state === "SUCCESS") {
-          this.KeepDays = res.data.data[0].hdate;
-        }
       });
     },
     selectChange(e) {
@@ -1881,7 +1844,7 @@ export default {
           {
             colName: "user_name",
             ruleType: "like",
-            value: uni.getStorageSync("current_user"),
+            value: this.userInfo.name,
           },
           {
             colName: "hdate",
@@ -2129,7 +2092,7 @@ export default {
           {
             colName: "user_name",
             ruleType: "like",
-            value: uni.getStorageSync("current_user"),
+            value: this.userInfo.name,
           },
           {
             colName: "hdate",
@@ -2219,38 +2182,44 @@ export default {
         url: "/pages/home/home",
       });
     },
-    resetRadioArr() {
-      this.radioArr = [
-        {
-          key: "全部",
-          name: "全部",
-          label: "全部(17)",
-          value: "all",
-          num: 0,
-        },
-        {
-          key: "不足",
-          name: "不足",
-          label: "不足(17)",
-          value: "lack",
-          num: 0,
-        },
-        {
-          key: "正常",
-          name: "正常",
-          label: "正常(0)",
-          value: "normal",
-          num: 0,
-        },
-        {
-          key: "过高",
-          name: "过高",
-          label: "过高(0)",
-          value: "over",
-          num: 0,
-        },
-      ];
-    },
+		clickUserMenu(e) {
+			console.log(e);
+			if (e === 'regulate') {
+				let viewTemp = {
+					title: 'name',
+					tip: 'sex',
+					img: 'pic',
+					footer: 'job'
+				};
+				let cond = [
+					{
+						colName: 'userno',
+						ruleType: 'eq',
+						value: 'user_no'
+					}
+				];
+				uni.navigateTo({
+					url:
+						'/publicPages/list/list?serviceName=srvhealth_person_info_select&navigationBarTitle=我的车辆&pageType=list&type=skip&viewTemp=' +
+						decodeURIComponent(JSON.stringify(viewTemp)) +
+						'&cond=' +
+						decodeURIComponent(JSON.stringify(cond))
+				});
+			} else if (e === 'health') {
+				uni.navigateTo({
+					url: '/pages/balancedDiet/balancedDiet'
+				});
+			} else {
+				uni.setStorageSync('current_user_info', e);
+				this.userInfo = e;
+				uni.setStorageSync('current_user', e.name);
+				debugger
+				this.getDietAllRecord();
+				this.getDietRecord(this.selectDate);
+				this.getSportsRecord(this.selectDate);
+			}
+			this.showUserList = false;
+		},
     clickDietRecordItem(item) {
       this.showEditModal = true;
       this.currentRecord = this.deepClone(item);
@@ -2416,6 +2385,7 @@ export default {
       this.getCurrUserInfo().then((_) => {
         if (uni.getStorageSync("current_user_info")) {
           this.userInfo = uni.getStorageSync("current_user_info");
+					uni.setStorageSync('current_user', this.userInfo.name);
         } else {
           let userList = uni.getStorageSync("user_info_list");
           if (Array.isArray(userList) && userList.length > 0) {
@@ -2423,8 +2393,10 @@ export default {
             uni.setStorageSync("current_user_info", userList[0]);
           }
         }
+				this.getDietAllRecord();
+				// this.getDietRecord(this.selectDate);
+				// this.getSportsRecord(this.selectDate);
       });
-      this.getDietAllRecord();
     } else {
       alert("未发现登录用户信息");
     }

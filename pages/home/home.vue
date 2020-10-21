@@ -20,32 +20,34 @@
 		</u-navbar>
 		<view class="main-box" @click="toToday">
 			<view class="main-box-title">今日概览</view>
-			<view class="energy-item ">
-				<view class="text">饮食摄入</view>
-				<view class="number">{{ parseFloat(dietIn).toFixed(1) }}</view>
-			</view>
-			<view class="operate">-</view>
-			<view class="energy-item">
-				<view class="text">运动消耗</view>
-				<view class="number">{{ parseFloat(sportOut).toFixed(1) }}</view>
-			</view>
-			<view class="operate">-</view>
-			<view class="energy-item">
-				<view class="text">基础代谢</view>
-				<view class="number">{{ basicOut ? parseFloat(basicOut).toFixed(1) : '0' }}</view>
-			</view>
-			<view class="operate">=</view>
-			<view class="energy-item">
-				<view class="text">体重变化</view>
-				<view class="number text-red" style="display: flex; width: 90px; justify-content: space-between;">
-					<text style="flex:1;">{{ parseFloat(energyChange) > 0 ? `+${parseFloat(energyChange).toFixed(1)}` : parseFloat(energyChange).toFixed(1) }}</text>
-					<text class="units">大卡</text>
+			<view class="energy-box">
+				<view class="energy-item ">
+					<view class="text">饮食摄入</view>
+					<view class="number">{{ parseFloat(dietIn).toFixed(1) }}</view>
 				</view>
-				<view class="number text-red" style="display: flex; width: 90px; justify-content: space-between;">
-					<text style="flex:1;">
-						{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
-					</text>
-					<text class="units">g脂肪</text>
+				<view class="operate">-</view>
+				<view class="energy-item">
+					<view class="text">运动消耗</view>
+					<view class="number">{{ parseFloat(sportOut).toFixed(1) }}</view>
+				</view>
+				<view class="operate">-</view>
+				<view class="energy-item">
+					<view class="text">基础代谢</view>
+					<view class="number">{{ basicOut ? parseFloat(basicOut).toFixed(1) : '0' }}</view>
+				</view>
+				<view class="operate">=</view>
+				<view class="energy-item">
+					<view class="text">体重变化</view>
+					<view class="number text-red" style="display: flex; width: 90px; justify-content: space-between;">
+						<text style="flex:1;">{{ parseFloat(energyChange) > 0 ? `+${parseFloat(energyChange).toFixed(1)}` : parseFloat(energyChange).toFixed(1) }}</text>
+						<text class="units">大卡</text>
+					</view>
+					<view class="number text-red" style="display: flex; width: 90px; justify-content: space-between;">
+						<text style="flex:1;">
+							{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
+						</text>
+						<text class="units">g脂肪</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -67,9 +69,9 @@
 		<view class="main-box">
 			<view class="main-box-title">基本信息</view>
 			<view class="menu-box">
-				<view class="box-item" @click="skip('basic')">基本数据</view>
-				<view class="box-item">疾病史</view>
-				<view class="box-item">遗传史</view>
+				<view class="box-item menu filled" @click="skip('basic')">个人中心</view>
+				<view class="box-item menu">疾病史</view>
+				<view class="box-item menu">遗传史</view>
 			</view>
 		</view>
 		<view class="main-box"><view class="main-box-title">饮食营养</view></view>
@@ -228,7 +230,6 @@ export default {
 	methods: {
 		skip(item) {
 			// 跳转页面
-			debugger
 			let url = '';
 			switch (item) {
 				case 'basic':
@@ -318,7 +319,7 @@ export default {
 				{
 					serviceName: 'srvhealth_service_record_add',
 					condition: [],
-					data: [{ user_info_no: this.currentUserInfo.no, user_no: this.currentUserInfo.userno, name: this.currentUserInfo.name, time: this.formateDate(new Date(), 'dateTimes') }]
+					data: [{ user_info_no: this.userInfo.no, user_no: this.userInfo.userno, name: this.userInfo.name, time: this.formateDate(new Date(), 'dateTimes') }]
 				}
 			];
 			let res = await this.$http.post(url, req);
@@ -482,8 +483,27 @@ export default {
 				// 有数据
 				uni.setStorageSync('current_user', res.data.data[0].name);
 				uni.setStorageSync('user_info_list', res.data.data);
-				this.userMenuList = res.data.data;
-			} else {
+				self.userMenuList = res.data.data;
+				return res.data.data;
+			} else if (res.data.resultCode === '0011') {
+				// 登录失效
+				this.isLogin = false;
+				uni.showModal({
+					title: '提示',
+					content: '登录失效,即将跳转到登录页面',
+					confirmText: '去登录',
+					confirmColor: '#02D199',
+					showCancel: false,
+					success(res) {
+						if (res.confirm) {
+							// 确认 跳转到登录页
+							uni.navigateTo({
+								url: '/publicPages/accountExec/accountExec'
+							});
+						}
+					}
+				});
+			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 				// 没有角色 提示跳转到创建角色页面
 				uni.showModal({
 					title: '提示',
@@ -502,6 +522,7 @@ export default {
 		},
 		async getDietAllRecord() {
 			//饮食记录
+			console.log(this.loginUserInfo)
 			let url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_diet_record_select',
@@ -546,7 +567,10 @@ export default {
 		},
 		getSignature(formData) {
 			let self = this;
-			let linkurl = window.location.href.split('#')[0];
+			let linkurl = '';
+			// #ifdef H5
+			window.location.href.split('#')[0];
+			// #endif
 			let req = {
 				serviceName: 'srvwx_app_signature_select',
 				colNames: ['*'],
@@ -554,7 +578,8 @@ export default {
 					{
 						colName: 'app_no',
 						ruleType: 'eq',
-						value: this.$api.appNo.wxh5
+						value: this.$api.appNo.wxmp
+						// value: this.$api.appNo.wxh5
 					},
 					{
 						colName: 'page_url',
@@ -569,6 +594,7 @@ export default {
 				if (res.data.state === 'SUCCESS') {
 					let resData = res.data.data[0];
 					uni.setStorageSync('signatureInfo', resData);
+					// #ifdef H5
 					self.$wx.config({
 						debug: false, // 调试阶段建议开启
 						appId: resData.appId, // APPID
@@ -624,6 +650,7 @@ export default {
 							success() {}
 						});
 					});
+					// #endif
 				} else {
 					uni.showToast({
 						title: '获取签名失败',
@@ -666,7 +693,6 @@ export default {
 			}
 		},
 		clickUserMenu(e) {
-			console.log(e);
 			if (e === 'regulate') {
 				let viewTemp = {
 					title: 'name',
@@ -696,6 +722,7 @@ export default {
 				uni.setStorageSync('current_user', e.name);
 				uni.setStorageSync('current_user_info', e);
 				this.userInfo = e;
+				this.getDietAllRecord()
 			}
 			this.showUserList = false;
 		},
@@ -795,6 +822,20 @@ export default {
 		}
 	},
 	created() {
+		uni.$on('loginStatusChange', result => {
+			this.isLogin = result;
+		});
+		uni.$on('dietInChange', dietIn => {
+			this.dietIn = dietIn;
+		});
+		uni.$on('sportOutChange', sportOut => {
+			this.sportOut = sportOut;
+		});
+	},
+	onLoad() {
+		_self = this;
+	},
+	async onShow() {
 		let userInfo = uni.getStorageSync('login_user_info');
 		if (!userInfo) {
 			// 未登录， 提示跳转
@@ -807,7 +848,7 @@ export default {
 				success(res) {
 					if (res.confirm) {
 						// 确认 跳转到登录页
-						uni.redirectTo({
+						uni.navigateTo({
 							url: '/publicPages/accountExec/accountExec'
 						});
 					} else if (res.cancel) {
@@ -821,35 +862,10 @@ export default {
 		} else {
 			this.isLogin = true;
 		}
-		uni.$on('dietInChange', dietIn => {
-			this.dietIn = dietIn;
-		});
-		uni.$on('sportOutChange', sportOut => {
-			this.sportOut = sportOut;
-		});
-	},
-	onLoad() {
-		_self = this;
-		if (!this.isLogin) {
-			console.log('onLoad-未登录');
-			return;
-		}
-	},
-	async onShow() {
-		if (!this.isLogin) {
-			console.log('onShow-未登录');
-			return;
-		}
 		self = this;
 		uni.setStorageSync('activeApp', 'health');
-		let userInfo = uni.getStorageSync('login_user_info');
 		if (userInfo && userInfo.user_no) {
-			await this.getUserInfo();
-			await this.getCurrUserInfo();
-			await this.getDietAllRecord();
-			// this.getUserInfo().then(_ => {
-			// this.getCurrUserInfo().then(_ => {
-			// this.getDietSportRecordList();
+			this.loginUserInfo = userInfo
 			if (uni.getStorageSync('current_user_info')) {
 				this.userInfo = uni.getStorageSync('current_user_info');
 			} else {
@@ -859,6 +875,9 @@ export default {
 					uni.setStorageSync('current_user_info', userList[0]);
 				}
 			}
+			await this.getUserInfo(); //查找微信用户基本信息
+			await this.getCurrUserInfo(); // 查找健康app个人基本信息
+			await this.getDietAllRecord(); //查找饮食和运动记录
 			this.selectServiceLog();
 			this.loginUserInfo = userInfo;
 		}
@@ -970,7 +989,6 @@ export default {
 	background-color: #fff;
 	justify-content: space-between;
 	margin: 10rpx;
-	padding: 10rpx;
 	border-radius: 2px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	min-height: 150rpx;
@@ -1000,7 +1018,7 @@ export default {
 			background-color: #fff;
 			margin: 10rpx;
 			height: 0;
-			transition: all 1s;
+			transition: all 0.5s;
 			&.max-height {
 				height: 280rpx;
 			}
@@ -1018,17 +1036,21 @@ export default {
 			width: calc(50% - 10rpx);
 			margin: 5rpx;
 			height: 80rpx;
-			color: #fff;
 			display: flex;
 			justify-content: center;
 			align-items: center;
 			letter-spacing: 10rpx;
 			font-size: 32rpx;
 			border-radius: 5rpx;
-			opacity: 0.6;
+			opacity: 0.5;
+			color: #fff;
 			transition: opacity 1s;
 			&.active {
+				opacity: 0.8;
+			}
+			&:active {
 				opacity: 1;
+				transform: scale(1.05);
 			}
 			&:nth-child(1) {
 				background-color: #3498db;
@@ -1042,7 +1064,17 @@ export default {
 			&:nth-child(4) {
 				background-color: #e67e22;
 			}
+			&.menu.filled {
+				opacity: 0.9;
+			}
 		}
+	}
+	.energy-box {
+		display: flex;
+		width: 100%;
+		justify-content: center;
+		align-items: center;
+		padding: 10rpx;
 	}
 	.energy-item {
 		color: #333;

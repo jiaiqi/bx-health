@@ -519,7 +519,6 @@ export default {
 		}
 
 		Vue.prototype.formateDate = function(date, type = 'date') {
-			console.log(date)
 			date = new Date(date)
 			let o = {
 				'yy': date.getFullYear(),
@@ -542,7 +541,7 @@ export default {
 				'ss': date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds()
 			};
 			if (type === 'date') {
-				return o.yy + '-' + o.MM + '-' + o.dd + ' '
+				return o.yy + '-' + o.MM + '-' + o.dd
 			} else if (type === 'dateTime') {
 				return o.HH + ':' + o.mm
 			} else {

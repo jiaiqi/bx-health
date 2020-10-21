@@ -3,9 +3,7 @@
 		<view class="head-box">
 			<view class="navbar"></view>
 			<view class="container">
-				<view class="left">
-					<!-- <view class="logo"><image src="/otherPages/static/img/logo96x96.png" mode="aspectFit"></image></view> -->
-				</view>
+				<view class="left"><!-- <view class="logo"><image src="/otherPages/static/img/logo96x96.png" mode="aspectFit"></image></view> --></view>
 				<view class="right" :style="'padding-right: ' + MPPR + 'px'">
 					<view class="address-box">
 						<i class="hxicon-locationfill"></i>
@@ -88,11 +86,45 @@ export default {
 			shopList: []
 		};
 	},
+	async created() {
+		uni.$on('loginStatusChange',(result)=>{
+			this.isLogin = result
+		})
+		let userInfo = uni.getStorageSync('login_user_info');
+		if (!userInfo) {
+			// 未登录， 提示跳转
+			this.isLogin = false;
+			let res = await uni.showModal({
+				title: '提示',
+				content: '未登录,是否跳转到登录页面?',
+				confirmText: '去登录',
+				confirmColor: '#02D199'
+			});
+			if (Array.isArray(res) && res.length > 1) {
+				if (res[1].confirm) {
+					// 确认 跳转到登录页
+					uni.navigateTo({
+						url: '/publicPages/accountExec/accountExec'
+					});
+				} else if (res[1].cancel) {
+					// 取消 返回首页
+					uni.switchTab({
+						url: '/pages/pedia/pedia'
+					});
+				}
+			}
+		} else {
+			this.isLogin = true;
+		}
+	},
 	onLoad() {
 		this.shopList = testData.storeList[0].goods;
 		console.log('--------', this.shopList);
-		this.getShopList();
+	},
+	onShow() {
+		console.log('onshow', this.isLogin);
 		if (this.isLogin) {
+			this.getShopList();
 		}
 	},
 	methods: {
@@ -117,34 +149,6 @@ export default {
 				console.log('商户列表-----', res.data.data);
 				this.storeList = res.data.data;
 			}
-		}
-	},
-	onTabItemTap(e) {
-		let userInfo = uni.getStorageSync('login_user_info');
-		if (!userInfo) {
-			// 未登录， 提示跳转
-			this.isLogin = false;
-			uni.showModal({
-				title: '提示',
-				content: '未登录,是否跳转到登录页面?',
-				confirmText: '去登录',
-				confirmColor: '#02D199',
-				success(res) {
-					if (res.confirm) {
-						// 确认 跳转到登录页
-						uni.redirectTo({
-							url: '/publicPages/accountExec/accountExec'
-						});
-					} else if (res.cancel) {
-						// 取消 返回首页
-						uni.switchTab({
-							url: '/pages/pedia/pedia'
-						});
-					}
-				}
-			});
-		} else {
-			this.isLogin = true;
 		}
 	}
 };
