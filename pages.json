@@ -168,6 +168,10 @@
 					"style": {}
 				},
 				{
+					"path": "shop/shopCarList",
+					"style": {}
+				},
+				{
 					"path": "chooseFood/chooseFood",
 					"style": {}
 				},

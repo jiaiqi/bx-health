@@ -43,7 +43,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="foot-record">
+		<!-- <view class="foot-record">
 			<text class="title">运动记录</text>
 			<view class="record-item" v-for="(item, index) in stepRecord" :key="index">
 				<view class="column">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
@@ -51,11 +51,17 @@
 				<view class="column">{{ item.amount + item.unit }}</view>
 				<view class="column">{{ item.energy }}千卡</view>
 			</view>
+		</view> -->
+		<view class="chart-box">
+			<canvas canvas-id="stepChart" id="stepChart" class="charts-line" disable-scroll="true" @touchmove="moveLine" @touchend="touchEndLine" @touchstart="touchLine"></canvas>
 		</view>
 	</view>
 </template>
 
 <script>
+import uCharts from '@/components/u-charts/u-charts.js';
+var _self;
+var stepChart = null;
 export default {
 	data() {
 		return {
@@ -69,12 +75,14 @@ export default {
 			targetStepNumbers: 6000, //目标步数
 			stepData: {
 				step: 0
-			}
+			},
+			cHeight: '',
+			cWidth: ''
 		};
 	},
 	computed: {
 		finishRatio() {
-			return this.stepData.step ? (this.stepData.step * 100) / this.targetStepNumbers + '%' : '0%';
+			return this.stepData.step ? (this.stepData.step * 100).toFixed(2) / this.targetStepNumbers + '%' : '0%';
 		},
 		startDate() {
 			return this.getDate('start');
@@ -84,6 +92,20 @@ export default {
 		}
 	},
 	methods: {
+		touchEndLine(e) {
+			stepChart.showToolTip(e, {
+				format: function(item, category) {
+					return category + ' 运动步数' + ':' + item.data + '步';
+				}
+			});
+			stepChart.scrollEnd(e);
+		},
+		touchLine(e) {
+			stepChart.scrollStart(e);
+		},
+		moveLine(e) {
+			stepChart.scroll(e);
+		},
 		changeDate(e) {
 			// 切换日期
 			let date = e.detail.value;
@@ -142,6 +164,15 @@ export default {
 						this.stepInfoList = stepList;
 						let stepData = this.getDayStepInfo(this.date);
 						this.stepData = stepData;
+						let chartData = { categories: [], series: [{}] };
+						chartData.categories = stepList.map(item => item.date.slice(5));
+						chartData.series[0] = {
+							name: '近31日运动步数',
+							data: []
+						};
+						chartData.series[0].data = stepList.map(item => item.step);
+						_self.showChart('stepChart', chartData);
+						return stepList;
 					} else {
 						return false;
 					}
@@ -195,6 +226,54 @@ export default {
 				year = year;
 			}
 			return `${year}-${month}-${day}`;
+		},
+		showChart(canvasId, chartData) {
+			this.cWidth = uni.upx2px(710);
+			this.cHeight = uni.upx2px(350);
+			stepChart = new uCharts({
+				$this: _self,
+				canvasId: canvasId,
+				type: 'line',
+				fontSize: 11,
+				legend: { show: true },
+				dataLabel: true,
+				dataPointShape: true,
+				background: '#FFFFFF',
+				pixelRatio: 1,
+				categories: chartData.categories,
+				series: chartData.series,
+				animation: false,
+				enableScroll: true, //开启图表拖拽功能
+				xAxis: {
+					type: 'grid',
+					disableGrid: false,
+					gridColor: '#CCCCCC',
+					gridType: 'dash',
+					dashLength: 8,
+					itemCount: 8, //x轴单屏显示数据的数量，默认为5个
+					scrollShow: true, //新增是否显示滚动条，默认false
+					scrollAlign: 'right' //滚动条初始位置
+				},
+				yAxis: {
+					disableGrid: false,
+					gridType: 'dash',
+					gridColor: '#CCCCCC',
+					dashLength: 8,
+					splitNumber: 5,
+					min: 10,
+					max: 180,
+					format: val => {
+						return val.toFixed(0) + '步';
+					}
+				},
+				width: this.cWidth,
+				height: this.cHeight,
+				extra: {
+					line: {
+						type: 'straight'
+					}
+				}
+			});
 		}
 	},
 	created() {
@@ -209,11 +288,12 @@ export default {
 			});
 			if (Array.isArray(currentUser) && currentUser.length > 0) {
 				this.currentUser = currentUser[0];
-				this.getSportRecord();
+				// this.getSportRecord();
 			}
 		}
 	},
 	onLoad(option) {
+		_self = this;
 		if (option.title) {
 			uni.setNavigationBarTitle({
 				title: option.title
@@ -226,7 +306,7 @@ export default {
 
 <style lang="scss" scoped>
 .sport-wrap {
-	background-color: #f1f1f1;
+	background-color: #fff;
 	height: 100vh;
 	overflow: scroll;
 	.picker {
@@ -235,6 +315,18 @@ export default {
 		height: 100rpx;
 		align-items: center;
 	}
+	.chart-box {
+		border-radius: 20rpx;
+		width: 710rpx;
+		height: 350rpx;
+		background-color: #fff;
+		margin: 0 auto;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		.charts-line {
+			width: 710rpx;
+			height: 350rpx;
+		}
+	}
 	.foot-num {
 		display: flex;
 		flex-direction: column;
@@ -242,6 +334,7 @@ export default {
 		padding: 30rpx;
 		background-color: #fff;
 		border-radius: 20rpx;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		.title {
 			line-height: 40rpx;
 			color: #999;
@@ -285,6 +378,7 @@ export default {
 			background-color: #fff;
 			border-radius: 20rpx;
 			padding: 20rpx 40rpx;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 			.title {
 				font-size: 20rpx;
 				color: #999;

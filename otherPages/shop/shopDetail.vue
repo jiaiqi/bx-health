@@ -20,8 +20,11 @@
 				</view>
 			</view>		
 			<view class="shop-detail-cen-rig">
-				<view class="shop-detail-btn">
+				<view v-if="!isJoin" @click="joinCar" class="shop-detail-btn">
 					加入购物车
+				</view>
+				<view v-else class="counter">
+					<u-number-box @minus="subtract" @plus="adds" :min="1" v-model="value" @change="valChange"></u-number-box>
 				</view>
 			</view>
 		</view>
@@ -218,20 +221,93 @@
 					
 			</view>
 		</view>
+		<jumpBall :backgroundColor="'red'" :start.sync="num" :element.sync="element" @msg="jbMsg" />
+		<view class="public-button-box">
+			<view @click="goCar" class="lg text-gray cuIcon-cart add-button">
+				<text class="add-button-num">{{carNum}}</text>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
+	import jumpBall from '@/components/hx-jump-ball/hx-jump-ball.vue';
 	export default {
 		name:'shopDetail',
+		components:{jumpBall},
 		data(){
 			return {
 				foodObj:"",
 				foodChild:'',
+				value: 1,
+				num:0,
+				carNum:0,
+				element: [],
+				isJoin:false,
 				eleData:['protein','vitamin_b1','vitamin_b2','vitamin_b3','vitamin_c','element_mg','element_p','element_k','element_fe','element_zn','element_se','element_cu','element_mn']
 			}
 		},
 		methods:{
+			/*计数器change方法*/
+			valChange(e) {
+				// if(!this.foodObj.car_num){
+				// 	this.foodObj['car_num'] = e.value
+				// }else{
+					this.foodObj.car_num = e.value
+					this.setShopCarData()
+				// }				
+			},
+			setShopCarData(){
+				if(!this.foodObj.car_num){
+					this.foodObj['car_num'] = 1
+				}
+				if(!uni.getStorageSync('shop_car')){
+					// this.foodObj.car_num  = 1					
+					let shopCarData = [this.foodObj]
+					uni.setStorageSync('shop_car',shopCarData)
+				}else{
+					let shop_car_data = uni.getStorageSync('shop_car')
+					let isHas = false
+					shop_car_data.forEach(item=>{
+						if(item.id === this.foodObj.id){
+							isHas = true
+							item.car_num = this.foodObj.car_num
+						}
+					})
+					if(!isHas){
+						shop_car_data.push(this.foodObj)
+					}
+					uni.setStorageSync('shop_car',shop_car_data)
+				}
+			},
+			/* 点击购物车前往购物车列表**/
+			goCar(){
+				uni.navigateTo({
+					url:"/otherPages/shop/shopCarList"
+				})
+			},
+			/* 点击计数器加号回调**/
+			adds(e){
+				this.element = ['.counter','.add-button'];
+				this.num = e.value
+				this.carNum++
+			},
+			/* 点击计数器减号回调**/
+			subtract(e){
+				this.carNum--
+			},
+			/* 点击加入购物车**/
+			joinCar(){				
+				this.element = ['.shop-detail-cen-rig', '.add-button'];
+				this.num = 1
+				this.isJoin = true
+				this.setShopCarData()
+				this.carNum += 1
+			},
+			jbMsg(res) {
+				//执行加入购物车的逻辑
+				console.log('执行回调', res.code);
+			},
 			async getMixChildFood(){
 				let self = this
 				let url = this.getServiceUrl('health', 'srvhealth_mixed_food_nutrition_item_select', 'select');
@@ -278,9 +354,26 @@
 			}
 		},
 		onLoad(option) {
-			this.foodObj = JSON.parse(decodeURIComponent(option.itemData))
+			let foodsDetail = JSON.parse(decodeURIComponent(option.itemData))
+			// foodsDetail.imgurl = foodsDetail.imgurl.substring(0,foodsDetail.imgurl.lastIndexOf("&"))
+			this.foodObj = foodsDetail
+			if(uni.getStorageSync('shop_car')){
+				let car_data = uni.getStorageSync('shop_car')
+				let isHas = false
+				let car_curr = null
+				car_data.forEach(item=>{
+					if(item.id === this.foodObj.id){
+						isHas = true
+						car_curr = item
+					}
+					this.carNum += item.car_num
+				})
+				if(isHas){
+					this.isJoin = true
+					this.value = car_curr.car_num
+				}
+			}
 			this.getMixChildFood()
-			console.log("option----",JSON.parse(decodeURIComponent(option.itemData)))
 		}
 	}
 </script>
@@ -342,7 +435,10 @@
 				padding: 10upx 20upx;
 				background-color: #fed061;
 				border-radius: 5px;
-				    font-weight: 700;
+				font-weight: 700;
+			}
+			.counter{
+				margin-right: 20upx;
 			}
 		}
 	}
@@ -439,4 +535,33 @@
 		}
 	}
 }
+.add-button {
+		position: fixed;
+		bottom: 20upx;
+		left: calc(50% - 50upx);
+		width: 100upx;
+		height: 100upx;
+		border-radius: 50%;
+		background-color: rgb(246, 210, 0);
+		z-index: 100;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 24px;
+		color: white;
+		.add-button-num {
+			position: absolute;
+			right: -4px;
+			top: 1px;
+			height: 18px;
+			width: 18px;
+			background-color: #ff4000;
+			color: #ffffff;
+			border-radius: 50%;
+			z-index: 1;
+			font-size: 10px;
+			text-align: center;
+			line-height: 18px;
+		}
+	}
 </style>

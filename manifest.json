@@ -69,7 +69,7 @@
         "domain" : "wx2.100xsys.cn",
         "router" : {
             "mode" : "history",
-            "base" : "/health/"
+            "base" : ""
         },
         "devServer" : {
             "disableHostCheck" : true

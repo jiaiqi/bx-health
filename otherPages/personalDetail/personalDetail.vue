@@ -259,7 +259,9 @@ export default {
 				let currentUser = userList.filter(item => {
 					return item.name === current_user;
 				});
-				if (Array.isArray(currentUser) && currentUser.length > 0) this.currentUser = currentUser[0];
+				if (Array.isArray(currentUser) && currentUser.length > 0){
+					this.currentUser = currentUser[0]
+				} ;
 				this.modifyUserInfo = this.deepClone(this.currentUser);
 			}
 		}

@@ -481,7 +481,15 @@ export default {
 			const res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				// 有数据
-				uni.setStorageSync('current_user', res.data.data[0].name);
+				if (uni.getStorageSync('current_user')) {
+					res.data.data.forEach(item => {
+						if (item.name === uni.getStorageSync('current_user')) {
+							uni.setStorageSync('current_user', item.name);
+						}
+					});
+				} else {
+					uni.setStorageSync('current_user_info', res.data.data[0]);
+				}
 				uni.setStorageSync('user_info_list', res.data.data);
 				self.userMenuList = res.data.data;
 				return res.data.data;
@@ -522,7 +530,7 @@ export default {
 		},
 		async getDietAllRecord() {
 			//饮食记录
-			console.log(this.loginUserInfo)
+			console.log(this.loginUserInfo);
 			let url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_diet_record_select',
@@ -722,7 +730,7 @@ export default {
 				uni.setStorageSync('current_user', e.name);
 				uni.setStorageSync('current_user_info', e);
 				this.userInfo = e;
-				this.getDietAllRecord()
+				this.getDietAllRecord();
 			}
 			this.showUserList = false;
 		},
@@ -865,14 +873,26 @@ export default {
 		self = this;
 		uni.setStorageSync('activeApp', 'health');
 		if (userInfo && userInfo.user_no) {
-			this.loginUserInfo = userInfo
+			this.loginUserInfo = userInfo;
 			if (uni.getStorageSync('current_user_info')) {
 				this.userInfo = uni.getStorageSync('current_user_info');
 			} else {
 				let userList = uni.getStorageSync('user_info_list');
 				if (Array.isArray(userList) && userList.length > 0) {
-					this.userInfo = userList[0];
-					uni.setStorageSync('current_user_info', userList[0]);
+					let name = uni.getStorageSync('current_user');
+					if (name) {
+						userList.forEach(item => {
+							if (item.name === name) {
+								uni.setStorageSync('current_user', item.name);
+								uni.setStorageSync('current_user_info', item);
+								this.userInfo = item;
+							}
+						});
+					} else {
+						uni.setStorageSync('current_user_info', userList[0]);
+						uni.setStorageSync('current_user', userList[0].name);
+						this.userInfo = userList[0];
+					}
 				}
 			}
 			await this.getUserInfo(); //查找微信用户基本信息
