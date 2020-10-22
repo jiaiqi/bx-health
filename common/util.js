@@ -569,6 +569,49 @@ export default {
 			return true
 			// #endif
 		};
+		 Vue.prototype.wxLogin= async function(obj = {}) {
+			// 使用code向后端发送登录请求
+			let { code } = obj;
+			if(!code){
+				return
+			}
+			let url = this.$api.verifyLogin.url;
+			let req = [
+				{
+					data: [
+						{
+							code: code,
+							app_no: this.$api.appNo.wxmp
+						}
+					],
+					serviceName: 'srvwx_app_login_verify'
+				}
+			];
+			let res = await this.$http.post(url, req);
+			if (res.data.resultCode === 'SUCCESS') {
+				// 登录成功
+				let resData = res.data.response[0].response;
+				if (resData.login_user_info.user_no) {
+					uni.setStorageSync('login_user_info', resData.login_user_info);
+					console.log('resData.login_user_info', resData.login_user_info);
+				}
+				uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
+				if (resData.login_user_info.data) {
+					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
+				}
+				uni.setStorageSync('isLogin', true);
+				return {
+					status: 'success',
+					response: resData
+				};
+			} else {
+				// 登录失败，显示提示信息
+				uni.showToast({
+					title: res.data.resultMessage
+				});
+				return false;
+			}
+		}
 		// 表单
 		Vue.prototype.getCoulmnConfig = function(e) {
 			let cnCol = {

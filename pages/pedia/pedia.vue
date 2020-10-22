@@ -80,7 +80,7 @@ export default {
 				});
 			} else {
 				uni.navigateTo({
-					url: dest_page,
+					url: item.dest_page,
 					fail(err) {
 						if (err.errMsg && err.errMsg.indexOf('is not found') !== -1) {
 							// 通过webview展示h5页面
@@ -90,7 +90,7 @@ export default {
 								});
 							} else {
 								uni.navigateTo({
-									url: '/publicPages/webviewPage/webviewPage?webUrl=' + self.$api.frontEndAddress + item.dest_page
+									url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(self.$api.frontEndAddress + item.dest_page)
 								});
 							}
 						}
@@ -179,6 +179,12 @@ export default {
 	},
 	created() {
 		this.getPageItem();
+	},
+	onLoad() {
+		wx.showShareMenu({
+			withShareTicket: true,
+			menus: ['shareAppMessage', 'shareTimeline']
+		});
 	}
 };
 </script>

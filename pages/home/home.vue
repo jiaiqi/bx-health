@@ -11,6 +11,7 @@
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
 						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
+							<text class="cuIcon-favorfill margin-right-xs" v-if="item.is_main === '是'"></text>
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -53,44 +54,130 @@
 		</view>
 		<view class="main-box column">
 			<view class="main-box-title">近期趋势</view>
-			<view class="menu-box">
+			<view class="chart-box" :class="{ 'max-height': currentChart }">
+				<canvas
+					v-if="currentChart === 'stepChart'"
+					canvas-id="stepChart"
+					id="stepChart"
+					class="charts-line"
+					disable-scroll="true"
+					@touchmove="moveLine"
+					@touchend="touchEndLine"
+					@touchstart="touchLine"
+				></canvas>
+				<canvas v-if="currentChart === 'canvasLineA'" canvas-id="canvasLineA" id="canvasLineA" class="charts-line" @touchstart="touchLineA"></canvas>
+				<canvas v-if="currentChart === 'canvasLineB'" canvas-id="canvasLineB" id="canvasLineB" class="charts-line" @touchstart="touchLineB"></canvas>
+				<canvas v-if="currentChart === 'canvasLineC'" canvas-id="canvasLineC" id="canvasLineC" class="charts-line" @touchstart="touchLineC"></canvas>
+				<canvas v-if="currentChart === 'canvasColumnD'" canvas-id="canvasColumnD" id="canvasColumnD" class="charts-line" @touchstart="touchColumnD"></canvas>
+			</view>
+			<view class="button-box">
+				<button class="button" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
+					{{ item.name }}
+				</button>
+				<!-- <view class="box-item" :class="{ active: currentChart === 'canvasLineA' }" @click="showCanvas('weight')">步数</view>
 				<view class="box-item" :class="{ active: currentChart === 'canvasLineA' }" @click="showCanvas('weight')">体重</view>
 				<view class="box-item" :class="{ active: currentChart === 'canvasLineB' }" @click="showCanvas('BP')">血压</view>
 				<view class="box-item" :class="{ active: currentChart === 'canvasLineC' }" @click="showCanvas('sleep')">睡眠</view>
-				<view class="box-item" :class="{ active: currentChart === 'canvasColumnD' }" @click="showCanvas('calories')">热量</view>
-			</view>
-			<view class="chart-box" :class="{ 'max-height': currentChart }">
-				<canvas v-show="currentChart === 'canvasLineA'" canvas-id="canvasLineA" id="canvasLineA" class="charts-line" @touchstart="touchLineA"></canvas>
-				<canvas v-show="currentChart === 'canvasLineB'" canvas-id="canvasLineB" id="canvasLineB" class="charts-line" @touchstart="touchLineB"></canvas>
-				<canvas v-show="currentChart === 'canvasLineC'" canvas-id="canvasLineC" id="canvasLineC" class="charts-line" @touchstart="touchLineC"></canvas>
-				<canvas v-show="currentChart === 'canvasColumnD'" canvas-id="canvasColumnD" id="canvasColumnD" class="charts-line" @touchstart="touchColumnD"></canvas>
+				<view class="box-item" :class="{ active: currentChart === 'canvasColumnD' }" @click="showCanvas('calories')">热量</view> -->
 			</view>
 		</view>
 		<view class="main-box">
 			<view class="main-box-title">基本信息</view>
 			<view class="menu-box">
-				<view class="box-item menu filled" @click="skip('basic')">个人中心</view>
-				<view class="box-item menu">疾病史</view>
-				<view class="box-item menu">遗传史</view>
+				<view class="box-item filled" @click="skip('basic')">
+					<view class="label">基本数据</view>
+					<view class="status">
+						点击查看
+						<u-icon name="eye-fill"></u-icon>
+					</view>
+				</view>
+				<view class="box-item" @click="topages">
+					<view class="label">疾病史</view>
+
+					<view class="status">
+						未填写
+						<u-icon name="edit-pen-fill"></u-icon>
+					</view>
+				</view>
+				<view class="box-item">
+					<view class="label">遗传史</view>
+					<view class="status">
+						未填写
+						<u-icon name="edit-pen-fill"></u-icon>
+					</view>
+				</view>
+				<view class="box-item">
+					<view class="label">饮食营养</view>
+					<view class="status">
+						未填写
+						<u-icon name="edit-pen-fill"></u-icon>
+					</view>
+				</view>
+				<view class="box-item">
+					<view class="label">运动</view>
+					<view class="status">
+						未填写
+						<u-icon name="edit-pen-fill"></u-icon>
+					</view>
+				</view>
+				<view class="box-item">
+					<view class="label">睡眠</view>
+					<view class="status">
+						未填写
+						<u-icon name="edit-pen-fill"></u-icon>
+					</view>
+				</view>
+				<view class="box-item">
+					<view class="label">心理</view>
+					<view class="status">
+						未填写
+						<u-icon name="edit-pen-fill"></u-icon>
+					</view>
+				</view>
 			</view>
 		</view>
-		<view class="main-box"><view class="main-box-title">饮食营养</view></view>
-		<view class="main-box"><view class="main-box-title">运动健康</view></view>
-		<view class="main-box"><view class="main-box-title">慢性疾病</view></view>
+		<view class="main-box">
+			<view class="main-box-title">慢性疾病</view>
+
+			<view class="menu-box">
+				<view class="box-item menu" :class="[bmiStatus.key]">
+					<view class="status" :class="[bmiStatus.key]">
+						<text class="label">BMI:</text>
+						{{ BMI }}
+					</view>
+					<view class="status" :class="[bmiStatus.key]">
+						<text class="icon"></text>
+						[{{ bmiStatus.label }}]
+					</view>
+				</view>
+				<view class="box-item menu">高血压</view>
+				<view class="box-item menu">糖尿病</view>
+				<view class="box-item menu">失眠</view>
+				<view class="box-item menu">颈椎病</view>
+			</view>
+		</view>
 	</view>
 </template>
 <script>
 var self;
 import uCharts from '@/components/u-charts/u-charts.js';
 var _self;
-var canvaLineA = null;
-var canvaLineB = null;
-var canvaLineC = null;
-var canvaColumnD = null;
+var canvasLineA = null;
+var canvasLineB = null;
+var canvasLineC = null;
+var canvasColumnD = null;
+var stepChart = null;
 var dayjs = require('dayjs');
 export default {
 	data() {
 		return {
+			subList: [
+				{ name: '步数', key: 'step', chartID: 'stepChart' },
+				{ name: '体重', key: 'weight', chartID: 'canvasLineA' },
+				{ name: '血压', key: 'BP', chartID: 'canvasLineB' },
+				{ name: '热量', key: 'calories', chartID: 'canvasColumnD' },
+				{ name: '睡眠', key: 'sleep', chartID: 'canvasLineC' }
+			],
 			currentChart: '', //当前chart id
 			isLogin: false, // 是否已经登录
 			loginUserInfo: {},
@@ -185,19 +272,55 @@ export default {
 						data: [100, 80, 95, 150, 112, 132]
 					}
 				]
-			}
+			},
+			wxRunData: {},
+			stepInfoList: [],
+			stepData: []
 		};
 	},
 	computed: {
 		profile_url() {
-			if (this.userInfo.profile_url) {
-				return this.$api.downloadFile + this.userInfo.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-			} else if (this.loginUserInfo.headimgurl) {
+			if (this.userInfo.is_main === '是' && this.loginUserInfo.headimgurl) {
 				return this.loginUserInfo.headimgurl;
+			} else {
+				if (this.userInfo.profile_url) {
+					return this.$api.downloadFile + this.userInfo.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+				}
 			}
 		},
 		energyChange() {
 			return Number(this.dietIn) - Number(this.sportOut) - Number(this.basicOut);
+		},
+		// BMI=体重（千克）除以身高（米）的平方。
+		BMI() {
+			if (this.userInfo.weight && this.userInfo.height) {
+				return (Number(this.userInfo.weight) / Math.pow(Number(this.userInfo.height) / 100, 2)).toFixed(2);
+			}
+		},
+		bmiStatus() {
+			if (this.BMI) {
+				if (this.BMI < 18.5) {
+					return {
+						label: '偏瘦',
+						key: 'thin'
+					};
+				} else if (18.5 <= this.BMI && this.BMI < 24) {
+					return {
+						label: '正常',
+						key: 'normal'
+					};
+				} else if (24 <= this.BMI && this.BMI < 28) {
+					return {
+						label: '超重',
+						key: 'overweight'
+					};
+				} else if (28 <= this.BMI) {
+					return {
+						label: '肥胖',
+						key: 'fat'
+					};
+				}
+			}
 		},
 		age() {
 			if (this.userInfo.birthday) {
@@ -228,12 +351,34 @@ export default {
 		}
 	},
 	methods: {
+		topages() {
+			let url = 'https://wx2.100xsys.cn/pages/specific/questionnaire/questionnaire?formType=form&activity_no=20200307210717000096&status=进行中';
+			uni.navigateTo({
+				url: '/publicPages/webviewPage/webviewPage?webUrl=' + url
+			});
+		},
 		skip(item) {
 			// 跳转页面
 			let url = '';
 			switch (item) {
 				case 'basic':
-					url = '/otherPages/personal/personal';
+					// url = '/otherPages/personal/personal';
+					let row = this.userInfo;
+					let params = {
+						type: 'detail',
+						condition: [
+							{
+								colName: 'id',
+								ruleType: 'in',
+								value: row.id
+							}
+						],
+						serviceName: 'srvhealth_person_info_select',
+						defaultVal: row
+					};
+					uni.navigateTo({
+						url: '/publicPages/form/form?params=' + JSON.stringify(params)
+					});
 					break;
 				default:
 					break;
@@ -246,12 +391,20 @@ export default {
 		},
 		showCanvas(type) {
 			// 显示图表
-			this.cWidth = uni.upx2px(690);
-			this.cHeight = uni.upx2px(300);
+			this.cWidth = uni.upx2px(710);
+			this.cHeight = uni.upx2px(350);
 			switch (type) {
+				case 'step':
+					if (this.currentChart === 'stepChart') {
+						// this.currentChart = '';
+					} else {
+						this.currentChart = 'stepChart';
+						this.getwxStepInfoList();
+					}
+					break;
 				case 'weight':
 					if (this.currentChart === 'canvasLineA') {
-						this.currentChart = '';
+						// this.currentChart = '';
 					} else {
 						this.currentChart = 'canvasLineA';
 						this.getChartData('weight').then(_ => {
@@ -261,7 +414,7 @@ export default {
 					break;
 				case 'BP':
 					if (this.currentChart === 'canvasLineB') {
-						this.currentChart = '';
+						// this.currentChart = '';
 					} else {
 						this.currentChart = 'canvasLineB';
 						this.getChartData('bloodPressure').then(_ => {
@@ -271,7 +424,7 @@ export default {
 					break;
 				case 'sleep':
 					if (this.currentChart === 'canvasLineC') {
-						this.currentChart = '';
+						// this.currentChart = '';
 					} else {
 						this.currentChart = 'canvasLineC';
 						this.showLineC('canvasLineC', this.sleepChartData, '小时');
@@ -279,7 +432,7 @@ export default {
 					break;
 				case 'calories':
 					if (this.currentChart === 'canvasColumnD') {
-						this.currentChart = '';
+						// this.currentChart = '';
 					} else {
 						this.currentChart = 'canvasColumnD';
 						this.getDietSportRecordList().then(_ => {
@@ -466,11 +619,10 @@ export default {
 		async getCurrUserInfo() {
 			self = this;
 			const url = self.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
-			let user = uni.getStorageSync('login_user_info').user_no;
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
 				colNames: ['*'],
-				condition: [{ colName: 'userno', ruleType: 'eq', value: user }],
+				condition: [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }],
 				order: [
 					{
 						colName: 'create_time',
@@ -494,23 +646,14 @@ export default {
 				self.userMenuList = res.data.data;
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {
-				// 登录失效
+				// 登录失效 进行静默登录
 				this.isLogin = false;
-				uni.showModal({
-					title: '提示',
-					content: '登录失效,即将跳转到登录页面',
-					confirmText: '去登录',
-					confirmColor: '#02D199',
-					showCancel: false,
-					success(res) {
-						if (res.confirm) {
-							// 确认 跳转到登录页
-							uni.navigateTo({
-								url: '/publicPages/accountExec/accountExec'
-							});
-						}
-					}
-				});
+				const result = await wx.login();
+				if (result.code) {
+					this.code = result.code;
+					await this.wxLogin({ code: result.code });
+					await this.initPage();
+				}
 			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 				// 没有角色 提示跳转到创建角色页面
 				uni.showModal({
@@ -519,7 +662,7 @@ export default {
 					showCancel: false,
 					success(res) {
 						if (res.confirm) {
-							let condition = [{ colName: 'userno', ruleType: 'eq', value: user }];
+							let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
 							uni.navigateTo({
 								url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
 							});
@@ -717,7 +860,7 @@ export default {
 				];
 				uni.navigateTo({
 					url:
-						'/publicPages/list/list?serviceName=srvhealth_person_info_select&navigationBarTitle=我的车辆&pageType=list&type=skip&viewTemp=' +
+						'/publicPages/list/list?serviceName=srvhealth_person_info_select&pageType=list&type=skip&viewTemp=' +
 						decodeURIComponent(JSON.stringify(viewTemp)) +
 						'&cond=' +
 						decodeURIComponent(JSON.stringify(cond))
@@ -730,25 +873,27 @@ export default {
 				uni.setStorageSync('current_user', e.name);
 				uni.setStorageSync('current_user_info', e);
 				this.userInfo = e;
-				this.getDietAllRecord();
+				this.getDietAllRecord().then(_ => {
+					this.showCanvas('weight');
+				});
 			}
 			this.showUserList = false;
 		},
 		showLineA(canvasId, chartData, unit) {
 			let options = this.getChartOptions(canvasId, chartData, unit);
-			canvaLineA = new uCharts(options);
+			canvasLineA = new uCharts(options);
 		},
 		showLineB(canvasId, chartData, unit) {
 			let options = this.getChartOptions(canvasId, chartData, unit);
-			canvaLineB = new uCharts(options);
+			canvasLineB = new uCharts(options);
 		},
 		showLineC(canvasId, chartData, unit) {
 			let options = this.getChartOptions(canvasId, chartData, unit);
-			canvaLineC = new uCharts(options);
+			canvasLineC = new uCharts(options);
 		},
 		showColumnD(canvasId, chartData, unit) {
 			let options = this.getChartOptions(canvasId, chartData, unit, 'column');
-			canvaColumnD = new uCharts(options);
+			canvasColumnD = new uCharts(options);
 		},
 		getChartOptions(canvasId, chartData, unit, type) {
 			return {
@@ -791,42 +936,260 @@ export default {
 						width: 20
 					},
 					line: {
-						type: 'straight'
+						type: 'curve'
 					}
 				}
 			};
 		},
+		touchEndLine(e) {
+			stepChart.showToolTip(e, {
+				format: function(item, category) {
+					return category + ' 步数' + ': ' + item.data + '步';
+				}
+			});
+			// stepChart.scrollEnd(e);
+		},
+		touchLine(e) {
+			stepChart.scrollStart(e);
+		},
+		moveLine(e) {
+			stepChart.scroll(e);
+		},
 		touchLineA(e) {
-			canvaLineA.showToolTip(e, {
+			canvasLineA.showToolTip(e, {
 				format: function(item, category) {
 					return category + ' ' + item.name + ':' + item.data + 'kg';
 				}
 			});
-			canvaLineA.touchLegend(e);
+			canvasLineA.touchLegend(e);
 		},
 		touchLineB(e) {
-			canvaLineB.showToolTip(e, {
+			canvasLineB.showToolTip(e, {
 				format: function(item, category) {
 					return category + ' ' + item.name + ':' + item.data + 'mmHg';
 				}
 			});
-			canvaLineB.touchLegend(e);
+			canvasLineB.touchLegend(e);
 		},
 		touchLineC(e) {
-			canvaLineC.showToolTip(e, {
+			canvasLineC.showToolTip(e, {
 				format: function(item, category) {
 					return category + ' ' + item.name + ':' + item.data + '小时';
 				}
 			});
-			canvaLineC.touchLegend(e);
+			canvasLineC.touchLegend(e);
 		},
 		touchColumnD(e) {
-			canvaColumnD.showToolTip(e, {
+			canvasColumnD.showToolTip(e, {
 				format: function(item, category) {
 					return category + ' ' + item.name + ':' + item.data + '大卡';
 				}
 			});
-			canvaColumnD.touchLegend(e);
+			canvasColumnD.touchLegend(e);
+		},
+		getDayStepInfo(date) {
+			let stepInfoList = this.stepInfoList;
+			if (Array.isArray(stepInfoList) && stepInfoList.length > 0) {
+				let stepData = {};
+				stepInfoList.forEach(item => {
+					if (date && date.indexOf(item.date) !== -1) {
+						stepData = item;
+					}
+				});
+				return stepData;
+			}
+		},
+		async getwxStepInfoList() {
+			// 获取微信运动记录
+			// #ifdef MP-WEIXIN
+			let result = await wx.getWeRunData();
+			if (result.errMsg === 'getWeRunData:ok') {
+				this.wxRunData = result;
+				this.decryptData(result);
+			}
+			// #endif
+		},
+		async decryptData(result) {
+			// 解密微信加密数据
+			if (result.encryptedData && result.iv) {
+				let url = this.getServiceUrl('wx', 'srvwx_app_data_decrypt', 'operate');
+				let req = [
+					{
+						data: [
+							{
+								encryptedData: result.encryptedData,
+								signature: result.iv
+							}
+						],
+						serviceName: 'srvwx_app_data_decrypt'
+					}
+				];
+				let res = await this.$http.post(url, req);
+				if (res.data.state == 'SUCCESS' && Array.isArray(res.data.response) && res.data.response.length > 0) {
+					let stepList = res.data.response[0].response.stepInfoList;
+					if (Array.isArray(stepList)) {
+						stepList = stepList.map(item => {
+							item.date = this.formateDate(item.timestamp * 1000);
+							return item;
+						});
+						console.log('stepList', this.deepClone(stepList));
+						this.stepInfoList = stepList;
+						// let stepData = this.getDayStepInfo(this.date);
+						// this.stepData = stepData;
+						let chartData = { categories: [], series: [{}] };
+						chartData.categories = stepList.map(item => item.date.slice(5));
+						chartData.series[0] = {
+							name: '近31日运动步数',
+							data: []
+						};
+						chartData.series[0].data = stepList.map(item => item.step);
+						if (_self.userInfo.is_main === '是') {
+							_self.showChart('stepChart', chartData);
+						} else {
+							uni.showToast({
+								title: '无权查看',
+								icon: 'none'
+							});
+							self.showCanvas('weight');
+						}
+						return stepList;
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		},
+		showChart(canvasId, chartData) {
+			this.cWidth = uni.upx2px(710);
+			this.cHeight = uni.upx2px(350);
+			stepChart = new uCharts({
+				$this: _self,
+				canvasId: canvasId,
+				type: 'line',
+				fontSize: 11,
+				legend: { show: true },
+				dataLabel: true,
+				dataPointShape: true,
+				background: '#FFFFFF',
+				pixelRatio: 1,
+				categories: chartData.categories,
+				series: chartData.series,
+				animation: false,
+				enableScroll: true, //开启图表拖拽功能
+				xAxis: {
+					type: 'grid',
+					disableGrid: false,
+					gridColor: '#CCCCCC',
+					gridType: 'dash',
+					dashLength: 8,
+					itemCount: 8, //x轴单屏显示数据的数量，默认为5个
+					scrollShow: true, //新增是否显示滚动条，默认false
+					scrollAlign: 'right' //滚动条初始位置
+				},
+				yAxis: {
+					disableGrid: false,
+					gridType: 'dash',
+					gridColor: '#CCCCCC',
+					dashLength: 8,
+					splitNumber: 5,
+					min: 10,
+					max: 180,
+					format: val => {
+						return val.toFixed(0) + '步';
+					}
+				},
+				width: this.cWidth,
+				height: this.cHeight,
+				extra: {
+					line: {
+						type: 'curve' //曲线
+					}
+				}
+			});
+		},
+		async initPage() {
+			let userInfo = uni.getStorageSync('login_user_info');
+			// #ifdef MP-WEIXIN
+
+			let res = await wx.getSetting();
+			if (!res.authSetting['scope.userInfo']) {
+				// 没有获取用户信息授权
+				uni.showModal({
+					title: '提示',
+					content: '请登录并授权获取用户信息后再进行查看',
+					confirmText: '去登录',
+					confirmColor: '#02D199',
+					success(res) {
+						if (res.confirm) {
+							// 确认 跳转到登录页
+							uni.navigateTo({
+								url: '/publicPages/accountExec/accountExec'
+							});
+						} else if (res.cancel) {
+							// 取消 返回首页
+							uni.switchTab({
+								url: '/pages/pedia/pedia'
+							});
+						}
+					}
+				});
+				return;
+			}
+			// #endif
+			if (!userInfo) {
+				// 未登录
+				const result = await wx.login();
+				if (result.code) {
+					this.code = result.code;
+					await this.wxLogin({ code: result.code });
+					await this.initPage();
+				}
+			} else {
+				this.isLogin = true;
+			}
+			self = this;
+			uni.setStorageSync('activeApp', 'health');
+			if (userInfo && userInfo.user_no) {
+				this.loginUserInfo = userInfo;
+				if (uni.getStorageSync('current_user_info')) {
+					this.userInfo = uni.getStorageSync('current_user_info');
+				} else {
+					let userList = uni.getStorageSync('user_info_list');
+					if (Array.isArray(userList) && userList.length > 0) {
+						let name = uni.getStorageSync('current_user');
+						if (name) {
+							userList.forEach(item => {
+								if (item.name === name) {
+									uni.setStorageSync('current_user', item.name);
+									uni.setStorageSync('current_user_info', item);
+									this.userInfo = item;
+								}
+							});
+						} else {
+							uni.setStorageSync('current_user_info', userList[0]);
+							uni.setStorageSync('current_user', userList[0].name);
+							this.userInfo = userList[0];
+						}
+					}
+				}
+				await this.getUserInfo(); //查找微信用户基本信息
+				await this.getCurrUserInfo(); // 查找健康app个人基本信息
+				await this.getDietAllRecord(); //查找饮食和运动记录
+				this.selectServiceLog();
+				this.loginUserInfo = userInfo;
+				// #ifdef MP-WEIXIN
+				this.getwxStepInfoList().then(_ => {
+					this.currentChart = 'stepChart';
+				}); //获取微信运动记录
+				// #endif
+				// #ifdef H5
+				this.showCanvas('weight');
+				// #endif
+			}
 		}
 	},
 	created() {
@@ -842,65 +1205,15 @@ export default {
 	},
 	onLoad() {
 		_self = this;
+		// #ifdef MP-WEIXIN
+		wx.showShareMenu({
+			withShareTicket: true,
+			menus: ['shareAppMessage', 'shareTimeline']
+		});
+		// #endif
 	},
 	async onShow() {
-		let userInfo = uni.getStorageSync('login_user_info');
-		if (!userInfo) {
-			// 未登录， 提示跳转
-			this.isLogin = false;
-			uni.showModal({
-				title: '提示',
-				content: '未登录,是否跳转到登录页面?',
-				confirmText: '去登录',
-				confirmColor: '#02D199',
-				success(res) {
-					if (res.confirm) {
-						// 确认 跳转到登录页
-						uni.navigateTo({
-							url: '/publicPages/accountExec/accountExec'
-						});
-					} else if (res.cancel) {
-						// 取消 返回首页
-						uni.switchTab({
-							url: '/pages/pedia/pedia'
-						});
-					}
-				}
-			});
-		} else {
-			this.isLogin = true;
-		}
-		self = this;
-		uni.setStorageSync('activeApp', 'health');
-		if (userInfo && userInfo.user_no) {
-			this.loginUserInfo = userInfo;
-			if (uni.getStorageSync('current_user_info')) {
-				this.userInfo = uni.getStorageSync('current_user_info');
-			} else {
-				let userList = uni.getStorageSync('user_info_list');
-				if (Array.isArray(userList) && userList.length > 0) {
-					let name = uni.getStorageSync('current_user');
-					if (name) {
-						userList.forEach(item => {
-							if (item.name === name) {
-								uni.setStorageSync('current_user', item.name);
-								uni.setStorageSync('current_user_info', item);
-								this.userInfo = item;
-							}
-						});
-					} else {
-						uni.setStorageSync('current_user_info', userList[0]);
-						uni.setStorageSync('current_user', userList[0].name);
-						this.userInfo = userList[0];
-					}
-				}
-			}
-			await this.getUserInfo(); //查找微信用户基本信息
-			await this.getCurrUserInfo(); // 查找健康app个人基本信息
-			await this.getDietAllRecord(); //查找饮食和运动记录
-			this.selectServiceLog();
-			this.loginUserInfo = userInfo;
-		}
+		await this.initPage();
 	}
 };
 </script>
@@ -1036,15 +1349,34 @@ export default {
 		.chart-box {
 			border-radius: 2px;
 			background-color: #fff;
-			margin: 10rpx;
+			margin: 0 auto;
 			height: 0;
 			transition: all 0.5s;
 			&.max-height {
-				height: 280rpx;
+				height: 330rpx;
 			}
 			.charts-line {
 				width: 690rpx;
-				height: 300rpx;
+				height: 350rpx;
+			}
+		}
+	}
+	.button-box {
+		display: flex;
+		justify-content: center;
+		height: 80rpx;
+		.u-subsection {
+			width: 100%;
+		}
+		.button {
+			flex: 1;
+			margin: 0 10rpx 10rpx;
+			padding: 0;
+			height: 50rpx;
+			line-height: 50rpx;
+			&.active {
+				background-color: #007aff;
+				color: #fff;
 			}
 		}
 	}
@@ -1053,48 +1385,109 @@ export default {
 		flex-wrap: wrap;
 		width: 100%;
 		.box-item {
-			width: calc(50% - 10rpx);
-			margin: 5rpx;
-			height: 80rpx;
+			width: calc(33.33% - 20rpx);
+			margin: 10rpx;
+			min-height: 120rpx;
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			letter-spacing: 10rpx;
+			letter-spacing: 2rpx;
 			font-size: 32rpx;
-			border-radius: 5rpx;
-			opacity: 0.5;
+			border-radius: 20rpx;
 			color: #fff;
-			transition: opacity 1s;
-			&.active {
-				opacity: 0.8;
-			}
+			transition: all 0.5s;
+			background-color: rgba($color: #909399, $alpha: 0.5);
+			box-shadow: 4px 3px 4px rgba($color: #909399, $alpha: 0.5);
+			flex-wrap: wrap;
 			&:active {
-				opacity: 1;
-				transform: scale(1.05);
+				// opacity: 1;
+				transform: scale(1.1);
 			}
-			&:nth-child(1) {
+			// background-color: rgba($color: #e74c3c, $alpha: 0.5);
+			&.active {
+				// opacity: 0.8;
+			}
+			&.menu {
+				background-color: rgba($color: #f1f1f1, $alpha: 1);
+				box-shadow: 4px 3px 4px rgba($color: #f1f1f1, $alpha: 0.5);
+				color: #333;
+				padding: 20rpx;
+			}
+			&.thin {
 				background-color: #3498db;
+				box-shadow: 4px 3px 4px rgba($color: #3498db, $alpha: 0.5);
 			}
-			&:nth-child(2) {
+			&.normal {
+				background-color: #1abc9c;
+				box-shadow: 4px 3px 4px rgba($color: #1abc9c, $alpha: 0.5);
+			}
+			&.overweight {
+				background-color: #f1c40f;
+				box-shadow: 4px 3px 4px rgba($color: #f1c40f, $alpha: 0.5);
+			}
+			&.fat {
 				background-color: #e74c3c;
+				box-shadow: 4px 3px 4px rgba($color: #e74c3c, $alpha: 0.5);
 			}
-			&:nth-child(3) {
-				background-color: #8e44ad;
+			.label {
+				width: 100%;
 			}
-			&:nth-child(4) {
-				background-color: #e67e22;
+
+			.u-icon {
+				padding: 2px;
 			}
-			&.menu.filled {
-				opacity: 0.9;
+			.status {
+				color: #fff;
+				&.thin {
+					.icon {
+						width: 50rpx;
+						height: 50rpx;
+						display: inline-block;
+						background-color: #3498db;
+					}
+				}
+			}
+			.status {
+				font-size: 24rpx;
+			}
+			// &:nth-child(1) {
+			// 	background-color: #3498db;
+			// }
+			// &:nth-child(2) {
+			// 	background-color: #e74c3c;
+			// }
+			// &:nth-child(3) {
+			// 	background-color: #8e44ad;
+			// }
+			// &:nth-child(4) {
+			// 	background-color: #e67e22;
+			// }
+			// &:nth-child(5) {
+			// 	background-color: #3498db;
+			// }
+			// &:nth-child(6) {
+			// 	background-color: #e74c3c;
+			// }
+			// &:nth-child(7) {
+			// 	background-color: #8e44ad;
+			// }
+			// &:nth-child(8) {
+			// 	background-color: #e67e22;
+			// }
+			&.filled {
+				opacity: 1;
+				color: #fff;
+				background-color: rgba($color: #2979ff, $alpha: 0.8);
+				box-shadow: 4px 3px 4px rgba($color: #2979ff, $alpha: 0.5);
 			}
 		}
 	}
 	.energy-box {
 		display: flex;
 		width: 100%;
-		justify-content: center;
+		justify-content: space-around;
 		align-items: center;
-		padding: 10rpx;
+		padding: 40rpx 20rpx;
 	}
 	.energy-item {
 		color: #333;

@@ -16,7 +16,7 @@ export default {
 	},
 	onLoad(option) {
 		if(option.webUrl){
-			this.webUrl = option.webUrl
+			this.webUrl = decodeURIComponent(option.webUrl)
 		}
 	}
 	

@@ -213,10 +213,8 @@
 				}, {
 					"path": "webviewPage/webviewPage",
 					"style": {
-						"navigationBarTitleText": "h5页面",
 						"enablePullDownRefresh": false
 					}
-
 				}
 			]
 		},
