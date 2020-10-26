@@ -1,6 +1,6 @@
 <template>
 	<view class="u-numberbox">
-		<view class="u-icon-minus" @touchstart="btnTouchStart('minus')" @touchend.stop="clearTimer" :class="{ 'u-icon-disabled': disabled || inputVal <= min }"
+		<view class="u-icon-minus" @touchstart.stop.prevent="btnTouchStart('minus')" @touchend.stop.prevent="clearTimer" :class="{ 'u-icon-disabled': disabled || inputVal <= min }"
 		    :style="{
 				background: bgColor,
 				height: inputHeight + 'rpx',
@@ -9,7 +9,7 @@
 			<u-icon name="minus" :size="size"></u-icon>
 		</view>
 		<input :disabled="disabledInput || disabled" :cursor-spacing="getCursorSpacing" :class="{ 'u-input-disabled': disabled }"
-		    v-model="inputVal" class="u-number-input" @blur="onBlur"
+		    v-model="inputVal" class="u-number-input" @blur="onBlur" @focus="onFocus"
 		    type="number" :style="{
 				color: color,
 				fontSize: size + 'rpx',
@@ -17,7 +17,7 @@
 				height: inputHeight + 'rpx',
 				width: inputWidth + 'rpx'
 			}" />
-		<view class="u-icon-plus" @touchstart="btnTouchStart('plus')" @touchend.stop="clearTimer" :class="{ 'u-icon-disabled': disabled || inputVal >= max }"
+		<view class="u-icon-plus" @touchstart.stop.prevent="btnTouchStart('plus')" @touchend.stop.prevent="clearTimer" :class="{ 'u-icon-disabled': disabled || inputVal >= max }"
 		    :style="{
 				background: bgColor,
 				height: inputHeight + 'rpx',
@@ -145,8 +145,13 @@
 				// 只有value的改变是来自外部的时候，才去同步inputVal的值，否则会造成循环错误
 				if(!this.changeFromInner) {
 					this.inputVal = v1;
+					// 因为inputVal变化后，会触发this.handleChange()，在其中changeFromInner会再次被设置为true，
+					// 造成外面修改值，也导致被认为是内部修改的混乱，这里进行this.$nextTick延时，保证在运行周期的最后处
+					// 将changeFromInner设置为false
+					this.$nextTick(function(){
+						this.changeFromInner = false;
+					})
 				}
-				this.changeFromInner = false;
 			},
 			inputVal(v1, v2) {
 				// 为了让用户能够删除所有输入值，重新输入内容，删除所有值后，内容为空字符串
@@ -176,6 +181,7 @@
 				inputVal: 1, // 输入框中的值，不能直接使用props中的value，因为应该改变props的状态
 				timer: null, // 用作长按的定时器
 				changeFromInner: false, // 值发生变化，是来自内部还是外部
+				innerChangeTimer: null, // 内部定时器
 			};
 		},
 		created() {
@@ -280,11 +286,26 @@
 				this.$nextTick(() => {
 					this.inputVal = val;
 				})
+				this.handleChange(val, 'blur');
+			},
+			// 输入框获得焦点事件
+			onFocus() {
+				this.$emit('focus');
 			},
 			handleChange(value, type) {
 				if (this.disabled) return;
+				// 清除定时器，避免造成混乱
+				if(this.innerChangeTimer) {
+					clearTimeout(this.innerChangeTimer);
+					this.innerChangeTimer = null;
+				}
 				// 发出input事件，修改通过v-model绑定的值，达到双向绑定的效果
 				this.changeFromInner = true;
+				// 一定时间内，清除changeFromInner标记，否则内部值改变后
+				// 外部通过程序修改value值，将会无效
+				this.innerChangeTimer = setTimeout(() => {
+					this.changeFromInner = false;
+				}, 150);
 				this.$emit('input', Number(value));
 				this.$emit(type, {
 					// 转为Number类型
@@ -309,7 +330,7 @@
 		text-align: center;
 		padding: 0;
 		margin: 0 6rpx;
-		display: flex;
+		@include vue-flex;
 		align-items: center;
 		justify-content: center;
 	}
@@ -317,7 +338,7 @@
 	.u-icon-plus,
 	.u-icon-minus {
 		width: 60rpx;
-		display: flex;
+		@include vue-flex;
 		justify-content: center;
 		align-items: center;
 	}

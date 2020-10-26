@@ -37,7 +37,7 @@
 						@tap="fieldClick"
 					/>
 				</view>
-				<u-icon :size="clearSize" v-if="clearable && value != '' && focused" name="close-circle-fill" color="#c0c4cc" class="u-clear-icon" @touchstart="onClear"/>
+				<u-icon :size="clearSize" v-if="clearable && value != '' && focused" name="close-circle-fill" color="#c0c4cc" class="u-clear-icon" @click="onClear"/>
 				<view class="u-button-wrap"><slot name="right" /></view>
 				<u-icon v-if="rightIcon" @click="rightIconClick" :name="rightIcon" color="#c0c4cc" :style="[rightIconStyle]" size="26" class="u-arror-right" />
 			</view>
@@ -183,6 +183,11 @@ export default {
 			type: Boolean,
 			default: true
 		},
+		// 是否自动去除两端的空格
+		trim: {
+			type: Boolean,
+			default: true
+		}
 	},
 	data() {
 		return {
@@ -241,14 +246,21 @@ export default {
 	},
 	methods: {
 		onInput(event) {
-			this.$emit('input', event.target.value);
+			let value = event.detail.value;
+			// 判断是否去除空格
+			if(this.trim) value = this.$u.trim(value);
+			this.$emit('input', value);
 		},
 		onFocus(event) {
 			this.focused = true;
 			this.$emit('focus', event);
 		},
 		onBlur(event) {
-			this.focused = false;
+			// 最开始使用的是监听图标@touchstart事件，自从hx2.8.4后，此方法在微信小程序出错
+			// 这里改为监听点击事件，手点击清除图标时，同时也发生了@blur事件，导致图标消失而无法点击，这里做一个延时
+			setTimeout(() => {
+				this.focused = false;
+			}, 100)
 			this.$emit('blur', event);
 		},
 		onConfirm(e) {
@@ -280,7 +292,7 @@ export default {
 }
 
 .u-field-inner {
-	display: flex;
+	@include vue-flex;
 	align-items: center;
 }
 
@@ -295,7 +307,7 @@ export default {
 }
 
 .fild-body {
-	display: flex;
+	@include vue-flex;
 	flex: 1;
 	align-items: center;
 }
@@ -305,7 +317,9 @@ export default {
 }
 
 .u-label-text {
-	display: inline-block;
+	/* #ifndef APP-NVUE */
+	display: inline-flex;		
+	/* #endif */
 }
 
 .u-label-left-gap {
@@ -322,7 +336,7 @@ export default {
 	flex: 1 1 130rpx;
 	text-align: left;
 	position: relative;
-	display: flex;
+	@include vue-flex;
 	align-items: center;
 }
 
@@ -346,7 +360,7 @@ export default {
 }
 
 .u-clear-icon {
-	display: flex;
+	@include vue-flex;
 	align-items: center;
 }
 

@@ -10,8 +10,9 @@
 			hairLine ? showHairLineBorder : 'u-btn--bold-border',
 			'u-btn--' + type,
 			disabled ? `u-btn--${type}--disabled` : '',
-			
 		]"
+		:hover-start-time="Number(hoverStartTime)"
+		:hover-stay-time="Number(hoverStayTime)"
 		:disabled="disabled"
 		:form-type="formType"
 		:open-type="openType"
@@ -29,7 +30,9 @@
 		@error="error"
 		@opensetting="opensetting"
 		@launchapp="launchapp"
-		:style="[customStyle]"
+		:style="[customStyle, {
+			overflow: ripple ? 'hidden' : 'visible'
+		}]"
 		@tap.stop="click($event)"
 		:hover-class="getHoverClass"
 		:loading="loading"
@@ -205,7 +208,22 @@ export default {
 		dataName: {
 			type: String,
 			default: ''
-		}
+		},
+		// 节流，一定时间内只能触发一次
+		throttleTime: {
+			type: [String, Number],
+			default: 1000
+		},
+		// 按住后多久出现点击态，单位毫秒
+		hoverStartTime: {
+			type: [String, Number],
+			default: 20
+		},
+		// 手指松开后点击态保留时间，单位毫秒
+		hoverStayTime: {
+			type: [String, Number],
+			default: 150
+		},
 	},
 	computed: {
 		// 当没有传bgColor变量时，按钮按下去的颜色类名
@@ -236,17 +254,20 @@ export default {
 	methods: {
 		// 按钮点击
 		click(e) {
-			// 如果按钮时disabled和loading状态，不触发水波纹效果
-			if (this.loading === true || this.disabled === true) return;
-			// 是否开启水波纹效果
-			if (this.ripple) {
-				// 每次点击时，移除上一次的类，再次添加，才能触发动画效果
-				this.waveActive = false;
-				this.$nextTick(function() {
-					this.getWaveQuery(e);
-				});
-			}
-			this.$emit('click', e);
+			// 进行节流控制，每this.throttle毫秒内，只在开始处执行
+			this.$u.throttle(() => {
+				// 如果按钮时disabled和loading状态，不触发水波纹效果
+				if (this.loading === true || this.disabled === true) return;
+				// 是否开启水波纹效果
+				if (this.ripple) {
+					// 每次点击时，移除上一次的类，再次添加，才能触发动画效果
+					this.waveActive = false;
+					this.$nextTick(function() {
+						this.getWaveQuery(e);
+					});
+				}
+				this.$emit('click', e);
+			}, this.throttleTime);
 		},
 		// 查询按钮的节点信息
 		getWaveQuery(e) {
@@ -330,10 +351,13 @@ export default {
 	position: relative;
 	border: 0;
 	//border-radius: 10rpx;
-	display: inline-block;
-	overflow: hidden;
+	/* #ifndef APP-NVUE */
+	display: inline-flex;		
+	/* #endif */
+	// 避免边框某些场景可能被“裁剪”，不能设置为hidden
+	overflow: visible;
 	line-height: 1;
-	display: flex;
+	@include vue-flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
@@ -487,7 +511,9 @@ export default {
 }
 
 .u-size-medium {
-	display: inline-flex;
+	/* #ifndef APP-NVUE */
+	display: inline-flex;		
+	/* #endif */
 	width: auto;
 	font-size: 26rpx;
 	height: 70rpx;
@@ -496,7 +522,9 @@ export default {
 }
 
 .u-size-mini {
-	display: inline-flex;
+	/* #ifndef APP-NVUE */
+	display: inline-flex;		
+	/* #endif */
 	width: auto;
 	font-size: 22rpx;
 	padding-top: 1px;

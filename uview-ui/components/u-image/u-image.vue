@@ -161,6 +161,20 @@ export default {
 			backgroundStyle: {}
 		};
 	},
+	watch: {
+		src: {
+			immediate: true,
+			handler (n) {
+				if(!n) {
+					// 如果传入null或者''，或者false，或者undefined，标记为错误状态
+					this.isError = true;
+					this.loading = false;
+				} else {
+					this.isError = false;
+				}
+			}
+		}
+	},
 	computed: {
 		wrapStyle() {
 			let style = {};
@@ -241,7 +255,7 @@ export default {
 		left: 0;
 		width: 100%;
 		height: 100%;
-		display: flex;
+		@include vue-flex;
 		align-items: center;
 		justify-content: center;
 		background-color: $u-bg-color;

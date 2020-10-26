@@ -101,6 +101,18 @@ fly.interceptors.response.use(
 							url: '/publicPages/accountExec/accountExec'
 						});
 						// #endif
+						// #ifdef MP-WEIXIN
+						wx.login({
+						  success (res) {
+						    if (res.code) {
+						      //发起网络请求
+									Vue.prototype.wxLogin({ code: res.code });
+						    } else {
+						      console.log('登录失败！' + res.errMsg)
+						    }
+						  }
+						})
+						// #endif
 						// uni.showModal({
 						// 	title: '提示',
 						// 	content: '未登录,是否跳转到登录页面?',

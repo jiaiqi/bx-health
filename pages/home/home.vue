@@ -93,7 +93,6 @@
 				</view>
 				<view class="box-item" @click="topages">
 					<view class="label">疾病史</view>
-
 					<view class="status">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
@@ -106,7 +105,7 @@
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
 				</view>
-				<view class="box-item">
+				<view class="box-item" @click="toQuestionnaire">
 					<view class="label">饮食营养</view>
 					<view class="status">
 						未填写
@@ -347,10 +346,20 @@ export default {
 		}
 	},
 	methods: {
+		toQuestionnaire(no){
+			no = '20201026114053000156'
+			let url = `/questionnaire/index/index?formType=form&activity_no=${no}&status=进行中`;
+			uni.navigateTo({
+				url:url
+			})
+			// uni.navigateTo({
+			// 	url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(url)
+			// });
+		},
 		topages() {
 			let url = 'https://wx2.100xsys.cn/pages/specific/questionnaire/questionnaire?formType=form&activity_no=20200307210717000096&status=进行中';
 			uni.navigateTo({
-				url: '/publicPages/webviewPage/webviewPage?webUrl=' + url
+				url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(url)
 			});
 		},
 		skip(item) {
@@ -1135,7 +1144,7 @@ export default {
 				return;
 			}
 			// #endif
-			if (!userInfo) {
+			if (!userInfo||!uni.getStorageSync('isLogin')) {
 				// 未登录
 				const result = await wx.login();
 				if (result.code) {
@@ -1149,8 +1158,10 @@ export default {
 			if (userInfo && userInfo.user_no) {
 				this.loginUserInfo = userInfo;
 				uni.setStorageSync('activeApp', 'health');
-				if(!uni.getStorageSync('user_info_list')){
+				if(!uni.getStorageSync('user_info_list')||!Array.isArray(uni.getStorageSync('user_info_list'))){
 					await this.getCurrUserInfo(); // 查找健康app个人基本信息
+				}else{
+					this.userMenuList = uni.getStorageSync('user_info_list')
 				}
 				if (uni.getStorageSync('current_user_info')) {
 					this.userInfo = uni.getStorageSync('current_user_info');

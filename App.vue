@@ -219,19 +219,10 @@ uni-page-body {
       }
     }
   }
-
-  .title {
-    // min-width: calc(4em + 15px);
-    // width: 100vw;
-    width: 100%;
-    display: block;
-    height: 80upx;
-    line-height: 80upx;
-    box-sizing: border-box;
-  }
   .title.valid_error {
     color: #ff0000;
   }
+
   uni-textarea {
     margin: 0;
     .uni-textarea-textarea {
@@ -264,44 +255,21 @@ uni-page-body {
     }
   }
 }
-
-uni-checkbox-group {
-  // width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  .checkbox {
-    // width: 30%;
-    padding: 10upx;
-    // line-height: 80upx;
-    text {
-      padding-left: 20upx;
-      span {
-        font-size: 1.2em;
-        padding: 0 10upx;
-      }
-    }
-  }
-}
-uni-radio-group {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  width: 100%;
-  justify-content: flex-start;
-  flex: 2;
-  uni-radio {
-    padding: 10upx;
-    // width: 40%;
-    .uni-radio-wrapper {
-      span {
-        font-size: 1.2em;
-        padding: 0 10upx;
-      }
-    }
-  }
-}
-uni-checkbox .uni-checkbox-input.uni-checkbox-input-checked {
-  background-color: #0081ff;
+radio.radio[checked]::after,
+radio.radio .uni-radio-input-checked::after {
+	content: "";
+	position: absolute;
+	width: 8px;
+	height: 8px;
+	z-index: 999;
+	top: 0upx;
+	left: 0upx;
+	right: 0;
+	bottom: 0;
+	border-radius: 200upx;
+	/* #ifdef MP */
+	border: 8px solid #ffffff !important;
+	/* #endif */
 }
 uni-page-head .uni-page-head {
   display: none;

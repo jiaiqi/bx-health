@@ -1,7 +1,10 @@
 <template>
 	<view class="u-switch" :class="[value == true ? 'u-switch--on' : '', disabled ? 'u-switch--disabled' : '']" @tap="onClick"
 	 :style="[switchStyle]">
-		<view class="u-switch__node node-class">
+		<view class="u-switch__node node-class" :style="{
+			width: $u.addUnit(this.size),
+			height: $u.addUnit(this.size)
+		}">
 			<u-loading :show="loading" class="u-switch__loading" :size="size * 0.6" :color="loadingColor" />
 		</view>
 	</view>
@@ -108,7 +111,9 @@
 	
 	.u-switch {
 		position: relative;
+		/* #ifndef APP-NVUE */
 		display: inline-block;
+		/* #endif */
 		box-sizing: initial;
 		width: 2em;
 		height: 1em;
@@ -120,7 +125,7 @@
 	}
 
 	.u-switch__node {
-		display: flex;
+		@include vue-flex;
 		align-items: center;
 		justify-content: center;
 		position: absolute;
@@ -128,8 +133,6 @@
 		left: 0;
 		border-radius: 100%;
 		z-index: 1;
-		width: 1em;
-		height: 1em;
 		background-color: #fff;
 		background-color: #fff;
 		box-shadow: 0 3px 1px 0 rgba(0, 0, 0, 0.05), 0 2px 2px 0 rgba(0, 0, 0, 0.1), 0 3px 3px 0 rgba(0, 0, 0, 0.05);
@@ -141,7 +144,7 @@
 	}
 
 	.u-switch__loading {
-		display: flex;
+		@include vue-flex;
 		align-items: center;
 		justify-content: center;
 	}
@@ -151,7 +154,7 @@
 	}
 
 	.u-switch--on .u-switch__node {
-		transform: translateX(1em);
+		transform: translateX(100%);
 	}
 
 	.u-switch--disabled {

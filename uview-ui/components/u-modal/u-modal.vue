@@ -5,7 +5,7 @@
 			<view class="u-model">
 				<view v-if="showTitle" class="u-model__title u-line-1" :style="[titleStyle]">{{ title }}</view>
 				<view class="u-model__content">
-					<view :style="[contentStyle]" v-if="$slots.default">
+					<view :style="[contentStyle]" v-if="$slots.default  || $slots.$default">
 						<slot />
 					</view>
 					<view v-else class="u-model__content__message" :style="[contentStyle]">{{ content }}</view>
@@ -15,11 +15,14 @@
 					 :style="[cancelBtnStyle]" @tap="cancel">
 						{{cancelText}}
 					</view>
-					<view v-if="showConfirmButton" :hover-stay-time="100" :hover-class="asyncClose ? 'none' : 'u-model__btn--hover'"
+					<view v-if="showConfirmButton || $slots['confirm-button']" :hover-stay-time="100" :hover-class="asyncClose ? 'none' : 'u-model__btn--hover'"
 					 class="u-model__footer__button hairline-left" :style="[confirmBtnStyle]" @tap="confirm">
-						<u-loading mode="circle" :color="confirmColor" v-if="loading"></u-loading>
+						<slot v-if="$slots['confirm-button']" name="confirm-button"></slot>
 						<block v-else>
-							{{confirmText}}
+							<u-loading mode="circle" :color="confirmColor" v-if="loading"></u-loading>
+							<block v-else>
+								{{confirmText}}
+							</block>
 						</block>
 					</view>
 				</view>
@@ -263,7 +266,7 @@
 		}
 
 		&__footer {
-			display: flex;
+			@include vue-flex;
 
 			&__button {
 				flex: 1;

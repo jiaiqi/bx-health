@@ -1,13 +1,7 @@
 import bus from '@/common/bus.js'
-// #ifdef H5
-var jweixin = require('jweixin-module')
-// #endif
 export default {
 	install(Vue, options) {
 		Vue.prototype.$bus = bus
-		// #ifdef H5
-		Vue.prototype.$wx = jweixin
-		// #endif
 		Vue.prototype.pageTitle = '加载中…' // 可以自定义变量
 		/**
 		 * 登录相关
@@ -183,8 +177,8 @@ export default {
 				fieldInfo.seq = item.seq
 				if (item.init_expr) {
 					item.init_expr = item.init_expr.replace(/\'/g, '')
+					fieldInfo.defaultValue = item.init_expr
 				}
-				fieldInfo.defaultValue = item.init_expr
 				fieldInfo.option_list_v2 = item.option_list_v2
 				fieldInfo.col_type = item.col_type
 				fieldInfo.section = item.section
@@ -519,6 +513,7 @@ export default {
 		}
 
 		Vue.prototype.formateDate = function(date, type = 'date') {
+			console.log(date)
 			date = new Date(date)
 			let o = {
 				'yy': date.getFullYear(),
@@ -541,7 +536,7 @@ export default {
 				'ss': date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds()
 			};
 			if (type === 'date') {
-				return o.yy + '-' + o.MM + '-' + o.dd
+				return o.yy + '-' + o.MM + '-' + o.dd + ' '
 			} else if (type === 'dateTime') {
 				return o.HH + ':' + o.mm
 			} else {
@@ -569,49 +564,6 @@ export default {
 			return true
 			// #endif
 		};
-		 Vue.prototype.wxLogin= async function(obj = {}) {
-			// 使用code向后端发送登录请求
-			let { code } = obj;
-			if(!code){
-				return
-			}
-			let url = this.$api.verifyLogin.url;
-			let req = [
-				{
-					data: [
-						{
-							code: code,
-							app_no: this.$api.appNo.wxmp
-						}
-					],
-					serviceName: 'srvwx_app_login_verify'
-				}
-			];
-			let res = await this.$http.post(url, req);
-			if (res.data.resultCode === 'SUCCESS') {
-				// 登录成功
-				let resData = res.data.response[0].response;
-				if (resData.login_user_info.user_no) {
-					uni.setStorageSync('login_user_info', resData.login_user_info);
-					console.log('resData.login_user_info', resData.login_user_info);
-				}
-				uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
-				if (resData.login_user_info.data) {
-					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
-				}
-				uni.setStorageSync('isLogin', true);
-				return {
-					status: 'success',
-					response: resData
-				};
-			} else {
-				// 登录失败，显示提示信息
-				uni.showToast({
-					title: res.data.resultMessage
-				});
-				return false;
-			}
-		}
 		// 表单
 		Vue.prototype.getCoulmnConfig = function(e) {
 			let cnCol = {
@@ -625,7 +577,13 @@ export default {
 				"item_type_attr": {},
 				"is_public": "否",
 				"show_cfg": "",
-				// "option_data":[]
+				points: e.points,
+				option_img_explain: e.option_img_explain,
+				ref_type: e.ref_type,
+				srv_app: e.srv_app,
+				serviceName: e.serviceName,
+				refed_col: e.refed_col,
+				key_disp_col: e.key_disp_col,
 			}
 			switch (e.item_type) {
 				case "文本":
@@ -647,6 +605,16 @@ export default {
 					break;
 				case "图片":
 					cnCol.item_type_attr['fileNum'] = e.max_num
+					break;
+				case "地址":
+					break;
+				case "引用":
+					cnCol.item_type_attr['ref_type'] = e.ref_type
+					cnCol.item_type_attr['srv_app'] = e.srv_app
+					cnCol.item_type_attr['serviceName'] = e.serviceName
+					cnCol.item_type_attr['refed_col'] = e.refed_col
+					cnCol.item_type_attr['key_disp_col'] = e.key_disp_col
+					cnCol.item_type_attr['option_list_v2'] = e.option_list_v2
 					break;
 				default:
 					''
@@ -807,6 +775,7 @@ export default {
 								isShowNum++
 							}
 						} else if (item.ruleType === 'neq') {
+
 							if (obj[item.colName] !== item.value) {
 								isShowNum++
 							}
@@ -816,7 +785,6 @@ export default {
 				} else {
 					return true
 				}
-
 			}
 		// 获取图片路径
 		Vue.prototype.getFilePath = async function(e) {
@@ -858,31 +826,26 @@ export default {
 			}
 		}
 		Vue.prototype.setWxUserInfo = async function(e) {
-			let userInfo = e
-			if (typeof e === 'string') {
-				try {
-					userInfo = JSON.parse(e)
-				} catch (e) {
-					//TODO handle the exception
-					console.error(e)
-				}
-			}
+			let userInfo = JSON.parse(e)
 			console.log("setWxUserInfo", userInfo)
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_basic_user_info_save', 'operate')
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
 				"data": [{
-					"app_no": Vue.prototype.$api.appID.wxmp, //百想健康助理小程序
-					"nickname": userInfo.nickname,
-					"sex": userInfo.sex,
-					"country": userInfo.country,
-					"province": userInfo.province,
-					"city": userInfo.city,
-					"headimgurl": userInfo.headimgurl
-				}],
+						"app_no": "APPNO20200107181133",
+						"nickname": userInfo.nickname,
+						"sex": userInfo.sex,
+						"country": userInfo.country,
+						"province": userInfo.province,
+						"city": userInfo.city,
+						"headimgurl": userInfo.headimgurl
+					}
+
+				],
 			}]
 			if (e) {
 				let response = await this.$http.post(url, req);
+				console.log('srvfile_attachment_select', response);
 				if (response.data.state === 'SUCCESS' && response.data.data.length > 0) {
 					return response.data.data
 				}
@@ -1098,6 +1061,7 @@ export default {
 						case "edit":
 							if (e.hasOwnProperty("row")) {
 								row = e.row
+
 								let params = {
 									"type": "update",
 									"condition": [{
@@ -1110,7 +1074,7 @@ export default {
 								}
 								console.log("点击了【有效】的公共编辑按钮", row)
 								uni.navigateTo({
-									url: "/publicPages/form/form?params=" + JSON.stringify(params)
+									url: "/pages/public/formPage/formPage?params=" + JSON.stringify(params)
 								})
 							} else {
 								console.log("点击了【无效】的公共编辑按钮")
@@ -1126,6 +1090,9 @@ export default {
 								Vue.prototype.onButtonRequest(e).then((res) => {
 									if (res) {
 										resolve(res)
+										// uni.showToast({
+										// 	title:e.button.button_name
+										// })
 									} else {
 										reject(res)
 									}
@@ -1155,6 +1122,7 @@ export default {
 						case "detail":
 							if (e.hasOwnProperty("row")) {
 								row = e.row
+
 								let params = {
 									"type": "detail",
 									"condition": [{
@@ -1167,11 +1135,13 @@ export default {
 								}
 								console.log("点击了【有效】的公共编辑按钮", row)
 								uni.navigateTo({
-									url: "/publicPages/form/form?params=" + JSON.stringify(params)
+									url: "/pages/public/formPage/formPage?params=" + JSON.stringify(params)
 								})
 							} else {
 								console.log("点击了【无效】的公共编辑按钮")
 							}
+
+
 							//代码块
 							break;
 						case "delete":

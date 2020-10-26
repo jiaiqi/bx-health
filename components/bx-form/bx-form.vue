@@ -15,6 +15,7 @@
 				@on-value-blur="onValBlur($event)"
 				@get-cascader-val="getCascaderVal"
 				@picker-change="pickerchange"
+				@show-option-list="showOptionlist"
 			></formItem>
 		</view>
 	</view>
@@ -78,11 +79,6 @@ export default {
 			default() {
 				return {};
 			}
-		}
-	},
-	computed: {
-		fieldsData: function() {
-			return this.fields;
 		}
 	},
 	data() {
@@ -167,7 +163,13 @@ export default {
 		};
 	},
 	created() {
-		if (this.fields.length > 0) {
+		if (this.fieldModel.length > 0) {
+			this.fieldModel = this.fieldModel.map(item => {
+				if (!item.value && item.defaultValue) {
+					item.value = item.defaultValue;
+				}
+				return item;
+			});
 			this.oldField = this.deepClone(this.fields);
 			this.oldField.forEach((item, index) => {
 				this.oldFieldModel[item.column] = item.value;
@@ -175,27 +177,10 @@ export default {
 		}
 		this.getAllField();
 	},
-	mounted() {
-		if (this.fields.length > 0) {
-			this.oldField = this.deepClone(this.fields);
-			this.oldField.forEach((item, index) => {
-				this.oldFieldModel[item.column] = item.value;
-			});
-		}
-	},
 	methods: {
 		pickerchange(oriData) {
 			console.log('oriData------', oriData, this.allField);
 			let filed = this.allField;
-			filed.forEach(item => {
-				if (item.column === 'dybm') {
-					// item.poupValue = oriData.lybm
-					this.$set(item, 'poupValue', oriData.lybm);
-				} else if (item.column === 'fwbm') {
-					this.$set(item, 'louValue', oriData.lybm);
-					this.$set(item, 'dyValue', oriData.dybm);
-				}
-			});
 			console.log(this.allField);
 		},
 		setRelationColumnValue(allField, colArr, col_relation) {
@@ -350,27 +335,45 @@ export default {
 		},
 		getAllField() {
 			let self = this;
-			console.log('getAllField', this.fields);
-			console.log('111111111111111111111111', this.allField);
 			if (this.fields.length > 0) {
-				let fields = this.deepClone(this.fields);
-				this.oldField = this.deepClone(this.fields);
+				let fields = this.fields;
 				this.oldField.forEach((item, index) => {
 					this.oldFieldModel[item.column] = item.value;
 				});
 				this.allField = fields.map((itemData, index) => {
 					this.fieldModel[itemData.column] = itemData.value;
 					let item = this.fieldModel;
+					if (itemData.hasOwnProperty('option_list_v2')) {
+						if (itemData.option_list_v2&&
+							typeof itemData.option_list_v2.srv_app_exp === 'object' &&
+							itemData.option_list_v2.srv_app_exp.type === 'column' &&
+							itemData.option_list_v2.srv_app_exp.value &&
+							item[itemData.option_list_v2.srv_app_exp.value]
+						) {
+							itemData.option_list_v2.srv_app = item[itemData.option_list_v2.srv_app_exp.value];
+						}
+						if (itemData?.option_list_v2?.conditions) {
+							let conditions = itemData.option_list_v2.conditions;
+							conditions = conditions.map(cond => {
+								if (cond.value_exp && cond.value_exp.type === 'column' && cond.value_exp.value) {
+									if (item[cond.value_exp.value]) {
+										cond.value = item[cond.value_exp.value];
+									}
+								}
+								return item;
+							});
+						}
+					}
 					if (itemData.hasOwnProperty('isShowExp') && item.hasOwnProperty(itemData.column)) {
 						itemData['showExp'] = this.evalInTo(itemData, item);
-						// itemData['showExp'] = this.colItemShowExps(itemData, item) ;
-						itemData['display'] = itemData.isShowExp && itemData.isShowExp.length > 0 ? this.colItemShowExps(itemData, item) : itemData.display === false ? false : true;
+						itemData['display'] =
+							itemData.isShowExp && itemData.isShowExp.length > 0 ? this.colItemShowExps(itemData, item) && itemData.display : itemData.display === false ? false : true;
 					} else {
 						itemData['showExp'] = itemData['showExp'] || true;
 					}
 					if (itemData.formulaShow) {
 						itemData['showExp'] = evaluatorTo(item, itemData.formulaShow);
-						itemData['display'] = itemData['showExp']
+						itemData['display'] = itemData['showExp'];
 					}
 					itemData.valid = {
 						column: itemData.column,
@@ -385,19 +388,8 @@ export default {
 							special.display ? (itemData['display'] = special.display) : '';
 						}
 					});
-
-					if (self.service && (self.service == 'srvzhxq_clgl_add' || self.service == 'srvzhxq_repairs_add') && (itemData.column == 'lybm' || itemData.column == 'dybm')) {
-						itemData.display = false;
-					}
-					if (self.service && self.service == 'srvzhxq_repairs_add' && itemData.column == 'lxdh') {
-						itemData.display = false;
-					}
-					if (self.service && (self.service == 'srvzhxq_guest_mgmt_yezhu_add' || self.service == 'srvzhxq_guest_mgmt_fangke_update') && itemData.column == 'confirm_user') {
-						itemData.display = false;
-					}
 					return itemData;
 				});
-				this.allField.forEach(fileIf => {});
 				console.log('0000000000000000', this.allField);
 			}
 		},
@@ -408,45 +400,8 @@ export default {
 			} else {
 				this.fieldModel[e.column] = e.value;
 			}
-			if (e.column === 'fwbm') {
-				if (e.condition && Array.isArray(e.condition) && e.condition.length > 0 && e.condition[0].colName === e.condition[0].value) {
-					e.condition.forEach(col => {
-						this.fieldModel[col.value] = e.colData[col.value];
-						self.allField.forEach((field,index)=>{
-							if(field.column===col.value){
-								field.value = e.colData[col.value]
-								// self.$set(self.allField,index,field)
-							}
-						})
-					});
-				}
-			}
-			if (e.column === 'fwbm' && (this.service == 'srvzhxq_guest_mgmt_yezhu_add' || this.service == 'srvzhxq_clgl_add' || this.service == 'srvzhxq_repairs_add')) {
-				this.allField.forEach(fileIf => {
-					if (fileIf.column === 'bfr' || fileIf.column === 'bfrbm' || fileIf.column === 'dybm' || fileIf.column === 'lybm') {
-						let infoArr = uni.getStorageSync('infoObjArr');
-						infoArr.forEach(infos => {
-							if (e.value == infos.fwbm) {
-								if (fileIf.column === 'bfr') {
-									fileIf.value = infos.xm;
-								} else if (fileIf.column === 'dybm') {
-									fileIf.value = infos.dybm;
-								} else if (fileIf.column === 'lybm') {
-									fileIf.value = infos.lybm;
-								} else if (fileIf.column === 'bfrbm') {
-									fileIf.value = infos.syrkbm;
-								}
-								this.fieldModel[fileIf.column] = fileIf.value;
-							}
-						});
-					}
-				});
-			}
-			if (e.column == 'bfrbm') {
-				this.fieldModel['person_no'] = e.colData.person_no;
-			}
 			e.value = this.fieldModel[e.column];
-			const fieldModel = JSON.parse(JSON.stringify(this.fieldModel));
+			const fieldModel = this.deepClone(this.fieldModel);
 			this.allField = this.allField.map((item, index) => {
 				item.display = item.isShowExp && item.isShowExp.length > 0 ? this.colItemShowExps(item, this.fieldModel) : item.display === false ? false : true;
 				if (item.column === e.column) {
@@ -458,13 +413,6 @@ export default {
 				if (fileIf.formulaShow) {
 					let isIfShow = evaluatorTo(fieldModel, fileIf.formulaShow);
 					fileIf.display = isIfShow;
-					if (fileIf.display && (e.column == 'is_huzhu' || e.column == 'fwyt') && fileIf.column === 'yfzgx') {
-						fileIf.value = '';
-						this.fieldModel[fileIf.column] = '';
-					} else if (!fileIf.display && (e.column == 'is_huzhu' || e.column == 'fwyt') && fileIf.column === 'yfzgx') {
-						fileIf.value = fileIf.defaultValue;
-						this.fieldModel[fileIf.column] = fileIf.defaultValue;
-					}
 				}
 			});
 			this.more_config.col_relation.forEach(col_relation => {
@@ -478,7 +426,6 @@ export default {
 					}
 				}
 			});
-			// return
 			this.more_config.service_call_cfg.forEach(serviceCallCfg => {
 				if (serviceCallCfg.watch_col.some(item => e.column === item)) {
 					//当前字段是监控字段
@@ -490,8 +437,6 @@ export default {
 							let condition = [];
 							serviceCallCfg.req.condition.forEach(cond => {
 								if (cond.value.valueType && cond.value.valueType === 'rowData' && cond.value.valueKey) {
-									// cond.value = fieldModel[cond.value.valueKey];
-									// this.$set(cond,'value', fieldModel[cond.value.valueKey])
 									condition.push({ colName: cond.colName, ruleType: 'eq', value: fieldModel[cond.value.valueKey] });
 								}
 							});
@@ -500,33 +445,6 @@ export default {
 					}
 				}
 			});
-			if (e.column == 'is_benren') {
-				let fields = this.allField;
-				if (e.value === '他人信息') {
-					fields.forEach(item => {
-						if (item.column == 'xm' || item.column == 'lxfs' || item.column == 'gmsfhm') {
-							if (this.service === 'srvzhxq_syrk_wuye_add') {
-								return;
-							}
-							item.value = '';
-						}
-					});
-				} else if (e.value === '本人信息' && this.defaultCondition.length > 0) {
-					this.defaultCondition.forEach(def => {
-						fields.forEach(fd => {
-							if (def.colName === fd.column) {
-								fd.value = def.value;
-							}
-						});
-					});
-				}
-				this.allField = fields.map((itemData, index) => {
-					this.fieldModel[itemData.column] = itemData.value;
-					return itemData;
-				});
-				console.log('本人信息----------', this.fieldModel, this.allField);
-				this.$emit('radio-benren-change', e);
-			}
 			if (e.bx_col_type === 'fk' && e.colData && typeof e.colData === 'object' && Array.isArray(e.colData) !== true && Object.keys(e.colData).length > 0) {
 				//冗余
 				this.allField.forEach(item => {
@@ -543,23 +461,23 @@ export default {
 				});
 			}
 			console.log('valueChange', e, this.fieldModel[e.column], this.fieldModel);
-			this.$emit('value-blur', e);
+			this.$emit('value-blur', e, this.fieldModel);
 		},
 		onValBlur(e) {
 			console.log('e', e, this.fieldModel, this.fieldModel[e.column]);
 			this.fieldModel[e.column] = e.value;
-			this.$emit('value-blur', e);
+			this.$emit('value-blur', e, this.fieldModel);
 		},
 		getDetailfieldModel() {
 			return this.fieldModel;
 		},
 		getFieldModel() {
-			console.log(this.fieldModel,'getFieldModel');
+			console.log(this.fieldModel, 'getFieldModel');
 			let valid = 0;
 			let showsNum = 0;
 			this.allField.map((item, index) => {
 				let valids = this.$refs.fitem[index].getValid();
-				console.log('字段校验', valids,item);
+				console.log('字段校验', valids, item);
 				if (item.display) {
 					showsNum++;
 					if (valids.valid) {
@@ -599,6 +517,7 @@ export default {
 						title: '没有需要提交的数据',
 						icon: 'none'
 					});
+					return false;
 				}
 			} else {
 				console.log('表单校验失败', showsNum, valid, this.fieldModel);
@@ -615,6 +534,9 @@ export default {
 			} else {
 				this.$emit('get-cascader-val');
 			}
+		},
+		showOptionlist(e) {
+			this.$emit('show-option-list', e);
 		},
 		onReset() {
 			this.allField = this.deepClone(this.oldField);

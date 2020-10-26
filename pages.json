@@ -30,6 +30,26 @@
 		// }
 	],
 	"subPackages": [{
+			// 问卷
+			"root": "questionnaire",
+			"pages": [{
+				"path": "index/index",
+				"style": {
+					"navigationBarTitleText": "问卷",
+					"enablePullDownRefresh": false
+				}
+			}    ,{
+                    "path" : "history/history",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
+		},
+		{
 			"root": "otherPages",
 			"pages": [{
 					"path": "index/index",
