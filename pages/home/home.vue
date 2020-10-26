@@ -11,7 +11,7 @@
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
 						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
-							<text class="cuIcon-favorfill margin-right-xs" v-if="item.is_main === '是'"></text>
+							<text class="cuIcon-favorfill margin-right-xs" v-if="item.is_main === '是'||index===0"></text>
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -181,6 +181,7 @@ export default {
 			currentChart: '', //当前chart id
 			isLogin: false, // 是否已经登录
 			loginUserInfo: {},
+			wxUserInfo:{},
 			serviceLog: {}, // 服务记录
 			pageTitle: '健康档案',
 			showUserList: false,
@@ -208,11 +209,6 @@ export default {
 						data: [73, 75, 73.5, 74.5, 75, 73.5],
 						color: '#1890ff'
 					}
-					// {
-					// 	name: '基础代谢',
-					// 	data: [73, 75, 73.5, 74.5, 75, 73.5],
-					// 	color: '#ff9900'
-					// }
 				]
 			},
 			BPChartData: {
@@ -504,7 +500,7 @@ export default {
 				}
 			};
 			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				let series = [];
 				if (type === 'weight') {
 					series = this.weightChartData.series;
@@ -829,7 +825,7 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				const userInfo = res.data.data[0];
 				this.wxUserInfo = userInfo;
 				uni.setStorageSync('wxUserInfo', userInfo);
@@ -1043,15 +1039,15 @@ export default {
 							data: []
 						};
 						chartData.series[0].data = stepList.map(item => item.step);
-						if (_self.userInfo.is_main === '是') {
+						// if (_self.userInfo.is_main === '是') {
 							_self.showChart('stepChart', chartData);
-						} else {
-							uni.showToast({
-								title: '无权查看',
-								icon: 'none'
-							});
-							self.showCanvas('weight');
-						}
+						// } else {
+						// 	uni.showToast({
+						// 		title: '无权查看',
+						// 		icon: 'none'
+						// 	});
+						// 	self.showCanvas('weight');
+						// }
 						return stepList;
 					} else {
 						return false;
@@ -1114,7 +1110,6 @@ export default {
 		async initPage() {
 			let userInfo = uni.getStorageSync('login_user_info');
 			// #ifdef MP-WEIXIN
-
 			let res = await wx.getSetting();
 			if (!res.authSetting['scope.userInfo']) {
 				// 没有获取用户信息授权
@@ -1151,10 +1146,12 @@ export default {
 			} else {
 				this.isLogin = true;
 			}
-			self = this;
-			uni.setStorageSync('activeApp', 'health');
 			if (userInfo && userInfo.user_no) {
 				this.loginUserInfo = userInfo;
+				uni.setStorageSync('activeApp', 'health');
+				if(!uni.getStorageSync('user_info_list')){
+					await this.getCurrUserInfo(); // 查找健康app个人基本信息
+				}
 				if (uni.getStorageSync('current_user_info')) {
 					this.userInfo = uni.getStorageSync('current_user_info');
 				} else {
@@ -1176,15 +1173,19 @@ export default {
 						}
 					}
 				}
-				await this.getUserInfo(); //查找微信用户基本信息
-				await this.getCurrUserInfo(); // 查找健康app个人基本信息
+				if(!this.wxUserInfo){
+					 await this.getUserInfo(); //查找微信用户基本信息
+				}
 				await this.getDietAllRecord(); //查找饮食和运动记录
-				this.selectServiceLog();
+				if(!this.serviceLog){
+					this.selectServiceLog();
+				}
 				this.loginUserInfo = userInfo;
 				// #ifdef MP-WEIXIN
 				this.getwxStepInfoList().then(_ => {
+					 //获取微信运动记录
 					this.currentChart = 'stepChart';
-				}); //获取微信运动记录
+				});
 				// #endif
 				// #ifdef H5
 				this.showCanvas('weight');

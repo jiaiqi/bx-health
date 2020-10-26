@@ -168,8 +168,9 @@
 			</view>			
 		</view>
 		<view class="shop-detail-bot-b">
-			<view class="shop-detail-bot-b-t">
-				食材营养素含量
+			<view @click="addIngredient" class="shop-detail-bot-b-t">
+				<text>食材营养素含量</text>
+				<text v-if="queryType === 'myShop'" class="cuIcon-add"></text>
 			</view>
 			<view class="shop-detail-bot-tab">
 				<view v-for="(alone,i) in foodChild" :key="i" class="table">
@@ -239,6 +240,7 @@
 			return {
 				foodObj:"",
 				foodChild:'',
+				queryType:'',
 				value: 1,
 				num:0,
 				carNum:0,
@@ -304,6 +306,20 @@
 				this.setShopCarData()
 				this.carNum += 1
 			},
+			/*添加食材**/
+			addIngredient(){
+				let cond = [{
+					colName:"meal_no",
+					ruleType:"eq",
+					value:this.foodObj.meal_no
+				}]
+				if(this.queryType === 'myShop'){
+					uni.navigateTo({
+					  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
+					});
+				}
+				
+			},
 			jbMsg(res) {
 				//执行加入购物车的逻辑
 				console.log('执行回调', res.code);
@@ -353,8 +369,12 @@
 			 * */	
 			}
 		},
+		onShow() {
+			this.getMixChildFood()
+		},
 		onLoad(option) {
 			let foodsDetail = JSON.parse(decodeURIComponent(option.itemData))
+			this.queryType = option.type
 			// foodsDetail.imgurl = foodsDetail.imgurl.substring(0,foodsDetail.imgurl.lastIndexOf("&"))
 			this.foodObj = foodsDetail
 			if(uni.getStorageSync('shop_car')){
@@ -373,7 +393,7 @@
 					this.value = car_curr.car_num
 				}
 			}
-			this.getMixChildFood()
+			
 		}
 	}
 </script>
@@ -481,6 +501,15 @@
 			font-weight: 600;
 			margin-left: 20upx;
 			padding: 20upx 0;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			text{
+				&:last-child{
+					margin-right: 20upx;
+					font-size: 36upx;
+				}
+			}
 		}
 		.shop-detail-bot-tab{
 			display: flex;

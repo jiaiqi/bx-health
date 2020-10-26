@@ -55,7 +55,7 @@
 			>
 			<view :class="changeType==='singleRow'?'':'doubleRow'" class="shop-main-list">
 				
-				<view class="shop-main-list-wrap">
+				<view v-if="shopList.length > 0" class="shop-main-list-wrap">
 					<view @click="toDetail(item)" v-for="(item,index) in shopList" class="shop-main-list-item">
 						<view class="item-left">
 							<image v-if="!item.imgurl" src="/otherPages/static/img/none.png" mode=""></image>
@@ -78,14 +78,28 @@
 								</view>
 							</view>
 							<view class="item-right-bot">
-								<text>￥</text>
-								<text>{{item.price}}</text>
+								<view class="item-right-bot-left">
+									<text>￥</text>
+									<text>{{item.price}}</text>
+								</view>
+								<view v-if="queryType === 'myShop'" class="item-right-bot-rig">
+									<text @click.stop="del(item)">删除</text>
+									<text @click.stop="amend(item)">修改</text>
+								</view>
 							</view>
 						</view>
 					</view>	
 				</view>
+				<!-- <view v-else class="none-rest">
+					暂无菜品
+				</view> -->
 			</view>
 			</sPullScroll>
+		</view>
+		<view v-if="queryType === 'myShop'" class="public-button-box">
+			<view @click="addFoods" class="add-button">
+				<!-- <text class="add-button-num"></text> -->
+			</view>
 		</view>
 	</view>
 </template>
@@ -106,7 +120,7 @@
 				heightStyle: 'calc(100vh-620upx)',
 				pageInfo: {
 					total: 0,
-					rownumber: 10,
+					rownumber: 5,
 					pageNo: 1
 				},
 				labelList:[
@@ -121,33 +135,20 @@
 				list: [{
 						name: '商品'
 					}],
-				shopList:[
-				// 	{
-				// 	title:'白果王水果沙拉',
-				// 	intro:'脆糯营养，口感好，健康绿色',
-				// 	mark:3.5,
-				// 	price:78
-				// },{
-				// 	title:'白果王水果沙拉',
-				// 	intro:'脆糯营养，口感好，健康绿色',
-				// 	mark:2,
-				// 	price:78
-				// },{
-				// 	title:'白果王水果沙拉',
-				// 	intro:'脆糯营养，口感好，健康绿色',
-				// 	mark:1,
-				// 	price:78
-				// },{
-				// 	title:'白果王水果沙拉',
-				// 	intro:'脆糯营养，口感好，健康绿色',
-				// 	mark:4,
-				// 	price:78
-				// },
-				]
+				shopList:[],
+				queryType:"", //此店铺列表是商户列表还是当前登录人得商户列表
+				rest_no:"", //当前餐馆编号
 			}
 		},
-		onLoad() {
-			this.getRestaurant()
+		onShow() {
+			this.onRefresh()
+		},
+		onLoad(option) {
+			let query = option.type
+			console.log("query----",query)
+			this.queryType = query
+			this.rest_no = option.restaurantNo
+			// this.getRestaurant()
 		},
 		methods:{
 			onRefresh() {
@@ -212,7 +213,7 @@
 			},
 			toDetail(item){
 				uni.navigateTo({
-					url:'/otherPages/shop/shopDetail?itemData=' + encodeURIComponent(JSON.stringify(item))
+					url:'/otherPages/shop/shopDetail?itemData=' + encodeURIComponent(JSON.stringify(item)) + '&type=' + this.queryType
 				})
 			},
 			tabSelect(e) {
@@ -227,7 +228,7 @@
 					condition:[{
 						colName:'restaurant_no',
 						ruleType:'eq',
-						value:"RT202009231543410001"
+						value:this.rest_no
 					}],
 					order:[]
 				};
@@ -249,10 +250,18 @@
 				let req = {
 					serviceName: 'srvhealth_mixed_food_nutrition_contents_select',
 					colNames: ['*'],
-					condition:[],
+					condition:[{
+						colName:'restaurant_no',
+						ruleType:'eq',
+						value:this.rest_no
+					}],
+					page:self.pageInfo,
 					order: orders?orders:initOrder
 				};
 				let res = await this.$http.post(url, req);
+				if(self.pageInfo.pageNo === 1){
+					self.shopList = []
+				}
 				self.pageInfo.total = res.data.page.total;
 				self.pageInfo.pageNo = res.data.page.pageNo;
 				let page = self.pageInfo;
@@ -263,16 +272,83 @@
 					self.$refs.pullScroll.success();
 				}
 				if(res.data.state === 'SUCCESS'){
-					this.shopList = res.data.data
+					// this.shopList = res.data.data
+					this.shopList = [...this.shopList,...res.data.data]
 					this.shopList.forEach((item,index)=>{
 						self.getFilePath(item.image).then(url=>{
-							let urls = self.$api.getFilePath + url[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+							let urls = self.$api.getFilePath + url[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
 							this.$set(this.shopList[index], 'imgurl', urls);
 						})
 					})
 					
 					console.log("food------",this.shopList)
 				}
+			},
+			/* 添加食物**/
+			addFoods(){
+				let cond = [{
+					colName:"restaurant_no",
+					ruleType:"eq",
+					value:this.rest_no
+				}]
+				uni.navigateTo({
+				  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
+				});
+			},
+			/*删除**/
+			 del(item){			
+				 let self = this
+				uni.showModal({
+				    title: '提示',
+				    content: '是否确认删除?',
+				    success:(res)=> {
+				        if (res.confirm) {
+							self.delFoods(item)
+				        } else if (res.cancel) {
+				            console.log('用户点击取消');
+				        }
+				    }
+				})
+				
+			},
+			async delFoods(item){
+				let self = this
+				let url = this.getServiceUrl('health', 'srvhealth_mixed_food_nutrition_contents_delete', 'operate');
+				let req = [{
+					serviceName: 'srvhealth_mixed_food_nutrition_contents_delete',
+					colNames: ['*'],
+					condition:[{
+						colName:'id',
+						ruleType:'in',
+						value:item.id
+					}]
+				}]
+				let rea = await self.$http.post(url, req);
+				if(rea.data.resultCode === 'SUCCESS'){
+					// self.getFoodsList()
+				self.onRefresh()
+				}else{
+					uni.showToast({
+						title:rea.data.resultMessage,
+						icon:'none'
+					})
+				}
+			},
+			amend(item){
+				let cond = [{
+					colName:"id",
+					ruleType:"in",
+					value:item.id
+				}]
+				let params = {
+				  type: 'update',
+				  condition: cond,
+				  serviceName: 'srvhealth_mixed_food_nutrition_contents_update',
+				  defaultVal: item
+				};
+				uni.navigateTo({
+				  url: '/publicPages/form/form?type=update&params='+ encodeURIComponent(JSON.stringify(params)) 
+				});
 			}
 		}
 	}
@@ -332,8 +408,8 @@
 		}
 		.shop-main-list{
 			// margin-top: 5px;
-			height: calc(100vh - 310px);
-			overflow-y: scroll;
+			// height: calc(100vh - 310px);
+			// overflow-y: scroll;
 			background-color: white;
 			.shop-main-list-wrap{
 				display: flex;
@@ -356,6 +432,7 @@
 						flex-direction: column;
 						justify-content: space-between;
 						margin-left: 10px;
+						width: calc(100% - 180upx);
 						.item-right-top{	
 							display: flex;
 							flex-direction: column;
@@ -375,20 +452,44 @@
 							.hx-comment_basic-info_center_item_center{
 								margin: 0 5px;
 							}
+							
 						}
 						.item-right-bot{
 							display: flex;
 							color: red;
 							align-items: center;
-							text{
-								&:first-child{
-									font-size: 12px;
-								}
-								&:last-child{
-									font-size: 18px;
-									font-weight: 700;
+							width: 100%;
+							justify-content: space-between;
+							.item-right-bot-left{								
+								text{
+									&:first-child{
+										font-size: 12px;
+									}
+									&:last-child{
+										font-size: 18px;
+										font-weight: 700;
+									}
 								}
 							}
+							.item-right-bot-rig{
+								margin-right: 20upx;
+								text{
+									&:first-child{
+										color: #0081ff;
+										margin-right: 20upx;
+										border: 1px solid #0081ff;
+										border-radius: 40upx;
+										padding:4upx 20upx;
+									}
+									&:last-child{
+										color: #0081ff;
+										border: 1px solid #0081ff;
+										border-radius: 40upx;
+										padding:4upx 20upx;
+									}
+								}
+							}
+							
 						}
 					}
 				}
@@ -550,6 +651,41 @@
 				width: 30px;
 				height: 3px;
 			}
+		}
+	}
+	.add-button {
+		position: fixed;
+		bottom: 20upx;
+		left: calc(50% - 50upx);
+		width: 100upx;
+		height: 100upx;
+		border-radius: 50%;
+		background-color: rgb(246, 210, 0);
+		z-index: 100;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 24px;
+		color: white;
+		&::before{
+		  content: '';
+		  position: absolute;
+		  left: 50%;
+		  top: 50%;
+		  width: 60upx;
+		  margin-left: -30upx;
+		  margin-top: -3px;
+		  border-top: 5px solid;
+		}
+		&::after {
+			 content: '';
+			 position: absolute;
+			 left: 50%;
+			 top: 50%;
+			 height: 60upx;
+			 margin-left: -2px;
+			 margin-top: -15px;
+			 border-left: 5px solid
 		}
 	}
 </style>

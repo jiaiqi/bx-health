@@ -24,64 +24,106 @@
 		</view>
 		<view class="container margin-top sort-box">
 			<view class="item-box" v-for="(item, i) in sortList" :key="i">
-				<view class="tit" :class="{ active: sortIndex == i }">
-					<text>{{ item.tit }}</text>
+				<view @click="tapTitItem(item,i)" class="tit" :class="{ active: sortIndex == i }">
+					<text v-if="item.tit === '商户'">{{item.tit}}</text>
+					<text v-if="item.tit === '我的店铺'">{{ item.tit }}</text>
 				</view>
 			</view>
 		</view>
-		<view @click="toShopDetail" class=" store-box" v-if="storeList">
-			<view class=" item-box" v-for="(store, i) in storeList" :key="i">
+		<view  class=" store-box" v-if="storeList && current_tit.type === 'shop'">
+			<sPullScroll
+				ref="pullScroll"
+				:heightStyle="heightStyle"
+				:pullDown="pullDown"
+				:pullUp="loadData"
+				:enablePullDown="true"
+				:enablePullUp="true"
+				:top="300"
+				:fixed="true"
+				:bottom="0"
+				finishText="我是有底线的..."
+			>
+				<view @click="toShopDetail(store)"  class=" item-box" v-for="(store, i) in storeList" :key="i">
+					<view class="container top-box">
+						<view class="left"><image src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image></view>
+						<view class="right">
+							<text class="tit">{{ store.name }}</text>
+							<view class="row justify-content">
+								<view class="row-right"><i class="hxicon-locationfill"></i></view>
+							</view>
+						</view>
+					</view>
+				</view>
+			</sPullScroll>
+		</view>
+		
+		<view  class=" store-box" v-else-if="current_tit.type === 'myShop'">
+			<sPullScroll
+				ref="pullScroll"
+				:heightStyle="heightStyle"
+				:pullDown="pullDown"
+				:pullUp="loadData"
+				:enablePullDown="true"
+				:enablePullUp="true"
+				:top="300"
+				:fixed="true"
+				:bottom="0"
+				finishText="我是有底线的..."
+			>
+			<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in myStoreList" :key="i">
 				<view class="container top-box">
 					<view class="left"><image src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image></view>
 					<view class="right">
 						<text class="tit">{{ store.name }}</text>
-						<view class="row justify-content">
-							<view class="row-right"><i class="hxicon-locationfill"></i></view>
+						<view class="del-shop">
+							<text @click.stop="del(store)">删除</text>
+							<text @click.stop="amend(store)">修改</text>
 						</view>
 					</view>
 				</view>
-				<scroll-view scroll-x class="bottom-box">
-					<view class="bottom-box-container">
-						<view class="goods-box" v-for="(goods, j) in shopList" :key="j" @click="toStore(store, goods.id)">
-							<view class="img-box">
-								<image :src="goods.main_pic" mode="aspectFit"></image>
-								<view class="tag">{{ goods.tag }}</view>
-							</view>
-							<view class="tit">{{ goods.name }}</view>
-							<view class="price-box">
-								<text class="txt1">￥</text>
-								<text class="txt2">{{ goods.price }}</text>
-							</view>
-						</view>
-					</view>
-				</scroll-view>
 			</view>
+			</sPullScroll>
 		</view>
 		<!-- </mescroll-body> -->
 		<!-- <view class="foot" v-if="showFoot">
 			<text>更多商家加入中，敬请期待</text>
 		</view -->
 		<view class="footzw"></view>
+		<view class="public-button-box">
+			<view @click="addShop" class="add-button">
+				<u-icon name="plus"></u-icon>
+				<!-- <text class="add-button-num"></text> -->
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
 //引入测试数据
 import testData from '@/common/testdata.js';
+import sPullScroll from '@/components/s-pull-scroll';
 export default {
-	components: {},
+	components: {sPullScroll},
 	data() {
 		return {
 			isLogin: false, //是否已经登录
 			MPPR: 0,
+			heightStyle: 'calc(100vh-620upx)',
 			GDHEAD: 0,
+			pageInfo: {
+				total: 0,
+				rownumber: 2,
+				pageNo: 1
+			},
 			//显示没有更多商户
 			showFoot: 0,
 			downOption: {
 				auto: false //是否在初始化后,自动执行downCallback; 默认true
 			},
 			sortIndex: 0,
-			sortList: [{ tit: '商户' }, { tit: '评分' }],
+			sortList: [{ tit: '商户',type:'shop' }, { tit: '我的店铺',type:'myShop' }],
+			myStoreList:[], //当前登录人得商铺列表
+			current_tit:{ tit: '商户',type:'shop' }, //当前点击顶部分类
 			storeList: [],
 			shopList: []
 		};
@@ -124,31 +166,179 @@ export default {
 	onShow() {
 		console.log('onshow', this.isLogin);
 		if (this.isLogin) {
+			this.onRefresh()
 			this.getShopList();
+			// this.getMyShopList()
 		}
 	},
 	methods: {
+		onRefresh() {
+			this.pageInfo.pageNo = 1;
+			this.$nextTick(() => {
+				this.$refs.pullScroll.refresh();
+			});
+		},
+		pullDown(pullScroll) {
+			console.log(pullScroll.page);
+			let page = this.pageInfo;
+			this.pageInfo.pageNo = 1;
+			let self = this;
+			setTimeout(() => {
+				this.loadData(pullScroll);
+			}, 200);
+		},
+		loadData(pullScroll) {
+			console.log('上拉加载');
+			let page = this.pageInfo;
+			this.pageInfo.pageNo = pullScroll.page;
+			console.log(pullScroll.page);
+			if(this.current_tit.type === 'shop'){
+				this.getShopList()
+			}else if(this.current_tit.type === 'myShop'){
+				this.getMyShopList()
+			}
+		},
+		amend(item){
+			let cond = [{
+				colName:"id",
+				ruleType:"in",
+				value:item.id
+			}]
+			let params = {
+			  type: 'update',
+			  condition: cond,
+			  serviceName: 'srvhealth_restaurant_mgmt_select',
+			  defaultVal: item
+			};
+			uni.navigateTo({
+			  url: '/publicPages/form/form?type=update&params='+ encodeURIComponent(JSON.stringify(params)) 
+			});
+		},
+		/*删除**/
+		 del(item){			
+			 let self = this
+			uni.showModal({
+			    title: '提示',
+			    content: '是否确认删除?',
+			    success:(res)=> {
+			        if (res.confirm) {
+						self.delFoods(item)
+			        } else if (res.cancel) {
+			            console.log('用户点击取消');
+			        }
+			    }
+			})
+			
+		},
+		async delFoods(item){
+			let self = this
+			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_delete', 'operate');
+			let req = [{
+				serviceName: 'srvhealth_restaurant_mgmt_delete',
+				colNames: ['*'],
+				condition:[{
+					colName:'id',
+					ruleType:'in',
+					value:item.id
+				}]
+			}]
+			let rea = await self.$http.post(url, req);
+			if(rea.data.resultCode === 'SUCCESS'){
+				// self.getFoodsList()
+				self.getMyShopList()
+			}else{
+				uni.showToast({
+					title:rea.data.resultMessage,
+					icon:'none'
+				})
+			}
+		},
+		/* 点击顶部切换商铺和我得商铺列表**/
+		tapTitItem(item,i){
+			this.current_tit = item
+			this.sortIndex = i
+			this.onRefresh()
+			console.log("点击顶部切换===》",item)
+		},
 		/*跳转至商铺详情*/
-		toShopDetail() {
+		toShopDetail(item) {
 			console.log('---------');
 			uni.navigateTo({
-				url: '/otherPages/shop/shopHome'
+				url: '/otherPages/shop/shopHome?type='+ this.current_tit.type +'&restaurantNo=' + item.restaurant_no
 			});
 		},
 		/* 获取商户列表**/
 		async getShopList() {
+			let self = this
 			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_restaurant_mgmt_select',
 				colNames: ['*'],
 				condition: [],
-				order: []
+				order: [],
+				page:self.pageInfo
 			};
 			let res = await this.$http.post(url, req);
+			if(self.pageInfo.pageNo === 1){
+				self.storeList = []
+			}
+			self.pageInfo.total = res.data.page.total;
+			self.pageInfo.pageNo = res.data.page.pageNo;
+			let page = self.pageInfo;
+			if (page.rownumber * page.pageNo >= page.total) {
+				// finish(boolean:是否显示finishText,默认显示)
+				self.$refs.pullScroll.finish();
+			} else {
+				self.$refs.pullScroll.success();
+			}
 			if (res.data.state === 'SUCCESS') {
 				console.log('商户列表-----', res.data.data);
-				this.storeList = res.data.data;
+				this.storeList = [...this.storeList,...res.data.data]
 			}
+		},
+		/* 获取当前登录人得商铺**/
+		async getMyShopList() {
+			let self = this
+			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_restaurant_mgmt_select',
+				colNames: ['*'],
+				condition: [{
+					colName:'create_user',
+					ruleType:'eq',
+					value:uni.getStorageSync('login_user_info').user_no
+				}],
+				order: [],
+				page:self.pageInfo
+			};
+			let res = await this.$http.post(url, req);
+			if(self.pageInfo.pageNo === 1){
+				self.myStoreList = []
+			}
+			self.pageInfo.total = res.data.page.total;
+			self.pageInfo.pageNo = res.data.page.pageNo;
+			let page = self.pageInfo;
+			if (page.rownumber * page.pageNo >= page.total) {
+				// finish(boolean:是否显示finishText,默认显示)
+				self.$refs.pullScroll.finish();
+			} else {
+				self.$refs.pullScroll.success();
+			}
+			
+			if (res.data.state === 'SUCCESS') {
+				console.log('我的商户列表-----', res.data.data);
+				this.myStoreList = [...this.myStoreList,...res.data.data]
+				if(this.myStoreList.length == 0){
+					this.current_tit={ tit: '商户',type:'shop' }
+					this.getShopList();
+				}
+			}
+		},
+		/*新增商铺**/
+		addShop(){
+			uni.navigateTo({
+			  url: '/publicPages/form/form?serviceName=srvhealth_restaurant_mgmt_add&type=add'
+			});
 		}
 	}
 };
@@ -391,7 +581,8 @@ page {
 	.item-box {
 		display: flex;
 		flex-direction: column;
-		margin-bottom: 14px;
+		// margin-bottom: 14px;
+		border-bottom: 1px solid #ccc;
 		padding-bottom: 18px;
 		padding-top: 18px;
 		background-color: #ffffff;
@@ -402,13 +593,16 @@ page {
 				margin-right: 10px;
 
 				image {
-					width: 72px;
-					height: 54px;
+					width: 170upx;
+					height: 170upx;
 					border-radius: 6px;
 				}
 			}
 			.right {
 				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
 				.tit {
 					font-size: 16px;
 					font-weight: bold;
@@ -509,6 +703,18 @@ page {
 				}
 			}
 		}
+		.del-shop{
+			display: flex;
+			justify-content: flex-end;
+			margin-right: 20upx;
+			text{
+				color: #0081ff;
+				margin-right: 10px;
+				border: 1px solid #0081ff;
+				border-radius: 20px;
+				padding: 2px 10px;
+			}
+		}
 	}
 	.item-box:last-child {
 		border-bottom: 0;
@@ -546,5 +752,20 @@ page {
 	/* #ifdef H5*/
 	height: 50px;
 	/* #endif */
+}
+.add-button {
+	position: fixed;
+	bottom: 20upx;
+	left: calc(50% - 50upx);
+	width: 100upx;
+	height: 100upx;
+	border-radius: 50%;
+	background-color: rgb(246, 210, 0);
+	z-index: 100;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 24px;
+	color: white;
 }
 </style>

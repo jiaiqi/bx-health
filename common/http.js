@@ -31,7 +31,7 @@ fly.interceptors.request.use((request) => {
 	if (request.url.indexOf('srvfile_attachment_select') === -1 && request.url.indexOf('srvdaq_page_item_buttons_select') ===
 		-1) {
 		uni.showLoading({
-			mask: true
+			// mask: true
 		})
 	}
 	// 如果是浏览器运行的记录 请求的页面path和参数

@@ -75,7 +75,7 @@ export default {
       uni.setStorageSync('activeApp', destApp);
     }
     if (option.params) {
-      this.params = JSON.parse(option.params);
+      this.params = JSON.parse(decodeURIComponent(option.params));
     }
     if (option.cond) {
       this.defaultCondition = JSON.parse(option.cond);
@@ -133,6 +133,11 @@ export default {
     },
     async onButton(e) {
       let req = this.$refs.bxForm.getFieldModel();
+	  for(let key in req){
+	  		 if(!req[key]){
+	  			 delete req[key]
+	  		 }		  
+	  }
       console.log(e, req);
       switch (e.button_type) {
         case 'edit':

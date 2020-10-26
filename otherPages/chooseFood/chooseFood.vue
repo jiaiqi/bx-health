@@ -1,13 +1,13 @@
 <template>
 	<view class="food_wrap">
 		<view class="cu-bar bg-white">
-			<view class=" text-cyan button" @tap="showBottomModal">取消</view>
+			<!-- <view class=" text-cyan button" >取消</view> -->
 			<view class="date-time">
 				<view class="date-time-rq">{{ nowDate }}</view>
 				/
 				<view class="date-time-rq">{{ currTime ? currTime : nowDateTime }}</view>
 			</view>
-			<view @click="confirms" class=" text-cyan button confir-btn">确定</view>
+			<!-- <view @click="confirms" class=" text-cyan button confir-btn">确定</view> -->
 		</view>
 
 		<view class="content">
@@ -135,27 +135,31 @@
 					</view>
 				</view>
 			</view>
-			<view class="calculate">
-				<view class="amount">
-					<view class="input-box">
-						<view class="key-left">
-							<text @click="countDietNum('-1')">-1</text>
-							<text @click="countDietNum('-0.5')">-0.5</text>
-						</view>
-						<u-input placeholder=" " :border="true" maxlength="20" v-model="choiceNum" type="number" />
-						<view class="key-right">
-							<text @click="countDietNum('+1')">+1</text>
-							<text @click="countDietNum('+0.5')">+0.5</text>
-						</view>
-					</view>
-				</view>
-				<view @click="changeUnit(currFood)" class="weight">
+			<view @click="changeUnit(currFood)" class="calculate">				
+				<view  class="weight">
 					<view style="padding-right: 8upx;" class="unit">
 						{{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }}
 					</view>
 					<view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view>
 				</view>
 			</view>
+			<view class="amount">
+				<view class="input-box">
+					<view class="key-left">
+						<text @click="countDietNum('-1')">-1</text>
+						<text @click="countDietNum('-0.1')">-0.1</text>
+					</view>
+					<u-input placeholder=" " :border="true" maxlength="20" v-model="choiceNum" type="number" />
+					<view class="key-right">
+						<text @click="countDietNum('+1')">+1</text>
+						<text @click="countDietNum('+0.1')">+0.1</text>
+					</view>
+				</view>
+			</view>
+		</view>
+		<view class="foods-btn">
+			<text @click="showBottomModal">取消</text>
+			<text @click="confirms">确认</text>
 		</view>
 		<view class="cu-modal radio-modal" :class="modalName == 'RadioModal' ? 'show' : ''" @tap="RadiohideModal">
 			<view class="cu-dialog">
@@ -260,9 +264,9 @@ export default {
 		countDietNum(num) {
 			let value = this.value1;
 			if (value >= 0) {
-				if (num === '-0.5') {
+				if (num === '-0.1') {
 					if (value > 0) {
-						value = value - 0.5;
+						value = value - 0.1;
 					} else {
 						value = 0;
 					}
@@ -272,8 +276,8 @@ export default {
 					}
 				} else if (num === '+1') {
 					value = value + 1;
-				} else if (num === '+0.5') {
-					value = value + 0.5;
+				} else if (num === '+0.1') {
+					value = value + 0.1;
 				}
 				this.value1 = value;
 				this.choiceNum = value;
@@ -558,25 +562,27 @@ export default {
 }
 .cu-bar {
 	padding: 0 50upx;
+	justify-content: center;
 }
 
 .input-box {
 	display: flex;
 	// flex-wrap: wrap;
 	align-items: center;
-	// justify-content: center;
+	justify-content: center;
 	/deep/ input {
-		width: 50upx !important;
+		width: 120upx !important;
+		text-align: center;
 	}
 	.key-left {
 		text {
 			padding: 12upx 12upx;
 			background-color: #d6e2eb;
 			font-size: 30upx;
-			min-width: 60upx;
+			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-right: 2px;	
+			margin-right: 20upx;	
 			border-radius: 5px;
 		}
 	}
@@ -585,10 +591,10 @@ export default {
 			padding: 12upx 12upx;
 			background-color: #d6e2eb;
 			font-size: 30upx;
-			min-width: 60upx;
+			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-left: 2px;		
+			margin-left: 20upx;		
 			border-radius: 5px;
 		}
 	}
@@ -776,30 +782,16 @@ export default {
 }
 .calculate {
 	display: flex;
-	justify-content: space-between;
+	justify-content: flex-end;
 	padding: 20upx 20upx;
 	min-height: 100upx;
 	align-items: center;
+	font-size: 36upx;
+	margin-right: 20upx;
 	color: #999;
 	.calorie {
 		min-width: 115upx;
-	}
-	.amount {
-		color: #009688;
-		font-weight: 800;
-		// max-width: 200rpx;
-
-		// margin-left: 4rem;
-		.number {
-			padding: 0 20upx;
-			font-size: 34upx;
-			// border-bottom: 5upx solid #009688;
-		}
-		.unit {
-			text-align: center;
-			padding: 10upx 0upx;
-		}
-	}
+	}	
 	.weight {
 		display: flex;
 		align-items: center;
@@ -809,6 +801,33 @@ export default {
 			width: 40upx;
 			height: 40upx;
 			margin-left: 20upx;
+		}
+	}
+}
+.amount {
+	color: #009688;
+	font-weight: 800;
+	.number {
+		padding: 0 20upx;
+		font-size: 34upx;
+	}
+	.unit {
+		text-align: center;
+		padding: 10upx 0upx;
+	}
+}
+.foods-btn{
+	margin-top: 60upx;
+	display: flex;
+	justify-content: center;
+	text{
+		padding: 10upx 40upx;
+		background-color: #1cbbb4;
+		color: white;
+		border-radius: 10upx;
+		font-size: 28upx;
+		&:first-child{
+			margin-right: 90upx;
 		}
 	}
 }
