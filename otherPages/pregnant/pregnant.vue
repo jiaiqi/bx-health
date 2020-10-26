@@ -4,7 +4,7 @@
 				<u-collapse-item v-for="(item,index) in timeLienData" :key="index" :open="item.open" :title="item.name">
 					<view class="cu-timeline pregnant-timeline">					
 						<view v-for="(week,i) in item.child" class="cu-item">
-							<view class="content bg-cyan">
+							<view @click="toDetail(week)" class="content bg-cyan">
 								<text>{{week.title}}</text>
 							</view>
 							<view class="pre-chunk-wrap">
@@ -26,7 +26,7 @@
 						<view v-for="(curr,i) in current_pre.child" class="pre-content-item">
 							<view class="pre-content-top">
 								<view class="pre-left">
-									<image src="/otherPages/static/img/header.jpg" mode=""></image>
+									<image :src="curr.image" mode=""></image>
 								</view>
 								<view class="pre-right">
 									<text>{{curr.tit}}</text>
@@ -79,24 +79,28 @@
 							 isOk:false,							 
 							 child:[
 								 {
-									 tit:'啤酒',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
+									 tit:'避孕药',
+									 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
+									 isOpen:false,
+									 image:"/otherPages/static/img/byy.jpg"
 								 },
 								 {
-									 tit:'可乐',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
+									 tit:'白酒',
+									 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
+									 isOpen:false,
+									 image:"/otherPages/static/img/bj.jpg"
 								 },
 								 {
-									 tit:'冰淇淋',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
+									 tit:'薏米',
+									 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
+									 isOpen:false,
+									 image:"/otherPages/static/img/ym.jpg"
 								 },
 								 {
-									 tit:'咖啡',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
+									 tit:'五香粉',
+									 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
+									 isOpen:false,
+									 image:"/otherPages/static/img/wxf.jpg"
 								 }]
 						 },{
 							 name:'出行',
@@ -702,6 +706,12 @@
 			}
 		},
 		methods:{
+			/*点击每周进入详情页面**/
+			toDetail(){
+				uni.navigateTo({
+					url:'/otherPages/pregnant/pregnantDetail'
+				})
+			},
 			/*点击小方块弹出模态框**/
 			openCont(item){
 				// item.open = true

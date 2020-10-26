@@ -204,6 +204,14 @@
 					"style": {}
 				},
 				{
+					"path": "pregnant/pregnantDetail",
+					"style": {}
+				},
+				{
+					"path": "pregnant/antenatal",
+					"style": {}
+				},
+				{
 					"path": "personal/personal",
 					"style": {
 						"navigationBarTitleText": "个人资料"

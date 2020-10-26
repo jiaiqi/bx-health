@@ -1,9 +1,10 @@
 <template>
 	<view class="main-history">
-		<view class="title">
+		<view class="title" v-if="list && list.length > 0">
 			<text class="text">{{ title }}</text>
+			<text class="sub-title">填写记录</text>
 		</view>
-		<view class="list-wrap">
+		<view class="list-wrap" v-if="list && list.length > 0">
 			<view
 				@click="toDetail(item)"
 				v-for="(item, index) in list"
@@ -24,7 +25,8 @@
 				</view>
 			</view>
 		</view>
-		<u-loadmore :status="status" @loadmore="loadMore" />
+		<u-loadmore :status="status" @loadmore="loadMore" :load-text="loadText" v-if="list && list.length > 0" />
+		<u-empty text="没有找到填写记录" v-if="list.length === 0"></u-empty>
 	</view>
 </template>
 
@@ -41,7 +43,12 @@ export default {
 			},
 			activity_no: '',
 			user_no: '',
-			list: []
+			list: [],
+			loadText: {
+				loadmore: '点击或上拉加载更多',
+				loading: '努力加载中',
+				nomore: '没有更多了'
+			}
 		};
 	},
 	methods: {
@@ -99,7 +106,7 @@ export default {
 
 <style scoped lang="scss">
 .main-history {
-	min-height: 100vh;
+	height: 100vh;
 	background-color: #fff;
 	.title {
 		padding: 20rpx 0;
@@ -107,6 +114,14 @@ export default {
 		font-weight: 800;
 		letter-spacing: 5px;
 		font-size: 30rpx;
+		display: flex;
+		flex-direction: column;
+		.sub-title {
+			font-size: 24rpx;
+			padding: 5rpx 0;
+			padding-left: 100rpx;
+			opacity: 0.8;
+		}
 		.text {
 			position: relative;
 			color: #007aff;
