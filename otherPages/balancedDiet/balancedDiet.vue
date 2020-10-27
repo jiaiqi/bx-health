@@ -115,9 +115,16 @@
 								<text class="ele-item-name">{{ alone.shortName }}</text>
 								<view class="bg-white probar">
 									<view class="cu-progress progress-bar radius pro-rad">
-										<view v-if="alone.value_left || alone.value_left === 0" class="pointer" :style="{ left: `${alone.value_left}px` }">
-											<view class="after">
-												{{ alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(2) + 'mg/d' : alone.value.toFixed(2) }}
+										<view class="pointer" :style="{ left: `${alone.value_left ? alone.value_left : 0}px` }">
+											<view
+												class="after"
+												:class="{
+													lack: alone.value < alone.EAR,
+													normal: alone.value >= alone.EAR && (alone.value <= alone.UL || !alone.UL),
+													over: alone.UL && alone.value > alone.UL
+												}"
+											>
+												{{ alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1) }}
 											</view>
 										</view>
 										<view
@@ -488,6 +495,24 @@ export default {
 							shortName: '蛋白',
 							key: 'protein',
 							EAR: 0.9, // 平均需要量
+							UL: 0, // 可耐受最高摄入量
+							value: 0 // 当前值
+						},
+						{
+							label: '脂肪',
+							name: '脂肪',
+							shortName: '脂肪',
+							key: 'axunge',
+							EAR: 0, // 平均需要量
+							UL: 0, // 可耐受最高摄入量
+							value: 0 // 当前值
+						},
+						{
+							label: '碳水',
+							name: '碳水',
+							shortName: '碳水',
+							key: 'carbohydrate',
+							EAR: 0, // 平均需要量
 							UL: 0, // 可耐受最高摄入量
 							value: 0 // 当前值
 						}
@@ -1088,7 +1113,7 @@ export default {
 				}
 			}
 		},
-		changeSub(e, showSub, data) {
+		async changeSub(e, showSub, data) {
 			// 切换展示营养素状态(异常||全部)
 			console.log(e);
 			if (this.subIndex === e && !showSub) {
@@ -1104,34 +1129,77 @@ export default {
 			switch (this.subIndex) {
 				case 0:
 					this.subColor = '#5098ff';
-					this.energyList = energyListWrap;
+					this.energyList = energyListWrap.map(item => {
+						item.matterList = item.matterList.map(ele => {
+							ele.value_left = 0;
+							ele.value = 0;
+							return ele;
+						});
+						return item;
+					});
+					setTimeout(() => {
+						this.energyList = this.deepClone(this.energyListWrap).map(item => {
+							item.matterList.map(ele => {
+								return ele;
+							});
+							return item;
+						});
+					}, 300);
 					break;
 				case 1:
 					this.subColor = '#999';
 					this.energyList = energyListWrap.filter(item => {
 						item.matterList = item.matterList.filter(ele => {
+							ele.value_left = 0;
 							return ele.value < ele.EAR;
 						});
 						return item.matterList.length > 0;
 					});
+					setTimeout(() => {
+						this.energyList = this.deepClone(this.energyListWrap).filter(item => {
+							item.matterList = item.matterList.filter(ele => {
+								return ele.value < ele.EAR;
+							});
+							return item.matterList.length > 0;
+						});
+					}, 300);
 					break;
 				case 2:
 					this.subColor = 'rgb(141, 198, 63)';
 					this.energyList = energyListWrap.filter(item => {
 						item.matterList = item.matterList.filter(ele => {
+							ele.value_left = 0;
 							return ele.UL ? ele.value >= ele.EAR && ele.value <= ele.UL : ele.value >= ele.EAR;
 						});
 						return item.matterList.length > 0;
 					});
+					setTimeout(() => {
+						this.energyList = this.deepClone(this.energyListWrap).filter(item => {
+							item.matterList = item.matterList.filter(ele => {
+								return ele.UL ? ele.value >= ele.EAR && ele.value <= ele.UL : ele.value >= ele.EAR;
+							});
+							return item.matterList.length > 0;
+						});
+					}, 300);
 					break;
 				case 3:
 					this.subColor = '#ff9900';
 					this.energyList = energyListWrap.filter(item => {
 						item.matterList = item.matterList.filter(ele => {
+							ele.value_left = 0;
+							// ele.value = 0;
 							return ele.UL ? ele.value > ele.UL : false;
 						});
 						return item.matterList.length > 0;
 					});
+					setTimeout(() => {
+						this.energyList = this.deepClone(this.energyListWrap).filter(item => {
+							item.matterList = item.matterList.filter(ele => {
+								return ele.UL ? ele.value > ele.UL : false;
+							});
+							return item.matterList.length > 0;
+						});
+					}, 300);
 					break;
 				case 4:
 					this.energyList = [];
@@ -1479,6 +1547,17 @@ export default {
 									mat.UL = 0;
 									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
 								}
+							}else{
+								if (mat.name === '脂肪') {
+									mat.EAR =  Number(self.userInfo.weight*50*0.2/9).toFixed(2);
+									mat.UL = 0;
+									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
+								}
+								if (mat.name === '碳水') {
+									mat.EAR = self.userInfo.weight*4;
+									mat.UL = 0;
+									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
+								}
 							}
 						});
 					});
@@ -1503,6 +1582,135 @@ export default {
 			let res = await this.$http.post(url, req);
 			console.log('res-------', res.data.data);
 			return res.data.data;
+		},
+		async buildDietData() {
+			let data = this.dietRecord;
+			let strArr = [];
+			data.forEach(item => {
+				item['editable'] = false;
+				strArr.push(item.name);
+			});
+			let energyList = this.deepClone(this.energyListWrap);
+			let str = strArr.join();
+			this.getChooseFood(str).then(a => {
+				if (Array.isArray(a) && a.length > 0) {
+					a.forEach(food => {
+						data.forEach(re => {
+							if (food.name === re.name) {
+								food['amount'] = food['amount'] ? food['amount'] + re.amount : re.amount;
+							}
+						});
+					});
+					let chooseFood = a;
+					if (chooseFood && chooseFood.length > 0) {
+						let eledata = '';
+						energyList.forEach(item => {
+							item.matterList.forEach(mat => {
+								mat.value = 0;
+								chooseFood.forEach(fod => {
+									for (let a in fod) {
+										if (mat.key && mat.key == a) {
+											mat.value = Number(mat.value) + Number(fod.amount) * Number(fod[a]);
+											/**
+											 * 共计 mat.EAR*2 + mat.UL-mat.EAR --> mat.EAR+mat.UL
+											 * 左/右： mat.EAR
+											 * 中间： mat.UL-mat.EAR
+											 */
+											if (mat.UL && mat.value && mat.value > (mat.UL - mat.EAR) * 4) {
+												mat['value_left'] = (120 * 0.9) / 2;
+												mat['left_width'] = (mat.EAR * 120) / ((mat.value * 2) / 0.9);
+												mat['center_width'] = ((mat.UL - mat.EAR) * 120) / ((mat.value * 2) / 0.9);
+												mat['right_width'] = 120 - mat['left_width'] - mat['center_width'];
+											} else {
+												if (!mat.UL) {
+													mat['right_width'] = 0;
+													mat['left_width'] = 50;
+													mat['center_width'] = 70;
+													if (mat.value <= mat.EAR) {
+														mat['value_left'] = (mat['left_width'] * mat.value) / mat.EAR;
+													} else {
+														mat['value_left'] = (mat['left_width'] * mat.value) / mat.EAR;
+													}
+													if (mat['value_left'] > 110) {
+														mat['value_left'] = 110;
+													}
+													return;
+												}
+												if (mat.value === 0 || mat.value === '0') {
+													mat['value_left'] = 0;
+													mat['right_width'] = 30;
+													mat['left_width'] = (90 * mat.EAR) / mat.UL;
+													mat['center_width'] = 90 - (90 * mat.EAR) / mat.UL;
+												} else {
+													mat['value_left'] = (40 * mat.value) / (mat.UL - mat.EAR);
+													mat['left_width'] = (120 * mat.EAR) / (mat.EAR + mat.UL);
+													mat['right_width'] = (120 * mat.EAR) / (mat.EAR + mat.UL) > 30 ? (120 * mat.EAR) / (mat.EAR + mat.UL) : 30;
+													if (mat['left_width'] + mat['right_width'] > 80) {
+														mat['right_width'] = 20;
+														mat['left_width'] = (100 * mat.EAR) / mat.UL;
+													}
+													mat['center_width'] = 120 - mat['left_width'] - mat['right_width'];
+
+													if (mat.value < mat.EAR) {
+														mat['value_left'] = (mat['left_width'] * mat.value) / mat.EAR;
+													}
+													if (mat.value >= mat.EAR && mat.value <= mat.UL) {
+														mat['value_left'] = mat['left_width'] + (mat['center_width'] * (mat.value - mat.EAR)) / (mat.UL - mat.EAR);
+													}
+													if (mat.value > mat.UL) {
+														mat['value_left'] = mat['left_width'] + mat['center_width'] + (mat['right_width'] * (mat.value - mat.UL)) / mat.EAR;
+													}
+												}
+												if (mat['value_left'] > 110) {
+													mat['value_left'] = 110;
+												}
+											}
+										} else {
+											if (mat.value == 0) {
+												mat['value_left'] = 0;
+												mat['right_width'] = 30;
+												mat['left_width'] = (90 * mat.EAR) / mat.UL;
+												mat['center_width'] = 90 - (90 * mat.EAR) / mat.UL;
+											}
+										}
+									}
+								});
+							});
+						});
+					}
+				}
+				this.radioArr.forEach((radio, index) => {
+					radio.num = 0;
+					energyList.forEach(item => {
+						item.matterList.forEach(ele => {
+							switch (index) {
+								case 0:
+									radio.num++;
+									break;
+								case 1:
+									if (ele.value < ele.EAR) {
+										radio.num++;
+									}
+									break;
+								case 2:
+									if (ele.value >= ele.EAR && ele.value <= ele.UL) {
+										radio.num++;
+									} else if (ele.value >= ele.EAR && ele.UL === 0) {
+										radio.num++;
+									}
+									break;
+								case 3:
+									if (ele.UL && ele.value > ele.UL) {
+										radio.num++;
+									}
+									break;
+							}
+						});
+					});
+					radio.label = radio.name + '(' + radio.num + ')';
+				});
+			});
+			return energyList;
 		},
 		async getDietRecord(chooseDate = null) {
 			//饮食记录
@@ -1562,15 +1770,7 @@ export default {
 					}
 				});
 			});
-
 			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
-				console.log(res.data.data);
-				let strArr = [];
-				res.data.data.forEach(item => {
-					item['editable'] = false;
-					strArr.push(item.name);
-				});
-				let str = strArr.join();
 				let dietIn = 0;
 				res.data.data.forEach(item => {
 					dietIn += item.energy;
@@ -1578,131 +1778,6 @@ export default {
 				this.dietIn = dietIn;
 				uni.$emit('dietInChange', dietIn);
 				this.dietRecord = res.data.data;
-				this.getChooseFood(str).then(a => {
-					if (Array.isArray(a) && a.length > 0) {
-						a.forEach(food => {
-							res.data.data.forEach(re => {
-								if (food.name === re.name) {
-									food['amount'] = food['amount'] ? food['amount'] + re.amount : re.amount;
-								}
-							});
-						});
-						let chooseFood = a;
-						if (chooseFood && chooseFood.length > 0) {
-							let eledata = '';
-							energyList.forEach(item => {
-								item.matterList.forEach(mat => {
-									mat.value = 0;
-									chooseFood.forEach(fod => {
-										for (let a in fod) {
-											if (mat.key && mat.key == a) {
-												if (mat.name === '蛋白') {
-													// mat.UL = this.userInfo.weight * mat.UL;
-													// mat.EAR = this.userInfo.weight * mat.EAR;
-												}
-												mat.value = Number(mat.value) + Number(fod.amount) * Number(fod[a]);
-												/**
-												 * 共计 mat.EAR*2 + mat.UL-mat.EAR --> mat.EAR+mat.UL
-												 * 左/右： mat.EAR
-												 * 中间： mat.UL-mat.EAR
-												 */
-												if (mat.UL && mat.value && mat.value > (mat.UL - mat.EAR) * 4) {
-													mat['value_left'] = (120 * 0.9) / 2;
-													mat['left_width'] = (mat.EAR * 120) / ((mat.value * 2) / 0.9);
-													mat['center_width'] = ((mat.UL - mat.EAR) * 120) / ((mat.value * 2) / 0.9);
-													mat['right_width'] = 120 - mat['left_width'] - mat['center_width'];
-												} else {
-													if (!mat.UL) {
-														mat['right_width'] = 0;
-														mat['left_width'] = 50;
-														mat['center_width'] = 70;
-														if (mat.value <= mat.EAR) {
-															mat['value_left'] = (mat['left_width'] * mat.value) / mat.EAR;
-														} else {
-															mat['value_left'] = (mat['left_width'] * mat.value) / mat.EAR;
-															// mat['value_left'] = 50 + mat.value;
-														}
-														if (mat['value_left'] > 110) {
-															mat['value_left'] = 110;
-														}
-														return;
-													}
-													if (mat.value === 0 || mat.value === '0') {
-														mat['value_left'] = 0;
-														mat['right_width'] = 30;
-														mat['left_width'] = (90 * mat.EAR) / mat.UL;
-														mat['center_width'] = 90 - (90 * mat.EAR) / mat.UL;
-													} else {
-														mat['value_left'] = (40 * mat.value) / (mat.UL - mat.EAR);
-														mat['left_width'] = (120 * mat.EAR) / (mat.EAR + mat.UL);
-														mat['right_width'] = (120 * mat.EAR) / (mat.EAR + mat.UL) > 30 ? (120 * mat.EAR) / (mat.EAR + mat.UL) : 30;
-														// mat['center_width'] = (120 * (mat.UL - mat.EAR)) / (mat.EAR + mat.UL);
-														if (mat['left_width'] + mat['right_width'] > 80) {
-															mat['right_width'] = 20;
-															mat['left_width'] = (100 * mat.EAR) / mat.UL;
-														}
-														mat['center_width'] = 120 - mat['left_width'] - mat['right_width'];
-
-														if (mat.value < mat.EAR) {
-															mat['value_left'] = (mat['left_width'] * mat.value) / mat.EAR;
-														}
-														if (mat.value >= mat.EAR && mat.value <= mat.UL) {
-															mat['value_left'] = mat['left_width'] + (mat['center_width'] * (mat.value - mat.EAR)) / (mat.UL - mat.EAR);
-														}
-														if (mat.value > mat.UL) {
-															mat['value_left'] = mat['left_width'] + mat['center_width'] + (mat['right_width'] * (mat.value - mat.UL)) / mat.EAR;
-														}
-														// mat['value_left'] = (120 * (mat.value/ ((mat.UL - mat.EAR) * 3)));
-													}
-													if (mat['value_left'] > 110) {
-														mat['value_left'] = 110;
-													}
-												}
-											} else {
-												if (mat.value == 0) {
-													mat['value_left'] = 0;
-													mat['right_width'] = 30;
-													mat['left_width'] = (90 * mat.EAR) / mat.UL;
-													mat['center_width'] = 90 - (90 * mat.EAR) / mat.UL;
-												}
-											}
-										}
-									});
-								});
-							});
-						}
-					}
-					this.radioArr.forEach((radio, index) => {
-						radio.num = 0;
-						energyList.forEach(item => {
-							item.matterList.forEach(ele => {
-								switch (index) {
-									case 0:
-										radio.num++;
-										break;
-									case 1:
-										if (ele.value < ele.EAR) {
-											radio.num++;
-										}
-										break;
-									case 2:
-										if (ele.value >= ele.EAR && ele.value <= ele.UL) {
-											radio.num++;
-										} else if (ele.value >= ele.EAR && ele.UL === 0) {
-											radio.num++;
-										}
-										break;
-									case 3:
-										if (ele.UL && ele.value > ele.UL) {
-											radio.num++;
-										}
-										break;
-								}
-							});
-						});
-						radio.label = radio.name + '(' + radio.num + ')';
-					});
-				});
 			} else if (res.data.state === 'SUCCESS' && res.data.data.length === 0) {
 				this.dietRecord = [];
 				this.dietIn = 0;
@@ -1712,6 +1787,7 @@ export default {
 					});
 				});
 			}
+			this.energyListWrap = await this.buildDietData();
 			this.energyList = this.deepClone(energyList);
 			this.changeSub(4);
 			return res.data.data;
@@ -2569,26 +2645,37 @@ export default {
 							z-index: 20;
 							top: 0;
 							border-radius: 20rpx;
-							transition: left 1s;
+							transition: left 1s ease;
 							.after {
 								position: absolute;
 								font-size: 14px;
 								top: -30rpx;
 								color: red;
+								&.lack {
+									color: #333;
+								}
+								&.normal {
+									color: #8dc63f;
+								}
+								&.over {
+									color: #ffb347;
+								}
 							}
 						}
 						.EAR {
+							transition: none;
 							.after {
 								position: absolute;
-								right: -8px;
+								right: 0px;
 								color: #333;
 								z-index: 2;
 							}
 						}
 						.risk {
+							transition: none;
 							.after {
 								position: absolute;
-								left: -10px;
+								left: 0px;
 								color: #333;
 								z-index: 2;
 							}
@@ -2610,7 +2697,12 @@ export default {
 								}
 							}
 						}
+						.regular {
+							position: relative;
+							transition: none;
+						}
 						.progress-bar {
+							transition: none;
 							height: 30rpx;
 							width: 240rpx;
 							position: relative;
@@ -2781,9 +2873,7 @@ uni-checkbox::before {
 		}
 	}
 }
-.regular {
-	position: relative;
-}
+
 .max-risk {
 	right: 8%;
 	.tootio-item {

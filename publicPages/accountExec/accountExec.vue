@@ -331,6 +331,7 @@ export default {
 			// 静默登录(验证登录)
 			const self = this;
 			const isWeixinClient = this.isWeixinClient();
+			self.getUserInfo()
 			if (isWeixinClient) {
 				const url = this.getServiceUrl('wx', 'srvwx_app_login_verify', 'operate');
 				// #ifdef MP-WEIXIN

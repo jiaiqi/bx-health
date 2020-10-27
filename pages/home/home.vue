@@ -11,7 +11,7 @@
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
 						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
-							<text class="cuIcon-favorfill margin-right-xs" v-if="item.is_main === '是'||index===0"></text>
+							<text class="cuIcon-favorfill margin-right-xs" v-if="item.is_main === '是' || index === 0"></text>
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -105,39 +105,54 @@
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
 				</view>
-				<view class="box-item" @click="toQuestionnaire">
+				<view class="box-item" :class="{ filled: quInfo.diet && quInfo.diet.hasFill === true }" @click="toQuestionnaire('diet')">
 					<view class="label">饮食营养</view>
-					<view class="status">
+					<view class="status" v-if="!quInfo.diet || !quInfo.diet.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
+					<view class="status" v-if="quInfo.diet && quInfo.diet.hasFill">
+						点击查看
+						<u-icon name="eye-fill"></u-icon>
+					</view>
 				</view>
-				<view class="box-item">
+				<view class="box-item" :class="{ filled: quInfo.sport && quInfo.sport.hasFill === true }" @click="toQuestionnaire('sport')">
 					<view class="label">运动</view>
-					<view class="status">
+					<view class="status" v-if="!quInfo.sport || !quInfo.sport.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
+					<view class="status" v-if="quInfo.sport && quInfo.sport.hasFill">
+						点击查看
+						<u-icon name="eye-fill"></u-icon>
+					</view>
 				</view>
-				<view class="box-item">
+				<view class="box-item" :class="{ filled: quInfo.sleep && quInfo.sleep.hasFill === true }" @click="toQuestionnaire('sleep')">
 					<view class="label">睡眠</view>
-					<view class="status">
+					<view class="status" v-if="!quInfo.sleep || !quInfo.sleep.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
+					<view class="status" v-if="quInfo.sleep && quInfo.sleep.hasFill">
+						点击查看
+						<u-icon name="eye-fill"></u-icon>
+					</view>
 				</view>
-				<view class="box-item">
+				<view class="box-item" :class="{ filled: quInfo.mental && quInfo.mental.hasFill === true }" @click="toQuestionnaire('mental')">
 					<view class="label">心理</view>
-					<view class="status">
+					<view class="status" v-if="!quInfo.mental || !quInfo.mental.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
+					</view>
+					<view class="status" v-if="quInfo.mental && quInfo.mental.hasFill">
+						点击查看
+						<u-icon name="eye-fill"></u-icon>
 					</view>
 				</view>
 			</view>
 		</view>
 		<view class="main-box">
 			<view class="main-box-title">慢性疾病</view>
-
 			<view class="menu-box">
 				<view class="box-item menu" :class="[bmiStatus.key]">
 					<view class="status" :class="[bmiStatus.key]">
@@ -170,6 +185,7 @@ var dayjs = require('dayjs');
 export default {
 	data() {
 		return {
+			quInfo: {}, // 问卷信息
 			subList: [
 				{ name: '步数', key: 'step', chartID: 'stepChart' },
 				{ name: '体重', key: 'weight', chartID: 'canvasLineA' },
@@ -180,7 +196,7 @@ export default {
 			currentChart: '', //当前chart id
 			isLogin: false, // 是否已经登录
 			loginUserInfo: {},
-			wxUserInfo:{},
+			wxUserInfo: {},
 			serviceLog: {}, // 服务记录
 			pageTitle: '健康档案',
 			showUserList: false,
@@ -275,7 +291,7 @@ export default {
 	},
 	computed: {
 		profile_url() {
-			if (this.userInfo.is_main === '是' && this.loginUserInfo.headimgurl) {
+			if (this.loginUserInfo.headimgurl) {
 				return this.loginUserInfo.headimgurl;
 			} else {
 				if (this.userInfo.profile_url) {
@@ -346,15 +362,82 @@ export default {
 		}
 	},
 	methods: {
-		toQuestionnaire(no){
-			no = '20201026114053000156'
+		async checkQuestionnaireRecord() {
+			let quInfo = {
+				//饮食营养
+				diet: {
+					no: '20201026114053000156',
+					hasFill: false
+				},
+				sport: {
+					//运动健康
+					no: '20201027151517000158',
+					hasFill: false
+				},
+				sleep: {
+					// 睡眠
+					no: '20200307210717000096',
+					hasFill: false
+				},
+				mental: {
+					// 心理
+					no: '20201027152137000159',
+					hasFill: false
+				}
+			};
+			let no = Object.keys(quInfo).map(key => quInfo[key].no);
+			let record = await this.getQuestionnaireRecord(no.toString());
+			Object.keys(quInfo).forEach(key => {
+				record.forEach(no => {
+					if (quInfo[key].no === no) {
+						quInfo[key]['hasFill'] = true;
+					}
+				});
+			});
+			this.quInfo = quInfo;
+		},
+		async getQuestionnaireRecord(no) {
+			let url = this.getServiceUrl('daq', 'srvdaq_record_reply_select', 'select');
+			let req = {
+				serviceName: 'srvdaq_record_reply_select',
+				colNames: ['*'],
+				condition: [{ colName: 'activity_no', ruleType: 'in', value: no }, { colName: 'user_no', ruleType: 'like', value: this.loginUserInfo.user_no }],
+				page: { pageNo: 1, rownumber: 10 },
+				order: [{ colName: 'create_time', orderType: 'desc' }]
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+					return Array.from(new Set(res.data.data.map(item => item.activity_no)));
+				}
+			}
+		},
+		toQuestionnaire(type) {
+			let no = '';
+			switch (type) {
+				case 'diet':
+					// 饮食营养卷
+					no = '20201026114053000156';
+					break;
+				case 'sport':
+					// 运动
+					no = '20201027151517000158';
+					break;
+				case 'sleep':
+					// 睡眠
+					no = '20200307210717000096';
+					break;
+				case 'mental':
+					// 心理问卷
+					no = '20201027152137000159';
+					break;
+				default:
+					break;
+			}
 			let url = `/questionnaire/index/index?formType=form&activity_no=${no}&status=进行中`;
 			uni.navigateTo({
-				url:url
-			})
-			// uni.navigateTo({
-			// 	url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(url)
-			// });
+				url: url
+			});
 		},
 		topages() {
 			let url = 'https://wx2.100xsys.cn/pages/specific/questionnaire/questionnaire?formType=form&activity_no=20200307210717000096&status=进行中';
@@ -1049,7 +1132,7 @@ export default {
 						};
 						chartData.series[0].data = stepList.map(item => item.step);
 						// if (_self.userInfo.is_main === '是') {
-							_self.showChart('stepChart', chartData);
+						_self.showChart('stepChart', chartData);
 						// } else {
 						// 	uni.showToast({
 						// 		title: '无权查看',
@@ -1144,7 +1227,7 @@ export default {
 				return;
 			}
 			// #endif
-			if (!userInfo||!uni.getStorageSync('isLogin')) {
+			if (!userInfo || !uni.getStorageSync('isLogin')) {
 				// 未登录
 				const result = await wx.login();
 				if (result.code) {
@@ -1158,10 +1241,10 @@ export default {
 			if (userInfo && userInfo.user_no) {
 				this.loginUserInfo = userInfo;
 				uni.setStorageSync('activeApp', 'health');
-				if(!uni.getStorageSync('user_info_list')||!Array.isArray(uni.getStorageSync('user_info_list'))){
+				if (!uni.getStorageSync('user_info_list') || !Array.isArray(uni.getStorageSync('user_info_list'))) {
 					await this.getCurrUserInfo(); // 查找健康app个人基本信息
-				}else{
-					this.userMenuList = uni.getStorageSync('user_info_list')
+				} else {
+					this.userMenuList = uni.getStorageSync('user_info_list');
 				}
 				if (uni.getStorageSync('current_user_info')) {
 					this.userInfo = uni.getStorageSync('current_user_info');
@@ -1184,23 +1267,24 @@ export default {
 						}
 					}
 				}
-				if(!this.wxUserInfo){
-					 await this.getUserInfo(); //查找微信用户基本信息
+				if (!this.wxUserInfo) {
+					await this.getUserInfo(); //查找微信用户基本信息
 				}
 				await this.getDietAllRecord(); //查找饮食和运动记录
-				if(!this.serviceLog){
+				if (!this.serviceLog) {
 					this.selectServiceLog();
 				}
 				this.loginUserInfo = userInfo;
 				// #ifdef MP-WEIXIN
 				this.getwxStepInfoList().then(_ => {
-					 //获取微信运动记录
+					//获取微信运动记录
 					this.currentChart = 'stepChart';
 				});
 				// #endif
 				// #ifdef H5
 				this.showCanvas('weight');
 				// #endif
+				this.checkQuestionnaireRecord(); //检查有没有填过饮食运动等相关问卷
 			}
 		}
 	},

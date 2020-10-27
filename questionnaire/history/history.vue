@@ -1,9 +1,9 @@
 <template>
 	<view class="main-history">
-		<view class="title" v-if="list && list.length > 0">
+<!-- 		<view class="title" v-if="list && list.length > 0">
 			<text class="text">{{ title }}</text>
 			<text class="sub-title">填写记录</text>
-		</view>
+		</view> -->
 		<view class="list-wrap" v-if="list && list.length > 0">
 			<view
 				@click="toDetail(item)"
@@ -25,7 +25,7 @@
 				</view>
 			</view>
 		</view>
-		<u-loadmore :status="status" @loadmore="loadMore" :load-text="loadText" v-if="list && list.length > 0" />
+		<view class="loadmore-box"><u-loadmore :status="status" @loadmore="loadMore" :load-text="loadText" v-if="list && list.length > 0" /></view>
 		<u-empty text="没有找到填写记录" v-if="list.length === 0"></u-empty>
 	</view>
 </template>
@@ -53,8 +53,9 @@ export default {
 	},
 	methods: {
 		toDetail(item) {
+			debugger;
 			uni.navigateTo({
-				url: `/questionnaire/index/index?formType=detail&activity_no=${this.activity_no}`
+				url: `/questionnaire/index/index?formType=detail&activity_no=${item.activity_no}&status=${item.state}&fill_batch_no=${item.fill_batch_no}`
 			});
 		},
 		getList() {
@@ -95,6 +96,9 @@ export default {
 			if (user_info && user_info.user_no) {
 				if (option.title) {
 					this.title = option.title;
+					uni.setNavigationBarTitle({
+						title: option.title
+					})
 				}
 				this.user_no = user_info.user_no;
 				this.getList();
@@ -119,7 +123,7 @@ export default {
 		.sub-title {
 			font-size: 24rpx;
 			padding: 5rpx 0;
-			padding-left: 100rpx;
+			padding-left: 400rpx;
 			opacity: 0.8;
 		}
 		.text {
@@ -139,10 +143,15 @@ export default {
 		}
 	}
 }
+.loadmore-box {
+	padding: 20rpx 0;
+	background-color: #fff;
+}
 .list-wrap {
 	display: flex;
 	flex-direction: column;
-	margin: 0 20rpx 50rpx;
+	margin: 0;
+	padding: 0 20rpx;
 	background-color: #fff;
 	.list-item {
 		margin-top: 20rpx;
@@ -154,10 +163,10 @@ export default {
 		padding: 20rpx;
 		border-radius: 10rpx;
 		transition: all 0.5s;
-		&.not-completed {
-			background-color: #f84343;
-			box-shadow: 4px 3px 4px rgba(248, 67, 67, 0.5);
-		}
+		// &.not-completed {
+		// 	background-color: #f84343;
+		// 	box-shadow: 4px 3px 4px rgba(248, 67, 67, 0.5);
+		// }
 		&.has-completed {
 			background-color: rgba(41, 121, 255, 0.8);
 			box-shadow: 4px 3px 4px rgba(41, 121, 255, 0.5);

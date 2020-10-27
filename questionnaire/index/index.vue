@@ -1,10 +1,10 @@
 <template>
 	<view class="cu-card">
 		<view class="cu-item" style="padding: 10upx;" v-if="configCols && configCols.length > 0">
-			<view class="question-title">
+			<!-- 		<view class="question-title">
 				<view>{{ formData.title }}</view>
-			</view>
-			<view class="content" style="padding: 0 30upx;">
+			</view> -->
+			<view class="content" style="padding:30upx 30upx 0;">
 				<view class="desc" style="text-align: justify;">
 					<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
 					<view class="date-box">
@@ -13,10 +13,8 @@
 					</view>
 				</view>
 			</view>
-			<view class="content" style="box-sizing: border-box; padding: 30rpx 0;">
-				<bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform>
-			</view>
-			<view class="content" style="padding: 0 30upx;">
+			<view class="content" style="box-sizing: border-box;"><bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform></view>
+			<view class="content" style="padding:30upx;">
 				<view class="desc">
 					<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
 				</view>
@@ -33,7 +31,7 @@
 				style="margin: 30upx;"
 				v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
 			>
-				<button class="bg-blue line-white" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
+				<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
 				<view class="score-box" v-if="scoreInfo.score || scoreInfo.score === 0">
 					得分：
 					<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
@@ -44,11 +42,11 @@
 				style="margin: 30upx;"
 				v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
 			>
-				<button class="bg-blue line-white" type="" @click="seeReport()">查看评估结果</button>
+				<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
 			</view>
 		</view>
 		<view class="to-history" v-if="configCols && configCols.length > 0 && formType === 'form'" @click="toHistory">点击查看历史提交</view>
-		<u-empty text="未找到问卷配置数据" v-else-if="!configCols||configCols.length===0"></u-empty>
+		<u-empty text="未找到问卷配置数据" v-else-if="!configCols || configCols.length === 0"></u-empty>
 	</view>
 </template>
 
@@ -135,7 +133,6 @@ export default {
 		saveValue(e) {
 			let self = this;
 			if (e.value && this.status === '进行中') {
-				// return
 				let itemData = [
 					{
 						item_no: e.column,
@@ -154,12 +151,12 @@ export default {
 					itemData = [
 						{
 							item_no: e.column,
-							option_data: e.value
+							option_data: e.value.filter(i => i && i)
 						}
 					];
 				}
 				const serviceName = 'srvdaq_activity_result_save';
-				const url = this.getServiceUrl(this.appName ? this.appName : 'daq', serviceName, 'operate');
+				const url = this.getServiceUrl('daq', serviceName, 'operate');
 				let req = [
 					{
 						serviceName: serviceName,
@@ -211,7 +208,7 @@ export default {
 										option_data: [itemData[item]]
 									};
 									if (Array.isArray(itemData[item])) {
-										obj.option_data = itemData[item];
+										obj.option_data = itemData[item].filter(i => i && i);
 									}
 									if (itemData[item]) {
 										resultData.push(obj);
@@ -386,6 +383,11 @@ export default {
 								});
 							}
 							this.formData = data;
+							if (data.title) {
+								uni.setNavigationBarTitle({
+									title: data.title
+								});
+							}
 							if (data.user_state === '完成' && data.answer_times !== '多次') {
 								this.formType = 'detail';
 							}
@@ -709,6 +711,7 @@ export default {
 }
 .button-box {
 	display: flex;
+	justify-content: center;
 	.button {
 		color: #fff;
 		background-color: #0bc99d;
