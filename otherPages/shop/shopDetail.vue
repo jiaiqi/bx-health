@@ -59,7 +59,7 @@
 							<view class="ele-text">
 								<text>蛋白质:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.protein ? foodObj.protein.toFixed(1):'0' }}g</text>
+								<text>{{ foodObj.protein ? foodObj.protein:'0' }}g</text>
 								<!-- <text style="color: red;">({{ foodObj.protein>=35?'高':foodObj.protein>=15&&foodObj.protein<35?'较高':'低' }})</text> -->
 							</view>								
 						</view>
@@ -72,25 +72,25 @@
 							<view class="ele-text">
 								<text>VB1:</text>
 								<text>2</text>
-								<text>{{ foodObj.vitamin_b1 ? foodObj.vitamin_b1.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.vitamin_b1 ? foodObj.vitamin_b1:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.vitamin_b1>=0.15?'高':foodObj.vitamin_b1>=0.1&&foodObj.vitamin_b1<0.15?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>VB2:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.vitamin_b2 ? foodObj.vitamin_b2.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.vitamin_b2 ? foodObj.vitamin_b2:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.vitamin_b2>=0.15?'高':foodObj.vitamin_b2>=0.1&&foodObj.vitamin_b2<0.15?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>VB3:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.vitamin_b3 ? foodObj.vitamin_b3.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.vitamin_b3 ? foodObj.vitamin_b3:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.vitamin_b3>=5?'高':foodObj.vitamin_b3>=3.5&&foodObj.vitamin_b3<5?'较高':'低' }})</text> -->
 							</view>		
 							<view class="ele-text">
 								<text>VC:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.vitamin_c ? foodObj.vitamin_c.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.vitamin_c ? foodObj.vitamin_c:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.vitamin_c>=50?'高':foodObj.vitamin_c>=35&&foodObj.vitamin_c<50?'较高':'低' }})</text> -->
 							</view>
 						</view>
@@ -103,25 +103,25 @@
 							<view class="ele-text">
 								<text>钙:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.vitamin_a ? foodObj.element_ca.toFixed(1):0 }}mg/</text>
+								<text>{{ foodObj.vitamin_a ? foodObj.element_ca:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.element_ca>=450?'高':foodObj.element_ca>=200?foodObj.element_ca<450?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>镁:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_mg ? foodObj.element_mg.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.element_mg ? foodObj.element_mg:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.element_mg>=150?'高':foodObj.element_mg>=80?foodObj.element_mg<150?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>磷:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_p ? foodObj.element_p.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.element_p ? foodObj.element_p:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.element_p>=250?'高':foodObj.element_p>=150?foodObj.element_p<250?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>钾:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_k ? foodObj.element_k.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.element_k ? foodObj.element_k:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.element_k>=500?'高':foodObj.element_k>=200?foodObj.element_k<500?'较高':'低' }})</text> -->
 							</view>
 						</view>
@@ -135,31 +135,31 @@
 							<view class="ele-text">
 								<text>铁:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_fe ? foodObj.element_fe.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.element_fe ? foodObj.element_fe:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.element_fe>=8?'高':foodObj.element_fe>=4?foodObj.element_fe<8?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>锌:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_zn ? foodObj.element_zn.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.element_zn ? foodObj.element_zn:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.element_zn>=7?'高':foodObj.element_zn>=4?foodObj.element_zn<7?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>硒:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_se ? foodObj.element_se.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.element_se ? foodObj.element_se:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.element_se>=20?'高':foodObj.element_se>=10?foodObj.element_se<20?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>铜:</text>
-								<text>{{ foodObj.element_cu ? foodObj.element_cu.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.element_cu ? foodObj.element_cu:0 }}mg</text>
 								<!-- <text>2</text> -->
 								<!-- <text style="color: red;">({{ foodObj.element_cu>=1.5?'高':foodObj.element_cu>=1?foodObj.element_cu<1.5?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>锰:</text>
 								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_mn ? foodObj.element_mn.toFixed(1):0 }}mg</text>
+								<text>{{ foodObj.element_mn ? foodObj.element_mn:0 }}mg</text>
 								<!-- <text style="color: red;">({{ foodObj.element_mn>=5?'高':foodObj.element_mn>=2.5?foodObj.element_mn<5?'较高':'低' }})</text> -->
 							</view>
 						</view>
@@ -167,59 +167,30 @@
 				</view>
 			</view>			
 		</view>
-		<view class="shop-detail-bot-b">
-			<view @click="addIngredient" class="shop-detail-bot-b-t">
-				<text>食材营养素含量</text>
-				<text v-if="queryType === 'myShop'" class="cuIcon-add"></text>
+		<view class="shop-detail-bot-b" :class="foodChild.length >=3?'bot-padd':''">
+			<view class="shop-detail-bot-b-t">
+				<text>食材含量</text>
 			</view>
 			<view class="shop-detail-bot-tab">
-				<view v-for="(alone,i) in foodChild" :key="i" class="table">
-					<view class="tr tab-tr">
-						<view class="td">
-							食材
-						</view>
-						<view class="td">
-							营养素
-						</view>
-						<view class="td">
-							含量
-						</view>
+				<view class="shop-detail-bot-tab-t">
+					<text>食材名称</text>
+					<text>食材含量</text>
+					<text>单位</text>
+				</view>
+				<view v-if="foodChild.length > 0" class="shop-detail-bot-tab-m">
+					<view v-for="(item,index) in foodChild" :key="index" class="shop-detail-bot-tab-m-item">
+						<text>{{item.name}}</text>
+						<text>{{item.unit_amount}}</text>
+						<text>{{item.unit}}</text>
 					</view>
-					<view class="tr-left-wrap">
-						<view class="tr-left">
-							<view class="td">
-								{{alone.name}}
-							</view>
-						</view>
-						<view class="tr-right">
-							<view v-for="(item,index) in alone.child" :key="index" class="tr">
-								<!-- <view class="td">
-									{{alone.name}}
-								</view> -->
-								<view class="td">
-									{{item.key}}
-								</view>
-								<view class="td">
-									{{item.value?item.value:0}}
-								</view>
-							</view>
-						</view>
-						
+				</view>
+				<view v-else class="detail-none">
+					<view class="detail-none-t">
+						<image src="/otherPages/static/img/noneData.png" mode=""></image>
+						<text>暂无数据</text>
 					</view>
 					
 				</view>
-				
-					
-					<!-- <tr>
-						<td rowspan="13" style="text-align: center;">{{alone.name}}</td>
-						<td>{{alone.child&&alone.child[0].key}}</td>
-						<td>{{alone.child&&alone.child[0].value?alone.child.value:0}}</td>
-					</tr>
-					<tr v-for="(item,index) in alone.child" :key="index" v-show="index < 12">
-						<td>{{alone.child[index+1]?alone.child[index+1].key:''}}</td>
-						<td>{{alone.child[index+1]?(alone.child[index+1].value?alone.child[index+1].value:0):''}}</td>
-					</tr> -->
-					
 			</view>
 		</view>
 		<jumpBall :backgroundColor="'red'" :start.sync="num" :element.sync="element" @msg="jbMsg" />
@@ -305,21 +276,7 @@
 				this.isJoin = true
 				this.setShopCarData()
 				this.carNum += 1
-			},
-			/*添加食材**/
-			addIngredient(){
-				let cond = [{
-					colName:"meal_no",
-					ruleType:"eq",
-					value:this.foodObj.meal_no
-				}]
-				if(this.queryType === 'myShop'){
-					uni.navigateTo({
-					  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
-					});
-				}
-				
-			},
+			},			
 			jbMsg(res) {
 				//执行加入购物车的逻辑
 				console.log('执行回调', res.code);
@@ -341,32 +298,9 @@
 				let data = res.data.data
 				let eleData = this.eleData
 				let dataArr = []
-				if(data.length > 0){						
-						data.forEach(d=>{
-							let obj = {
-								name:"",
-								child:[]
-							}
-							eleData.forEach(item=>{
-								let obj1 = {}
-								obj['name'] = d.name
-								obj1['key'] = item
-								obj1['value'] = d[item]
-								obj.child.push(obj1)
-							})
-							dataArr.push(obj)
-						console.log("-0-----",dataArr)
-					})
-				}
-				this.foodChild = dataArr
-			/**
-			 * [{
-				 name:''
-				 child:[{
-					 
-				 }]
-			 }]
-			 * */	
+				// if(data.length > 0){	
+					this.foodChild = data
+				// }	
 			}
 		},
 		onShow() {
@@ -496,7 +430,7 @@
 	.shop-detail-bot-b{
 		background-color: white;
 		margin-top: 30upx;
-		padding-bottom: 20upx;
+		// padding-bottom: 100upx;
 		.shop-detail-bot-b-t{
 			font-weight: 600;
 			margin-left: 20upx;
@@ -512,56 +446,54 @@
 			}
 		}
 		.shop-detail-bot-tab{
-			display: flex;
-			justify-content: center;
-			flex-direction: column;
-			align-items: center;
-			width: 100%;
-			.table{
+			min-height: 300upx;
+			.shop-detail-bot-tab-t{
+				display: flex;
+				justify-content: space-around;
+				background-color: rgb(240,240,240);
+				padding: 5px 0;
 				width: 95%;
-				border:1px solid #000000;
-				margin-top: 10upx;
-				.tr-left-wrap{
+				margin: 0 auto;
+			}
+			.shop-detail-bot-tab-m{
+				.shop-detail-bot-tab-m-item{
 					display: flex;
-					.tr-left{
-						width: 33%;
-						border-right: 1px solid #000;
-						display: flex;
-						align-items: center;
-						justify-content: center;
+					justify-content: space-around;
+					padding: 10px 0;
+					border-bottom: 1px solid #f2f3f3;
+					width: 95%;
+					margin: 0 auto;
+					text{
+						min-width: 33%;
+						text-align: center;
+						
 					}
-					.tr-right{
-						width: 67%;
+					&:last-of-type{
+						border-bottom: none;
 					}
-					
 				}
 				
 			}
-			table{
-				margin-top: 10upx;
-				tr{
-					td{
-						height: 50upx;
+			.detail-none{
+				.detail-none-t{
+					min-height: 200upx;
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+					image{
+						width: 100upx;
+						height: 100upx;
+					}
+					text{
+						color: #b0b0b0;
 					}
 				}
 			}
 		}
 	}
-	
-}
-.tr{
-	display: flex;
-	justify-content: space-between;
-	.td{
-		width: 50%;
-		border-right: 1px solid #000000;
-		border-bottom: 1px solid #000000;
-		
-	}
-	&:last-child{
-		.td{
-			border-bottom: none;
-		}
+	.bot-padd{
+		padding-bottom: 100upx;
 	}
 }
 .add-button {

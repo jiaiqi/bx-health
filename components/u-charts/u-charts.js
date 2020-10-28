@@ -1,5 +1,5 @@
 /*
- * uCharts v1.9.3.20190922
+ * uCharts v1.9.4.20200331
  * uni-app平台高性能跨全端图表，支持H5、APP、小程序（微信/支付宝/百度/头条/QQ/360）
  * Copyright (c) 2019 QIUN秋云 https://www.ucharts.cn All rights reserved.
  * Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
@@ -603,8 +603,12 @@ function getCandleToolTipData(series, seriesData, calPoints, index, categories, 
   };
   textList.push(text0);
   seriesData.map(function(item) {
-    if (index == 0 && item.data[1] - item.data[0] < 0) {
-      color[1] = downColor;
+    if (index == 0) {
+      if(item.data[1] - item.data[0] < 0){
+      	color[1] = downColor;
+      }else{
+      	color[1] = upColor;
+      }
     } else {
       if (item.data[0] < series[index - 1][1]) {
         color[0] = downColor;
@@ -1020,7 +1024,7 @@ function getXAxisTextList(series, opts, config) {
   data = data.filter(function(item) {
     //return item !== null;
     if (typeof item === 'object' && item !== null) {
-      if (item.constructor == Array) {
+      if (item.constructor.toString().indexOf('Array')>-1) {
         return item !== null;
       } else {
         return item.value !== null;
@@ -1031,7 +1035,7 @@ function getXAxisTextList(series, opts, config) {
   });
   data.map(function(item) {
     if (typeof item === 'object') {
-      if (item.constructor == Array) {
+      if (item.constructor.toString().indexOf('Array')>-1) {
 				if(opts.type=='candle'){
 					item.map(function(subitem) {
 					  sorted.push(subitem);
@@ -1451,7 +1455,7 @@ function getDataPoints(data, minRange, maxRange, xAxisPoints, eachSpacing, opts,
       point.x = xAxisPoints[index];
       var value = item;
       if (typeof item === 'object' && item !== null) {
-				if (item.constructor == Array) {
+				if (item.constructor.toString().indexOf('Array')>-1) {
 					let xranges,xminRange,xmaxRange;
 					xranges = [].concat(opts.chartData.xAxisData.ranges);
 					xminRange = xranges.shift();
@@ -1526,7 +1530,7 @@ function getYAxisTextList(series, opts, config, stack) {
   data = data.filter(function(item) {
     //return item !== null;
     if (typeof item === 'object' && item !== null) {
-      if (item.constructor == Array) {
+      if (item.constructor.toString().indexOf('Array')>-1) {
         return item !== null;
       } else {
         return item.value !== null;
@@ -1537,7 +1541,7 @@ function getYAxisTextList(series, opts, config, stack) {
   });
   data.map(function(item) {
     if (typeof item === 'object') {
-      if (item.constructor == Array) {
+      if (item.constructor.toString().indexOf('Array')>-1) {
 				if(opts.type=='candle'){
 					item.map(function(subitem) {
 					  sorted.push(subitem);

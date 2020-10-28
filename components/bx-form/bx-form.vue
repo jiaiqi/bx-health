@@ -400,6 +400,18 @@ export default {
 			} else {
 				this.fieldModel[e.column] = e.value;
 			}
+			/*争对食材选择冗余做单独处理*/
+			if(e.column === 'food_no' && e.type === 'treeSelector' && typeof e.colData === 'object'){
+				this.allField.forEach(hea=>{
+					if(hea.column === 'unit'){
+						hea.value = e.colData.unit
+					}else if(hea.column === 'name'){
+						hea.value = e.colData.name
+					}
+				})
+			}
+			/*----------------*/
+			
 			e.value = this.fieldModel[e.column];
 			const fieldModel = this.deepClone(this.fieldModel);
 			this.allField = this.allField.map((item, index) => {
@@ -538,7 +550,7 @@ export default {
 		showOptionlist(e) {
 			this.$emit('show-option-list', e);
 		},
-		onReset() {
+		async onReset() {
 			this.allField = this.deepClone(this.oldField);
 			console.log(this.oldField, 'this.oldField');
 			try {

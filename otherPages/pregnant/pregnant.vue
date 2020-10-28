@@ -1,6 +1,25 @@
 <template>
 	<view class="pregnant_wrap">
-		<u-collapse  :head-style="headStyle">
+		<view class="pregnant-top">
+			<scroll-view scroll-x class="bg-white nav">
+				<view class="flex text-center">
+					<view class="cu-item flex-sub" :class="index==TabCur?'text-orange cur':''" v-for="(item,index) in titleData" :key="index" @tap="tabSelect(item,$event)" :data-id="index">
+						{{item.name}}
+					</view>
+				</view>
+			</scroll-view>
+			<view class="pregnant-time">
+				<view class="pregnant-time-left">
+					<text>预产时间：</text>
+					<text>请选择预产期</text>
+				</view>
+				<view @click="openCale" class="pregnant-time-right">
+					<u-icon size="50" name="calendar"></u-icon>
+				</view>
+			</view>
+		</view>
+		<view v-if="current_tit === 'pregnancy'" class="pregnant-main-fetation">
+			<u-collapse :head-style="headStyle">
 				<u-collapse-item v-for="(item,index) in timeLienData" :key="index" :open="item.open" :title="item.name">
 					<view class="cu-timeline pregnant-timeline">					
 						<view v-for="(week,i) in item.child" class="cu-item">
@@ -17,6 +36,14 @@
 					</view>
 				</u-collapse-item>
 			</u-collapse>
+		</view>
+		<view v-else-if="current_tit === 'prepare'" class="pregnant-main-pregnancy">
+			<text>备孕</text>
+		</view>
+		<view v-else-if="current_tit === 'postpartum'" class="pregnant-main-delivery">
+			<text>产后</text>
+		</view>
+		
 			<u-popup v-model="show" mode="center" width="85%">
 				<view class="pre-model-wrap">
 					<view class="pre-top">
@@ -53,18 +80,45 @@
 					</view>
 				</view>
 			</u-popup>	
+			<!-- <u-popup v-model="showTimeSignPicker" mode="center" width="85%">
+				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :headerBar="true" :disabledAfter='true' :isMarkDays="false" @onDayClick="onDayClick"></bx-date-stamp>
+			</u-popup> -->
+			<!-- <view @click.self="closeDay" class="cu-modal" style="display: flex; align-items: center" :class="modalName == 'Modal' ? 'show' : ''">
+				<view class="cu-dialog">
+					<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :markDays="markDays" :headerBar="true" @onDayClick="onDayClick"></bx-date-stamp>
+				</view>
+			</view> -->
 	</view>
 </template>
 
 <script>
+	import bxDateStamp from '@/components/bx-date-stamp/bx-date-stamp.vue';
 	export default {
 		name:"pregnant",
+		components:{bxDateStamp},
 		data(){
 			return {
 				headStyle:{
 					paddingLeft:'18px'
 				},
 				current_pre:"",
+				
+				markDays:[],
+				showTimeSignPicker:false,
+				modalName:'',
+				selectDate:'',
+				TabCur: 1,
+				scrollLeft: 0,
+				titleData:[{
+					name:'备孕',
+					type:'prepare'
+				},{
+					name:'已怀孕',
+					type:'pregnancy'
+				},{
+					name:'产后',
+					type:'postpartum'
+				}],
 				show:false,
 				timeLienData:
 				 [
@@ -702,10 +756,33 @@
 					 },
 					 ]
 				 },
-				 ],				
+				 ],	
+				current_tit:'pregnancy'
 			}
 		},
 		methods:{
+			/*点击日期某一天**/
+			onDayClick(data){
+				this.showTimeSignPicker = false;
+				this.selectDate = data.date;
+				this.modalName = '';
+			},
+			/*关闭日期选择器**/
+			closeDay(e) {
+				this.modalName = '';
+				this.showTimeSignPicker = false;
+			},
+			/*点击打开日期选择器*/
+			openCale(){
+				this.modalName = 'Modal';
+				this.showTimeSignPicker = true
+			},
+			/*tab选择*/
+			tabSelect(item,e) {
+				this.TabCur = e.currentTarget.dataset.id;
+				this.scrollLeft = (e.currentTarget.dataset.id - 1) * 60
+				this.current_tit = item.type
+			},
 			/*点击每周进入详情页面**/
 			toDetail(){
 				uni.navigateTo({
@@ -734,6 +811,9 @@
 				}
 				this.show = false
 			}
+		},
+		onLoad() {
+			console.log("---------------------")
 		}
 	}
 </script>
@@ -742,6 +822,25 @@
 	.pregnant_wrap{
 		min-height: 100vh;
 		background-color: white;
+		.pregnant-top{
+			.pregnant-time{
+				margin: 20upx 0;
+				display: flex;
+				justify-content: space-between;
+				.pregnant-time-left{
+					margin-left: 25upx;
+					font-size: 32upx;
+					text{
+						&:last-child{
+							color: red;
+						}
+					}
+				}
+				.pregnant-time-right{
+					margin-right: 25upx;
+				}
+			}
+		}
 		.pregnant-timeline{
 			.cu-time{
 				font-weight: 700;

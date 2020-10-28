@@ -83,6 +83,7 @@
 									<text>{{item.price}}</text>
 								</view>
 								<view v-if="queryType === 'myShop'" class="item-right-bot-rig">
+									<text @click.stop="addIngredient(item)">食材管理</text>
 									<text @click.stop="del(item)">删除</text>
 									<text @click.stop="amend(item)">修改</text>
 								</view>
@@ -295,6 +296,12 @@
 				  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
 				});
 			},
+			/*添加食材**/
+			addIngredient(item){
+				uni.navigateTo({
+					url:'/otherPages/shop/foodMaterial?itemFood=' + encodeURIComponent(JSON.stringify(item))
+				})
+			},
 			/*删除**/
 			 del(item){			
 				 let self = this
@@ -474,9 +481,13 @@
 							.item-right-bot-rig{
 								margin-right: 20upx;
 								text{
+									color: #0081ff;
+									border: 1px solid #0081ff;
+									border-radius: 40upx;
+									padding:4upx 20upx;
 									&:first-child{
 										color: #0081ff;
-										margin-right: 20upx;
+										margin-right: 10upx;
 										border: 1px solid #0081ff;
 										border-radius: 40upx;
 										padding:4upx 20upx;
@@ -486,6 +497,7 @@
 										border: 1px solid #0081ff;
 										border-radius: 40upx;
 										padding:4upx 20upx;
+										margin-left: 10upx;
 									}
 								}
 							}

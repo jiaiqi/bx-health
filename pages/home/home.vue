@@ -54,7 +54,8 @@
 		</view>
 		<view class="main-box column">
 			<view class="main-box-title">近期趋势</view>
-			<view class="chart-box" :class="{ 'max-height': currentChart }">
+			<view class="chart-box">
+				<uni-ec-canvas class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="ecWeight"></uni-ec-canvas>
 				<canvas
 					v-if="currentChart === 'stepChart'"
 					canvas-id="stepChart"
@@ -74,11 +75,6 @@
 				<button class="button" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
 					{{ item.name }}
 				</button>
-				<!-- <view class="box-item" :class="{ active: currentChart === 'canvasLineA' }" @click="showCanvas('weight')">步数</view>
-				<view class="box-item" :class="{ active: currentChart === 'canvasLineA' }" @click="showCanvas('weight')">体重</view>
-				<view class="box-item" :class="{ active: currentChart === 'canvasLineB' }" @click="showCanvas('BP')">血压</view>
-				<view class="box-item" :class="{ active: currentChart === 'canvasLineC' }" @click="showCanvas('sleep')">睡眠</view>
-				<view class="box-item" :class="{ active: currentChart === 'canvasColumnD' }" @click="showCanvas('calories')">热量</view> -->
 			</view>
 		</view>
 		<view class="main-box">
@@ -174,18 +170,111 @@
 </template>
 <script>
 var self;
-import uCharts from '@/components/u-charts/u-charts.js';
+// import uCharts from '@/components/u-charts/u-charts.js';
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
 var _self;
 var canvasLineA = null;
 var canvasLineB = null;
 var canvasLineC = null;
 var canvasColumnD = null;
 var stepChart = null;
+var canvasPie = null;
 var dayjs = require('dayjs');
 export default {
+	components: {
+		uniEcCanvas
+	},
 	data() {
 		return {
 			quInfo: {}, // 问卷信息
+			ecWeight: {
+				option: {
+					title: {
+						text: '体重'
+					},
+					tooltip: {
+						trigger: 'axis',
+						formatter: '{b}\r\n{c0}kg',
+						axisPointer: {
+							type: 'line',
+							axis: 'x',
+							label: {
+								backgroundColor: '#000000'
+							}
+						}
+					},
+					grid: {
+						left: '6%',
+						right: '6%',
+						top: '6%',
+						bottom: '6%',
+						containLabel: true
+					},
+					xAxis: {
+						type: 'category',
+						boundaryGap: false,
+						data: ['2-12', '2-14', '2-16', '2-18', '2-20', '2-22', '2-24'],
+						axisLine: {
+							// y轴
+							show: false
+						},
+						axisTick: {
+							// y轴刻度线
+							show: false
+						},
+						splitLine: {
+							// 网格线
+							show: false
+						}
+					},
+					yAxis: {
+						type: 'value',
+						axisLine: {
+							// y轴
+							show: false
+						},
+						axisTick: {
+							// y轴刻度线
+							show: false
+						},
+						splitLine: {
+							// 网格线
+							show: false
+						}
+					},
+					series: [
+						{
+							name: '浏览量',
+							type: 'line',
+							smooth: true,
+							areaStyle: {
+								color: {
+									type: 'linear',
+									x: 0,
+									y: 0,
+									x2: 0,
+									y2: 1,
+									colorStops: [
+										{
+											offset: 0,
+											color: '#E50113' // 0% 处的颜色
+										},
+										{
+											offset: 1,
+											color: '#fff' // 100% 处的颜色
+										}
+									],
+									global: false // 缺省为 false
+								}
+							},
+							lineStyle: {
+								color: '#EF5959'
+							},
+							data: [120, 132, 101, 134, 90, 230, 210]
+						}
+					]
+				}
+			},
 			subList: [
 				{ name: '步数', key: 'step', chartID: 'stepChart' },
 				{ name: '体重', key: 'weight', chartID: 'canvasLineA' },
@@ -362,6 +451,34 @@ export default {
 		}
 	},
 	methods: {
+		showPie(canvasId, chartData) {
+			canvasPie = new uCharts({
+				$this: _self,
+				canvasId: canvasId,
+				type: 'pie',
+				fontSize: 11,
+				legend: { show: true },
+				background: '#FFFFFF',
+				pixelRatio: _self.pixelRatio,
+				series: chartData.series,
+				animation: true,
+				width: _self.cWidth * _self.pixelRatio,
+				height: _self.cHeight * _self.pixelRatio,
+				dataLabel: true,
+				extra: {
+					pie: {
+						lableWidth: 15
+					}
+				}
+			});
+		},
+		touchPie(e) {
+			canvaPie.showToolTip(e, {
+				format: function(item) {
+					return item.name + ':' + item.data;
+				}
+			});
+		},
 		async checkQuestionnaireRecord() {
 			let quInfo = {
 				//饮食营养
@@ -479,8 +596,6 @@ export default {
 		},
 		showCanvas(type) {
 			// 显示图表
-			this.cWidth = uni.upx2px(710);
-			this.cHeight = uni.upx2px(350);
 			switch (type) {
 				case 'step':
 					if (this.currentChart === 'stepChart') {
@@ -601,7 +716,7 @@ export default {
 					});
 					this.weightChartData.series = series;
 					this.weightChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
-					this.showLineA('canvasLineA', this.weightChartData, 'kg');
+					// this.showLineA('canvasLineA', this.weightChartData, 'kg');
 				} else if (type === 'bloodPressure') {
 					series = this.BPChartData.series;
 					series[0].data = res.data.data.map(item => {
@@ -903,6 +1018,96 @@ export default {
 				this.showUserList = false;
 			}
 		},
+		buildEcData(option = { unit: '', title: '', chartData: { categories: [], series: { name: '', color: '', data: [] } } }) {
+			let data = {
+				option: {
+					title: {
+						text: '体重'
+					},
+					tooltip: {
+						trigger: 'axis',
+						formatter: '{b}\r\n{c0}kg',
+						axisPointer: {
+							type: 'line',
+							axis: 'x',
+							label: {
+								backgroundColor: '#000000'
+							}
+						}
+					},
+					grid: {
+						left: '6%',
+						right: '6%',
+						top: '6%',
+						bottom: '6%',
+						containLabel: true
+					},
+					xAxis: {
+						type: 'category',
+						boundaryGap: false,
+						data: ['2-12', '2-14', '2-16', '2-18', '2-20', '2-22', '2-24'],
+						axisLine: {
+							// y轴
+							show: false
+						},
+						axisTick: {
+							// y轴刻度线
+							show: false
+						},
+						splitLine: {
+							// 网格线
+							show: false
+						}
+					},
+					yAxis: {
+						type: 'value',
+						axisLine: {
+							// y轴
+							show: false
+						},
+						axisTick: {
+							// y轴刻度线
+							show: false
+						},
+						splitLine: {
+							// 网格线
+							show: false
+						}
+					},
+					series: [
+						{
+							name: '浏览量',
+							type: 'line',
+							smooth: true,
+							areaStyle: {
+								color: {
+									type: 'linear',
+									x: 0,
+									y: 0,
+									x2: 0,
+									y2: 1,
+									colorStops: [
+										{
+											offset: 0,
+											color: '#E50113' // 0% 处的颜色
+										},
+										{
+											offset: 1,
+											color: '#fff' // 100% 处的颜色
+										}
+									],
+									global: false // 缺省为 false
+								}
+							},
+							lineStyle: {
+								color: '#EF5959'
+							},
+							data: [120, 132, 101, 134, 90, 230, 210]
+						}
+					]
+				}
+			};
+		},
 		async getUserInfo() {
 			let url = this.$api.getUserInfo;
 			let req = {
@@ -969,19 +1174,51 @@ export default {
 		},
 		showLineA(canvasId, chartData, unit) {
 			let options = this.getChartOptions(canvasId, chartData, unit);
-			canvasLineA = new uCharts(options);
+			if (canvasLineA) {
+				canvasLineA.updateData({
+					series: chartData.series,
+					categories: chartData.categories,
+					animation: true
+				});
+			} else {
+				canvasLineA = new uCharts(options);
+			}
 		},
 		showLineB(canvasId, chartData, unit) {
 			let options = this.getChartOptions(canvasId, chartData, unit);
-			canvasLineB = new uCharts(options);
+			if (canvasLineB) {
+				canvasLineB.updateData({
+					series: chartData.series,
+					categories: chartData.categories,
+					animation: true
+				});
+			} else {
+				canvasLineB = new uCharts(options);
+			}
 		},
 		showLineC(canvasId, chartData, unit) {
 			let options = this.getChartOptions(canvasId, chartData, unit);
-			canvasLineC = new uCharts(options);
+			if (canvasLineC) {
+				canvasLineC.updateData({
+					series: chartData.series,
+					categories: chartData.categories,
+					animation: true
+				});
+			} else {
+				canvasLineC = new uCharts(options);
+			}
 		},
 		showColumnD(canvasId, chartData, unit) {
 			let options = this.getChartOptions(canvasId, chartData, unit, 'column');
-			canvasColumnD = new uCharts(options);
+			if (canvasColumnD) {
+				canvasColumnD.updateData({
+					series: chartData.series,
+					categories: chartData.categories,
+					animation: true
+				});
+			} else {
+				canvasColumnD = new uCharts(options);
+			}
 		},
 		getChartOptions(canvasId, chartData, unit, type) {
 			return {
@@ -1035,7 +1272,10 @@ export default {
 					return category + ' 步数' + ': ' + item.data + '步';
 				}
 			});
-			// stepChart.scrollEnd(e);
+			stepChart.touchLegend(e, {
+				animation: true
+			});
+			stepChart.scrollEnd(e);
 		},
 		touchLine(e) {
 			stepChart.scrollStart(e);
@@ -1092,7 +1332,7 @@ export default {
 			// #ifdef MP-WEIXIN
 			let result = await wx.getWeRunData();
 			if (result.errMsg === 'getWeRunData:ok') {
-				this.wxRunData = result;
+				// this.wxRunData = result;
 				this.decryptData(result);
 			}
 			// #endif
@@ -1122,8 +1362,6 @@ export default {
 						});
 						console.log('stepList', this.deepClone(stepList));
 						this.stepInfoList = stepList;
-						// let stepData = this.getDayStepInfo(this.date);
-						// this.stepData = stepData;
 						let chartData = { categories: [], series: [{}] };
 						chartData.categories = stepList.map(item => item.date.slice(5));
 						chartData.series[0] = {
@@ -1131,15 +1369,8 @@ export default {
 							data: []
 						};
 						chartData.series[0].data = stepList.map(item => item.step);
-						// if (_self.userInfo.is_main === '是') {
+						this.wxRunData = chartData;
 						_self.showChart('stepChart', chartData);
-						// } else {
-						// 	uni.showToast({
-						// 		title: '无权查看',
-						// 		icon: 'none'
-						// 	});
-						// 	self.showCanvas('weight');
-						// }
 						return stepList;
 					} else {
 						return false;
@@ -1152,52 +1383,58 @@ export default {
 			}
 		},
 		showChart(canvasId, chartData) {
-			this.cWidth = uni.upx2px(710);
-			this.cHeight = uni.upx2px(350);
-			stepChart = new uCharts({
-				$this: _self,
-				canvasId: canvasId,
-				type: 'line',
-				fontSize: 11,
-				legend: { show: true },
-				dataLabel: true,
-				dataPointShape: true,
-				background: '#FFFFFF',
-				pixelRatio: 1,
-				categories: chartData.categories,
-				series: chartData.series,
-				animation: false,
-				enableScroll: true, //开启图表拖拽功能
-				xAxis: {
-					type: 'grid',
-					disableGrid: false,
-					gridColor: '#CCCCCC',
-					gridType: 'dash',
-					dashLength: 8,
-					itemCount: 8, //x轴单屏显示数据的数量，默认为5个
-					scrollShow: true, //新增是否显示滚动条，默认false
-					scrollAlign: 'right' //滚动条初始位置
-				},
-				yAxis: {
-					disableGrid: false,
-					gridType: 'dash',
-					gridColor: '#CCCCCC',
-					dashLength: 8,
-					splitNumber: 5,
-					min: 10,
-					max: 180,
-					format: val => {
-						return val.toFixed(0) + '步';
+			if (stepChart) {
+				stepChart.updateData({
+					series: chartData.series,
+					categories: chartData.categories,
+					animation: true
+				});
+			} else {
+				stepChart = new uCharts({
+					$this: _self,
+					canvasId: canvasId,
+					type: 'line',
+					fontSize: 11,
+					legend: { show: true },
+					dataLabel: true,
+					dataPointShape: true,
+					background: '#FFFFFF',
+					pixelRatio: 1,
+					categories: chartData.categories,
+					series: chartData.series,
+					animation: false,
+					enableScroll: true, //开启图表拖拽功能
+					xAxis: {
+						type: 'grid',
+						disableGrid: false,
+						gridColor: '#CCCCCC',
+						gridType: 'dash',
+						dashLength: 8,
+						itemCount: 8, //x轴单屏显示数据的数量，默认为5个
+						scrollShow: true, //新增是否显示滚动条，默认false
+						scrollAlign: 'right' //滚动条初始位置
+					},
+					yAxis: {
+						disableGrid: false,
+						gridType: 'dash',
+						gridColor: '#CCCCCC',
+						dashLength: 8,
+						splitNumber: 5,
+						min: 10,
+						max: 180,
+						format: val => {
+							return val.toFixed(0) + '步';
+						}
+					},
+					width: this.cWidth,
+					height: this.cHeight,
+					extra: {
+						line: {
+							type: 'curve' //曲线
+						}
 					}
-				},
-				width: this.cWidth,
-				height: this.cHeight,
-				extra: {
-					line: {
-						type: 'curve' //曲线
-					}
-				}
-			});
+				});
+			}
 		},
 		async initPage() {
 			let userInfo = uni.getStorageSync('login_user_info');
@@ -1241,11 +1478,7 @@ export default {
 			if (userInfo && userInfo.user_no) {
 				this.loginUserInfo = userInfo;
 				uni.setStorageSync('activeApp', 'health');
-				if (!uni.getStorageSync('user_info_list') || !Array.isArray(uni.getStorageSync('user_info_list'))) {
-					await this.getCurrUserInfo(); // 查找健康app个人基本信息
-				} else {
-					this.userMenuList = uni.getStorageSync('user_info_list');
-				}
+				await this.getCurrUserInfo(); // 查找健康app个人基本信息
 				if (uni.getStorageSync('current_user_info')) {
 					this.userInfo = uni.getStorageSync('current_user_info');
 				} else {
@@ -1282,7 +1515,7 @@ export default {
 				});
 				// #endif
 				// #ifdef H5
-				this.showCanvas('weight');
+				// this.showCanvas('weight');
 				// #endif
 				this.checkQuestionnaireRecord(); //检查有没有填过饮食运动等相关问卷
 			}
@@ -1301,6 +1534,8 @@ export default {
 	},
 	onLoad() {
 		_self = this;
+		this.cWidth = uni.upx2px(710);
+		this.cHeight = uni.upx2px(350);
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({
 			withShareTicket: true,
@@ -1315,6 +1550,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.qiun-charts {
+	width: 750upx;
+	height: 500upx;
+	background-color: #ffffff;
+	.charts-line {
+		width: 710rpx;
+		height: 350rpx;
+	}
+}
+.charts {
+	width: 750upx;
+	height: 500upx;
+	background-color: #ffffff;
+}
 .health-wrap {
 	background-color: #fff;
 	width: 100vw;
@@ -1436,23 +1685,31 @@ export default {
 			border-bottom: 1px dotted #f1f1f1;
 			bottom: -10rpx;
 			left: 0;
-			// left: calc(50% - 50rpx);
 		}
 	}
+
 	&.column {
 		flex-direction: column;
 		flex-wrap: nowrap;
+		position: relative;
+		.swiper {
+			height: 380rpx;
+			.swiper-item {
+				width: 710rpx;
+				height: 380rpx;
+				.charts-line {
+					width: 710rpx;
+					height: 350rpx;
+				}
+			}
+		}
 		.chart-box {
 			border-radius: 2px;
 			background-color: #fff;
 			margin: 0 auto;
-			height: 0;
-			transition: all 0.5s;
-			&.max-height {
-				height: 330rpx;
-			}
+			height: 350rpx;
 			.charts-line {
-				width: 690rpx;
+				width: 710rpx;
 				height: 350rpx;
 			}
 		}
@@ -1654,5 +1911,10 @@ export default {
 		background-color: #f1f1f1;
 		font-size: 40rpx;
 	}
+}
+.uni-ec-canvas {
+	width: 100%;
+	height: 350rpx;
+	display: block;
 }
 </style>

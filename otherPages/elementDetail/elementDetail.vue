@@ -54,6 +54,7 @@
 				</view>
 			</view>
 			<view class="qiun-charts qiun-rows"><canvas canvas-id="canvasPie" id="canvasPie" class="charts-pie" @touchstart="touchPie"></canvas></view>
+			<!-- <view class="qiun-charts qiun-rows"><canvas canvas-id="stepChart" id="stepChart" class="charts-pie" @touchstart="touchLine"></canvas></view> -->
 		</view>
 		<view class="element-box">
 			<view class="element-name title">
@@ -134,6 +135,7 @@
 				<view class="unit-bar"></view>
 			</view>
 		</view>
+		<!-- <button type="default" @click="showChart('stepChart', testData)">test</button> -->
 	</view>
 </template>
 
@@ -141,6 +143,7 @@
 import uCharts from '@/components/u-charts/u-charts.js';
 var _self;
 var canvaPie = null;
+var stepChart = null;
 export default {
 	computed: {
 		totalWeight() {
@@ -173,6 +176,110 @@ export default {
 	},
 	data() {
 		return {
+			ecWeight: {
+				option: {
+					title: {
+						text: '体重'
+					},
+					tooltip: {
+						trigger: 'axis',
+						formatter: '{b}\r\n{c0}kg',
+						axisPointer: {
+							type: 'line',
+							axis: 'x',
+							label: {
+								backgroundColor: '#000000'
+							}
+						}
+					},
+					grid: {
+						left: '6%',
+						right: '6%',
+						top: '6%',
+						bottom: '6%',
+						containLabel: true
+					},
+					xAxis: {
+						type: 'category',
+						boundaryGap: false,
+						data: ['2-12', '2-14', '2-16', '2-18', '2-20', '2-22', '2-24'],
+						axisLine: {
+							// y轴
+							show: false
+						},
+						axisTick: {
+							// y轴刻度线
+							show: false
+						},
+						splitLine: {
+							// 网格线
+							show: false
+						}
+					},
+					yAxis: {
+						type: 'value',
+						axisLine: {
+							// y轴
+							show: false
+						},
+						axisTick: {
+							// y轴刻度线
+							show: false
+						},
+						splitLine: {
+							// 网格线
+							show: false
+						}
+					},
+					series: [
+						{
+							name: '浏览量',
+							type: 'line',
+							smooth: true,
+							areaStyle: {
+								color: {
+									type: 'linear',
+									x: 0,
+									y: 0,
+									x2: 0,
+									y2: 1,
+									colorStops: [
+										{
+											offset: 0,
+											color: '#E50113' // 0% 处的颜色
+										},
+										{
+											offset: 1,
+											color: '#fff' // 100% 处的颜色
+										}
+									],
+									global: false // 缺省为 false
+								}
+							},
+							lineStyle: {
+								color: '#EF5959'
+							},
+							data: [120, 132, 101, 134, 90, 230, 210]
+						}
+					]
+				}
+			},
+			testData: {
+				categories: ['03-09', '03-12', '03-12', '03-14', '03-16', '03-19', '04-06'],
+				series: [
+					{
+						name: '体重',
+						data: [84.5, 67, 70, 70, 70, 68, 65],
+						color: '#1890ff',
+						index: 0,
+						type: 'line',
+						show: true,
+						pointShape: 'circle',
+						legendShape: 'line',
+						area: [156.5, 144, 208.5, 155]
+					}
+				]
+			},
 			currentDiet: null,
 			showEditModal: false,
 			showAddDiet: false,
@@ -425,7 +532,62 @@ export default {
 				_self.elementData.value_left = 0;
 				_self.elementData = _self.buildElemetBarData(_self.elementData);
 				_self.showPie('canvasPie', this.chartData);
+				// this.showChart('stepChart',this.testData);
 				return this.dietRecord;
+			}
+		},
+		showChart(canvasId, chartData) {
+			if (stepChart) {
+				stepChart.updateData({
+					series: chartData.series,
+					categories: chartData.categories,
+					animation: true
+				});
+			} else {
+				stepChart = new uCharts({
+					$this: _self,
+					canvasId: canvasId,
+					type: 'line',
+					fontSize: 11,
+					legend: { show: true },
+					dataLabel: true,
+					dataPointShape: true,
+					background: '#FFFFFF',
+					pixelRatio: 1,
+					categories: chartData.categories,
+					series: chartData.series,
+					animation: false,
+					enableScroll: true, //开启图表拖拽功能
+					xAxis: {
+						type: 'grid',
+						disableGrid: false,
+						gridColor: '#CCCCCC',
+						gridType: 'dash',
+						dashLength: 8,
+						itemCount: 8, //x轴单屏显示数据的数量，默认为5个
+						scrollShow: true, //新增是否显示滚动条，默认false
+						scrollAlign: 'right' //滚动条初始位置
+					},
+					yAxis: {
+						disableGrid: false,
+						gridType: 'dash',
+						gridColor: '#CCCCCC',
+						dashLength: 8,
+						splitNumber: 5,
+						min: 10,
+						max: 180,
+						format: val => {
+							return val.toFixed(0) + '步';
+						}
+					},
+					width: this.cWidth,
+					height: this.cHeight,
+					extra: {
+						line: {
+							type: 'curve' //曲线
+						}
+					}
+				});
 			}
 		},
 		showPie(canvasId, chartData) {
@@ -462,7 +624,6 @@ export default {
 					}
 				}
 			});
-
 			this.piearr = canvaPie.opts.series;
 		},
 		touchPie(e) {
@@ -896,5 +1057,10 @@ export default {
 	border-top-right-radius: 5px;
 	border-bottom-right-radius: 5px;
 	background-color: rgb(255, 179, 71);
+}
+.uni-ec-canvas {
+	width: 100%;
+	height: 350rpx;
+	display: block;
 }
 </style>

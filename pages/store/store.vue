@@ -129,13 +129,14 @@ export default {
 		};
 	},
 	async created() {
+		let self = this
 		uni.$on('loginStatusChange',(result)=>{
-			this.isLogin = result
+			self.isLogin = result
 		})
 		let userInfo = uni.getStorageSync('login_user_info');
 		if (!userInfo) {
 			// 未登录， 提示跳转
-			this.isLogin = false;
+			self.isLogin = false;
 			let res = await uni.showModal({
 				title: '提示',
 				content: '未登录,是否跳转到登录页面?',
@@ -156,18 +157,20 @@ export default {
 				}
 			}
 		} else {
-			this.isLogin = true;
+			self.isLogin = true;
+			this.onRefresh()
+			this.getShopList();
 		}
 	},
 	onLoad() {
-		this.shopList = testData.storeList[0].goods;
-		console.log('--------', this.shopList);
+		// this.shopList = testData.storeList[0].goods;
+		// console.log('--------', this.shopList);
 	},
 	onShow() {
 		console.log('onshow', this.isLogin);
 		if (this.isLogin) {
-			this.onRefresh()
 			this.getShopList();
+			this.onRefresh()
 			// this.getMyShopList()
 		}
 	},
@@ -279,22 +282,34 @@ export default {
 				page:self.pageInfo
 			};
 			let res = await this.$http.post(url, req);
-			if(self.pageInfo.pageNo === 1){
-				self.storeList = []
+			if(res.data.resultCode === '0011'){
+				this.isLogin = false;
+				const result = await wx.login();
+				if (result.code) {
+					this.code = result.code;
+					await this.wxLogin({ code: result.code });
+					this.isLogin = true
+					// await this.initPage();
+				}
+			}else{
+				if(self.pageInfo.pageNo === 1){
+					self.storeList = []
+				}
+				self.pageInfo.total = res.data.page.total;
+				self.pageInfo.pageNo = res.data.page.pageNo;
+				let page = self.pageInfo;
+				if (page.rownumber * page.pageNo >= page.total) {
+					// finish(boolean:是否显示finishText,默认显示)
+					self.$refs.pullScroll.finish();
+				} else {
+					self.$refs.pullScroll.success();
+				}
+				if (res.data.state === 'SUCCESS') {
+					console.log('商户列表-----', res.data.data);
+					this.storeList = [...this.storeList,...res.data.data]
+				}
 			}
-			self.pageInfo.total = res.data.page.total;
-			self.pageInfo.pageNo = res.data.page.pageNo;
-			let page = self.pageInfo;
-			if (page.rownumber * page.pageNo >= page.total) {
-				// finish(boolean:是否显示finishText,默认显示)
-				self.$refs.pullScroll.finish();
-			} else {
-				self.$refs.pullScroll.success();
-			}
-			if (res.data.state === 'SUCCESS') {
-				console.log('商户列表-----', res.data.data);
-				this.storeList = [...this.storeList,...res.data.data]
-			}
+			
 		},
 		/* 获取当前登录人得商铺**/
 		async getMyShopList() {

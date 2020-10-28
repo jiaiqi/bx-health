@@ -263,7 +263,7 @@ export default {
     }
   },
   created() {
-    if (this.srvInfo.serviceName) {
+    if (this.srvInfo&&this.srvInfo.serviceName) {
       this.getAreaData();
     }
     // if(this.defaultLineVal){

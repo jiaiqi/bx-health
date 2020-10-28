@@ -1,31 +1,28 @@
 <template>
 	<view class="cu-card">
-		<view class="cu-item" style="padding: 10upx;" v-if="configCols && configCols.length > 0">
-			<!-- 		<view class="question-title">
-				<view>{{ formData.title }}</view>
-			</view> -->
-			<view class="content" style="padding:30upx 30upx 0;">
-				<view class="desc" style="text-align: justify;">
-					<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
-					<view class="date-box">
-						<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
-						<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
-					</view>
+		<view class="content" style="padding:30upx 30upx 0;">
+			<view class="desc" style="text-align: justify;">
+				<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
+				<view class="date-box">
+					<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
+					<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
 				</view>
 			</view>
-			<view class="content" style="box-sizing: border-box;"><bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform></view>
-			<view class="content" style="padding:30upx;">
-				<view class="desc">
-					<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
-				</view>
+		</view>
+		<view class="content form-wrap" style="box-sizing: border-box;">
+			<bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform>
+		</view>
+		<view class="content" style="padding:30upx;">
+			<view class="desc">
+				<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
 			</view>
-			<view
-				class="button-box"
-				style="margin: 30upx;"
-				v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
-			>
-				<button class="button" type="" @click="submitForm()">提交</button>
-			</view>
+		</view>
+		<view
+			class="button-box"
+			style="margin: 30upx;"
+			v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
+		>
+			<button class="button" type="" @click="submitForm()">提交</button>
 			<view
 				class="button-box"
 				style="margin: 30upx;"
@@ -662,51 +659,52 @@ export default {
 
 <style lang="scss" scoped>
 .cu-card {
-	// background-color: #0bc99d;
 	background-color: #fff;
 	color: #fff;
-	height: 100vh;
-	overflow: scroll;
 	.cu-item {
 		margin: 0;
 		width: 100%;
-		.content {
-			width: 100%;
-			.desc {
-				width: 100%;
-			}
-			.date-box {
-				color: #0bc99d;
-				padding: 20rpx 0;
-				width: 100%;
-				display: flex;
-				justify-content: space-between;
-			}
-		}
 	}
-	.to-history {
-		text-align: center;
+}
+.content {
+	width: 100%;
+	&.form-wrap {
+		// height: calc(100vh - 600rpx);
+		// overflow-y: scroll;
+	}
+	.desc {
+		width: 100%;
+	}
+	.date-box {
 		color: #0bc99d;
-		position: relative;
-		margin: 20rpx 0 50rpx;
-		&::before {
-			content: '';
-			position: absolute;
-			width: 25%;
-			height: 1px;
-			background-color: #0bc99d;
-			top: 50%;
-			left: 50rpx;
-		}
-		&::after {
-			content: '';
-			position: absolute;
-			width: 25%;
-			height: 1px;
-			background-color: #0bc99d;
-			top: 50%;
-			right: 50rpx;
-		}
+		padding: 20rpx 0;
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+	}
+}
+.to-history {
+	text-align: center;
+	color: #0bc99d;
+	position: relative;
+	margin: 20rpx 0 50rpx;
+	&::before {
+		content: '';
+		position: absolute;
+		width: 25%;
+		height: 1px;
+		background-color: #0bc99d;
+		top: 50%;
+		left: 50rpx;
+	}
+	&::after {
+		content: '';
+		position: absolute;
+		width: 25%;
+		height: 1px;
+		background-color: #0bc99d;
+		top: 50%;
+		right: 50rpx;
 	}
 }
 .button-box {

@@ -72,7 +72,11 @@ export default {
         disabledAfter: {
             type: Boolean,
             default: false
-        }
+        },
+		isMarkDays: {
+		    type: Boolean,
+		    default: true
+		}
     },
     data() {
         return {
@@ -250,7 +254,7 @@ export default {
                     this.choose = date;
                     this.$emit('onDayClick', response);
                 }
-            }else if(chooseDate.indexOf(response.date) < 0){
+            }else if(chooseDate.indexOf(response.date) < 0 && this.isMarkDays){
 				this.$refs.uToast.show({
 					title: '暂无记录数据',
 					type: 'warning',

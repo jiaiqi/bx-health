@@ -33,7 +33,6 @@
 					></image>
 				</view>
 			</view>
-
 			<view
 				class="form-content"
 				:class="{
@@ -62,6 +61,7 @@
 				</radio-group> -->
 				<u-radio-group v-model="fieldData.value" @change="radioChange" v-if="fieldData.type === 'radioFk'" :class="!valid.valid ? 'valid_error' : ''">
 					<u-radio
+						class="radio"
 						color="#2979ff"
 						:disabled="fieldData.disabled ? fieldData.disabled : false"
 						v-for="(itema, index) in fieldData.options"
@@ -96,7 +96,7 @@
 					</label>
 				</checkbox-group>
 				<checkbox-group name="checkbox-group" class="checkbox-group" v-else-if="fieldData.type === 'checkboxFk'" :class="!valid.valid ? 'valid_error' : ''">
-					<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox" @click="radioChange(item, index)">
+					<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox wrap-row" @click="radioChange(item, index)">
 						<checkbox
 							color="#2979ff"
 							class="blue"
@@ -1286,9 +1286,14 @@ export default {
 }
 .checkbox-group {
 	display: flex;
-	flex-direction: column;
+	flex-wrap: wrap;
 	.checkbox {
 		padding: 10rpx 0;
+		min-width: 30%;
+		padding-right: 50rpx;
+		&.wrap-row{
+			width: 100%;
+		}
 		.text {
 			margin-left: 20rpx;
 		}
@@ -1302,6 +1307,7 @@ export default {
 	.radio {
 		min-width: calc(33% - 40rpx);
 		margin-right: 20rpx;
+		max-width: 700rpx;
 		&.has-img {
 			width: 100%;
 			::v-deep .uni-radio-wrapper {
@@ -1322,10 +1328,6 @@ export default {
 	}
 	& /deep/ .uni-radio-input-checked {
 		background-color: red;
-	}
-
-	.checkbox {
-		width: 100%;
 	}
 }
 

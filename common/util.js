@@ -141,7 +141,7 @@ export default {
 				case "add":
 					cols = cols.filter((item, index) => {
 						// if (item.in_add !== 0) {
-						if (item.in_add === 1) {
+						if (item.in_add === 1 || item.in_add === 2) {
 							return item
 						}
 					})
@@ -226,6 +226,7 @@ export default {
 						"key_disp_col": "user_disp"
 					}
 					fieldInfo.srvInfo = {
+						"key_disp_col": "user_disp",
 						serviceName: 'srvsso_user_select',
 						appNo: 'sso',
 						isTree: false,
@@ -285,7 +286,6 @@ export default {
 		 * 
 		 */
 		Vue.prototype.getButtonInfo = function(buttons, pageType) {
-
 			let cols = buttons
 			let buttonInfo = {}
 			cols = cols.filter((item, index) => {
@@ -313,7 +313,7 @@ export default {
 						}
 						break;
 					case "detail":
-						if ((item.button_type === "customize") && item.permission) {
+						if ((item.button_type === "customize" || item.button_type === "edit") && item.permission) {
 							if (item.operate_params && typeof item.operate_params === 'string') {
 								try {
 									item.operate_params = JSON.parse(item.operate_params)
@@ -321,8 +321,8 @@ export default {
 									console.log(e)
 									//TODO handle the exception
 								}
-								return item
 							}
+							return item
 						}
 						break;
 					default:
@@ -567,7 +567,8 @@ export default {
 		Vue.prototype.wxLogin = async function(obj = {}) {
 			// 使用code向后端发送登录请求
 			let {
-				code,user
+				code,
+				user
 			} = obj;
 			if (!code) {
 				return
