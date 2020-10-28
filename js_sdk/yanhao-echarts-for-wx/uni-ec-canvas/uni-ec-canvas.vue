@@ -46,6 +46,7 @@
     watch: {
       "ec.option": {
         deep: true,
+				immediate:true,
         handler(val, oldVal) {
           this.setOption(val);
         }

@@ -11,7 +11,8 @@
 			<view class="pregnant-time">
 				<view class="pregnant-time-left">
 					<text>预产时间：</text>
-					<text>请选择预产期</text>
+					<text>{{selectDate?selectDate:'请选择末次经期时间'}}</text>   
+					<!-- 怀孕280天，计算预产期从末次月经时间 + 280天 -->
 				</view>
 				<view @click="openCale" class="pregnant-time-right">
 					<u-icon size="50" name="calendar"></u-icon>
@@ -19,16 +20,66 @@
 			</view>
 		</view>
 		<view v-if="current_tit === 'pregnancy'" class="pregnant-main-fetation">
-			<u-collapse :head-style="headStyle">
+			<u-collapse ref='collapse' :head-style="headStyle">
 				<u-collapse-item v-for="(item,index) in timeLienData" :key="index" :open="item.open" :title="item.name">
 					<view class="cu-timeline pregnant-timeline">					
 						<view v-for="(week,i) in item.child" class="cu-item">
-							<view @click="toDetail(week)" class="content bg-cyan">
-								<text>{{week.title}}</text>
+							<view @click="toDetail(week)" class="content " :class="week.isCurrent?'bg-green shadow-blur':'bg-cyan'">
+								<view class="content-item-top">
+									<text v-if="week.start_time && week.end_time">{{week.start_time}} ~ {{week.end_time}}</text>
+								</view>
+								<view class="content-item-cen">
+									<text>{{week.title}}</text>
+								</view>								
 							</view>
+							
 							<view class="pre-chunk-wrap">
-								<view @click="openCont(con)" v-for="(con,k) in week.content" :class="con.isOk?'pass-pre-chunk':''" class="pre-chunk">
-									{{con.name}}
+								<view class="pre-chunk-top">
+									<view class="pre-chunk-top-notice">
+										<text>注意事项</text>
+									</view>
+									<view class="pre-chunk-top-notice-cont">										
+											<u-collapse :head-style="headMatterStyle" :item-style="itemStyle">
+												<u-collapse-item @change="collapseClick"  :title="matter.name" v-for="(matter, m) in week.content" :key="m" :open="matter.isOk" :disabled="item.disabled">
+													<view v-for="(matterItem,n) in matter.child" class="pre-chunk-top-notice-cont-item">
+														<view class="pre-chunk-top-notice-cont-item-l">
+															<text>{{n+1}}.</text>
+														</view>
+														<view class="pre-chunk-top-notice-cont-item-r">
+															<text>{{matterItem.tit}}.</text>
+															<text>{{matterItem.content}}</text>
+														</view>
+														
+													</view>
+												</u-collapse-item>
+											</u-collapse>
+									</view>
+								</view>
+								
+								<view class="pre-chunk-top pre-chunk-bot">
+									<view class="pre-chunk-top-notice">
+										<text>待办事项</text>
+									</view>
+									<view class="pre-chunk-top-backlog-cont">										
+										<view @click="toPreDetail" class="pre-chunk-top-backlog-cont-item">
+											<view class="pre-chunk-top-backlog-cont-item-l">
+												<text>1.建档</text>
+												<text>建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。</text>
+											</view>
+											<view class="pre-chunk-top-backlog-cont-item-r">
+												<text>查看详情</text>
+											</view>
+										</view>
+										<view class="pre-chunk-top-backlog-cont-item">
+											<view class="pre-chunk-top-backlog-cont-item-l">
+												<text>2.建档</text>
+												<text>建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。</text>
+											</view>
+											<view class="pre-chunk-top-backlog-cont-item-r">
+												<text>查看详情</text>
+											</view>
+										</view>
+									</view>
 								</view>
 							</view>
 							
@@ -80,9 +131,9 @@
 					</view>
 				</view>
 			</u-popup>	
-			<!-- <u-popup v-model="showTimeSignPicker" mode="center" width="85%">
-				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :headerBar="true" :disabledAfter='true' :isMarkDays="false" @onDayClick="onDayClick"></bx-date-stamp>
-			</u-popup> -->
+			<u-popup v-model="showTimeSignPicker" mode="center" width="85%">
+				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :headerBar="true" :isMarkDays="false" @onDayClick="onDayClick"></bx-date-stamp>
+			</u-popup>
 			<!-- <view @click.self="closeDay" class="cu-modal" style="display: flex; align-items: center" :class="modalName == 'Modal' ? 'show' : ''">
 				<view class="cu-dialog">
 					<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :markDays="markDays" :headerBar="true" @onDayClick="onDayClick"></bx-date-stamp>
@@ -100,6 +151,15 @@
 			return {
 				headStyle:{
 					paddingLeft:'18px'
+				},
+				itemStyle:{
+					marginTop:"5px",
+					boxShadow: "0 3px 10px rgba(0, 0, 0, 0.1), 0 0 6px rgba(0, 0, 0, 0.04)",
+					borderRadius:'5px'
+				},
+				headMatterStyle:{
+					paddingLeft:'18px',
+					fontWeight:"800"
 				},
 				current_pre:"",
 				
@@ -761,11 +821,84 @@
 			}
 		},
 		methods:{
+			/*点击注意事项item触发**/
+			collapseClick(e){
+				console.log("--------点击触发--------")
+				this.$nextTick(()=>{
+					setTimeout(()=>{
+						this.$refs.collapse.init()
+					},250)
+				})
+			},
+			/*跳转至产检详情**/
+			toPreDetail(){
+				uni.navigateTo({
+					url:'/otherPages/pregnant/antenatal'
+				})
+			},
 			/*点击日期某一天**/
 			onDayClick(data){
 				this.showTimeSignPicker = false;
-				this.selectDate = data.date;
+				
+				/***/
+				let interval_time = 280 * 24 * 60 * 60 *1000  //计算280天得毫秒数
+				let choose_time = new Date(data.date).getTime() + 24 * 60 * 60 *1000 // 计算当前选择时间下一天得毫秒数
+				let period_time = choose_time + interval_time // 预产期毫秒数
+				let endTime = this.formateDate(period_time)
+				console.log("点击选择预产期----",endTime)				
+				this.selectDate = endTime;
 				this.modalName = '';
+				let time = {
+					choose_time :data.date,
+					end_time : endTime
+				}
+				uni.setStorageSync('pretime',time)
+				this.calcTimeQuantum(data.date)
+			},
+			/*计算每一周得时间段**/
+			calcTimeQuantum(time){
+				let timeLienData = this.timeLienData
+				let startTime = new Date(time).getTime() + 24 * 60 * 60 *1000  //开始时间
+				// startTime * index * 7 * 60 * 60 * 1000
+				let currIndex = 0
+				
+				timeLienData.forEach(item=>{
+					item.child.forEach((child,index)=>{
+						if(item.name === '早期'){
+							this.$set(child,'start_time',this.formateDate(startTime * index * 7 * 60 * 60 * 1000==0?startTime:startTime + index * 7 *24 * 60 * 60 * 1000))
+							this.$set(child,'end_time',this.formateDate(new Date(child.start_time).getTime() + 6*24 * 60 * 60 * 1000))
+							currIndex = index
+						}else{
+							currIndex = currIndex + 1
+							this.$set(child,'start_time',this.formateDate(startTime + currIndex * 7*24 * 60 * 60 * 1000))
+							this.$set(child,'end_time',this.formateDate(new Date(child.start_time).getTime() + 6*24 * 60 * 60 * 1000))
+						}
+					})
+				})
+				this.$nextTick(()=>{
+					this.$refs.collapse.init()
+				})
+				this.calcCurrTime()
+				console.log("每周预期时间---",timeLienData)
+			},
+			/*计算当前所处孕期时间阶段**/
+			calcCurrTime(){
+				let nowTime = new Date().getTime() //当前时间
+				let timeLienData = this.timeLienData
+				timeLienData.forEach(item=>{
+						item.open = false
+					item.child.forEach(child=>{
+						if(child.isCurrent){
+							child.isCurrent = false
+						}
+						let startTime = new Date(child.start_time).getTime()
+						let endTime = new Date(child.end_time).getTime()
+						if(nowTime>=startTime && nowTime <= endTime){
+							this.$set(child,'isCurrent',true)
+							item.open = true
+						}
+					})
+				})
 			},
 			/*关闭日期选择器**/
 			closeDay(e) {
@@ -813,7 +946,17 @@
 			}
 		},
 		onLoad() {
+			let time = uni.getStorageSync('pretime')
+			if(time){
+				this.selectDate = time.end_time
+				this.calcTimeQuantum(time.choose_time)
+			}
 			console.log("---------------------")
+		},
+		mounted() {
+			this.$nextTick(()=>{
+				this.$refs.collapse.init()
+			})
 		}
 	}
 </script>
@@ -822,7 +965,7 @@
 	.pregnant_wrap{
 		min-height: 100vh;
 		background-color: white;
-		.pregnant-top{
+		.pregnant-top{			
 			.pregnant-time{
 				margin: 20upx 0;
 				display: flex;
@@ -840,6 +983,11 @@
 					margin-right: 25upx;
 				}
 			}
+		}
+		.pregnant-main-fetation{
+			// /deep/ .u-collapse-body{
+			// 	height: 750upx!important;
+			// }
 		}
 		.pregnant-timeline{
 			.cu-time{
@@ -862,23 +1010,87 @@
 					display: flex;
 					margin-top: 20upx;
 					flex-wrap: wrap;
-					.pre-chunk{
-						width: 120upx;
-						height: 120upx;
-						display: flex;
-						align-items: center;
-						justify-content: center;
-						background-color: #e54d42;
-						box-shadow: 4px 3px 4px rgba(229, 77, 66, 0.2);
-						color: white;
-						border-radius: 5px;
-						margin-right: 20upx;
-						margin-bottom: 20upx;
+					.pre-chunk-top{
+						width: 100%;
+						.pre-chunk-top-notice{
+							font-size: 16px;
+							color: #000;
+							font-weight: 600;
+						}
+						.pre-chunk-top-notice-cont{
+							margin-top: 10px;
+							.pre-chunk-top-notice-cont-item{
+								display: flex;
+								line-height: 48upx;
+								// box-shadow: 3px 3px 5px rgba(26, 26, 26, 0.2);
+								width: 100%;
+								padding: 0 20upx;
+								.pre-chunk-top-notice-cont-item-l{
+									color: #000;
+									font-weight: 600;
+								}
+								.pre-chunk-top-notice-cont-item-r{
+									// font-weight: 800;
+									color: #ccc;
+									text{
+										&:first-child{
+											margin-right: 10upx;
+											color: #000;
+											font-weight: 800;
+										}
+									}
+								}
+							}
+						}
 					}
-					.pass-pre-chunk{
-						background-color: #39b54a;
-						box-shadow: 4px 3px 4px rgba(57, 181, 74, 0.2);
+					.pre-chunk-bot{
+						margin-top: 20upx;
+						.pre-chunk-top-backlog-cont{
+							// box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+							border-radius: 10px;
+							// padding: 10px;
+							margin-top: 15px;
+							.pre-chunk-top-backlog-cont-item{
+								box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+								border-radius: 10px;
+								padding: 10px;
+								margin-top: 15px;
+								// box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+								.pre-chunk-top-backlog-cont-item-l{
+									line-height: 48upx;
+									text{
+										&:first-child{
+											font-weight: 700;
+											display: inline-block;
+											margin-right: 20upx;
+											color: #000;
+										}
+									}
+								}
+								.pre-chunk-top-backlog-cont-item-r{
+									text-align: right;
+									color: #fb7e62;
+								}
+							}
+						}
 					}
+					// .pre-chunk{
+					// 	width: 120upx;
+					// 	height: 120upx;
+					// 	display: flex;
+					// 	align-items: center;
+					// 	justify-content: center;
+					// 	background-color: #e54d42;
+					// 	box-shadow: 4px 3px 4px rgba(229, 77, 66, 0.2);
+					// 	color: white;
+					// 	border-radius: 5px;
+					// 	margin-right: 20upx;
+					// 	margin-bottom: 20upx;
+					// }
+					// .pass-pre-chunk{
+					// 	background-color: #39b54a;
+					// 	box-shadow: 4px 3px 4px rgba(57, 181, 74, 0.2);
+					// }
 				}				
 			}
 			

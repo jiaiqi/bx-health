@@ -130,7 +130,7 @@
 							<view class="calorie">{{ heatNum ? heatNum.toFixed(1) :''}}千卡</view>
 						</view>
 					</view>					
-					<view class="calculate">
+					<!-- <view class="calculate">
 						<view class="amount">
 							<view class="input-box">
 								<view class="key-left">
@@ -148,6 +148,32 @@
 							<view style="padding-right: 8upx;" class="unit">{{ radioLabel?(radioLabel.unit_amount?radioLabel.unit_amount+radioLabel.unit:radioLabel.unit):currFood.unit_amount+currFood.unit }}</view>
 							<view class="unit-change">
 							<u-icon size="24" name="arrow-down-fill"></u-icon>
+							</view>
+						</view>
+					</view> -->
+					<view class="calculate">
+						<view class="calculate-l">
+							单位：
+						</view>
+							<view  class="weight">
+								<view @click="changeUnit(u,ids)" v-for="(u,ids) in unitList" :key="ids" :class="currIndex==ids?'active-unit':''" class="unit">
+									{{u.unit_amount?u.unit_amount+u.unit:u.unit}}
+									<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
+								</view>
+								<!-- <view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view> -->
+							</view>
+						
+					</view>
+					<view class="amount">
+						<view class="input-box">
+							<view class="key-left">
+								<text @click="countDietNum('-0.1')">-0.1</text>
+								<text @click="countDietNum('-1')">-1</text>
+							</view>
+							<u-input placeholder=" " :border="true" maxlength="20" v-model="choiceNum" type="number" />
+							<view class="key-right">
+								<text @click="countDietNum('+1')">+1</text>
+								<text @click="countDietNum('+0.1')">+0.1</text>
 							</view>
 						</view>
 					</view>
@@ -266,6 +292,7 @@ export default {
 			value1:0,
 			list: [],
 			current: 0,
+			currIndex:'',
 			topNum:350,
 			colData: [],
 			currFoodLabel: {},
@@ -863,11 +890,11 @@ export default {
 	},
 	methods: {
 		countDietNum(num){
-			let value = this.value1
+			let value = Number(this.value1)
 			if(value >= 0){				
-				if(num === '-0.5'){
+				if(num === '-0.1'){
 					if(value > 0){
-						value = value - 0.5
+						value = value - 0.1
 					}else{
 						value = 0
 					}
@@ -878,11 +905,11 @@ export default {
 				}else if(num === '+1'){
 					value = value + 1
 					
-				}else if(num === '+0.5'){
-					value = value + 0.5
+				}else if(num === '+0.1'){
+					value = value + 0.1
 				}
-				this.value1 = value
-				this.choiceNum = value
+				this.value1 = value.toFixed(1)
+				this.choiceNum = value.toFixed(1)
 				if (Number(this.choiceNum) && !this.radioLabel) {
 					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
 				}else if(Number(this.choiceNum) && this.radioLabel){
@@ -1194,8 +1221,19 @@ export default {
 			}
 		},
 		/* 选择单位**/
-		changeUnit(item){
-			this.modalName = 'RadioModal'
+		changeUnit(item,index){
+			// this.modalName = 'RadioModal'
+			this.currIndex = i
+			this.radioLabel = item;
+			if (Number(this.choiceNum) && !this.radioLabel) {
+				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
+			} else if (Number(this.choiceNum) && this.radioLabel) {
+				if (this.radioLabel.unit_amount) {
+					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
+				} else {
+					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
+				}
+			}
 		},
 		RadioChange(e) {
 			this.radioIndex = e.detail.value
@@ -2103,13 +2141,20 @@ export default {
 		}
 		.calculate {
 			display: flex;
-			justify-content: space-between;
+			justify-content: flex-start;
+			// flex-wrap: wrap;
 			padding: 20upx 20upx;
 			min-height: 100upx;
 			align-items: center;
+			font-size: 36upx;
+			margin-right: 20upx;
 			color: #999;
 			.calorie{
 				min-width: 115upx;
+			}
+			.calculate-l{
+				width: 100rpx;
+				font-size: 28upx;
 			}
 			.amount {
 				color: #009688;
@@ -2128,16 +2173,49 @@ export default {
 					
 				}
 			}
-			.weight{
+			.weight {
 				display: flex;
 				align-items: center;
-				justify-content: flex-end;
+				font-size: 28upx;
+				flex-wrap: nowrap;
+				white-space:nowrap;
+				overflow-x: scroll;
+				// justify-content: flex-end;
+				// flex-wrap: wrap;
 				// min-width: 220upx;
-				image{
+				.unit{
+					margin-right: 10upx;
+					background-color: #f37b1d;
+					color: white;
+					border-radius: 40upx;
+					border: 1px solid #f37b1d;
+					padding: 6upx 16upx;
+			
+				}
+				.active-unit{
+					border: 1px dashed #f37b1d;
+					background-color: #fff;
+					color: #f37b1d;
+					// color: red;
+					// font-size: 32upx;
+				}
+				image {
 					width: 40upx;
 					height: 40upx;
 					margin-left: 20upx;
 				}
+			}
+		}
+		.amount {
+			color: #009688;
+			font-weight: 800;
+			.number {
+				padding: 0 20upx;
+				font-size: 34upx;
+			}
+			.unit {
+				text-align: center;
+				padding: 10upx 0upx;
 			}
 		}
 	}
@@ -2149,34 +2227,33 @@ export default {
 	display: flex;
 	// flex-wrap: wrap;
 	align-items: center;
-	// justify-content: center;
-	/deep/ input{
-		width: 50upx!important;
+	justify-content: center;
+	/deep/ input {
+		width: 120upx !important;
+		text-align: center;
 	}
-	.key-left{
-		text{
+	.key-left {
+		text {
 			padding: 12upx 12upx;
-			background-color: #f2f3f5;
+			background-color: #d6e2eb;
 			font-size: 30upx;
-			min-width: 60upx;
+			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			&:first-child{
-				margin-right: 2px;
-			}
+			margin-right: 20upx;	
+			border-radius: 5px;
 		}
 	}
-	.key-right{
-		text{
+	.key-right {
+		text {
 			padding: 12upx 12upx;
-			background-color: #f2f3f5;
+			background-color: #d6e2eb;
 			font-size: 30upx;
-			min-width: 60upx;
+			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			&:first-child{
-				margin-right: 2px;
-			}
+			margin-left: 20upx;		
+			border-radius: 5px;
 		}
 	}
 	.digit {

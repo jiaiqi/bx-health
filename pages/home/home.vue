@@ -55,21 +55,25 @@
 		<view class="main-box column">
 			<view class="main-box-title">近期趋势</view>
 			<view class="chart-box">
-				<uni-ec-canvas class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="ecWeight"></uni-ec-canvas>
-				<canvas
-					v-if="currentChart === 'stepChart'"
-					canvas-id="stepChart"
-					id="stepChart"
-					class="charts-line"
-					disable-scroll="true"
-					@touchmove="moveLine"
-					@touchend="touchEndLine"
-					@touchstart="touchLine"
-				></canvas>
-				<canvas v-if="currentChart === 'canvasLineA'" canvas-id="canvasLineA" id="canvasLineA" class="charts-line" @touchstart="touchLineA"></canvas>
-				<canvas v-if="currentChart === 'canvasLineB'" canvas-id="canvasLineB" id="canvasLineB" class="charts-line" @touchstart="touchLineB"></canvas>
-				<canvas v-if="currentChart === 'canvasLineC'" canvas-id="canvasLineC" id="canvasLineC" class="charts-line" @touchstart="touchLineC"></canvas>
-				<canvas v-if="currentChart === 'canvasColumnD'" canvas-id="canvasColumnD" id="canvasColumnD" class="charts-line" @touchstart="touchColumnD"></canvas>
+				<uni-ec-canvas v-if="currentChart === 'stepChart'" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uni-ec-canvas>
+				<uni-ec-canvas
+					v-if="currentChart === 'canvasLineA'"
+					class="uni-ec-canvas"
+					id="uni-ec-canvas"
+					ref="uni-ec-canvas"
+					canvas-id="uni-ec-canvas"
+					:ec="weightData"
+				></uni-ec-canvas>
+				<uni-ec-canvas v-if="currentChart === 'canvasLineB'" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="BPData"></uni-ec-canvas>
+				<uni-ec-canvas v-if="currentChart === 'canvasLineC'" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="sleepData"></uni-ec-canvas>
+				<uni-ec-canvas
+					v-if="currentChart === 'canvasColumnD'"
+					class="uni-ec-canvas"
+					id="uni-ec-canvas"
+					ref="uni-ec-canvas"
+					canvas-id="uni-ec-canvas"
+					:ec="caloriesData"
+				></uni-ec-canvas>
 			</view>
 			<view class="button-box">
 				<button class="button" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
@@ -187,6 +191,102 @@ export default {
 	data() {
 		return {
 			quInfo: {}, // 问卷信息
+			ecData: {
+				option: ''
+			},
+			stepData: {},
+			weightData: {},
+			caloriesData:{},
+			BPData: {},
+			sleepData: {},
+			ec: {
+				option: {
+					title: {
+						text: ''
+					},
+					tooltip: {
+						trigger: 'axis',
+						formatter: '{b}\r\n{c0}人',
+						axisPointer: {
+							type: 'line',
+							axis: 'x',
+							label: {
+								backgroundColor: '#000000'
+							}
+						}
+					},
+					grid: {
+						left: '6%',
+						right: '6%',
+						top: '6%',
+						bottom: '6%',
+						containLabel: true
+					},
+					xAxis: {
+						type: 'category',
+						boundaryGap: false,
+						data: ['2-12', '2-14', '2-16', '2-18', '2-20', '2-22', '2-24'],
+						axisLine: {
+							// y轴
+							show: false
+						},
+						axisTick: {
+							// y轴刻度线
+							show: false
+						},
+						splitLine: {
+							// 网格线
+							show: false
+						}
+					},
+					yAxis: {
+						type: 'value',
+						axisLine: {
+							// y轴
+							show: false
+						},
+						axisTick: {
+							// y轴刻度线
+							show: false
+						},
+						splitLine: {
+							// 网格线
+							show: false
+						}
+					},
+					series: [
+						{
+							name: '浏览量',
+							type: 'line',
+							smooth: true,
+							areaStyle: {
+								color: {
+									type: 'linear',
+									x: 0,
+									y: 0,
+									x2: 0,
+									y2: 1,
+									colorStops: [
+										{
+											offset: 0,
+											color: '#E50113' // 0% 处的颜色
+										},
+										{
+											offset: 1,
+											color: '#fff' // 100% 处的颜色
+										}
+									],
+									global: false // 缺省为 false
+								}
+							},
+							lineStyle: {
+								color: '#EF5959'
+							},
+							data: [120, 132, 101, 134, 90, 230, 210]
+						}
+					]
+				}
+			},
 			ecWeight: {
 				option: {
 					title: {
@@ -374,8 +474,7 @@ export default {
 				]
 			},
 			wxRunData: {},
-			stepInfoList: [],
-			stepData: []
+			stepInfoList: []
 		};
 	},
 	computed: {
@@ -611,7 +710,7 @@ export default {
 					} else {
 						this.currentChart = 'canvasLineA';
 						this.getChartData('weight').then(_ => {
-							this.showLineA('canvasLineA', this.weightChartData, 'kg');
+							this.weightData = this.buildEcData(this.weightChartData, 'kg', '体重');
 						}); // 体重
 					}
 					break;
@@ -621,7 +720,7 @@ export default {
 					} else {
 						this.currentChart = 'canvasLineB';
 						this.getChartData('bloodPressure').then(_ => {
-							this.showLineB('canvasLineB', this.BPChartData, 'mmHg');
+							this.BPData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
 						}); // 血压
 					}
 					break;
@@ -630,7 +729,7 @@ export default {
 						// this.currentChart = '';
 					} else {
 						this.currentChart = 'canvasLineC';
-						this.showLineC('canvasLineC', this.sleepChartData, '小时');
+						this.sleepData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
 					}
 					break;
 				case 'calories':
@@ -639,7 +738,7 @@ export default {
 					} else {
 						this.currentChart = 'canvasColumnD';
 						this.getDietSportRecordList().then(_ => {
-							this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
+							this.caloriesData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
 						});
 					}
 					break;
@@ -716,7 +815,7 @@ export default {
 					});
 					this.weightChartData.series = series;
 					this.weightChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
-					// this.showLineA('canvasLineA', this.weightChartData, 'kg');
+					this.weightData = this.buildEcData(this.weightChartData, 'kg', '体重');
 				} else if (type === 'bloodPressure') {
 					series = this.BPChartData.series;
 					series[0].data = res.data.data.map(item => {
@@ -725,7 +824,7 @@ export default {
 					series[1].data = res.data.data.map(item => item.diastolic_pressure);
 					this.BPChartData.series = series;
 					this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
-					this.showLineB('canvasLineB', this.BPChartData, 'mmHg');
+					this.BPData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
 				}
 			}
 		},
@@ -884,7 +983,7 @@ export default {
 				condition: [
 					{ colName: 'userno', ruleType: 'like', value: this.loginUserInfo.user_no },
 					{ colName: 'user_name', ruleType: 'like', value: this.userInfo.name },
-					{ colName: 'hdate', ruleType: 'like', value: this.selectDate.trim() }
+					{ colName: 'hdate', ruleType: 'like', value: this.formateDate(new Date(), 'date').trim() }
 				]
 			};
 			let res = await this.$http.post(url, req);
@@ -906,7 +1005,7 @@ export default {
 				condition: [
 					{ colName: 'userno', ruleType: 'like', value: this.loginUserInfo.user_no },
 					{ colName: 'user_name', ruleType: 'like', value: this.userInfo.name },
-					{ colName: 'hdate', ruleType: 'like', value: this.selectDate.trim() }
+					{ colName: 'hdate', ruleType: 'like', value: this.formateDate(new Date(), 'date').trim() }
 				],
 				order: []
 			};
@@ -1018,95 +1117,107 @@ export default {
 				this.showUserList = false;
 			}
 		},
-		buildEcData(option = { unit: '', title: '', chartData: { categories: [], series: { name: '', color: '', data: [] } } }) {
-			let data = {
-				option: {
-					title: {
-						text: '体重'
-					},
-					tooltip: {
-						trigger: 'axis',
-						formatter: '{b}\r\n{c0}kg',
-						axisPointer: {
-							type: 'line',
-							axis: 'x',
-							label: {
-								backgroundColor: '#000000'
-							}
+		/**
+		 * @param {object}  = [chartData]
+		 * @param {string}  = [unit] -单位
+		 * @param {string}  = [title]
+		 */
+		buildEcData(chartData = { categories: [], series: [] }, unit, title) {
+			let option = {
+				title: {
+					text: title,
+				},
+				tooltip: {
+					trigger: 'axis',
+					formatter: '{b}\r\n{c0}' + unit,
+					axisPointer: {
+						type: 'line',
+						axis: 'x',
+						label: {
+							backgroundColor: '#000000'
 						}
+					}
+				},
+				grid: {
+					left: '6%',
+					right: '6%',
+					top: '20%',
+					bottom: '6%',
+					containLabel: true
+				},
+				xAxis: {
+					type: 'category',
+					boundaryGap: false,
+					data: chartData.categories,
+					axisLine: {
+						// y轴
+						show: true
 					},
-					grid: {
-						left: '6%',
-						right: '6%',
-						top: '6%',
-						bottom: '6%',
-						containLabel: true
+					axisTick: {
+						// y轴刻度线
+						show: true
 					},
-					xAxis: {
-						type: 'category',
-						boundaryGap: false,
-						data: ['2-12', '2-14', '2-16', '2-18', '2-20', '2-22', '2-24'],
-						axisLine: {
-							// y轴
-							show: false
-						},
-						axisTick: {
-							// y轴刻度线
-							show: false
-						},
-						splitLine: {
-							// 网格线
-							show: false
-						}
+					splitLine: {
+						// 网格线
+						show: true
+					}
+				},
+				yAxis: {
+					type: 'value',
+					axisLine: {
+						// y轴
+						show: true
 					},
-					yAxis: {
-						type: 'value',
-						axisLine: {
-							// y轴
-							show: false
-						},
-						axisTick: {
-							// y轴刻度线
-							show: false
-						},
-						splitLine: {
-							// 网格线
-							show: false
-						}
+					axisTick: {
+						// y轴刻度线
+						show: true
 					},
-					series: [
-						{
-							name: '浏览量',
-							type: 'line',
-							smooth: true,
-							areaStyle: {
-								color: {
-									type: 'linear',
-									x: 0,
-									y: 0,
-									x2: 0,
-									y2: 1,
-									colorStops: [
-										{
-											offset: 0,
-											color: '#E50113' // 0% 处的颜色
-										},
-										{
-											offset: 1,
-											color: '#fff' // 100% 处的颜色
-										}
-									],
-									global: false // 缺省为 false
-								}
-							},
-							lineStyle: {
-								color: '#EF5959'
-							},
-							data: [120, 132, 101, 134, 90, 230, 210]
-						}
-					]
-				}
+					splitLine: {
+						// 网格线
+						show: true
+					}
+				},
+				series: []
 			};
+			option.series = [];
+			chartData.series.forEach(item => {
+				let obj = {
+					name: item.name,
+					type: 'line',
+					smooth: true,
+					areaStyle: {
+						color: {
+							type: 'linear',
+							x: 0,
+							y: 0,
+							x2: 0,
+							y2: 1,
+							colorStops: [
+								{
+									offset: 0,
+									color: item.color // 0% 处的颜色
+								},
+								{
+									offset: 1,
+									color: '#fff' // 100% 处的颜色
+								}
+							],
+							global: false // 缺省为 false
+						}
+					},
+					itemStyle: {
+						color: item.color
+					},
+					data: item.data
+				};
+				option.series.push(obj);
+			});
+			// this.$set(this.ecData, 'option', option);
+			let data = {
+				option: option
+			};
+			// this.ecData = this.deepClone(option);
+			return data;
 		},
 		async getUserInfo() {
 			let url = this.$api.getUserInfo;
@@ -1366,11 +1477,13 @@ export default {
 						chartData.categories = stepList.map(item => item.date.slice(5));
 						chartData.series[0] = {
 							name: '近31日运动步数',
-							data: []
+							data: [],
+							color: '#1e4cf3'
 						};
 						chartData.series[0].data = stepList.map(item => item.step);
 						this.wxRunData = chartData;
-						_self.showChart('stepChart', chartData);
+						this.stepData = this.buildEcData(this.wxRunData, '步', '步数');
+						// _self.showChart('stepChart', chartData);
 						return stepList;
 					} else {
 						return false;
@@ -1509,9 +1622,9 @@ export default {
 				}
 				this.loginUserInfo = userInfo;
 				// #ifdef MP-WEIXIN
+				this.currentChart = 'stepChart';
 				this.getwxStepInfoList().then(_ => {
 					//获取微信运动记录
-					this.currentChart = 'stepChart';
 				});
 				// #endif
 				// #ifdef H5
@@ -1708,6 +1821,10 @@ export default {
 			background-color: #fff;
 			margin: 0 auto;
 			height: 350rpx;
+			.uni-ec-canvas {
+				width: 710rpx;
+				height: 350rpx;
+			}
 			.charts-line {
 				width: 710rpx;
 				height: 350rpx;

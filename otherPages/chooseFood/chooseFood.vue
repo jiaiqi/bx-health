@@ -43,12 +43,22 @@
 						</view>
 					</view>
 					<view class="ele-text-cen-item">
-						<view class="ele-text-cen-item-title">有机物</view>
+						<view class="ele-text-cen-item-title">产能营养素</view>
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
 								<text>蛋白质:</text>
 								<text>{{ currFood.protein ? currFood.protein.toFixed(1) : '' }}g</text>
 								<text style="color: red;">({{ currFood.protein >= 30.1 ? '高' : currFood.protein >= 15.5 && currFood.protein < 30.1 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-text">
+								<text>碳水化合物:</text>
+								<text>{{ currFood.carbohydrate ? currFood.carbohydrate.toFixed(1) : '' }}g</text>
+								<text style="color: red;">({{ currFood.carbohydrate >= 51.9 ? '高' : currFood.carbohydrate >= 25.74 && currFood.carbohydrate < 51.9 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-text">
+								<text>脂肪:</text>
+								<text>{{ currFood.axunge ? currFood.axunge.toFixed(1) : '' }}g</text>
+								<text style="color: red;">({{ currFood.axunge >= 35.3 ? '高' : currFood.axunge >= 17.6 && currFood.axunge < 35.3 ? '中' : '低' }})</text>
 							</view>
 						</view>
 					</view>
@@ -135,19 +145,24 @@
 					</view>
 				</view>
 			</view>
-			<view @click="changeUnit(currFood)" class="calculate">				
-				<view  class="weight">
-					<view style="padding-right: 8upx;" class="unit">
-						{{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }}
-					</view>
-					<view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view>
+			<view class="calculate">	
+				<view class="calculate-l">
+					单位：
 				</view>
+					<view  class="weight">
+						<view @click="chooseUnit(u,ids)" v-for="(u,ids) in unitList" :key="ids" :class="currIndex==ids?'active-unit':''" class="unit">
+							{{u.unit_amount?u.unit_amount+u.unit:u.unit}}
+							<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
+						</view>
+						<!-- <view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view> -->
+					</view>
+				
 			</view>
 			<view class="amount">
 				<view class="input-box">
 					<view class="key-left">
-						<text @click="countDietNum('-1')">-1</text>
 						<text @click="countDietNum('-0.1')">-0.1</text>
+						<text @click="countDietNum('-1')">-1</text>
 					</view>
 					<u-input placeholder=" " :border="true" maxlength="20" v-model="choiceNum" type="number" />
 					<view class="key-right">
@@ -195,7 +210,8 @@ export default {
 			currTime: '',
 			chooseFoods: [],
 			value1: 0,
-			modalName: ''
+			modalName: '',
+			currIndex:'', //选择单位index
 		};
 	},
 	onLoad(option) {
@@ -224,6 +240,21 @@ export default {
 		RadiohideModal() {
 			this.modalName = '';
 		},
+		/*选择单位*/
+		chooseUnit(item,i){
+			console.log("单位选择----",item)
+			this.currIndex = i
+			this.radioLabel = item;
+			if (Number(this.choiceNum) && !this.radioLabel) {
+				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
+			} else if (Number(this.choiceNum) && this.radioLabel) {
+				if (this.radioLabel.unit_amount) {
+					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
+				} else {
+					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
+				}
+			}
+		},
 		/*选择单位**/
 		RadioChange(e) {
 			this.radioIndex = e.detail.value;
@@ -234,15 +265,7 @@ export default {
 					this.radioLabel = item;
 				}
 			});
-			if (Number(this.choiceNum) && !this.radioLabel) {
-				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-			} else if (Number(this.choiceNum) && this.radioLabel) {
-				if (this.radioLabel.unit_amount) {
-					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-				} else {
-					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
-				}
-			}
+			
 		},
 		/*点击确定**/
 		confirms() {
@@ -262,7 +285,7 @@ export default {
 		},
 		/* 点击食物选择数字加减**/
 		countDietNum(num) {
-			let value = this.value1;
+			let value = Number(this.value1);
 			if (value >= 0) {
 				if (num === '-0.1') {
 					if (value > 0) {
@@ -279,8 +302,8 @@ export default {
 				} else if (num === '+0.1') {
 					value = value + 0.1;
 				}
-				this.value1 = value;
-				this.choiceNum = value;
+				this.value1 = value.toFixed(1);
+				this.choiceNum = value.toFixed(1);
 				if (Number(this.choiceNum) && !this.radioLabel) {
 					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
 				} else if (Number(this.choiceNum) && this.radioLabel) {
@@ -782,21 +805,47 @@ export default {
 }
 .calculate {
 	display: flex;
-	justify-content: flex-end;
+	justify-content: flex-start;
+	// flex-wrap: wrap;
 	padding: 20upx 20upx;
 	min-height: 100upx;
 	align-items: center;
 	font-size: 36upx;
 	margin-right: 20upx;
 	color: #999;
+	.calculate-l{
+		width: 100rpx;
+		font-size: 28upx;
+	}
 	.calorie {
 		min-width: 115upx;
 	}	
 	.weight {
 		display: flex;
 		align-items: center;
-		justify-content: flex-end;
+		font-size: 28upx;
+		flex-wrap: nowrap;
+		white-space:nowrap;
+		overflow-x: scroll;
+		// justify-content: flex-end;
+		// flex-wrap: wrap;
 		// min-width: 220upx;
+		.unit{
+			margin-right: 10upx;
+			background-color: #f37b1d;
+			color: white;
+			border-radius: 40upx;
+			border: 1px solid #f37b1d;
+			padding: 6upx 16upx;
+
+		}
+		.active-unit{
+			border: 1px dashed #f37b1d;
+			background-color: #fff;
+			color: #f37b1d;
+			// color: red;
+			// font-size: 32upx;
+		}
 		image {
 			width: 40upx;
 			height: 40upx;
@@ -821,11 +870,13 @@ export default {
 	display: flex;
 	justify-content: center;
 	text{
-		padding: 10upx 40upx;
+		padding: 15upx 40upx;
 		background-color: #1cbbb4;
 		color: white;
 		border-radius: 10upx;
 		font-size: 28upx;
+		width: 30%;
+		text-align: center;
 		&:first-child{
 			margin-right: 90upx;
 		}

@@ -50,7 +50,9 @@
       "ec.option": {
         deep: true,
         handler(val, oldVal) {
-          this.setOption(val);
+					if(val){
+						this.setOption(val);
+					}
         }
       }
     },
@@ -78,7 +80,6 @@
         while (v2.length < len) {
           v2.push("0");
         }
-
         for (let i = 0; i < len; i++) {
           const num1 = parseInt(v1[i]);
           const num2 = parseInt(v2[i]);
