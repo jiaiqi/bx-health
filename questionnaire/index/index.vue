@@ -1,6 +1,6 @@
 <template>
 	<view class="cu-card">
-		<view class="content" style="padding:30upx 30upx 0;">
+		<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
 			<view class="desc" style="text-align: justify;">
 				<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
 				<view class="date-box">
@@ -12,7 +12,7 @@
 		<view class="content form-wrap" style="box-sizing: border-box;">
 			<bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform>
 		</view>
-		<view class="content" style="padding:30upx;">
+		<view class="content" style="padding:30upx;" v-if="formData.end_remark">
 			<view class="desc">
 				<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
 			</view>
@@ -23,27 +23,27 @@
 			v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
 		>
 			<button class="button" type="" @click="submitForm()">提交</button>
-			<view
-				class="button-box"
-				style="margin: 30upx;"
-				v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
-			>
-				<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
-				<view class="score-box" v-if="scoreInfo.score || scoreInfo.score === 0">
-					得分：
-					<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
-				</view>
-			</view>
-			<view
-				class="button-box"
-				style="margin: 30upx;"
-				v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
-			>
-				<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
+		</view>
+		<view
+			class="button-box"
+			style="margin: 30upx;"
+			v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
+		>
+			<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
+		</view>
+		<view
+			class="button-box"
+			style="margin: 30upx;"
+			v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
+		>
+			<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
+			<view class="score-box" v-if="scoreInfo.score || scoreInfo.score === 0">
+				得分：
+				<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
 			</view>
 		</view>
 		<view class="to-history" v-if="configCols && configCols.length > 0 && formType === 'form'" @click="toHistory">点击查看历史提交</view>
-		<u-empty text="未找到问卷配置数据" v-else-if="!configCols || configCols.length === 0"></u-empty>
+		<u-empty :text="emptyText" v-else-if="!configCols || configCols.length === 0"></u-empty>
 	</view>
 </template>
 
@@ -58,6 +58,7 @@ export default {
 	data() {
 		return {
 			appName: 'daq',
+			emptyText: '', //无数据时提示文字
 			formType: 'form', // 表单类型 预览:detail 正常:form
 			activity_no: '', // 问卷编号
 			status: '未开始',
@@ -112,19 +113,13 @@ export default {
 		async seeReport() {
 			// 查看评估结果
 			uni.navigateTo({
-				url: `/pages/specific/assessmentResult/assessmentResult?activity_no=${this.activity_no}&fill_batch_no=${this.fill_batch_no}`
-			});
-		},
-		toCreate() {
-			// 跳转到问卷列表页面
-			uni.redirectTo({
-				url: '/pages/specific/home/home'
+				url: `/questionnaire/assessmentResult/assessmentResult?activity_no=${this.activity_no}&fill_batch_no=${this.fill_batch_no}`
 			});
 		},
 		toFeedback() {
 			// 跳转到意见反馈问卷
 			uni.redirectTo({
-				url: '/pages/specific/questionnaire/questionnaire?formType=form&activity_no=20200309125000000100&status=进行中'
+				url: '/questionnaire/index/index?formType=form&activity_no=20200309125000000100&status=进行中'
 			});
 		},
 		saveValue(e) {
@@ -609,6 +604,10 @@ export default {
 		uni.setStorageSync('fill_batch_no', '');
 	},
 	onLoad(option) {
+		this.emptyText = '正在请求问卷配置数据';
+		setTimeout(() => {
+			this.emptyText = '未找到问卷配置数据';
+		}, 3000);
 		if (option.formType && option.formType === 'detail') {
 			this.formType = option.formType;
 		} else {
@@ -661,6 +660,8 @@ export default {
 .cu-card {
 	background-color: #fff;
 	color: #fff;
+	height: 100vh;
+	overflow-y: scroll;
 	.cu-item {
 		margin: 0;
 		width: 100%;
@@ -774,5 +775,8 @@ export default {
 		font-size: 60rpx;
 		font-weight: 700;
 	}
+}
+.u-empty{
+	height: 100%;
 }
 </style>

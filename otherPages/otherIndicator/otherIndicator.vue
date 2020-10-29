@@ -230,7 +230,6 @@ export default {
 			if (!this.canSave) {
 				return;
 			}
-			debugger;
 			let serviceName = '';
 			let req = [];
 			switch (this.type) {

@@ -181,10 +181,12 @@ export default {
 		this.getPageItem();
 	},
 	onLoad() {
+		// #ifdef MP-WEIXIN
 		wx.showShareMenu({
 			withShareTicket: true,
 			menus: ['shareAppMessage', 'shareTimeline']
 		});
+		// #endif
 	}
 };
 </script>

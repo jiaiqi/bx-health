@@ -22,7 +22,6 @@ export default {
 			};
 			let res = await this.$http.post(url,req)
 			if(res.data.state==="SUCCESS"){
-				debugger
 			}
 		}
 	}

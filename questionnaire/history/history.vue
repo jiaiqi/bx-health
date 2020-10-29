@@ -1,6 +1,6 @@
 <template>
 	<view class="main-history">
-<!-- 		<view class="title" v-if="list && list.length > 0">
+		<!-- 		<view class="title" v-if="list && list.length > 0">
 			<text class="text">{{ title }}</text>
 			<text class="sub-title">填写记录</text>
 		</view> -->
@@ -53,9 +53,12 @@ export default {
 	},
 	methods: {
 		toDetail(item) {
-			debugger;
+			let formType = 'detail';
+			if (item.state === '未完成') {
+				// formType = 'form'
+			}
 			uni.navigateTo({
-				url: `/questionnaire/index/index?formType=detail&activity_no=${item.activity_no}&status=${item.state}&fill_batch_no=${item.fill_batch_no}`
+				url: `/questionnaire/index/index?formType=${formType}&activity_no=${item.activity_no}&status=${item.state}&fill_batch_no=${item.fill_batch_no}`
 			});
 		},
 		getList() {
@@ -98,7 +101,7 @@ export default {
 					this.title = option.title;
 					uni.setNavigationBarTitle({
 						title: option.title
-					})
+					});
 				}
 				this.user_no = user_info.user_no;
 				this.getList();

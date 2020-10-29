@@ -340,7 +340,6 @@ export default {
 					// 登录成功，返回上一页面
 					let num = getCurrentPages()
 					if(Array.isArray(num)&&num.length===1){
-						debugger
 						if (self.$api.homePath.indexOf('/pages/') !== -1) {
 							uni.switchTab({
 								url: self.$api.homePath

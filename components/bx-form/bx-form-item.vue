@@ -268,8 +268,13 @@
 					v-else-if="fieldData.type === 'digit' || fieldData.type === 'Float'"
 				/>
 				<view v-else-if="fieldData.type === 'treeSelector'" @click="openTreeSelector">
-					<!-- <input :placeholder="'点击选择' + fieldData.label" v-model="fieldData.value" disabled :class="!valid.valid ? 'valid_error' : ''" name="input"  /> -->
-					<input :placeholder="'点击选择' + fieldData.label" :value="treeSelectorShowValue" disabled :class="!valid.valid ? 'valid_error' : ''" name="input" />
+					<input
+						:placeholder="'点击选择' + fieldData.label"
+						:value="treeSelectorShowValue ? treeSelectorShowValue : fieldData.value"
+						disabled
+						:class="!valid.valid ? 'valid_error' : ''"
+						name="input"
+					/>
 				</view>
 				<view v-else-if="fieldData.type === 'cascader'" @click="openCascader">
 					<input :placeholder="'点击选择' + fieldData.label" v-model="fieldData.value" disabled :class="!valid.valid ? 'valid_error' : ''" name="input" />
@@ -1291,7 +1296,7 @@ export default {
 		padding: 10rpx 0;
 		min-width: 30%;
 		padding-right: 50rpx;
-		&.wrap-row{
+		&.wrap-row {
 			width: 100%;
 		}
 		.text {

@@ -48,8 +48,14 @@
 						<view class="left"><image src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image></view>
 						<view class="right">
 							<text class="tit">{{ store.name }}</text>
-							<view class="row justify-content">
-								<view class="row-right"><i class="hxicon-locationfill"></i></view>
+							<view class="column store-r-b">
+								<view class="store-r-b-t">
+									<u-icon name="star-fill"></u-icon>	
+									<text>{{store.grade}}</text>
+								</view>
+								<view class="store-r-b-b">
+									<text>月售{{store.sale_num}}</text>
+								</view>
 							</view>
 						</view>
 					</view>
@@ -75,6 +81,15 @@
 					<view class="left"><image src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image></view>
 					<view class="right">
 						<text class="tit">{{ store.name }}</text>
+						<view class="column store-r-b store-r-b-my">
+							<view class="store-r-b-t">
+								<u-icon name="star-fill"></u-icon>	
+								<text>{{store.grade}}</text>
+							</view>
+							<view class="store-r-b-b">
+								<text>月售{{store.sale_num}}</text>
+							</view>
+						</view>
 						<view class="del-shop">
 							<text @click.stop="del(store)">删除</text>
 							<text @click.stop="amend(store)">修改</text>
@@ -112,7 +127,7 @@ export default {
 			GDHEAD: 0,
 			pageInfo: {
 				total: 0,
-				rownumber: 2,
+				rownumber: 8,
 				pageNo: 1
 			},
 			//显示没有更多商户
@@ -414,7 +429,6 @@ page {
 			.logo {
 				width: 32px;
 				height: 32px;
-
 				image {
 					width: 32px;
 					height: 32px;
@@ -424,10 +438,9 @@ page {
 		}
 		.right {
 			display: flex;
-			flex-direction: row;
+			flex-direction: column;
 			color: #333333;
-			align-items: center;
-
+			justify-content: space-around;
 			.address-box {
 				font-size: 14px;
 				margin-right: 16px;
@@ -450,6 +463,23 @@ page {
 			}
 		}
 	}
+}
+.store-r-b{
+	.store-r-b-t{
+		color: #f98c00;
+		font-weight: 700;
+		display: flex;
+		text{
+			margin-right: 10upx;
+		}
+	}
+	.store-r-b-b{
+		color: #848484;
+		margin-top: 10upx;
+	}
+}
+.store-r-b-my{
+	margin-top: 30upx;
 }
 .search-box {
 	position: sticky;
@@ -606,10 +636,9 @@ page {
 			flex-direction: row;
 			.left {
 				margin-right: 10px;
-
 				image {
-					width: 170upx;
-					height: 170upx;
+					width: 150upx;
+					height: 150upx;
 					border-radius: 6px;
 				}
 			}

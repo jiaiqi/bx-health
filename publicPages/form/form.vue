@@ -164,7 +164,6 @@ export default {
 						this.type = 'update';
 						await this.getFieldsV2();
 					} else {
-						debugger;
 						if (req) {
 							req = [{ serviceName: e.service_name, data: [req], condition: this.condition }];
 							let app = uni.getStorageSync('activeApp');

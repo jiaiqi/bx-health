@@ -19,11 +19,388 @@
 				</view>
 			</view>
 		</view>
+		
 		<view v-if="current_tit === 'pregnancy'" class="pregnant-main-fetation">
-			<u-collapse ref='collapse' :head-style="headStyle">
+			<view class="pregnant-main-top">
+				<view class="pregnant-main-top-item">
+					<text @click="chooseClasify(item,index)" :class="currClasifyIndex===index?'active-clasify':''" v-for="(item,index) in classifyData" :key="index">{{item.name}}</text>
+				</view>
+			</view>
+			<!-- 预期首页===胎儿 -->
+			<view v-if="currentClasifyType === 'fetus' " class="fetus-wrap">
+				<view class="cu-timeline">
+					<view class="cu-time">胎儿</view>
+					<view class="cu-item cur">
+						<view class="content bg-orange shadow-blur">
+							<text>第一周</text>
+						</view>
+						<view class="fetus-top">
+							<view class="fetus-top-tit">
+								<text>胎儿发育</text>
+							</view>
+							<view class="fetus-top-main">
+								<view class="fetus-top-main-left">
+									<image src="/otherPages/static/img/1.png" mode=""></image>
+								</view>
+								<view class="fetus-top-main-right">
+									<view class="fetus-top-main-right-t">
+										<text>孕1周</text>
+									</view>
+									<view class="fetus-top-main-right-b">
+										<view class="fetus-top-main-right-b-l">
+											<text>体重：</text>
+											<text>1000克</text>
+										</view>
+										<view class="fetus-top-main-right-b-l">
+											<text>身长：</text>
+											<text>50厘米</text>
+										</view>
+									</view>
+								</view>
+							</view>
+							<view class="fetus-top-bot">
+								<view class="fetus-top-bot-t">
+									<text>概览</text>
+								</view>
+								<view class="fetus-top-bot-b">
+									<view class="fetus-top-bot-b-t">
+										<text>宝宝变化</text>
+										<text>孕1周时，精子和卵子尚未结合，胎宝宝还未形成，此时卵子正乖乖呆在准妈妈的体内</text>
+									</view>
+									<view class="fetus-top-bot-b-b">
+										<text>关爱提醒</text>
+										<text>有的妈妈有少量出血，别怕，这可能是受精卵着床成功的信号；如果量多，建议去医院检查</text>
+									</view>
+								</view>
+							</view>
+						</view>
+					</view>
+					<view class="cu-item cur">
+						<view class="content bg-orange shadow-blur">
+							<text>第二周</text>
+						</view>
+						<view class="fetus-top">
+							<view class="fetus-top-tit">
+								<text>胎儿发育</text>
+							</view>
+							<view class="fetus-top-main">
+								<view class="fetus-top-main-left">
+									<image src="/otherPages/static/img/1.png" mode=""></image>
+								</view>
+								<view class="fetus-top-main-right">
+									<view class="fetus-top-main-right-t">
+										<text>孕2周</text>
+									</view>
+									<view class="fetus-top-main-right-b">
+										<view class="fetus-top-main-right-b-l">
+											<text>体重：</text>
+											<text>1000克</text>
+										</view>
+										<view class="fetus-top-main-right-b-l">
+											<text>身长：</text>
+											<text>50厘米</text>
+										</view>
+									</view>
+								</view>
+							</view>
+							<view class="fetus-top-bot">
+								<view class="fetus-top-bot-t">
+									<text>概览</text>
+								</view>
+								<view class="fetus-top-bot-b">
+									<view class="fetus-top-bot-b-t">
+										<text>宝宝变化</text>
+										<text>孕1周时，精子和卵子尚未结合，胎宝宝还未形成，此时卵子正乖乖呆在准妈妈的体内</text>
+									</view>
+									<view class="fetus-top-bot-b-b">
+										<text>关爱提醒</text>
+										<text>有的妈妈有少量出血，别怕，这可能是受精卵着床成功的信号；如果量多，建议去医院检查</text>
+									</view>
+								</view>
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
+			<!-- 孕期首页===> 饮食 -->
+			<view v-if="currentClasifyType === 'diet' " class="diet-wrap">
+				<u-collapse :head-style='dietHeadStyle'>
+					<u-collapse-item  title="饮食" :open="true">
+						<view class="diet-wrap-top">
+							<view class="diet-wrap-top-item">
+								<view class="diet-wrap-top-item-left">
+									<image src="/otherPages/static/img/14.jpg" mode=""></image>
+								</view>
+								<view class="diet-wrap-top-item-right">
+									<view class="diet-wrap-top-item-right-t">
+										<text>面条</text>
+									</view>
+									<view class="diet-wrap-top-item-right-c">
+										<view class="diet-wrap-top-item-right-c-i">
+											<view class="r-c-i-l">
+												<u-icon color="#5fdb13" name="checkmark-circle-fill"></u-icon>
+												<text>孕期</text>
+											</view>	
+											<view class="r-c-i-l">
+												<u-icon color="#ffc121" name="error-circle-fill"></u-icon>
+												<text>坐月子</text>
+											</view>	
+											<view class="r-c-i-l">
+												<u-icon color="#f75d64" name="close-circle-fill"></u-icon>
+												<text>脯乳期</text>
+											</view>	
+										</view>
+									</view>
+									<!-- <view class="diet-wrap-top-item-right-b">
+										<text>面条</text>
+									</view> -->
+								</view>
+							</view>
+							<view class="diet-wrap-top-item">
+								<view class="diet-wrap-top-item-left">
+									<image src="/otherPages/static/img/14.jpg" mode=""></image>
+								</view>
+								<view class="diet-wrap-top-item-right">
+									<view class="diet-wrap-top-item-right-t">
+										<text>面条</text>
+									</view>
+									<view class="diet-wrap-top-item-right-c">
+										<view class="diet-wrap-top-item-right-c-i">
+											<view class="r-c-i-l">
+												<u-icon color="#5fdb13" name="checkmark-circle-fill"></u-icon>
+												<text>孕期</text>
+											</view>	
+											<view class="r-c-i-l">
+												<u-icon color="#ffc121" name="error-circle-fill"></u-icon>
+												<text>坐月子</text>
+											</view>	
+											<view class="r-c-i-l">
+												<u-icon color="#f75d64" name="close-circle-fill"></u-icon>
+												<text>脯乳期</text>
+											</view>	
+										</view>
+									</view>
+									<!-- <view class="diet-wrap-top-item-right-b">
+										<text>面条</text>
+									</view> -->
+								</view>
+							</view>
+						</view>
+					</u-collapse-item>
+					<u-collapse-item title="运动" >
+						<view class="diet-wrap-top">
+							<view class="diet-wrap-top-item">
+								<view class="diet-wrap-top-item-left">
+									<image src="/otherPages/static/img/yy.jpg" mode=""></image>
+								</view>
+								<view class="diet-wrap-top-item-right">
+									<view class="diet-wrap-top-item-right-t">
+										<text>游泳</text>
+									</view>
+									<view class="diet-wrap-top-item-right-c">
+										<view class="diet-wrap-top-item-right-c-i">
+											<view class="r-c-i-l">
+												<u-icon color="#5fdb13" name="checkmark-circle-fill"></u-icon>
+												<text>孕期</text>
+											</view>	
+											<view class="r-c-i-l">
+												<u-icon color="#ffc121" name="error-circle-fill"></u-icon>
+												<text>坐月子</text>
+											</view>	
+											<view class="r-c-i-l">
+												<u-icon color="#f75d64" name="close-circle-fill"></u-icon>
+												<text>脯乳期</text>
+											</view>	
+										</view>
+									</view>
+									<!-- <view class="diet-wrap-top-item-right-b">
+										<text>面条</text>
+									</view> -->
+								</view>
+							</view>
+							<view class="diet-wrap-top-item">
+								<view class="diet-wrap-top-item-left">
+									<image src="/otherPages/static/img/pb.jpg" mode=""></image>
+								</view>
+								<view class="diet-wrap-top-item-right">
+									<view class="diet-wrap-top-item-right-t">
+										<text>跑步</text>
+									</view>
+									<view class="diet-wrap-top-item-right-c">
+										<view class="diet-wrap-top-item-right-c-i">
+											<view class="r-c-i-l">
+												<u-icon color="#5fdb13" name="checkmark-circle-fill"></u-icon>
+												<text>孕期</text>
+											</view>	
+											<view class="r-c-i-l">
+												<u-icon color="#ffc121" name="error-circle-fill"></u-icon>
+												<text>坐月子</text>
+											</view>	
+											<view class="r-c-i-l">
+												<u-icon color="#f75d64" name="close-circle-fill"></u-icon>
+												<text>脯乳期</text>
+											</view>	
+										</view>
+									</view>
+									<!-- <view class="diet-wrap-top-item-right-b">
+										<text>面条</text>
+									</view> -->
+								</view>
+							</view>
+						</view>
+					</u-collapse-item>
+				</u-collapse>				
+			</view>
+			
+			<!-- 孕期首页===> 待办/已办 -->
+			<view v-if="currentClasifyType === 'matter'" class="matter-wrap">
+				<view class="cu-timeline">
+					<view class="cu-time">待办/已办</view>
+					<view class="cu-item cur">
+						<view class="content bg-blue shadow-blur">
+							<text>第一周</text>
+						</view>
+						<view class="pre-chunk-top pre-chunk-bot matter-wrap-main">
+							<view class="pre-chunk-top-notice">
+								<text>待办事项</text>
+							</view>
+							<view class="pre-chunk-top-backlog-cont">										
+								<view @click="toPreDetail('no')" class="pre-chunk-top-backlog-cont-item">
+									<view class="pre-chunk-top-backlog-cont-item-l">
+										<text>1.建档</text>
+										<text>建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。</text>
+									</view>
+									<view class="pre-chunk-top-backlog-cont-item-r">
+										<text>查看详情</text>
+									</view>
+								</view>
+								<view class="pre-chunk-top-backlog-cont-item">
+									<view class="pre-chunk-top-backlog-cont-item-l">
+										<text>2.建档</text>
+										<text>建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。</text>
+									</view>
+									<view class="pre-chunk-top-backlog-cont-item-r">
+										<text>查看详情</text>
+									</view>
+								</view>
+							</view>
+						</view>
+						<view class="pre-chunk-top pre-chunk-bot matter-wrap-main">
+							<view class="pre-chunk-top-notice">
+								<text>已办事项</text>
+							</view>
+							<view class="pre-chunk-top-backlog-cont">										
+								<view @click="toPreDetail('ok')" class="pre-chunk-top-backlog-cont-item">
+									<view class="pre-chunk-top-backlog-cont-item-l">
+										<text>1.建档</text>
+										<text>建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。</text>
+									</view>
+									<view class="pre-chunk-top-backlog-cont-item-r">
+										<text>查看详情</text>
+									</view>
+								</view>
+								<view class="pre-chunk-top-backlog-cont-item">
+									<view class="pre-chunk-top-backlog-cont-item-l">
+										<text>2.建档</text>
+										<text>建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。</text>
+									</view>
+									<view class="pre-chunk-top-backlog-cont-item-r">
+										<text>查看详情</text>
+									</view>
+								</view>
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
+			
+			<!-- 孕期首页===> 检查 -->
+			<view v-if="currentClasifyType === 'inspect'" class="inspect_wrap">
+				<view class="cu-timeline">
+					<view class="cu-time">检查</view>
+					<view class="cu-item cur">
+						<view class="content bg-yellow shadow-blur">
+							<view class="inspect_wrap_top_left">
+								<view class="inspect_wrap_top_left_t">
+									<text>2020-10-29</text>
+								</view>
+								<view class="inspect_wrap_top_left_c">
+									<view class="inspect_wrap_top_left_c_l">
+										<text>产检重点：</text>
+									</view>
+									<view class="inspect_wrap_top_left_c_r">
+										<text>建档</text>
+										<text>NT检查</text>
+										<text>B超</text>
+									</view>									
+								</view>
+								<view class="inspect_wrap_top_left_b">
+									<text>孕2周</text>
+								</view>
+							</view>
+							<view class="inspect_wrap_top_rig">
+								<u-icon name="arrow-right"></u-icon>
+							</view>
+						</view>
+					</view>
+					<view class="cu-item cur">
+						<view class="content bg-yellow shadow-blur">
+							<view class="inspect_wrap_top_left">
+								<view class="inspect_wrap_top_left_t">
+									<text>2021-01-10</text>
+								</view>
+								<view class="inspect_wrap_top_left_c">
+									<view class="inspect_wrap_top_left_c_l">
+										<text>产检重点：</text>
+									</view>
+									<view class="inspect_wrap_top_left_c_r">
+										<text>建档</text>
+										<text>NT检查</text>
+										<text>B超</text>
+									</view>									
+								</view>
+								<view class="inspect_wrap_top_left_b">
+									<text>孕5周</text>
+								</view>
+							</view>
+							<view class="inspect_wrap_top_rig">
+								<u-icon name="arrow-right"></u-icon>
+							</view>
+						</view>
+					</view>
+					<view class="cu-item cur">
+						<view class="content bg-yellow shadow-blur">
+							<view class="inspect_wrap_top_left">
+								<view class="inspect_wrap_top_left_t">
+									<text>2021-9-10</text>
+								</view>
+								<view class="inspect_wrap_top_left_c">
+									<view class="inspect_wrap_top_left_c_l">
+										<text>产检重点：</text>
+									</view>
+									<view class="inspect_wrap_top_left_c_r">
+										<text>建档</text>
+										<text>NT检查</text>
+										<text>B超</text>
+									</view>									
+								</view>
+								<view class="inspect_wrap_top_left_b">
+									<text>孕10周</text>
+								</view>
+							</view>
+							<view class="inspect_wrap_top_rig">
+								<u-icon name="arrow-right"></u-icon>
+							</view>
+						</view>
+					</view>
+				</view>				
+			</view>
+			
+			<!-- 孕期首页===> 孕期 -->
+			<u-collapse v-if="currentClasifyType === 'gestation'" ref='collapse' :head-style="headStyle">
 				<u-collapse-item v-for="(item,index) in timeLienData" :key="index" :open="item.open" :title="item.name">
 					<view class="cu-timeline pregnant-timeline">					
-						<view v-for="(week,i) in item.child" class="cu-item">
+						<view v-for="(week,i) in item.child" class="cu-item" :class="week.isCurrent?'text-green':''">
 							<view @click="toDetail(week)" class="content " :class="week.isCurrent?'bg-green shadow-blur':'bg-cyan'">
 								<view class="content-item-top">
 									<text v-if="week.start_time && week.end_time">{{week.start_time}} ~ {{week.end_time}}</text>
@@ -38,7 +415,13 @@
 									<view class="pre-chunk-top-notice">
 										<text>注意事项</text>
 									</view>
-									<view class="pre-chunk-top-notice-cont">										
+									<view class="pre-chunk-item-wrap">
+										<view @click="openCont(con)" v-for="(con,k) in week.content" :key="k" :class="con.isOk?'pass-pre-chunk':''" class="pre-chunk">
+												{{con.name}}																			
+										</view>
+									</view>
+									
+									<!-- <view class="pre-chunk-top-notice-cont">										
 											<u-collapse :head-style="headMatterStyle" :item-style="itemStyle">
 												<u-collapse-item @change="collapseClick"  :title="matter.name" v-for="(matter, m) in week.content" :key="m" :open="matter.isOk" :disabled="item.disabled">
 													<view v-for="(matterItem,n) in matter.child" class="pre-chunk-top-notice-cont-item">
@@ -53,7 +436,7 @@
 													</view>
 												</u-collapse-item>
 											</u-collapse>
-									</view>
+									</view> -->
 								</view>
 								
 								<view class="pre-chunk-top pre-chunk-bot">
@@ -61,7 +444,32 @@
 										<text>待办事项</text>
 									</view>
 									<view class="pre-chunk-top-backlog-cont">										
-										<view @click="toPreDetail" class="pre-chunk-top-backlog-cont-item">
+										<view @click="toPreDetail('no')" class="pre-chunk-top-backlog-cont-item">
+											<view class="pre-chunk-top-backlog-cont-item-l">
+												<text>1.建档</text>
+												<text>建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。</text>
+											</view>
+											<view class="pre-chunk-top-backlog-cont-item-r">
+												<text>查看详情</text>
+											</view>
+										</view>
+										<view class="pre-chunk-top-backlog-cont-item">
+											<view class="pre-chunk-top-backlog-cont-item-l">
+												<text>2.建档</text>
+												<text>建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。</text>
+											</view>
+											<view class="pre-chunk-top-backlog-cont-item-r">
+												<text>查看详情</text>
+											</view>
+										</view>
+									</view>
+								</view>
+								<view class="pre-chunk-top pre-chunk-bot">
+									<view class="pre-chunk-top-notice">
+										<text>已办事项</text>
+									</view>
+									<view class="pre-chunk-top-backlog-cont">										
+										<view @click="toPreDetail('ok')" class="pre-chunk-top-backlog-cont-item">
 											<view class="pre-chunk-top-backlog-cont-item-l">
 												<text>1.建档</text>
 												<text>建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。</text>
@@ -148,9 +556,31 @@
 		name:"pregnant",
 		components:{bxDateStamp},
 		data(){
-			return {
+			return {				
+				classifyData:[{
+					name:'孕期',
+					type:'gestation'
+				},{
+					name:'胎儿',
+					type:"fetus"
+				},{
+					name:'饮食/运动',
+					type:"diet"
+				},{
+					name:'检查',
+					type:"inspect"
+				},{
+					name:'待办/已办',
+					type:"matter"
+				}],
+				currentClasifyType:'gestation',
 				headStyle:{
 					paddingLeft:'18px'
+				},
+				dietHeadStyle:{
+					paddingLeft:'18px',
+					fontWeight:'700',
+					fontSize:'18px'
 				},
 				itemStyle:{
 					marginTop:"5px",
@@ -165,6 +595,7 @@
 				
 				markDays:[],
 				showTimeSignPicker:false,
+				currClasifyIndex:0,
 				modalName:'',
 				selectDate:'',
 				TabCur: 1,
@@ -830,10 +1261,16 @@
 					},250)
 				})
 			},
+			/*点击孕期顶部分类**/
+			chooseClasify(item,i){
+				this.currClasifyIndex = i
+				this.currentClasifyType = item.type
+			},
 			/*跳转至产检详情**/
-			toPreDetail(){
+			toPreDetail(type){
+				
 				uni.navigateTo({
-					url:'/otherPages/pregnant/antenatal'
+					url:'/otherPages/pregnant/antenatal?type=' + type
 				})
 			},
 			/*点击日期某一天**/
@@ -985,6 +1422,217 @@
 			}
 		}
 		.pregnant-main-fetation{
+			.pregnant-main-top{
+				margin-bottom: 20upx;
+				.pregnant-main-top-item{
+					display: flex;
+					justify-content: center;
+					text{
+						background-color: #ededed;
+						color: #000;
+						padding: 4upx 20upx;
+						border: 1px solid #ededed;
+						border-radius: 10upx;
+						margin-right: 10upx;
+					}
+					.active-clasify{
+						background-color: #1cbbb4;
+						color: #fff;
+					}
+				}
+			}
+			.fetus-wrap{
+				/deep/ .fetus-top{
+					margin-top: 30upx;					
+					.fetus-top-tit{
+						color: #000;
+						font-size: 32upx;
+						font-weight: 700;
+					}
+					.fetus-top-main{
+						display: flex;
+						box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+						border-radius: 80upx;
+						margin-top: 30upx;
+						.fetus-top-main-left{
+							width: 180upx;
+							height: 180upx;
+							margin: 6upx;
+							image{
+								width: 100%;
+								height: 100%;
+							}
+						}
+						.fetus-top-main-right{
+							display: flex;
+							flex-direction: column;
+							justify-content: space-around;
+							margin-left: 15px;
+							.fetus-top-main-right-t{
+								font-size: 40upx;
+								color: #fcc005;
+								font-weight: 600;
+							}
+						}
+					}
+					.fetus-top-bot{
+						margin-top: 30upx;
+						.fetus-top-bot-t{							
+							color: #000;
+							font-size: 32upx;
+							font-weight: 700;
+						}
+						.fetus-top-bot-b{
+							box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+							border-radius: 15px;
+							padding: 10px;
+							margin-top: 15px;
+							.fetus-top-bot-b-t{								
+								text{
+									color: #000;
+									&:first-child{
+										display: inline-block;
+										border-radius: 10upx;
+										padding: 4upx 20upx;
+										background-color: #ffe7eb;
+										color: #c87684;
+										margin-right: 10upx;
+									}
+								}
+							}
+							.fetus-top-bot-b-b{
+								margin-top: 15upx;
+								text{
+									color: #000;
+									&:first-child{
+										display: inline-block;
+										padding: 4upx 20upx;
+										border-radius: 10upx;
+										background-color: #ffe7eb;
+										color: #c87684;
+										margin-right: 10upx;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			.diet-wrap{
+				.diet-wrap-top{
+					.diet-wrap-top-item{
+						display: flex;
+						width: 95%;
+						margin: 30upx auto 0;
+						.diet-wrap-top-item-left{
+							width: 250upx;
+							height: 150upx;
+							image{
+								width: 100%;
+								height: 100%;
+								border-radius: 30upx;
+							}
+						}
+						.diet-wrap-top-item-right{
+							margin-left: 20upx;
+							display: flex;
+							flex-direction: column;
+							justify-content: space-around;
+							flex: 1;
+							border-bottom: 1px solid #f5f5f5;
+							.diet-wrap-top-item-right-t{
+								font-size: 32upx;
+								font-weight: 600;
+							}
+							.diet-wrap-top-item-right-c{
+								display: flex;
+								.diet-wrap-top-item-right-c-i{
+									display: flex;
+									.r-c-i-l{
+										line-height: 20upx;
+										margin-right: 15upx;
+										text{
+											margin-left: 10upx;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			.matter-wrap{
+				/deep/ .matter-wrap-main{
+						margin-top: 20upx;
+						.pre-chunk-top-notice{
+							font-size: 16px;
+							color: #000;
+							font-weight: 600;
+						}
+						
+						.pre-chunk-top-backlog-cont{
+							// box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+							border-radius: 10px;
+							// padding: 10px;
+							margin-top: 15px;
+							.pre-chunk-top-backlog-cont-item{
+								box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+								border-radius: 10px;
+								padding: 10px;
+								margin-top: 15px;
+								// box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+								.pre-chunk-top-backlog-cont-item-l{
+									line-height: 48upx;									
+									text{
+										color:#ccc;
+										&:first-child{
+											font-weight: 700;
+											display: inline-block;
+											margin-right: 20upx;
+											color: #000;
+										}
+									}
+								}
+								.pre-chunk-top-backlog-cont-item-r{
+									text-align: right;
+									color: #fb7e62;
+								}
+							}
+						}
+				}
+			}
+			.inspect_wrap{
+				.content{
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					color: #fff;
+					background-color: #f4b600;
+				}
+				/deep/ .inspect_wrap_top_left{
+					.inspect_wrap_top_left_t{
+						font-size: 16px;
+						font-weight: 700;
+						color: #fff;
+					}
+					.inspect_wrap_top_left_c{
+						display: flex;
+						.inspect_wrap_top_left_c_l{
+							
+						}
+						.inspect_wrap_top_left_c_r{
+							display: flex;
+							text{
+								margin-right: 20upx;
+							}
+						}
+					}
+				}
+				.inspect_wrap_top_rig{
+					
+				}
+				
+			}
 			// /deep/ .u-collapse-body{
 			// 	height: 750upx!important;
 			// }
@@ -1017,6 +1665,28 @@
 							color: #000;
 							font-weight: 600;
 						}
+						.pre-chunk-item-wrap{
+							display: flex;
+							margin-top: 15upx;
+							.pre-chunk{
+								width: 120upx;
+								height: 120upx;
+								display: flex;
+								align-items: center;
+								justify-content: center;
+								background-color: #e54d42;
+								box-shadow: 4px 3px 4px rgba(229, 77, 66, 0.2);
+								color: white;
+								border-radius: 5px;
+								margin-right: 20upx;
+								margin-bottom: 20upx;
+							}
+							.pass-pre-chunk{
+								background-color: #39b54a;
+								box-shadow: 4px 3px 4px rgba(57, 181, 74, 0.2);
+							}
+						}
+						
 						.pre-chunk-top-notice-cont{
 							margin-top: 10px;
 							.pre-chunk-top-notice-cont-item{
@@ -1057,8 +1727,9 @@
 								margin-top: 15px;
 								// box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
 								.pre-chunk-top-backlog-cont-item-l{
-									line-height: 48upx;
+									line-height: 48upx;									
 									text{
+										color:#ccc;
 										&:first-child{
 											font-weight: 700;
 											display: inline-block;
@@ -1152,7 +1823,9 @@
 					display: none;
 					text{
 						&:first-child{
-							width: 20upx;
+							max-width: 10upx;
+							min-width: 10upx;
+							display: inline-block;
 							height: 40upx;
 							background: chartreuse;
 							border-radius: 4upx;

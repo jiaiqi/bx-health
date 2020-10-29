@@ -28,21 +28,6 @@
 				<view class="ele-text-top">主要维生素含量如下：</view>
 				<view class="ele-text-cen">
 					<view class="ele-text-cen-item">
-						<view class="ele-text-cen-item-title">脂溶性维生素</view>
-						<view class="ele-text-cen-item-cen">
-							<view class="ele-text">
-								<text>VA:</text>
-								<text>{{ currFood.vitamin_a ? currFood.vitamin_a.toFixed(1) : '' }}ug</text>
-								<text style="color: red;">({{ currFood.vitamin_a >= 915 ? '高' : currFood.vitamin_a >= 457 && currFood.vitamin_a < 915 ? '中' : '低' }})</text>
-							</view>
-							<view class="ele-text">
-								<text>VE:</text>
-								<text>{{ currFood.vitamin_e ? currFood.vitamin_e.toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.vitamin_e >= 27.9 ? '高' : currFood.vitamin_e >= 13.9 && currFood.vitamin_e < 27.9 ? '中' : '低' }})</text>
-							</view>
-						</view>
-					</view>
-					<view class="ele-text-cen-item">
 						<view class="ele-text-cen-item-title">产能营养素</view>
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
@@ -62,6 +47,21 @@
 							</view>
 						</view>
 					</view>
+					<view class="ele-text-cen-item">
+						<view class="ele-text-cen-item-title">脂溶性维生素</view>
+						<view class="ele-text-cen-item-cen">
+							<view class="ele-text">
+								<text>VA:</text>
+								<text>{{ currFood.vitamin_a ? currFood.vitamin_a.toFixed(1) : '' }}ug</text>
+								<text style="color: red;">({{ currFood.vitamin_a >= 915 ? '高' : currFood.vitamin_a >= 457 && currFood.vitamin_a < 915 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-text">
+								<text>VE:</text>
+								<text>{{ currFood.vitamin_e ? currFood.vitamin_e.toFixed(1) : '' }}mg</text>
+								<text style="color: red;">({{ currFood.vitamin_e >= 27.9 ? '高' : currFood.vitamin_e >= 13.9 && currFood.vitamin_e < 27.9 ? '中' : '低' }})</text>
+							</view>
+						</view>
+					</view>					
 					<view class="ele-text-cen-item">
 						<view class="ele-text-cen-item-title">水溶性维生素</view>
 						<view class="ele-text-cen-item-cen">
@@ -146,10 +146,11 @@
 				</view>
 			</view>
 			<view class="calculate">	
-				<view class="calculate-l">
-					单位：
-				</view>
+				
 					<view  class="weight">
+						<view class="calculate-l">
+							单位：
+						</view>
 						<view @click="chooseUnit(u,ids)" v-for="(u,ids) in unitList" :key="ids" :class="currIndex==ids?'active-unit':''" class="unit">
 							{{u.unit_amount?u.unit_amount+u.unit:u.unit}}
 							<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
@@ -824,25 +825,32 @@ export default {
 		display: flex;
 		align-items: center;
 		font-size: 28upx;
-		flex-wrap: nowrap;
+		flex-wrap: wrap;
 		white-space:nowrap;
 		overflow-x: scroll;
 		// justify-content: flex-end;
 		// flex-wrap: wrap;
 		// min-width: 220upx;
+		.calculate-l{
+			font-size: 28upx;
+			margin-bottom: 16upx;
+		}
 		.unit{
 			margin-right: 10upx;
-			background-color: #f37b1d;
-			color: white;
+			background-color: #f8f8f8;
+			color: #999;
 			border-radius: 40upx;
-			border: 1px solid #f37b1d;
-			padding: 6upx 16upx;
-
+			border: 1px solid #999;
+			padding: 0px 16upx;
+			min-height:54upx ;
+			display: flex;
+			align-items: center;
+			margin-bottom: 10upx;
 		}
 		.active-unit{
-			border: 1px dashed #f37b1d;
-			background-color: #fff;
-			color: #f37b1d;
+			border: 1px solid #f37b1d;
+			background-color: #f37b1d;
+			color: #fff;
 			// color: red;
 			// font-size: 32upx;
 		}
@@ -866,9 +874,10 @@ export default {
 	}
 }
 .foods-btn{
-	margin-top: 60upx;
+	padding: 60upx 0;
 	display: flex;
 	justify-content: center;
+	background-color: #f8f8f8;
 	text{
 		padding: 15upx 40upx;
 		background-color: #1cbbb4;

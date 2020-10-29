@@ -35,14 +35,32 @@
 				</view>
 			</view>
 		</view>
-		<view class="antenatal-bot ">
-			<button class="cu-btn bg-green lg">已进行</button>
-			<button class="cu-btn bg-red margin-tb-sm lg">未进行</button>
+		<view v-if="type&&type==='no'" class="antenatal-bot ">
+			<button @click="march('proceed')" class="cu-btn bg-green lg">已进行</button>
+			<button @click="march('noProceed')" class="cu-btn bg-red margin-tb-sm lg">未进行</button>
 		</view>
 	</view>
 </template>
 
 <script>
+	export default{
+		name:'antenatal',
+		data(){
+			return {
+				type:''
+			}
+		},
+		methods:{
+			march(type){
+				uni.redirectTo({
+					url:'/otherPages/pregnant/pregnant'
+				})
+			}
+		},
+		onLoad(option) {
+			this.type = option.type 
+		}
+	}
 </script>
 
 <style lang="scss" scoped>

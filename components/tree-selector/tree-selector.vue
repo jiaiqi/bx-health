@@ -10,7 +10,7 @@
             normal: item[nodeKey] !== activeNode[nodeKey]
              }"
           >
-            {{ item[disColName] ? item[disColName] : srvInfo.key_disp_col ? item[srvInfo.key_disp_col] : '' }}
+            {{ item[disColName] ? item[disColName] : srvInfo&&srvInfo.key_disp_col ? item[srvInfo.key_disp_col] : '' }}
           </view>
         </view>
       </view>

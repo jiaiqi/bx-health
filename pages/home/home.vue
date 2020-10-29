@@ -38,12 +38,20 @@
 				</view>
 				<view class="operate">=</view>
 				<view class="energy-item">
-					<view class="text">体重变化</view>
-					<view class="number text-red" style="display: flex; width: 90px; justify-content: space-between;">
+					<view class="text">热量变化</view>
+					<view
+						class="number "
+						:class="{ 'text-red': parseFloat(energyChange) > 0, 'text-green': parseFloat(energyChange) < 0 }"
+						style="display: flex; width: 90px; justify-content: space-between;"
+					>
 						<text style="flex:1;">{{ parseFloat(energyChange) > 0 ? `+${parseFloat(energyChange).toFixed(1)}` : parseFloat(energyChange).toFixed(1) }}</text>
 						<text class="units">大卡</text>
 					</view>
-					<view class="number text-red" style="display: flex; width: 90px; justify-content: space-between;">
+					<view
+						class="number"
+						:class="{ 'text-red': parseFloat(energyChange) > 0, 'text-green': parseFloat(energyChange) < 0 }"
+						style="display: flex; width: 90px; justify-content: space-between;"
+					>
 						<text style="flex:1;">
 							{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
 						</text>
@@ -91,61 +99,70 @@
 						<u-icon name="eye-fill"></u-icon>
 					</view>
 				</view>
-				<view class="box-item" @click="topages">
+				<view class="box-item" :class="{ filled: quInfo.disease && quInfo.disease.hasFill === true && quInfo.disease.state === '完成','bg-green':quInfo.disease&&quInfo.disease.data&&quInfo.disease.data.score>=20 }" @click="toQuestionnaire('disease')">
 					<view class="label">疾病史</view>
-					<view class="status">
+					<view class="status" v-if="!quInfo.disease || !quInfo.disease.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
+					<view class="status" v-if="quInfo.disease && quInfo.disease.hasFill">
+						<!-- {{ quInfo.disease.state === '完成' ? '点击查看' : quInfo.disease.state }} -->
+						<!-- <u-icon name="eye-fill"></u-icon> -->
+						<u-rate :count="3" size="24"  active-icon="heart-fill" inactive-icon="heart" inactive-color="#fff" active-color="#fff" :current="getQuestionRate(quInfo.disease)"></u-rate>
+					</view>
 				</view>
-				<view class="box-item">
+				<view class="box-item" :class="{ filled: quInfo.genetic && quInfo.genetic.hasFill === true && quInfo.genetic.state === '完成' }" @click="toQuestionnaire('genetic')">
 					<view class="label">遗传史</view>
-					<view class="status">
+					<view class="status" v-if="!quInfo.genetic || !quInfo.genetic.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
+					<view class="status" v-if="quInfo.genetic && quInfo.genetic.hasFill">
+						{{ quInfo.genetic.state === '完成' ? '点击查看' : quInfo.genetic.state }}
+						<u-icon name="eye-fill"></u-icon>
+					</view>
 				</view>
-				<view class="box-item" :class="{ filled: quInfo.diet && quInfo.diet.hasFill === true }" @click="toQuestionnaire('diet')">
+				<view class="box-item" :class="{ filled: quInfo.diet && quInfo.diet.hasFill === true && quInfo.diet.state === '完成' }" @click="toQuestionnaire('diet')">
 					<view class="label">饮食营养</view>
 					<view class="status" v-if="!quInfo.diet || !quInfo.diet.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
 					<view class="status" v-if="quInfo.diet && quInfo.diet.hasFill">
-						点击查看
+						{{ quInfo.diet.state === '完成' ? '点击查看' : quInfo.diet.state }}
 						<u-icon name="eye-fill"></u-icon>
 					</view>
 				</view>
-				<view class="box-item" :class="{ filled: quInfo.sport && quInfo.sport.hasFill === true }" @click="toQuestionnaire('sport')">
+				<view class="box-item" :class="{ filled: quInfo.sport && quInfo.sport.hasFill === true && quInfo.sport.state === '完成' }" @click="toQuestionnaire('sport')">
 					<view class="label">运动</view>
 					<view class="status" v-if="!quInfo.sport || !quInfo.sport.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
 					<view class="status" v-if="quInfo.sport && quInfo.sport.hasFill">
-						点击查看
+						{{ quInfo.sport.state === '完成' ? '点击查看' : quInfo.sport.state }}
 						<u-icon name="eye-fill"></u-icon>
 					</view>
 				</view>
-				<view class="box-item" :class="{ filled: quInfo.sleep && quInfo.sleep.hasFill === true }" @click="toQuestionnaire('sleep')">
+				<view class="box-item" :class="{ filled: quInfo.sleep && quInfo.sleep.hasFill === true && quInfo.sleep.state === '完成' }" @click="toQuestionnaire('sleep')">
 					<view class="label">睡眠</view>
 					<view class="status" v-if="!quInfo.sleep || !quInfo.sleep.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
 					<view class="status" v-if="quInfo.sleep && quInfo.sleep.hasFill">
-						点击查看
+						{{ quInfo.sleep.state === '完成' ? '点击查看' : quInfo.sleep.state }}
 						<u-icon name="eye-fill"></u-icon>
 					</view>
 				</view>
-				<view class="box-item" :class="{ filled: quInfo.mental && quInfo.mental.hasFill === true }" @click="toQuestionnaire('mental')">
+				<view class="box-item" :class="{ filled: quInfo.mental && quInfo.mental.hasFill === true && quInfo.mental.state === '完成' }" @click="toQuestionnaire('mental')">
 					<view class="label">心理</view>
 					<view class="status" v-if="!quInfo.mental || !quInfo.mental.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
 					</view>
 					<view class="status" v-if="quInfo.mental && quInfo.mental.hasFill">
-						点击查看
+						{{ quInfo.mental.state === '完成' ? '点击查看' : quInfo.mental.state }}
 						<u-icon name="eye-fill"></u-icon>
 					</view>
 				</view>
@@ -177,12 +194,6 @@ var self;
 // import uCharts from '@/components/u-charts/u-charts.js';
 import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
 var _self;
-var canvasLineA = null;
-var canvasLineB = null;
-var canvasLineC = null;
-var canvasColumnD = null;
-var stepChart = null;
-var canvasPie = null;
 var dayjs = require('dayjs');
 export default {
 	components: {
@@ -191,190 +202,11 @@ export default {
 	data() {
 		return {
 			quInfo: {}, // 问卷信息
-			ecData: {
-				option: ''
-			},
 			stepData: {},
 			weightData: {},
-			caloriesData:{},
+			caloriesData: {},
 			BPData: {},
 			sleepData: {},
-			ec: {
-				option: {
-					title: {
-						text: ''
-					},
-					tooltip: {
-						trigger: 'axis',
-						formatter: '{b}\r\n{c0}人',
-						axisPointer: {
-							type: 'line',
-							axis: 'x',
-							label: {
-								backgroundColor: '#000000'
-							}
-						}
-					},
-					grid: {
-						left: '6%',
-						right: '6%',
-						top: '6%',
-						bottom: '6%',
-						containLabel: true
-					},
-					xAxis: {
-						type: 'category',
-						boundaryGap: false,
-						data: ['2-12', '2-14', '2-16', '2-18', '2-20', '2-22', '2-24'],
-						axisLine: {
-							// y轴
-							show: false
-						},
-						axisTick: {
-							// y轴刻度线
-							show: false
-						},
-						splitLine: {
-							// 网格线
-							show: false
-						}
-					},
-					yAxis: {
-						type: 'value',
-						axisLine: {
-							// y轴
-							show: false
-						},
-						axisTick: {
-							// y轴刻度线
-							show: false
-						},
-						splitLine: {
-							// 网格线
-							show: false
-						}
-					},
-					series: [
-						{
-							name: '浏览量',
-							type: 'line',
-							smooth: true,
-							areaStyle: {
-								color: {
-									type: 'linear',
-									x: 0,
-									y: 0,
-									x2: 0,
-									y2: 1,
-									colorStops: [
-										{
-											offset: 0,
-											color: '#E50113' // 0% 处的颜色
-										},
-										{
-											offset: 1,
-											color: '#fff' // 100% 处的颜色
-										}
-									],
-									global: false // 缺省为 false
-								}
-							},
-							lineStyle: {
-								color: '#EF5959'
-							},
-							data: [120, 132, 101, 134, 90, 230, 210]
-						}
-					]
-				}
-			},
-			ecWeight: {
-				option: {
-					title: {
-						text: '体重'
-					},
-					tooltip: {
-						trigger: 'axis',
-						formatter: '{b}\r\n{c0}kg',
-						axisPointer: {
-							type: 'line',
-							axis: 'x',
-							label: {
-								backgroundColor: '#000000'
-							}
-						}
-					},
-					grid: {
-						left: '6%',
-						right: '6%',
-						top: '6%',
-						bottom: '6%',
-						containLabel: true
-					},
-					xAxis: {
-						type: 'category',
-						boundaryGap: false,
-						data: ['2-12', '2-14', '2-16', '2-18', '2-20', '2-22', '2-24'],
-						axisLine: {
-							// y轴
-							show: false
-						},
-						axisTick: {
-							// y轴刻度线
-							show: false
-						},
-						splitLine: {
-							// 网格线
-							show: false
-						}
-					},
-					yAxis: {
-						type: 'value',
-						axisLine: {
-							// y轴
-							show: false
-						},
-						axisTick: {
-							// y轴刻度线
-							show: false
-						},
-						splitLine: {
-							// 网格线
-							show: false
-						}
-					},
-					series: [
-						{
-							name: '浏览量',
-							type: 'line',
-							smooth: true,
-							areaStyle: {
-								color: {
-									type: 'linear',
-									x: 0,
-									y: 0,
-									x2: 0,
-									y2: 1,
-									colorStops: [
-										{
-											offset: 0,
-											color: '#E50113' // 0% 处的颜色
-										},
-										{
-											offset: 1,
-											color: '#fff' // 100% 处的颜色
-										}
-									],
-									global: false // 缺省为 false
-								}
-							},
-							lineStyle: {
-								color: '#EF5959'
-							},
-							data: [120, 132, 101, 134, 90, 230, 210]
-						}
-					]
-				}
-			},
 			subList: [
 				{ name: '步数', key: 'step', chartID: 'stepChart' },
 				{ name: '体重', key: 'weight', chartID: 'canvasLineA' },
@@ -394,17 +226,12 @@ export default {
 			},
 			dietIn: 0, //饮食摄入
 			sportOut: 0, //运动消耗
-			modalName: '',
-			showTimeSignPicker: false,
 			userInfo: {},
 			selectDate: this.formateDate(new Date(), 'date'),
 			userMenuList: [],
 			navBackground: {
 				backgroundColor: '#0bc99d'
 			},
-			cWidth: '',
-			cHeight: '',
-			pixelRatio: 1,
 			weightChartData: {
 				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
 				series: [
@@ -452,24 +279,6 @@ export default {
 						name: '睡眠',
 						data: [7.5, 8, 7.5, 7, 6, 8.5],
 						color: '#8543e0'
-					}
-				]
-			},
-			chartData: {
-				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
-				series: [
-					{
-						name: '体重',
-						data: [35, 20, 25, 37, 4, 20],
-						color: '#000000'
-					},
-					{
-						name: '血压',
-						data: [70, 40, 65, 100, 44, 68]
-					},
-					{
-						name: '热量',
-						data: [100, 80, 95, 150, 112, 132]
 					}
 				]
 			},
@@ -550,36 +359,33 @@ export default {
 		}
 	},
 	methods: {
-		showPie(canvasId, chartData) {
-			canvasPie = new uCharts({
-				$this: _self,
-				canvasId: canvasId,
-				type: 'pie',
-				fontSize: 11,
-				legend: { show: true },
-				background: '#FFFFFF',
-				pixelRatio: _self.pixelRatio,
-				series: chartData.series,
-				animation: true,
-				width: _self.cWidth * _self.pixelRatio,
-				height: _self.cHeight * _self.pixelRatio,
-				dataLabel: true,
-				extra: {
-					pie: {
-						lableWidth: 15
-					}
-				}
-			});
-		},
-		touchPie(e) {
-			canvaPie.showToolTip(e, {
-				format: function(item) {
-					return item.name + ':' + item.data;
-				}
-			});
+		getQuestionRate(e){
+			let score = 0
+			if(e.data&&e.data.score){
+				score = e.data.score
+			}
+			if(score<20){
+				return 0
+			}else if(score>=20&&score<40){
+				return 1
+			}else if(score>=40&&score<60){
+				return 2
+			}else if(score>=60){
+				return 3
+			}
 		},
 		async checkQuestionnaireRecord() {
 			let quInfo = {
+				//疾病
+				disease: {
+					no: '20201027152801000160',
+					hasFill: false
+				},
+				//遗传
+				genetic: {
+					no: '20201029103509000161',
+					hasFill: false
+				},
 				//饮食营养
 				diet: {
 					no: '20201026114053000156',
@@ -604,9 +410,17 @@ export default {
 			let no = Object.keys(quInfo).map(key => quInfo[key].no);
 			let record = await this.getQuestionnaireRecord(no.toString());
 			Object.keys(quInfo).forEach(key => {
-				record.forEach(no => {
-					if (quInfo[key].no === no) {
+				// record.forEach(no => {
+				// 	if (quInfo[key].no === no) {
+				// 		debugger;
+				// 		quInfo[key]['hasFill'] = true;
+				// 	}
+				// });
+				record.forEach(res => {
+					if (quInfo[key].no === res.activity_no) {
 						quInfo[key]['hasFill'] = true;
+						quInfo[key]['data'] = res;
+						quInfo[key]['state'] = res.state;
 					}
 				});
 			});
@@ -618,19 +432,41 @@ export default {
 				serviceName: 'srvdaq_record_reply_select',
 				colNames: ['*'],
 				condition: [{ colName: 'activity_no', ruleType: 'in', value: no }, { colName: 'user_no', ruleType: 'like', value: this.loginUserInfo.user_no }],
-				page: { pageNo: 1, rownumber: 10 },
 				order: [{ colName: 'create_time', orderType: 'desc' }]
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-					return Array.from(new Set(res.data.data.map(item => item.activity_no)));
+					let noList = [];
+					let result = res.data.data.filter(item => {
+						if (!noList.includes(item.activity_no) && item.state === '完成') {
+							// 最近时间的问卷记录
+							noList.push(item.activity_no);
+							return true;
+						}
+					});
+					res.data.data.forEach(item => {
+						if (!noList.includes(item.activity_no)) {
+							// 最近时间的问卷记录
+							noList.push(item.activity_no);
+							result.push(item);
+						}
+					});
+					return result;
 				}
 			}
 		},
 		toQuestionnaire(type) {
 			let no = '';
 			switch (type) {
+				case 'genetic':
+					// 遗传史
+					no = '20201029103509000161';
+					break;
+				case 'disease':
+					// 疾病史
+					no = '20201027152801000160';
+					break;
 				case 'diet':
 					// 饮食营养卷
 					no = '20201026114053000156';
@@ -666,7 +502,6 @@ export default {
 			let url = '';
 			switch (item) {
 				case 'basic':
-					// url = '/otherPages/personal/personal';
 					let row = this.userInfo;
 					let params = {
 						type: 'detail',
@@ -786,7 +621,6 @@ export default {
 			//
 			let serviceObj = {
 				weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
-				// bloodGlucose: '', // 血糖
 				bloodPressure: 'srvhealth_blood_pressure_record_select' // 血压
 			};
 			let serviceName = serviceObj[type];
@@ -910,7 +744,6 @@ export default {
 				return item;
 			});
 			this.caloriesChartData.series = series;
-			// this.showColumnD('canvasColumnD', this.caloriesChartData, '大卡');
 		},
 		toToday() {
 			uni.navigateTo({
@@ -1018,100 +851,6 @@ export default {
 				this.sportOut = sportOut;
 			}
 		},
-		getSignature(formData) {
-			let self = this;
-			let linkurl = '';
-			// #ifdef H5
-			window.location.href.split('#')[0];
-			// #endif
-			let req = {
-				serviceName: 'srvwx_app_signature_select',
-				colNames: ['*'],
-				condition: [
-					{
-						colName: 'app_no',
-						ruleType: 'eq',
-						value: this.$api.appNo.wxmp
-						// value: this.$api.appNo.wxh5
-					},
-					{
-						colName: 'page_url',
-						ruleType: 'eq',
-						value: linkurl
-					}
-				]
-			};
-			console.log('linkurl', linkurl);
-			uni.setStorageSync('linkUrl', null);
-			self.$http.post(self.$api.getSignature, req).then(res => {
-				if (res.data.state === 'SUCCESS') {
-					let resData = res.data.data[0];
-					uni.setStorageSync('signatureInfo', resData);
-					// #ifdef H5
-					self.$wx.config({
-						debug: false, // 调试阶段建议开启
-						appId: resData.appId, // APPID
-						timestamp: resData.timestamp, // 时间戳timestamp
-						nonceStr: resData.noncestr, // 随机数nonceStr
-						signature: resData.signature, // 签名signature
-						// 需要调用的方法接口
-						jsApiList: [
-							'updateAppMessageShareData',
-							'updateTimelineShareData',
-							'onMenuShareTimeline',
-							'onMenuShareAppMessage',
-							'onMenuShareWeibo',
-							'onMenuShareQQ',
-							'onMenuShareQZone'
-						]
-					});
-					self.$wx.ready(() => {
-						console.log('wx.ready()', self.wxUserInfo);
-						self.$wx.updateAppMessageShareData({
-							//自定义“分享给朋友”及“分享到QQ”按钮的分享内容
-							imgUrl: self.wxUserInfo.headimgurl, // 分享图，默认当相对路径处理，所以使用绝对路径的的话，“http://”协议前缀必须在。
-							desc: '百想健康', // 摘要,如果分享到朋友圈的话，不显示摘要。
-							title: '百想健康', // 分享卡片标题
-							// link:  window.location.href, // 分享出去后的链接，这里可以将链接设置为另一个页面。
-							link: linkurl, // 分享出去后的链接，这里可以将链接设置为另一个页面。
-							success: function() {
-								// 分享成功后的回调函数
-							},
-							cancel: function() {
-								// 用户取消分享后执行的回调函数
-								// //// alert('分享失败')
-							}
-						}); // 自定义“分享到朋友圈”及“分享到QQ空间”按钮的分享内容
-						self.$wx.updateTimelineShareData({
-							imgUrl: self.formData.fileUrl, // 分享图，默认当相对路径处理，所以使用绝对路径的的话，“http://”协议前缀必须在。
-							desc: '百想健康', // 摘要,如果分享到朋友圈的话，不显示摘要。
-							title: '百想健康', // 分享卡片标题
-							link: linkurl, // 分享出去后的链接，这里可以将链接设置为另一个页面。
-							success: function() {
-								// 分享成功后的回调函数
-							},
-							cancel: function() {
-								// 用户取消分享后执行的回调函数
-								// //// alert('分享失败')
-							}
-						});
-					});
-					self.$wx.error(function(res) {
-						uni.showModal({
-							title: '提示',
-							content: JSON.stringify(res),
-							success() {}
-						});
-					});
-					// #endif
-				} else {
-					uni.showToast({
-						title: '获取签名失败',
-						icon: 'none'
-					});
-				}
-			});
-		},
 		clickPage(e) {
 			if (this.showUserList) {
 				this.showUserList = false;
@@ -1125,7 +864,7 @@ export default {
 		buildEcData(chartData = { categories: [], series: [] }, unit, title) {
 			let option = {
 				title: {
-					text: title,
+					text: title
 				},
 				tooltip: {
 					trigger: 'axis',
@@ -1185,38 +924,41 @@ export default {
 					name: item.name,
 					type: 'line',
 					smooth: true,
-					areaStyle: {
-						color: {
-							type: 'linear',
-							x: 0,
-							y: 0,
-							x2: 0,
-							y2: 1,
-							colorStops: [
-								{
-									offset: 0,
-									color: item.color // 0% 处的颜色
-								},
-								{
-									offset: 1,
-									color: '#fff' // 100% 处的颜色
-								}
-							],
-							global: false // 缺省为 false
-						}
-					},
 					itemStyle: {
 						color: item.color
 					},
+					label: { show: true },
 					data: item.data
 				};
+				if (item.data.length > 10) {
+					option.grid.bottom = '20%';
+					option.dataZoom = [
+						{
+							type: 'inside',
+							start: 70,
+							end: 100
+						},
+						{
+							start: 70,
+							end: 100,
+							handleIcon:
+								'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+							handleSize: '70%',
+							handleStyle: {
+								color: '#fff',
+								shadowBlur: 3,
+								shadowColor: 'rgba(0, 0, 0, 0.6)',
+								shadowOffsetX: 2,
+								shadowOffsetY: 2
+							}
+						}
+					];
+				}
 				option.series.push(obj);
 			});
-			// this.$set(this.ecData, 'option', option);
 			let data = {
 				option: option
 			};
-			// this.ecData = this.deepClone(option);
 			return data;
 		},
 		async getUserInfo() {
@@ -1240,9 +982,6 @@ export default {
 				if (userInfo.headimgurl) {
 					this.src = userInfo.headimgurl;
 				}
-				// #ifdef H5
-				// this.getSignature();
-				// #endif
 			} else {
 				// 没有用户信息
 			}
@@ -1282,149 +1021,6 @@ export default {
 				});
 			}
 			this.showUserList = false;
-		},
-		showLineA(canvasId, chartData, unit) {
-			let options = this.getChartOptions(canvasId, chartData, unit);
-			if (canvasLineA) {
-				canvasLineA.updateData({
-					series: chartData.series,
-					categories: chartData.categories,
-					animation: true
-				});
-			} else {
-				canvasLineA = new uCharts(options);
-			}
-		},
-		showLineB(canvasId, chartData, unit) {
-			let options = this.getChartOptions(canvasId, chartData, unit);
-			if (canvasLineB) {
-				canvasLineB.updateData({
-					series: chartData.series,
-					categories: chartData.categories,
-					animation: true
-				});
-			} else {
-				canvasLineB = new uCharts(options);
-			}
-		},
-		showLineC(canvasId, chartData, unit) {
-			let options = this.getChartOptions(canvasId, chartData, unit);
-			if (canvasLineC) {
-				canvasLineC.updateData({
-					series: chartData.series,
-					categories: chartData.categories,
-					animation: true
-				});
-			} else {
-				canvasLineC = new uCharts(options);
-			}
-		},
-		showColumnD(canvasId, chartData, unit) {
-			let options = this.getChartOptions(canvasId, chartData, unit, 'column');
-			if (canvasColumnD) {
-				canvasColumnD.updateData({
-					series: chartData.series,
-					categories: chartData.categories,
-					animation: true
-				});
-			} else {
-				canvasColumnD = new uCharts(options);
-			}
-		},
-		getChartOptions(canvasId, chartData, unit, type) {
-			return {
-				$this: _self,
-				colors: ['#1890ff', '#2fc25b', '#facc14', '#f04864', '#8543e0', '#90ed7d'],
-				canvasId: canvasId,
-				type: type ? type : 'line',
-				fontSize: 11,
-				// legend: { show: true },
-				dataLabel: false,
-				dataPointShape: true,
-				background: '#FFFFFF',
-				pixelRatio: _self.pixelRatio,
-				categories: chartData.categories,
-				series: chartData.series,
-				animation: true,
-				xAxis: {
-					type: 'grid',
-					gridColor: '#CCCCCC',
-					gridType: 'dash'
-					// dashLength: 8
-				},
-				yAxis: {
-					gridType: 'dash',
-					gridColor: '#CCCCCC',
-					// dashLength: 8,
-					// splitNumber: 5,
-					// min: 10,
-					// max: 180,
-					format: val => {
-						// y轴显示
-						return val.toFixed(0) + unit;
-					}
-				},
-				width: _self.cWidth * _self.pixelRatio,
-				height: _self.cHeight * _self.pixelRatio,
-				extra: {
-					column: {
-						type: 'stack',
-						width: 20
-					},
-					line: {
-						type: 'curve'
-					}
-				}
-			};
-		},
-		touchEndLine(e) {
-			stepChart.showToolTip(e, {
-				format: function(item, category) {
-					return category + ' 步数' + ': ' + item.data + '步';
-				}
-			});
-			stepChart.touchLegend(e, {
-				animation: true
-			});
-			stepChart.scrollEnd(e);
-		},
-		touchLine(e) {
-			stepChart.scrollStart(e);
-		},
-		moveLine(e) {
-			stepChart.scroll(e);
-		},
-		touchLineA(e) {
-			canvasLineA.showToolTip(e, {
-				format: function(item, category) {
-					return category + ' ' + item.name + ':' + item.data + 'kg';
-				}
-			});
-			canvasLineA.touchLegend(e);
-		},
-		touchLineB(e) {
-			canvasLineB.showToolTip(e, {
-				format: function(item, category) {
-					return category + ' ' + item.name + ':' + item.data + 'mmHg';
-				}
-			});
-			canvasLineB.touchLegend(e);
-		},
-		touchLineC(e) {
-			canvasLineC.showToolTip(e, {
-				format: function(item, category) {
-					return category + ' ' + item.name + ':' + item.data + '小时';
-				}
-			});
-			canvasLineC.touchLegend(e);
-		},
-		touchColumnD(e) {
-			canvasColumnD.showToolTip(e, {
-				format: function(item, category) {
-					return category + ' ' + item.name + ':' + item.data + '大卡';
-				}
-			});
-			canvasColumnD.touchLegend(e);
 		},
 		getDayStepInfo(date) {
 			let stepInfoList = this.stepInfoList;
@@ -1483,7 +1079,6 @@ export default {
 						chartData.series[0].data = stepList.map(item => item.step);
 						this.wxRunData = chartData;
 						this.stepData = this.buildEcData(this.wxRunData, '步', '步数');
-						// _self.showChart('stepChart', chartData);
 						return stepList;
 					} else {
 						return false;
@@ -1493,60 +1088,6 @@ export default {
 				}
 			} else {
 				return false;
-			}
-		},
-		showChart(canvasId, chartData) {
-			if (stepChart) {
-				stepChart.updateData({
-					series: chartData.series,
-					categories: chartData.categories,
-					animation: true
-				});
-			} else {
-				stepChart = new uCharts({
-					$this: _self,
-					canvasId: canvasId,
-					type: 'line',
-					fontSize: 11,
-					legend: { show: true },
-					dataLabel: true,
-					dataPointShape: true,
-					background: '#FFFFFF',
-					pixelRatio: 1,
-					categories: chartData.categories,
-					series: chartData.series,
-					animation: false,
-					enableScroll: true, //开启图表拖拽功能
-					xAxis: {
-						type: 'grid',
-						disableGrid: false,
-						gridColor: '#CCCCCC',
-						gridType: 'dash',
-						dashLength: 8,
-						itemCount: 8, //x轴单屏显示数据的数量，默认为5个
-						scrollShow: true, //新增是否显示滚动条，默认false
-						scrollAlign: 'right' //滚动条初始位置
-					},
-					yAxis: {
-						disableGrid: false,
-						gridType: 'dash',
-						gridColor: '#CCCCCC',
-						dashLength: 8,
-						splitNumber: 5,
-						min: 10,
-						max: 180,
-						format: val => {
-							return val.toFixed(0) + '步';
-						}
-					},
-					width: this.cWidth,
-					height: this.cHeight,
-					extra: {
-						line: {
-							type: 'curve' //曲线
-						}
-					}
-				});
 			}
 		},
 		async initPage() {
@@ -1628,7 +1169,6 @@ export default {
 				});
 				// #endif
 				// #ifdef H5
-				// this.showCanvas('weight');
 				// #endif
 				this.checkQuestionnaireRecord(); //检查有没有填过饮食运动等相关问卷
 			}
@@ -1647,8 +1187,6 @@ export default {
 	},
 	onLoad() {
 		_self = this;
-		this.cWidth = uni.upx2px(710);
-		this.cHeight = uni.upx2px(350);
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({
 			withShareTicket: true,
@@ -1820,14 +1358,14 @@ export default {
 			border-radius: 2px;
 			background-color: #fff;
 			margin: 0 auto;
-			height: 350rpx;
+			height: 450rpx;
 			.uni-ec-canvas {
 				width: 710rpx;
-				height: 350rpx;
+				height: 450rpx;
 			}
 			.charts-line {
 				width: 710rpx;
-				height: 350rpx;
+				height: 450rpx;
 			}
 		}
 	}
@@ -1857,10 +1395,7 @@ export default {
 		.box-item {
 			width: calc(33.33% - 20rpx);
 			margin: 10rpx;
-			min-height: 120rpx;
-			display: flex;
-			justify-content: center;
-			align-items: center;
+			min-height: 200rpx;
 			letter-spacing: 2rpx;
 			font-size: 32rpx;
 			border-radius: 20rpx;
@@ -1868,7 +1403,9 @@ export default {
 			transition: all 0.5s;
 			background-color: rgba($color: #909399, $alpha: 0.5);
 			box-shadow: 4px 3px 4px rgba($color: #909399, $alpha: 0.5);
-			flex-wrap: wrap;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
 			&:active {
 				// opacity: 1;
 				transform: scale(1.1);
@@ -1901,6 +1438,7 @@ export default {
 			}
 			.label {
 				width: 100%;
+				padding: 10rpx 0;
 			}
 
 			.u-icon {
@@ -1950,6 +1488,10 @@ export default {
 				background-color: rgba($color: #2979ff, $alpha: 0.8);
 				box-shadow: 4px 3px 4px rgba($color: #2979ff, $alpha: 0.5);
 			}
+			&.bg-green{
+				background-color: rgba(11, 201, 157, 0.8);
+				box-shadow: 4px 3px 4px rgba(11, 201, 157, 0.8);
+			}
 		}
 	}
 	.energy-box {
@@ -1957,24 +1499,66 @@ export default {
 		width: 100%;
 		justify-content: space-around;
 		align-items: center;
-		padding: 40rpx 20rpx;
+		padding: 0rpx 10rpx;
+		// background-color: #f1f1f1;
+		// box-shadow: 4px 3px 4px rgba($color: #f1f1f1, $alpha: 0.5);
 	}
 	.energy-item {
 		color: #333;
 		font-weight: bold;
-		min-height: 100upx;
+		min-height: 150upx;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-around;
+		// justify-content: space-around;
+		justify-content: center;
+		flex: 1;
+		margin-bottom: 10rpx;
+		border-radius: 20rpx;
+		margin: 30rpx 10rpx;
+		&:first-child {
+			background-color: rgba($color: #f14d30, $alpha: 0.8);
+			box-shadow: 4px 3px 4px rgba($color: #cf6d40, $alpha: 0.5);
+			color: #f1f1f1;
+		}
+		&:nth-child(3) {
+			color: #f1f1f1;
+			background-color: rgba($color: #0bc99d, $alpha: 0.8);
+			box-shadow: 4px 3px 4px rgba($color: #0bc99d, $alpha: 0.5);
+		}
+		&:nth-child(5) {
+			color: #f1f1f1;
+			background-color: rgba($color: #2989ff, $alpha: 0.8);
+			box-shadow: 4px 3px 4px rgba($color: #2979ff, $alpha: 0.5);
+		}
+		&:last-child {
+			background-color: #fff;
+			flex: 2;
+			margin-right: 0;
+			color: #333;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background-color: rgba($color: #fff, $alpha: 0.8);
+			box-shadow: 0px 1px 5px 0px rgba(153, 153, 153, 0.5);
+			// box-shadow: -3px 3px 4px rgba(0, 0, 0, 0.12), 4px 0 6px rgba(0, 0, 0, 0.04);
+			// background-color: rgba($color: #e79715, $alpha: 0.8);
+			// box-shadow: 4px 3px 4px rgba($color: #e79715, $alpha: 0.5);
+		}
 		.text {
 			font-size: 20upx;
+			font-weight: normal;
 		}
 		.number {
 			font-size: 30upx;
 			text-align: center;
+			margin-top: 10rpx;
 		}
 		.text-red {
-			color: #red;
+			color: rgba(241, 77, 48, 0.8);
+			text-align: right;
+		}
+		.text-green {
+			color: rgba($color: #0bc99d, $alpha: 0.7);
 			text-align: right;
 		}
 		.units {
@@ -1982,13 +1566,16 @@ export default {
 			padding-left: 10upx;
 			font-size: 20upx;
 			color: #000;
+			// color: #f1f1f1;
 		}
 	}
 	.operate {
 		font-size: 60upx;
 		font-weight: 600;
-		width: 60upx;
+		// width: 60upx;
+		color: #ff8944;
 		text-align: center;
+		text-shadow: 4px 3px 4px rgba($color: #e79715, $alpha: 0.5);
 	}
 }
 .popup-box {

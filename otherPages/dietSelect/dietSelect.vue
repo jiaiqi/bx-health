@@ -151,11 +151,11 @@
 							</view>
 						</view>
 					</view> -->
-					<view class="calculate">
-						<view class="calculate-l">
-							单位：
-						</view>
+					<view class="calculate">						
 							<view  class="weight">
+								<view class="calculate-l">
+									单位：
+								</view>
 								<view @click="changeUnit(u,ids)" v-for="(u,ids) in unitList" :key="ids" :class="currIndex==ids?'active-unit':''" class="unit">
 									{{u.unit_amount?u.unit_amount+u.unit:u.unit}}
 									<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
@@ -809,6 +809,27 @@ export default {
 									value: 'element_k',
 									choose:false,
 									num: 877,
+									current_num:0
+								},								
+								{
+									title: '钠',
+									value: 'element_na',
+									choose:false,
+									num: 250,
+									current_num:0
+								},
+								{
+									title: '铁',
+									value: 'element_fe',
+									choose:false,
+									num: 12,
+									current_num:0
+								},
+								{
+									title: '锌',
+									value: 'element_zn',
+									choose:false,
+									num: 10,
 									current_num:0
 								}
 							]
@@ -2177,7 +2198,7 @@ export default {
 				display: flex;
 				align-items: center;
 				font-size: 28upx;
-				flex-wrap: nowrap;
+				flex-wrap: wrap;
 				white-space:nowrap;
 				overflow-x: scroll;
 				// justify-content: flex-end;
@@ -2185,17 +2206,21 @@ export default {
 				// min-width: 220upx;
 				.unit{
 					margin-right: 10upx;
-					background-color: #f37b1d;
-					color: white;
+					background-color: #f8f8f8;
+					color: #999;
 					border-radius: 40upx;
-					border: 1px solid #f37b1d;
-					padding: 6upx 16upx;
+					border: 1px solid #999;
+					padding: 0px 16upx;
+					min-height:54upx ;
+					display: flex;
+					align-items: center;
+					margin-bottom: 10upx;
 			
 				}
 				.active-unit{
-					border: 1px dashed #f37b1d;
-					background-color: #fff;
-					color: #f37b1d;
+					border: 1px solid #f37b1d;
+					background-color: #f37b1d;
+					color: #fff;
 					// color: red;
 					// font-size: 32upx;
 				}
