@@ -45,16 +45,14 @@
 					"enablePullDownRefresh": false
 				}
 
-			}    ,{
-                    "path" : "assessmentResult/assessmentResult",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			}, {
+				"path": "assessmentResult/assessmentResult",
+				"style": {
+					"navigationBarTitleText": "",
+					"enablePullDownRefresh": false
+				}
+
+			}]
 		},
 		{
 			"root": "otherPages",
@@ -223,12 +221,34 @@
 					"style": {}
 				},
 				{
+					"path": "pregnant/pregnantFoods",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnantFoodsDetail",
+					"style": {}
+				},
+				{
+					"path": "pregnant/symptomDetail",
+					"style": {}
+				},
+				{
 					"path": "personal/personal",
 					"style": {
 						"navigationBarTitleText": "个人资料"
 					}
 				}
 			]
+		},
+		{
+			// 健康百科中的页面
+			"root": "pediaPages",
+			"pages": [{
+				"path": "hospitalOverview/hospitalOverview",
+				"style": {
+					"navigationBarTitleText": "医院简介"
+				}
+			}]
 		},
 		{
 			"root": "publicPages",

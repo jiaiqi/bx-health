@@ -103,14 +103,16 @@ fly.interceptors.response.use(
 						// #endif
 						// #ifdef MP-WEIXIN
 						wx.login({
-						  success (res) {
-						    if (res.code) {
-						      //发起网络请求
-									Vue.prototype.wxLogin({ code: res.code });
-						    } else {
-						      console.log('登录失败！' + res.errMsg)
-						    }
-						  }
+							success(res) {
+								if (res.code) {
+									//发起网络请求
+									Vue.prototype.wxLogin({
+										code: res.code
+									});
+								} else {
+									console.log('登录失败！' + res.errMsg)
+								}
+							}
 						})
 						// #endif
 						// uni.showModal({

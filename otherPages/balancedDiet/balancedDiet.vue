@@ -73,7 +73,7 @@
 				</view>
 			</view>
 			<view class="main-box main-box-plus">
-				<view class="title" @click="toChart">
+				<view class="title">
 					<view class="label">
 						营养素摄入情况分析
 						<text class="cuIcon-rankfill"></text>
@@ -272,6 +272,7 @@
 							/{{ currentRecord.unit_weight_g ? currentRecord.amount * currentRecord.unit_weight_g : currentRecord.amount }}
 							<text class="unit">{{ currentRecord.unit }}</text>
 						</view>
+
 						<view class="amount">
 							数量:
 							<view class="number-box">
@@ -279,6 +280,12 @@
 								<input @change="changeValue" v-model="currentRecord.amount" type="digit" disabled />
 								<text @click="changeCurrentVal('plus')" class="symbol">+</text>
 							</view>
+						</view>
+					</view>
+					<view class="unit-box">
+						<view class="title">单位:</view>
+						<view class="unit-item" :class="{ 'active-unit': currentUnitIndex === index }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">
+							{{ u.unit_weight_g ? u.unit_weight_g + u.unit : u.unit }}
 						</view>
 					</view>
 				</view>
@@ -373,6 +380,8 @@ export default {
 	components: { MxDatePicker, xflSelect, bxDateStamp },
 	data() {
 		return {
+			unitList: [],
+			currentUnitIndex: 0,
 			pageTitle: '今日概览',
 			showUserList: false,
 			backTextStyle: {
@@ -430,14 +439,7 @@ export default {
 			selectRadio: '',
 			field: {},
 			symptomList: [],
-			list: [
-				//要展示的数据
-				'苹果',
-				{ value: '香蕉', disabled: true },
-				'葡萄',
-				'芒果',
-				'大白菜'
-			],
+			list: [],
 			refresh: false,
 			PageCur: 'basics',
 			radio: '',
@@ -779,6 +781,32 @@ export default {
 		}
 	},
 	methods: {
+		checkUnit(item, index) {
+			// 切换单位
+			this.currentUnitIndex = index;
+			let currentUnit = this.unitList[index];
+			this.currentRecord.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
+			this.currentRecord.unit = item.unit;
+			console.log(this.currentRecord);
+		},
+		async getFoodUnit(item) {
+			// 查找当前食物的单位
+			let url = this.getServiceUrl('health', 'srvhealth_food_unit_amount_estimate_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_food_unit_amount_estimate_select',
+				colNames: ['*'],
+				condition: [{ colName: 'food_no', ruleType: 'eq', value: item.diet_contents_no ? item.diet_contents_no : item.mixed_food_no }],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			let res = await this.$http.post(url, req);
+			let unitList = [];
+			unitList.push(item);
+			if (res.data.state === 'SUCCESS') {
+				unitList = [...unitList, ...res.data.data];
+			}
+			this.unitList = unitList;
+			return unitList;
+		},
 		getDownloadPath(e) {
 			return this.$api.downloadFile + e['image'] + '&bx_auth_ticket=' + this.bx_auth_ticket + '&thumbnailType=fwsu_100';
 		},
@@ -819,7 +847,6 @@ export default {
 				];
 			}
 			const url = '/otherPages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
-			// const url = '/pages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
 			uni.navigateTo({
 				url: url
 			});
@@ -948,8 +975,6 @@ export default {
 					resultData.chartOption.series.unshift(obj);
 				});
 				resultData.chartOption.xAxis.data = item.matterList.map(item => item.name);
-				// resultData.chartOption.series = lineSeries.concat(resultData.chartOption.series);
-				// resultData.chartOption.series = resultData.chartOption.series.concat(lineSeries);
 				resultList.push(resultData);
 			});
 			return resultList;
@@ -1045,21 +1070,6 @@ export default {
 			this.modalName = 'Modal';
 			let dietRecord = null;
 			this.showTimeSignPicker = !this.showTimeSignPicker;
-		},
-		async toChart() {
-			// 跳转到食物营养素占比页面
-			if (this.dietRecord.length === 0) {
-				return;
-			}
-			let energyData = { energy: this.energyListWrap, diet: this.dietRecord };
-			// let chartList = await this.buildChartData(energyData);
-			// uni.setStorageSync('chartList', chartList);
-			// uni.navigateTo({
-			// 	url: '/pages/nutrientRatio/nutrientRatio?date=' + this.selectDate,
-			// 	complete() {
-			// 		uni.$emit('sendEnergyList', chartList);
-			// 	}
-			// });
 		},
 		async getSymptomDiseaseList(symptomList) {
 			if (Array.isArray(symptomList) && symptomList.length > 0) {
@@ -1272,8 +1282,12 @@ export default {
 				serviceName = 'srvhealth_body_activity_record_update';
 				recordType = await this.getSportType(cond);
 			}
+			let currentUnit = this.unitList[this.currentUnitIndex];
 			if (Array.isArray(recordType) && recordType.length > 0) {
 				ele = recordType[0];
+				if (currentUnit.unit != 'g') {
+					ele.unit_energy = (currentUnit.amount / 100) * ele.unit_energy;
+				}
 				dietInfo.energy = dietInfo.amount * ele.unit_energy;
 			}
 			let url = this.getServiceUrl('health', serviceName, 'operate');
@@ -1289,6 +1303,9 @@ export default {
 					]
 				}
 			];
+			if(this.currentRecordType==='diet'){
+				req[0].data[0]['unit'] = currentUnit.unit
+			}
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				await self.getDietRecord();
@@ -1476,12 +1493,12 @@ export default {
 			this.getDietRecord().then(res => {
 				let condition = null;
 				if (Array.isArray(res) && res.length > 0) {
-					res = res.map(item => item.name);
+					let names = res.map(item => item.name);
 					condition = [
 						{
 							colName: 'name',
 							ruleType: 'in',
-							value: res.toString()
+							value: names.toString()
 						}
 					];
 					this.getFoodType(condition);
@@ -1547,14 +1564,14 @@ export default {
 									mat.UL = 0;
 									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
 								}
-							}else{
+							} else {
 								if (mat.name === '脂肪') {
-									mat.EAR =  Number(self.userInfo.weight*50*0.2/9).toFixed(2);
+									mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
 									mat.UL = 0;
 									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
 								}
 								if (mat.name === '碳水') {
-									mat.EAR = self.userInfo.weight*4;
+									mat.EAR = self.userInfo.weight * 4;
 									mat.UL = 0;
 									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
 								}
@@ -1777,6 +1794,7 @@ export default {
 				});
 				this.dietIn = dietIn;
 				uni.$emit('dietInChange', dietIn);
+				console.log(this.foodType);
 				this.dietRecord = res.data.data;
 			} else if (res.data.state === 'SUCCESS' && res.data.data.length === 0) {
 				this.dietRecord = [];
@@ -1929,7 +1947,14 @@ export default {
 			}
 			this.showUserList = false;
 		},
-		clickDietRecordItem(item) {
+		async clickDietRecordItem(item) {
+			let unitList = await this.getFoodUnit(item);
+			unitList.forEach((unit, index) => {
+				console.log(item, unit);
+				if (item.unit === unit.unit) {
+					this.currentUnitIndex = index;
+				}
+			});
 			this.showEditModal = true;
 			this.currentRecord = this.deepClone(item);
 			this.currentRecordType = 'food';
@@ -2278,6 +2303,7 @@ export default {
 				height: 50upx;
 				line-height: 50upx;
 			}
+
 			.top-item-bottom {
 				display: flex;
 				display: flex;
@@ -2999,6 +3025,7 @@ uni-checkbox::before {
 		display: flex;
 		padding: 20rpx;
 		justify-content: space-around;
+		flex-wrap: wrap;
 		.img {
 			width: 200rpx;
 			height: 200rpx;
@@ -3071,6 +3098,32 @@ uni-checkbox::before {
 						}
 					}
 				}
+			}
+		}
+		.unit-box {
+			width: 100%;
+			display: flex;
+			padding: 20rpx;
+			flex-wrap: wrap;
+			.title {
+				padding: 0 50rpx 0 30rpx;
+			}
+			.unit-item {
+				margin-right: 5px;
+				background-color: #f8f8f8;
+				color: #999;
+				border-radius: 20px;
+				border: 1px solid #999;
+				padding: 0px 8px;
+				min-height: 27px;
+				display: flex;
+				align-items: center;
+				margin-bottom: 5px;
+			}
+			.active-unit {
+				border: 1px solid #f37b1d;
+				background-color: #f37b1d;
+				color: #fff;
 			}
 		}
 	}

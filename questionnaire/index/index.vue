@@ -1,49 +1,51 @@
 <template>
 	<view class="cu-card">
-		<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
-			<view class="desc" style="text-align: justify;">
-				<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
-				<view class="date-box">
-					<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
-					<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
+		<view class="page-wrap">
+				<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
+					<view class="desc" style="text-align: justify;">
+						<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
+						<view class="date-box">
+							<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
+							<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
+						</view>
+					</view>
 				</view>
-			</view>
+				<view class="content form-wrap" style="box-sizing: border-box;">
+					<bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform>
+				</view>
+				<view class="content" style="padding:30upx;" v-if="formData.end_remark">
+					<view class="desc">
+						<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
+					</view>
+				</view>
+				<view
+					class="button-box"
+					style="margin: 30upx;"
+					v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
+				>
+					<button class="button" type="" @click="submitForm()">提交</button>
+				</view>
+				<view
+					class="button-box"
+					style="margin: 30upx;"
+					v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
+				>
+					<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
+				</view>
+				<view
+					class="button-box"
+					style="margin: 30upx;"
+					v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
+				>
+					<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
+					<view class="score-box" v-if="scoreInfo.score || scoreInfo.score === 0">
+						得分：
+						<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
+					</view>
+				</view>
+				<view class="to-history" v-if="configCols && configCols.length > 0 && formType === 'form'" @click="toHistory">点击查看历史提交</view>
 		</view>
-		<view class="content form-wrap" style="box-sizing: border-box;">
-			<bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform>
-		</view>
-		<view class="content" style="padding:30upx;" v-if="formData.end_remark">
-			<view class="desc">
-				<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
-			</view>
-		</view>
-		<view
-			class="button-box"
-			style="margin: 30upx;"
-			v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
-		>
-			<button class="button" type="" @click="submitForm()">提交</button>
-		</view>
-		<view
-			class="button-box"
-			style="margin: 30upx;"
-			v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
-		>
-			<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
-		</view>
-		<view
-			class="button-box"
-			style="margin: 30upx;"
-			v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
-		>
-			<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
-			<view class="score-box" v-if="scoreInfo.score || scoreInfo.score === 0">
-				得分：
-				<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
-			</view>
-		</view>
-		<view class="to-history" v-if="configCols && configCols.length > 0 && formType === 'form'" @click="toHistory">点击查看历史提交</view>
-		<u-empty :text="emptyText" v-else-if="!configCols || configCols.length === 0"></u-empty>
+		<u-empty :text="emptyText" v-if="!configCols || configCols.length === 0"></u-empty>
 	</view>
 </template>
 
@@ -661,10 +663,9 @@ export default {
 	background-color: #fff;
 	color: #fff;
 	height: 100vh;
-	overflow-y: scroll;
-	.cu-item {
-		margin: 0;
-		width: 100%;
+	.page-wrap{
+		height: 100%;
+		overflow-y: scroll;
 	}
 }
 .content {
