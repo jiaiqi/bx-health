@@ -23,13 +23,21 @@
 		<view v-if="current_tit === 'pregnancy'" class="pregnant-main-fetation">
 			<view class="pregnant-main-top">
 				<view class="pregnant-main-top-item">
-					<text @click="chooseClasify(item,index)" v-if="index < 6" :class="currClasifyIndex===index?'active-clasify':''" v-for="(item,index) in classifyData" :key="index">{{item.name}}</text>					
-					<u-icon v-if="!menuIsShow" size="32" @click="showMore('open')" name="list"></u-icon>
-					<u-icon v-else size="32" @click="showMore('close')" name="close"></u-icon>
+						<view class="pregnant-main-top-item-w">
+							<scroll-view :scroll-with-animation="true" style="height: 60upx;" scroll-x :scroll-left="scrollMenuLeft">
+								<text @click="chooseClasify(item,index)" :class="currClasifyIndex===index?'active-clasify':''" v-for="(item,index) in classifyData" :key="index">{{item.name}}</text>						
+							</scroll-view>
+						</view>
+						<view class="pregnant-main-top-item-r">
+							<u-icon :top="4" v-if="!menuIsShow" size="48" @click="showMore('open')" name="list"></u-icon>
+							<u-icon :top="4" v-else size="48" @click="showMore('close')" name="close"></u-icon>
+						</view>
+					
 				</view>
-				<view v-if="menuIsShow" class="pregnant-main-top-item-add">
+				
+				<!-- <view v-if="menuIsShow" class="pregnant-main-top-item-add">
 					<text @click="chooseClasify(item,index)" v-if="index >= 6" :class="currClasifyIndex===index?'active-clasify':''" v-for="(item,index) in classifyData" :key="index">{{item.name}}</text>
-				</view>
+				</view> -->
 			</view>
 			<!-- 预期首页===胎儿 -->
 			<view v-if="currentClasifyType === 'fetus' " class="fetus-wrap">
@@ -96,7 +104,47 @@
 			<!-- 孕期首页===> 饮食 -->
 			<view v-if="currentClasifyType === 'diet' " class="diet-wrap">
 				<view class="diet-item-wrap">
-					<view @click="toFoodsList(item)" v-for="(item,index) in foodsClassify" :key="index" class="diet-item">
+					<view class="cu-timeline">
+						<view class="cu-time">饮食</view>
+						<view v-for="(item,index) in dietTimeLineData" :key="index" class="cu-item cur">
+							<view class="content bg-green shadow-blur">
+								<view class="content-item-top">
+									<text>{{item.name}}</text>
+								</view>								
+							</view>
+							<view class="diet-main">
+								<view class="diet-main-top">
+									<text class="diet-main-top-text" >推荐饮食</text>
+									<view class="diet-main-item-wrap">
+										<view @click="toFoodsDetail('recommend')" v-for="(rec,i) in item.recommend" :key="i" class="diet-main-item">
+											<view class="diet-main-item-t">
+												<text>宜</text>
+												<!-- <text>忌</text> -->
+											</view>
+											<view  class="diet-main-item-b">
+												{{rec.name}}
+											</view>
+										</view>
+									</view>									
+								</view>
+								<view class="diet-main-top">
+									<text class="diet-main-top-text">忌讳饮食</text>
+									<view class="diet-main-item-wrap">
+										<view @click="toFoodsDetail('taboo')" v-for="(dietab,o) in item.taboo" :key="o" class="diet-main-item taboo-item">
+											<view class="diet-main-item-t">
+												<text>忌</text>
+												<!-- <text>忌</text> -->
+											</view>
+											<view  class="diet-main-item-b">
+												{{dietab.name}}
+											</view>
+										</view>
+									</view>									
+								</view>
+							</view>
+						</view>
+					</view>
+					<!-- <view @click="toFoodsList(item)" v-for="(item,index) in foodsClassify" :key="index" class="diet-item">
 						<view class="diet-item-left">
 							<view class="diet-item-left-top">
 								<text>{{item.name}}</text>
@@ -105,10 +153,55 @@
 						<view class="diet-item-rig">
 							<u-icon name="arrow-right"></u-icon>
 						</view>
-					</view>					
+					</view>	 -->				
 				</view>
 			</view>
 			
+			<!-- 孕期首页===> 运动 -->
+			<view v-if="currentClasifyType === 'sports'" class="sports-wrap diet-wrap">
+				<view class="diet-item-wrap">
+					<view class="cu-timeline">
+						<view class="cu-time">运动</view>
+						<view v-for="(item,index) in sportsTimeLineData" :key="index" class="cu-item cur">
+							<view class="content bg-green shadow-blur">
+								<view class="content-item-top">
+									<text>{{item.name}}</text>
+								</view>								
+							</view>
+							<view class="diet-main">
+								<view class="diet-main-top">
+									<text class="diet-main-top-text" >推荐运动</text>
+									<view class="diet-main-item-wrap">
+										<view v-for="(rec,i) in item.recommend" :key="i" class="diet-main-item">
+											<view class="diet-main-item-t">
+												<text>宜</text>
+												<!-- <text>忌</text> -->
+											</view>
+											<view  class="diet-main-item-b">
+												{{rec.name}}
+											</view>
+										</view>
+									</view>									
+								</view>
+								<view class="diet-main-top">
+									<text class="diet-main-top-text">忌讳运动</text>
+									<view class="diet-main-item-wrap">
+										<view v-for="(dietab,o) in item.taboo" :key="o" class="diet-main-item taboo-item">
+											<view class="diet-main-item-t">
+												<text>忌</text>
+												<!-- <text>忌</text> -->
+											</view>
+											<view  class="diet-main-item-b">
+												{{dietab.name}}
+											</view>
+										</view>
+									</view>									
+								</view>
+							</view>
+						</view>
+					</view>			
+				</view>
+			</view>
 			<!-- 孕期首页===> 待办/已办 -->
 			<view v-if="currentClasifyType === 'matter'" class="matter-wrap">
 				<view class="cu-timeline">
@@ -202,12 +295,9 @@
 			<view v-if="currentClasifyType === 'inspect'" class="inspect_wrap">
 				<view class="cu-timeline">
 					<view class="cu-time">检查</view>
-					<view @click="toInspect" v-for="(item,index) in matterTimeLineData" :key="index" class="cu-item cur" :class="item.isCurrent?'text-green':''">
+					<view v-for="(item,index) in matterTimeLineData" :key="index" class="cu-item cur" :class="item.isCurrent?'text-green':''">
 						<view class="content shadow-blur" :class="item.isCurrent?'inspect-bg':'bg-yellow'">
 							<view class="inspect_wrap_top_left">
-								<view class="inspect_wrap_top_left_b">
-									<text>孕{{item.num}}周</text>
-								</view>
 								<view class="inspect_wrap_top_left_t">
 									<text>{{item.start_time}} ~ {{item.end_time}}</text>
 								</view>
@@ -219,7 +309,9 @@
 										<text v-for="(sing,i) in item.point">{{sing.name}}</text>
 									</view>									
 								</view>
-								
+								<view class="inspect_wrap_top_left_b">
+									<text>孕{{item.num}}周</text>
+								</view>
 							</view>
 							<view class="inspect_wrap_top_rig">
 								<u-icon name="arrow-right"></u-icon>
@@ -234,27 +326,45 @@
 				<u-collapse-item v-for="(item,index) in timeLienData" :key="index" :open="item.open" :title="item.name">
 					<view class="cu-timeline pregnant-timeline">					
 						<view v-for="(week,i) in item.child" class="cu-item " :class="week.isCurrent?'text-green':''">
-							<view @click="toDetail(week)" class="content " :class="week.isCurrent?'bg-green shadow-blur':'bg-cyan'">
+							<view  class="content " :class="week.isCurrent?'bg-green shadow-blur':'bg-cyan'">
 								<view class="content-item-top">
 									<text>{{week.title}}</text>
 									<text v-if="week.start_time && week.end_time">{{week.start_time}} ~ {{week.end_time}}</text>
 								</view>	
-								<view @click.stop="shrink(week,'pregnant')" class="content-item-cen">
-									<text v-if="!week.isOpen">展开</text>
-									<text v-else>收起</text>
+								<view  class="content-item-cen">
+									<view @click="toDetail(week)" class="content-item-cen-l">
+										详情
+									</view>
+									<view @click.stop="shrink(week,'pregnant')" class="content-item-cen-r">
+										<text v-if="!week.isOpen">展开</text>
+										<text v-else>收起</text>
+									</view>
 								</view>																							
 							</view>
 							
-							<view v-show="week.isOpen" class="pre-chunk-wrap">
+							<view v-if="week.isOpen" class="pre-chunk-wrap">
 								<view class="pre-chunk-top">
-									<view class="pre-chunk-top-notice">
-										<text>注意事项</text>
-									</view>
-									<view class="pre-chunk-item-wrap">
-										<view @click="openCont(con)" v-for="(con,k) in week.content" :key="k" :class="con.isOk?'pass-pre-chunk':''" class="pre-chunk">
+									<view v-for="(con,k) in week.content" :key="k" class="pre-chunk-top-item">
+										<view class="pre-chunk-top-notice">
+											<text>{{con.name}}</text>
+										</view>
+										<view class="pre-chunk-item-wrap">
+											<!-- <view   :class="con.isOk?'pass-pre-chunk':''" class="pre-chunk">
 												{{con.name}}																			
+											</view> -->
+											<view @click="toFoodsDetail(pre.type)" v-for="(pre,p) in con.child" :class="pre.type === 'recom'?'pass-pre-chunk':''" class="pre-chunk">
+												<view class="pre-chunk-top">
+													<text v-if="pre.type === 'recom'">宜</text>
+													<text v-else>忌</text>
+												</view>
+												<view class="pre-chunk-item-bot">
+													{{pre.tit}}
+												</view>
+											</view>
 										</view>
 									</view>
+									
+									
 									
 									<!-- <view class="pre-chunk-top-notice-cont">										
 											<u-collapse :head-style="headMatterStyle" :item-style="itemStyle">
@@ -373,7 +483,12 @@
 						</view>
 					</view>
 				</view>
-			</u-popup>	
+			</u-popup>
+				<u-popup v-model="menuIsShow" :closeable="true" mode="top">
+					<view class="pregnant-main-top-item-poup">
+						<text @click="chooseClasify(item,index)" :class="currClasifyIndex===index?'active-clasify':''" v-for="(item,index) in classifyData" :key="index">{{item.name}}</text>
+					</view>
+				</u-popup>
 			<u-popup v-model="showTimeSignPicker" mode="center" width="85%">
 				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :headerBar="true" :isMarkDays="false" @onDayClick="onDayClick"></bx-date-stamp>
 			</u-popup>
@@ -442,6 +557,7 @@
 				selectDate:'',
 				TabCur: 1,
 				scrollLeft: 0,
+				scrollMenuLeft:0,
 				titleData:[{
 					name:'备孕',
 					type:'prepare'
@@ -608,6 +724,97 @@
 						content:'建立母子健康档案意味着各次产检都会在 这家医院进行，宝宝也会在这里出生。一般来说 建档主要为了确定孕周、推算预产期、评估妊娠 风险等。'
 					}]
 				}],
+				dietTimeLineData:[{
+					name:'第一周~第五周',
+					isCurrent:false,
+					isOpen:false,
+					recommend:[{
+						name:'苹果'
+					},{
+						name:'黑米粥'
+					},{
+						name:'大米'
+					},{
+						name:'炒面'
+					}],
+					taboo:[{
+						name:"烤冷面"
+					},{
+						name:"避孕药"
+					},{
+						name:"五香粉"
+					},{
+						name:"锅巴"
+					}]
+				},{
+					name:'第六周~第二十周',
+					isCurrent:false,
+					isOpen:false,
+					recommend:[{
+						name:'苹果'
+					},{
+						name:'黑米粥'
+					},{
+						name:'大米'
+					},{
+						name:'炒面'
+					}],
+					taboo:[{
+						name:"烤冷面"
+					},{
+						name:"避孕药"
+					},{
+						name:"五香粉"
+					},{
+						name:"锅巴"
+					}]
+				}],
+				
+				sportsTimeLineData:[{
+					name:'第一周~第五周',
+					isCurrent:false,
+					isOpen:false,
+					recommend:[{
+						name:'散步'
+					},{
+						name:'瑜伽'
+					},{
+						name:'做操'
+					},{
+						name:'晨练'
+					}],
+					taboo:[{
+						name:"踢足球"
+					},{
+						name:"滑雪"
+					},{
+						name:"打网球"
+					},{
+						name:"减肥"
+					}]
+				},{
+					name:'第六周~第二十周',
+					isCurrent:false,
+					isOpen:false,
+					recommend:[{
+						name:'散步'
+					},{
+						name:'瑜伽'
+					},{
+						name:'做操'
+					},{
+						name:'晨练'
+					}],
+					taboo:[{
+						name:"跳绳"
+					},{
+						name:"踢毽子"
+					},{
+						name:"打篮球"
+					},{
+						name:"倒立"
+					}]
+				}],
 				timeLienData:
 				 [
 					 {
@@ -623,24 +830,28 @@
 							 child:[
 								 {
 									 tit:'避孕药',
+									 type:'taboo',
 									 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
 									 isOpen:false,
 									 image:"/otherPages/static/img/byy.jpg"
 								 },
 								 {
 									 tit:'白酒',
+									 type:'taboo',
 									 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
 									 isOpen:false,
 									 image:"/otherPages/static/img/bj.jpg"
 								 },
 								 {
 									 tit:'薏米',
+									 type:'taboo',
 									 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
 									 isOpen:false,
 									 image:"/otherPages/static/img/ym.jpg"
 								 },
 								 {
-									 tit:'五香粉',
+									 tit:'苹果',
+									 type:'recom',
 									 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
 									 isOpen:false,
 									 image:"/otherPages/static/img/wxf.jpg"
@@ -651,21 +862,25 @@
 							 child:[
 								 {
 									 tit:'坐动车',
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:'过安检',
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
-									 tit:'坐飞机',
+									 tit:'散步',
+									 type:'recom',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:'摔跤',
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 }]
@@ -674,22 +889,26 @@
 							 isOk:false,
 							 child:[
 								 {
-									 tit:'看电影',
+									 tit:'看书',
+									 type:'recom',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:'唱歌',
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"烧烤",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"看恐怖片",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								}
@@ -700,21 +919,25 @@
 							 child:[
 								 {
 									 tit:"滑雪",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"骑马",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"踢毽子",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"用跑步机",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 }
@@ -726,98 +949,118 @@
 						 isOpen:false,
 						 content:[{
 							 name:'饮食',
-							 isOk:false,
+							 isOk:false,							 
 							 child:[
 								 {
-									 tit:'啤酒',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
+									 tit:'避孕药',
+									 type:'taboo',
+									 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
+									 isOpen:false,
+									 image:"/otherPages/static/img/byy.jpg"
 								 },
 								 {
-									 tit:'可乐',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
+									 tit:'白酒',
+									 type:'taboo',
+									 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
+									 isOpen:false,
+									 image:"/otherPages/static/img/bj.jpg"
 								 },
 								 {
-									 tit:'冰淇淋',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
+									 tit:'薏米',
+									 type:'taboo',
+									 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
+									 isOpen:false,
+									 image:"/otherPages/static/img/ym.jpg"
 								 },
 								 {
-									 tit:'咖啡',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
+									 tit:'苹果',
+									 type:'recom',
+									 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
+									 isOpen:false,
+									 image:"/otherPages/static/img/wxf.jpg"
 								 }]
-						 },{
+							},{
 							 name:'出行',
 							 isOk:false,
 							 child:[
 								 {
 									 tit:'坐动车',
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:'过安检',
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
-									 tit:'坐飞机',
+									 tit:'散步',
+									 type:'recom',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:'摔跤',
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 }]
-						 },{
+								},{
 							 name:'娱乐',
 							 isOk:false,
 							 child:[
 								 {
-									 tit:'看电影',
+									 tit:'看书',
+									 type:'recom',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:'唱歌',
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"烧烤",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"看恐怖片",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								}
 							 ]
-						 },{
+							},{
 							 name:'运动',
 							 isOk:false,
 							 child:[
 								 {
 									 tit:"滑雪",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"骑马",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"踢毽子",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 },
 								 {
 									 tit:"用跑步机",
+									 type:'taboo',
 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
 									 isOpen:false
 								 }
@@ -833,208 +1076,248 @@
 						{
 						 title:"第三周",
 						 isOpen:false,
-						 content:[{
-							 name:'饮食',
-							 isOk:false,							 
-							 child:[
-								 {
-									 tit:'啤酒',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'可乐',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'冰淇淋',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'咖啡',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }]
-						 },{
-							 name:'出行',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:'坐动车',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'过安检',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'坐飞机',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'摔跤',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }]
-						 },{
-							 name:'娱乐',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:'看电影',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'唱歌',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"烧烤",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"看恐怖片",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								}
-							 ]
-						 },{
-							 name:'运动',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:"滑雪",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"骑马",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"踢毽子",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"用跑步机",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }
-							 ]
-						 }]
+						content:[{
+													 name:'饮食',
+													 isOk:false,							 
+													 child:[
+														 {
+															 tit:'避孕药',
+															 type:'taboo',
+															 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
+															 isOpen:false,
+															 image:"/otherPages/static/img/byy.jpg"
+														 },
+														 {
+															 tit:'白酒',
+															 type:'taboo',
+															 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
+															 isOpen:false,
+															 image:"/otherPages/static/img/bj.jpg"
+														 },
+														 {
+															 tit:'薏米',
+															 type:'taboo',
+															 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
+															 isOpen:false,
+															 image:"/otherPages/static/img/ym.jpg"
+														 },
+														 {
+															 tit:'苹果',
+															 type:'recom',
+															 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
+															 isOpen:false,
+															 image:"/otherPages/static/img/wxf.jpg"
+														 }]
+						},{
+													 name:'出行',
+													 isOk:false,
+													 child:[
+														 {
+															 tit:'坐动车',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'过安检',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'散步',
+															 type:'recom',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'摔跤',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 }]
+						},{
+													 name:'娱乐',
+													 isOk:false,
+													 child:[
+														 {
+															 tit:'看书',
+															 type:'recom',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'唱歌',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"烧烤",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"看恐怖片",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														}
+													 ]
+						},{
+													 name:'运动',
+													 isOk:false,
+													 child:[
+														 {
+															 tit:"滑雪",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"骑马",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"踢毽子",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"用跑步机",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 }
+													 ]
+						}]
 					 },
 					 {
 						 title:"第四周",
 						 isOpen:false,
-						 content:[{
-							 name:'饮食',
-							 isOk:false,							 
-							 child:[
-								 {
-									 tit:'啤酒',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'可乐',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'冰淇淋',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'咖啡',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }]
-						 },{
-							 name:'出行',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:'坐动车',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'过安检',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'坐飞机',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'摔跤',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }]
-						 },{
-							 name:'娱乐',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:'看电影',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'唱歌',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"烧烤",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"看恐怖片",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								}
-							 ]
-						 },{
-							 name:'运动',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:"滑雪",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"骑马",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"踢毽子",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"用跑步机",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }
-							 ]
-						 }]
+						content:[{
+													 name:'饮食',
+													 isOk:false,							 
+													 child:[
+														 {
+															 tit:'避孕药',
+															 type:'taboo',
+															 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
+															 isOpen:false,
+															 image:"/otherPages/static/img/byy.jpg"
+														 },
+														 {
+															 tit:'白酒',
+															 type:'taboo',
+															 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
+															 isOpen:false,
+															 image:"/otherPages/static/img/bj.jpg"
+														 },
+														 {
+															 tit:'薏米',
+															 type:'taboo',
+															 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
+															 isOpen:false,
+															 image:"/otherPages/static/img/ym.jpg"
+														 },
+														 {
+															 tit:'苹果',
+															 type:'recom',
+															 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
+															 isOpen:false,
+															 image:"/otherPages/static/img/wxf.jpg"
+														 }]
+						},{
+													 name:'出行',
+													 isOk:false,
+													 child:[
+														 {
+															 tit:'坐动车',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'过安检',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'散步',
+															 type:'recom',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'摔跤',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 }]
+						},{
+													 name:'娱乐',
+													 isOk:false,
+													 child:[
+														 {
+															 tit:'看书',
+															 type:'recom',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'唱歌',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"烧烤",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"看恐怖片",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														}
+													 ]
+						},{
+													 name:'运动',
+													 isOk:false,
+													 child:[
+														 {
+															 tit:"滑雪",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"骑马",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"踢毽子",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"用跑步机",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 }
+													 ]
+						}]
 					 },
 					 ]
 				 },
@@ -1046,207 +1329,247 @@
 						 title:"第五周",
 						 isOpen:false,
 						 content:[{
-							 name:'饮食',
-							 isOk:false,							 
-							 child:[
-								 {
-									 tit:'啤酒',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'可乐',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'冰淇淋',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'咖啡',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }]
+						 							 name:'饮食',
+						 							 isOk:false,							 
+						 							 child:[
+						 								 {
+						 									 tit:'避孕药',
+						 									 type:'taboo',
+						 									 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
+						 									 isOpen:false,
+						 									 image:"/otherPages/static/img/byy.jpg"
+						 								 },
+						 								 {
+						 									 tit:'白酒',
+						 									 type:'taboo',
+						 									 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
+						 									 isOpen:false,
+						 									 image:"/otherPages/static/img/bj.jpg"
+						 								 },
+						 								 {
+						 									 tit:'薏米',
+						 									 type:'taboo',
+						 									 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
+						 									 isOpen:false,
+						 									 image:"/otherPages/static/img/ym.jpg"
+						 								 },
+						 								 {
+						 									 tit:'苹果',
+						 									 type:'recom',
+						 									 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
+						 									 isOpen:false,
+						 									 image:"/otherPages/static/img/wxf.jpg"
+						 								 }]
 						 },{
-							 name:'出行',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:'坐动车',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'过安检',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'坐飞机',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'摔跤',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }]
+						 							 name:'出行',
+						 							 isOk:false,
+						 							 child:[
+						 								 {
+						 									 tit:'坐动车',
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 },
+						 								 {
+						 									 tit:'过安检',
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 },
+						 								 {
+						 									 tit:'散步',
+						 									 type:'recom',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 },
+						 								 {
+						 									 tit:'摔跤',
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 }]
 						 },{
-							 name:'娱乐',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:'看电影',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'唱歌',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"烧烤",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"看恐怖片",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								}
-							 ]
+						 							 name:'娱乐',
+						 							 isOk:false,
+						 							 child:[
+						 								 {
+						 									 tit:'看书',
+						 									 type:'recom',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 },
+						 								 {
+						 									 tit:'唱歌',
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 },
+						 								 {
+						 									 tit:"烧烤",
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 },
+						 								 {
+						 									 tit:"看恐怖片",
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								}
+						 							 ]
 						 },{
-							 name:'运动',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:"滑雪",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"骑马",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"踢毽子",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"用跑步机",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }
-							 ]
+						 							 name:'运动',
+						 							 isOk:false,
+						 							 child:[
+						 								 {
+						 									 tit:"滑雪",
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 },
+						 								 {
+						 									 tit:"骑马",
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 },
+						 								 {
+						 									 tit:"踢毽子",
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 },
+						 								 {
+						 									 tit:"用跑步机",
+						 									 type:'taboo',
+						 									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+						 									 isOpen:false
+						 								 }
+						 							 ]
 						 }]
 					 },
 					 {
 						 title:"第六周",
 						 isOpen:false,
-						 content:[{
-							 name:'饮食',
-							 isOk:false,							 
-							 child:[
-								 {
-									 tit:'啤酒',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'可乐',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'冰淇淋',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'咖啡',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }]
-						 },{
-							 name:'出行',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:'坐动车',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'过安检',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'坐飞机',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'摔跤',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }]
-						 },{
-							 name:'娱乐',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:'看电影',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:'唱歌',
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"烧烤",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"看恐怖片",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								}
-							 ]
-						 },{
-							 name:'运动',
-							 isOk:false,
-							 child:[
-								 {
-									 tit:"滑雪",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"骑马",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"踢毽子",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 },
-								 {
-									 tit:"用跑步机",
-									 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
-									 isOpen:false
-								 }
-							 ]
-						 }]
+						content:[{
+													 name:'饮食',
+													 isOk:false,							 
+													 child:[
+														 {
+															 tit:'避孕药',
+															 type:'taboo',
+															 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
+															 isOpen:false,
+															 image:"/otherPages/static/img/byy.jpg"
+														 },
+														 {
+															 tit:'白酒',
+															 type:'taboo',
+															 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
+															 isOpen:false,
+															 image:"/otherPages/static/img/bj.jpg"
+														 },
+														 {
+															 tit:'薏米',
+															 type:'taboo',
+															 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
+															 isOpen:false,
+															 image:"/otherPages/static/img/ym.jpg"
+														 },
+														 {
+															 tit:'苹果',
+															 type:'recom',
+															 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
+															 isOpen:false,
+															 image:"/otherPages/static/img/wxf.jpg"
+														 }]
+						},{
+													 name:'出行',
+													 isOk:false,
+													 child:[
+														 {
+															 tit:'坐动车',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'过安检',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'散步',
+															 type:'recom',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'摔跤',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 }]
+						},{
+													 name:'娱乐',
+													 isOk:false,
+													 child:[
+														 {
+															 tit:'看书',
+															 type:'recom',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:'唱歌',
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"烧烤",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"看恐怖片",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														}
+													 ]
+						},{
+													 name:'运动',
+													 isOk:false,
+													 child:[
+														 {
+															 tit:"滑雪",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"骑马",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"踢毽子",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 },
+														 {
+															 tit:"用跑步机",
+															 type:'taboo',
+															 content:"孕妇最好不要踢毽子。踢毽子很容易摔着，动了胎气，对宝宝的发育不好。如果想运动的话，可以找老公陪你练瑜伽!",
+															 isOpen:false
+														 }
+													 ]
+						}]
 					 },
 					 ]
 				 },
@@ -1257,13 +1580,7 @@
 		methods:{
 			toSymDetail(item){
 				uni.navigateTo({
-					url:'/otherPages/pregnant/symptomDetail'
-				})
-			},
-			/*点击检查跳转至详情**/
-			toInspect(){
-				uni.navigateTo({
-					url:'/otherPages/pregnant/antenatal'
+					url:'/pages/specific/health/pregnant/symptomDetail'
 				})
 			},
 			/*点击隐藏显示顶部菜单*/
@@ -1273,16 +1590,19 @@
 			/*控制展开收缩*/
 			shrink(item,type){
 				item.isOpen = !item.isOpen
-				if(item.type =="pregnant"){
-					this.$nextTick(()=>{
-						this.$refs.collapse.init()
-					})
+				if(type =="pregnant"){
+					// setTimeout(()=>{
+						this.$nextTick(()=>{
+							this.$refs.collapse.init()
+						})
+					// },1000)
+					
 				}				
 			},
 			/*点击食物分类进行跳转**/
-			toFoodsList(item){
+			toFoodsDetail(type){
 				uni.navigateTo({
-					url:'/otherPages/pregnant/pregnantFoods?type=' + item.type
+					url:'/otherPages/pregnant/pregnantFoodsDetail?type=' + type
 				})
 			},
 			/*点击注意事项item触发**/
@@ -1298,6 +1618,11 @@
 			chooseClasify(item,i){
 				this.currClasifyIndex = i
 				this.currentClasifyType = item.type
+				this.scrollMenuLeft = (i - 1) * 85
+				// this.scrollMenuLeft = 
+				if(this.menuIsShow){
+					this.menuIsShow  = false
+				}
 			},
 			/*跳转至产检详情**/
 			toPreDetail(type){
@@ -1543,18 +1868,32 @@
 				.pregnant-main-top-item{
 					display: flex;
 					justify-content: center;
-					text{
-						background-color: #ededed;
-						color: #000;
-						padding: 4upx 20upx;
-						border: 1px solid #ededed;
-						border-radius: 10upx;
-						margin-right: 10upx;
+					.pregnant-main-top-item-w{
+						width: 600upx;
+						overflow: hidden;
+						display: flex;
+						// justify-content: center;
+						white-space: nowrap;
+						/deep/ text{
+							display: inline-block;
+							background-color: #ededed;
+							color: #000;
+							padding: 4upx 50upx;
+							border: 1px solid #ededed;
+							border-radius: 10upx;
+							margin-right: 10upx;
+							height: 48upx;
+							line-height:48upx;
+						}
+						.active-clasify{
+							background-color: #1cbbb4;
+							color: #fff;
+						}
 					}
-					.active-clasify{
-						background-color: #1cbbb4;
-						color: #fff;
+					.pregnant-main-top-item-r{
+						margin-left: 10upx;
 					}
+					
 				}
 				.pregnant-main-top-item-add{
 					display: flex;
@@ -1668,36 +2007,88 @@
 					}
 				}
 			}
+			
 			.diet-wrap{
+				.content{
+					font-size: 30upx;
+					font-weight: 700;
+					background-color: lightseagreen;
+				}
 				.diet-item-wrap{
-					.diet-item{
+					.diet-main{
 						display: flex;
-						justify-content: space-between;
-						align-items: center;
-						width: 85%;
-						margin: 60upx auto;
-						padding: 20px;
-						background: #f8b3a4;
-						color: white;
-						font-size: 18px;
-						border-radius: 15px;
-						font-weight: 800;
-						box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
-						&:nth-of-type(2){
-							background: #8e9bc5;
-						}
-						&:nth-of-type(3){
-							background: #76a1c3;
-						}
-						.diet-item-left{
-							.diet-item-left-top{
-								
+						flex-direction: column;
+						.diet-main-top{
+							margin-top: 30upx;
+							.diet-main-top-text{
+								font-size: 32upx;
+								color: #000;
+								font-weight: 700;
+							}
+							.diet-main-item-wrap{
+								margin-top: 20upx;
+								display: flex;
+								flex-wrap: wrap;
+								.diet-main-item{
+									display: flex;
+									flex-direction: column;
+									box-shadow: 4px 3px 4px rgba(57, 181, 74, 0.2);
+									background-color: #39b54a;
+									color: #fff;
+									width: 120upx;
+									height: 120upx;
+									border-radius: 10upx;
+									margin-right: 20upx;
+									.diet-main-item-t{
+										margin: 10upx 0 0 10upx;
+									}
+									.diet-main-item-b{
+										text-align: center;
+										// margin-top: 10upx;
+									}
+								}
+								.taboo-item{
+									box-shadow: 4px 3px 4px rgba(229, 77, 66, 0.2);
+									background-color: #e54d42;
+									color: #fff;
+								}
 							}
 						}
-						.diet-item-rig{
-							
-						}
+						
 					}
+				// 	.diet-item{
+				// 		display: flex;
+				// 		justify-content: space-between;
+				// 		align-items: center;
+				// 		width: 85%;
+				// 		margin: 60upx auto;
+				// 		padding: 20px;
+				// 		background: #f8b3a4;
+				// 		color: white;
+				// 		font-size: 18px;
+				// 		border-radius: 15px;
+				// 		font-weight: 800;
+				// 		box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+				// 		&:nth-of-type(2){
+				// 			background: #8e9bc5;
+				// 		}
+				// 		&:nth-of-type(3){
+				// 			background: #76a1c3;
+				// 		}
+				// 		.diet-item-left{
+				// 			.diet-item-left-top{
+								
+				// 			}
+				// 		}
+				// 		.diet-item-rig{
+							
+				// 		}
+				// 	}
+				}
+			}
+			.sports-wrap{
+				.content{
+					background-color: steelblue;
 				}
 			}
 			.matter-wrap{
@@ -1859,38 +2250,55 @@
 					display: flex;
 					flex-direction: column;
 				}
+				.content-item-cen{
+					display: flex;
+					.content-item-cen-l{
+						margin-right: 15upx;
+					}
+				}
 				.pre-chunk-wrap{
 					display: flex;
 					margin-top: 20upx;
 					flex-wrap: wrap;
 					.pre-chunk-top{
 						width: 100%;
-						.pre-chunk-top-notice{
-							font-size: 16px;
-							color: #000;
-							font-weight: 600;
-						}
-						.pre-chunk-item-wrap{
-							display: flex;
-							margin-top: 15upx;
-							.pre-chunk{
-								width: 120upx;
-								height: 120upx;
+						.pre-chunk-top-item{
+							.pre-chunk-top-notice{
+								font-size: 16px;
+								color: #000;
+								font-weight: 600;
+							}
+							.pre-chunk-item-wrap{
 								display: flex;
-								align-items: center;
 								justify-content: center;
-								background-color: #e54d42;
-								box-shadow: 4px 3px 4px rgba(229, 77, 66, 0.2);
-								color: white;
-								border-radius: 5px;
-								margin-right: 20upx;
-								margin-bottom: 20upx;
-							}
-							.pass-pre-chunk{
-								background-color: #39b54a;
-								box-shadow: 4px 3px 4px rgba(57, 181, 74, 0.2);
+								margin-top: 15upx;
+								.pre-chunk{									
+									width: 120upx;
+									height: 120upx;
+									display: flex;
+									flex-direction: column;
+									// align-items: center;
+									// justify-content: center;
+									background-color: #e54d42;
+									box-shadow: 4px 3px 4px rgba(229, 77, 66, 0.2);
+									color: white;
+									border-radius: 5px;
+									margin-right: 20upx;
+									margin-bottom: 20upx;
+									.pre-chunk-top{
+										margin: 10upx 0 0 10upx;
+									}
+									.pre-chunk-item-bot{
+										text-align: center;
+									}
+								}
+								.pass-pre-chunk{
+									background-color: #39b54a;
+									box-shadow: 4px 3px 4px rgba(57, 181, 74, 0.2);
+								}
 							}
 						}
+						
 						
 						.pre-chunk-top-notice-cont{
 							margin-top: 10px;
@@ -1920,6 +2328,11 @@
 					}
 					.pre-chunk-bot{
 						margin-top: 20upx;
+						.pre-chunk-top-notice{
+							color: #000;
+							font-weight: 700;
+							font-size: 32upx;
+						}
 						.pre-chunk-top-backlog-cont{
 							// box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
 							border-radius: 10px;
@@ -2054,6 +2467,33 @@
 					color: #4e90ff;
 				}
 			}
+		}
+	}
+	.pregnant-main-top-item-poup{
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		padding: 80upx 0;
+		width: 98%;
+		margin: 0 auto;
+		text{
+			background-color: #ededed;
+			color: #000;
+			padding: 4upx 56upx;
+			border: 1px solid #ededed;
+			border-radius: 10upx;
+			margin-right: 10upx;
+			margin-bottom: 15upx;
+			height: 48upx;
+			line-height: 48upx;
+			// &:first-child{
+			// 	margin-left: 10upx;
+			// }
+		}
+		.active-clasify{
+			background-color: #1cbbb4;
+			color: #fff;
 		}
 	}
 	// .pregnant_wrap{

@@ -56,7 +56,7 @@
 		},
 		onLoad(option) {
 			this.type = option.type
-			this.currFood = JSON.parse(decodeURIComponent(option.currFood))
+			// this.currFood = JSON.parse(decodeURIComponent(option.currFood))
 		}
 	}
 </script>

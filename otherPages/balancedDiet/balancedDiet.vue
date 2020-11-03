@@ -59,11 +59,11 @@
 					<view class="operate">=</view>
 					<view class="energy-item">
 						<view class="text">体重变化</view>
-						<view class="number text-red" style="display: flex; width: 90px; justify-content: space-between">
+						<view class="number" :class="{ 'text-red': parseFloat(energyChange) > 0, 'text-green': parseFloat(energyChange) < 0 }" style="display: flex; width: 90px; justify-content: space-between">
 							<text style="flex: 1">{{ parseFloat(energyChange) > 0 ? `+${parseFloat(energyChange).toFixed(1)}` : parseFloat(energyChange).toFixed(1) }}</text>
 							<text class="units">大卡</text>
 						</view>
-						<view class="number text-red" style="display: flex; width: 90px; justify-content: space-between">
+						<view class="number" :class="{ 'text-red': parseFloat(energyChange) > 0, 'text-green': parseFloat(energyChange) < 0 }" style="display: flex; width: 90px; justify-content: space-between">
 							<text style="flex: 1">
 								{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
 							</text>
@@ -78,8 +78,14 @@
 						营养素摄入情况分析
 						<text class="cuIcon-rankfill"></text>
 					</view>
-					<!-- <button class="cu-btn bg-blue" @click.stop="toAddDiet" v-if="subIndex === 1 || subIndex === 0">选餐</button> -->
-					<!-- <view class="num">[{{sportsRecord.length}}]</view> -->
+				</view>
+				<view class="chart-box">
+					<!-- #ifdef MP-WEIXIN -->
+					<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas" @click-chart="clickCharts" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
+					<!-- #endif -->
+					<!-- #ifdef H5 -->
+					<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></uni-echarts>
+					<!-- #endif -->
 				</view>
 				<view class="indicator">
 					<view
@@ -100,66 +106,70 @@
 							{{ item.label }}
 						</button>
 					</view>
-					<view class="tips" v-if="!hasRecord">请先添加您的饮食记录</view>
 				</view>
-				<view v-for="(item, index) in energyList" :key="index" class="main-box">
-					<view class="main-top">
-						<view class="main-title">
-							<text>{{ item.title }}</text>
-							<text>({{ item.units }})</text>
+				<view class="" style="width: 100%;">
+					<view class="tips" v-if="!hasRecord">请先添加您的饮食记录</view>
+					<view v-for="(item, index) in energyList" :key="index" class="main-box">
+						<view class="main-top">
+							<view class="main-title">
+								<text>{{ item.title }}</text>
+								<text>({{ item.units }})</text>
+							</view>
 						</view>
-					</view>
-					<view class="main-content ele-content" v-if="energyList.length > 0">
-						<view v-for="(alone, i) in item.matterList" :key="i" class="ele-item" @click="toDetail(alone, item)">
-							<view class="ele-item-wrap" v-if="subIndex === 1 ? alone.value < alone.EAR || alone.value > alone.UL : true">
-								<text class="ele-item-name">{{ alone.shortName }}</text>
-								<view class="bg-white probar">
-									<view class="cu-progress progress-bar radius pro-rad">
-										<view class="pointer" :style="{ left: `${alone.value_left ? alone.value_left : 0}px` }">
+						<view class="main-content ele-content" v-if="energyList.length > 0">
+							<view v-for="(alone, i) in item.matterList" :key="i" class="ele-item" @click="toDetail(alone, item)">
+								<view class="ele-item-wrap" v-if="subIndex === 1 ? alone.value < alone.EAR || alone.value > alone.UL : true">
+									<text class="ele-item-name">{{ alone.shortName }}</text>
+									<view class="bg-white probar">
+										<view class="cu-progress progress-bar radius pro-rad">
+											<view class="pointer" :style="{ left: `${alone.value_left ? alone.value_left : 0}px` }">
+												<view
+													class="after"
+													:class="{
+														lack: alone.value < alone.EAR,
+														normal: alone.value >= alone.EAR && (alone.value <= alone.UL || !alone.UL),
+														over: alone.UL && alone.value > alone.UL
+													}"
+												>
+													{{
+														alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1)
+													}}
+												</view>
+											</view>
 											<view
-												class="after"
-												:class="{
-													lack: alone.value < alone.EAR,
-													normal: alone.value >= alone.EAR && (alone.value <= alone.UL || !alone.UL),
-													over: alone.UL && alone.value > alone.UL
+												class="bg-grey EAR"
+												:style="{
+													width: alone.left_width ? alone.left_width + 'px' : '33%'
 												}"
 											>
-												{{ alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1) }}
+												<view class="after">{{ alone.left_width ? alone.EAR : '' }}</view>
 											</view>
-										</view>
-										<view
-											class="bg-grey EAR"
-											:style="{
-												width: alone.left_width ? alone.left_width + 'px' : '33%'
-											}"
-										>
-											<view class="after">{{ alone.left_width ? alone.EAR : '' }}</view>
-										</view>
-										<view
-											class="bg-olive regular"
-											:style="{
-												width: alone.center_width ? alone.center_width + 'px' : '33%',
-												'border-top-right-radius': !alone.UL ? '5px' : '',
-												'border-bottom-right-radius': !alone.UL ? '5px' : ''
-											}"
-										></view>
-										<view
-											class="bg-red risk"
-											:style="{
-												width: alone.UL && alone.right_width ? alone.right_width + 'px' : !alone.UL ? 0 : '33%'
-											}"
-										>
 											<view
-												class="before"
-												:class="{
-													lack: alone.value < alone.EAR,
-													normal: alone.value >= alone.EAR && (alone.value <= alone.UL || !alone.UL),
-													over: alone.UL && alone.value > alone.UL
+												class="bg-olive regular"
+												:style="{
+													width: alone.center_width ? alone.center_width + 'px' : '33%',
+													'border-top-right-radius': !alone.UL ? '5px' : '',
+													'border-bottom-right-radius': !alone.UL ? '5px' : ''
+												}"
+											></view>
+											<view
+												class="bg-red risk"
+												:style="{
+													width: alone.UL && alone.right_width ? alone.right_width + 'px' : !alone.UL ? 0 : '33%'
 												}"
 											>
-												{{ alone.value < alone.EAR ? '不足' : alone.UL && alone.value > alone.UL ? '过多' : '正常' }}
+												<view
+													class="before"
+													:class="{
+														lack: alone.value < alone.EAR,
+														normal: alone.value >= alone.EAR && (alone.value <= alone.UL || !alone.UL),
+														over: alone.UL && alone.value > alone.UL
+													}"
+												>
+													{{ alone.value < alone.EAR ? '不足' : alone.UL && alone.value > alone.UL ? '过多' : '正常' }}
+												</view>
+												<view class="after">{{ alone.right_width && alone.UL ? alone.UL : '' }}</view>
 											</view>
-											<view class="after">{{ alone.right_width && alone.UL ? alone.UL : '' }}</view>
 										</view>
 									</view>
 								</view>
@@ -171,71 +181,112 @@
 			<view class="main-box symptom">
 				<view class="title">
 					<view class="label">饮食</view>
+					<view class="switch-layout">
+						<text class="cuIcon-list" :class="{ 'active-layout': dietLayout === 'list' }" @click="dietLayout = 'list'"></text>
+						<text class="cuIcon-apps" :class="{ 'active-layout': dietLayout === 'grid' }" @click="dietLayout = 'grid'"></text>
+					</view>
 					<!-- <view class="cuIcon-add" @click="toPages('food')"></view> -->
 				</view>
-				<view class="record-box" @click.self="clickDietBox" :class="{ showall: foodListDisplay, readmore: dietRecord.length > 3 }">
-					<view class="table" v-if="dietRecord">
-						<view class="no-data" v-if="!dietRecord || dietRecord.length === 0" @click="toPages('food')">
-							<view class="cuIcon-add text-black" style="font-size: 38rpx"></view>
-							点击添加饮食运动记录
-						</view>
-						<view class="row" v-for="(item, index) in dietRecord" :key="index">
-							<view class="readonly" @click="clickDietRecordItem(item)">
-								<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
-								<view class="column center">
-									<view class="name">{{ item.name }}</view>
-									<view class="number">{{ item.amount * item.unit_weight_g + item.unit }}</view>
-								</view>
-								<view class="column time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
-								<view class="column">
-									<text class="heat">
-										<text class="text text-orange">{{ item.energy }}</text>
-										千卡
-									</text>
-									<text class="cuIcon-right"></text>
+				<u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more">
+					<view class="record-box" @click.self="clickDietBox">
+						<view class="table" v-if="dietLayout === 'list'">
+							<view class="no-data" v-if="!dietRecord || dietRecord.length === 0" @click="toPages('food')">
+								<view class="cuIcon-add text-black" style="font-size: 38rpx"></view>
+								点击添加饮食记录
+							</view>
+							<view class="row" v-for="(item, index) in dietRecord" :key="index">
+								<view class="readonly" @click="clickDietRecordItem(item)">
+									<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
+									<view class="column center">
+										<view class="name">{{ item.name }}</view>
+										<view class="number">{{ item.amount * item.unit_weight_g + item.unit }}</view>
+									</view>
+									<view class="column time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
+									<view class="column">
+										<text class="heat">
+											<text class="text text-orange">{{ item.energy }}</text>
+											千卡
+										</text>
+										<text class="cuIcon-right" v-if="dietLayout === 'list'"></text>
+									</view>
 								</view>
 							</view>
 						</view>
+						<view class="table grid-layout" v-if="dietLayout === 'grid'">
+							<view class="diet-item" v-for="(item, index) in dietRecord" :key="index" @click="clickDietRecordItem(item)">
+								<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
+								<view class="diet-detail">
+									<view class="name">{{ item.name }}</view>
+									<view class="number">
+										<text class="heat">{{ item.energy }}千卡</text>
+									</view>
+									<view class="number">
+										<text>{{ item.amount * item.unit_weight_g + item.unit }}</text>
+										<text class="time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</text>
+									</view>
+								</view>
+							</view>
+							<view class="diet-item" @click="toPages('food')"><text class="cuIcon-add add-icon"></text></view>
+						</view>
 					</view>
-				</view>
+				</u-read-more>
 			</view>
 			<view class="main-box symptom">
 				<view class="title">
 					<view class="label">运动</view>
-					<!-- <view class="cuIcon-add" @click="toPages('sport')"></view> -->
+					<view class="switch-layout">
+						<text class="cuIcon-list" :class="{ 'active-layout': sportLayout === 'list' }" @click="sportLayout = 'list'"></text>
+						<text class="cuIcon-apps" :class="{ 'active-layout': sportLayout === 'grid' }" @click="sportLayout = 'grid'"></text>
+					</view>
 				</view>
-				<view
-					class="record-box"
-					@click.self="clickSportBox"
-					:class="{
-						showall: sportListDisplay,
-						readmore: sportsRecord.length > 3
-					}"
-				>
-					<view class="table">
-						<view class="no-data" v-if="!sportsRecord || sportsRecord.length === 0" @click="toPages('sport')">
-							<view class="cuIcon-add text-black" style="font-size: 38rpx"></view>
-							点击添加饮食运动记录
-						</view>
-						<view class="row" v-for="(item, index) in sportsRecord" :key="index">
-							<view class="readonly" @click="(showEditModal = true), (currentRecord = deepClone(item)), (currentRecordType = 'sport')">
-								<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
-								<view class="column center">
-									<view class="name">{{ item.name }}</view>
-									<view class="number">{{ item.amount + item.unit }}</view>
-								</view>
-								<view class="column time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
-								<view class="column">
-									<text class="heat">
-										<text class="text text-green">{{ item.energy }}</text>
-										千卡
-									</text>
-									<text class="cuIcon-right"></text>
+				<u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more">
+					<view class="record-box" @click.self="clickSportBox">
+						<view class="table" v-if="sportLayout === 'list'">
+							<view class="no-data" v-if="!sportsRecord || sportsRecord.length === 0" @click="toPages('sport')">
+								<view class="cuIcon-add text-black" style="font-size: 38rpx"></view>
+								点击添加运动记录
+							</view>
+							<view class="row" v-for="(item, index) in sportsRecord" :key="index">
+								<view class="readonly" @click="(showEditModal = true), (currentRecord = deepClone(item)), (currentRecordType = 'sport')">
+									<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
+									<view class="column center">
+										<view class="name">{{ item.name }}</view>
+										<view class="number">{{ item.amount + item.unit }}</view>
+									</view>
+									<view class="column time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
+									<view class="column">
+										<text class="heat">
+											<text class="text text-green">{{ item.energy }}</text>
+											千卡
+										</text>
+										<text class="cuIcon-right"></text>
+									</view>
 								</view>
 							</view>
 						</view>
+						<view class="table grid-layout" v-if="sportsRecord && sportLayout === 'grid'">
+							<view
+								class="diet-item"
+								v-for="(item, index) in sportsRecord"
+								:key="index"
+								@click="(showEditModal = true), (currentRecord = deepClone(item)), (currentRecordType = 'sport')"
+							>
+								<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
+								<view class="diet-detail">
+									<view class="name">{{ item.name }}</view>
+									<view class="number">
+										<text class="heat">{{ item.energy }}千卡</text>
+									</view>
+									<view class="number">
+										<text>{{ item.amount + item.unit }}</text>
+										<text class="time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</text>
+									</view>
+								</view>
+							</view>
+							<view class="diet-item" @click="toPages('sport')"><text class="cuIcon-add add-icon"></text></view>
+						</view>
 					</view>
-				</view>
+				</u-read-more>
 			</view>
 			<view class="main-box symptom">
 				<view class="title">症状</view>
@@ -244,13 +295,13 @@
 					<view class="symptom-item symptom-add" @click="addSymptom">+</view>
 				</view>
 			</view>
-			<view class="main-box symptom">
+			<!-- <view class="main-box symptom">
 				<view class="title">慢病风险</view>
 				<view class="symptom-box">
 					<view class="symptom-item" v-for="(item, index) in diseaseList" :key="index" v-show="item.disease_name">{{ item.disease_name }}</view>
 					<view class="symptom-item symptom-add">+</view>
 				</view>
-			</view>
+			</view> -->
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
 			<view class="cu-dialog" v-if="currentRecord">
@@ -282,7 +333,7 @@
 							</view>
 						</view>
 					</view>
-					<view class="unit-box">
+					<view class="unit-box" v-if="currentRecordType === 'food'">
 						<view class="title">单位:</view>
 						<view class="unit-item" :class="{ 'active-unit': currentUnitIndex === index }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">
 							{{ u.unit_weight_g ? u.unit_weight_g + u.unit : u.unit }}
@@ -375,12 +426,31 @@
 import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
 import bxDateStamp from '@/components/bx-date-stamp/bx-date-stamp.vue';
 import xflSelect from '@/components/xfl-select/xfl-select.vue';
+// #ifdef MP-WEIXIN
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+// #endif
+// #ifdef H5
+import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+// #endif
 let self;
 export default {
-	components: { MxDatePicker, xflSelect, bxDateStamp },
+	components: {
+		MxDatePicker,
+		xflSelect,
+		bxDateStamp,
+		// #ifdef MP-WEIXIN
+		uniEcCanvas,
+		// #endif
+		// #ifdef H5
+		uniEcharts
+		// #endif
+	},
 	data() {
 		return {
 			unitList: [],
+			dietLayout: 'grid',
+			sportLayout: 'grid', //grid,list
+			nutrientsChartOption: {},
 			currentUnitIndex: 0,
 			pageTitle: '今日概览',
 			showUserList: false,
@@ -781,6 +851,158 @@ export default {
 		}
 	},
 	methods: {
+		clickCharts(e) {
+			this.toDetail(e);
+		},
+		buildNutrientsChartOption(energyListWrap) {
+			// 构建echarts需要的数据格式
+			let energyList = this.deepClone(this.energyListWrap);
+			let eleArr = [];
+			energyList.forEach(item => {
+				item.matterList.forEach(ele => {
+					eleArr.push(ele);
+				});
+			});
+			let category = eleArr.map(item => {
+				return item.name;
+			});
+			let legendData = ['已选正常', '超标', '达标线'];
+			let seriesData = legendData.map(le => {
+				let obj = {
+					name: le,
+					data: []
+				};
+				obj.type = 'bar';
+				obj.stack = '营养素';
+				let data = eleArr.map(item => {
+					let num = (item.value * 100) / Number(item.EAR);
+					num = parseFloat(num.toFixed(1));
+					return num;
+				});
+				switch (le) {
+					case '已选正常':
+						obj.data = eleArr.map(item => {
+							let num = 0;
+							if (item.UL) {
+								// 有最大值
+								if (item.value > item.UL) {
+									num = (Number(item.UL) * 100) / Number(item.EAR);
+								} else {
+									num = (item.value * 100) / Number(item.EAR);
+								}
+							} else {
+								num = (item.value * 100) / Number(item.EAR);
+							}
+							num = parseFloat(num.toFixed(1));
+							return num;
+						});
+						break;
+					case '新增':
+						break;
+					case '超标':
+						obj.data = eleArr.map(item => {
+							let num = 0;
+							if (item.UL) {
+								// 有最大值
+								if (item.value > item.UL) {
+									num = (Number(item.UL) * 100) / Number(item.EAR) - 100;
+								} else {
+									num = 0;
+								}
+							} else {
+								num = 0;
+							}
+							num = parseFloat(num.toFixed(1));
+							return num;
+						});
+						break;
+					case '达标线':
+						obj.type = 'line';
+						obj.stack = false;
+						obj.data = eleArr.map(item => {
+							return 100;
+						});
+						break;
+				}
+				return obj;
+			});
+			let option = {
+				color: ['#92d050', '#f79646', '#4f81bd'],
+				// color: ['#92d050', '#00b050', '#f79646', '#4f81bd'],
+				title: {
+					text: ''
+				},
+				// tooltip: {
+				// 	trigger: 'axis',
+				// 	axisPointer: {
+				// 		type: 'cross',
+				// 		label: {
+				// 			backgroundColor: '#6a7985'
+				// 		}
+				// 	}
+				// },
+				legend: {
+					data: legendData
+				},
+				grid: {
+					left: '3%',
+					right: '4%',
+					bottom: '3%',
+					top: '10%',
+					containLabel: true
+				},
+				xAxis: [
+					{
+						type: 'category',
+						data: category,
+						axisLabel: {
+							rotate: 70,
+							interval: 0,
+							fontSize: 10
+						}
+					}
+				],
+				yAxis: [
+					{
+						type: 'value',
+						axisLabel: {
+							formatter: `{value}%`
+						}
+					}
+				],
+				series: [
+					{
+						name: '已选正常',
+						type: 'bar',
+						stack: '营养素',
+						data: [120, 132, 101, 134, 120, 132, 101, 134]
+					},
+					{
+						name: '新增',
+						type: 'bar',
+						stack: '营养素',
+						data: [220, 182, 191, 234, 120, 132, 101, 134]
+					},
+					{
+						name: '超标',
+						type: 'bar',
+						stack: '营养素',
+						data: [150, 232, 201, 154, 120, 132, 101, 134]
+					},
+					{
+						name: '达标线',
+						type: 'line',
+						data: [320, 332, 301, 334, 120, 132, 101, 134]
+					}
+				]
+			};
+			option.series = seriesData;
+			let result = {
+				option: option
+			};
+			this.nutrientsChartOption = result;
+			return result;
+		},
 		checkUnit(item, index) {
 			// 切换单位
 			this.currentUnitIndex = index;
@@ -988,8 +1210,24 @@ export default {
 				this.currentRecord.amount = this.currentRecord.amount + 0.5;
 			}
 		},
+
 		toDetail(e, item) {
-			e.units = item.units;
+			if (!item) {
+				let name = e.name;
+				let energyList = this.deepClone(this.energyListWrap);
+				let eleArr = [];
+				energyList.forEach(ene => {
+					ene.matterList.forEach(ele => {
+						ele.units = ene.units;
+						eleArr.push(ele);
+						if (e.name === ele.name) {
+							e = ele;
+						}
+					});
+				});
+			} else {
+				e.units = item.units;
+			}
 			uni.navigateTo({
 				url: '/otherPages/elementDetail/elementDetail?data=' + JSON.stringify(e) + '&user_no=' + this.loginUserInfo.user_no + '&date=' + this.selectDate
 			});
@@ -1020,7 +1258,6 @@ export default {
 				order: []
 			};
 			let res = await this.$http.post(url, req);
-			console.log('00000000000000');
 			if (res.data.state === 'SUCCESS') {
 				this.getSportsAllRecord(res.data.data);
 			}
@@ -1303,8 +1540,8 @@ export default {
 					]
 				}
 			];
-			if(this.currentRecordType==='diet'){
-				req[0].data[0]['unit'] = currentUnit.unit
+			if (this.currentRecordType === 'diet') {
+				req[0].data[0]['unit'] = currentUnit.unit;
 			}
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
@@ -1726,6 +1963,7 @@ export default {
 					});
 					radio.label = radio.name + '(' + radio.num + ')';
 				});
+				this.buildNutrientsChartOption(this.energyListWrap);
 			});
 			return energyList;
 		},
@@ -1752,7 +1990,7 @@ export default {
 					{
 						colName: 'hdate',
 						ruleType: 'like',
-						value: chooseDate ? chooseDate : this.selectDate.trim()
+						value: chooseDate ? chooseDate.trim() : this.selectDate.trim()
 					}
 				],
 				order: [
@@ -2141,7 +2379,7 @@ export default {
 	flex-direction: column;
 	width: 100%;
 	/* #ifdef H5 */
-	padding-bottom: 100rpx;
+	// padding-bottom: 100rpx;
 	/* #endif */
 	overflow-y: auto;
 	background-color: #f1f1f1;
@@ -2257,12 +2495,6 @@ export default {
 			}
 		}
 	}
-	.diet-wrap {
-		// height: 100%;
-		// height: 1500rpx;
-		// margin-bottom: 100rpx;
-		// overflow: scroll;
-	}
 	.headline {
 		font-size: 40upx;
 		height: 80upx;
@@ -2325,6 +2557,9 @@ export default {
 		transition: height 0.6s ease;
 		height: auto;
 		background-color: #fff;
+		.chart-box {
+			width: 100%;
+		}
 		.title {
 			width: 100%;
 			padding: 10rpx;
@@ -2336,6 +2571,15 @@ export default {
 			text-align: left;
 			justify-content: space-between;
 			align-items: center;
+			.switch-layout {
+				width: 100rpx;
+				display: flex;
+				justify-content: space-around;
+				color: #ccc;
+				.active-layout {
+					color: rgb(11, 201, 157);
+				}
+			}
 		}
 		.main-box {
 			width: calc(100% - 20rpx);
@@ -2368,6 +2612,15 @@ export default {
 				font-size: 34rpx;
 				display: flex;
 				justify-content: space-between;
+				.switch-layout {
+					width: 100rpx;
+					display: flex;
+					justify-content: space-around;
+					color: #ccc;
+					.active-layout {
+						color: rgb(11, 201, 157);
+					}
+				}
 				.cuIcon-add {
 					&:active {
 						transform: scale(1.5);
@@ -2383,30 +2636,8 @@ export default {
 			.record-box {
 				width: 100%;
 				display: flex;
-				&.readmore {
-					height: 200px;
-					overflow: hidden;
-					position: relative;
-					&::before {
-						color: #409eff;
-						height: 60px;
-						line-height: 60px;
-						width: 100%;
-						text-align: center;
-						background-image: linear-gradient(-180deg, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 60%);
-						content: '点击展开全部记录';
-						bottom: 0;
-						position: absolute;
-						z-index: 90;
-					}
-					&.showall {
-						// min-height: 200px;
-						height: auto;
-						padding-bottom: 40px;
-						&::before {
-							content: '点击收起';
-						}
-					}
+				.read-more {
+					width: 100%;
 				}
 				.record-item {
 					flex: 1;
@@ -2431,6 +2662,7 @@ export default {
 				.table {
 					width: 100%;
 					padding: 10rpx 0;
+					text-indent: 0;
 					.no-data {
 						width: 100%;
 						height: 60rpx;
@@ -2441,18 +2673,62 @@ export default {
 						color: #666;
 						font-size: 34rpx;
 					}
+					&.grid-layout {
+						display: flex;
+						flex-wrap: wrap;
+						padding: 20rpx 10rpx 0 20rpx;
+						.diet-item {
+							width: calc(25% - 10rpx);
+							min-height: 170rpx;
+							margin: 0 10rpx 10rpx 0;
+							border-radius: 10rpx;
+							background-color: #fff;
+							overflow: hidden;
+							display: flex;
+							flex-wrap: wrap;
+							flex-direction: column;
+							justify-content: center;
+							align-items: center;
+							box-shadow: 6px 2px 30px #d1d9e6, inset -20px -18px 30px 0px #fff;
+							.add-icon {
+								font-size: 80rpx;
+								font-weight: bold;
+								color: #cecece;
+							}
+							.u-image {
+								width: 100%;
+								height: 100rpx;
+							}
+							.diet-detail {
+								width: 100%;
+								padding: 10rpx 5rpx;
+								flex: 1;
+								line-height: 1;
+								.name {
+									width: 100%;
+									font-weight: bold;
+									white-space: nowrap;
+								}
+								.time {
+									font-size: 20rpx;
+									color: #999;
+								}
+								.number {
+									line-height: 1.2;
+									font-size: 24rpx;
+									display: flex;
+									justify-content: space-between;
+									.heat {
+										line-height: 1.5;
+										display: inline-block;
+										color: #dc2a26;
+									}
+								}
+							}
+						}
+					}
 					.row {
 						padding: 0 20rpx;
-						// border-top: 1px #f1f1f1 solid;
-						&:nth-child(2n + 1) {
-							// color: #fbbd08;
-							// background-color: #fef2ced2;
-						}
-						&:nth-child(2n) {
-							// color: #0081ff;
-							// background-color: #cce6ff;
-							// background-color: rgba($color: #f1f1f1, $alpha: 0.7);
-						}
 						.readonly {
 							width: 100%;
 							display: flex;
@@ -2540,16 +2816,19 @@ export default {
 					justify-content: center;
 					align-items: center;
 					border-radius: 10rpx;
-					max-width: 170rpx;
+					max-width: 180rpx;
 					// margin: 0 auto;
 					margin-right: 10rpx;
 					margin-bottom: 20rpx;
 					letter-spacing: 2px;
 					&.symptom-add {
-						background-color: #f1f1f1;
+						background-color: #fff;
+						width: 180rpx;
+						height: 170rpx;
 						font-size: 40px;
-						color: #999;
+						color: #ccc;
 						font-weight: 100;
+						box-shadow: 6px 2px 30px #d1d9e6, inset -20px -18px 30px 0px #fff;
 					}
 				}
 			}
@@ -2581,19 +2860,58 @@ export default {
 				color: #666;
 			}
 			.energy-item {
-				min-height: 100upx;
+				color: #333;
+				font-weight: bold;
+				min-height: 150upx;
 				display: flex;
 				flex-direction: column;
-				justify-content: space-around;
+				justify-content: center;
+				flex: 1;
+				margin-bottom: 10rpx;
+				border-radius: 20rpx;
+				margin: 30rpx 10rpx;
+				&:nth-child(2) {
+					background-color: rgba($color: #f14d30, $alpha: 0.8);
+					box-shadow: 4px 3px 4px rgba($color: #cf6d40, $alpha: 0.5);
+					color: #f1f1f1;
+				}
+				&:nth-child(4) {
+					color: #f1f1f1;
+					background-color: rgba($color: #0bc99d, $alpha: 0.8);
+					box-shadow: 4px 3px 4px rgba($color: #0bc99d, $alpha: 0.5);
+				}
+				&:nth-child(6) {
+					color: #f1f1f1;
+					background-color: rgba($color: #2989ff, $alpha: 0.8);
+					box-shadow: 4px 3px 4px rgba($color: #2979ff, $alpha: 0.5);
+				}
+				&:last-child {
+					background-color: #fff;
+					flex: 1.5;
+					margin-right: 0;
+					color: #333;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					background-color: rgba($color: #fff, $alpha: 0.8);
+					box-shadow: 0px 1px 5px 0px rgba(153, 153, 153, 0.5);
+				}
 				.text {
 					font-size: 20upx;
+					text-align: center;
+					font-weight: normal;
 				}
 				.number {
 					font-size: 30upx;
 					text-align: center;
+					margin-top: 10rpx;
 				}
 				.text-red {
-					color: #red;
+					color: rgba(241, 77, 48, 0.8);
+					text-align: right;
+				}
+				.text-green {
+					color: rgba($color: #0bc99d, $alpha: 0.7);
 					text-align: right;
 				}
 				.units {
@@ -2601,13 +2919,16 @@ export default {
 					padding-left: 10upx;
 					font-size: 20upx;
 					color: #000;
+					// color: #f1f1f1;
 				}
 			}
 			.operate {
 				font-size: 60upx;
 				font-weight: 600;
-				width: 60upx;
+				// width: 60upx;
+				color: #ff8944;
 				text-align: center;
+				text-shadow: 4px 3px 4px rgba($color: #e79715, $alpha: 0.5);
 			}
 			.table {
 				width: 100%;
@@ -2954,35 +3275,44 @@ uni-checkbox::before {
 		}
 	}
 }
+.tips {
+	text-align: center;
+	width: 100%;
+	height: 80rpx;
+	line-height: 80rpx;
+	color: #999;
+	font-size: 12px;
+}
 .indicator {
 	background-color: #ffffff;
 	text-align: center;
 	font-size: 15px;
 	width: 100%;
 	padding: 10rpx 0;
+	display: flex;
+	justify-content: center;
+	padding: 20rpx;
 	.btn {
 		display: inline-flex;
 		margin-right: 10rpx;
+		flex: 1;
 		&.active-btn {
-			// letter-spacing: 2px;
-			// font-size: 14px;
-			// margin: 0 10px;
 			padding-bottom: 10rpx;
 			border-bottom: 5px solid #2fc25b;
+		}
+		&:last-child {
+			margin-right: 0;
 		}
 	}
 	.cu-btn {
 		padding: 0 10px;
 		font-size: 12px;
+		width: 100%;
 		&:last-child {
 			margin-right: 0rpx;
 		}
 	}
-	.tips {
-		color: #999;
-		font-size: 12px;
-		padding-top: 20rpx;
-	}
+
 	.cu-item {
 		.content {
 			font-weight: 700;
@@ -3231,5 +3561,10 @@ uni-checkbox::before {
 		transform: rotate(45deg);
 		bottom: -100rpx;
 	}
+}
+.uni-ec-canvas {
+	width: 100%;
+	height: 550rpx;
+	display: block;
 }
 </style>

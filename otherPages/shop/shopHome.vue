@@ -48,7 +48,7 @@
 				:pullUp="loadData"
 				:enablePullDown="true"
 				:enablePullUp="true"
-				:top="630"
+				:top="650"
 				:fixed="true"
 				:bottom="0"
 				finishText="我是有底线的..."
@@ -390,9 +390,10 @@
 			border-bottom: 2px solid #efefef;
 		}
 		.shop-main-sort{
-			padding-top: 20upx;
+			padding: 20upx 0;
 			display: flex;
 			justify-content: space-between;
+			border-bottom: 1px solid #ccc;
 			.shop-main-sort-left{
 				width: 80%;
 				font-size: 28upx;
@@ -533,7 +534,9 @@
 						width: 100%;
 					}
 					.item-right{
+						width: 100%;
 						.item-right-top{
+							width: 100%;
 							text{
 								&:first-child{
 									text-align: center;

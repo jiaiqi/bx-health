@@ -309,7 +309,7 @@
 		onLoad(option) {
 			let foodsDetail = JSON.parse(decodeURIComponent(option.itemData))
 			this.queryType = option.type
-			// foodsDetail.imgurl = foodsDetail.imgurl.substring(0,foodsDetail.imgurl.lastIndexOf("&"))
+			foodsDetail.imgurl = foodsDetail.imgurl.substring(0,foodsDetail.imgurl.lastIndexOf("&"))
 			this.foodObj = foodsDetail
 			if(uni.getStorageSync('shop_car')){
 				let car_data = uni.getStorageSync('shop_car')

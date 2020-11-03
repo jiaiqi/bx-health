@@ -14,21 +14,21 @@
 							:adjust-position="false"
 							v-model="searchValue"
 							@keyup.enter="searchStart"
-							@change="searchStart"
+							@input="searchStart"
 							type="text"
 							:placeholder="'请输入病症搜索'"
 							confirm-type="search"
 						/>
 					</view>
 					<view class="action">
-						<button @click.stop="changeListType" class="cu-btn bg-olive shadow-blur round">切换</button>
+						<!-- <button @click.stop="changeListType" class="cu-btn bg-olive shadow-blur round">切换</button> -->
 						<button v-if="isSearch" @click.stop="searchEnd" class="cu-btn bg-orange shadow-blur round">取消</button>
 					</view>
 				</view>
 			</view>
 		</view>
 
-		<view v-if="isChunk" class="symptom-bot-wrap">
+		<!-- <view v-if="isChunk" class="symptom-bot-wrap">
 			<view class="" v-if="symptomList.length > 0 && !isSearch">
 				<view v-if="item.is_show" v-for="(item, index) in symptomList" class="wrapCont" :key="index">
 					<view class="wrapCont-top">{{ item[query.key] }}</view>
@@ -50,22 +50,49 @@
 				</view>
 				<view class="box normalstyle" v-show="serseData.length == 0">没有找到相关内容</view>
 			</view>
-			<!-- <view v-else class=""> -->
-
-			<!-- </view> -->
 			<view class="boxbtn"><view class="btns" @click="lookobj">完成</view></view>
-		</view>
-		<view v-else class="symptom-bot-wrap">
-			<u-tabs active-color="#42b983" :list="symptomList" :is-scroll="false" :current="currentTab" @change="change"></u-tabs>
+		</view> -->
+		<view class="symptom-bot-wrap">
+			<view class="symptom-bot-wrap-top">
+				<view class="symptom-bot-wrap-top-l">
+					<scroll-view :scroll-with-animation="true" style="height: 60upx;" scroll-x :scroll-left="scrollMenuLeft">
+						<text @click="changeMenu(item,index)" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomList" :key="index">{{item.name}}</text>
+					</scroll-view>
+				</view>
+				<view class="symptom-bot-wrap-top-r">
+					<u-icon :top="4" v-if="!menuIsShow" size="48" @click="showMore('open')" name="list"></u-icon>
+					<u-icon :top="4" v-else size="48" @click="showMore('close')" name="close"></u-icon>
+				</view>
+			</view>
+			<!-- <u-tabs active-color="#42b983" :show-bar="false" :list="symptomList" :is-scroll="false" :current="currentTab" @change="change"></u-tabs> -->
 			<view class="" v-if="symptomList.length && symptomList[currentTab].children.length > 0 && !isSearch">
 				<view v-if="symptomList[currentTab].is_show && items.is_leaf === '否'" :key="index" v-for="(items, index) in symptomList[currentTab].children" class="wrapCont">
 					<view v-if="items.is_leaf === '否' && items.children.length > 0" class="wrapCont_row">
-						<text>{{ items[query.key] }}</text>
-						<view class="wrapCont_row_item_wrap">
-							<view @click="chooseItem(single)" v-for="(single, idx) in items.children" :key="idx" :class="single.is_checked ? 'actived' : ''" class="wrapCont_row_item">
-								{{ single.name }}
+						<!-- <text>{{ items[query.key] }}</text> -->
+						<view class="wrapCont-top">{{ items[query.key] }}</view>
+						<view class="wrapCont-main-no">
+							<view v-for="(noillnes,nos) in items.children" :key="nos" v-if="!Array.isArray(noillnes.children) || noillnes.children.length <= 0" class="wrapCont_row_item_wrap-b">
+								<view  @click="chooseItem(noillnes)" :class="noillnes.is_checked ? 'actived' : ''" class="wrapCont_row_item">
+									{{ noillnes.name }}
+								</view>
 							</view>
 						</view>
+						
+						<view class="wrapCont-main">
+							<view v-for="(illnes,n) in items.children" :key="n" class="wrapCont_row_item_wrap" :class="(Array.isArray(illnes.children) && illnes.children.length > 0)?'':'no_wrapCont_row_item_wrap'">
+								<view  v-if="Array.isArray(illnes.children) && illnes.children.length > 0" class="wrapCont_row_item_wrap-t">
+									<text>{{illnes.name}}</text>
+								</view>
+								<view v-if="Array.isArray(illnes.children)&& illnes.children.length>0" class="wrapCont_row_item_wrap-b">
+									<view @click="chooseItem(single)" v-for="(single, idx) in illnes.children" :key="idx" :class="single.is_checked ? 'actived' : ''" class="wrapCont_row_item">
+										{{ single.name }}
+									</view>
+								</view>
+								
+							</view>
+						</view>
+						
+						
 					</view>
 				</view>
 			</view>
@@ -96,6 +123,11 @@
 				</view>
 			</u-popup>
 		</view>
+		<u-popup v-model="menuIsShow" :closeable="true" mode="top">
+			<view class="pregnant-main-top-item-poup">
+				<text @click="changeMenu(item,index)" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomList" :key="index">{{item.name}}</text>
+			</view>
+		</u-popup>
 		<u-toast ref="uToast" />
 	</view>
 </template>
@@ -119,6 +151,7 @@ export default {
 			poupName: null,
 			mask: false,
 			isSearch: false,
+			scrollMenuLeft:0,
 			dataItem: [],
 			oriData: [],
 			serBtn: false,
@@ -129,6 +162,8 @@ export default {
 			show: false,
 			checkedData: [],
 			current_item: '',
+			menuIsShow:false,
+			activeIndex:0,
 			fromTypeData: '' //表单类型和数据
 		};
 	},
@@ -174,12 +209,25 @@ export default {
 		}
 	},
 	methods: {
+		/* 点击菜单展开或者收缩**/
+		showMore(){
+			this.menuIsShow = !this.menuIsShow
+		},
 		changeListType() {
 			this.isChunk = !this.isChunk;
+		},
+		changeMenu(item,i){
+			this.activeIndex = i;
+			this.scrollMenuLeft = (i - 1) * 85
+			this.currentTab = i;
+			if(this.menuIsShow){
+				this.menuIsShow = false
+			}
 		},
 		change(index) {
 			this.currentTab = index;
 			this.currentMenu = 0;
+			
 		},
 
 		/** 复选框事件*/
@@ -361,7 +409,20 @@ export default {
 								child.children.push(item);
 								parent.is_show = true;
 							}
+							
 						});
+						if(Array.isArray(child.children)){
+							child.children.forEach(thirdChild=>{
+								thirdChild.children = [];
+								flattArr.forEach(thirdChilditem => {
+									if (thirdChilditem.parent_no === thirdChild.no) {
+										thirdChild.children.push(thirdChilditem);
+										// parent.is_show = true;
+									}									
+								});
+							})
+						}
+						
 					});
 				}
 			});
@@ -498,6 +559,29 @@ export default {
 		// height: calc(100vh - 150px);
 		flex: 1;
 		overflow-y: scroll;
+		/deep/ .u-tab-item{
+			padding: 0 20upx;
+		}
+		.symptom-bot-wrap-top{
+			display: flex;
+			align-items: center;
+			line-height: 30px;
+			background-color: #fff;
+			font-size: 30upx;
+			padding: 10upx 0;
+			.symptom-bot-wrap-top-l{
+				width: 670upx;
+				overflow-x: scroll;
+				white-space: nowrap;
+				text{
+					padding: 10upx 40upx;
+				}
+				.activeSympt{
+					color: rgb(66, 185, 131);
+					font-weight: 700;
+				}
+			}
+		}
 	}
 }
 .wrapCont {
@@ -508,6 +592,7 @@ export default {
 		font-weight: 700;
 		font-size: 18px;
 		text-align: center;
+		margin-bottom: 20upx;
 	}
 	.wrapCont_row {
 		display: flex;
@@ -522,9 +607,30 @@ export default {
 				box-sizing: border-box;
 			}
 		}
-		.wrapCont_row_item_wrap {
+		.wrapCont-main{
+			display: flex;
+			flex-direction: column;
+			.wrapCont_row_item_wrap {
+				display: flex;
+				flex-direction: column;
+				margin-top: 20upx;
+				.wrapCont_row_item_wrap-t{
+					color: #000000;
+					font-size: 30upx;
+					margin-bottom: 10upx;
+				}
+				.wrapCont_row_item_wrap-b{
+					display: flex;
+					flex-wrap: wrap;
+				}
+			}
+		}
+		.wrapCont-main-no{
 			display: flex;
 			flex-wrap: wrap;
+		}
+		.no_wrapCont_row_item_wrap{
+			display: flex;
 		}
 	}
 	.box {
@@ -710,5 +816,24 @@ export default {
 }
 .navs-top {
 	margin-right: 20upx;
+}
+.pregnant-main-top-item-poup{
+	width: 95%;
+	margin: 0 auto;
+	padding: 60upx 0; 
+	font-size: 30upx;
+	color: #000000;
+	text{
+		display: inline-block;
+		padding: 10upx 20upx;
+		border: 1px solid #ccc;
+		margin-right: 10upx;
+		margin-bottom: 20upx;
+		background-color: rgb(242,242,242);
+	}
+	.activeSympt{
+		color: rgb(66, 185, 131);
+		font-weight: 700;
+	}
 }
 </style>

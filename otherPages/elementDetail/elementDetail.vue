@@ -53,8 +53,14 @@
 					</view>
 				</view>
 			</view>
-			<view class="qiun-charts qiun-rows"><canvas canvas-id="canvasPie" id="canvasPie" class="charts-pie" @touchstart="touchPie"></canvas></view>
-			<!-- <view class="qiun-charts qiun-rows"><canvas canvas-id="stepChart" id="stepChart" class="charts-pie" @touchstart="touchLine"></canvas></view> -->
+			<view class="qiun-charts">
+				<!-- #ifdef MP-WEIXIN -->
+				<uni-ec-canvas class="uni-ec-canvas" ref="canvasPie" @click-chart="clickCharts" canvas-id="canvasPie" :ec="ec"></uni-ec-canvas>
+				<!-- #endif -->
+				<!-- #ifdef H5 -->
+				<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas" ref="canvasPie" canvas-id="canvasPie" :ec="ec"></uni-echarts>
+				<!-- #endif -->
+			</view>
 		</view>
 		<view class="element-box">
 			<view class="element-name title">
@@ -135,16 +141,26 @@
 				<view class="unit-bar"></view>
 			</view>
 		</view>
-		<!-- <button type="default" @click="showChart('stepChart', testData)">test</button> -->
 	</view>
 </template>
 
 <script>
-import uCharts from '@/components/u-charts/u-charts.js';
 var _self;
-var canvaPie = null;
-var stepChart = null;
+// #ifdef MP-WEIXIN
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+// #endif
+// #ifdef H5
+import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+// #endif
 export default {
+	components: {
+		// #ifdef MP-WEIXIN
+		uniEcCanvas,
+		// #endif
+		// #ifdef H5
+		uniEcharts
+		// #endif
+	},
 	computed: {
 		totalWeight() {
 			let total = 0;
@@ -176,116 +192,9 @@ export default {
 	},
 	data() {
 		return {
-			ecWeight: {
-				option: {
-					title: {
-						text: '体重'
-					},
-					tooltip: {
-						trigger: 'axis',
-						formatter: '{b}\r\n{c0}kg',
-						axisPointer: {
-							type: 'line',
-							axis: 'x',
-							label: {
-								backgroundColor: '#000000'
-							}
-						}
-					},
-					grid: {
-						left: '6%',
-						right: '6%',
-						top: '6%',
-						bottom: '6%',
-						containLabel: true
-					},
-					xAxis: {
-						type: 'category',
-						boundaryGap: false,
-						data: ['2-12', '2-14', '2-16', '2-18', '2-20', '2-22', '2-24'],
-						axisLine: {
-							// y轴
-							show: false
-						},
-						axisTick: {
-							// y轴刻度线
-							show: false
-						},
-						splitLine: {
-							// 网格线
-							show: false
-						}
-					},
-					yAxis: {
-						type: 'value',
-						axisLine: {
-							// y轴
-							show: false
-						},
-						axisTick: {
-							// y轴刻度线
-							show: false
-						},
-						splitLine: {
-							// 网格线
-							show: false
-						}
-					},
-					series: [
-						{
-							name: '浏览量',
-							type: 'line',
-							smooth: true,
-							areaStyle: {
-								color: {
-									type: 'linear',
-									x: 0,
-									y: 0,
-									x2: 0,
-									y2: 1,
-									colorStops: [
-										{
-											offset: 0,
-											color: '#E50113' // 0% 处的颜色
-										},
-										{
-											offset: 1,
-											color: '#fff' // 100% 处的颜色
-										}
-									],
-									global: false // 缺省为 false
-								}
-							},
-							lineStyle: {
-								color: '#EF5959'
-							},
-							data: [120, 132, 101, 134, 90, 230, 210]
-						}
-					]
-				}
-			},
-			testData: {
-				categories: ['03-09', '03-12', '03-12', '03-14', '03-16', '03-19', '04-06'],
-				series: [
-					{
-						name: '体重',
-						data: [84.5, 67, 70, 70, 70, 68, 65],
-						color: '#1890ff',
-						index: 0,
-						type: 'line',
-						show: true,
-						pointShape: 'circle',
-						legendShape: 'line',
-						area: [156.5, 144, 208.5, 155]
-					}
-				]
-			},
+			ec: {},
 			currentDiet: null,
 			showEditModal: false,
-			showAddDiet: false,
-			cWidth: '',
-			cHeight: '',
-			pixelRatio: 1,
 			chartData: {
 				series: []
 			},
@@ -300,6 +209,9 @@ export default {
 		};
 	},
 	methods: {
+		clickCharts(e) {
+			console.log(e);
+		},
 		buildElemetBarData(e) {
 			_self.elementData.value = 0;
 			_self.dietRecord.forEach(item => {
@@ -360,7 +272,6 @@ export default {
 					dietInfo['value_left'] = 110;
 				}
 			}
-			// this.elementData = dietInfo;
 			return dietInfo;
 		},
 		clickDietItem(item) {
@@ -414,15 +325,13 @@ export default {
 				},
 				lackEle: elementData
 			};
-			if (elementData.value < elementData.EAR) {
-				condType.order = [
-					{
-						colName: this.elementData.key,
-						orderType: 'desc' // asc升序  desc降序
-					}
-				];
-			} else if (elementData.UL && elementData.value > elementData.UL) {
-			}
+			// if (elementData.value < elementData.EAR) {
+			condType.order = [
+				{
+					colName: this.elementData.key,
+					orderType: 'desc' // asc升序  desc降序
+				}
+			];
 			const url = '/otherPages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
 			uni.navigateTo({
 				url: url
@@ -495,7 +404,6 @@ export default {
 				let foodNameList = res.data.data.map(item => {
 					return item.name;
 				});
-
 				let foodNameStr = foodNameList.toString();
 				let foodList = await this.getDietList(foodNameStr);
 				res.data.data.forEach(item => {
@@ -525,126 +433,69 @@ export default {
 				});
 				this.chartData.series = dietList.map(item => {
 					return {
+						unit: item.unit,
 						name: item.name,
-						data: item[this.elementData.key]
+						amount: item.amount,
+						value: item[this.elementData.key] * item.amount
 					};
 				});
 				_self.elementData.value_left = 0;
 				_self.elementData = _self.buildElemetBarData(_self.elementData);
-				_self.showPie('canvasPie', this.chartData);
-				// this.showChart('stepChart',this.testData);
+				this.buildEchartsData(this.chartData.series);
 				return this.dietRecord;
 			}
 		},
-		showChart(canvasId, chartData) {
-			if (stepChart) {
-				stepChart.updateData({
-					series: chartData.series,
-					categories: chartData.categories,
-					animation: true
-				});
-			} else {
-				stepChart = new uCharts({
-					$this: _self,
-					canvasId: canvasId,
-					type: 'line',
-					fontSize: 11,
-					legend: { show: true },
-					dataLabel: true,
-					dataPointShape: true,
-					background: '#FFFFFF',
-					pixelRatio: 1,
-					categories: chartData.categories,
-					series: chartData.series,
-					animation: false,
-					enableScroll: true, //开启图表拖拽功能
-					xAxis: {
-						type: 'grid',
-						disableGrid: false,
-						gridColor: '#CCCCCC',
-						gridType: 'dash',
-						dashLength: 8,
-						itemCount: 8, //x轴单屏显示数据的数量，默认为5个
-						scrollShow: true, //新增是否显示滚动条，默认false
-						scrollAlign: 'right' //滚动条初始位置
-					},
-					yAxis: {
-						disableGrid: false,
-						gridType: 'dash',
-						gridColor: '#CCCCCC',
-						dashLength: 8,
-						splitNumber: 5,
-						min: 10,
-						max: 180,
-						format: val => {
-							return val.toFixed(0) + '步';
-						}
-					},
-					width: this.cWidth,
-					height: this.cHeight,
-					extra: {
-						line: {
-							type: 'curve' //曲线
-						}
-					}
-				});
-			}
-		},
-		showPie(canvasId, chartData) {
-			canvaPie = new uCharts({
-				$this: _self,
-				canvasId: canvasId,
-				type: 'pie',
-				fontSize: 11,
-				legend: {
-					show: true,
-					position: 'bottom',
-					float: 'center',
-					itemGap: 10,
-					padding: 5,
-					lineHeight: 26,
-					margin: 5,
-					borderWidth: 1
-				},
-				background: '#FFFFFF',
-				pixelRatio: _self.pixelRatio,
-				series: chartData.series,
-				animation: true,
-				width: _self.cWidth * _self.pixelRatio,
-				height: _self.cHeight * _self.pixelRatio,
-				dataLabel: {
-					show: true,
-					format: function(item) {
-						return item.data;
+		buildEchartsData(data) {
+			// 构建echarts需要的数据格式
+			let option = {
+				color: [
+					'#0090ff',
+					'#06d3c4',
+					'#ffbc32',
+					'#2ccc44',
+					'#ff3976',
+					'#6173d6',
+					'#914ce5',
+					'#42b1cc',
+					'#ff55ac',
+					'#0090ff',
+					'#06d3c4',
+					'#ffbc32',
+					'#2ccc44',
+					'#ff3976',
+					'#6173d6',
+					'#914ce5',
+					'#42b1cc',
+					'#ff55ac'
+				],
+				label: {
+					formatter: function(param) {
+						return param.data.name + ':' + param.percent + '%';
 					}
 				},
-				extra: {
-					pie: {
-						labelWidth: 15
+				tooltip: {
+					trigger: 'item',
+					formatter: param => {
+						return `${param.data.name}:${Number(param.data.value.toFixed(1))} ${this.elementData.units}(${Number(param.percent.toFixed(1))}%)`;
+					}
+					// formatter: '{a}: {b} : {c} ({d}%)'
+				},
+				series: {
+					name: '食物占比',
+					type: 'pie',
+					radius: '50%',
+					center: ['50%', '50%'],
+					data: data,
+					labelLine: {
+						smooth: true
 					}
 				}
-			});
-			this.piearr = canvaPie.opts.series;
-		},
-		touchPie(e) {
-			canvaPie.showToolTip(e, {
-				format: function(item) {
-					let amount = 0;
-					let unit = '';
-					let unit_weight_g = 0;
-					_self.dietRecord.forEach(diet => {
-						if (item.name === diet.name) {
-							amount += diet.amount;
-							unit = diet.unit;
-							unit_weight_g = diet.unit_weight_g;
-						}
-					});
-					return (
-						amount * unit_weight_g + unit + item.name + '提供:' + Number(amount * item.data).toFixed(1) + _self.elementData.units.split('/')[0] + ' ' + _self.elementData.label
-					);
-				}
-			});
-			canvaPie.touchLegend(e);
+			};
+			let result = {
+				option: option
+			};
+			this.ec = result;
+			return result;
 		},
 		// ListTouch触摸开始
 		ListTouchStart(e) {
@@ -671,20 +522,18 @@ export default {
 	},
 	onLoad(e) {
 		_self = this;
-		this.cWidth = uni.upx2px(710);
-		this.cHeight = uni.upx2px(500);
 		if (e.data) {
 			try {
-				this.elementData = JSON.parse(e.data);
+				let data = JSON.parse(e.data);
+				if (data.units.indexOf('/d') !== -1) {
+					data.units = data.units.slice(0, data.units.indexOf('/d'));
+				}
+				this.elementData = data;
 				_self.elementData.value_left = 0;
 				setTimeout(() => {
 					_self.elementData.value_left = JSON.parse(e.data).value_left;
 				}, 1000);
 				this.copyElementData = JSON.parse(e.data);
-
-				if (this.elementData.value < this.elementData.EAR) {
-					this.showAddDiet = true;
-				}
 			} catch (e) {
 				//TODO handle the exception
 			}
@@ -958,7 +807,6 @@ export default {
 	.ele-item-num {
 		text-align: center;
 		background: #39b54a;
-		// background-image: linear-gradient(45deg, #39b54a, #8dc63f);
 		padding: 4px 5px;
 		border-radius: 4px;
 		font-size: 12px;
@@ -969,7 +817,6 @@ export default {
 		}
 	}
 	.max {
-		// background-image: linear-gradient(45deg, #f43f3b, #ec008c);
 		background-color: #e54d42;
 	}
 }
@@ -981,6 +828,11 @@ export default {
 			transform: scale(1.2);
 			background-color: #999;
 		}
+	}
+	.diet-name {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	&.column-name {
 		color: #9c9c9c;
@@ -1060,7 +912,7 @@ export default {
 }
 .uni-ec-canvas {
 	width: 100%;
-	height: 350rpx;
+	height: 100%;
 	display: block;
 }
 </style>

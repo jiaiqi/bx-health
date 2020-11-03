@@ -93,14 +93,21 @@
 			<view class="main-box-title">基本信息</view>
 			<view class="menu-box">
 				<view class="box-item filled" @click="skip('basic')">
-					<view class="label">基本数据</view>
+					<view class="label title">基本数据</view>
 					<view class="status">
 						点击查看
 						<u-icon name="eye-fill"></u-icon>
 					</view>
 				</view>
-				<view class="box-item" :class="{ filled: quInfo.disease && quInfo.disease.hasFill === true && quInfo.disease.state === '完成','bg-green':quInfo.disease&&quInfo.disease.data&&quInfo.disease.data.score>=20 }" @click="toQuestionnaire('disease')">
-					<view class="label">疾病史</view>
+				<view
+					class="box-item"
+					:class="{
+						filled: quInfo.disease && quInfo.disease.hasFill === true && quInfo.disease.state === '完成',
+						'bg-green': quInfo.disease && quInfo.disease.data && quInfo.disease.data.score >= 20
+					}"
+					@click="toQuestionnaire('disease')"
+				>
+					<view class="label title">疾病史</view>
 					<view class="status" v-if="!quInfo.disease || !quInfo.disease.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
@@ -108,11 +115,19 @@
 					<view class="status" v-if="quInfo.disease && quInfo.disease.hasFill">
 						<!-- {{ quInfo.disease.state === '完成' ? '点击查看' : quInfo.disease.state }} -->
 						<!-- <u-icon name="eye-fill"></u-icon> -->
-						<u-rate :count="3" size="24"  active-icon="heart-fill" inactive-icon="heart" inactive-color="#fff" active-color="#fff" :current="getQuestionRate(quInfo.disease)"></u-rate>
+						<u-rate
+							:count="3"
+							size="24"
+							active-icon="heart-fill"
+							inactive-icon="heart"
+							inactive-color="#fff"
+							active-color="#fff"
+							:current="getQuestionRate(quInfo.disease)"
+						></u-rate>
 					</view>
 				</view>
 				<view class="box-item" :class="{ filled: quInfo.genetic && quInfo.genetic.hasFill === true && quInfo.genetic.state === '完成' }" @click="toQuestionnaire('genetic')">
-					<view class="label">遗传史</view>
+					<view class="label title">遗传史</view>
 					<view class="status" v-if="!quInfo.genetic || !quInfo.genetic.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
@@ -123,7 +138,7 @@
 					</view>
 				</view>
 				<view class="box-item" :class="{ filled: quInfo.diet && quInfo.diet.hasFill === true && quInfo.diet.state === '完成' }" @click="toQuestionnaire('diet')">
-					<view class="label">饮食营养</view>
+					<view class="label title">饮食营养</view>
 					<view class="status" v-if="!quInfo.diet || !quInfo.diet.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
@@ -134,7 +149,7 @@
 					</view>
 				</view>
 				<view class="box-item" :class="{ filled: quInfo.sport && quInfo.sport.hasFill === true && quInfo.sport.state === '完成' }" @click="toQuestionnaire('sport')">
-					<view class="label">运动</view>
+					<view class="label title">运动</view>
 					<view class="status" v-if="!quInfo.sport || !quInfo.sport.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
@@ -145,7 +160,7 @@
 					</view>
 				</view>
 				<view class="box-item" :class="{ filled: quInfo.sleep && quInfo.sleep.hasFill === true && quInfo.sleep.state === '完成' }" @click="toQuestionnaire('sleep')">
-					<view class="label">睡眠</view>
+					<view class="label title">睡眠</view>
 					<view class="status" v-if="!quInfo.sleep || !quInfo.sleep.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
@@ -156,7 +171,7 @@
 					</view>
 				</view>
 				<view class="box-item" :class="{ filled: quInfo.mental && quInfo.mental.hasFill === true && quInfo.mental.state === '完成' }" @click="toQuestionnaire('mental')">
-					<view class="label">心理</view>
+					<view class="label title">心理</view>
 					<view class="status" v-if="!quInfo.mental || !quInfo.mental.hasFill">
 						未填写
 						<u-icon name="edit-pen-fill"></u-icon>
@@ -172,32 +187,63 @@
 			<view class="main-box-title">慢性疾病</view>
 			<view class="menu-box">
 				<view class="box-item menu" :class="[bmiStatus.key]">
-					<view class="status" :class="[bmiStatus.key]">
-						<text class="label">BMI:</text>
-						{{ BMI }}
-					</view>
-					<view class="status" :class="[bmiStatus.key]">
-						<text class="icon"></text>
-						[{{ bmiStatus.label }}]
+					<view class="status" :class="[bmiStatus.key]"><text class="label">BMI</text></view>
+					<view class="value">{{ BMI }}</view>
+					<view class="images">
+						<text class="text">{{ bmiStatus.label }}</text>
+						<image class="u-image" src="/static/icon/weight.png" mode=""></image>
 					</view>
 				</view>
-				<view class="box-item menu">高血压</view>
-				<view class="box-item menu">糖尿病</view>
-				<view class="box-item menu">失眠</view>
-				<view class="box-item menu">颈椎病</view>
+				<view class="box-item menu">
+					<view class="status"><text class="label">高血压</text></view>
+					<view class="images">
+						<text class="text"></text>
+						<image class="u-image" src="/static/icon/bp.png" mode=""></image>
+					</view>
+				</view>
+				<view class="box-item menu">
+					<view class="status"><text class="label">糖尿病</text></view>
+					<view class="images">
+						<text class="text"></text>
+						<image class="u-image" src="/static/icon/diabetes.png" mode=""></image>
+					</view>
+				</view>
+				<view class="box-item menu">
+					<view class="status"><text class="label">失眠</text></view>
+					<view class="images">
+						<text class="text"></text>
+						<image class="u-image" src="/static/icon/sleep.png" mode=""></image>
+					</view>
+				</view>
+				<view class="box-item menu">
+					<view class="status"><text class="label">颈椎病</text></view>
+					<view class="images">
+						<text class="text"></text>
+						<image class="u-image" src="/static/icon/cervical.png" mode=""></image>
+					</view>
+				</view>
 			</view>
 		</view>
 	</view>
 </template>
 <script>
 var self;
-// import uCharts from '@/components/u-charts/u-charts.js';
+// #ifdef MP-WEIXIN
 import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+// #endif
+// #ifdef H5
+import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+// #endif
 var _self;
 var dayjs = require('dayjs');
 export default {
 	components: {
-		uniEcCanvas
+		// #ifdef MP-WEIXIN
+		uniEcCanvas,
+		// #endif
+		// #ifdef H5
+		uniEcharts
+		// #endif
 	},
 	data() {
 		return {
@@ -359,19 +405,19 @@ export default {
 		}
 	},
 	methods: {
-		getQuestionRate(e){
-			let score = 0
-			if(e.data&&e.data.score){
-				score = e.data.score
+		getQuestionRate(e) {
+			let score = 0;
+			if (e.data && e.data.score) {
+				score = e.data.score;
 			}
-			if(score<20){
-				return 0
-			}else if(score>=20&&score<40){
-				return 1
-			}else if(score>=40&&score<60){
-				return 2
-			}else if(score>=60){
-				return 3
+			if (score < 20) {
+				return 0;
+			} else if (score >= 20 && score < 40) {
+				return 1;
+			} else if (score >= 40 && score < 60) {
+				return 2;
+			} else if (score >= 60) {
+				return 3;
 			}
 		},
 		async checkQuestionnaireRecord() {
@@ -410,12 +456,6 @@ export default {
 			let no = Object.keys(quInfo).map(key => quInfo[key].no);
 			let record = await this.getQuestionnaireRecord(no.toString());
 			Object.keys(quInfo).forEach(key => {
-				// record.forEach(no => {
-				// 	if (quInfo[key].no === no) {
-				// 		debugger;
-				// 		quInfo[key]['hasFill'] = true;
-				// 	}
-				// });
 				record.forEach(res => {
 					if (quInfo[key].no === res.activity_no) {
 						quInfo[key]['hasFill'] = true;
@@ -937,7 +977,7 @@ export default {
 							type: 'inside',
 							start: 80,
 							end: 100
-						},
+						}
 						// {
 						// 	start: 70,
 						// 	end: 100,
@@ -1372,7 +1412,8 @@ export default {
 	.button-box {
 		display: flex;
 		justify-content: center;
-		height: 80rpx;
+		align-items: center;
+		height: 100rpx;
 		.u-subsection {
 			width: 100%;
 		}
@@ -1395,58 +1436,93 @@ export default {
 		.box-item {
 			width: calc(33.33% - 20rpx);
 			margin: 10rpx;
-			min-height: 200rpx;
 			letter-spacing: 2rpx;
+			padding: 20rpx;
 			font-size: 32rpx;
 			border-radius: 20rpx;
 			color: #fff;
+			text-align: left;
 			transition: all 0.5s;
 			background-color: rgba($color: #909399, $alpha: 0.5);
 			box-shadow: 4px 3px 4px rgba($color: #909399, $alpha: 0.5);
 			display: flex;
 			flex-direction: column;
-			justify-content: center;
+			justify-content: space-between;
+			.value {
+				font-size: 40rpx;
+				font-weight: bold;
+			}
 			&:active {
-				// opacity: 1;
 				transform: scale(1.1);
 			}
-			// background-color: rgba($color: #e74c3c, $alpha: 0.5);
-			&.active {
-				// opacity: 0.8;
-			}
 			&.menu {
-				background-color: rgba($color: #f1f1f1, $alpha: 1);
-				box-shadow: 4px 3px 4px rgba($color: #f1f1f1, $alpha: 0.5);
+				min-height: 200rpx;
+				background-color: rgba($color: #fff, $alpha: 1);
+				box-shadow: 4px 3px 4px rgba($color: #fff, $alpha: 0.5);
 				color: #333;
 				padding: 20rpx;
+				border: 1px solid #999;
 			}
 			&.thin {
-				background-color: #3498db;
-				box-shadow: 4px 3px 4px rgba($color: #3498db, $alpha: 0.5);
+				// background-color: #3498db;
+				border: 1px solid #3498db;
+				// box-shadow: 4px 3px 4px rgba($color: #3498db, $alpha: 0.5);
+				.value,
+				.text {
+					color: #3498db;
+				}
 			}
 			&.normal {
-				background-color: #1abc9c;
-				box-shadow: 4px 3px 4px rgba($color: #1abc9c, $alpha: 0.5);
+				// background-color: #1abc9c;
+				border: 1px solid #1abc9c;
+				.value,
+				.text {
+					color: #1abc9c;
+				}
+				// box-shadow: 4px 3px 4px rgba($color: #1abc9c, $alpha: 0.5);
 			}
 			&.overweight {
-				background-color: #f1c40f;
-				box-shadow: 4px 3px 4px rgba($color: #f1c40f, $alpha: 0.5);
+				// background-color: #f1c40f;
+				border: 1px solid #f1c40f;
+				.value,
+				.text {
+					color: #f1c40f;
+				}
+				// box-shadow: 4px 3px 4px rgba($color: #f1c40f, $alpha: 0.5);
 			}
 			&.fat {
-				background-color: #e74c3c;
-				box-shadow: 4px 3px 4px rgba($color: #e74c3c, $alpha: 0.5);
+				border: 1px solid #e74c3c;
+				.value,
+				.text {
+					color: #e74c3c;
+				}
+				// background-color: #e74c3c;
+				// box-shadow: 4px 3px 4px rgba($color: #e74c3c, $alpha: 0.5);
 			}
 			.label {
 				width: 100%;
 				padding: 10rpx 0;
+				font-size: 30rpx;
+				&.title{
+					font-size: 34rpx;
+				}
 			}
-
 			.u-icon {
 				padding: 2px;
 			}
+			.images {
+				width: 100%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				.u-image {
+					width: 60rpx;
+					height: 60rpx;
+				}
+			}
 			.status {
-				color: #fff;
 				&.thin {
+					color: #3498db;
 					.icon {
 						width: 50rpx;
 						height: 50rpx;
@@ -1454,41 +1530,26 @@ export default {
 						background-color: #3498db;
 					}
 				}
+				&.normal {
+					// color:  #1abc9c;
+				}
+				&.overweight {
+					// color: #f1c40f;
+				}
+				&.fat {
+					// color: #e74c3c;
+				}
 			}
 			.status {
 				font-size: 24rpx;
 			}
-			// &:nth-child(1) {
-			// 	background-color: #3498db;
-			// }
-			// &:nth-child(2) {
-			// 	background-color: #e74c3c;
-			// }
-			// &:nth-child(3) {
-			// 	background-color: #8e44ad;
-			// }
-			// &:nth-child(4) {
-			// 	background-color: #e67e22;
-			// }
-			// &:nth-child(5) {
-			// 	background-color: #3498db;
-			// }
-			// &:nth-child(6) {
-			// 	background-color: #e74c3c;
-			// }
-			// &:nth-child(7) {
-			// 	background-color: #8e44ad;
-			// }
-			// &:nth-child(8) {
-			// 	background-color: #e67e22;
-			// }
 			&.filled {
 				opacity: 1;
 				color: #fff;
 				background-color: rgba($color: #2979ff, $alpha: 0.8);
 				box-shadow: 4px 3px 4px rgba($color: #2979ff, $alpha: 0.5);
 			}
-			&.bg-green{
+			&.bg-green {
 				background-color: rgba(11, 201, 157, 0.8);
 				box-shadow: 4px 3px 4px rgba(11, 201, 157, 0.8);
 			}
@@ -1500,8 +1561,6 @@ export default {
 		justify-content: space-around;
 		align-items: center;
 		padding: 0rpx 10rpx;
-		// background-color: #f1f1f1;
-		// box-shadow: 4px 3px 4px rgba($color: #f1f1f1, $alpha: 0.5);
 	}
 	.energy-item {
 		color: #333;
@@ -1509,7 +1568,6 @@ export default {
 		min-height: 150upx;
 		display: flex;
 		flex-direction: column;
-		// justify-content: space-around;
 		justify-content: center;
 		flex: 1;
 		margin-bottom: 10rpx;
@@ -1540,9 +1598,6 @@ export default {
 			align-items: center;
 			background-color: rgba($color: #fff, $alpha: 0.8);
 			box-shadow: 0px 1px 5px 0px rgba(153, 153, 153, 0.5);
-			// box-shadow: -3px 3px 4px rgba(0, 0, 0, 0.12), 4px 0 6px rgba(0, 0, 0, 0.04);
-			// background-color: rgba($color: #e79715, $alpha: 0.8);
-			// box-shadow: 4px 3px 4px rgba($color: #e79715, $alpha: 0.5);
 		}
 		.text {
 			font-size: 20upx;

@@ -32,6 +32,7 @@ fly.interceptors.request.use((request) => {
 		-1) {
 		uni.showLoading({
 			// mask: true
+			title:'加载中...'
 		})
 	}
 	// 如果是浏览器运行的记录 请求的页面path和参数
