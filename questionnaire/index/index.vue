@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import bxform from '@/components/bx-form/bx-form.vue';
+import bxform from '@/questionnaire/components/bx-form/bx-form.vue';
 
 export default {
 	name: 'questionnaire', //问卷答题页面

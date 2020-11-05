@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import bxform from '@/components/bx-form/bx-form.vue';
-import bxButtons from '@/components/bx-buttons/bx-buttons.vue';
+import bxform from '@/publicPages/components/bx-form/bx-form.vue';
+import bxButtons from '@/publicPages/components/bx-buttons/bx-buttons.vue';
 export default {
 	components: { bxform, bxButtons },
 	props: {},

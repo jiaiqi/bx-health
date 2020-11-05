@@ -51,7 +51,6 @@
 </template>
 
 <script>
-	// import uCharts from '@/components/u-charts/u-charts.js';
 	var canvaRing=null;
 	export default{
 		data(){

@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import hrPullLoad from '@/components/hr-pull-load/hr-pull-load.vue';
+import hrPullLoad from '@/otherPages/components/hr-pull-load/hr-pull-load.vue';
 export default {
 	data() {
 		return {

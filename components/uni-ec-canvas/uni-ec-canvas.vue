@@ -45,9 +45,7 @@ export default {
 		'ec.option': {
 			deep: true,
 			handler(val, oldVal) {
-				if (val) {
-					this.setOption(val);
-				}
+				this.setOption(val);
 			}
 		}
 	},
@@ -72,6 +70,7 @@ export default {
 			while (v2.length < len) {
 				v2.push('0');
 			}
+
 			for (let i = 0; i < len; i++) {
 				const num1 = parseInt(v1[i]);
 				const num2 = parseInt(v2[i]);
@@ -283,10 +282,6 @@ export default {
 				width: width,
 				height: height,
 				devicePixelRatio: canvasDpr
-			});
-			this.$curChart.on('click', e => {
-				console.log(e); // 这里就可以收到echart发来的事件了
-				this.$emit('click-chart', e);
 			});
 			canvas.setChart(this.$curChart);
 			this.$curChart.setOption(this.ec.option);

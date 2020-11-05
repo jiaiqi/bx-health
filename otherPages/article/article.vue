@@ -1,7 +1,7 @@
 <template>
 	<view class="article-wrap">
 		<view class="header">
-		<!-- 	<u-search placeholder="输入关键词进行搜索" :animation="true" v-model="keyword" shape="square" @custom="searchWithKeywords"></u-search> -->
+			<!-- 	<u-search placeholder="输入关键词进行搜索" :animation="true" v-model="keyword" shape="square" @custom="searchWithKeywords"></u-search> -->
 			<view class="title" v-if="tabList.length > 1">
 				<u-tabs name="title" :list="tabList" :is-scroll="true" :current="showType" @change="changeShowType"></u-tabs>
 				<!-- 	<view class="tab-item" @tap="changeShowType(index)" :class="showType == index ? 'activeContent' : ''" v-for="(item, index) in tabList" :key="item.title">
@@ -73,8 +73,7 @@ export default {
 			],
 			keyword: '', // 搜索关键词
 			showType: 0,
-			tabList: [
-			]
+			tabList: []
 		};
 	},
 	computed: {
@@ -85,7 +84,7 @@ export default {
 	methods: {
 		clickListItem(e) {
 			console.log(e);
-			// 
+			//
 			uni.navigateTo({
 				url: '/pages/articleDetail/articleDetail?content_no=' + e.content_no
 			});
@@ -128,7 +127,12 @@ export default {
 			if (e === 0) {
 			} else if (e === 1) {
 				uni.redirectTo({
-					url: '/pages/home/home'
+					url: '/pages/home/home',
+					fail() {
+						uni.navigateTo({
+							url: '/archivesPages/old-home/old-home'
+						});
+					}
 				});
 			} else if (e === 2) {
 			} else if (e === 3) {
@@ -193,7 +197,7 @@ export default {
 			width: 100%;
 			display: flex;
 			overflow-y: scroll;
-			.u-tabs{
+			.u-tabs {
 				width: calc(100vw - 40rpx);
 				margin: 0 auto;
 			}

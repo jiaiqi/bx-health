@@ -106,7 +106,7 @@
 </template>
 
 <script>
-	import uniRate from '@/components/uni-rate/uni-rate.vue'
+	import uniRate from '@/otherPages/components/uni-rate/uni-rate.vue'
 	import sPullScroll from '@/components/s-pull-scroll';
 	export default {
 		name:'shopHome',

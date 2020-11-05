@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import bxList from '@/components/bx-list/bx-list.vue';
+import bxList from '@/publicPages/components/bx-list/bx-list.vue';
 export default {
 	components: { bxList },
 	data() {

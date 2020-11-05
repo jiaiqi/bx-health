@@ -177,7 +177,7 @@
 </template>
 
 <script>
-	import jumpBall from '@/components/hx-jump-ball/hx-jump-ball.vue';
+	import jumpBall from '@/otherPages/components/hx-jump-ball/hx-jump-ball.vue';
 	// #ifdef MP-WEIXIN
 	import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
 	// #endif

@@ -24,7 +24,13 @@
 						<u-icon name="arrow-down-fill" size="28" :class="{ active: showUserList }"></u-icon>
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
-						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
+						<view
+							class="menu-item"
+							:class="{ 'current-user': userInfo.name === item.name }"
+							@click.stop="clickUserMenu(item)"
+							v-for="(item, index) in userMenuList"
+							:key="index"
+						>
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -73,7 +79,13 @@
 							style="display: flex; width: 90px; justify-content: space-between"
 						>
 							<text style="flex: 1">
-								{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
+								{{
+									energyChange === 0
+										? '0.0'
+										: parseFloat(energyChange / 7.7) > 0
+										? `+${parseFloat(energyChange / 7.7).toFixed(1)}`
+										: parseFloat(energyChange / 7.7).toFixed(1)
+								}}
 							</text>
 							<text class="units">g脂肪</text>
 						</view>
@@ -96,10 +108,10 @@
 				</view>
 				<view class="chart-box">
 					<!-- #ifdef MP-WEIXIN -->
-					<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas" @click-chart="clickCharts" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
+					<uni-ec-canvas class="uni-ec-canvas" @click-chart="clickCharts" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
 					<!-- #endif -->
 					<!-- #ifdef H5 -->
-					<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></uni-echarts>
+					<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></uni-echarts>
 					<!-- #endif -->
 				</view>
 				<view class="indicator">
@@ -147,7 +159,13 @@
 													}"
 												>
 													{{
-														alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1)
+														alone.value === 0
+															? alone.shortName === 'E'
+																? 0 + 'mg/d'
+																: '0'
+															: alone.shortName === 'E'
+															? alone.value.toFixed(1) + 'mg/d'
+															: alone.value.toFixed(1)
 													}}
 												</view>
 											</view>
@@ -390,33 +408,6 @@
 				<view class="unit-bar"></view>
 			</view>
 		</view>
-		<uni-popup ref="showtip" type="center" :mask-click="false" style="z-index: 1025">
-			<view class="uni-tip">
-				<text class="uni-tip-title">修改数据</text>
-				<view class="number-box">
-					<text @click="changeCurrentVal('minus')">-</text>
-					<input @change="changeValue" v-model="currentVal" type="digit" />
-					<text @click="changeCurrentVal('plus')">+</text>
-				</view>
-				<view class="uni-tip-group-button">
-					<text class="uni-tip-button" @click="cancel('cancel')">取消</text>
-					<text class="uni-tip-button" @click="cancel('confirm')">确定</text>
-				</view>
-			</view>
-		</uni-popup>
-		<mx-date-picker
-			style="z-index: 1290"
-			:format="dateFormat"
-			:show="showTimePicker"
-			:type="timeType"
-			:value="showTimePicker ? currentVal : ''"
-			:show-tips="true"
-			:begin-text="'入住'"
-			:end-text="'离店'"
-			:show-seconds="true"
-			@confirm="onSelected"
-			@cancel="onSelected"
-		/>
 		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
 		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
 			<view class="popup-box">
@@ -464,9 +455,7 @@
 </template>
 
 <script>
-import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
-import bxDateStamp from '@/components/bx-date-stamp/bx-date-stamp.vue';
-import xflSelect from '@/components/xfl-select/xfl-select.vue';
+import bxDateStamp from '@/otherPages/components/bx-date-stamp/bx-date-stamp.vue';
 // #ifdef MP-WEIXIN
 import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #endif
@@ -476,8 +465,6 @@ import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
 let self;
 export default {
 	components: {
-		MxDatePicker,
-		xflSelect,
 		bxDateStamp,
 		// #ifdef MP-WEIXIN
 		uniEcCanvas,
@@ -903,7 +890,7 @@ export default {
 							? `${parseFloat(this.energyChange / 7.7).toFixed(1)}`
 							: parseFloat(this.energyChange / 7.7).toFixed(1);
 					dietIn = dietIn * 30;
-					if (dietIn>0) {
+					if (dietIn > 0) {
 						if (dietIn / 1000 >= 1) {
 							dietIn = Number((dietIn / 1000).toFixed(1)) + 'kg';
 						} else {
@@ -1005,15 +992,15 @@ export default {
 							num = parseFloat(num.toFixed(1));
 							return num;
 						});
-						debugger
+						debugger;
 						break;
 					case '当前食物':
 						obj.data = eleArr.map(item => {
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							debugger
-							return currentDiet[item.key] ? ratio * currentDiet[item.key]*100/ Number(item.EAR) : 0;
+							debugger;
+							return currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
 						});
-						debugger
+						debugger;
 						break;
 					case 'NRV%达标线':
 						obj.type = 'line';
@@ -1032,8 +1019,8 @@ export default {
 					text: ''
 				},
 				tooltip: {
-					show:false,
-					trigger: 'axis',
+					show: false,
+					trigger: 'axis'
 					// axisPointer: {
 					// 	type: 'cross',
 					// 	label: {
@@ -1994,7 +1981,7 @@ export default {
 						}
 					}
 				});
-				console.log("----------age-->>>--",result)
+				console.log('----------age-->>>--', result);
 				result.forEach(item => {
 					self.energyListWrap.forEach(energy => {
 						energy.matterList.forEach(mat => {
@@ -2009,7 +1996,11 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni
+										? item.val_rni * self.userInfo.weight
+										: item.val_ear
+										? item.val_ear * self.userInfo.weight
+										: mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
 								}
@@ -2360,8 +2351,8 @@ export default {
 				url: '/pages/home/home',
 				fail() {
 					uni.navigateTo({
-						url:'/archivesPages/old-home/old-home'
-					})
+						url: '/archivesPages/old-home/old-home'
+					});
 				}
 			});
 		},

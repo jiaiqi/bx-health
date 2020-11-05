@@ -1,65 +1,7 @@
 export default {
   install (Vue, options) {
     Vue.prototype.pageTitle = '加载中…'   // 可以自定义变量
-    Vue.prototype.selectRequestObjs = function () { // 给自定义方法起个名
-      let selectRequestObj = {}
-      let condition = {}
-      let order = {}
-      selectRequestObj['serviceName'] = ''
-      selectRequestObj['colNames'] = ['*']
-      selectRequestObj['condition'] = []
-      condition['colName'] = ''
-      condition['ruleType'] = ''
-      condition['value'] = ''
-      selectRequestObj.condition.push(condition)
-      selectRequestObj['order'] = []
-      order['colName'] = ''
-      order['orderType'] = ''
-      selectRequestObj.order.push(order)
-      return selectRequestObj
-    }
-    
-    
-    Vue.prototype.getKeyOrValue = function (obj, ke, val, name, icon) { // 给自定义方法起个名
-      let Obj = obj
-      let item = Obj.map(function (item) {
-        let a = {}
-        a['key'] = item[ke]
-        a['value'] = item[val]
-        a['name'] = item[name]
-        // console.log('====a:' + a)
-        if (item[icon] === null) {
-          a['icon'] = '../../assets/img/icons/init/menu-icon.png'
-        } else {
-          a['icon'] = Vue.prototype.$api.downloadImg + item[icon]
-        }
-        return a
-      })
-      return item
-    }
-    
-    Vue.prototype.menuSpliceArr = function (arr, num) { // 根据组件定义菜单分页封装
-      let len = arr.length
-      let se = 0
-      let newArr = []
-      let c = Math.ceil(len / num)
-      this.spli = function (r, n) {
-        let a = r.slice(n * num, n * num + num)
-        return a
-      }
-      this.newA = function (arr, num) {
-        if (se < c) {
-          let l = this.spli(arr, se)
-          newArr.push(l)
-          se++
-          this.newA(arr, num)
-        } else {
-          return newArr
-        }
-      }
-      this.newA(arr, num)
-      return newArr
-    }
+ 
     Vue.prototype.getQueryString = function (name) {
       var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i')
       var r = window.location.search.substr(1).match(reg)
@@ -102,23 +44,7 @@ export default {
       let footerBtns = btns.filter((item) => item.permission === true && (item.button_type === 'edit' || item.button_type === 'delete' || item.button_type === 'deletedraft' || item.button_type === 'closeproc' || item.button_type === 'deleteproc' || item.button_type === 'startproc' || item.button_type === 'customize'))
       return footerBtns
     }
-	// Vue.prototype.loadingStatus=function(value){
-	// 	switch (value) {
-	// 		case 0:
-	// 			if(this.valno){
-	// 				this.status = 3
-	// 			}else{
-	// 				this.status = 2
-	// 			}
-	// 			break;
-	// 		case 10:
-	// 			this.status = 0
-	// 			break;
-	// 		default:
-	// 			this.status = 2;
-	// 			break;
-	// 	}
-	// }
+	
     Vue.prototype.selectOne = async function (srv, cond) { // 查询
       let self = this
 
@@ -178,39 +104,8 @@ export default {
         return '查询失败'
       }
     }
-    Vue.prototype.getDispExps = function (item, data) {  // 表达式校验
-      let result = true
-      try {
-        let dispExps = item.disp_exps
-        if (dispExps !== undefined && dispExps !== '' && dispExps !== null) {
-          // eslint-disable-next-line
-          result = eval(dispExps)
-        }
-      } catch (err) {
-        console.error('按钮表达式执行错误')
-      }
-      return result
-    }
-    Vue.prototype.selectUserMenu = async function (cond) { // 查询菜单
-      let self = this
 
-      let req = {}
-      req.serviceName = 'srvsys_user_menu_select'
-      req.colNames = ['*']
-      req.condition = []
-      req.condition = cond
-      // req.condition[1] = JSON.parse(JSON.stringify(condObj))
-      req.order = [{}]
-      req.order[0].colName = 'seq'
-      req.order[0].orderType = 'asc'
-      const response = await this.$http.post(self.$api.selectByUser, req)
-      if (response.data.data) {
-        return response.data.data
-      } else {
-        return '查询失败'
-      }
-    }
-   
+  
     Vue.prototype.deleteRow = async function (srv, cond) { // 删除数据
       let self = this
       let reqs = []
@@ -377,81 +272,6 @@ export default {
       // console.log(resData, req)
       return req
     }
-    Vue.prototype.getColValidators = function (cols) { // 根据columns data 返回字段校验信息
-      if (cols) {
-        if (cols.validators !== null && cols.validators_message !== null) {
-          let str = cols.validators
-          let msg = cols.validators_message
-
-          let getStr = function (val, state, end) {
-            if (val.length > state.length + end.length) {
-              let s = val.indexOf(state)
-              if (s === -1) {
-                return ''
-              } else {
-                let nval = val.slice(s + state.length, val.length)
-                let e = nval.indexOf(end)
-                let str = nval.slice(0, e)
-                if (e === -1) {
-                  str = nval.slice(0)
-                }
-                return str
-              }
-            } else {
-              return ''
-            }
-          }
-          let Validators = {}
-          let reg = /required/gi
-          let msgs = getStr(msg, 'ngPattern=', ';')
-          msgs = msgs === '' ? cols.label + '信息有误' : msgs
-          Validators['max'] = getStr(str, 'ngMaxlength=', ';').length > 0 ? parseInt(getStr(str, 'ngMaxlength=', ';')) : null
-          Validators['min'] = getStr(str, 'ngMinlength=', ';').length > 0 ? parseInt(getStr(str, 'ngMinlength=', ';')) : null
-          Validators['reg'] = getStr(str, 'ngPattern=', ';')
-          Validators['col_type'] = cols.bx_col_type
-          Validators['required'] = reg.test(str)
-          Validators['msg'] = msgs
-          Validators['isType'] = function (e) {
-            let reg = new RegExp(getStr(str, 'ngPattern=', ';'))
-            if (reg.test(e)) {
-              let obj = {valid: reg.test(e)}
-              return obj
-            } else {
-              let msgs = getStr(msg, 'ngPattern=', ';')
-              msgs = msgs === '' ? cols.label + '信息有误' : msgs
-              let obj = {valid: reg.test(e), msg: msgs}
-              return obj
-            }
-          }
-          return Validators
-        } else {
-          let Validators = {}
-          // let msgs = getStr(msg, 'ngPattern=', ';')
-          // msgs = msgs === '' ? cols.label + '信息有误' : msgs
-          Validators['max'] = null
-          Validators['min'] = null
-          Validators['reg'] = ''
-          Validators['col_type'] = cols.bx_col_type
-          Validators['required'] = false
-          Validators['msg'] = ''
-          Validators['isType'] = function (e) {
-            let reg = new RegExp()
-            if (reg.test(e)) {
-              let obj = {valid: reg.test(e)}
-              return obj
-            } else {
-              let msgs = ''
-              msgs = ''
-              let obj = {valid: reg.test(e), msg: msgs}
-              return obj
-            }
-          }
-          return Validators
-        }
-      } else {
-        return false
-      }
-    }
     Vue.prototype.getValidators = function (vds, msg) { // 获取校验信息返回组件data
       if (vds !== null && msg !== null) {
         let str = vds
@@ -545,27 +365,6 @@ export default {
         }
       } else {
         return false
-      }
-    }
-
-    /**
-     * find descendant nodes with type and predict
-     * @param type
-     * @param predict
-     * @returns {*}
-     */
-    Vue.prototype.findAnyNodeByTypeAndPredict = function (type, predict) {
-      let nodeType = this.$options.name || this.$options._componentTag
-      if (nodeType && nodeType === type && (!predict || predict(this))) {
-        return this
-      } else {
-        for (let child of this.$children) {
-          let match = child.findAnyNodeByTypeAndPredict(type, predict)
-          if (match) {
-            return match
-          }
-        }
-        return null
       }
     }
   }

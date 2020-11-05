@@ -14,14 +14,6 @@
 			}
 		},
 		{
-			"path": "pages/home/home",
-			"style": {
-				"navigationStyle": "custom",
-				"navigationBarTitleText": "健康档案",
-				"navigationBarBackgroundColor": "#0bc99d"
-			}
-		},
-		{
 			"path": "pages/health-archives/health-archives",
 			"style": {
 				"navigationBarTitleText": "健康档案",
@@ -62,6 +54,7 @@
 			"pages": [{
 				"path": "old-home/old-home",
 				"style": {
+					"navigationStyle": "custom",
 					"navigationBarTitleText": "健康档案",
 					"enablePullDownRefresh": false
 				}

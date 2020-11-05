@@ -28,23 +28,21 @@
 		<view class="filtrate-wrap">
 			<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 				<text>已选择：</text>
-				<view v-for="(item,index) in childChooseArr" class="filtrate-choose-item">
-					<u-tag :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"/>
+				<view v-for="(item, index) in childChooseArr" class="filtrate-choose-item">
+					<u-tag :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light" />
 				</view>
 			</view>
 			<view class="filtrate-item-wrap">
-				<view v-for="(item,index) in menuAgList" :key="index" class="filtrate-item">
-					<view class="filtrate-item-left">
-						{{item.classify_name}}
-					</view>
-					<view @click="chooseMenu(item,cate)" v-for="(cate,i) in item.children" :class="cate.choose?'cate-active':''" class="filtrate-item-right">
-						<text>{{cate.title}}</text>
+				<view v-for="(item, index) in menuAgList" :key="index" class="filtrate-item">
+					<view class="filtrate-item-left">{{ item.classify_name }}</view>
+					<view @click="chooseMenu(item, cate)" v-for="(cate, i) in item.children" :class="cate.choose ? 'cate-active' : ''" class="filtrate-item-right">
+						<text>{{ cate.title }}</text>
 						<!-- arrow-down-fill -->
-						<u-icon size="24" v-show="cate.current_num == 1 && item.type !=='food' && childChooseArrLength == 1" name="arrow-up-fill"></u-icon>
-						<u-icon size="24" v-show="cate.current_num == 2 && item.type !=='food' && childChooseArrLength == 1" name="arrow-down-fill"></u-icon>
-						<text v-show="cate.current_num == 1 && item.type !=='food' && childChooseArrLength >= 2">(高)</text>
-						<text v-show="cate.current_num == 2 && item.type !=='food' && childChooseArrLength >= 2">(中)</text>
-						<text v-show="cate.current_num == 3 && item.type !=='food' && childChooseArrLength >= 2">(低)</text>
+						<u-icon size="24" v-show="cate.current_num == 1 && item.type !== 'food' && childChooseArrLength == 1" name="arrow-up-fill"></u-icon>
+						<u-icon size="24" v-show="cate.current_num == 2 && item.type !== 'food' && childChooseArrLength == 1" name="arrow-down-fill"></u-icon>
+						<text v-show="cate.current_num == 1 && item.type !== 'food' && childChooseArrLength >= 2">(高)</text>
+						<text v-show="cate.current_num == 2 && item.type !== 'food' && childChooseArrLength >= 2">(中)</text>
+						<text v-show="cate.current_num == 3 && item.type !== 'food' && childChooseArrLength >= 2">(低)</text>
 					</view>
 				</view>
 			</view>
@@ -77,13 +75,10 @@
 							<u-image width="100%" height="100%" v-if="!food.imgurl" src="/otherPages/static/img/none.png"></u-image>
 							<u-image width="100%" height="100%" v-else :src="food.imgurl"></u-image>
 						</view>
-						
+
 						<view class="textbox">
-							<view class="title-food">
-								{{ food.name }}
-								
-							</view>
-							<view v-if="lockEledata " class="lock-ele">
+							<view class="title-food">{{ food.name }}</view>
+							<view v-if="lockEledata" class="lock-ele">
 								(
 								<text>{{ lockEledata.label }}:</text>
 								<text class="second-lock">{{ food[lockEledata.key] }}</text>
@@ -107,7 +102,7 @@
 		</sPullScroll>
 		<!-- </scroll-view> -->
 		<view v-if="pageType === 'sport'" class="cu-modal bottom-modal" :class="{ show: showBottomModal }">
-			<view class="cu-dialog" :class="pageType === 'sport'?'sport-dialog':''">
+			<view class="cu-dialog" :class="pageType === 'sport' ? 'sport-dialog' : ''">
 				<view class="cu-bar bg-white">
 					<view class=" text-cyan button" @tap="showBottomModal = false">取消</view>
 					<view class="date-time">
@@ -129,9 +124,9 @@
 									千卡/{{ currFood.unit_amount + currFood.unit }}
 								</text>
 							</view>
-							<view class="calorie">{{ heatNum ? heatNum.toFixed(1) :''}}千卡</view>
+							<view class="calorie">{{ heatNum ? heatNum.toFixed(1) : '' }}千卡</view>
 						</view>
-					</view>					
+					</view>
 					<!-- <view class="calculate">
 						<view class="amount">
 							<view class="input-box">
@@ -153,18 +148,15 @@
 							</view>
 						</view>
 					</view> -->
-					<view class="calculate">						
-							<view  class="weight">
-								<view class="calculate-l">
-									单位：
-								</view>
-								<view @click="changeUnit(u,ids)" v-for="(u,ids) in unitList" :key="ids" :class="currIndex==ids?'active-unit':''" class="unit">
-									{{u.unit_amount?u.unit_amount+u.unit:u.unit}}
-									<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
-								</view>
-								<!-- <view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view> -->
+					<view class="calculate">
+						<view class="weight">
+							<view class="calculate-l">单位：</view>
+							<view @click="changeUnit(u, ids)" v-for="(u, ids) in unitList" :key="ids" :class="currIndex == ids ? 'active-unit' : ''" class="unit">
+								{{ u.unit_amount ? u.unit_amount + u.unit : u.unit }}
+								<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
 							</view>
-						
+							<!-- <view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view> -->
+						</view>
 					</view>
 					<view class="amount">
 						<view class="input-box">
@@ -179,8 +171,6 @@
 							</view>
 						</view>
 					</view>
-					
-					
 				</view>
 			</view>
 		</view>
@@ -199,9 +189,8 @@
 								<view class="title-food_car">{{ food.name }}</view>
 								<view class="food-utis_car">
 									<text class="number_car" style="margin-right: 5px;">{{ food.energy }}千卡</text>
-									<text class="utis_car">/ {{ food.unit_weight_g?food.amount * food.unit_weight_g:food.amount  + food.unit }}</text>
+									<text class="utis_car">/ {{ food.unit_weight_g ? food.amount * food.unit_weight_g : food.amount + food.unit }}</text>
 								</view>
-								
 							</view>
 						</view>
 						<view class="relian">
@@ -215,15 +204,14 @@
 				<view class="button-box"><button class="cu-btn bg-blue" @click="back">完成</button></view>
 			</view>
 		</view>
-		<view class="cu-modal radio-modal" :class="modalName=='RadioModal'?'show':''" @tap="RadiohideModal">
+		<view class="cu-modal radio-modal" :class="modalName == 'RadioModal' ? 'show' : ''" @tap="RadiohideModal">
 			<view class="cu-dialog" @tap.stop="">
 				<radio-group class="block" @change="RadioChange">
 					<view class="cu-list menu text-left">
-						<view class="cu-item" v-for="(item,index) in unitList" :key="index">
+						<view class="cu-item" v-for="(item, index) in unitList" :key="index">
 							<label class="flex justify-between align-center flex-sub">
-								<view class="flex-sub">{{item.unit_amount?item.unit_amount+item.unit:item.unit}}</view>
-								<radio class="round" :class="radioIndex==index?'checked':''" :checked="radioIndex==index?true:false"
-								 :value="index.toString()"></radio>
+								<view class="flex-sub">{{ item.unit_amount ? item.unit_amount + item.unit : item.unit }}</view>
+								<radio class="round" :class="radioIndex == index ? 'checked' : ''" :checked="radioIndex == index ? true : false" :value="index.toString()"></radio>
 							</label>
 						</view>
 					</view>
@@ -247,19 +235,19 @@
 		<jumpBall :backgroundImage="currFood.imgurl" :start.sync="num" :element.sync="element" @msg="jbMsg" />
 		<view class="public-button-box add-button">
 			<view @click="openCar" class="lg text-gray cuIcon-cart add-button-wrap">
-					<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>				
+				<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
-import jumpBall from '@/components/hx-jump-ball/hx-jump-ball.vue';
+import MxDatePicker from '@/otherPages/components/mx-datepicker/mx-datepicker.vue';
+import jumpBall from '@/otherPages/components/hx-jump-ball/hx-jump-ball.vue';
 import sPullScroll from '@/components/s-pull-scroll';
 export default {
 	components: {
-		sPullScroll,			
+		sPullScroll,
 		MxDatePicker,
 		jumpBall
 	},
@@ -286,16 +274,16 @@ export default {
 				return str;
 			}
 		}
-	},	
+	},
 	data() {
 		return {
 			heightStyle: 'calc(100vh-200upx)',
 			chooseFoods: [],
-			value1:0,
+			value1: 0,
 			list: [],
 			current: 0,
-			currIndex:'',
-			topNum:350,
+			currIndex: '',
+			topNum: 350,
 			colData: [],
 			currFoodLabel: {},
 			listTouchStart: 0,
@@ -316,7 +304,7 @@ export default {
 			filterResult: '',
 			choiceNum: '',
 			currTime: '',
-			unitList:[],
+			unitList: [],
 			nowDate: this.formateDate(new Date(), 'date').replace(/\s*/g, ''),
 			nowDateTime: this.formateDate(new Date(), 'dateTime'),
 			selectDate: this.formateDate(new Date(), 'date'),
@@ -370,7 +358,7 @@ export default {
 					type: 'num',
 					value: '9'
 				},
-				
+
 				{
 					type: 'num',
 					value: '0'
@@ -472,7 +460,7 @@ export default {
 					]
 				}
 			],
-			menuAgList:[],
+			menuAgList: [],
 			menuList: [
 				{
 					title: '宏量成分',
@@ -651,9 +639,9 @@ export default {
 			radioLabel: '',
 			TabCur: 0,
 			scrollLeft: 0,
-			pageType:'',
-			childChooseArr:[],
-			childChooseArrLength:0
+			pageType: '',
+			childChooseArr: [],
+			childChooseArrLength: 0
 		};
 	},
 	onShow() {
@@ -663,230 +651,243 @@ export default {
 	},
 	onLoad(option) {
 		let query = JSON.parse(decodeURIComponent(option.condType));
-		if(query.date){
-			this.selectDate = query.date
+		if (query.date) {
+			this.selectDate = query.date;
 		}
 		console.log('optionoptionoption', query);
 		if (query.lackEle) {
 			this.lockEledata = query.lackEle;
 		}
 		let singleType = '';
-		this.pageType = query.type
+		this.pageType = query.type;
 		if (query.type === 'food') {
-					let menuData = [
+			let menuData = [
+				{
+					classify_name: '分类',
+					type: 'food',
+					children: [
 						{
-							classify_name:'分类',
-							type:"food",
-							children:[
-								{
-									title: '食材',
-									value: 'matter',
-									choose:true
-								},
-							{
-								title: '食物',
-								value: 'foods',
-								choose:false
-							}]
+							title: '食材',
+							value: 'matter',
+							choose: true
 						},
 						{
-						classify_name:'宏量成分',
-						type:'capacity',				
-						children:[
-							{
-								title: '默认',
-								value: 'default',
-								choose:true,
-								current_num:0
-							},
-							{
-								title: '热量',
-								value: 'unit_energy',
-								choose:false,
-								num: 646,
-								current_num:0
-							},
-							{
-								title: '蛋白质',
-								value: 'protein',
-								choose:false,
-								num: 51.6,
-								current_num:0
-							},
-							{
-								title: '脂肪',
-								value: 'axunge',
-								choose:false,
-								num: 58.8,
-								current_num:0
-							},
-							{
-								title: '碳水化合物',
-								value: 'carbohydrate',
-								choose:false,
-								num: 85.8,
-								current_num:0
-							}
-						]
-					},{
-						classify_name:'维生素',
-						type:'vitamin',				
-						children:[{
-									title: '不限',
-									value: '不限',
-									choose:true,
-									current_num:0
-								},
-								{
-									title: 'VA',
-									value: 'vitamin_a',
-									choose:false,
-									num: 20,
-									current_num:0
-								},
-								{
-									title: 'VC',
-									value: 'vitamin_c',
-									choose:false,
-									num: 25,
-									current_num:0
-								},{
-									title: 'VD',
-									value: 'vitamin_d',
-									choose:false,
-									num: 141,
-									current_num:0
-								},{
-									title: 'VE',
-									value: 'vitamin_e',
-									choose:false,
-									num: 46.55,
-									current_num:0
-								},{
-									title: 'B1',
-									value: 'vitamin_b1',
-									choose:false,
-									num: 1.01,
-									current_num:0
-								},{
-									title: 'B2',
-									value: 'vitamin_b2',
-									choose:false,
-									num: 1.32,
-									current_num:0
-								},{
-									title: 'B3',
-									value: 'vitamin_b3',
-									choose:false,
-									num: 7.54,
-									current_num:0
-								}
-								]
-						},{
-						classify_name:'矿物质',
-						type:'mineral',				
-						children:[
-								{
-									title: '不限',
-									value: '不限',
-									choose:true,
-									current_num:0
-									
-								},
-								{
-									title: '钙',
-									value: 'element_ca',
-									choose:false,
-									num: 635,
-									current_num:0
-								},
-								{
-									title: '镁',
-									value: 'element_m',
-									choose:false,
-									num: 186,
-									current_num:0
-								},
-								{
-									title: '钾',
-									value: 'element_k',
-									choose:false,
-									num: 877,
-									current_num:0
-								},								
-								{
-									title: '钠',
-									value: 'element_na',
-									choose:false,
-									num: 250,
-									current_num:0
-								},
-								{
-									title: '铁',
-									value: 'element_fe',
-									choose:false,
-									num: 12,
-									current_num:0
-								},
-								{
-									title: '锌',
-									value: 'element_zn',
-									choose:false,
-									num: 10,
-									current_num:0
-								}
-							]
+							title: '食物',
+							value: 'foods',
+							choose: false
 						}
-						]
-						this.menuAgList = menuData
-					if (query.order) {
-						this.order = query.order;
-					}
-					this.getChooseFoodList();
-					this.getElementLabel();
-					this.onRefresh();
-				} else if (query.type === 'sport') {
-					let menuData = [{
-						classify_name:'运动',
-						type:'capacity',
-						children:[{
+					]
+				},
+				{
+					classify_name: '宏量成分',
+					type: 'capacity',
+					children: [
+						{
 							title: '默认',
 							value: 'default',
-							choose:true
-						},{
+							choose: true,
+							current_num: 0
+						},
+						{
+							title: '热量',
+							value: 'unit_energy',
+							choose: false,
+							num: 646,
+							current_num: 0
+						},
+						{
+							title: '蛋白质',
+							value: 'protein',
+							choose: false,
+							num: 51.6,
+							current_num: 0
+						},
+						{
+							title: '脂肪',
+							value: 'axunge',
+							choose: false,
+							num: 58.8,
+							current_num: 0
+						},
+						{
+							title: '碳水化合物',
+							value: 'carbohydrate',
+							choose: false,
+							num: 85.8,
+							current_num: 0
+						}
+					]
+				},
+				{
+					classify_name: '维生素',
+					type: 'vitamin',
+					children: [
+						{
+							title: '不限',
+							value: '不限',
+							choose: true,
+							current_num: 0
+						},
+						{
+							title: 'VA',
+							value: 'vitamin_a',
+							choose: false,
+							num: 20,
+							current_num: 0
+						},
+						{
+							title: 'VC',
+							value: 'vitamin_c',
+							choose: false,
+							num: 25,
+							current_num: 0
+						},
+						{
+							title: 'VD',
+							value: 'vitamin_d',
+							choose: false,
+							num: 141,
+							current_num: 0
+						},
+						{
+							title: 'VE',
+							value: 'vitamin_e',
+							choose: false,
+							num: 46.55,
+							current_num: 0
+						},
+						{
+							title: 'B1',
+							value: 'vitamin_b1',
+							choose: false,
+							num: 1.01,
+							current_num: 0
+						},
+						{
+							title: 'B2',
+							value: 'vitamin_b2',
+							choose: false,
+							num: 1.32,
+							current_num: 0
+						},
+						{
+							title: 'B3',
+							value: 'vitamin_b3',
+							choose: false,
+							num: 7.54,
+							current_num: 0
+						}
+					]
+				},
+				{
+					classify_name: '矿物质',
+					type: 'mineral',
+					children: [
+						{
+							title: '不限',
+							value: '不限',
+							choose: true,
+							current_num: 0
+						},
+						{
+							title: '钙',
+							value: 'element_ca',
+							choose: false,
+							num: 635,
+							current_num: 0
+						},
+						{
+							title: '镁',
+							value: 'element_m',
+							choose: false,
+							num: 186,
+							current_num: 0
+						},
+						{
+							title: '钾',
+							value: 'element_k',
+							choose: false,
+							num: 877,
+							current_num: 0
+						},
+						{
+							title: '钠',
+							value: 'element_na',
+							choose: false,
+							num: 250,
+							current_num: 0
+						},
+						{
+							title: '铁',
+							value: 'element_fe',
+							choose: false,
+							num: 12,
+							current_num: 0
+						},
+						{
+							title: '锌',
+							value: 'element_zn',
+							choose: false,
+							num: 10,
+							current_num: 0
+						}
+					]
+				}
+			];
+			this.menuAgList = menuData;
+			if (query.order) {
+				this.order = query.order;
+			}
+			this.getChooseFoodList();
+			this.getElementLabel();
+			this.onRefresh();
+		} else if (query.type === 'sport') {
+			let menuData = [
+				{
+					classify_name: '运动',
+					type: 'capacity',
+					children: [
+						{
+							title: '默认',
+							value: 'default',
+							choose: true
+						},
+						{
 							title: '卡路里',
 							value: 'unit_energy',
-							choose:false,
+							choose: false,
 							num: 880,
-							current_num:0
-						}]
-					}]
-					let submenu = [
+							current_num: 0
+						}
+					]
+				}
+			];
+			let submenu = [
+				{
+					name: '跑步',
+					value: '跑步',
+					filterList: [
 						{
-							name: '跑步',
-							value: '跑步',
-							filterList: [
+							title: '跑步',
+							type: 'fltd_type',
+
+							items: [
 								{
-									title: '跑步',
-									type: 'fltd_type',
-		
-									items: [
-										{
-											value: '跑步',
-											name: '跑步'
-										}
-									]
+									value: '跑步',
+									name: '跑步'
 								}
 							]
 						}
-					];
-		
-					this.submenu = submenu;
-					this.menuAgList = menuData;
-					this.topNum = 160
-					// submenu.
-					this.getChooseSportList();
+					]
 				}
+			];
+
+			this.submenu = submenu;
+			this.menuAgList = menuData;
+			this.topNum = 160;
+			// submenu.
+			this.getChooseSportList();
+		}
 		this.searchArg = query;
 		// this.getFoodsList();
 		this.onRefresh();
@@ -895,139 +896,135 @@ export default {
 	},
 	watch: {
 		childChooseArr(newValue, oldValue) {
-			console.log("-------------",newValue.length)
-			this.childChooseArrLength = newValue.length
-			if(newValue.length > 0){
-				if(this.pageType == 'food'){
-					this.topNum = 450
-				}else if(this.pageType== 'sport'){
-					this.topNum = 240
+			console.log('-------------', newValue.length);
+			this.childChooseArrLength = newValue.length;
+			if (newValue.length > 0) {
+				if (this.pageType == 'food') {
+					this.topNum = 450;
+				} else if (this.pageType == 'sport') {
+					this.topNum = 240;
 				}
-			}else{
-				if(this.pageType == 'food'){
-					this.topNum = 380
-				}else if(this.pageType== 'sport'){
-					this.topNum = 180
+			} else {
+				if (this.pageType == 'food') {
+					this.topNum = 380;
+				} else if (this.pageType == 'sport') {
+					this.topNum = 180;
 				}
 			}
 		}
 	},
 	methods: {
-		countDietNum(num){
-			let value = Number(this.value1)
-			if(value >= 0){				
-				if(num === '-0.1'){
-					if(value > 0){
-						value = value - 0.1
-					}else{
-						value = 0
+		countDietNum(num) {
+			let value = Number(this.value1);
+			if (value >= 0) {
+				if (num === '-0.1') {
+					if (value > 0) {
+						value = value - 0.1;
+					} else {
+						value = 0;
 					}
-				}else if(num === '-1'){
-					if(value >= 1){
-						value = value - 1
+				} else if (num === '-1') {
+					if (value >= 1) {
+						value = value - 1;
 					}
-				}else if(num === '+1'){
-					value = value + 1
-					
-				}else if(num === '+0.1'){
-					value = value + 0.1
+				} else if (num === '+1') {
+					value = value + 1;
+				} else if (num === '+0.1') {
+					value = value + 0.1;
 				}
-				this.value1 = value.toFixed(1)
-				this.choiceNum = value.toFixed(1)
+				this.value1 = value.toFixed(1);
+				this.choiceNum = value.toFixed(1);
 				if (Number(this.choiceNum) && !this.radioLabel) {
 					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-				}else if(Number(this.choiceNum) && this.radioLabel){
-					if(this.radioLabel.unit_amount){
+				} else if (Number(this.choiceNum) && this.radioLabel) {
+					if (this.radioLabel.unit_amount) {
 						this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-					}else{						
-						this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount/100) * this.currFood.unit_energy)
+					} else {
+						this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
 					}
 				}
-				if(value == 0){
-					this.heatNum = 0
+				if (value == 0) {
+					this.heatNum = 0;
 				}
 			}
 		},
 		/*标签关闭事件**/
-		tagClick(item){
+		tagClick(item) {
 			let cond = {
 				relation: 'AND',
 				data: []
 			};
-			let order = ""
-			let childChooseArr = this.childChooseArr
-			childChooseArr.forEach((ch,i)=>{
-				if(ch.title === item.title){
-					childChooseArr.splice(i,1)
+			let order = '';
+			let childChooseArr = this.childChooseArr;
+			childChooseArr.forEach((ch, i) => {
+				if (ch.title === item.title) {
+					childChooseArr.splice(i, 1);
 				}
-			})
-			let menuData = this.menuAgList
-			let hasChild = false
-			let childCloseData = []
-			menuData.forEach(m=>{
-				m.children.forEach(c=>{
-					if(c.title === item.title){
-						hasChild = true
-						c.choose = false
-						c.current_num = 0
-						
-						if(childChooseArr.length <= 0){
-							m.children[0].choose = true
-						}else{
-							childChooseArr.forEach(b=>{
-								if(b.title === c.title){
-									childCloseData.push(b)
+			});
+			let menuData = this.menuAgList;
+			let hasChild = false;
+			let childCloseData = [];
+			menuData.forEach(m => {
+				m.children.forEach(c => {
+					if (c.title === item.title) {
+						hasChild = true;
+						c.choose = false;
+						c.current_num = 0;
+
+						if (childChooseArr.length <= 0) {
+							m.children[0].choose = true;
+						} else {
+							childChooseArr.forEach(b => {
+								if (b.title === c.title) {
+									childCloseData.push(b);
 								}
-							})
+							});
 						}
-						if(childCloseData.length == 0){
-							m.children[0].choose = true
+						if (childCloseData.length == 0) {
+							m.children[0].choose = true;
 						}
-					}					
-				})
-				
-			})
-			
-			
-			if(childChooseArr.length === 0){
-				this.getFoodsList()
-			}else{
-				childChooseArr.forEach(son=>{
-					
-					let obj = {
-						colName:son.value,
-						ruleType: 'ge',
-						value:son.num
 					}
-					cond.data.push(obj)
-				})
+				});
+			});
+
+			if (childChooseArr.length === 0) {
+				this.getFoodsList();
+			} else {
+				childChooseArr.forEach(son => {
+					let obj = {
+						colName: son.value,
+						ruleType: 'ge',
+						value: son.num
+					};
+					cond.data.push(obj);
+				});
 				if (cond.data.length === 1) {
 					order = {
 						col: cond.data[0].colName,
 						type: 'desc'
 					};
 				}
-				if(cond.data.length === 0){
-					cond = null
+				if (cond.data.length === 0) {
+					cond = null;
 				}
-				
+
 				this.getFoodsList(order, cond, 'filtrate');
 			}
-			console.log("--标签--")
+			console.log('--标签--');
 		},
 		/* 顶部菜单点击**/
-		chooseMenu(parent,child){			
-			this.pageInfo.pageNo = 1
-			if(child.value!='不限' && child.value != 'default'){
-				child.current_num += 1
-				if(child.current_num == 5){
-					child.current_num  = 0
+		chooseMenu(parent, child) {
+			this.pageInfo.pageNo = 1;
+			if (child.value != '不限' && child.value != 'default') {
+				child.current_num += 1;
+				if (child.current_num == 5) {
+					child.current_num = 0;
 				}
-			}else{
-				child.choose = !child.choose
+			} else {
+				child.choose = !child.choose;
 			}
-			let menuData = this.menuAgList
-			let order = ''
+			let menuData = this.menuAgList;
+			let order = '';
 			/* 宏量成分---排序**/
 			// if(parent.type==='capacity'){
 			// 	if(child.value != 'default'){
@@ -1035,15 +1032,15 @@ export default {
 			// 			 order = {
 			// 			 	col: child.value,
 			// 			 	type: 'asc'
-			// 			 };	
+			// 			 };
 			// 		 }else if(child.current_num == 2){
 			// 			 order = {
 			// 			 	col: child.value,
 			// 			 	type: 'desc'
-			// 			 };	
+			// 			 };
 			// 		 }else if(child.current_num == 3){
 			// 			 child.current_num = 0
-			// 		 }														
+			// 		 }
 			// 	}
 			// 	menuData.forEach(par=>{
 			// 		if(par.type === parent.type){
@@ -1068,19 +1065,19 @@ export default {
 			// 							p.current_num = 0
 			// 							this.childChooseArr.splice(s,1)
 			// 						}
-									
+
 			// 					})
 			// 				}
 			// 				if(p.value == child.value && !p.choose){
-								
+
 			// 					this.childChooseArr.forEach((I,x)=>{
 			// 						/* 当点击某个菜单3次之后删除**/
 			// 						if(I.value === child.value){
 			// 							this.childChooseArr.splice(x,1)
 			// 						}
-									
+
 			// 					})
-								
+
 			// 					par.children[0].choose = true
 			// 					p.choose = false
 			// 					order = ''
@@ -1092,112 +1089,110 @@ export default {
 			// 	this.onRefresh();
 			// 	this.getFoodsList(order, this.condObj);
 			// }
-			if(parent.type==='food'){
-				child.choose = !child.choose
-				menuData.forEach(par=>{
-					if(par.type === parent.type){
-						par.children.forEach(p=>{
-							if(p.value !== child.value){
-								p.choose = false
+			if (parent.type === 'food') {
+				child.choose = !child.choose;
+				menuData.forEach(par => {
+					if (par.type === parent.type) {
+						par.children.forEach(p => {
+							if (p.value !== child.value) {
+								p.choose = false;
 							}
-							if(!child.choose){
-								par.children[0].choose = true
-								this.getFoodsList()
+							if (!child.choose) {
+								par.children[0].choose = true;
+								this.getFoodsList();
 							}
-						})
+						});
 					}
-				})				
+				});
 			}
-			if(child.value === 'foods' && menuData[0].children[1].choose){
-				this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
-				this.getFoodsList(null,null,null,'srvhealth_mixed_food_nutrition_contents_select')
-			}else if(child.value === 'matter' && menuData[0].children[0].choose) {
-				this.searchArg.serviceName = 'srvhealth_diet_contents_select'
-				this.getFoodsList()
-				console.log("点击素材")
+			if (child.value === 'foods' && menuData[0].children[1].choose) {
+				this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select';
+				this.getFoodsList(null, null, null, 'srvhealth_mixed_food_nutrition_contents_select');
+			} else if (child.value === 'matter' && menuData[0].children[0].choose) {
+				this.searchArg.serviceName = 'srvhealth_diet_contents_select';
+				this.getFoodsList();
+				console.log('点击素材');
 			}
-			if(parent.type === 'capacity' || parent.type === 'vitamin' || parent.type === 'mineral' ||parent.type === 'mingle'){
-				let isHas = false
-				this.childChooseArr.forEach(hdel=>{
-					if(hdel.title === child.title){
-						isHas = true
+			if (parent.type === 'capacity' || parent.type === 'vitamin' || parent.type === 'mineral' || parent.type === 'mingle') {
+				let isHas = false;
+				this.childChooseArr.forEach(hdel => {
+					if (hdel.title === child.title) {
+						isHas = true;
 					}
-				})
-				if(child.value != '不限' && !isHas){
-					this.childChooseArr.push(child)
-				}							
-				let childChooseArr = this.childChooseArr
+				});
+				if (child.value != '不限' && !isHas) {
+					this.childChooseArr.push(child);
+				}
+				let childChooseArr = this.childChooseArr;
 				// else if(child.current_num === 3){
 				// 	child.current_num = 0
 				// }
-				if(childChooseArr.length === 1){
-					if(child.current_num === 3){
-						childChooseArr.forEach((del,index)=>{
-							if(del.title === child.title){
-								childChooseArr.splice(index,1)
-									child.current_num = 0
-									child.choose = false
+				if (childChooseArr.length === 1) {
+					if (child.current_num === 3) {
+						childChooseArr.forEach((del, index) => {
+							if (del.title === child.title) {
+								childChooseArr.splice(index, 1);
+								child.current_num = 0;
+								child.choose = false;
 							}
-						})
+						});
 					}
-				}else{
-					if(childChooseArr.length==2 && childChooseArr[1].current_num == 1 && child.value != childChooseArr[0].value){
-						childChooseArr[0].current_num = 1 
+				} else {
+					if (childChooseArr.length == 2 && childChooseArr[1].current_num == 1 && child.value != childChooseArr[0].value) {
+						childChooseArr[0].current_num = 1;
 					}
-					if(child.current_num === 4){
-						childChooseArr.forEach((del,index)=>{
-							if(del.title === child.title){
-								childChooseArr.splice(index,1)
-								if(childChooseArr.length == 1){
-									childChooseArr[0].current_num = 1
+					if (child.current_num === 4) {
+						childChooseArr.forEach((del, index) => {
+							if (del.title === child.title) {
+								childChooseArr.splice(index, 1);
+								if (childChooseArr.length == 1) {
+									childChooseArr[0].current_num = 1;
 								}
 							}
-						})
+						});
 					}
 				}
-				
-				let hasChild = false
-				menuData.forEach(par=>{
-					if(par.type === parent.type){
-						par.children.forEach(p=>{
-							this.childChooseArr.forEach(chos=>{
-								if(chos.title === p.title){
-									hasChild = true
+
+				let hasChild = false;
+				menuData.forEach(par => {
+					if (par.type === parent.type) {
+						par.children.forEach(p => {
+							this.childChooseArr.forEach(chos => {
+								if (chos.title === p.title) {
+									hasChild = true;
 								}
-							})
-							if(child.value !== '不限' && child.value !== 'default' && child.value ===p.value&& child.current_num == 4){
-								child.current_num = 0
-								p.choose = false
-								par.children[0].choose = true
-							}else if(child.value !== '不限' && child.value !== 'default' && child.value ===p.value&& child.current_num != 0){
-								p.choose = true
-								par.children[0].choose = false
-							}else if(child.value === '不限'|| child.value == 'default'){
-								p.current_num = 0
-								par.children.forEach(a=>{
-									this.childChooseArr.forEach((b,i)=>{
-										if(a.value != 'default' || a.value != '不限'){
-											if(a.value === b.value){
-												this.childChooseArr.splice(i,1)
+							});
+							if (child.value !== '不限' && child.value !== 'default' && child.value === p.value && child.current_num == 4) {
+								child.current_num = 0;
+								p.choose = false;
+								par.children[0].choose = true;
+							} else if (child.value !== '不限' && child.value !== 'default' && child.value === p.value && child.current_num != 0) {
+								p.choose = true;
+								par.children[0].choose = false;
+							} else if (child.value === '不限' || child.value == 'default') {
+								p.current_num = 0;
+								par.children.forEach(a => {
+									this.childChooseArr.forEach((b, i) => {
+										if (a.value != 'default' || a.value != '不限') {
+											if (a.value === b.value) {
+												this.childChooseArr.splice(i, 1);
 											}
 										}
-									})
-								})
-								if((p.value === '不限'|| p.value == 'default') && child.value === p.value){
-									p.choose = true
-								}else {
-									p.choose = false
+									});
+								});
+								if ((p.value === '不限' || p.value == 'default') && child.value === p.value) {
+									p.choose = true;
+								} else {
+									p.choose = false;
 								}
-								
 							}
-							
-						})
-						if(!hasChild){
-							par.children.forEach(bpar=>{
-								if(bpar.value === '不限'){
-									bpar.choose = true
+						});
+						if (!hasChild) {
+							par.children.forEach(bpar => {
+								if (bpar.value === '不限') {
+									bpar.choose = true;
 								}
-							})
+							});
 						}
 					}
 					// if(par.type == 'capacity'){
@@ -1211,10 +1206,10 @@ export default {
 					// 			}
 					// 		})
 					// 	})
-						
+
 					// }
-				})
-				
+				});
+
 				let cond = {
 					relation: 'AND',
 					data: []
@@ -1222,106 +1217,106 @@ export default {
 				// if((child.value === '不限') ){
 				// 	childChooseArr = []
 				// }
-				if(childChooseArr.length > 0 ){
-					if(childChooseArr.length === 1){
-						
-						if(child.current_num === 1){
+				if (childChooseArr.length > 0) {
+					if (childChooseArr.length === 1) {
+						if (child.current_num === 1) {
 							order = {
-								 	col: child.value,
-								 	type: 'asc'
-							}
-						}else if(child.current_num === 2){
+								col: child.value,
+								type: 'asc'
+							};
+						} else if (child.current_num === 2) {
 							order = {
-								 	col: child.value,
-								 	type: 'desc'
-							}
+								col: child.value,
+								type: 'desc'
+							};
 						}
-						
-					}else{
-						childChooseArr.forEach(son=>{
-							let min_num = (son.num * 0.3).toFixed(2)
-							let max_num = (son.num * 0.6).toFixed(2)
-							let obj = [{
-								colName:son.value,
-								ruleType: 'ge',
-								value:max_num
-							}]
-							if(son.current_num == 2){
-								obj[0].ruleType = 'lt'
-								obj[1] = {
-									colName:son.value,
-									ruleType: 'gt',
-									value:min_num
+					} else {
+						childChooseArr.forEach(son => {
+							let min_num = (son.num * 0.3).toFixed(2);
+							let max_num = (son.num * 0.6).toFixed(2);
+							let obj = [
+								{
+									colName: son.value,
+									ruleType: 'ge',
+									value: max_num
 								}
-							}else if(son.current_num == 3){
-								obj = [{
-									colName:son.value,
-									ruleType: 'le',
-									value:min_num
-								}]
+							];
+							if (son.current_num == 2) {
+								obj[0].ruleType = 'lt';
+								obj[1] = {
+									colName: son.value,
+									ruleType: 'gt',
+									value: min_num
+								};
+							} else if (son.current_num == 3) {
+								obj = [
+									{
+										colName: son.value,
+										ruleType: 'le',
+										value: min_num
+									}
+								];
 							}
 							// cond.data.push(obj)
-							cond.data = [...cond.data,...obj]
-						})
+							cond.data = [...cond.data, ...obj];
+						});
 					}
-					
-					
 				}
-				
+
 				if (cond.data.length === 1) {
 					order = {
 						col: cond.data[0].colName,
 						type: 'desc'
 					};
 				}
-				if(childChooseArr.length === 1){
-					let order_type = 'asc'
-					if(childChooseArr[0].current_num == 1){
-						order_type = 'desc'
+				if (childChooseArr.length === 1) {
+					let order_type = 'asc';
+					if (childChooseArr[0].current_num == 1) {
+						order_type = 'desc';
 					}
 					order = {
 						col: childChooseArr[0].value,
 						type: order_type
 					};
 				}
-				if(cond.data.length === 0){
-					cond = null
+				if (cond.data.length === 0) {
+					cond = null;
 				}
-				this.childChooseArr = childChooseArr
-				this.condObj =cond
-				console.log('childChooseArr-----',order)
-				this.getFoodsList(this.order?this.order:order, cond, 'filtrate');
+				this.childChooseArr = childChooseArr;
+				this.condObj = cond;
+				console.log('childChooseArr-----', order);
+				this.getFoodsList(this.order ? this.order : order, cond, 'filtrate');
 			}
-			console.log("parent:",parent,"child",child)
+			console.log('parent:', parent, 'child', child);
 		},
 		tabSelect(e) {
 			this.TabCur = e.currentTarget.dataset.id;
-			this.scrollLeft = (e.currentTarget.dataset.id - 1) * 60
+			this.scrollLeft = (e.currentTarget.dataset.id - 1) * 60;
 		},
 		change(index) {
 			// this.current = index;
-			this.radioIndex = index
-			console.log("点击单位",index)
-			this.list.forEach((item,i)=>{
-				let unitLabel = ''
-				if(i == this.radioIndex){
-					this.radioLabel = item
+			this.radioIndex = index;
+			console.log('点击单位', index);
+			this.list.forEach((item, i) => {
+				let unitLabel = '';
+				if (i == this.radioIndex) {
+					this.radioLabel = item;
 				}
-			})
+			});
 			if (Number(this.choiceNum) && !this.radioLabel) {
 				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-			}else if(Number(this.choiceNum) && this.radioLabel){
-				if(this.radioLabel.unit_amount){
+			} else if (Number(this.choiceNum) && this.radioLabel) {
+				if (this.radioLabel.unit_amount) {
 					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-				}else{						
-					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount/100) * this.currFood.unit_energy)
+				} else {
+					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
 				}
 			}
 		},
 		/* 选择单位**/
-		changeUnit(item,index){
+		changeUnit(item, index) {
 			// this.modalName = 'RadioModal'
-			this.currIndex = i
+			this.currIndex = i;
 			this.radioLabel = item;
 			if (Number(this.choiceNum) && !this.radioLabel) {
 				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
@@ -1334,50 +1329,48 @@ export default {
 			}
 		},
 		RadioChange(e) {
-			this.radioIndex = e.detail.value
-			this.modalName = ''
-			this.unitList.forEach((item,i)=>{
-				let unitLabel = ''
-				if(i == this.radioIndex){
-					this.radioLabel = item
+			this.radioIndex = e.detail.value;
+			this.modalName = '';
+			this.unitList.forEach((item, i) => {
+				let unitLabel = '';
+				if (i == this.radioIndex) {
+					this.radioLabel = item;
 				}
-			})
+			});
 			if (Number(this.choiceNum) && !this.radioLabel) {
 				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-			}else if(Number(this.choiceNum) && this.radioLabel){
-				if(this.radioLabel.unit_amount){
+			} else if (Number(this.choiceNum) && this.radioLabel) {
+				if (this.radioLabel.unit_amount) {
 					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-				}else{						
-					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount/100) * this.currFood.unit_energy)
+				} else {
+					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
 				}
 			}
 		},
-		RadiohideModal(){
-			this.modalName =  ''
+		RadiohideModal() {
+			this.modalName = '';
 		},
 		/* 查询当前选择食物得单位**/
-		async selectCurrFoodUnit(item){
+		async selectCurrFoodUnit(item) {
 			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_food_unit_amount_estimate_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_food_unit_amount_estimate_select',
 				colNames: ['*'],
-				condition: [
-					{ colName: 'food_no', ruleType: 'eq', value: item.food_no }
-				],
+				condition: [{ colName: 'food_no', ruleType: 'eq', value: item.food_no }],
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);
-			this.radioLabel = ''
-			this.radioIndex = 0
-			let unitList = []
-			unitList.push(item)
-			if(res.data.state === 'SUCCESS'){
-				unitList = [...unitList,...res.data.data]
-				this.unitList = unitList
-				this.list = unitList
+			this.radioLabel = '';
+			this.radioIndex = 0;
+			let unitList = [];
+			unitList.push(item);
+			if (res.data.state === 'SUCCESS') {
+				unitList = [...unitList, ...res.data.data];
+				this.unitList = unitList;
+				this.list = unitList;
 			}
-			console.log("食物选择单位===>>>",res)
+			console.log('食物选择单位===>>>', res);
 		},
 		/* 查询食物元素label**/
 		getElementLabel() {
@@ -1467,7 +1460,10 @@ export default {
 			if (this.searchArg.type === 'food') {
 				uni.navigateTo({
 					url:
-						'/pages/specific/health/foodDetail/foodDetail?foods=' + encodeURIComponent(JSON.stringify(itemFood)) + '&filters=' + encodeURIComponent(JSON.stringify(this.filterArr))
+						'/pages/specific/health/foodDetail/foodDetail?foods=' +
+						encodeURIComponent(JSON.stringify(itemFood)) +
+						'&filters=' +
+						encodeURIComponent(JSON.stringify(this.filterArr))
 				});
 			} else if (this.searchArg.type === 'sport') {
 				uni.navigateTo({
@@ -1489,17 +1485,17 @@ export default {
 					{ colName: 'userno', ruleType: 'like', value: loginUserInfo.user_no },
 					{ colName: 'user_name', ruleType: 'like', value: userName },
 					{ colName: 'hdate', ruleType: 'like', value: this.selectDate.trim() }
-				],
+				]
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && res.data.data.length >= 0) {
 				this.chooseFoodArr = res.data.data;
 				for (let i = 0; i < this.chooseFoodArr.length; i++) {
-					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +"&thumbnailType=fwsu_100";
+					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 					this.$set(this.chooseFoodArr[i], 'imgurl', urls);
 				}
-			}else{
-				this.chooseFoodArr = []
+			} else {
+				this.chooseFoodArr = [];
 			}
 		},
 		/* 查询已经选择过得食物**/
@@ -1515,17 +1511,17 @@ export default {
 					{ colName: 'userno', ruleType: 'like', value: loginUserInfo.user_no },
 					{ colName: 'user_name', ruleType: 'like', value: userName },
 					{ colName: 'hdate', ruleType: 'like', value: this.selectDate.trim() }
-				],
+				]
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && res.data.data.length >= 0) {
 				this.chooseFoodArr = res.data.data;
 				for (let i = 0; i < this.chooseFoodArr.length; i++) {
-					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+					let urls = self.$api.downloadFile + this.chooseFoodArr[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 					this.$set(this.chooseFoodArr[i], 'imgurl', urls);
 				}
-			}else{
-				this.chooseFoodArr = []
+			} else {
+				this.chooseFoodArr = [];
 			}
 		},
 		/* 已选食物的删除**/
@@ -1601,7 +1597,7 @@ export default {
 			for (let i = 0; i < resData.length; i++) {
 				if (resData[i][self.searchArg.imgCol]) {
 					let fileDatas = await self.getFilePath(resData[i][self.searchArg.imgCol]);
-					url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+					url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 					self.$set(resData[i], 'imgurl', url);
 				}
 			}
@@ -1631,7 +1627,7 @@ export default {
 		},
 		async goBalanceDiet() {
 			if (this.chooseFoods.length > 0) {
-				let arr = [];			
+				let arr = [];
 				this.chooseFoods.forEach(item => {
 					let obj = {
 						userno: uni.getStorageSync('login_user_info').user_no,
@@ -1642,16 +1638,16 @@ export default {
 						unit: item.unit,
 						energy: item.heatNum,
 						user_name: uni.getStorageSync('current_user'),
-						image: item.image,
+						image: item.image
 					};
 					if (this.searchArg.type === 'food') {
-						if(item.classify && item.classify === 'mixed_food'){
-							obj['mixed_food_no'] = item.meal_no
-							obj['diret_type'] = item.classify
-							obj['unit_weight_g'] = this.radioLabel?this.radioLabel.amount:100
-						}else {
-							obj['diet_contents_no'] = item.food_no
-							obj['diret_type'] = 'diet_contents'
+						if (item.classify && item.classify === 'mixed_food') {
+							obj['mixed_food_no'] = item.meal_no;
+							obj['diret_type'] = item.classify;
+							obj['unit_weight_g'] = this.radioLabel ? this.radioLabel.amount : 100;
+						} else {
+							obj['diet_contents_no'] = item.food_no;
+							obj['diret_type'] = 'diet_contents';
 						}
 					}
 					arr.push(obj);
@@ -1680,7 +1676,7 @@ export default {
 		},
 		hideModal() {
 			this.showCarModal = false;
-			this.modalName = ''
+			this.modalName = '';
 		},
 		openCar() {
 			console.log('点击购物车');
@@ -1706,11 +1702,11 @@ export default {
 			// chooseFoodArr.push(this.currFood)
 		},
 
-		async getFoodsList(order = null, cond = null, type = null,serviceName=null) {
+		async getFoodsList(order = null, cond = null, type = null, serviceName = null) {
 			let self = this;
-			let url = this.getServiceUrl('health', serviceName?serviceName:this.searchArg.serviceName, 'select');
+			let url = this.getServiceUrl('health', serviceName ? serviceName : this.searchArg.serviceName, 'select');
 			let req = {
-				serviceName: serviceName?serviceName:this.searchArg.serviceName,
+				serviceName: serviceName ? serviceName : this.searchArg.serviceName,
 				colNames: ['*'],
 				// condition: [],
 				relation_condition: {
@@ -1775,7 +1771,7 @@ export default {
 						// let fileDatas = await self.getFilePath(data[i].image);
 						// console.log('img---', fileDatas);
 						// url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-						url = self.$api.downloadFile + data[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+						url = self.$api.downloadFile + data[i].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 						// let url = this.$api.serverURL + '/file/download?filePath=' + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
 						self.$set(data[i], 'imgurl', url);
 					}
@@ -1789,28 +1785,28 @@ export default {
 				this.choiceNum += e.value;
 				if (Number(this.choiceNum) && !this.radioLabel) {
 					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-				}else if(Number(this.choiceNum) && this.radioLabel){
-					if(this.radioLabel.unit_amount){
+				} else if (Number(this.choiceNum) && this.radioLabel) {
+					if (this.radioLabel.unit_amount) {
 						this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-					}else{						
-						this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount/100) * this.currFood.unit_energy)
+					} else {
+						this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
 					}
 				}
 			} else {
 				let currNum = this.choiceNum;
 				currNum = currNum.substring(0, currNum.length - 1);
 				this.choiceNum = currNum;
-				
+
 				if (Number(this.choiceNum) && !this.radioLabel) {
 					this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-				}else if(Number(this.choiceNum) && this.radioLabel){
-					if(this.radioLabel.unit_amount){
+				} else if (Number(this.choiceNum) && this.radioLabel) {
+					if (this.radioLabel.unit_amount) {
 						this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
-					}else{						
-						this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount/100) * this.currFood.unit_energy)
+					} else {
+						this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
 					}
-				}else{
-					this.heatNum = 0
+				} else {
+					this.heatNum = 0;
 				}
 			}
 		},
@@ -1819,7 +1815,7 @@ export default {
 			this.dotEndStr = '';
 			this.choiceNum = 0;
 			this.heatNum = 0;
-			this.value1 = 0
+			this.value1 = 0;
 			this.showBottomModal = true;
 			let label_obj = {};
 			let colData = this.colData;
@@ -1832,14 +1828,14 @@ export default {
 			});
 			this.currFoodLabel = label_obj;
 			this.currFood = e;
-			this.currFood.hdate = this.selectDate
-			if(this.pageType === 'food'){
-				let food = encodeURIComponent(JSON.stringify(this.currFood))
+			this.currFood.hdate = this.selectDate;
+			if (this.pageType === 'food') {
+				let food = encodeURIComponent(JSON.stringify(this.currFood));
 				uni.navigateTo({
-					url:'/otherPages/chooseFood/chooseFood?currFood=' + food
-				})
+					url: '/otherPages/chooseFood/chooseFood?currFood=' + food
+				});
 			}
-			this.selectCurrFoodUnit(e)
+			this.selectCurrFoodUnit(e);
 			console.log('选择食物：', e);
 		},
 		onSureFilter(e) {
@@ -2031,31 +2027,31 @@ export default {
 	.flexSelece {
 	}
 }
-.filtrate-wrap{
-	.filtrate-choose{
+.filtrate-wrap {
+	.filtrate-choose {
 		display: flex;
 		align-items: center;
 		padding-left: 20upx;
-		.filtrate-choose-item{
+		.filtrate-choose-item {
 			padding: 10upx;
 		}
 	}
-	.filtrate-item-wrap{
+	.filtrate-item-wrap {
 		background-color: white;
-		.filtrate-item{
+		.filtrate-item {
 			display: flex;
-			.filtrate-item-left{
+			.filtrate-item-left {
 				padding: 10upx 20upx;
 			}
-			.filtrate-item-right{
+			.filtrate-item-right {
 				// padding: 10upx 20upx;
 				display: flex;
 				margin: 0 10upx;
 				align-items: center;
 			}
-			.cate-active{
+			.cate-active {
 				color: red;
-				/deep/ .u-icon{
+				/deep/ .u-icon {
 					display: flex;
 					padding-bottom: 8upx;
 					padding-left: 2upx;
@@ -2128,14 +2124,14 @@ export default {
 	width: 23%;
 	// flex:1;
 	margin: 20upx 10upx 0 0;
-	height: 100%!important;
+	height: 100% !important;
 	display: flex;
 	align-items: center;
 	position: relative;
 	flex-wrap: wrap;
-	padding-right: 0!important;
+	padding-right: 0 !important;
 	border-radius: 20upx;
-	&:nth-child(4n + 1){
+	&:nth-child(4n + 1) {
 		margin-left: 14upx;
 	}
 	.boxfood-item {
@@ -2165,7 +2161,7 @@ export default {
 		display: flex;
 		flex-direction: column;
 		width: 100%;
-		.smallbox-img{
+		.smallbox-img {
 			width: 100%;
 			height: 100upx;
 			image {
@@ -2173,13 +2169,13 @@ export default {
 				height: 100upx;
 				border-radius: 8upx;
 			}
-			/deep/ .u-image__image{
-				div{
-					background-size:100% 100%!important;
+			/deep/ .u-image__image {
+				div {
+					background-size: 100% 100% !important;
 				}
 			}
 		}
-		
+
 		.textbox {
 			width: 100%;
 			padding: 10upx 4upx;
@@ -2193,7 +2189,6 @@ export default {
 				-webkit-line-clamp: 1;
 				overflow: hidden;
 				text-align: center;
-				
 			}
 			.lock-ele {
 				margin-left: 5px;
@@ -2247,10 +2242,10 @@ export default {
 			font-size: 36upx;
 			margin-right: 20upx;
 			color: #999;
-			.calorie{
+			.calorie {
 				min-width: 115upx;
 			}
-			.calculate-l{
+			.calculate-l {
 				width: 100rpx;
 				font-size: 28upx;
 			}
@@ -2258,7 +2253,7 @@ export default {
 				color: #009688;
 				font-weight: 800;
 				// max-width: 200rpx;
-				
+
 				// margin-left: 4rem;
 				.number {
 					padding: 0 20upx;
@@ -2268,7 +2263,6 @@ export default {
 				.unit {
 					text-align: center;
 					padding: 10upx 0upx;
-					
 				}
 			}
 			.weight {
@@ -2276,25 +2270,24 @@ export default {
 				align-items: center;
 				font-size: 28upx;
 				flex-wrap: wrap;
-				white-space:nowrap;
+				white-space: nowrap;
 				overflow-x: scroll;
 				// justify-content: flex-end;
 				// flex-wrap: wrap;
 				// min-width: 220upx;
-				.unit{
+				.unit {
 					margin-right: 10upx;
 					background-color: #f8f8f8;
 					color: #999;
 					border-radius: 40upx;
 					border: 1px solid #999;
 					padding: 0px 16upx;
-					min-height:54upx ;
+					min-height: 54upx;
 					display: flex;
 					align-items: center;
 					margin-bottom: 10upx;
-			
 				}
-				.active-unit{
+				.active-unit {
 					border: 1px solid #f37b1d;
 					background-color: #f37b1d;
 					color: #fff;
@@ -2321,7 +2314,7 @@ export default {
 			}
 		}
 	}
-	.sport-dialog{
+	.sport-dialog {
 		height: 710upx;
 	}
 }
@@ -2342,7 +2335,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-right: 20upx;	
+			margin-right: 20upx;
 			border-radius: 5px;
 		}
 	}
@@ -2354,7 +2347,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-left: 20upx;		
+			margin-left: 20upx;
 			border-radius: 5px;
 		}
 	}
@@ -2385,7 +2378,7 @@ export default {
 		}
 	}
 }
-.public-button-box{
+.public-button-box {
 	position: relative;
 }
 .add-button {
@@ -2402,7 +2395,7 @@ export default {
 	align-items: center;
 	font-size: 24px;
 	color: white;
-	.add-button-wrap{
+	.add-button-wrap {
 		width: 100%;
 		height: 100%;
 		display: flex;
@@ -2410,25 +2403,23 @@ export default {
 		justify-content: center;
 		position: relative;
 		color: white;
-			.add-button-num {
-				display: flex;
-				justify-content: center;
-				position: absolute;
-				right: -4px;
-				top: 1px;
-				height: 18px;
-				width: 18px;
-				background-color: #ff4000;
-				color: #ffffff;
-				border-radius: 50%;
-				z-index: 1;
-				font-size: 10px;
-				text-align: center;
-				line-height: 18px;
-			}
+		.add-button-num {
+			display: flex;
+			justify-content: center;
+			position: absolute;
+			right: -4px;
+			top: 1px;
+			height: 18px;
+			width: 18px;
+			background-color: #ff4000;
+			color: #ffffff;
+			border-radius: 50%;
+			z-index: 1;
+			font-size: 10px;
+			text-align: center;
+			line-height: 18px;
+		}
 	}
-	
-	
 }
 .car-model {
 	display: flex;
@@ -2455,23 +2446,23 @@ export default {
 			overflow-y: scroll;
 			display: flex;
 			flex-direction: column;
-			.boxfood_car{
+			.boxfood_car {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
 				margin: 5px;
 				margin-bottom: 0;
 				background-color: white;
-				.smallbox_car{
+				.smallbox_car {
 					display: flex;
 					align-items: center;
-					image{
+					image {
 						width: 100upx;
 						height: 100upx;
 						margin: 10upx;
 					}
 				}
-				.relian{
+				.relian {
 					margin-right: 10px;
 				}
 			}
@@ -2509,15 +2500,15 @@ export default {
 	.ele-text-cen {
 		display: flex;
 		flex-wrap: wrap;
-		.ele-text-cen-item-title{
+		.ele-text-cen-item-title {
 			color: #000000;
 		}
-		.ele-text-cen-item{
+		.ele-text-cen-item {
 			display: flex;
 			flex-direction: column;
 			height: 100%;
 			margin: 0 20upx;
-			.ele-text-cen-item-cen{
+			.ele-text-cen-item-cen {
 				display: flex;
 				flex-wrap: wrap;
 			}
@@ -2527,19 +2518,19 @@ export default {
 		margin: 5px;
 	}
 }
-.radio-modal{
+.radio-modal {
 	display: flex;
 	align-items: center;
 }
-.radio-modal /deep/ uni-radio::before{
-	right:20upx;
+.radio-modal /deep/ uni-radio::before {
+	right: 20upx;
 }
-.change-tab{
+.change-tab {
 	width: 100px;
 	margin: 0 0 0 auto;
 	margin-top: -20px;
 }
-.change-tab /deep/ .u-tab-item{
+.change-tab /deep/ .u-tab-item {
 	padding: 0 10rpx;
 }
 </style>

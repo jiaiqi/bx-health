@@ -1,7 +1,7 @@
 <template>
 	<view class="health-archive-wrap">
 		<view class="top text-bold" @click="showUserListPopup = true">
-			<view class="avatar"><u-avatar :src="avatarUrl" size="60"></u-avatar></view>
+			<view class="avatar"><image class="avatar" :src="avatarUrl" size="60"></image ></view>
 			<view class="user-name">{{ currentUser.name }}</view>
 			<view class="switch-icon cuIcon-right"></view>
 		</view>
@@ -103,7 +103,7 @@
 		<u-popup v-model="showUserListPopup" border-radius="40" mode="top" closeable>
 			<view class="user-list">
 				<view class="user-item" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === currentUser.name }">
-					<u-avatar class="avatar" :src="getavatarUrl(item.profile_url)" size="60"></u-avatar>
+					<image  class="avatar" :src="getavatarUrl(item.profile_url)" size="60"></image >
 					{{ item.name }}
 				</view>
 			</view>
@@ -215,54 +215,60 @@ export default {
 					}
 				});
 			}
+		},
+		async initPage() {
+			let userInfo = uni.getStorageSync('login_user_info');
+			// #ifdef MP-WEIXIN
+			let res = await wx.getSetting();
+			if (!res.authSetting['scope.userInfo']) {
+				// 没有获取用户信息授权
+				uni.showModal({
+					title: '提示',
+					content: '请登录并授权获取用户信息后再进行查看',
+					confirmText: '去登录',
+					confirmColor: '#02D199',
+					success(res) {
+						if (res.confirm) {
+							// 确认 跳转到登录页
+							uni.navigateTo({
+								url: '/publicPages/accountExec/accountExec'
+							});
+						} else if (res.cancel) {
+							// 取消 返回首页
+							uni.switchTab({
+								url: '/pages/pedia/pedia'
+							});
+						}
+					}
+				});
+				return;
+			}
+			// #endif
+			if (!userInfo || !uni.getStorageSync('isLogin')) {
+				// 未登录
+				const result = await wx.login();
+				if (result.code) {
+					this.code = result.code;
+					await this.wxLogin({ code: result.code });
+					await this.initPage();
+				}
+			} else {
+				this.isLogin = true;
+			}
+			if (userInfo) {
+				this.loginUserInfo = userInfo;
+				this.selectUserList();
+			}
 		}
+	},
+	onShow() {
+		this.initPage()
 	},
 	async onLoad() {
 		if (chartOption) {
 			this.chartOption = chartOption;
 		}
-		let userInfo = uni.getStorageSync('login_user_info');
-		// #ifdef MP-WEIXIN
-		let res = await wx.getSetting();
-		if (!res.authSetting['scope.userInfo']) {
-			// 没有获取用户信息授权
-			uni.showModal({
-				title: '提示',
-				content: '请登录并授权获取用户信息后再进行查看',
-				confirmText: '去登录',
-				confirmColor: '#02D199',
-				success(res) {
-					if (res.confirm) {
-						// 确认 跳转到登录页
-						uni.navigateTo({
-							url: '/publicPages/accountExec/accountExec'
-						});
-					} else if (res.cancel) {
-						// 取消 返回首页
-						uni.switchTab({
-							url: '/pages/pedia/pedia'
-						});
-					}
-				}
-			});
-			return;
-		}
-		// #endif
-		if (!userInfo || !uni.getStorageSync('isLogin')) {
-			// 未登录
-			const result = await wx.login();
-			if (result.code) {
-				this.code = result.code;
-				await this.wxLogin({ code: result.code });
-				await this.initPage();
-			}
-		} else {
-			this.isLogin = true;
-		}
-		if (userInfo) {
-			this.loginUserInfo = userInfo;
-			this.selectUserList();
-		}
+
 		// uni.setTabBarStyle({
 		//   color: '#333',
 		//   selectedColor: '#fff',
@@ -281,6 +287,11 @@ export default {
 	min-height: 100vh;
 	background-color: #fff;
 	padding-bottom: 20rpx;
+	.avatar{
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 100%;
+	}
 	// background-image: linear-gradient(#0e1327,#0e1327,#fff);
 	.top {
 		display: flex;

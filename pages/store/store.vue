@@ -17,7 +17,8 @@
 			<!-- <view class="navbar" ></view> -->
 			<view class="ctn">
 				<view class="hx-search-box" @click="goSearch">
-					<uni-icons type="search" size="22" color="#666666" />
+					<text class="cuIcon-search" style="color: #666;font-size: 22;"></text>
+					<!-- <uni-icons type="search" size="22" color="#666666" /> -->
 					<text>输入搜索关键词</text>
 				</view>
 			</view>
@@ -115,7 +116,6 @@
 
 <script>
 //引入测试数据
-import testData from '@/common/testdata.js';
 import sPullScroll from '@/components/s-pull-scroll';
 export default {
 	components: {sPullScroll},

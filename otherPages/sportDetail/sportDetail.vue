@@ -59,7 +59,6 @@
 </template>
 
 <script>
-// import uCharts from '@/components/u-charts/u-charts.js';
 var _self;
 var stepChart = null;
 export default {
