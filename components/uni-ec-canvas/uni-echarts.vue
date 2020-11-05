@@ -6,7 +6,8 @@
 </template>
 
 <script>
-import * as echarts from "./echarts.min.js";
+import * as echarts from "./echarts.mini.js";
+// import * as echarts from './echarts.min.js';
 export default {
 	data() {
 		return {
@@ -27,9 +28,11 @@ export default {
 	methods: {
 		setOption(val) {
 			if (this.chartInstance) {
+				this.chartInstance.clear();
 				this.chartInstance.setOption(val);
-			}else{
-				this.initChart()
+				// this.chartInstance.setOption(val);
+			} else {
+				this.initChart();
 			}
 		},
 		initChart() {
@@ -53,15 +56,10 @@ export default {
 	},
 	mounted() {
 		if (!this.ec) {
-		  console.warn(
-		    '组件需绑定 ec 变量，例：<ec-canvas id="mychart-dom-bar" ' +
-		    'canvas-id="mychart-bar" ec="{{ ec }}"></ec-canvas>'
-		  );
-		  return;
+			console.warn('组件需绑定 ec 变量，例：<ec-canvas id="mychart-dom-bar" ' + 'canvas-id="mychart-bar" ec="{{ ec }}"></ec-canvas>');
+			return;
 		}
-		if (!this.ec.lazyLoad) {
-		  this.initChart();
-		}
+		this.initChart();
 	}
 };
 </script>

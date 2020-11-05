@@ -447,6 +447,7 @@ export default {
 		},
 		buildEchartsData(data) {
 			// 构建echarts需要的数据格式
+			let elementData = this.elementData;
 			let option = {
 				color: [
 					'#0090ff',
@@ -469,16 +470,11 @@ export default {
 					'#ff55ac'
 				],
 				label: {
-					formatter: function(param) {
-						return param.data.name + ':' + param.percent + '%';
-					}
+					formatter: '{b}:{d}%'
 				},
 				tooltip: {
 					trigger: 'item',
-					formatter: param => {
-						return `${param.data.name}:${Number(param.data.value.toFixed(1))} ${this.elementData.units}(${Number(param.percent.toFixed(1))}%)`;
-					}
-					// formatter: '{a}: {b} : {c} ({d}%)'
+					formatter: '{a}:{b}:{c}'+elementData.units+'({d}%)'
 				},
 				series: {
 					name: '食物占比',

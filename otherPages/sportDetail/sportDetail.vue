@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import uCharts from '@/components/u-charts/u-charts.js';
+// import uCharts from '@/components/u-charts/u-charts.js';
 var _self;
 var stepChart = null;
 export default {
@@ -171,7 +171,7 @@ export default {
 							data: []
 						};
 						chartData.series[0].data = stepList.map(item => item.step);
-						_self.showChart('stepChart', chartData);
+						// _self.showChart('stepChart', chartData);
 						return stepList;
 					} else {
 						return false;

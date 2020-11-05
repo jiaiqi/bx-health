@@ -3,7 +3,7 @@
 		<view class="foods-item-wrap">
 			<view @click="toDetail(item)" v-for="(item,index) in foodsData" :key="index" class="foods-item">
 				<view class="foods-item-left">
-					<image src="/otherPages/static/img/ym.jpg" mode=""></image>
+					<image src="/pregnancy/static/img/ym.jpg" mode=""></image>
 				</view>
 				<view class="foods-item-right">
 					<view class="foods-item-right-t">
@@ -58,7 +58,7 @@
 		methods:{
 			toDetail(item){
 				uni.navigateTo({
-					url:'/otherPages/pregnant/pregnantFoodsDetail?currFood=' + encodeURIComponent(JSON.stringify(item)) + '&type=' + this.type
+					url:'/pregnancy/pregnant/pregnantFoodsDetail?currFood=' + encodeURIComponent(JSON.stringify(item)) + '&type=' + this.type
 				})
 			}
 		},

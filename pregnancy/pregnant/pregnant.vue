@@ -50,7 +50,7 @@
 							<!-- </view> -->
 							<view class="content-item-top">
 								<text>{{item.name}}</text>
-								<text>{{item.start_time}} ~ {{item.end_time}}</text>
+								<text v-if="item.start_time && item.end_time">{{item.start_time}} ~ {{item.end_time}}</text>
 							</view>
 							<view @click="shrink(item,'fetus')" class="content-item-bot">
 								<text v-if="!item.isOpen">展开</text>
@@ -64,7 +64,7 @@
 							</view>
 							<view class="fetus-top-main">
 								<view class="fetus-top-main-left">
-									<image src="/otherPages/static/img/1.png" mode=""></image>
+									<image src="/pregnancy/static/img/1.png" mode=""></image>
 								</view>
 								<view class="fetus-top-main-right">
 									<view class="fetus-top-main-right-t">
@@ -210,7 +210,7 @@
 						<view class="content shadow-blur" :class="item.isCurrent?'bg-green':'bg-blue'">
 							<view class="matter-content-top">
 								<text>{{item.name}}</text>
-								<text>{{item.start_time}} ~ {{item.end_time}}</text>
+								<text v-if="item.start_time && item.end_time">{{item.start_time}} ~ {{item.end_time}}</text>
 							</view>
 							<view @click="shrink(item,'fetus')" class="matter-content-bot">
 								<text v-if="!item.isOpen">展开</text>
@@ -264,7 +264,7 @@
 						<view  class="content bg-mauve shadow-blur" :class="item.isCurrent?'symptom-current':''">
 							<view class="symptom-content-top">
 								<text>{{item.name}}</text>
-								<text>{{item.start_time}} ~ {{item.end_time}}</text>
+								<text v-if="item.start_time && item.end_time">{{item.start_time}} ~ {{item.end_time}}</text>
 							</view>
 							<view @click="shrink(item,'symptom')" class="symptom-content-bot">
 								<text v-if="!item.isOpen">展开</text>
@@ -299,7 +299,7 @@
 						<view class="content shadow-blur" :class="item.isCurrent?'inspect-bg':'bg-yellow'">
 							<view class="inspect_wrap_top_left">
 								<view class="inspect_wrap_top_left_t">
-									<text>{{item.start_time}} ~ {{item.end_time}}</text>
+									<text v-if="item.start_time && item.end_time">{{item.start_time}} ~ {{item.end_time}}</text>
 								</view>
 								<view class="inspect_wrap_top_left_c">
 									<view class="inspect_wrap_top_left_c_l">
@@ -464,7 +464,7 @@
 									<view @click="selectDetail(curr)" class="details">
 										<text>查看详情</text>
 										<text v-if="!curr.isOpen" class="lg text-gray cuIcon-rounddown"><span></span></text>
-										<image v-else src="/otherPages/static/img/pretop.png" mode=""></image>
+										<image v-else src="/pregnancy/static/img/pretop.png" mode=""></image>
 									</view>
 								</view>
 							</view>
@@ -833,28 +833,28 @@
 									 type:'taboo',
 									 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
 									 isOpen:false,
-									 image:"/otherPages/static/img/byy.jpg"
+									 image:"/pregnancy/static/img/byy.jpg"
 								 },
 								 {
 									 tit:'白酒',
 									 type:'taboo',
 									 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
 									 isOpen:false,
-									 image:"/otherPages/static/img/bj.jpg"
+									 image:"/pregnancy/static/img/bj.jpg"
 								 },
 								 {
 									 tit:'薏米',
 									 type:'taboo',
 									 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
 									 isOpen:false,
-									 image:"/otherPages/static/img/ym.jpg"
+									 image:"/pregnancy/static/img/ym.jpg"
 								 },
 								 {
 									 tit:'苹果',
 									 type:'recom',
 									 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
 									 isOpen:false,
-									 image:"/otherPages/static/img/wxf.jpg"
+									 image:"/pregnancy/static/img/wxf.jpg"
 								 }]
 						 },{
 							 name:'出行',
@@ -956,28 +956,28 @@
 									 type:'taboo',
 									 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
 									 isOpen:false,
-									 image:"/otherPages/static/img/byy.jpg"
+									 image:"/pregnancy/static/img/byy.jpg"
 								 },
 								 {
 									 tit:'白酒',
 									 type:'taboo',
 									 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
 									 isOpen:false,
-									 image:"/otherPages/static/img/bj.jpg"
+									 image:"/pregnancy/static/img/bj.jpg"
 								 },
 								 {
 									 tit:'薏米',
 									 type:'taboo',
 									 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
 									 isOpen:false,
-									 image:"/otherPages/static/img/ym.jpg"
+									 image:"/pregnancy/static/img/ym.jpg"
 								 },
 								 {
 									 tit:'苹果',
 									 type:'recom',
 									 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
 									 isOpen:false,
-									 image:"/otherPages/static/img/wxf.jpg"
+									 image:"/pregnancy/static/img/wxf.jpg"
 								 }]
 							},{
 							 name:'出行',
@@ -1085,28 +1085,28 @@
 															 type:'taboo',
 															 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
 															 isOpen:false,
-															 image:"/otherPages/static/img/byy.jpg"
+															 image:"/pregnancy/static/img/byy.jpg"
 														 },
 														 {
 															 tit:'白酒',
 															 type:'taboo',
 															 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
 															 isOpen:false,
-															 image:"/otherPages/static/img/bj.jpg"
+															 image:"/pregnancy/static/img/bj.jpg"
 														 },
 														 {
 															 tit:'薏米',
 															 type:'taboo',
 															 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
 															 isOpen:false,
-															 image:"/otherPages/static/img/ym.jpg"
+															 image:"/pregnancy/static/img/ym.jpg"
 														 },
 														 {
 															 tit:'苹果',
 															 type:'recom',
 															 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
 															 isOpen:false,
-															 image:"/otherPages/static/img/wxf.jpg"
+															 image:"/pregnancy/static/img/wxf.jpg"
 														 }]
 						},{
 													 name:'出行',
@@ -1208,28 +1208,28 @@
 															 type:'taboo',
 															 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
 															 isOpen:false,
-															 image:"/otherPages/static/img/byy.jpg"
+															 image:"/pregnancy/static/img/byy.jpg"
 														 },
 														 {
 															 tit:'白酒',
 															 type:'taboo',
 															 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
 															 isOpen:false,
-															 image:"/otherPages/static/img/bj.jpg"
+															 image:"/pregnancy/static/img/bj.jpg"
 														 },
 														 {
 															 tit:'薏米',
 															 type:'taboo',
 															 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
 															 isOpen:false,
-															 image:"/otherPages/static/img/ym.jpg"
+															 image:"/pregnancy/static/img/ym.jpg"
 														 },
 														 {
 															 tit:'苹果',
 															 type:'recom',
 															 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
 															 isOpen:false,
-															 image:"/otherPages/static/img/wxf.jpg"
+															 image:"/pregnancy/static/img/wxf.jpg"
 														 }]
 						},{
 													 name:'出行',
@@ -1337,28 +1337,28 @@
 						 									 type:'taboo',
 						 									 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
 						 									 isOpen:false,
-						 									 image:"/otherPages/static/img/byy.jpg"
+						 									 image:"/pregnancy/static/img/byy.jpg"
 						 								 },
 						 								 {
 						 									 tit:'白酒',
 						 									 type:'taboo',
 						 									 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
 						 									 isOpen:false,
-						 									 image:"/otherPages/static/img/bj.jpg"
+						 									 image:"/pregnancy/static/img/bj.jpg"
 						 								 },
 						 								 {
 						 									 tit:'薏米',
 						 									 type:'taboo',
 						 									 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
 						 									 isOpen:false,
-						 									 image:"/otherPages/static/img/ym.jpg"
+						 									 image:"/pregnancy/static/img/ym.jpg"
 						 								 },
 						 								 {
 						 									 tit:'苹果',
 						 									 type:'recom',
 						 									 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
 						 									 isOpen:false,
-						 									 image:"/otherPages/static/img/wxf.jpg"
+						 									 image:"/pregnancy/static/img/wxf.jpg"
 						 								 }]
 						 },{
 						 							 name:'出行',
@@ -1460,28 +1460,28 @@
 															 type:'taboo',
 															 content:"怀孕后吃避孕药会对胎儿产生影响，所以孕期不能吃。",
 															 isOpen:false,
-															 image:"/otherPages/static/img/byy.jpg"
+															 image:"/pregnancy/static/img/byy.jpg"
 														 },
 														 {
 															 tit:'白酒',
 															 type:'taboo',
 															 content:"准妈妈不能喝白酒，白酒中含有一定量的酒精，酒精会通过血液循环到达胎盘，会影响薄薄的智力发育，甚至会造成宝宝畸形。准妈妈摄入酒精过多会刺激子宫收缩，造成流产、早产等后果",
 															 isOpen:false,
-															 image:"/otherPages/static/img/bj.jpg"
+															 image:"/pregnancy/static/img/bj.jpg"
 														 },
 														 {
 															 tit:'薏米',
 															 type:'taboo',
 															 content:"薏米虽然营养丰富，但是大量食用会有兴奋子宫的作用，食用不当会引起宫缩，不利于安胎。保险起见，建议准妈妈不要吃薏米哦",
 															 isOpen:false,
-															 image:"/otherPages/static/img/ym.jpg"
+															 image:"/pregnancy/static/img/ym.jpg"
 														 },
 														 {
 															 tit:'苹果',
 															 type:'recom',
 															 content:"五香粉种类繁多，大部分用的都是温热性的中药性食材，不仅吃多了容易上火，还会出现一些未知的风险，影响胎儿的健康。建议不要食用",
 															 isOpen:false,
-															 image:"/otherPages/static/img/wxf.jpg"
+															 image:"/pregnancy/static/img/wxf.jpg"
 														 }]
 						},{
 													 name:'出行',
@@ -1580,7 +1580,7 @@
 		methods:{
 			toSymDetail(item){
 				uni.navigateTo({
-					url:'/pages/specific/health/pregnant/symptomDetail'
+					url:'/pregnancy/pregnant/symptomDetail'
 				})
 			},
 			/*点击隐藏显示顶部菜单*/
@@ -1602,7 +1602,7 @@
 			/*点击食物分类进行跳转**/
 			toFoodsDetail(type){
 				uni.navigateTo({
-					url:'/otherPages/pregnant/pregnantFoodsDetail?type=' + type
+					url:'/pregnancy/pregnant/pregnantFoodsDetail?type=' + type
 				})
 			},
 			/*点击注意事项item触发**/
@@ -1628,7 +1628,7 @@
 			toPreDetail(type){
 				
 				uni.navigateTo({
-					url:'/otherPages/pregnant/antenatal?type=' + type
+					url:'/pregnancy/pregnant/antenatal?type=' + type
 				})
 			},
 			/*点击日期某一天**/
@@ -1797,7 +1797,7 @@
 			/*点击每周进入详情页面**/
 			toDetail(){
 				uni.navigateTo({
-					url:'/otherPages/pregnant/pregnantDetail'
+					url:'/pregnancy/pregnant/pregnantDetail'
 				})
 			},
 			/*点击小方块弹出模态框**/

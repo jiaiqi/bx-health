@@ -78,6 +78,16 @@ export default {
 			scoreInfo: {} // 得分情况
 		};
 	},
+	props:{
+		activityNo: {
+			type: String,
+			default:''
+		},
+		comfromType:{
+			type: String,
+			default:''
+		}
+	},
 	methods: {
 		toHistory() {
 			uni.navigateTo({
@@ -605,7 +615,20 @@ export default {
 	beforeDestroy() {
 		uni.setStorageSync('fill_batch_no', '');
 	},
+	mounted() {
+		if(this.activityNo){
+			this.emptyText = '正在请求问卷配置数据';
+			setTimeout(() => {
+				this.emptyText = '未找到问卷配置数据';
+			}, 3000);
+			this.formType = this.comfromType;
+			this.status = '进行中'
+			this.activity_no = this.activityNo
+			this.getQuestionnaireData();
+		}
+	},
 	onLoad(option) {
+		
 		this.emptyText = '正在请求问卷配置数据';
 		setTimeout(() => {
 			this.emptyText = '未找到问卷配置数据';
@@ -635,7 +658,7 @@ export default {
 				console.log('status', this.status);
 			}
 			if (option.activity_no) {
-				this.activity_no = option.activity_no;
+				this.activity_no = option.activity_no
 				this.getQuestionnaireData();
 			} else if (this.questionData.activity_no) {
 				this.status = '已完成';

@@ -96,7 +96,7 @@
 					</label>
 				</checkbox-group>
 				<checkbox-group name="checkbox-group" class="checkbox-group" v-else-if="fieldData.type === 'checkboxFk'" :class="!valid.valid ? 'valid_error' : ''">
-					<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox wrap-row" @click="radioChange(item, index)">
+					<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox" @click="radioChange(item, index)">
 						<checkbox
 							color="#2979ff"
 							class="blue"

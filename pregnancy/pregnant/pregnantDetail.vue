@@ -3,7 +3,7 @@
 		<view class="detail-top">
 			<view class="detail-top-t">
 				<text>宝宝一周变化</text>
-				<image src="/otherPages/static/img/pt.png" mode=""></image>
+				<image src="/pregnancy/static/img/pt.png" mode=""></image>
 			</view>
 			<view class="detail-top-b">
 				<text>关爱提醒</text>
@@ -72,7 +72,7 @@
 		methods:{
 			toAntenatal(){
 				uni.navigateTo({
-					url:'/otherPages/pregnant/antenatal'
+					url:'/pregnancy/pregnant/antenatal'
 				})
 			}
 		}

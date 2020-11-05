@@ -40,9 +40,11 @@
 					<view @click="chooseMenu(item,cate)" v-for="(cate,i) in item.children" :class="cate.choose?'cate-active':''" class="filtrate-item-right">
 						<text>{{cate.title}}</text>
 						<!-- arrow-down-fill -->
-						<text v-show="cate.current_num == 1 && item.type !=='food'">(高)</text>
-						<text v-show="cate.current_num == 2 && item.type !=='food'">(中)</text>
-						<text v-show="cate.current_num == 3 && item.type !=='food'">(低)</text>
+						<u-icon size="24" v-show="cate.current_num == 1 && item.type !=='food' && childChooseArrLength == 1" name="arrow-up-fill"></u-icon>
+						<u-icon size="24" v-show="cate.current_num == 2 && item.type !=='food' && childChooseArrLength == 1" name="arrow-down-fill"></u-icon>
+						<text v-show="cate.current_num == 1 && item.type !=='food' && childChooseArrLength >= 2">(高)</text>
+						<text v-show="cate.current_num == 2 && item.type !=='food' && childChooseArrLength >= 2">(中)</text>
+						<text v-show="cate.current_num == 3 && item.type !=='food' && childChooseArrLength >= 2">(低)</text>
 					</view>
 				</view>
 			</view>
@@ -170,7 +172,7 @@
 								<text @click="countDietNum('-0.1')">-0.1</text>
 								<text @click="countDietNum('-1')">-1</text>
 							</view>
-							<u-input placeholder=" " :border="true" maxlength="20" v-model="choiceNum" type="number" />
+							<u-input placeholder=" " :disabled="true" :clearable="false" :border="true" maxlength="20" v-model="choiceNum" type="number" />
 							<view class="key-right">
 								<text @click="countDietNum('+1')">+1</text>
 								<text @click="countDietNum('+0.1')">+0.1</text>
@@ -650,13 +652,14 @@ export default {
 			TabCur: 0,
 			scrollLeft: 0,
 			pageType:'',
-			childChooseArr:[]
+			childChooseArr:[],
+			childChooseArrLength:0
 		};
 	},
 	onShow() {
 		this.getChooseFoodList();
 		this.getElementLabel();
-		this.onRefresh();
+		// this.onRefresh();
 	},
 	onLoad(option) {
 		let query = JSON.parse(decodeURIComponent(option.condType));
@@ -892,8 +895,8 @@ export default {
 	},
 	watch: {
 		childChooseArr(newValue, oldValue) {
-			console.log("-------------",newValue)
-			
+			console.log("-------------",newValue.length)
+			this.childChooseArrLength = newValue.length
 			if(newValue.length > 0){
 				if(this.pageType == 'food'){
 					this.topNum = 450
@@ -960,17 +963,29 @@ export default {
 			})
 			let menuData = this.menuAgList
 			let hasChild = false
+			let childCloseData = []
 			menuData.forEach(m=>{
 				m.children.forEach(c=>{
 					if(c.title === item.title){
+						hasChild = true
 						c.choose = false
 						c.current_num = 0
+						
 						if(childChooseArr.length <= 0){
 							m.children[0].choose = true
-						}						
-					}
-					
+						}else{
+							childChooseArr.forEach(b=>{
+								if(b.title === c.title){
+									childCloseData.push(b)
+								}
+							})
+						}
+						if(childCloseData.length == 0){
+							m.children[0].choose = true
+						}
+					}					
 				})
+				
 			})
 			
 			
@@ -1001,7 +1016,7 @@ export default {
 			console.log("--标签--")
 		},
 		/* 顶部菜单点击**/
-		chooseMenu(parent,child){
+		chooseMenu(parent,child){			
 			this.pageInfo.pageNo = 1
 			if(child.value!='不限' && child.value != 'default'){
 				child.current_num += 1
@@ -1094,8 +1109,10 @@ export default {
 				})				
 			}
 			if(child.value === 'foods' && menuData[0].children[1].choose){
+				this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
 				this.getFoodsList(null,null,null,'srvhealth_mixed_food_nutrition_contents_select')
 			}else if(child.value === 'matter' && menuData[0].children[0].choose) {
+				this.searchArg.serviceName = 'srvhealth_diet_contents_select'
 				this.getFoodsList()
 				console.log("点击素材")
 			}
@@ -1108,15 +1125,37 @@ export default {
 				})
 				if(child.value != '不限' && !isHas){
 					this.childChooseArr.push(child)
-				}
+				}							
 				let childChooseArr = this.childChooseArr
-				if(child.current_num === 4){
-					childChooseArr.forEach((del,index)=>{
-						if(del.title === child.title){
-							childChooseArr.splice(index,1)
-						}
-					})
+				// else if(child.current_num === 3){
+				// 	child.current_num = 0
+				// }
+				if(childChooseArr.length === 1){
+					if(child.current_num === 3){
+						childChooseArr.forEach((del,index)=>{
+							if(del.title === child.title){
+								childChooseArr.splice(index,1)
+									child.current_num = 0
+									child.choose = false
+							}
+						})
+					}
+				}else{
+					if(childChooseArr.length==2 && childChooseArr[1].current_num == 1 && child.value != childChooseArr[0].value){
+						childChooseArr[0].current_num = 1 
+					}
+					if(child.current_num === 4){
+						childChooseArr.forEach((del,index)=>{
+							if(del.title === child.title){
+								childChooseArr.splice(index,1)
+								if(childChooseArr.length == 1){
+									childChooseArr[0].current_num = 1
+								}
+							}
+						})
+					}
 				}
+				
 				let hasChild = false
 				menuData.forEach(par=>{
 					if(par.type === parent.type){
@@ -1144,7 +1183,7 @@ export default {
 										}
 									})
 								})
-								if((p.value === '不限'|| p.value == 'default') && child.value === p.value){									
+								if((p.value === '不限'|| p.value == 'default') && child.value === p.value){
 									p.choose = true
 								}else {
 									p.choose = false
@@ -1161,43 +1200,71 @@ export default {
 							})
 						}
 					}
+					// if(par.type == 'capacity'){
+					// 	par.children.forEach(alone=>{
+					// 		alone.choose = false
+					// 		alone.current_num = 0
+					// 		par.children[0].choose = true
+					// 		this.childChooseArr.forEach((c,i)=>{
+					// 			if(alone.value === c.value){
+					// 				this.childChooseArr.splice(i,1)
+					// 			}
+					// 		})
+					// 	})
+						
+					// }
 				})
 				
 				let cond = {
 					relation: 'AND',
 					data: []
 				};
-				// if(child.value === '不限'){
+				// if((child.value === '不限') ){
 				// 	childChooseArr = []
 				// }
 				if(childChooseArr.length > 0 ){
-					childChooseArr.forEach(son=>{
-						if(son.value != '不限' && son.value != 'default' ){							
-						let min_num = (son.num * 0.3).toFixed(2)
-						let max_num = (son.num * 0.6).toFixed(2)
-						let obj = [{
-							colName:son.value,
-							ruleType: 'ge',
-							value:max_num
-						}]
-						if(son.current_num == 2){
-							obj[0].ruleType = 'lt'
-							obj[1] = {
-								colName:son.value,
-								ruleType: 'gt',
-								value:min_num
+					if(childChooseArr.length === 1){
+						
+						if(child.current_num === 1){
+							order = {
+								 	col: child.value,
+								 	type: 'asc'
 							}
-						}else if(son.current_num == 3){
-							obj = [{
+						}else if(child.current_num === 2){
+							order = {
+								 	col: child.value,
+								 	type: 'desc'
+							}
+						}
+						
+					}else{
+						childChooseArr.forEach(son=>{
+							let min_num = (son.num * 0.3).toFixed(2)
+							let max_num = (son.num * 0.6).toFixed(2)
+							let obj = [{
 								colName:son.value,
-								ruleType: 'le',
-								value:min_num
+								ruleType: 'ge',
+								value:max_num
 							}]
-						}
-						// cond.data.push(obj)
-						cond.data = [...cond.data,...obj]
-						}
-					})
+							if(son.current_num == 2){
+								obj[0].ruleType = 'lt'
+								obj[1] = {
+									colName:son.value,
+									ruleType: 'gt',
+									value:min_num
+								}
+							}else if(son.current_num == 3){
+								obj = [{
+									colName:son.value,
+									ruleType: 'le',
+									value:min_num
+								}]
+							}
+							// cond.data.push(obj)
+							cond.data = [...cond.data,...obj]
+						})
+					}
+					
 					
 				}
 				
@@ -1207,13 +1274,23 @@ export default {
 						type: 'desc'
 					};
 				}
+				if(childChooseArr.length === 1){
+					let order_type = 'asc'
+					if(childChooseArr[0].current_num == 1){
+						order_type = 'desc'
+					}
+					order = {
+						col: childChooseArr[0].value,
+						type: order_type
+					};
+				}
 				if(cond.data.length === 0){
 					cond = null
 				}
 				this.childChooseArr = childChooseArr
 				this.condObj =cond
+				console.log('childChooseArr-----',order)
 				this.getFoodsList(this.order?this.order:order, cond, 'filtrate');
-				console.log('childChooseArr-----',cond)
 			}
 			console.log("parent:",parent,"child",child)
 		},
@@ -2254,7 +2331,7 @@ export default {
 	align-items: center;
 	justify-content: center;
 	/deep/ input {
-		width: 120upx !important;
+		width: 65upx !important;
 		text-align: center;
 	}
 	.key-left {

@@ -63,12 +63,19 @@
 		<view class="main-box column">
 			<view class="main-box-title">近期趋势</view>
 			<view class="chart-box">
-	
+				<!-- #ifdef H5 -->
+				<uni-echarts v-if="currentChart === 'canvasLineA'" class="uni-ec-canvas" :ec="weightData"></uni-echarts>
+				<uni-echarts v-if="currentChart === 'canvasLineB'" class="uni-ec-canvas" :ec="BPData"></uni-echarts>
+				<uni-echarts v-if="currentChart === 'canvasLineC'" class="uni-ec-canvas" :ec="sleepData"></uni-echarts>
+				<uni-echarts v-if="currentChart === 'canvasColumnD'" class="uni-ec-canvas" :ec="caloriesData"></uni-echarts>
+				<!-- #endif -->
+				<!-- #ifdef MP-WEIXIN -->
 				<uni-ec-canvas v-if="currentChart === 'stepChart'" class="uni-ec-canvas" id="uni-ec-canvas" :ec="stepData"></uni-ec-canvas>
 				<uni-ec-canvas v-if="currentChart === 'canvasLineA'" class="uni-ec-canvas" id="uni-ec-canvas" :ec="weightData"></uni-ec-canvas>
 				<uni-ec-canvas v-if="currentChart === 'canvasLineB'" class="uni-ec-canvas" id="uni-ec-canvas" :ec="BPData"></uni-ec-canvas>
 				<uni-ec-canvas v-if="currentChart === 'canvasLineC'" class="uni-ec-canvas" id="uni-ec-canvas" :ec="sleepData"></uni-ec-canvas>
 				<uni-ec-canvas v-if="currentChart === 'canvasColumnD'" class="uni-ec-canvas" id="uni-ec-canvas" :ec="caloriesData"></uni-ec-canvas>
+				<!-- #endif -->
 			</view>
 			<view class="button-box">
 				<button class="button" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
@@ -215,13 +222,22 @@
 </template>
 <script>
 var self;
-
-import uniEcCanvas from '@/components/uni-ec-canvas/uni-echart.vue';
+// #ifdef MP-WEIXIN
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+// #endif
+// #ifdef H5
+import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+// #endif
 var _self;
 var dayjs = require('dayjs');
 export default {
 	components: {
-		uniEcCanvas
+		// #ifdef MP-WEIXIN
+		uniEcCanvas,
+		// #endif
+		// #ifdef H5
+		uniEcharts
+		// #endif
 	},
 	data() {
 		return {

@@ -9,7 +9,7 @@
 		}, {
 			"path": "pages/store/store",
 			"style": {
-				"navigationBarTitleText": "生活圈",
+				"navigationBarTitleText": "健康生活",
 				"navigationBarBackgroundColor": "#0bc99d"
 			}
 		},
@@ -20,14 +20,14 @@
 				"navigationBarTitleText": "健康档案",
 				"navigationBarBackgroundColor": "#0bc99d"
 			}
+		},
+		{
+			"path": "pages/health-archives/health-archives",
+			"style": {
+				"navigationBarTitleText": "健康档案",
+				"enablePullDownRefresh": false
+			}
 		}
-		// , {
-		// 	"path": "pages/accountExec/accountExec",
-		// 	"style": {
-		// 		"navigationBarTitleText": "微信登录",
-		// 		"navigationBarBackgroundColor": "#0055ff"
-		// 	}
-		// }
 	],
 	"subPackages": [{
 			// 问卷
@@ -52,7 +52,51 @@
 					"enablePullDownRefresh": false
 				}
 
+			}, {
+				"path": "couple/couple",
+				"style": {}
 			}]
+		},
+		{
+			"root": "archivesPages",
+			"pages": [{
+				"path": "old-home/old-home",
+				"style": {
+					"navigationBarTitleText": "健康档案",
+					"enablePullDownRefresh": false
+				}
+			}]
+		},
+		{
+			"root": "pregnancy",
+			"pages": [{
+					"path": "pregnant/pregnant",
+					"style": {}
+				}, {
+					"path": "pregnant/pregnantHome",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnantDetail",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnantFoods",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnantFoodsDetail",
+					"style": {}
+				},
+				{
+					"path": "pregnant/antenatal",
+					"style": {}
+				},
+				{
+					"path": "pregnant/symptomDetail",
+					"style": {}
+				}
+			]
 		},
 		{
 			"root": "otherPages",
@@ -204,34 +248,31 @@
 					"path": "chooseFood/chooseFood",
 					"style": {}
 				},
-				{
-					"path": "pregnant/pregnant",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantHome",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantDetail",
-					"style": {}
-				},
-				{
-					"path": "pregnant/antenatal",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantFoods",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantFoodsDetail",
-					"style": {}
-				},
-				{
-					"path": "pregnant/symptomDetail",
-					"style": {}
-				},
+				// {
+				// 	"path": "pregnant/pregnant",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/pregnantHome",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/pregnantDetail",
+				// 	"style": {}
+				// },
+
+				// {
+				// 	"path": "pregnant/pregnantFoods",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/pregnantFoodsDetail",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/symptomDetail",
+				// 	"style": {}
+				// },
 				{
 					"path": "personal/personal",
 					"style": {
@@ -288,21 +329,25 @@
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
 		"list": [{
-			"pagePath": "pages/pedia/pedia",
-			"iconPath": "/static/icon/find.png",
-			"selectedIconPath": "static/icon/find_active.png",
-			"text": "健康宝典"
-		}, {
-			"pagePath": "pages/home/home",
-			"iconPath": "/static/icon/health.png",
-			"selectedIconPath": "static/icon/health_active.png",
-			"text": "健康档案"
-		}, {
-			"pagePath": "pages/store/store",
-			"iconPath": "/static/icon/live.png",
-			"selectedIconPath": "static/icon/live_active.png",
-			"text": "健康生活"
-		}]
+				"pagePath": "pages/pedia/pedia",
+				"iconPath": "/static/icon/find.png",
+				"selectedIconPath": "static/icon/find_active.png",
+				"text": "健康宝典"
+			},
+			{
+				"pagePath": "pages/health-archives/health-archives",
+				// "pagePath": "pages/home/home",
+				"iconPath": "/static/icon/health.png",
+				"selectedIconPath": "static/icon/health_active.png",
+				"text": "健康档案"
+			},
+			{
+				"pagePath": "pages/store/store",
+				"iconPath": "/static/icon/live.png",
+				"selectedIconPath": "static/icon/live_active.png",
+				"text": "健康生活"
+			}
+		]
 	},
 	"easycom": {
 		"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue"

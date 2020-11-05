@@ -26,6 +26,17 @@
 					</view>
 				</view>
 			</view>
+			<view class="symptom-bot-wrap-top">
+				<view class="symptom-bot-wrap-top-l">
+					<scroll-view :scroll-with-animation="true" style="height: 60upx;" scroll-x :scroll-left="scrollMenuLeft">
+						<text @click="changeMenu(item,index)" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomList" :key="index">{{item.name}}</text>
+					</scroll-view>
+				</view>
+				<view class="symptom-bot-wrap-top-r">
+					<u-icon :top="4" v-if="!menuIsShow" size="48" @click="showMore('open')" name="list"></u-icon>
+					<u-icon :top="4" v-else size="48" @click="showMore('close')" name="close"></u-icon>
+				</view>
+			</view>
 		</view>
 
 		<!-- <view v-if="isChunk" class="symptom-bot-wrap">
@@ -53,19 +64,9 @@
 			<view class="boxbtn"><view class="btns" @click="lookobj">完成</view></view>
 		</view> -->
 		<view class="symptom-bot-wrap">
-			<view class="symptom-bot-wrap-top">
-				<view class="symptom-bot-wrap-top-l">
-					<scroll-view :scroll-with-animation="true" style="height: 60upx;" scroll-x :scroll-left="scrollMenuLeft">
-						<text @click="changeMenu(item,index)" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomList" :key="index">{{item.name}}</text>
-					</scroll-view>
-				</view>
-				<view class="symptom-bot-wrap-top-r">
-					<u-icon :top="4" v-if="!menuIsShow" size="48" @click="showMore('open')" name="list"></u-icon>
-					<u-icon :top="4" v-else size="48" @click="showMore('close')" name="close"></u-icon>
-				</view>
-			</view>
+			
 			<!-- <u-tabs active-color="#42b983" :show-bar="false" :list="symptomList" :is-scroll="false" :current="currentTab" @change="change"></u-tabs> -->
-			<view class="" v-if="symptomList.length && symptomList[currentTab].children.length > 0 && !isSearch">
+			<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[currentTab].children.length > 0 && !isSearch">
 				<view v-if="symptomList[currentTab].is_show && items.is_leaf === '否'" :key="index" v-for="(items, index) in symptomList[currentTab].children" class="wrapCont">
 					<view v-if="items.is_leaf === '否' && items.children.length > 0" class="wrapCont_row">
 						<!-- <text>{{ items[query.key] }}</text> -->
@@ -79,8 +80,8 @@
 						</view>
 						
 						<view class="wrapCont-main">
-							<view v-for="(illnes,n) in items.children" :key="n" class="wrapCont_row_item_wrap" :class="(Array.isArray(illnes.children) && illnes.children.length > 0)?'':'no_wrapCont_row_item_wrap'">
-								<view  v-if="Array.isArray(illnes.children) && illnes.children.length > 0" class="wrapCont_row_item_wrap-t">
+							<view v-if="Array.isArray(illnes.children) && illnes.children.length > 0" v-for="(illnes,n) in items.children" :key="n" class="wrapCont_row_item_wrap" :class="(Array.isArray(illnes.children) && illnes.children.length > 0)?'':'no_wrapCont_row_item_wrap'">
+								<view   class="wrapCont_row_item_wrap-t">
 									<text>{{illnes.name}}</text>
 								</view>
 								<view v-if="Array.isArray(illnes.children)&& illnes.children.length>0" class="wrapCont_row_item_wrap-b">
@@ -90,9 +91,7 @@
 								</view>
 								
 							</view>
-						</view>
-						
-						
+						</view>												
 					</view>
 				</view>
 			</view>
@@ -123,7 +122,7 @@
 				</view>
 			</u-popup>
 		</view>
-		<u-popup v-model="menuIsShow" :closeable="true" mode="top">
+		<u-popup v-model="menuIsShow" :closeable="true" mode="bottom">
 			<view class="pregnant-main-top-item-poup">
 				<text @click="changeMenu(item,index)" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomList" :key="index">{{item.name}}</text>
 			</view>
@@ -556,31 +555,14 @@ export default {
 	display: flex;
 	flex-direction: column;
 	.symptom-bot-wrap {
-		// height: calc(100vh - 150px);
+		height: calc(100vh - 360rpx);
 		flex: 1;
 		overflow-y: scroll;
 		/deep/ .u-tab-item{
 			padding: 0 20upx;
-		}
-		.symptom-bot-wrap-top{
-			display: flex;
-			align-items: center;
-			line-height: 30px;
-			background-color: #fff;
-			font-size: 30upx;
-			padding: 10upx 0;
-			.symptom-bot-wrap-top-l{
-				width: 670upx;
-				overflow-x: scroll;
-				white-space: nowrap;
-				text{
-					padding: 10upx 40upx;
-				}
-				.activeSympt{
-					color: rgb(66, 185, 131);
-					font-weight: 700;
-				}
-			}
+		}		
+		.symptom-bot-wrap-main{
+			// height: calc(100vh - 240rpx);
 		}
 	}
 }
@@ -636,7 +618,7 @@ export default {
 	.box {
 		display: flex;
 		flex-wrap: wrap;
-	}
+	}	
 }
 .wrapCont_row_item {
 	line-height: 34px;
@@ -686,7 +668,26 @@ export default {
 .box {
 	margin: 10px 0;
 }
-
+.symptom-bot-wrap-top{
+		display: flex;
+		align-items: center;
+		line-height: 30px;
+		background-color: #fff;
+		font-size: 30upx;
+		padding: 10upx 0;
+		.symptom-bot-wrap-top-l{
+			width: 670upx;
+			overflow-x: scroll;
+			white-space: nowrap;
+			text{
+				padding: 10upx 40upx;
+			}
+			.activeSympt{
+				color: rgb(66, 185, 131);
+				font-weight: 700;
+			}
+		}
+	}
 .poupbox {
 	.mask {
 		background: rgba(0, 0, 0, 0.6);

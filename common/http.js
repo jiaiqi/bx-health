@@ -79,7 +79,7 @@ fly.interceptors.response.use(
 			// uni.setStorageSync('backUrl',window.location.pathname + window.location.search)
 			// 后端返回 无效登录时，需要进行的跳转处理
 			if (uni.getStorageSync("isLogin")) {
-				// 登录状态记录 为 tree 时暂时不处理
+				// 登录状态记录 为 true 时暂时不处理
 				uni.showToast({
 					title: "用户异常，请退出后，清理缓存重试"
 				})
@@ -116,25 +116,6 @@ fly.interceptors.response.use(
 							}
 						})
 						// #endif
-						// uni.showModal({
-						// 	title: '提示',
-						// 	content: '未登录,是否跳转到登录页面?',
-						// 	confirmText: '去登录',
-						// 	confirmColor: '#02D199',
-						// 	success(res) {
-						// 		if (res.confirm) {
-						// 			// 确认 跳转到登录页
-						// 			uni.navigateTo({
-						// 				url: '/publicPages/accountExec/accountExec'
-						// 			});
-						// 		} else if (res.cancel) {
-						// 			// 取消 返回首页
-						// 			uni.switchTab({
-						// 				url: '/pages/pedia/pedia'
-						// 			});
-						// 		}
-						// 	}
-						// });
 					} catch (e) {
 						console.error('请求失败', e)
 						//TODO handle the exception
@@ -151,7 +132,8 @@ fly.interceptors.response.use(
 			// 没有访问权限
 			uni.setStorageSync('isLogin', false)
 			uni.showToast({
-				title: data.resultMessage
+				title: data.resultMessage,
+				icon: "none"
 			})
 		} else {
 			uni.setStorageSync('stophttp', false)

@@ -73,7 +73,7 @@ export default {
 				let index = item.dest_page.indexOf('/pages/specific/health');
 				dest_page = '/otherPages' + item.dest_page.slice(22);
 				console.log(item.dest_page);
-			}
+			}			
 			if (dest_page && typeof dest_page === 'string' && dest_page.indexOf('/pages/') !== -1) {
 				uni.switchTab({
 					url: dest_page

@@ -29,7 +29,8 @@
 			</view>
 		</view>
 		<view class="shop-detail-bot">
-			<view class="shop-detail-bot-t">
+			<uniEcCanvas class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+			<!-- <view class="shop-detail-bot-t">
 				<view class="shop-detail-bot-t-t">
 					食物营养素含量
 				</view>
@@ -42,12 +43,10 @@
 							<view class="ele-text">
 								<text>VA:</text>
 								<text>1ug</text>
-								<!-- <text style="color: red;">({{ foodObj.vitamin_a>=450?'高':foodObj.vitamin_a>=100&&foodObj.vitamin_a<450?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>VE:</text>
 								<text>2mg</text>
-								<!-- <text style="color: red;">({{ foodObj.vitamin_e>=35?'高':foodObj.vitamin_e>=15&&foodObj.vitamin_e<35?'较高':'低' }})</text> -->
 							</view>
 						</view>
 					</view>
@@ -57,10 +56,8 @@
 						</view>
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
-								<text>蛋白质:</text>
-								<!-- <text>2</text> -->
+								<text>蛋白质:</text>							
 								<text>{{ foodObj.protein ? foodObj.protein:'0' }}g</text>
-								<!-- <text style="color: red;">({{ foodObj.protein>=35?'高':foodObj.protein>=15&&foodObj.protein<35?'较高':'低' }})</text> -->
 							</view>								
 						</view>
 					</view>
@@ -73,25 +70,18 @@
 								<text>VB1:</text>
 								<text>2</text>
 								<text>{{ foodObj.vitamin_b1 ? foodObj.vitamin_b1:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.vitamin_b1>=0.15?'高':foodObj.vitamin_b1>=0.1&&foodObj.vitamin_b1<0.15?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>VB2:</text>
-								<!-- <text>2</text> -->
 								<text>{{ foodObj.vitamin_b2 ? foodObj.vitamin_b2:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.vitamin_b2>=0.15?'高':foodObj.vitamin_b2>=0.1&&foodObj.vitamin_b2<0.15?'较高':'低' }})</text> -->
 							</view>
 							<view class="ele-text">
 								<text>VB3:</text>
-								<!-- <text>2</text> -->
 								<text>{{ foodObj.vitamin_b3 ? foodObj.vitamin_b3:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.vitamin_b3>=5?'高':foodObj.vitamin_b3>=3.5&&foodObj.vitamin_b3<5?'较高':'低' }})</text> -->
 							</view>		
 							<view class="ele-text">
-								<text>VC:</text>
-								<!-- <text>2</text> -->
-								<text>{{ foodObj.vitamin_c ? foodObj.vitamin_c:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.vitamin_c>=50?'高':foodObj.vitamin_c>=35&&foodObj.vitamin_c<50?'较高':'低' }})</text> -->
+								<text>VC:</text>								
+								<text>{{ foodObj.vitamin_c ? foodObj.vitamin_c:0 }}mg</text>								
 							</view>
 						</view>
 					</view>
@@ -102,27 +92,21 @@
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
 								<text>钙:</text>
-								<!-- <text>2</text> -->
 								<text>{{ foodObj.vitamin_a ? foodObj.element_ca:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.element_ca>=450?'高':foodObj.element_ca>=200?foodObj.element_ca<450?'较高':'低' }})</text> -->
+								
 							</view>
 							<view class="ele-text">
 								<text>镁:</text>
-								<!-- <text>2</text> -->
 								<text>{{ foodObj.element_mg ? foodObj.element_mg:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.element_mg>=150?'高':foodObj.element_mg>=80?foodObj.element_mg<150?'较高':'低' }})</text> -->
+								
 							</view>
 							<view class="ele-text">
-								<text>磷:</text>
-								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_p ? foodObj.element_p:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.element_p>=250?'高':foodObj.element_p>=150?foodObj.element_p<250?'较高':'低' }})</text> -->
+								<text>磷:</text>								
+								<text>{{ foodObj.element_p ? foodObj.element_p:0 }}mg</text>								
 							</view>
 							<view class="ele-text">
-								<text>钾:</text>
-								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_k ? foodObj.element_k:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.element_k>=500?'高':foodObj.element_k>=200?foodObj.element_k<500?'较高':'低' }})</text> -->
+								<text>钾:</text>								
+								<text>{{ foodObj.element_k ? foodObj.element_k:0 }}mg</text>								
 							</view>
 						</view>
 					</view>
@@ -133,39 +117,29 @@
 						</view>
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
-								<text>铁:</text>
-								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_fe ? foodObj.element_fe:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.element_fe>=8?'高':foodObj.element_fe>=4?foodObj.element_fe<8?'较高':'低' }})</text> -->
+								<text>铁:</text>								
+								<text>{{ foodObj.element_fe ? foodObj.element_fe:0 }}mg</text>								
 							</view>
 							<view class="ele-text">
-								<text>锌:</text>
-								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_zn ? foodObj.element_zn:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.element_zn>=7?'高':foodObj.element_zn>=4?foodObj.element_zn<7?'较高':'低' }})</text> -->
+								<text>锌:</text>								
+								<text>{{ foodObj.element_zn ? foodObj.element_zn:0 }}mg</text>								
 							</view>
 							<view class="ele-text">
-								<text>硒:</text>
-								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_se ? foodObj.element_se:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.element_se>=20?'高':foodObj.element_se>=10?foodObj.element_se<20?'较高':'低' }})</text> -->
+								<text>硒:</text>								
+								<text>{{ foodObj.element_se ? foodObj.element_se:0 }}mg</text>								
 							</view>
 							<view class="ele-text">
 								<text>铜:</text>
-								<text>{{ foodObj.element_cu ? foodObj.element_cu:0 }}mg</text>
-								<!-- <text>2</text> -->
-								<!-- <text style="color: red;">({{ foodObj.element_cu>=1.5?'高':foodObj.element_cu>=1?foodObj.element_cu<1.5?'较高':'低' }})</text> -->
+								<text>{{ foodObj.element_cu ? foodObj.element_cu:0 }}mg</text>								
 							</view>
 							<view class="ele-text">
-								<text>锰:</text>
-								<!-- <text>2</text> -->
-								<text>{{ foodObj.element_mn ? foodObj.element_mn:0 }}mg</text>
-								<!-- <text style="color: red;">({{ foodObj.element_mn>=5?'高':foodObj.element_mn>=2.5?foodObj.element_mn<5?'较高':'低' }})</text> -->
+								<text>锰:</text>								
+								<text>{{ foodObj.element_mn ? foodObj.element_mn:0 }}mg</text>								
 							</view>
 						</view>
 					</view>	
 				</view>
-			</view>			
+			</view>	 -->		
 		</view>
 		<view class="shop-detail-bot-b" :class="foodChild.length >=3?'bot-padd':''">
 			<view class="shop-detail-bot-b-t">
@@ -204,9 +178,23 @@
 
 <script>
 	import jumpBall from '@/components/hx-jump-ball/hx-jump-ball.vue';
+	// #ifdef MP-WEIXIN
+	import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+	// #endif
+	// #ifdef H5
+	import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+	// #endif
 	export default {
 		name:'shopDetail',
-		components:{jumpBall},
+		components:{			
+			jumpBall,
+			// #ifdef MP-WEIXIN
+			uniEcCanvas,
+			// #endif
+			// #ifdef H5
+			uniEcharts
+			// #endif			
+		},
 		data(){
 			return {
 				foodObj:"",
@@ -217,10 +205,228 @@
 				carNum:0,
 				element: [],
 				isJoin:false,
+				nutrientData:[{
+					name:'蛋白质',
+					key:'protein'
+				},{
+					name:'碳水化合物',
+					key:'carbohydrate'
+				},{
+					name:'脂肪',
+					key:'axunge'
+				},{
+					name:'VA',
+					key:'vitamin_a'
+				},{
+					name:'VE',
+					key:'vitamin_e'
+				},{
+					name:'VB1',
+					key:'vitamin_b1'
+				},{
+					name:'VB2',
+					key:'vitamin_b2'
+				},{
+					name:'VB3',
+					key:'vitamin_b3'
+				},{
+					name:'钙',
+					key:'element_ca'
+				},{
+					name:'镁',
+					key:'element_mg'
+				},{
+					name:'磷',
+					key:'element_p'
+				},{
+					name:'钾',
+					key:'element_k'
+				},{
+					name:'铁',
+					key:'element_fe'
+				},{
+					name:'锌',
+					key:'element_se'
+				},{
+					name:'铜',
+					key:'element_cu'
+				},{
+					name:'锰',
+					key:'element_mn'
+				}],
+				stepData:{
+					option:{
+						color: ['#92d050','#4f81bd','#f79646'],
+						title: {
+							text: "营养素含量"
+						},
+						tooltip: {
+							trigger: 'axis',
+							axisPointer: {
+								type: 'line',
+								axis: 'x',
+								label: {
+									backgroundColor: '#000000'
+								}
+							}
+						},
+						legend: {
+							y:'25px',
+							data: ['食物含量', '达标线']
+						},
+						grid: {
+							left: '6%',
+							right: '6%',
+							top: '20%',
+							bottom: '6%',
+							containLabel: true
+						},
+						xAxis: {
+							type: 'category',
+							// boundaryGap: false,
+							data:[],
+							axisLabel:{
+								rotate: 70,
+								interval: 0,
+								fontSize: 10
+							},
+							axisLine: {
+								// y轴
+								show: true
+							},
+							axisTick: {
+								// y轴刻度线
+								show: true
+							},
+							splitLine: {
+								// 网格线
+								show: true
+							}
+						},
+						yAxis: {
+							type: 'value',
+							axisLine: {
+								// y轴
+								show: true
+							},
+							axisLabel:{
+								formatter: `{value}%`
+							},
+							axisTick: {
+								// y轴刻度线
+								show: true
+							},
+							splitLine: {
+								// 网格线
+								show: true
+							}
+						},
+						series:[{
+							name:'食物含量',
+							type:'bar',
+							stack:'总数',
+							data:[]
+						}]	
+					}			
+				},
+				echartsIsShow:false,
+				userInfo:'',
 				eleData:['protein','vitamin_b1','vitamin_b2','vitamin_b3','vitamin_c','element_mg','element_p','element_k','element_fe','element_zn','element_se','element_cu','element_mn']
 			}
 		},
+		computed: {
+			age() {
+				if (this.userInfo.birthday) {
+					let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
+					return age;
+				}
+			},
+		},
 		methods:{
+			async getNutrientRecommended() {
+				let self = this
+				let url = this.getServiceUrl('health', 'srvhealth_nutrient_values_recommended_select', 'select');
+				let req = {
+					serviceName: 'srvhealth_nutrient_values_recommended_select',
+					colNames: ['*'],
+					order: [
+						{
+							colName: 'nutrient',
+							orderType: 'desc' // asc升序  desc降序
+						}
+					]
+				};
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+					let result = res.data.data.filter(item => {
+						if ((item.sex && item.sex.indexOf(self.userInfo.sex) !== -1) || !item.sex) {
+							if (item.age_start && item.age_end) {
+								return self.age >= item.age_start && self.age < item.age_end;
+							} else if (item.age_start && !item.age_end) {
+								return self.age >= item.age_start;
+							} else if (!item.age_start && !item.age_end) {
+								return true;
+							} else {
+								return false;
+							}
+						}
+					});
+					this.result = result
+					let endArr = []
+					let currFood = this.foodObj
+					let nutrientData = this.nutrientData
+					nutrientData.forEach(nut=>{
+						let num = 0
+						if(nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'B3'){
+							endArr.push(currFood[nut.key])
+						}					
+						result.forEach(re=>{
+							if(nut.name === re.nutrient){
+								num = ((Number(currFood[nut.key]) / Number(re.val_rni))* 100).toFixed(1)
+								endArr.push(Number(num))
+							}
+						})
+						
+					})
+					return endArr;
+				}
+			},
+			/* 组装图表数据**/
+			async assembleData(){
+				let self = this
+				let nutrientData = this.nutrientData
+				let chart_option = this.stepData.option
+				let xdata = nutrientData.map(item=>{
+					return item.name
+				})
+				/*达标线*/
+				let obj = {
+					name:'达标线',
+					data:[],
+					type:'line',
+					stack: false
+				}
+				obj.data = nutrientData.map(item=>{
+					return 100
+				})
+				console.log("---x轴数据--",xdata)
+				chart_option.xAxis.data = xdata
+				let currFood =  this.foodObj
+				nutrientData.forEach(ele=>{
+					if(currFood[ele.key]){
+						this.$set(ele,'value',currFood[ele.key])
+					}else{
+						this.$set(ele,'value',0)
+					}
+				})
+				let currData = await this.getNutrientRecommended()
+				chart_option.series[0].data = currData.map(ser=>{
+					return ser
+				})
+				chart_option.series.push(obj)
+				console.log("chart_optionchart_option",chart_option)
+				this.echartsIsShow = true
+			},
 			/*计数器change方法*/
 			valChange(e) {
 				// if(!this.foodObj.car_num){
@@ -311,6 +517,17 @@
 			this.queryType = option.type
 			foodsDetail.imgurl = foodsDetail.imgurl.substring(0,foodsDetail.imgurl.lastIndexOf("&"))
 			this.foodObj = foodsDetail
+			if (uni.getStorageSync('current_user_info')) {
+				this.userInfo = uni.getStorageSync('current_user_info');
+				uni.setStorageSync('current_user', this.userInfo.name);
+			} else {
+				let userList = uni.getStorageSync('user_info_list');
+				if (Array.isArray(userList) && userList.length > 0) {
+					this.userInfo = userList[0];
+					uni.setStorageSync('current_user_info', userList[0]);
+				}
+			}
+			this.assembleData()
 			if(uni.getStorageSync('shop_car')){
 				let car_data = uni.getStorageSync('shop_car')
 				let isHas = false
@@ -399,7 +616,9 @@
 	.shop-detail-bot{
 		background-color: white;
 		margin-top: 30upx;
-		padding-bottom: 20upx;
+		padding: 20upx 0;
+		height: 520rpx;
+		
 		.shop-detail-bot-t{
 			.shop-detail-bot-t-t{
 				font-size: 30upx;
@@ -524,5 +743,9 @@
 			text-align: center;
 			line-height: 18px;
 		}
+	}
+	.uni-ec-canvas {
+		width: 710rpx;
+		height: 520rpx;
 	}
 </style>

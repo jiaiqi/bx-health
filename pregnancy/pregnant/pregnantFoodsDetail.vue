@@ -1,7 +1,7 @@
 <template>
 	<view class="foods-detail-wrap">
 		<view class="foods-detail-top">
-			<image src="/otherPages/static/img/ym.jpg" mode=""></image>
+			<image src="/pregnancy/static/img/ym.jpg" mode=""></image>
 		</view>
 		<view class="foods-detail-cen">
 			<view class="foods-detail-cen-item">
