@@ -36,7 +36,7 @@
 				>
 					<view class="swiper-item" v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
 						<view @click="skip(btn)" class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
-							<image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></image>
+							<u-image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></u-image>
 							<text class="btn-name">{{ btn.dest_menu_no }}</text>
 						</view>
 					</view>
@@ -45,7 +45,7 @@
 					<swiper-item v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
 						<view class="swiper-item">
 							<view @click="skip(btn)" class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
-								<image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></image>
+								<u-image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></u-image>
 								<text class="btn-name">{{ btn.dest_menu_no }}</text>
 							</view>
 						</view>

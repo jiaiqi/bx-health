@@ -73,7 +73,7 @@
 			<view class="cu-list">
 				<view class="diet-item column-name">
 					<view class="column">食物名称</view>
-					<view class="column">质量</view>
+					<view class="column">单位</view>
 					<view class="column">{{ elementData.label }}</view>
 					<view class="column">热量</view>
 				</view>
@@ -89,7 +89,7 @@
 					:class="modalName == 'move-box-' + index ? 'move-cur' : ''"
 				>
 					<view class="column diet-name">{{ item.name }}</view>
-					<view class="column">{{ item.amount * item.unit_weight_g + item.unit }}</view>
+					<view class="column">{{ item.unit === 'g' ? item.amount * item.unit_weight_g + item.unit : item.amount + item.unit }}</view>
 					<view class="column">{{ (item.amount * item[elementData.key]).toFixed(1) + elementData.units }}</view>
 					<view class="column">{{ item.amount * item.unit_energy }}千卡</view>
 					<view class="move column"><view class="" @click="deleteItem(item)">删除</view></view>
@@ -102,56 +102,81 @@
 				</view>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="showEditModal = false">
+		<u-popup v-model="showEditModal" mode="bottom" border-radius="50">
+		<!-- <view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentDiet = null)"> -->
 			<view class="cu-dialog" v-if="currentDiet">
-				<view class="title-bar">
-					<view class="btn" @click="showEditModal = false">取消</view>
-					<view class="date">{{ currentDiet.hdate + ' ' + currentDiet.htime }}</view>
-					<view class="btn" @click="UpdateDietInfo">确认</view>
+				<view class="title-bar" v-if="currentDiet.hdate && currentDiet.htime">
+					<view class="date">{{ currentDiet.hdate + ' ' + currentDiet.htime.slice(0, 5) }}</view>
 				</view>
 				<view class="diet-info">
 					<view class="img"><u-image width="100%" height="100%" :src="currentDietImgUrl"></u-image></view>
 					<view class="info">
-						<view class="name">{{ currentDiet.name }}</view>
+						<view class="name">
+							{{ currentDiet.name }}
+							<view class="delete-icon" @click="deleteItem(currentDiet)">
+								<text class="text">删除记录</text>
+								<text class="cuIcon-delete"></text>
+							</view>
+						</view>
 						<view class="weight">
-							<text class="label">热量:</text>
+							<text class="label margin-right-xs">热量:</text>
 							<text class="heat">
-								{{ currentDiet.amount * currentDiet.unit_energy }}
+								{{ currentDiet.energy }}
 								<text class="unit">千卡</text>
 							</text>
-							/{{ currentDiet.amount * currentDiet.unit_weight_g }}
+						</view>
+						<view class="">
+							<text class="label text-bold margin-right-xs">单位:</text>
+							<!-- {{ currentDiet.unit_weight_g ? currentDiet.amount * currentDiet.unit_weight_g : currentDiet.amount }} -->
 							<text class="unit">{{ currentDiet.unit }}</text>
 						</view>
-						<view class="element">{{ elementData.label }}:{{ (currentDiet.amount * currentDiet[elementData.key]).toFixed(1) }}{{ elementData.units }}</view>
-						<view class="amount">
-							数量:
-							<view class="number-box">
-								<text @click="changeCurrentVal('minus')" class="symbol">-</text>
-								<input @change="changeValue" v-model="currentDiet.amount" type="digit" disabled />
-								<text @click="changeCurrentVal('plus')" class="symbol">+</text>
-							</view>
+					</view>
+					<view class="chart-box">
+						<!-- #ifdef MP-WEIXIN -->
+						<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-ec-canvas>
+						<!-- #endif -->
+						<!-- #ifdef H5 -->
+						<uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-echarts>
+						<!-- #endif -->
+					</view>
+					<view class="unit-box">
+						<view class="title">单位:</view>
+						<view class="unit-item" :class="{ 'active-unit': currentUnitIndex === index }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">
+							{{ u.unit_weight_g && u.unit === 'g' ? u.unit_weight_g + u.unit : u.unit }}
+						</view>
+					</view>
+					<view class="amount">
+						<view class="title">数量:</view>
+						<view class="number-box">
+							<text @click="changeCurrentVal('minus', 0.1)" class="symbol">-0.1</text>
+							<text @click="changeCurrentVal('minus')" class="symbol">-1</text>
+							<input class="input" @change="changeValue" v-model.number="currentDiet.amount" type="number" />
+							<text @click="changeCurrentVal('plus')" class="symbol">+1</text>
+							<text @click="changeCurrentVal('plus', 0.1)" class="symbol">+0.1</text>
 						</view>
 					</view>
 				</view>
 				<view class="delete-bar">
-					<text class="cuIcon-delete" @click="deleteItem(currentDiet)"></text>
-					<!-- 删除此条记录 -->
+					<view class="btn bg-grey" @click="(showEditModal = false), (currentDiet = null)">取消</view>
+					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
 				<view class="number-bar"></view>
 				<view class="unit-bar"></view>
 			</view>
-		</view>
+			</u-popup>
+		<!-- </view> -->
 	</view>
 </template>
 
 <script>
 var _self;
 // #ifdef MP-WEIXIN
-import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #endif
 // #ifdef H5
-import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+import uniEcharts from '@/otherPages/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
+import energyListWrap from '../static/js/totalEnergyList.js';
 export default {
 	components: {
 		// #ifdef MP-WEIXIN
@@ -188,12 +213,21 @@ export default {
 			if (currentDiet && currentDiet.image) {
 				return this.$api.downloadFile + currentDiet['image'] + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 			}
+		},
+		age() {
+			if (this.userInfo.birthday) {
+				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
+				return age;
+			}
 		}
 	},
 	data() {
 		return {
+			currentDietChartData: {},
 			ec: {},
 			currentDiet: null,
+			currentUnitIndex: 0,
+			unitList: [],
 			showEditModal: false,
 			chartData: {
 				series: []
@@ -205,78 +239,317 @@ export default {
 			dietRecord: [],
 			listTouchStart: 0,
 			modalName: null,
-			piearr: []
+			piearr: [],
+			energyListWrap: energyListWrap,
+			userInfo: uni.getStorageSync('current_user_info')
 		};
 	},
 	methods: {
 		clickCharts(e) {
 			console.log(e);
 		},
-		buildElemetBarData(e) {
-			_self.elementData.value = 0;
-			_self.dietRecord.forEach(item => {
-				_self.elementData.value += item.amount * item[_self.elementData.key];
-			});
-			let dietInfo = this.deepClone(e);
-			/**
-			 * 共计 dietInfo.EAR*2 + dietInfo.UL-dietInfo.EAR --> dietInfo.EAR+dietInfo.UL
-			 * 左/右： dietInfo.EAR
-			 * 中间： dietInfo.UL-dietInfo.EAR
-			 */
-			if (dietInfo.UL && dietInfo.value && dietInfo.value > (dietInfo.UL - dietInfo.EAR) * 4) {
-				dietInfo['value_left'] = (120 * 0.9) / 2;
-				dietInfo['left_width'] = (dietInfo.EAR * 120) / ((dietInfo.value * 2) / 0.9);
-				dietInfo['center_width'] = ((dietInfo.UL - dietInfo.EAR) * 120) / ((dietInfo.value * 2) / 0.9);
-				dietInfo['right_width'] = 120 - dietInfo['left_width'] - dietInfo['center_width'];
+		async getFoodUnit(item) {
+			// 查找当前食物的单位
+			let url = this.getServiceUrl('health', 'srvhealth_food_unit_amount_estimate_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_food_unit_amount_estimate_select',
+				colNames: ['*'],
+				condition: [{ colName: 'food_no', ruleType: 'eq', value: item.diet_contents_no ? item.diet_contents_no : item.mixed_food_no }],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			let res = await this.$http.post(url, req);
+			let unitList = [];
+			// unitList.push(item);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				unitList = [...res.data.data];
 			} else {
-				if (!dietInfo.UL) {
-					dietInfo['right_width'] = 0;
-					dietInfo['left_width'] = 50;
-					dietInfo['center_width'] = 70;
-					if (dietInfo.value <= dietInfo.EAR) {
-						dietInfo['value_left'] = (dietInfo['left_width'] * dietInfo.value) / dietInfo.EAR;
-					} else {
-						dietInfo['value_left'] = (dietInfo['left_width'] * dietInfo.value) / dietInfo.EAR;
-					}
-					if (dietInfo['value_left'] > 110) {
-						dietInfo['value_left'] = 110;
-					}
-					return dietInfo;
-				}
-				if (dietInfo.value === 0 || dietInfo.value === '0') {
-					dietInfo['value_left'] = 0;
-					dietInfo['right_width'] = 30;
-					dietInfo['left_width'] = (90 * dietInfo.EAR) / dietInfo.UL;
-					dietInfo['center_width'] = 90 - (90 * dietInfo.EAR) / dietInfo.UL;
-				} else {
-					dietInfo['value_left'] = (40 * dietInfo.value) / (dietInfo.UL - dietInfo.EAR);
-					dietInfo['left_width'] = (120 * dietInfo.EAR) / (dietInfo.EAR + dietInfo.UL);
-					dietInfo['right_width'] = (120 * dietInfo.EAR) / (dietInfo.EAR + dietInfo.UL) > 30 ? (120 * dietInfo.EAR) / (dietInfo.EAR + dietInfo.UL) : 30;
-					// dietInfo['center_width'] = (120 * (dietInfo.UL - dietInfo.EAR)) / (dietInfo.EAR + dietInfo.UL);
-					if (dietInfo['left_width'] + dietInfo['right_width'] > 80) {
-						dietInfo['right_width'] = 20;
-						dietInfo['left_width'] = (100 * dietInfo.EAR) / dietInfo.UL;
-					}
-					dietInfo['center_width'] = 120 - dietInfo['left_width'] - dietInfo['right_width'];
-					if (dietInfo.value < dietInfo.EAR) {
-						dietInfo['value_left'] = (dietInfo['left_width'] * dietInfo.value) / dietInfo.EAR;
-					}
-					if (dietInfo.value >= dietInfo.EAR && dietInfo.value <= dietInfo.UL) {
-						dietInfo['value_left'] = dietInfo['left_width'] + (dietInfo['center_width'] * (dietInfo.value - dietInfo.EAR)) / (dietInfo.UL - dietInfo.EAR);
-					}
-					if (dietInfo.value > dietInfo.UL) {
-						dietInfo['value_left'] = dietInfo['left_width'] + dietInfo['center_width'] + (dietInfo['right_width'] * (dietInfo.value - dietInfo.UL)) / dietInfo.EAR;
-					}
-				}
-				if (dietInfo['value_left'] > 110) {
-					dietInfo['value_left'] = 110;
+				unitList = [item];
+			}
+			this.unitList = unitList;
+			return unitList;
+		},
+		async getFoodType(cond) {
+			// 食物类型
+			let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_diet_contents_select',
+				colNames: ['*'],
+				condition: [],
+				order: []
+			};
+			if (cond) {
+				req.condition = cond;
+			}
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
+				console.log(res.data.data);
+				this.foodType = res.data.data;
+			}
+			return res.data.data;
+		},
+		checkUnit(item, index) {
+			// 切换单位
+			this.currentUnitIndex = index;
+			let currentUnit = this.unitList[index];
+			console.log(this.currentDiet);
+			//TODO 动态改变热量
+			this.currentDiet.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
+			this.currentDiet.unit = item.unit;
+			this.buildCurrenDietChartOption();
+		},
+		async buildCurrenDietChartOption() {
+			let currentDiet = this.deepClone(this.currentDiet);
+			let dietRecordList = this.deepClone(this.dietRecord);
+			let foodType = [];
+			if (Array.isArray(this.foodType) && this.foodType.length > 0) {
+				foodType = this.deepClone(this.foodType);
+			} else {
+				let record = this.dietRecord;
+				let condition = null;
+				if (Array.isArray(record) && record.length > 0) {
+					let names = record.map(item => item.name);
+					condition = [
+						{
+							colName: 'name',
+							ruleType: 'in',
+							value: names.toString()
+						}
+					];
+					foodType = await this.getFoodType(condition);
 				}
 			}
-			return dietInfo;
+			foodType.forEach(food => {
+				if (currentDiet.name === food.name) {
+					currentDiet = { ...food, ...currentDiet };
+				}
+			});
+			this.energyListWrap = await this.buildDietData();
+			console.log(this.energyListWrap);
+			let energyList = this.deepClone(this.energyListWrap);
+			let eleArr = [];
+			energyList.forEach(item => {
+				item.matterList.forEach(ele => {
+					eleArr.push(ele);
+				});
+			});
+			let category = eleArr.map(item => {
+				return item.name;
+			});
+			let legendData = ['其它食物', '当前食物', 'NRV%达标线'];
+			let seriesData = legendData.map(le => {
+				let obj = {
+					name: le,
+					data: []
+				};
+				obj.type = 'bar';
+				obj.stack = '营养素';
+				let data = eleArr.map(item => {
+					let num = (item.value * 100) / Number(item.EAR);
+					num = parseFloat(num.toFixed(1));
+					return num;
+				});
+				switch (le) {
+					case '其它食物':
+						obj.data = eleArr.map(item => {
+							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
+							item.value = item.value - currentDiet[item.key];
+							let num = (item.value * 100) / Number(item.EAR);
+							num = parseFloat(num.toFixed(1));
+							if (typeof num === 'number' && num.toString() === 'NaN') {
+								num = 0;
+							}
+							return num;
+						});
+						break;
+					case '当前食物':
+						obj.data = eleArr.map(item => {
+							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
+							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
+							return num;
+						});
+						break;
+					case 'NRV%达标线':
+						obj.type = 'line';
+						obj.stack = false;
+						obj.data = eleArr.map(item => {
+							return 100;
+						});
+						break;
+				}
+				return obj;
+			});
+			let option = {
+				color: ['#92d050', '#f79646', '#4f81bd'],
+				title: {
+					text: ''
+				},
+				tooltip: {
+					show: false,
+					trigger: 'axis'
+				},
+				legend: {
+					data: legendData
+				},
+				grid: {
+					left: '3%',
+					right: '4%',
+					bottom: '3%',
+					top: '10%',
+					containLabel: true
+				},
+				xAxis: [
+					{
+						type: 'category',
+						data: category,
+						axisLabel: {
+							rotate: 70,
+							interval: 0,
+							fontSize: 10
+						}
+					}
+				],
+				yAxis: [
+					{
+						type: 'value',
+						axisLabel: {
+							formatter: `{value}%`
+						}
+					}
+				],
+				series: []
+			};
+			option.series = seriesData;
+			let result = {
+				option: option
+			};
+			this.currentDietChartData = result;
 		},
-		clickDietItem(item) {
+		async getNutrientRecommended() {
+			let self = this;
+			let url = this.getServiceUrl('health', 'srvhealth_nutrient_values_recommended_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_nutrient_values_recommended_select',
+				colNames: ['*'],
+				order: [
+					{
+						colName: 'nutrient',
+						orderType: 'desc' // asc升序  desc降序
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				let result = res.data.data.filter(item => {
+					if ((item.sex && item.sex.indexOf(self.userInfo.sex) !== -1) || !item.sex) {
+						if (item.age_start && item.age_end) {
+							return self.age >= item.age_start && self.age < item.age_end;
+						} else if (item.age_start && !item.age_end) {
+							return self.age >= item.age_start;
+						} else if (!item.age_start && !item.age_end) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				});
+				result.forEach(item => {
+					self.energyListWrap.forEach(energy => {
+						energy.matterList.forEach(mat => {
+							if (item.nutrient === mat.name || item.nutrient.indexOf(mat.name) !== -1) {
+								mat.UL = item.val_ul ? item.val_ul : mat.UL;
+								mat.EAR = item.val_rni ? item.val_rni : mat.EAR;
+								if (energy.title !== '水溶性维生素') {
+									mat.UL = item.val_ul ? item.val_ul : mat.UL;
+								} else {
+									mat.UL = 0;
+								}
+								if (mat.name === '蛋白') {
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.UL = 0;
+								}
+							} else {
+								if (mat.name === '脂肪') {
+									mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
+									mat.UL = 0;
+								}
+								if (mat.name === '碳水') {
+									mat.EAR = self.userInfo.weight * 4;
+									mat.UL = 0;
+								}
+							}
+						});
+					});
+				});
+				console.log(this.deepClone(self.energyListWrap));
+				return result;
+			}
+		},
+		/* 根据饮食记录查找食物**/
+		async getChooseFood(str) {
+			let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_diet_contents_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'name',
+						ruleType: 'in',
+						value: str
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			console.log('res-------', res.data.data);
+			return res.data.data;
+		},
+		async buildDietData() {
+			let data = this.dietRecord;
+			let strArr = [];
+			data.forEach(item => {
+				item['editable'] = false;
+				strArr.push(item.name);
+			});
+			let energyList = this.deepClone(this.energyListWrap);
+			let str = strArr.join();
+			let a = await this.getChooseFood(str);
+			if (Array.isArray(a) && a.length > 0) {
+				a.forEach(food => {
+					data.forEach(re => {
+						if (food.name === re.name) {
+							food['amount'] = food['amount'] ? food['amount'] + re.amount : re.amount;
+						}
+					});
+				});
+				let chooseFood = a;
+				if (chooseFood && chooseFood.length > 0) {
+					let eledata = '';
+					energyList.forEach(item => {
+						item.matterList.forEach(mat => {
+							mat.value = 0;
+							chooseFood.forEach(fod => {
+								for (let a in fod) {
+									if (mat.key && mat.key == a) {
+										mat.value = Number(mat.value) + Number(fod.amount) * Number(fod[a]);
+									}
+								}
+							});
+						});
+					});
+				}
+			}
+			return energyList;
+		},
+		async clickDietItem(item) {
+			let unitList = await this.getFoodUnit(item);
+			unitList.forEach((unit, index) => {
+				console.log(item, unit);
+				if (item.unit === unit.unit) {
+					this.currentUnitIndex = index;
+				}
+			});
 			this.showEditModal = true;
-			this.currentDiet = item;
+			this.currentDiet = this.deepClone(item);
+			this.buildCurrenDietChartOption();
 		},
 		async UpdateDietInfo() {
 			let self = this;
@@ -301,14 +574,17 @@ export default {
 				self.showEditModal = false;
 			}
 		},
-		changeCurrentVal(e) {
+		changeCurrentVal(e, step = 1) {
 			if (e === 'minus') {
 				if (this.currentDiet.amount >= 1) {
-					this.currentDiet.amount = this.currentDiet.amount - 0.5;
+					this.currentDiet.amount = Number((this.currentDiet.amount - step).toFixed(1));
+				} else {
+					return;
 				}
 			} else {
-				this.currentDiet.amount = this.currentDiet.amount + 0.5;
+				this.currentDiet.amount = Number((this.currentDiet.amount + step).toFixed(1));
 			}
+			this.buildCurrenDietChartOption();
 		},
 		toAddDiet() {
 			// 跳转到选餐页面
@@ -384,6 +660,7 @@ export default {
 			return res.data.data;
 		},
 		async getDietRecord() {
+			await this.getNutrientRecommended();
 			// 饮食记录
 			let url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
 			let req = {
@@ -431,7 +708,7 @@ export default {
 						dietList.push(item);
 					}
 				});
-				this.chartData.series = dietList.map(item => {
+				let series = dietList.map(item => {
 					return {
 						unit: item.unit,
 						name: item.name,
@@ -439,9 +716,8 @@ export default {
 						value: item[this.elementData.key] * item.amount
 					};
 				});
+				this.buildEchartsData(series);
 				_self.elementData.value_left = 0;
-				_self.elementData = _self.buildElemetBarData(_self.elementData);
-				this.buildEchartsData(this.chartData.series);
 				return this.dietRecord;
 			}
 		},
@@ -474,7 +750,7 @@ export default {
 				},
 				tooltip: {
 					trigger: 'item',
-					formatter: '{a}:{b}:{c}'+elementData.units+'({d}%)'
+					formatter: '{a}:{b}:{c}' + elementData.units + '({d}%)'
 				},
 				series: {
 					name: '食物占比',
@@ -558,6 +834,10 @@ export default {
 		height: 500rpx;
 		background-color: #ffffff;
 	}
+	.chart-box {
+		width: 100%;
+		height: 550rpx;
+	}
 	.charts-pie {
 		width: 100%;
 		height: 500upx;
@@ -575,9 +855,14 @@ export default {
 		width: 100vw;
 		.title-bar {
 			display: flex;
-			justify-content: space-between;
+			justify-content: center;
 			min-height: 80rpx;
 			align-items: center;
+			background-color: #fff;
+			.date {
+				font-size: 28rpx;
+				font-weight: bold;
+			}
 			.btn {
 				padding: 030rpx;
 				color: #0081ff;
@@ -586,8 +871,9 @@ export default {
 		}
 		.diet-info {
 			display: flex;
-			padding: 20rpx;
+			padding: 20rpx 0;
 			justify-content: space-around;
+			flex-wrap: wrap;
 			.img {
 				width: 200rpx;
 				height: 200rpx;
@@ -601,9 +887,38 @@ export default {
 				padding-left: 50rpx;
 				display: flex;
 				flex-direction: column;
+				.delete-icon {
+					padding: 10rpx 20rpx;
+					background-color: #fff;
+					font-size: 24rpx;
+					border-radius: 60rpx;
+					text-align: center;
+					transition: all 0.5s;
+					border: 1rpx solid #e54d42;
+					color: #f56c6c;
+					background: #fef0f0;
+					border-color: #fbc4c4;
+					&:active {
+						background-color: #e54d42;
+						color: #fff;
+						transform: scale(1.1);
+						box-shadow: 0 0 10px #e54d42;
+					}
+					.text {
+					}
+				}
+				.cuIcon-delete {
+					display: inline-block;
+					// height: 90rpx;
+					// line-height: 90rpx;
+					text-align: center;
+					border-radius: 100%;
+				}
 				.name {
 					font-weight: 700;
 					font-size: 16px;
+					display: flex;
+					justify-content: space-between;
 				}
 				.element {
 					color: #8dc63f;
@@ -620,46 +935,79 @@ export default {
 						font-size: 12px;
 					}
 				}
-				.amount {
+			}
+			.amount {
+				display: flex;
+				align-items: center;
+				.number-box {
 					display: flex;
-					align-items: center;
-					.number-box {
+					justify-content: center;
+					.title {
+						margin-right: 20rpx;
+					}
+					.input {
+						width: 120rpx;
+						height: 70rpx;
+						color: rgb(50, 50, 51);
+						font-size: 14px;
+						background: rgb(242, 243, 245);
+						text-align: center;
+						position: relative;
+						padding: 10rpx 0;
+						margin: 0 3px;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						border: 1px solid #dcdfe6;
+						border-radius: 10rpx;
+					}
+					.symbol {
+						border-radius: 10rpx;
+						margin: 0 5rpx;
+						padding: 10rpx 0;
+						background: #d6e2eb;
+						color: rgb(50, 50, 51);
+						width: 120rpx;
 						display: flex;
 						justify-content: center;
-						padding: 20rpx;
-						text {
-							background: rgb(242, 243, 245);
-							color: rgb(50, 50, 51);
-							width: 30px;
-							height: 27px;
-							line-height: 27px;
-							display: flex;
-							justify-content: center;
-							align-content: center;
-							font-size: 20px;
+						align-content: center;
+						font-size: 20px;
+						&:active {
+							// box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+							transform: scale(1.2);
 						}
-						input {
-							width: 100rpx;
-							color: rgb(50, 50, 51);
-							font-size: 14px;
-							background: rgb(242, 243, 245);
-							height: 27px;
-							width: 43px;
-							text-align: center;
-							position: relative;
-							padding: 0;
-							margin: 0 3px;
-							display: flex;
-							align-items: center;
-							justify-content: center;
-						}
-						.symbol {
-							&:active {
-								// box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-								transform: scale(1.5);
-							}
+						&:last-child {
+							margin-right: 0;
 						}
 					}
+				}
+			}
+			.unit-box {
+				width: 100%;
+				display: flex;
+				padding: 20rpx;
+				flex-wrap: wrap;
+				.title {
+					margin-right: 20rpx;
+				}
+				.unit-item {
+					margin-right: 5px;
+					background-color: #f8f8f8;
+					color: #999;
+					border-radius: 20px;
+					border: 1px solid #999;
+					padding: 0px 8px;
+					min-height: 27px;
+					display: flex;
+					align-items: center;
+					margin-bottom: 5px;
+					font-size: 20rpx;
+				}
+				.active-unit {
+					font-size: 26rpx;
+					border: 1px solid #f37b1d;
+					background-color: #f37b1d;
+					color: #fff;
 				}
 			}
 		}
@@ -669,22 +1017,19 @@ export default {
 			color: #999;
 			border-top: 1px solid #f1f1f1;
 			display: flex;
-			justify-content: center;
+			justify-content: space-between;
 			align-items: center;
 			font-size: 50rpx;
-			height: 150rpx;
-			.cuIcon-delete {
-				display: inline-block;
-				height: 80rpx;
-				line-height: 80rpx;
+			margin-bottom: 50rpx;
+			.btn {
+				padding: 10rpx 30rpx;
+				border-radius: 10rpx;
+				font-size: 28rpx;
+				flex: 1;
+				margin-right: 20rpx;
 				text-align: center;
-				width: 80rpx;
-				border-radius: 100%;
-				border: #666 1px solid;
-				color: #666;
-				&:active {
-					box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-					transform: scale(1.1);
+				&:last-child {
+					margin-right: 0rpx;
 				}
 			}
 		}
@@ -852,7 +1197,7 @@ export default {
 		background-color: #fff;
 		min-height: 80rpx;
 		border-top: 1rpx solid #f1f1f1;
-
+		white-space: nowrap;
 		&:first-child {
 			text-indent: 20px;
 			justify-content: flex-start;

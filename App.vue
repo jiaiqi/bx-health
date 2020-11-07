@@ -272,11 +272,11 @@ radio.radio .uni-radio-input-checked::after {
 	/* #endif */
 }
 uni-page-head .uni-page-head {
-  display: none;
+  // display: none;
 }
 uni-app uni-page-head {
   // display: none;
-  display: none;
-  box-sizing: border-box;
+  // display: none;
+  // box-sizing: border-box;
 }
 </style>

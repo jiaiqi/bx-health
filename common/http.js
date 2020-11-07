@@ -140,6 +140,7 @@ fly.interceptors.response.use(
 		}
 	},
 	(err) => {
+		//发生网络错误后会走到这里
 		if (err.status === 429) {
 			// too many request
 			uni.showToast({
@@ -147,8 +148,6 @@ fly.interceptors.response.use(
 				icon: "none"
 			})
 		}
-		//发生网络错误后会走到这里
-		//return Promise.resolve("ssss")
 	}
 )
 export default fly

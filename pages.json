@@ -54,8 +54,22 @@
 			"pages": [{
 				"path": "old-home/old-home",
 				"style": {
-					"navigationStyle": "custom",
 					"navigationBarTitleText": "健康档案",
+					"enablePullDownRefresh": false
+				}
+			}, {
+				"path": "archives-history/archives-history",
+				"style": {
+					"navigationBarTitleText": "健康记录",
+					"navigationStyle": "custom",
+					"enablePullDownRefresh": false
+				}
+
+			},
+			{
+				"path": "illnessDetaiList/illnessDetaiList",
+				"style": {
+					"navigationBarTitleText": "相关病症",
 					"enablePullDownRefresh": false
 				}
 			}]
@@ -239,6 +253,10 @@
 				},
 				{
 					"path": "chooseFood/chooseFood",
+					"style": {}
+				},
+				{
+					"path": "chooseFood/myFoodList",
 					"style": {}
 				},
 				// {

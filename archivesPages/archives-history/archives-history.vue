@@ -1,0 +1,1031 @@
+<template>
+	<view class="history-wrap">
+		<u-navbar back-text="返回" :back-text-style="backTextStyle" :back-icon-color="backTextStyle.color" :title="pageName" :background="navBackground" title-color="#fff"></u-navbar>
+		<view class="history-chart" v-if="isAllPages"><uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" :ec="echartsData"></uniEcCharts></view>
+		<view class="button-box">
+			<button class="button" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
+				{{ item.name }}
+			</button>
+		</view>
+		<view class="history-box" v-if="pageType">
+			<!-- <view class="history-title">{{ currentType }}</view> -->
+			<view class="history-content"><dietList :key="pageType" @changePageType="changePageType" :pageType="pageType" v-if="pageType"></dietList></view>
+		</view>
+		<u-popup v-model="showTypePopup" border-radius="40" mode="top" closeable>
+			<view class="switch-type-box">
+				<view class="type-item cu-btn round" :class="{ 'bg-blue': item.name === currentType }" v-for="item in typeList" :key="item.name" @click="currentType = item.name">
+					{{ item.name }}
+				</view>
+			</view>
+		</u-popup>
+	</view>
+</template>
+
+<script>
+import uniEcCharts from '@/archivesPages/components/uni-ec-canvas/uni-echart.vue';
+import energyListWrap from './totalEnergyList.js';
+import dietList from '@/archivesPages/components/balancedDiet/balancedDiet';
+var dayjs = require('dayjs');
+export default {
+	components: {
+		uniEcCharts,
+		dietList
+	},
+	data() {
+		return {
+			isAllPages:false,
+			backTextStyle: {
+				width: '100rpx',
+				color: '#fff'
+			},
+			navBackground: {
+				backgroundColor: '#0bc99d'
+			},
+			showTypePopup: false,
+			subList: [
+				{ name: '步数', key: 'step', chartID: 'stepChart' },
+				{ name: '体重', key: 'weight', chartID: 'canvasLineA' },
+				{ name: '血压', key: 'BP', chartID: 'canvasLineB' },
+				{ name: '热量', key: 'calories', chartID: 'canvasColumnD' },
+				{ name: '睡眠', key: 'sleep', chartID: 'canvasLineC' }
+			],
+			currentChart: 'stepChart',
+			typeList: [
+				{
+					name: '饮食'
+				},
+				{
+					name: '运动'
+				},
+				{
+					name: '睡眠'
+				},
+				{
+					name: '症状'
+				},
+				{
+					name: '心理'
+				},
+				{
+					name: '其它'
+				}
+			],
+			chartData: {},
+			currentType: '饮食',
+			currentDate: 0,
+			energyListWrap: [],
+			loginUserInfo: {},
+			userInfo: {},
+			wxUserInfo: {},
+			weightChartData: {
+				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
+				series: [
+					{
+						name: '体重',
+						data: [73, 75, 73.5, 74.5, 75, 73.5],
+						color: '#1890ff'
+					}
+				]
+			},
+			BPChartData: {
+				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
+				series: [
+					{
+						name: '收缩压',
+						data: [117, 115, 121, 105, 110, 115],
+						color: '#2fc25b'
+					},
+					{
+						name: '舒张压',
+						data: [71, 75, 73, 77, 79, 75],
+						color: '#facc14'
+					}
+				]
+			},
+			caloriesChartData: {
+				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
+				series: [
+					{
+						name: '饮食',
+						data: [1314, 1124, 1300, 1215, 1001, 1416],
+						color: '#ff9900'
+					},
+					{
+						name: '运动',
+						data: [234, 315, 517, 145, 357, 241],
+						color: '#8dc63f'
+					}
+				]
+			},
+			sleepChartData: {
+				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
+				series: [
+					{
+						name: '睡眠',
+						data: [7.5, 8, 7.5, 7, 6, 8.5],
+						color: '#8543e0'
+					}
+				]
+			},
+			wxRunData: {},
+			stepInfoList: [],
+			pageType: '',
+			pageName: ''
+		};
+	},
+	computed: {
+		echartsData() {
+			return this.deepClone(this.chartData);
+		}
+	},
+	methods: {
+		changePageType(e) {
+			this.pageType = e;
+			switch (e) {
+				case 'sport':
+					this.pageName = '运动记录';
+					this.showCanvas('step');
+					break;
+				case 'diet':
+					this.pageName = '饮食记录';
+					this.showCanvas('calories');
+					break;
+				case 'weight':
+					this.pageName = '体重记录';
+					this.showCanvas('weight');
+					break;
+			}
+		},
+		showCanvas(type) {
+			// 显示图表
+			switch (type) {
+				case 'step':
+					this.pageType = 'sport';
+					if (this.currentChart === 'stepChart') {
+					} else {
+						this.currentChart = 'stepChart';
+						this.getwxStepInfoList();
+					}
+					this.currentType = '运动';
+					break;
+				case 'weight':
+					this.pageType = 'weight';
+					if (this.currentChart === 'canvasLineA') {
+						// this.currentChart = '';
+					} else {
+						this.currentChart = 'canvasLineA';
+						this.getChartData('weight').then(_ => {
+							this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
+						}); // 体重
+					}
+					this.currentType = '体重';
+					break;
+				case 'BP':
+					this.pageType = 'bp';
+					if (this.currentChart === 'canvasLineB') {
+						// this.currentChart = '';
+					} else {
+						this.currentChart = 'canvasLineB';
+						this.getChartData('bloodPressure').then(_ => {
+							this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+						}); // 血压
+					}
+					this.currentType = '血压';
+					break;
+				case 'sleep':
+					if (this.currentChart === 'canvasLineC') {
+					} else {
+						this.currentChart = 'canvasLineC';
+						this.chartData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
+					}
+					this.pageType = 'sleep';
+					this.currentType = '睡眠';
+					break;
+				case 'calories':
+					this.pageType = 'diet';
+					if (this.currentChart === 'canvasColumnD') {
+					} else {
+						this.currentChart = 'canvasColumnD';
+						this.getDietSportRecordList().then(_ => {
+							this.chartData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
+						});
+					}
+					this.currentType = '饮食';
+					break;
+			}
+		},
+		/**
+		 * @param {object}  = [chartData]
+		 * @param {string}  = [unit] -单位
+		 * @param {string}  = [title]
+		 */
+		buildEcData(chartData = { categories: [], series: [] }, unit, title) {
+			let option = {
+				title: {
+					text: title
+				},
+				tooltip: {
+					trigger: 'axis',
+					formatter: '{b}\r\n{c0}' + unit,
+					axisPointer: {
+						type: 'line',
+						axis: 'x',
+						label: {
+							backgroundColor: '#000000'
+						}
+					}
+				},
+				grid: {
+					left: '6%',
+					right: '6%',
+					top: '20%',
+					bottom: '6%',
+					containLabel: true
+				},
+				xAxis: {
+					type: 'category',
+					boundaryGap: false,
+					data: chartData.categories,
+					axisLine: {
+						// y轴
+						show: true
+					},
+					axisTick: {
+						// y轴刻度线
+						show: true
+					},
+					splitLine: {
+						// 网格线
+						show: true
+					}
+				},
+				yAxis: {
+					type: 'value',
+					axisLine: {
+						// y轴
+						show: true
+					},
+					axisTick: {
+						// y轴刻度线
+						show: true
+					},
+					splitLine: {
+						// 网格线
+						show: true
+					}
+				},
+				series: []
+			};
+			option.series = [];
+			chartData.series.forEach(item => {
+				let obj = {
+					name: item.name,
+					type: 'line',
+					smooth: true,
+					itemStyle: {
+						color: item.color
+					},
+					label: { show: true },
+					data: item.data
+				};
+				if (item.data.length > 10) {
+					option.dataZoom = [
+						{
+							type: 'inside',
+							start: 80,
+							end: 100
+						}
+					];
+				} else {
+					option.dataZoom = [
+						{
+							type: 'inside',
+							start: 0,
+							end: 100
+						}
+					];
+				}
+				option.series.push(obj);
+			});
+			let data = {
+				option: option
+			};
+			return data;
+		},
+		async selectServiceLog() {
+			// 查找服务记录编号
+			let serviceName = 'srvhealth_service_record_select';
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: 'srvhealth_service_record_select',
+				colNames: ['*'],
+				condition: [{ colName: 'user_info_no', ruleType: 'like', value: this.userInfo.no }],
+				page: { pageNo: 1, rownumber: 100 }
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				// 请求成功
+				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+					// 有记录
+					this.serviceLog = res.data.data[0];
+				} else {
+					// 没有记录，添加记录
+					await this.addServiceLog();
+				}
+			}
+		},
+		async addServiceLog() {
+			// 创建服务记录
+			let serviceName = 'srvhealth_service_record_add';
+			let url = this.getServiceUrl('health', serviceName, 'operate');
+			let req = [
+				{
+					serviceName: 'srvhealth_service_record_add',
+					condition: [],
+					data: [{ user_info_no: this.userInfo.no, user_no: this.userInfo.userno, name: this.userInfo.name, time: this.formateDate(new Date(), 'dateTimes') }]
+				}
+			];
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				await this.selectServiceLog();
+			}
+		},
+		async getChartData(type) {
+			//
+			let serviceObj = {
+				weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
+				bloodPressure: 'srvhealth_blood_pressure_record_select' // 血压
+			};
+			let serviceName = serviceObj[type];
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: serviceName,
+				colNames: ['*'],
+				condition: [{ colName: 'service_no', ruleType: 'like', value: this.serviceLog.no }],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'asc' // asc升序  desc降序
+					}
+				],
+				page: {
+					rownumber: 7
+				}
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				let series = [];
+				if (type === 'weight') {
+					series = this.weightChartData.series;
+					series[0].data = res.data.data.map(item => {
+						return item.weight;
+					});
+					this.weightChartData.series = series;
+					this.weightChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
+					this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
+				} else if (type === 'bloodPressure') {
+					series = this.BPChartData.series;
+					series[0].data = res.data.data.map(item => {
+						return item.systolic_pressure;
+					});
+					series[1].data = res.data.data.map(item => item.diastolic_pressure);
+					this.BPChartData.series = series;
+					this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
+					this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+				}
+			}
+		},
+		async getDietSportRecordList() {
+			// 查找最近七天的饮食记录和运动记录，展示为柱状图
+			let serveList = [
+				'srvhealth_diet_record_select', //饮食
+				'srvhealth_body_activity_record_select' //运动
+			];
+			let resultData = {};
+			let timeRange = {
+				start: '',
+				end: ''
+			};
+			timeRange.end = dayjs()
+				.add(1, 'days')
+				.format('YYYY-MM-DD');
+			timeRange.start = dayjs()
+				.subtract(6, 'days')
+				.format('YYYY-MM-DD');
+			console.log('timeRange', timeRange);
+			for (let i in serveList) {
+				let serviceName = serveList[i];
+				let url = this.getServiceUrl('health', serviceName, 'select');
+				let req = {
+					serviceName: serviceName,
+					colNames: ['*'],
+					condition: [
+						{ colName: 'userno', ruleType: 'like', value: this.loginUserInfo.user_no },
+						{ colName: 'user_name', ruleType: 'like', value: this.userInfo.name },
+						{ colName: 'hdate', ruleType: 'gt', value: timeRange.start },
+						{ colName: 'hdate', ruleType: 'lt', value: timeRange.end }
+					]
+				};
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data)) {
+					resultData[serviceName] = res.data.data;
+				}
+			}
+			resultData = {
+				diet: resultData.srvhealth_diet_record_select,
+				sport: resultData.srvhealth_body_activity_record_select
+			};
+			let dateList = [];
+			let series = [
+				{
+					name: '饮食',
+					data: [0, 0, 0, 0, 0, 0, 0],
+					color: '#ff9900'
+				},
+				{
+					name: '运动',
+					data: [0, 0, 0, 0, 0, 0, 0],
+					color: '#8dc63f'
+				}
+			];
+			Object.keys(resultData).forEach(key => {
+				const data = resultData[key];
+				data.forEach(item => {
+					for (let i = 0; i < 7; i++) {
+						let day = dayjs()
+							.subtract(i, 'days')
+							.format('YYYY-MM-DD');
+						dateList[i] = day;
+						if (item.hdate === day) {
+							if (key === 'diet') {
+								series[0].data[i] += item.energy;
+							} else if (key === 'sport') {
+								series[1].data[i] += item.energy;
+							}
+						}
+					}
+				});
+			});
+			this.caloriesChartData.categories = dateList
+				.map(item => {
+					return item.slice(5);
+				})
+				.reverse();
+			console.log(series);
+			series = series.map(item => {
+				item.data = item.data.reverse();
+				return item;
+			});
+			this.caloriesChartData.series = series;
+		},
+		async getwxStepInfoList() {
+			// 获取微信运动记录
+			// #ifdef MP-WEIXIN
+			let result = await wx.getWeRunData();
+			if (result.errMsg === 'getWeRunData:ok') {
+				// this.wxRunData = result;
+				this.decryptData(result);
+			}
+			// #endif
+		},
+		async decryptData(result) {
+			// 解密微信加密数据
+			if (result.encryptedData && result.iv) {
+				let url = this.getServiceUrl('wx', 'srvwx_app_data_decrypt', 'operate');
+				let req = [
+					{
+						data: [
+							{
+								encryptedData: result.encryptedData,
+								signature: result.iv
+							}
+						],
+						serviceName: 'srvwx_app_data_decrypt'
+					}
+				];
+				let res = await this.$http.post(url, req);
+				if (res.data.state == 'SUCCESS' && Array.isArray(res.data.response) && res.data.response.length > 0) {
+					let stepList = res.data.response[0].response.stepInfoList;
+					if (Array.isArray(stepList)) {
+						stepList = stepList.map(item => {
+							item.date = this.formateDate(item.timestamp * 1000);
+							return item;
+						});
+						console.log('stepList', this.deepClone(stepList));
+						this.stepInfoList = stepList;
+						let chartData = { categories: [], series: [{}] };
+						chartData.categories = stepList.map(item => item.date.slice(5));
+						chartData.series[0] = {
+							name: '近31日运动步数',
+							data: [],
+							color: '#1e4cf3'
+						};
+						chartData.series[0].data = stepList.map(item => item.step);
+						this.wxRunData = chartData;
+						this.chartData = this.buildEcData(this.wxRunData, '步', '步数');
+						return stepList;
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		},
+		async getNutrientRecommended() {
+			let url = this.getServiceUrl('health', 'srvhealth_nutrient_values_recommended_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_nutrient_values_recommended_select',
+				colNames: ['*'],
+				order: [
+					{
+						colName: 'nutrient',
+						orderType: 'desc' // asc升序  desc降序
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				let result = res.data.data.filter(item => {
+					if ((item.sex && item.sex.indexOf(self.userInfo.sex) !== -1) || !item.sex) {
+						if (item.age_start && item.age_end) {
+							return self.age >= item.age_start && self.age < item.age_end;
+						} else if (item.age_start && !item.age_end) {
+							return self.age >= item.age_start;
+						} else if (!item.age_start && !item.age_end) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				});
+				result.forEach(item => {
+					self.energyListWrap.forEach(energy => {
+						energy.matterList.forEach(mat => {
+							if (item.nutrient === mat.name || item.nutrient.indexOf(mat.name) !== -1) {
+								// mat.EAR = item.val_ear ? item.val_ear : mat.EAR;
+								mat.UL = item.val_ul ? item.val_ul : mat.UL;
+								mat.EAR = item.val_rni ? item.val_rni : mat.EAR;
+								if (energy.title !== '水溶性维生素') {
+									mat.UL = item.val_ul ? item.val_ul : mat.UL;
+								} else {
+									mat.UL = 0;
+								}
+								if (mat.name === '蛋白') {
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.UL = 0;
+								}
+							} else {
+								if (mat.name === '脂肪') {
+									mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
+									mat.UL = 0;
+								}
+								if (mat.name === '碳水') {
+									mat.EAR = self.userInfo.weight * 4;
+									mat.UL = 0;
+								}
+							}
+						});
+					});
+				});
+				return result;
+			}
+		},
+		async getDietRecord(chooseDate = null) {
+			//饮食记录
+			if (chooseDate) {
+				this.selectDate = chooseDate;
+			}
+			let url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_diet_record_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'userno',
+						ruleType: 'like',
+						value: this.loginUserInfo.user_no
+					},
+					{
+						colName: 'user_name',
+						ruleType: 'like',
+						value: this.userInfo.name
+					},
+					{
+						colName: 'hdate',
+						ruleType: 'like',
+						value: chooseDate ? chooseDate.trim() : this.selectDate.trim()
+					}
+				],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'desc'
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			let energyList = this.energyListWrap;
+			energyList.forEach(item => {
+				item.matterList.forEach(mat => {
+					mat['value_left'] = 0;
+					mat['right_width'] = 30;
+					mat['left_width'] = (90 * mat.EAR) / mat.UL;
+					mat['center_width'] = 90 - (90 * mat.EAR) / mat.UL;
+					if (item.title === '水溶性维生素') {
+						mat['right_width'] = 0;
+						mat['left_width'] = 30;
+						mat['center_width'] = 90;
+					}
+					if (item.title === '有机大分子') {
+						mat['right_width'] = 0;
+						mat['left_width'] = 50;
+						mat['center_width'] = 70;
+					}
+					if (mat.center_width * 3 < mat.left_width || mat.center_width * 3 < mat.right_width) {
+						mat.left_width = mat.left_width - mat['center_width'];
+						mat.right_width = mat.right_width - mat['center_width'];
+						mat['center_width'] = 3 * mat['center_width'];
+					}
+				});
+			});
+			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
+				let dietIn = 0;
+				res.data.data.forEach(item => {
+					dietIn += item.energy;
+				});
+				this.dietIn = dietIn;
+				uni.$emit('dietInChange', dietIn);
+				console.log(this.foodType);
+				this.dietRecord = res.data.data;
+			} else if (res.data.state === 'SUCCESS' && res.data.data.length === 0) {
+				this.dietRecord = [];
+				this.dietIn = 0;
+				this.energyListWrap.forEach(i => {
+					i.matterList.forEach(at => {
+						at.value = 0;
+					});
+				});
+			}
+			this.energyListWrap = await this.buildDietData();
+			this.energyList = this.deepClone(energyList);
+			this.changeSub(4);
+			return res.data.data;
+		},
+		async getBaseInfo() {
+			// 使用user_no查找基本信息
+			await this.getNutrientRecommended();
+			this.getDietRecord().then(res => {
+				let condition = null;
+				if (Array.isArray(res) && res.length > 0) {
+					let names = res.map(item => item.name);
+					condition = [
+						{
+							colName: 'name',
+							ruleType: 'in',
+							value: names.toString()
+						}
+					];
+					this.getFoodType(condition);
+				}
+			});
+		},
+		async getFoodType(cond) {
+			// 食物类型
+			let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_diet_contents_select',
+				colNames: ['*'],
+				condition: [],
+				order: []
+			};
+			if (cond) {
+				req.condition = cond;
+			}
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
+				console.log(res.data.data);
+				this.foodType = res.data.data;
+			}
+			return res.data.data;
+		},
+		async getUserInfo() {
+			let url = this.$api.getUserInfo;
+			let req = {
+				serviceName: 'srvwx_basic_user_info_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'app_no',
+						ruleType: 'eq',
+						value: this.$api.appNo.wxmp
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				const userInfo = res.data.data[0];
+				this.wxUserInfo = userInfo;
+				uni.setStorageSync('wxUserInfo', userInfo);
+				if (userInfo.headimgurl) {
+					this.src = userInfo.headimgurl;
+				}
+			} else {
+				// 没有用户信息
+			}
+		},
+		async initPage() {
+			let userInfo = uni.getStorageSync('login_user_info');
+			if (userInfo && userInfo.user_no) {
+				this.loginUserInfo = userInfo;
+				// #ifdef MP-WEIXIN
+				let res = await wx.getSetting();
+				if (!res.authSetting['scope.userInfo']) {
+					// 没有获取用户信息授权
+					uni.showModal({
+						title: '提示',
+						content: '请登录并授权获取用户信息后再进行查看',
+						confirmText: '去登录',
+						confirmColor: '#02D199',
+						success(res) {
+							if (res.confirm) {
+								// 确认 跳转到登录页
+								uni.navigateTo({
+									url: '/publicPages/accountExec/accountExec'
+								});
+							} else if (res.cancel) {
+								// 取消 返回首页
+								uni.switchTab({
+									url: '/pages/pedia/pedia'
+								});
+							}
+						}
+					});
+					return;
+				}
+				// #endif
+				if (!userInfo || !uni.getStorageSync('isLogin')) {
+					// 未登录
+					const result = await wx.login();
+					if (result.code) {
+						this.code = result.code;
+						await this.wxLogin({ code: result.code });
+						await this.initPage();
+					}
+				} else {
+					this.isLogin = true;
+				}
+				if (userInfo && userInfo.user_no) {
+					this.loginUserInfo = userInfo;
+					uni.setStorageSync('activeApp', 'health');
+					await this.getCurrUserInfo(); // 查找健康app个人基本信息
+					if (uni.getStorageSync('current_user_info')) {
+						this.userInfo = uni.getStorageSync('current_user_info');
+					} else {
+						let userList = uni.getStorageSync('user_info_list');
+						if (Array.isArray(userList) && userList.length > 0) {
+							let name = uni.getStorageSync('current_user');
+							if (name) {
+								userList.forEach(item => {
+									if (item.name === name) {
+										uni.setStorageSync('current_user', item.name);
+										uni.setStorageSync('current_user_info', item);
+										this.userInfo = item;
+									}
+								});
+							} else {
+								uni.setStorageSync('current_user_info', userList[0]);
+								uni.setStorageSync('current_user', userList[0].name);
+								this.userInfo = userList[0];
+							}
+						}
+					}
+					if (!this.wxUserInfo) {
+						await this.getUserInfo(); //查找微信用户基本信息
+					}
+					if (!this.serviceLog) {
+						await this.selectServiceLog();
+					}
+					// #ifdef MP-WEIXIN
+					this.currentChart = 'stepChart';
+					this.getwxStepInfoList().then(_ => {
+						//获取微信运动记录
+					});
+					// #endif
+				}
+			}
+			switch (this.pageType) {
+				case 'diet':
+					this.pageName = '饮食记录';
+					this.showCanvas('calories');
+					break;
+				case 'sport':
+					this.pageName = '运动记录';
+					// #ifdef H5
+					this.showCanvas('calories');
+					// #endif
+					// #ifdef MP-WEIXIN
+					this.showCanvas('step');
+					// #endif
+					break;
+				case 'weight':
+					this.pageName = '体重记录';
+					this.showCanvas('weight');
+					break;
+				case 'bp':
+					this.pageName = '血压记录';
+					this.showCanvas('BP');
+					break;
+				case 'sleep':
+					this.pageName = '睡眠记录';
+					this.showCanvas('sleep');
+					break;
+				case 'all':
+					this.pageName = '历史记录';
+					// #ifdef MP-WEIXIN
+					this.showCanvas('step');
+					// #endif
+					// #ifdef H5
+					this.showCanvas('weight');
+					// #endif
+					break;
+			}
+		},
+		/*查询当前登录人创建得用户信息**/
+		async getCurrUserInfo() {
+			self = this;
+			const url = self.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_person_info_select',
+				colNames: ['*'],
+				condition: [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'asc'
+					}
+				]
+			};
+			const res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				// 有数据
+				if (uni.getStorageSync('current_user')) {
+					res.data.data.forEach(item => {
+						if (item.name === uni.getStorageSync('current_user')) {
+							uni.setStorageSync('current_user', item.name);
+						}
+					});
+				} else {
+					uni.setStorageSync('current_user_info', res.data.data[0]);
+				}
+				uni.setStorageSync('user_info_list', res.data.data);
+				self.userMenuList = res.data.data;
+				return res.data.data;
+			} else if (res.data.resultCode === '0011') {
+				// 登录失效 进行静默登录
+				this.isLogin = false;
+				const result = await wx.login();
+				if (result.code) {
+					this.code = result.code;
+					await this.wxLogin({ code: result.code });
+					await this.initPage();
+				}
+			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
+				// 没有角色 提示跳转到创建角色页面
+				uni.showModal({
+					title: '提示',
+					content: '当前账号未登记个人信息，即将跳转到信息登记页面',
+					showCancel: false,
+					success(res) {
+						if (res.confirm) {
+							let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+							uni.navigateTo({
+								url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
+							});
+						}
+					}
+				});
+			}
+		}
+	},
+	onShow() {
+		this.initPage();
+	},
+	onLoad(option) {
+		if(option.isAll){
+			this.isAllPages = true
+		}
+		if (option.pageType) {
+			this.pageType = option.pageType;
+		}
+	}
+};
+</script>
+
+<style scoped lang="scss">
+.history-wrap {
+	.switch-type {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		padding-right: 20rpx;
+	}
+	.top {
+		padding: 20rpx;
+		display: flex;
+		justify-content: space-between;
+		background-color: #fff;
+		width: 100%;
+		// margin-bottom: 20rpx;
+		min-height: 80rpx;
+		align-items: center;
+		.cuIcon-triangledownfill {
+			font-size: 54rpx;
+		}
+	}
+}
+.history-chart {
+	padding: 20rpx;
+	background-color: #fff;
+}
+.history-box {
+	background-color: #fff;
+	// padding: 20rpx;
+	font-size: 30rpx;
+	font-weight: 700;
+	.history-content {
+		width: 100%;
+	}
+}
+.date-switch {
+	padding: 20rpx;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #fff;
+	.button-item {
+		flex: 1;
+		text-align: center;
+		margin-right: 20rpx;
+		background-color: #fff;
+		color: #333;
+		&.bg-blue {
+			background-color: #0081ff;
+			color: #fff;
+		}
+		&:last-child {
+			margin-right: 0;
+		}
+	}
+}
+.history-chart {
+	width: 100%;
+	height: 400rpx;
+	.uni-ec-charts {
+		width: 100%;
+		height: 100%;
+	}
+}
+
+.switch-type-box {
+	padding: 80rpx 50rpx 80rpx;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	.type-item {
+		min-width: 100rpx;
+		height: 60rpx;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin-right: 10rpx;
+		margin-bottom: 10rpx;
+		&:last-child {
+			margin-right: 0;
+		}
+	}
+}
+.button-box {
+	background-color: #fff;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100rpx;
+	.button {
+		flex: 1;
+		margin: 0 10rpx 10rpx;
+		padding: 0;
+		height: 50rpx;
+		line-height: 50rpx;
+		&.active {
+			background-color: #007aff;
+			color: #fff;
+		}
+	}
+}
+</style>

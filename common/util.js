@@ -3,9 +3,6 @@ export default {
 	install(Vue, options) {
 		Vue.prototype.$bus = bus
 		Vue.prototype.pageTitle = '加载中…' // 可以自定义变量
-		/**
-		 * 登录相关
-		 */
 
 		/**
 		 *@param {Array} loginInfoList 要存储的登录信息 [{key:'',value:''}]
@@ -15,7 +12,6 @@ export default {
 				uni.setStorageSync(item.key, item.value)
 			})
 		}
-
 		Vue.prototype.$logout = function() {
 			try {
 				uni.clearStorageSync();
@@ -38,7 +34,6 @@ export default {
 			if (order) {
 				selectRequestObj['order'] = order
 			}
-
 			return selectRequestObj
 		}
 		/**
@@ -88,7 +83,6 @@ export default {
 						if ('rowButton' in response.data.data) {
 							// response.data.data._footerBtns = this.getFooterBtns(response.data.data.rowButton)
 						}
-
 						// 第一次拿到，缓存
 						let pageconfig = Vue.prototype.getPageConfig(response.data.data, pageType)
 						self.$store.commit('setSrvCol', pageconfig)

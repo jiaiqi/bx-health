@@ -25,8 +25,11 @@
 				</view>
 			</view>
 			<view class="ele-text-wrap">
+				<view class="ele-text-top-tit">
+					<text @click="changeCate(item,index)" v-for="(item,index) in categoryTop" :key="index" :class="categoryTopIndex === index?'active-text-top-tit':''">{{item.name}}</text>					
+				</view>
 				<!-- <view class="ele-text-top">主要维生素含量如下：</view> -->
-				<!-- <view class="ele-text-cen">
+				<view v-if="categoryTopIndex === 0" class="ele-text-cen">
 					<view class="ele-text-cen-item">
 						<view class="ele-text-cen-item-title">产能营养素</view>
 						<view class="ele-text-cen-item-cen">
@@ -143,22 +146,23 @@
 							</view>
 						</view> 
 					</view>
-				</view> -->
-				<uniEcCanvas v-if="echartsIsShow" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+				</view>
+				<!-- #ifdef MP-WEIXIN -->
+					<uniEcCanvas v-if="echartsIsShow && categoryTopIndex === 1" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+				<!-- #endif -->
+				<!-- #ifdef H5 -->
+					<uniEcharts v-if="echartsIsShow && categoryTopIndex === 1" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
+				<!-- #endif -->
 			</view>
-			<view class="calculate">	
-				
-					<view  class="weight">
-						<view class="calculate-l">
-							单位：
-						</view>
-						<view @click="chooseUnit(u,ids)" v-for="(u,ids) in unitList" :key="ids" :class="currIndex==ids?'active-unit':''" class="unit">
-							{{u.unit_amount?u.unit_amount+u.unit:u.unit}}
-							<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
-						</view>
-						<!-- <view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view> -->
+			<view class="calculate">
+				<view class="weight">
+					<view class="calculate-l">单位：</view>
+					<view @click="chooseUnit(u, ids)" v-for="(u, ids) in unitList" :key="ids" :class="currIndex == ids ? 'active-unit' : ''" class="unit">
+						{{ u.unit_amount ? u.unit_amount + u.unit : u.unit }}
+						<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
 					</view>
-				
+					<!-- <view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view> -->
+				</view>
 			</view>
 			<view class="amount">
 				<view class="input-box">
@@ -196,15 +200,15 @@
 </template>
 
 <script>
-	// #ifdef MP-WEIXIN
-	import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
-	// #endif
-	// #ifdef H5
-	import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
-	// #endif
+// #ifdef MP-WEIXIN
+import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
+// #endif
+// #ifdef H5
+import uniEcharts from '@/otherPages/components/uni-ec-canvas/uni-echarts.vue';
+// #endif
 export default {
 	name: 'chooseFood',
-	components:{
+	components: {
 		// #ifdef MP-WEIXIN
 		uniEcCanvas,
 		// #endif
@@ -216,6 +220,14 @@ export default {
 		return {
 			unitList: [],
 			list: [],
+			categoryTop:[{
+				name:'营养素含量',
+				type:'purity'
+			},{
+				name:'NRV%占比',
+				type:'NRV'
+			}],
+			categoryTopIndex:0,
 			currFood: '',
 			heatNum: '',
 			nowDate: this.formateDate(new Date(), 'date').replace(/\s*/g, ''),
@@ -227,61 +239,78 @@ export default {
 			chooseFoods: [],
 			value1: 0,
 			modalName: '',
-			nutrientData:[{
-				name:'蛋白质',
-				key:'protein'
-			},{
-				name:'碳水化合物',
-				key:'carbohydrate'
-			},{
-				name:'脂肪',
-				key:'axunge'
-			},{
-				name:'VA',
-				key:'vitamin_a'
-			},{
-				name:'VE',
-				key:'vitamin_e'
-			},{
-				name:'VB1',
-				key:'vitamin_b1'
-			},{
-				name:'VB2',
-				key:'vitamin_b2'
-			},{
-				name:'VB3',
-				key:'vitamin_b3'
-			},{
-				name:'钙',
-				key:'element_ca'
-			},{
-				name:'镁',
-				key:'element_mg'
-			},{
-				name:'磷',
-				key:'element_p'
-			},{
-				name:'钾',
-				key:'element_k'
-			},{
-				name:'铁',
-				key:'element_fe'
-			},{
-				name:'锌',
-				key:'element_se'
-			},{
-				name:'铜',
-				key:'element_cu'
-			},{
-				name:'锰',
-				key:'element_mn'
-			}],
-			echartsIsShow:false,
-			stepData:{
-				option:{
-					color: ['#92d050','#4f81bd','#f79646'],
+			nutrientData: [
+				{
+					name: '蛋白质',
+					key: 'protein'
+				},
+				{
+					name: '碳水化合物',
+					key: 'carbohydrate'
+				},
+				{
+					name: '脂肪',
+					key: 'axunge'
+				},
+				{
+					name: 'VA',
+					key: 'vitamin_a'
+				},
+				{
+					name: 'VE',
+					key: 'vitamin_e'
+				},
+				{
+					name: 'VB1',
+					key: 'vitamin_b1'
+				},
+				{
+					name: 'VB2',
+					key: 'vitamin_b2'
+				},
+				{
+					name: 'VB3',
+					key: 'vitamin_b3'
+				},
+				{
+					name: '钙',
+					key: 'element_ca'
+				},
+				{
+					name: '镁',
+					key: 'element_mg'
+				},
+				{
+					name: '磷',
+					key: 'element_p'
+				},
+				{
+					name: '钾',
+					key: 'element_k'
+				},
+				{
+					name: '铁',
+					key: 'element_fe'
+				},
+				{
+					name: '锌',
+					key: 'element_se'
+				},
+				{
+					name: '铜',
+					key: 'element_cu'
+				},
+				{
+					name: '锰',
+					key: 'element_mn'
+				}
+			],
+			echartsIsShow: false,
+			stepData: {
+				option: {
+					color: ['#92d050', '#4f81bd', '#f79646'],
 					title: {
-						text: "营养素含量"
+						text: 'NRV占比'
 					},
 					tooltip: {
 						trigger: 'axis',
@@ -294,7 +323,7 @@ export default {
 						}
 					},
 					legend: {
-						y:'25px',
+						y: '25px',
 						data: ['食物含量', '超标部分', '达标线']
 					},
 					grid: {
@@ -307,8 +336,8 @@ export default {
 					xAxis: {
 						type: 'category',
 						// boundaryGap: false,
-						data:[],
-						axisLabel:{
+						data: [],
+						axisLabel: {
 							rotate: 70,
 							interval: 0,
 							fontSize: 10
@@ -332,7 +361,7 @@ export default {
 							// y轴
 							show: true
 						},
-						axisLabel:{
+						axisLabel: {
 							formatter: `{value}%`
 						},
 						axisTick: {
@@ -344,17 +373,19 @@ export default {
 							show: true
 						}
 					},
-					series:[{
-						name:'食物含量',
-						type:'bar',
-						stack:'总数',
-						data:[]
-					}]	
-				}			
+					series: [
+						{
+							name: '食物含量',
+							type: 'bar',
+							stack: '总数',
+							data: []
+						}
+					]
+				}
 			},
-			currIndex:'', //选择单位index
-			userInfo:'',
-			result:''
+			currIndex: '', //选择单位index
+			userInfo: '',
+			result: ''
 		};
 	},
 	onLoad(option) {
@@ -375,7 +406,7 @@ export default {
 		}
 		this.currFood = JSON.parse(decodeURIComponent(option.currFood));
 		if (this.currFood) {
-			this.assembleData()
+			this.assembleData();
 			this.selectCurrFoodUnit(this.currFood);
 			// this.getNutrientRecommended()
 		}
@@ -386,11 +417,15 @@ export default {
 				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
 				return age;
 			}
-		},
+		}
 	},
 	methods: {
+		/*点击切换营养素占比和NRV**/
+		changeCate(item,index){
+			this.categoryTopIndex = index
+		},
 		async getNutrientRecommended() {
-			let self = this
+			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_nutrient_values_recommended_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_nutrient_values_recommended_select',
@@ -417,23 +452,22 @@ export default {
 						}
 					}
 				});
-				this.result = result
-				let endArr = []
-				let currFood = this.currFood
-				let nutrientData = this.nutrientData
-				nutrientData.forEach(nut=>{
-					let num = 0
-					if(nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'B3'){
-						endArr.push(currFood[nut.key])
-					}					
-					result.forEach(re=>{
-						if(nut.name === re.nutrient){
-							num = ((Number(currFood[nut.key]) / Number(re.val_rni))* 100).toFixed(1)
-							endArr.push(Number(num))
+				this.result = result;
+				let endArr = [];
+				let currFood = this.currFood;
+				let nutrientData = this.nutrientData;
+				nutrientData.forEach(nut => {
+					let num = 0;
+					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'B3') {
+						endArr.push(currFood[nut.key]);
+					}
+					result.forEach(re => {
+						if (nut.name === re.nutrient) {
+							num = ((Number(currFood[nut.key]) / Number(re.val_rni)) * 100).toFixed(1);
+							endArr.push(Number(num));
 						}
-					})
-					
-				})				
+					});
+				});
 				// result.forEach(item => {
 				// 	self.energyListWrap.forEach(energy => {
 				// 		energy.matterList.forEach(mat => {
@@ -471,41 +505,41 @@ export default {
 			}
 		},
 		/* 组装图表数据**/
-		async assembleData(){
-			let self = this
-			let nutrientData = self.nutrientData
-			let option = self.stepData.option
-			let xdata = nutrientData.map(item=>{
-				return item.name
-			})
+		async assembleData() {
+			let self = this;
+			let nutrientData = self.nutrientData;
+			let option = self.stepData.option;
+			let xdata = nutrientData.map(item => {
+				return item.name;
+			});
 			/*达标线*/
 			let obj = {
-				name:'达标线',
-				data:[],
-				type:'line',
+				name: '达标线',
+				data: [],
+				type: 'line',
 				stack: false
-			}
-			obj.data = nutrientData.map(item=>{
-				return 100
-			})
-			console.log("---x轴数据--",xdata)
-			option.xAxis.data = xdata
-			let currFood =  self.currFood
-			nutrientData.forEach(ele=>{
-				if(currFood[ele.key]){
-					self.$set(ele,'value',currFood[ele.key])
-				}else{
-					self.$set(ele,'value',0)
+			};
+			obj.data = nutrientData.map(item => {
+				return 100;
+			});
+			console.log('---x轴数据--', xdata);
+			option.xAxis.data = xdata;
+			let currFood = self.currFood;
+			nutrientData.forEach(ele => {
+				if (currFood[ele.key]) {
+					self.$set(ele, 'value', currFood[ele.key]);
+				} else {
+					self.$set(ele, 'value', 0);
 				}
-			})
-			let currData = await this.getNutrientRecommended()
-			console.log("currData======>",currData)
-			option.series[0].data = currData.map(ser=>{
-				return ser
-			})
-			option.series.push(obj)
-			this.countDietNum('+1')
-			this.echartsIsShow = true
+			});
+			let currData = await this.getNutrientRecommended();
+			console.log('currData======>', currData);
+			option.series[0].data = currData.map(ser => {
+				return ser;
+			});
+			option.series.push(obj);
+			this.countDietNum('+1');
+			this.echartsIsShow = true;
 		},
 		/* 点击取消*/
 		showBottomModal() {
@@ -522,9 +556,9 @@ export default {
 			this.modalName = '';
 		},
 		/*选择单位*/
-		chooseUnit(item,i){
-			console.log("单位选择----",item)
-			this.currIndex = i
+		chooseUnit(item, i) {
+			console.log('单位选择----', item);
+			this.currIndex = i;
 			this.radioLabel = item;
 			if (Number(this.choiceNum) && !this.radioLabel) {
 				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
@@ -546,7 +580,6 @@ export default {
 					this.radioLabel = item;
 				}
 			});
-			
 		},
 		/*点击确定**/
 		confirms() {
@@ -566,7 +599,7 @@ export default {
 		},
 		/* 点击食物选择数字加减**/
 		countDietNum(num) {
-			let self = this
+			let self = this;
 			let value = Number(this.value1);
 			if (value >= 0) {
 				if (num === '-0.1') {
@@ -599,35 +632,34 @@ export default {
 					this.heatNum = 0;
 				}
 				let addObj = {
-						name:'超标部分',
-						type:'bar',
-						stack:'总数',
-						data:[]
+					name: '超标部分',
+					type: 'bar',
+					stack: '总数',
+					data: []
+				};
+				let addData = [];
+				let option = this.stepData.option;
+				let currFood = this.currFood;
+				let nutrientData = this.nutrientData;
+				let result = this.result;
+				nutrientData.forEach(nut => {
+					let num = 0;
+					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'B3') {
+						addData.push(currFood[nut.key] * Number(self.choiceNum));
 					}
-				let addData = []
-				let option = this.stepData.option
-				let currFood = this.currFood
-				let nutrientData = this.nutrientData
-				let result = this.result
-				nutrientData.forEach(nut=>{
-					let num = 0					
-					if(nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'B3'){
-						addData.push(currFood[nut.key] * Number(self.choiceNum))
-					}					
-					result.forEach(re=>{
-						if(nut.name === re.nutrient){
-							num = (((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100).toFixed(1)						
-							addData.push(Number(num))
+					result.forEach(re => {
+						if (nut.name === re.nutrient) {
+							num = (((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100).toFixed(1);
+							addData.push(Number(num));
 						}
-					})
-					
-				})					
-				addObj.data = addData
-				
-				if(option.series[2]&&option.series[2].type){
-					option.series[2].data = addData
-				}else{
-					option.series.push(addObj)
+					});
+				});
+				addObj.data = addData;
+
+				if (option.series[2] && option.series[2].type) {
+					option.series[2].data = addData;
+				} else {
+					option.series.push(addObj);
 				}
 			}
 		},
@@ -701,10 +733,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
-	.food_wrap{
-		background-color: #f8f8f8;
-		height: 100vh;
-	}
+.food_wrap {
+	background-color: #f8f8f8;
+	height: 100vh;
+}
 .contents {
 	// overflow: hidden;
 	.flexSelece {
@@ -918,7 +950,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-right: 20upx;	
+			margin-right: 20upx;
 			border-radius: 5px;
 		}
 	}
@@ -930,7 +962,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-left: 20upx;		
+			margin-left: 20upx;
 			border-radius: 5px;
 		}
 	}
@@ -1080,7 +1112,23 @@ export default {
 	color: #999;
 	margin-left: 10px;
 	margin-top: 10px;
-	padding: 20upx 0;
+	// padding: 20upx 0;
+	.ele-text-top-tit{
+		display: flex;
+		margin-bottom: 15rpx;
+		text{
+			padding: 4rpx 20rpx;
+			border: 1px solid #ccc;
+			margin-right: 20rpx;
+			border-radius: 30rpx;
+		}
+		.active-text-top-tit{
+			background-color: #fbbd08;
+			color: white;
+			border-color: #FBBD08;
+		}
+	}
+	
 	.ele-text-cen {
 		display: flex;
 		flex-wrap: wrap;
@@ -1127,40 +1175,40 @@ export default {
 	font-size: 36upx;
 	margin-right: 20upx;
 	color: #999;
-	.calculate-l{
+	.calculate-l {
 		width: 100rpx;
 		font-size: 28upx;
 	}
 	.calorie {
 		min-width: 115upx;
-	}	
+	}
 	.weight {
 		display: flex;
 		align-items: center;
 		font-size: 28upx;
 		flex-wrap: wrap;
-		white-space:nowrap;
+		white-space: nowrap;
 		overflow-x: scroll;
 		// justify-content: flex-end;
 		// flex-wrap: wrap;
 		// min-width: 220upx;
-		.calculate-l{
+		.calculate-l {
 			font-size: 28upx;
 			margin-bottom: 16upx;
 		}
-		.unit{
+		.unit {
 			margin-right: 10upx;
 			background-color: #f8f8f8;
 			color: #999;
 			border-radius: 40upx;
 			border: 1px solid #999;
 			padding: 0px 16upx;
-			min-height:54upx ;
+			min-height: 54upx;
 			display: flex;
 			align-items: center;
 			margin-bottom: 10upx;
 		}
-		.active-unit{
+		.active-unit {
 			border: 1px solid #f37b1d;
 			background-color: #f37b1d;
 			color: #fff;
@@ -1186,12 +1234,12 @@ export default {
 		padding: 10upx 0upx;
 	}
 }
-.foods-btn{
+.foods-btn {
 	padding: 60upx 0;
 	display: flex;
 	justify-content: center;
 	background-color: #f8f8f8;
-	text{
+	text {
 		padding: 15upx 40upx;
 		background-color: #1cbbb4;
 		color: white;
@@ -1199,7 +1247,7 @@ export default {
 		font-size: 28upx;
 		width: 30%;
 		text-align: center;
-		&:first-child{
+		&:first-child {
 			margin-right: 90upx;
 		}
 	}

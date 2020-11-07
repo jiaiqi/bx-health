@@ -1,5 +1,5 @@
 <template>
-	<view v-if="isLogin">
+	<view class="store-wrap" v-if="isLogin">
 		<view class="head-box">
 			<view class="navbar"></view>
 			<view class="container">
@@ -375,6 +375,9 @@ export default {
 </script>
 
 <style lang="scss">
+	.store-wrap{
+		height: 100%;
+	}
 page {
 	background-color: #f8f8f8;
 }

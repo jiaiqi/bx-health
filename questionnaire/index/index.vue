@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import bxform from '@/questionnaire/components/bx-form/bx-form.vue';
+import bxform from '../components/bx-form/bx-form.vue';
 
 export default {
 	name: 'questionnaire', //问卷答题页面
@@ -86,6 +86,20 @@ export default {
 		comfromType:{
 			type: String,
 			default:''
+		}
+	},
+	watch: {
+		activityNo(newValue, oldValue) {
+			if(this.activityNo){
+				this.emptyText = '正在请求问卷配置数据';
+				setTimeout(() => {
+					this.emptyText = '未找到问卷配置数据';
+				}, 3000);
+				this.formType = this.comfromType;
+				this.status = '进行中'
+				this.activity_no = this.activityNo
+				this.getQuestionnaireData();
+			}
 		}
 	},
 	methods: {

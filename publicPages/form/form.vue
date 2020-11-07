@@ -1,13 +1,13 @@
 <template>
 	<view>
-		<bxform ref="bxForm" :pageType="type" :BxformType="type" :fields="fields" :moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"></bxform>
+		<bxform ref="bxForm" :addType="addType" :pageType="type" :BxformType="type" :fields="fields" :moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"></bxform>
 		<bxButtons :buttons="buttons" @on-button-change="onButton($event)"></bxButtons>
 	</view>
 </template>
 
 <script>
-import bxform from '@/publicPages/components/bx-form/bx-form.vue';
-import bxButtons from '@/publicPages/components/bx-buttons/bx-buttons.vue';
+import bxform from '../components/bx-form/bx-form.vue';
+import bxButtons from '../components/bx-buttons/bx-buttons.vue';
 export default {
 	components: { bxform, bxButtons },
 	props: {},
@@ -20,7 +20,8 @@ export default {
 			serviceName: '',
 			condition: [],
 			defaultCondition: [],
-			params: {}
+			params: {},
+			addType:''
 		};
 	},
 	computed: {
@@ -75,6 +76,9 @@ export default {
 		}
 		if (option.params) {
 			this.params = JSON.parse(decodeURIComponent(option.params));
+		}
+		if(option.addType){
+			this.addType = option.addType
 		}
 		if (option.cond) {
 			this.defaultCondition = JSON.parse(option.cond);

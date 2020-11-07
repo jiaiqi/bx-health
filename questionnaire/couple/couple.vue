@@ -20,7 +20,7 @@
 				<text>{{currentItem.name}}</text>
 			</view>
 			<view class="couple-main-m">
-				<question-naire :comfromType="fromType" :activityNo="currentItem.no"></question-naire>				
+				<question-naire :key="currIndex" :comfromType="fromType" :activityNo="currentItem.no"></question-naire>				
 			</view>
 		</view>
 	</view>
@@ -38,7 +38,8 @@
 					grade:0
 				},{
 					name:'疾病历史',
-					grade:50
+					grade:50,
+					no:'20201105115153000168'
 				},{
 					name:'遗传史',
 					grade:20,
@@ -54,11 +55,13 @@
 					grade:0
 				}],
 				currentItem:'',
-				fromType:''
+				fromType:'',
+				currIndex:0
 			}
 		},
 		methods:{
 			async chooseItem(item){
+				++this.currIndex
 				this.currentItem = item
 				if(item.no){
 					let question = await this.selectQuestion()

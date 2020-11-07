@@ -132,8 +132,8 @@
 </template>
 
 <script>
-import Thetable from '@/otherPages/components/Thetable/Thetable.vue';
-import symFrom from '@/otherPages/components/bx-sym-from/bx-sym-from.vue';
+import Thetable from '../components/Thetable/Thetable.vue';
+import symFrom from '../components/bx-sym-from/bx-sym-from.vue';
 // import template from "@/common/addFile.js";
 export default {
 	components: {
@@ -304,7 +304,11 @@ export default {
 							uni.setStorageSync('symptomList', this.chooseArr);
 							uni.$emit('symptomSelect', this.chooseArr);
 						}
-						uni.navigateBack();
+						// uni.navigateBack();
+						uni.navigateTo({
+							url: '/archivesPages/illnessDetaiList/illnessDetaiList'
+						});
+						
 					}
 				}
 			});

@@ -179,10 +179,10 @@
 <script>
 	import jumpBall from '@/otherPages/components/hx-jump-ball/hx-jump-ball.vue';
 	// #ifdef MP-WEIXIN
-	import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+	import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 	// #endif
 	// #ifdef H5
-	import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+	import uniEcharts from '@/otherPages/components/uni-ec-canvas/uni-echarts.vue';
 	// #endif
 	export default {
 		name:'shopDetail',

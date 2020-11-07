@@ -1,16 +1,15 @@
 <template>
-	<view class="balanced-diet">
+	<view class="balanced-diet" :class="{ 'component-page': pageType }">
 		<u-navbar
+			v-if="!pageType"
 			back-text="返回"
 			:back-text-style="backTextStyle"
 			:back-icon-color="backTextStyle.color"
 			:is-back="true"
 			:border-bottom="true"
-			:custom-back="backToHome"
 			:background="navBackground"
 		>
 			<view class="header-wrap">
-				<!-- <view class="title">{{ pageTitle }}</view> -->
 				<!-- #ifdef H5 -->
 				<view class="switch-date" @click="changeSignDate">
 					<text>{{ selectDate }}</text>
@@ -24,13 +23,7 @@
 						<u-icon name="arrow-down-fill" size="28" :class="{ active: showUserList }"></u-icon>
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
-						<view
-							class="menu-item"
-							:class="{ 'current-user': userInfo.name === item.name }"
-							@click.stop="clickUserMenu(item)"
-							v-for="(item, index) in userMenuList"
-							:key="index"
-						>
+						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -44,25 +37,25 @@
 			<u-icon name="calendar-fill" color="#333" size="30"></u-icon>
 		</view>
 		<!-- #endif -->
-		<view class="diet-wrap">
+		<view class="diet-wrap" v-if="!pageType || pageType == 'diet' || pageType == 'sport'|| pageType == 'weight' || pageType == 'all'">
 			<view class="main-box">
 				<view class="main-content main-content-t">
 					<view class="main-box-title">能量等式</view>
-					<view class="energy-item">
+					<view class="energy-item" @click="changePageType('diet')">
 						<view class="text">饮食摄入</view>
 						<view class="number">{{ parseFloat(dietIn).toFixed(1) }}</view>
 					</view>
 					<view class="operate">-</view>
-					<view class="energy-item">
+					<view class="energy-item" @click="changePageType('sport')">
 						<view class="text">运动消耗</view>
 						<view class="number">{{ parseFloat(sportOut).toFixed(1) }}</view>
 					</view>
 					<view class="operate">-</view>
-					<view class="energy-item">
+					<view class="energy-item"  @click="changePageType('weight')">
 						<view class="text">基础代谢</view>
 						<view class="number">{{ basicOut ? parseFloat(basicOut).toFixed(1) : '0' }}</view>
 					</view>
-					<view class="operate">=</view>
+					<view class="operate"   @click="changePageType('weight')">=</view>
 					<view class="energy-item">
 						<view class="text">体重变化</view>
 						<view
@@ -79,27 +72,20 @@
 							style="display: flex; width: 90px; justify-content: space-between"
 						>
 							<text style="flex: 1">
-								{{
-									energyChange === 0
-										? '0.0'
-										: parseFloat(energyChange / 7.7) > 0
-										? `+${parseFloat(energyChange / 7.7).toFixed(1)}`
-										: parseFloat(energyChange / 7.7).toFixed(1)
-								}}
+								{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
 							</text>
 							<text class="units">g脂肪</text>
 						</view>
 					</view>
 					<view class="bmi-tip-box" v-if="weightUp">
 						<text class="cuIcon-warn text-yellow margin-right-xs"></text>
-						<!-- <text v-html="bmiTip"></text> -->
 						<text>根据您近期的饮食运动记录及身体数据分析,若长期保持当前的饮食习惯,您的体重将会在一个月后后增长</text>
 						<text class="text-red text-bold">{{ weightUp }}</text>
 						,建议合理饮食并适当进行运动
 					</view>
 				</view>
 			</view>
-			<view class="main-box main-box-plus">
+			<view class="main-box main-box-plus" v-if="!pageType || pageType === 'diet' || pageType === 'all'">
 				<view class="title">
 					<view class="label">
 						营养素摄入情况分析
@@ -108,10 +94,10 @@
 				</view>
 				<view class="chart-box">
 					<!-- #ifdef MP-WEIXIN -->
-					<uni-ec-canvas class="uni-ec-canvas" @click-chart="clickCharts" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
+					<uni-ec-canvas class="uni-ec-canvas"  @click-chart="clickCharts" canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
 					<!-- #endif -->
 					<!-- #ifdef H5 -->
-					<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></uni-echarts>
+					<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas"  canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-echarts>
 					<!-- #endif -->
 				</view>
 				<view class="indicator">
@@ -159,13 +145,7 @@
 													}"
 												>
 													{{
-														alone.value === 0
-															? alone.shortName === 'E'
-																? 0 + 'mg/d'
-																: '0'
-															: alone.shortName === 'E'
-															? alone.value.toFixed(1) + 'mg/d'
-															: alone.value.toFixed(1)
+														alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1)
 													}}
 												</view>
 											</view>
@@ -211,7 +191,7 @@
 					</view>
 				</view>
 			</view>
-			<view class="main-box symptom">
+			<view class="main-box symptom" v-if="!pageType || pageType === 'diet' || pageType === 'all'">
 				<view class="title">
 					<view class="label">饮食</view>
 					<view class="switch-layout">
@@ -231,7 +211,7 @@
 									<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
 									<view class="column center">
 										<view class="name">{{ item.name }}</view>
-										<view class="number">{{ item.amount * item.unit_weight_g + item.unit }}</view>
+										<view class="number">{{ item.unit !== 'g' ? item.amount + item.unit : item.amount * item.unit_weight_g + item.unit }}</view>
 									</view>
 									<view class="column time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
 									<view class="column">
@@ -253,7 +233,7 @@
 										<text class="heat">{{ item.energy }}千卡</text>
 									</view>
 									<view class="number">
-										<text>{{ item.amount * item.unit_weight_g + item.unit }}</text>
+										<text>{{ item.unit !== 'g' ? item.amount + item.unit : item.amount * item.unit_weight_g + item.unit }}</text>
 										<text class="time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</text>
 									</view>
 								</view>
@@ -263,7 +243,7 @@
 					</view>
 				</u-read-more>
 			</view>
-			<view class="main-box symptom">
+			<view class="main-box symptom" v-if="!pageType || pageType === 'sport' || pageType === 'all'">
 				<view class="title">
 					<view class="label">运动</view>
 					<view class="switch-layout">
@@ -320,7 +300,7 @@
 					</view>
 				</u-read-more>
 			</view>
-			<view class="main-box symptom">
+			<view class="main-box symptom" v-if="!pageType || pageType === 'symptom' || pageType === 'all'">
 				<view class="title">症状</view>
 				<view class="symptom-box">
 					<view class="symptom-item" v-for="(item, index) in symptomList" :key="index">{{ item.name }}</view>
@@ -335,17 +315,23 @@
 				</view>
 			</view> -->
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
+		<u-popup v-model="showEditModal" mode="bottom" border-radius="50">
+		<!-- <view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)"> -->
 			<view class="cu-dialog" v-if="currentRecord">
 				<view class="title-bar" v-if="currentRecord.hdate && currentRecord.htime">
-					<!-- <view class="btn" @click="(showEditModal = false), (currentRecord = null)">取消</view> -->
 					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
 					<!-- <view class="btn" @click="UpdateDietInfo">确认</view> -->
 				</view>
 				<view class="diet-info">
 					<view class="img"><u-image width="100%" height="100%" :src="currentDietImgUrl"></u-image></view>
 					<view class="info">
-						<view class="name">{{ currentRecord.name }}</view>
+						<view class="name">
+							{{ currentRecord.name }}
+							<view class="delete-icon" @click="deleteItem(currentRecord)">
+								<text class="text">删除记录</text>
+								<text class="cuIcon-delete"></text>
+							</view>
+						</view>
 						<view class="weight">
 							<text class="label margin-right-xs">热量:</text>
 							<text class="heat">
@@ -358,14 +344,6 @@
 							<!-- {{ currentRecord.unit_weight_g ? currentRecord.amount * currentRecord.unit_weight_g : currentRecord.amount }} -->
 							<text class="unit">{{ currentRecord.unit }}</text>
 						</view>
-						<!-- 		<view class="amount">
-							数量:
-							<view class="number-box">
-								<text @click="changeCurrentVal('minus')" class="symbol">-</text>
-								<input @change="changeValue" v-model="currentRecord.amount" type="digit" disabled />
-								<text @click="changeCurrentVal('plus')" class="symbol">+</text>
-							</view>
-						</view> -->
 					</view>
 					<view class="chart-box">
 						<!-- #ifdef MP-WEIXIN -->
@@ -375,11 +353,10 @@
 						<uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-echarts>
 						<!-- #endif -->
 					</view>
-
 					<view class="unit-box" v-if="currentRecordType === 'food'">
 						<view class="title">单位:</view>
 						<view class="unit-item" :class="{ 'active-unit': currentUnitIndex === index }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">
-							{{ u.unit_weight_g ? u.unit_weight_g + u.unit : u.unit }}
+							{{ u.unit_weight_g && u.unit === 'g' ? u.unit_weight_g + u.unit : u.unit }}
 						</view>
 					</view>
 					<view class="amount">
@@ -393,54 +370,48 @@
 						</view>
 					</view>
 				</view>
-				<!-- 	<view class="title-bar">
-					<view class="btn" @click="(showEditModal = false), (currentRecord = null)">取消</view>
-					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime }}</view>
-					<view class="btn" @click="UpdateDietInfo">确认</view>
-				</view> -->
 				<view class="delete-bar">
-					<view class="btn" @click="(showEditModal = false), (currentRecord = null)">取消</view>
-					<text class="cuIcon-delete" @click="deleteItem(currentRecord)"></text>
-					<!-- 删除此条记录 -->
-					<view class="btn" @click="UpdateDietInfo">确认</view>
+					<view class="btn bg-grey" @click="(showEditModal = false), (currentRecord = null)">取消</view>
+					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
-				<view class="number-bar"></view>
-				<view class="unit-bar"></view>
+<!-- 				<view class="number-bar"></view>
+				<view class="unit-bar"></view> -->
 			</view>
-		</view>
+			</u-popup>
+		<!-- </view> -->
 		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
 		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
 			<view class="popup-box">
 				<view class="icon-item" @click="toPages('food')">
-					<image src="@/otherPages/static/icon/yinshi.png" mode="" class="icon"></image>
+					<image src="@/archivesPages/static/icon/yinshi.png" mode="" class="icon"></image>
 					<text class="label">饮食</text>
 				</view>
 				<view class="icon-item" @click="toPages('sport')">
-					<image src="@/otherPages/static/icon/yundong.png" mode="" class="icon"></image>
+					<image src="@/archivesPages/static/icon/yundong.png" mode="" class="icon"></image>
 					<text class="label">运动</text>
 				</view>
 				<view class="icon-item" @click="toPages('weight')">
-					<image src="@/otherPages/static/icon/tizhong.png" mode="" class="icon"></image>
+					<image src="@/archivesPages/static/icon/tizhong.png" mode="" class="icon"></image>
 					<text class="label">体重</text>
 				</view>
 				<view class="icon-item" @click="toPages('sleep')">
-					<image src="@/otherPages/static/icon/sleep.png" mode="" class="icon"></image>
+					<image src="@/archivesPages/static/icon/sleep.png" mode="" class="icon"></image>
 					<text class="label">睡眠</text>
 				</view>
 				<view class="icon-item" @click="toPages('heartRate')">
-					<image src="@/otherPages/static/icon/xinlv.png" mode="" class="icon"></image>
+					<image src="@/archivesPages/static/icon/xinlv.png" mode="" class="icon"></image>
 					<text class="label">心率</text>
 				</view>
 				<view class="icon-item" @click="toPages('pressure')">
-					<image src="@/otherPages/static/icon/xueya.png" mode="" class="icon"></image>
+					<image src="@/archivesPages/static/icon/xueya.png" mode="" class="icon"></image>
 					<text class="label">血压</text>
 				</view>
 				<view class="icon-item" @click="toPages('oxygen')">
-					<image src="@/otherPages/static/icon/xueyang.png" mode="" class="icon"></image>
+					<image src="@/archivesPages/static/icon/xueyang.png" mode="" class="icon"></image>
 					<text class="label">血氧</text>
 				</view>
 				<view class="icon-item" @click="toPages('glucose')">
-					<image src="@/otherPages/static/icon/xuetang.png" mode="" class="icon"></image>
+					<image src="@/archivesPages/static/icon/xuetang.png" mode="" class="icon"></image>
 					<text class="label">血糖</text>
 				</view>
 			</view>
@@ -455,16 +426,18 @@
 </template>
 
 <script>
-import bxDateStamp from '@/otherPages/components/bx-date-stamp/bx-date-stamp.vue';
+import bxDateStamp from '@/archivesPages/components/bx-date-stamp/bx-date-stamp.vue';
+import xflSelect from '@/archivesPages/components/xfl-select/xfl-select.vue';
 // #ifdef MP-WEIXIN
-import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+import uniEcCanvas from '@/archivesPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #endif
 // #ifdef H5
-import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+import uniEcharts from '@/archivesPages/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
 let self;
 export default {
 	components: {
+		xflSelect,
 		bxDateStamp,
 		// #ifdef MP-WEIXIN
 		uniEcCanvas,
@@ -481,7 +454,6 @@ export default {
 			nutrientsChartOption: {},
 			currentDietChartData: {},
 			currentUnitIndex: 0,
-			pageTitle: '今日概览',
 			showUserList: false,
 			backTextStyle: {
 				width: '100rpx',
@@ -501,10 +473,6 @@ export default {
 			showEditModal: false, // 是否显示食物/运动记录编辑弹框
 			subColor: '#999',
 			subIndex: 4,
-			cWidth: '',
-			cHeight: '',
-			pixelRatio: 1,
-			gaugeWidth: 15,
 			radioArr: [
 				{
 					key: '全部',
@@ -539,17 +507,10 @@ export default {
 			field: {},
 			symptomList: [],
 			list: [],
-			refresh: false,
-			PageCur: 'basics',
 			radio: '',
-			// userInfo: {},
 			loginUserInfo: {},
 			dietRecord: [],
 			sportsRecord: [],
-			timeType: 'time',
-			showTimePicker: false,
-			dateFormat: 'hh:ii:ss',
-			timeValue: '',
 			dietIn: 0, //饮食摄入
 			sportOut: 0, //运动消耗
 			editable: false,
@@ -582,7 +543,6 @@ export default {
 			sportList: [],
 			wxUserInfo: {},
 			unit_energy: '', //当前选项每单位的能量
-			KeepDays: '', //保持天数
 			symptomDiseaseList: [], // 病症-疾病对照
 			diseaseList: [],
 			energyListWrap: [
@@ -815,13 +775,11 @@ export default {
 					this.diseaseList = [];
 				}
 			}
-		},
-		timeType(newValue, oldValue) {
-			if (newValue === 'time') {
-				this.dateFormat = 'hh:ii:ss';
-			} else if (newValue === 'date') {
-				this.dateFormat = 'yyyy-mm-dd';
-			}
+		}
+	},
+	props: {
+		pageType: {
+			type: String
 		}
 	},
 	computed: {
@@ -946,14 +904,37 @@ export default {
 		}
 	},
 	methods: {
+		changePageType(e) {
+			if (this.pageType && this.pageType !== e) {
+				this.$emit('changePageType', e);
+			}
+		},
 		clickCharts(e) {
 			this.toDetail(e);
 		},
 		async buildCurrenDietChartOption() {
 			let currentDiet = this.deepClone(this.currentRecord);
 			let dietRecordList = this.deepClone(this.dietRecord);
+			let foodType = [];
+			if (Array.isArray(this.foodType) && this.foodType.length > 0) {
+				foodType = this.deepClone(this.foodType);
+			} else {
+				let record = this.dietRecord;
+				let condition = null;
+				if (Array.isArray(record) && record.length > 0) {
+					let names = record.map(item => item.name);
+					condition = [
+						{
+							colName: 'name',
+							ruleType: 'in',
+							value: names.toString()
+						}
+					];
+					foodType = await this.getFoodType(condition);
+				}
+			}
 			let energyList = await this.buildDietData();
-			this.foodType.forEach(food => {
+			foodType.forEach(food => {
 				if (currentDiet.name === food.name) {
 					currentDiet = { ...food, ...currentDiet };
 				}
@@ -990,17 +971,16 @@ export default {
 							item.value = item.value - currentDiet[item.key];
 							let num = (item.value * 100) / Number(item.EAR);
 							num = parseFloat(num.toFixed(1));
+							if (typeof num === 'number' && num.toString() === 'NaN') {
+							}
 							return num;
 						});
-						debugger;
 						break;
 					case '当前食物':
 						obj.data = eleArr.map(item => {
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							debugger;
 							return currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
 						});
-						debugger;
 						break;
 					case 'NRV%达标线':
 						obj.type = 'line';
@@ -1204,9 +1184,11 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			let unitList = [];
-			unitList.push(item);
-			if (res.data.state === 'SUCCESS') {
-				unitList = [...unitList, ...res.data.data];
+			// unitList.push(item);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				unitList = [...res.data.data];
+			} else {
+				unitList = [item];
 			}
 			this.unitList = unitList;
 			return unitList;
@@ -1279,8 +1261,6 @@ export default {
 		},
 		async buildChartData(e) {
 			let { energy, diet } = e;
-			// let dietList = await this.getFoodList(diet);
-			// this.foodList = dietList;
 			let normalData = {
 				chartName: ' ',
 				chartId: '',
@@ -1745,7 +1725,6 @@ export default {
 			if (res.data.state === 'SUCCESS') {
 				await self.getDietRecord();
 				await self.getSportsRecord();
-				console.log(self.elementData);
 				self.showEditModal = false;
 			}
 		},
@@ -1866,58 +1845,6 @@ export default {
 				});
 			}
 		},
-		onSelected(e) {
-			//时间选择器
-			this.showTimePicker = false;
-			if (e) {
-				this['time'] = e.value;
-				//选择的值
-				console.log('value => ' + e.value);
-				//原始的Date对象
-				console.log('date => ' + e.date);
-				if (this.timeType === 'time') {
-					if (this.onSelect === 'form') {
-						this.formData['htime'] = e.value;
-						this.onSelect = '';
-						this.$refs.showForm.open();
-					} else {
-						const data = this.currentData;
-						const index = this.currentIndex;
-						let val = e.value;
-						data[index][this.currentColumn] = val;
-						if (this.currentType === 'food') {
-							this.$set(this.dietRecord, index, data[index]);
-						} else if (this.currentType === 'sport') {
-							this.$set(this.sportsRecord, index, data[index]);
-						}
-					}
-				} else if (this.timeType === 'date') {
-					this.selectDate = e.value;
-					this.getDietRecord();
-					this.getSportsRecord();
-				}
-			} else if (this.onSelect === 'form') {
-				this.$refs.showForm.open();
-			}
-		},
-		cancel(type) {
-			//popup弹出层点击事件
-			if (type === 'confirm') {
-				const data = this.currentData;
-				const index = this.currentIndex;
-				let val = this.currentVal;
-				data[index][this.currentColumn] = val;
-				console.log('item', data[index]);
-				if (this.currentType === 'food') {
-					this.$set(this.dietRecord, index, data[index]);
-					this.updateData(data[index], 'food');
-				} else if (this.currentType === 'sport') {
-					this.$set(this.sportsRecord, index, data[index]);
-					this.updateData(data[index], 'sport');
-				}
-			}
-			this.$refs.showtip.close();
-		},
 		changeValue(val) {
 			console.log(val);
 			this.currentVal = val.value;
@@ -1981,39 +1908,29 @@ export default {
 						}
 					}
 				});
-				console.log('----------age-->>>--', result);
 				result.forEach(item => {
 					self.energyListWrap.forEach(energy => {
 						energy.matterList.forEach(mat => {
 							if (item.nutrient === mat.name || item.nutrient.indexOf(mat.name) !== -1) {
-								// mat.EAR = item.val_ear ? item.val_ear : mat.EAR;
 								mat.UL = item.val_ul ? item.val_ul : mat.UL;
 								mat.EAR = item.val_rni ? item.val_rni : mat.EAR;
 								if (energy.title !== '水溶性维生素') {
 									mat.UL = item.val_ul ? item.val_ul : mat.UL;
-									// mat.UL = item.val_ul ? item.val_ul : mat.UL;
 								} else {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni
-										? item.val_rni * self.userInfo.weight
-										: item.val_ear
-										? item.val_ear * self.userInfo.weight
-										: mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
-									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
 								}
 							} else {
 								if (mat.name === '脂肪') {
 									mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
 									mat.UL = 0;
-									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
 								}
 								if (mat.name === '碳水') {
 									mat.EAR = self.userInfo.weight * 4;
 									mat.UL = 0;
-									// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
 								}
 							}
 						});
@@ -2343,9 +2260,6 @@ export default {
 			}
 			return res.data.data;
 		},
-		NavChange(e) {
-			this.PageCur = e.currentTarget.dataset.cur;
-		},
 		backToHome() {
 			uni.switchTab({
 				url: '/pages/home/home',
@@ -2432,7 +2346,6 @@ export default {
 							energy: 'unit_energy'
 						}
 					};
-					url = '/pages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
 					url = '/otherPages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
 					break;
 				case 'sport':
@@ -2448,7 +2361,6 @@ export default {
 							energy: 'unit_energy'
 						}
 					};
-					url = '/pages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
 					url = '/otherPages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
 					break;
 			}
@@ -2552,6 +2464,9 @@ export default {
 		});
 	},
 	mounted() {
+		// if (!this.pageType) {
+		// 	return;
+		// }
 		self = this;
 		this.procEleData();
 		let userInfo = uni.getStorageSync('login_user_info');
@@ -2595,6 +2510,9 @@ export default {
 	position: relative;
 	/deep/ .u-navbar {
 		border-bottom: 1px solid #f1f1f1;
+	}
+	&.component-page {
+		background-color: #fff;
 	}
 	.switch-date {
 		/* #ifdef MP-WEIXIN */
@@ -2793,7 +2711,6 @@ export default {
 		}
 		.main-box {
 			width: calc(100% - 20rpx);
-			margin: 3px auto;
 			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 			padding: 20rpx 0;
 		}
@@ -3589,9 +3506,38 @@ uni-checkbox::before {
 			padding-left: 50rpx;
 			display: flex;
 			flex-direction: column;
+			.delete-icon {
+				padding: 10rpx 20rpx;
+				background-color: #fff;
+				font-size: 24rpx;
+				border-radius: 60rpx;
+				text-align: center;
+				transition: all 0.5s;
+				border: 1rpx solid #e54d42;
+				color: #f56c6c;
+				background: #fef0f0;
+				border-color: #fbc4c4;
+				&:active {
+					background-color: #e54d42;
+					color: #fff;
+					transform: scale(1.1);
+					box-shadow: 0 0 10px #e54d42;
+				}
+				.text {
+				}
+			}
+			.cuIcon-delete {
+				display: inline-block;
+				// height: 90rpx;
+				// line-height: 90rpx;
+				text-align: center;
+				border-radius: 100%;
+			}
 			.name {
 				font-weight: 700;
 				font-size: 16px;
+				display: flex;
+				justify-content: space-between;
 			}
 			.element {
 				color: #8dc63f;
@@ -3693,29 +3639,37 @@ uni-checkbox::before {
 		justify-content: space-between;
 		align-items: center;
 		font-size: 50rpx;
+		padding-top: 50rpx;
 		// height: 150rpx;
+		margin-bottom: 200rpx;
 		.btn {
 			padding: 10rpx 30rpx;
 			border-radius: 10rpx;
-			color: #0081ff;
 			font-size: 28rpx;
+			// background-color:#0081ff;
+			// color: #fff;
 			// background-color: #fff;
-		}
-		.cuIcon-delete {
-			display: inline-block;
-			height: 90rpx;
-			line-height: 90rpx;
+			flex: 1;
+			margin-right: 20rpx;
 			text-align: center;
-			width: 90rpx;
-			border-radius: 100%;
-			// border: #E54D42 1px solid;
-			background-color: #e54d42;
-			color: #fff;
-			&:active {
-				box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-				transform: scale(1.1);
+			&:last-child {
+				margin-right: 0rpx;
 			}
 		}
+		// .cuIcon-delete {
+		// 	display: inline-block;
+		// 	height: 90rpx;
+		// 	line-height: 90rpx;
+		// 	text-align: center;
+		// 	width: 90rpx;
+		// 	border-radius: 100%;
+		// 	background-color: #fff;
+		// 	color: #333;
+		// 	&:active {
+		// 		box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+		// 		transform: scale(1.1);
+		// 	}
+		// }
 	}
 }
 .tootio-item {
