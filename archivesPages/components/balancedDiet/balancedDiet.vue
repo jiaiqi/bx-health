@@ -23,7 +23,13 @@
 						<u-icon name="arrow-down-fill" size="28" :class="{ active: showUserList }"></u-icon>
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
-						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
+						<view
+							class="menu-item"
+							:class="{ 'current-user': userInfo.name === item.name }"
+							@click.stop="clickUserMenu(item)"
+							v-for="(item, index) in userMenuList"
+							:key="index"
+						>
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -72,7 +78,13 @@
 							style="display: flex; width: 90px; justify-content: space-between"
 						>
 							<text style="flex: 1">
-								{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
+								{{
+									energyChange === 0
+										? '0.0'
+										: parseFloat(energyChange / 7.7) > 0
+										? `+${parseFloat(energyChange / 7.7).toFixed(1)}`
+										: parseFloat(energyChange / 7.7).toFixed(1)
+								}}
 							</text>
 							<text class="units">g脂肪</text>
 						</view>
@@ -145,7 +157,13 @@
 													}"
 												>
 													{{
-														alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1)
+														alone.value === 0
+															? alone.shortName === 'E'
+																? 0 + 'mg/d'
+																: '0'
+															: alone.shortName === 'E'
+															? alone.value.toFixed(1) + 'mg/d'
+															: alone.value.toFixed(1)
 													}}
 												</view>
 											</view>
@@ -316,7 +334,7 @@
 			</view> -->
 		</view>
 		<!-- <u-popup v-model="showEditModal" mode="bottom"> -->
-			<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
+		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
 			<view class="cu-dialog current-diet-detail" v-if="currentRecord">
 				<view class="title-bar" v-if="currentRecord.hdate && currentRecord.htime">
 					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
@@ -374,7 +392,7 @@
 					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
 			</view>
-		<!-- </u-popup> -->
+			<!-- </u-popup> -->
 		</view>
 		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
 		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
@@ -977,7 +995,7 @@ export default {
 					case '当前食物':
 						obj.data = eleArr.map(item => {
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0
+							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
 							return Math.abs(num);
 						});
 						break;
@@ -1919,7 +1937,11 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni
+										? item.val_rni * self.userInfo.weight
+										: item.val_ear
+										? item.val_ear * self.userInfo.weight
+										: mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
