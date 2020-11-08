@@ -103,8 +103,8 @@
 			</view>
 		</view>
 		<u-popup v-model="showEditModal" mode="bottom" border-radius="50">
-		<!-- <view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentDiet = null)"> -->
-			<view class="cu-dialog" v-if="currentDiet">
+			<!-- <view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentDiet = null)"> -->
+			<view class="cu-dialog current-diet-detail" v-if="currentDiet">
 				<view class="title-bar" v-if="currentDiet.hdate && currentDiet.htime">
 					<view class="date">{{ currentDiet.hdate + ' ' + currentDiet.htime.slice(0, 5) }}</view>
 				</view>
@@ -163,7 +163,7 @@
 				<view class="number-bar"></view>
 				<view class="unit-bar"></view>
 			</view>
-			</u-popup>
+		</u-popup>
 		<!-- </view> -->
 	</view>
 </template>
@@ -464,7 +464,11 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni
+										? item.val_rni * self.userInfo.weight
+										: item.val_ear
+										? item.val_ear * self.userInfo.weight
+										: mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -851,8 +855,10 @@ export default {
 	.cu-modal {
 		z-index: 666;
 	}
-	.cu-dialog {
+	.current-diet-detail {
 		width: 100vw;
+		max-height: 90vh;
+		overflow: scroll;
 		.title-bar {
 			display: flex;
 			justify-content: center;
@@ -879,7 +885,6 @@ export default {
 				height: 200rpx;
 				border-radius: 10rpx;
 				overflow: hidden;
-				// padding: 2px;
 				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 			}
 			.info {
@@ -909,8 +914,6 @@ export default {
 				}
 				.cuIcon-delete {
 					display: inline-block;
-					// height: 90rpx;
-					// line-height: 90rpx;
 					text-align: center;
 					border-radius: 100%;
 				}
@@ -925,7 +928,6 @@ export default {
 				}
 				.weight {
 					padding: 10rpx 0;
-					// color: #999;
 					color: #ffb347;
 					.heat {
 						color: #ffb347;
@@ -973,7 +975,6 @@ export default {
 						align-content: center;
 						font-size: 20px;
 						&:active {
-							// box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 							transform: scale(1.2);
 						}
 						&:last-child {

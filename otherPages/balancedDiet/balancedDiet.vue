@@ -1,7 +1,6 @@
 <template>
-	<view class="balanced-diet" :class="{ 'component-page': pageType }">
+	<view class="balanced-diet">
 		<u-navbar
-			v-if="!pageType"
 			back-text="返回"
 			:back-text-style="backTextStyle"
 			:back-icon-color="backTextStyle.color"
@@ -23,7 +22,13 @@
 						<u-icon name="arrow-down-fill" size="28" :class="{ active: showUserList }"></u-icon>
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
-						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
+						<view
+							class="menu-item"
+							:class="{ 'current-user': userInfo.name === item.name }"
+							@click.stop="clickUserMenu(item)"
+							v-for="(item, index) in userMenuList"
+							:key="index"
+						>
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -37,7 +42,7 @@
 			<u-icon name="calendar-fill" color="#333" size="30"></u-icon>
 		</view>
 		<!-- #endif -->
-		<view class="diet-wrap" v-if="!pageType || pageType == 'diet' || pageType == 'sport'|| pageType == 'weight' || pageType == 'all'">
+		<view class="diet-wrap">
 			<view class="main-box">
 				<view class="main-content main-content-t">
 					<view class="main-box-title">能量等式</view>
@@ -51,11 +56,11 @@
 						<view class="number">{{ parseFloat(sportOut).toFixed(1) }}</view>
 					</view>
 					<view class="operate">-</view>
-					<view class="energy-item"  @click="changePageType('weight')">
+					<view class="energy-item" @click="changePageType('weight')">
 						<view class="text">基础代谢</view>
 						<view class="number">{{ basicOut ? parseFloat(basicOut).toFixed(1) : '0' }}</view>
 					</view>
-					<view class="operate"   @click="changePageType('weight')">=</view>
+					<view class="operate" @click="changePageType('weight')">=</view>
 					<view class="energy-item">
 						<view class="text">体重变化</view>
 						<view
@@ -72,7 +77,13 @@
 							style="display: flex; width: 90px; justify-content: space-between"
 						>
 							<text style="flex: 1">
-								{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
+								{{
+									energyChange === 0
+										? '0.0'
+										: parseFloat(energyChange / 7.7) > 0
+										? `+${parseFloat(energyChange / 7.7).toFixed(1)}`
+										: parseFloat(energyChange / 7.7).toFixed(1)
+								}}
 							</text>
 							<text class="units">g脂肪</text>
 						</view>
@@ -93,12 +104,7 @@
 					</view>
 				</view>
 				<view class="chart-box">
-					<!-- #ifdef MP-WEIXIN -->
-					<uni-ec-canvas class="uni-ec-canvas"  @click-chart="clickCharts" canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
-					<!-- #endif -->
-					<!-- #ifdef H5 -->
-					<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas"  canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-echarts>
-					<!-- #endif -->
+					<uni-ec-canvas class="uni-ec-canvas" @click-chart="clickCharts" canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
 				</view>
 				<view class="indicator">
 					<view
@@ -145,7 +151,13 @@
 													}"
 												>
 													{{
-														alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1)
+														alone.value === 0
+															? alone.shortName === 'E'
+																? 0 + 'mg/d'
+																: '0'
+															: alone.shortName === 'E'
+															? alone.value.toFixed(1) + 'mg/d'
+															: alone.value.toFixed(1)
 													}}
 												</view>
 											</view>
@@ -191,7 +203,7 @@
 					</view>
 				</view>
 			</view>
-			<view class="main-box symptom" v-if="!pageType || pageType === 'diet' || pageType === 'all'">
+			<view class="main-box symptom">
 				<view class="title">
 					<view class="label">饮食</view>
 					<view class="switch-layout">
@@ -243,7 +255,7 @@
 					</view>
 				</u-read-more>
 			</view>
-			<view class="main-box symptom" v-if="!pageType || pageType === 'sport' || pageType === 'all'">
+			<view class="main-box symptom">
 				<view class="title">
 					<view class="label">运动</view>
 					<view class="switch-layout">
@@ -300,7 +312,7 @@
 					</view>
 				</u-read-more>
 			</view>
-			<view class="main-box symptom" v-if="!pageType || pageType === 'symptom' || pageType === 'all'">
+			<view class="main-box symptom">
 				<view class="title">症状</view>
 				<view class="symptom-box">
 					<view class="symptom-item" v-for="(item, index) in symptomList" :key="index">{{ item.name }}</view>
@@ -315,12 +327,11 @@
 				</view>
 			</view> -->
 		</view>
-		<u-popup v-model="showEditModal" mode="bottom" border-radius="50">
-		<!-- <view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)"> -->
-			<view class="cu-dialog" v-if="currentRecord">
+		<!-- <u-popup v-model="showEditModal" mode="bottom" border-radius="50"> -->
+		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
+			<view class="cu-dialog current-diet-detail" v-if="currentRecord">
 				<view class="title-bar" v-if="currentRecord.hdate && currentRecord.htime">
 					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
-					<!-- <view class="btn" @click="UpdateDietInfo">确认</view> -->
 				</view>
 				<view class="diet-info">
 					<view class="img"><u-image width="100%" height="100%" :src="currentDietImgUrl"></u-image></view>
@@ -346,12 +357,7 @@
 						</view>
 					</view>
 					<view class="chart-box">
-						<!-- #ifdef MP-WEIXIN -->
 						<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-ec-canvas>
-						<!-- #endif -->
-						<!-- #ifdef H5 -->
-						<uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-echarts>
-						<!-- #endif -->
 					</view>
 					<view class="unit-box" v-if="currentRecordType === 'food'">
 						<view class="title">单位:</view>
@@ -374,44 +380,42 @@
 					<view class="btn bg-grey" @click="(showEditModal = false), (currentRecord = null)">取消</view>
 					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
-<!-- 				<view class="number-bar"></view>
-				<view class="unit-bar"></view> -->
 			</view>
-			</u-popup>
-		<!-- </view> -->
+		<!-- </u-popup> -->
+		</view>
 		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
 		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
 			<view class="popup-box">
 				<view class="icon-item" @click="toPages('food')">
-					<image src="@/archivesPages/static/icon/yinshi.png" mode="" class="icon"></image>
+					<image src="@/otherPages/static/icon/yinshi.png" mode="" class="icon"></image>
 					<text class="label">饮食</text>
 				</view>
 				<view class="icon-item" @click="toPages('sport')">
-					<image src="@/archivesPages/static/icon/yundong.png" mode="" class="icon"></image>
+					<image src="@/otherPages/static/icon/yundong.png" mode="" class="icon"></image>
 					<text class="label">运动</text>
 				</view>
 				<view class="icon-item" @click="toPages('weight')">
-					<image src="@/archivesPages/static/icon/tizhong.png" mode="" class="icon"></image>
+					<image src="@/otherPages/static/icon/tizhong.png" mode="" class="icon"></image>
 					<text class="label">体重</text>
 				</view>
 				<view class="icon-item" @click="toPages('sleep')">
-					<image src="@/archivesPages/static/icon/sleep.png" mode="" class="icon"></image>
+					<image src="@/otherPages/static/icon/sleep.png" mode="" class="icon"></image>
 					<text class="label">睡眠</text>
 				</view>
 				<view class="icon-item" @click="toPages('heartRate')">
-					<image src="@/archivesPages/static/icon/xinlv.png" mode="" class="icon"></image>
+					<image src="@/otherPages/static/icon/xinlv.png" mode="" class="icon"></image>
 					<text class="label">心率</text>
 				</view>
 				<view class="icon-item" @click="toPages('pressure')">
-					<image src="@/archivesPages/static/icon/xueya.png" mode="" class="icon"></image>
+					<image src="@/otherPages/static/icon/xueya.png" mode="" class="icon"></image>
 					<text class="label">血压</text>
 				</view>
 				<view class="icon-item" @click="toPages('oxygen')">
-					<image src="@/archivesPages/static/icon/xueyang.png" mode="" class="icon"></image>
+					<image src="@/otherPages/static/icon/xueyang.png" mode="" class="icon"></image>
 					<text class="label">血氧</text>
 				</view>
 				<view class="icon-item" @click="toPages('glucose')">
-					<image src="@/archivesPages/static/icon/xuetang.png" mode="" class="icon"></image>
+					<image src="@/otherPages/static/icon/xuetang.png" mode="" class="icon"></image>
 					<text class="label">血糖</text>
 				</view>
 			</view>
@@ -426,25 +430,13 @@
 </template>
 
 <script>
-import bxDateStamp from '@/archivesPages/components/bx-date-stamp/bx-date-stamp.vue';
-import xflSelect from '@/archivesPages/components/xfl-select/xfl-select.vue';
-// #ifdef MP-WEIXIN
-import uniEcCanvas from '@/archivesPages/components/uni-ec-canvas/uni-ec-canvas.vue';
-// #endif
-// #ifdef H5
-import uniEcharts from '@/archivesPages/components/uni-ec-canvas/uni-echarts.vue';
-// #endif
+import bxDateStamp from '@/otherPages/components/bx-date-stamp/bx-date-stamp.vue';
+import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 let self;
 export default {
 	components: {
-		xflSelect,
 		bxDateStamp,
-		// #ifdef MP-WEIXIN
 		uniEcCanvas,
-		// #endif
-		// #ifdef H5
-		uniEcharts
-		// #endif
 	},
 	data() {
 		return {
@@ -888,16 +880,6 @@ export default {
 					<li> <b>坚持规律的运动</b></li>
 					<li> <b>调整好心态</b></li>
 					<li> <b>保证充足的睡眠</b></li>`;
-					// 减少卡路里的摄入
-					// 要实现这一点就要少吃高脂肪的食物，同时，食用不饱和脂肪食物对你的心脏大有好处，并且可以帮助你吸收脂溶性维生素。为了达到减少卡路里的目的，你食用的必须比身体需要的更少。
-					// 改变饮食习惯
-					// 适当节食，少吃高脂肪食物，减少热量摄入，主要饮食改为蔬菜、水果、谷物和少量瘦蛋白。放慢吃饭速度，吃得慢一些。并且，要对碳酸饮料、加糖饮料、奶制品饮料、酒精及酒精饮料说不。
-					// 坚持规律的运动
-					// 每周5次，每次大约60分钟的有氧运动，如快步走、健身操、游泳等项目，可以让您的减肥事业事半功倍。
-					// 拥有积极乐观的心态
-					// 调整好心态，设定一个现实的目标，专心健身。注意把握自己身体的规律，不要在无聊或者压力大的时候海吃海喝，只有在真正饿的时候再吃东西。
-					// 保证充足的睡眠
-					// 要知道没有充足的睡眠，也是可能导致肥胖的发生的，所以要想要降低过高的bmi指数，就需要保证每天7-8小时的睡眠时间。
 				}
 				return tip;
 			}
@@ -967,7 +949,6 @@ export default {
 					case '其它食物':
 						obj.data = eleArr.map(item => {
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							// item.value = item.value - ratio * currentDiet[item.key];
 							item.value = item.value - currentDiet[item.key];
 							let num = (item.value * 100) / Number(item.EAR);
 							num = parseFloat(num.toFixed(1));
@@ -1167,10 +1148,8 @@ export default {
 			let currentUnit = this.unitList[index];
 			console.log(this.currentRecord);
 			//TODO 动态改变热量
-			// this.currentRecord.energy  this.currentRecord.unit_weight_g/100
 			this.currentRecord.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
 			this.currentRecord.unit = item.unit;
-			// this.currentRecord.energy = currentUnit.amount / 100;
 			this.buildCurrenDietChartOption();
 		},
 		async getFoodUnit(item) {
@@ -1920,7 +1899,11 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni
+										? item.val_rni * self.userInfo.weight
+										: item.val_ear
+										? item.val_ear * self.userInfo.weight
+										: mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -3470,8 +3453,9 @@ uni-checkbox::before {
 .cu-modal.show {
 	z-index: 999;
 }
-.cu-dialog {
+.current-diet-detail {
 	width: 100vw;
+	max-height: 90vh;
 	.title-bar {
 		display: flex;
 		justify-content: center;

@@ -315,12 +315,11 @@
 				</view>
 			</view> -->
 		</view>
-		<u-popup v-model="showEditModal" mode="bottom">
-			<!-- <view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)"> -->
-			<view class="cu-dialog" v-if="currentRecord">
+		<!-- <u-popup v-model="showEditModal" mode="bottom"> -->
+			<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
+			<view class="cu-dialog current-diet-detail" v-if="currentRecord">
 				<view class="title-bar" v-if="currentRecord.hdate && currentRecord.htime">
 					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
-					<!-- <view class="btn" @click="UpdateDietInfo">确认</view> -->
 				</view>
 				<view class="diet-info">
 					<view class="img"><u-image width="100%" height="100%" :src="currentDietImgUrl"></u-image></view>
@@ -374,11 +373,9 @@
 					<view class="btn bg-grey" @click="(showEditModal = false), (currentRecord = null)">取消</view>
 					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
-				<!-- 				<view class="number-bar"></view>
-				<view class="unit-bar"></view> -->
 			</view>
-		</u-popup>
-		<!-- </view> -->
+		<!-- </u-popup> -->
+		</view>
 		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
 		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
 			<view class="popup-box">
@@ -971,7 +968,7 @@ export default {
 							// item.value = item.value - ratio * currentDiet[item.key];
 							item.value = item.value - currentDiet[item.key];
 							let num = (item.value * 100) / Number(item.EAR);
-							num = parseFloat(num.toFixed(1));
+							num = Math.abs(parseFloat(num.toFixed(1)));
 							if (typeof num === 'number' && num.toString() === 'NaN') {
 							}
 							return num;
@@ -980,7 +977,8 @@ export default {
 					case '当前食物':
 						obj.data = eleArr.map(item => {
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							return currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
+							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0
+							return Math.abs(num);
 						});
 						break;
 					case 'NRV%达标线':
@@ -1000,7 +998,7 @@ export default {
 					text: ''
 				},
 				tooltip: {
-					show: false,
+					show: true,
 					trigger: 'axis'
 					// axisPointer: {
 					// 	type: 'cross',
@@ -3471,8 +3469,10 @@ uni-checkbox::before {
 .cu-modal.show {
 	z-index: 999;
 }
-.cu-dialog {
+.current-diet-detail {
 	width: 100vw;
+	max-height: 90vh;
+	overflow: scroll;
 	.title-bar {
 		display: flex;
 		justify-content: center;
@@ -3499,7 +3499,6 @@ uni-checkbox::before {
 			height: 200rpx;
 			border-radius: 10rpx;
 			overflow: hidden;
-			// padding: 2px;
 			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		}
 		.info {
@@ -3529,8 +3528,6 @@ uni-checkbox::before {
 			}
 			.cuIcon-delete {
 				display: inline-block;
-				// height: 90rpx;
-				// line-height: 90rpx;
 				text-align: center;
 				border-radius: 100%;
 			}
@@ -3593,7 +3590,6 @@ uni-checkbox::before {
 					align-content: center;
 					font-size: 20px;
 					&:active {
-						// box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 						transform: scale(1.2);
 					}
 					&:last-child {
@@ -3647,9 +3643,6 @@ uni-checkbox::before {
 			padding: 10rpx 30rpx;
 			border-radius: 10rpx;
 			font-size: 28rpx;
-			// background-color:#0081ff;
-			// color: #fff;
-			// background-color: #fff;
 			flex: 1;
 			margin-right: 20rpx;
 			text-align: center;
@@ -3657,20 +3650,6 @@ uni-checkbox::before {
 				margin-right: 0rpx;
 			}
 		}
-		// .cuIcon-delete {
-		// 	display: inline-block;
-		// 	height: 90rpx;
-		// 	line-height: 90rpx;
-		// 	text-align: center;
-		// 	width: 90rpx;
-		// 	border-radius: 100%;
-		// 	background-color: #fff;
-		// 	color: #333;
-		// 	&:active {
-		// 		box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-		// 		transform: scale(1.1);
-		// 	}
-		// }
 	}
 }
 .tootio-item {
@@ -3700,7 +3679,6 @@ uni-checkbox::before {
 	padding: 50rpx 0 20rpx;
 	flex-wrap: wrap;
 	.icon-item {
-		// width: 33%;
 		min-width: 22%;
 		margin: 0 auto;
 		display: flex;

@@ -2,7 +2,7 @@
 	<view class="history-wrap">
 		<u-navbar back-text="返回" :back-text-style="backTextStyle" :back-icon-color="backTextStyle.color" :title="pageName" :background="navBackground" title-color="#fff"></u-navbar>
 		<view class="history-chart" v-if="isAllPages"><uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" :ec="echartsData"></uniEcCharts></view>
-		<view class="button-box">
+		<view class="button-box" v-if="isAllPages">
 			<button class="button" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
 				{{ item.name }}
 			</button>
