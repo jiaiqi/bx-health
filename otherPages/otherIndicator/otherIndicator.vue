@@ -13,11 +13,11 @@
 			</view>
 			<view v-else-if="type && type === 'sleep'" class="item-wrap">
 				<view class="item-list">
-					<text>开始时间</text>
+					<text>入睡时间</text>
 					<input type="text" value="" />
 				</view>
 				<view class="item-list">
-					<text>结束时间</text>
+					<text>起床时间</text>
 					<input type="text" value="" />
 				</view>
 			</view>

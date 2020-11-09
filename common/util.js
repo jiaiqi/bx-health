@@ -1158,7 +1158,6 @@ export default {
 						case "detail":
 							if (e.hasOwnProperty("row")) {
 								row = e.row
-
 								let params = {
 									"type": "detail",
 									"condition": [{
@@ -1171,13 +1170,14 @@ export default {
 								}
 								console.log("点击了【有效】的公共编辑按钮", row)
 								uni.navigateTo({
-									url: "/pages/public/formPage/formPage?params=" + JSON.stringify(params)
+									url: "/publicPages/form/form?params=" + JSON.stringify(params)
 								})
 							} else {
 								console.log("点击了【无效】的公共编辑按钮")
 							}
-
-
+							return new Promise((resolve, reject) => {
+								resolve(e)
+							})
 							//代码块
 							break;
 						case "delete":

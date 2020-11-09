@@ -6,7 +6,7 @@
 				<view class="user-name" @click="showUserListPopup = true">{{ currentUser.name }}</view>
 				<view class="switch-icon cuIcon-right" @click="showUserListPopup = true"></view>
 				<view class="tag-box">
-					<text class="tag-item" v-for="item in checkedList" :key="item">{{ item }}</text>
+					<text class="tag-item" v-for="item in checkboxList" :key="item.name" v-show="item.checked">{{ item.name }}</text>
 				</view>
 			</view>
 			<view class="right" @click="showUserHealtManagePopup = true">健康标签管理</view>
@@ -81,7 +81,7 @@
 					<view class="data text-gray">0</view>
 					<view class="action"></view>
 				</view> -->
-					<view class="grid-item" @click="toOldHome">
+				<view class="grid-item" @click="toOldHome">
 					<view class="title">旧版主页</view>
 					<view class="data"></view>
 					<view class="action"></view>
@@ -135,21 +135,28 @@
 					<text class="cuIcon-info"></text>
 					最多只能勾选三项
 				</view>
-				<u-checkbox-group @change="checkboxGroupChange" max="3">
+				<checkbox-group @change="checkboxGroupChange">
+					<label v-for="(item, index) in checkboxList" :key="index">
+						<checkbox
+							:value="item.name"
+							:checked="item.checked"
+							color="#FFCC33"
+							style="transform:scale(0.7)"
+							:disabled="disabledTag&&!checkedList.includes(item.name)"
+						/>
+						{{ item.name }}
+					</label>
+				</checkbox-group>
+				<!-- 			<u-checkbox-group @change="checkboxGroupChange" max="3">
 					<u-checkbox v-model="item.checked" v-for="(item, index) in checkboxList" :key="index" :name="item.name">{{ item.name }}</u-checkbox>
-				</u-checkbox-group>
+				</u-checkbox-group> -->
 			</view>
 		</u-popup>
 	</view>
 </template>
 
 <script>
-// import chartOption from './score-chart-option.js';
-// import uniEcCharts from '@/components/uni-ec-canvas/uni-echart.vue';
 export default {
-	components: {
-		// uniEcCharts
-	},
 	data() {
 		return {
 			isLogin: false,
@@ -161,22 +168,29 @@ export default {
 			loginUserInfo: {},
 			checkboxList: [
 				{
-					name: '备孕'
+					name: '备孕',
+					checked: false
 				},
 				{
-					name: '孕期'
+					name: '孕期',
+					checked: false
 				},
 				{
-					name: '哺乳期'
+					name: '哺乳期',
+					checked: false
 				},
 				{
-					name: '肥胖'
+					name: '肥胖',
+					checked: false
 				}
 			],
 			checkedList: []
 		};
 	},
 	computed: {
+		disabledTag(){
+			return this.checkedList.length === 3
+		},
 		avatarUrl() {
 			if (this.loginUserInfo.headimgurl) {
 				return this.loginUserInfo.headimgurl;
@@ -228,9 +242,18 @@ export default {
 		},
 		checkboxGroupChange(e) {
 			console.log(e);
-			if (Array.isArray(e)) {
-				this.checkedList = e;
+			var items = this.checkboxList,
+				values = e.detail.value;
+			for (var i = 0, lenI = items.length; i < lenI; ++i) {
+				const item = items[i];
+				if (values.includes(item.name)) {
+					this.$set(item, 'checked', true);
+				} else {
+					this.$set(item, 'checked', false);
+				}
 			}
+
+			this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.name);
 		},
 		navPages(type = 'history') {
 			if (type === 'history') {

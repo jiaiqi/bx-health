@@ -258,6 +258,9 @@
 				{
 					"path": "chooseFood/myFoodList",
 					"style": {}
+				},{
+					"path": "chooseFood/myFoodsInfo",
+					"style": {}
 				},
 				// {
 				// 	"path": "pregnant/pregnant",

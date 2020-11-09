@@ -29,7 +29,7 @@
 					<text @click="changeCate(item,index)" v-for="(item,index) in categoryTop" :key="index" :class="categoryTopIndex === index?'active-text-top-tit':''">{{item.name}}</text>					
 				</view>
 				<!-- <view class="ele-text-top">主要维生素含量如下：</view> -->
-				<view v-if="categoryTopIndex === 0" class="ele-text-cen">
+				<view v-if="categoryTopIndex === 1" class="ele-text-cen">
 					<view class="ele-text-cen-item">
 						<view class="ele-text-cen-item-title">产能营养素</view>
 						<view class="ele-text-cen-item-cen">
@@ -147,12 +147,21 @@
 						</view> 
 					</view>
 				</view>
-				<!-- #ifdef MP-WEIXIN -->
-					<uniEcCanvas v-if="echartsIsShow && categoryTopIndex === 1" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
-				<!-- #endif -->
-				<!-- #ifdef H5 -->
-					<uniEcharts v-if="echartsIsShow && categoryTopIndex === 1" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
-				<!-- #endif -->
+				<view class="uni-ec-canvas-wrap">
+					<view class="uni-ec-canvas-top">
+						<text @click="changeApprove(item,index)" :class="currentAppr.name === item.name?'active-approve':''" v-for="(item,index) in approveData" :key="index">{{item.name}}</text>
+					</view>
+					<view class="uni-ec-canvas-bot">
+						<!-- #ifdef MP-WEIXIN -->
+							<uniEcCanvas v-if="echartsIsShow && categoryTopIndex === 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+						<!-- #endif -->
+						<!-- #ifdef H5 -->
+							<uniEcharts v-if="echartsIsShow && categoryTopIndex === 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
+						<!-- #endif -->
+					</view>
+					
+				</view>
+			
 			</view>
 			<view class="calculate">
 				<view class="weight">
@@ -220,14 +229,36 @@ export default {
 		return {
 			unitList: [],
 			list: [],
+			isShowInfo:false,
 			categoryTop:[{
-				name:'营养素含量',
-				type:'purity'
-			},{
 				name:'NRV%占比',
 				type:'NRV'
+			},{
+				name:'营养素含量',
+				type:'purity'
+			}],
+			approveData:[{
+				name:'成年男性',
+				type:'man',
+				sex:'男',
+				age:18,
+				weight:65
+				
+			},{
+				name:'成年女性',
+				type:'woman',
+				sex:'女',
+				age:18,
+				weight:50
+			},{
+				name:'我的',
+				type:'mine',
+				sex:null,
+				age:null,
+				weight:null
 			}],
 			categoryTopIndex:0,
+			currentAppr:'',
 			currFood: '',
 			heatNum: '',
 			nowDate: this.formateDate(new Date(), 'date').replace(/\s*/g, ''),
@@ -388,9 +419,14 @@ export default {
 			result: ''
 		};
 	},
+	onShow() {
+		this.approveData[2].sex = this.userInfo.sex
+		this.approveData[2].age = this.age
+		this.approveData[2].weight = this.userInfo.weight
+	},
 	onLoad(option) {
 		if (uni.getStorageSync('current_user_info')) {
-			this.userInfo = uni.getStorageSync('current_user_info');
+			this.userInfo = uni.getStorageSync('current_user_info');			
 			uni.setStorageSync('current_user', this.userInfo.name);
 		} else {
 			let userList = uni.getStorageSync('user_info_list');
@@ -406,6 +442,7 @@ export default {
 		}
 		this.currFood = JSON.parse(decodeURIComponent(option.currFood));
 		if (this.currFood) {
+			this.currentAppr = this.approveData[0]
 			this.assembleData();
 			this.selectCurrFoodUnit(this.currFood);
 			// this.getNutrientRecommended()
@@ -420,9 +457,34 @@ export default {
 		}
 	},
 	methods: {
+		/*点击切换图表顶部类型**/
+		changeApprove(item,index){
+			if(item.type === 'mine' && (!item.age || !item.sex)){
+				uni.showModal({
+				    title: '提示',
+				    content: '当前没有进行登记年龄、性别和体重，是否去登记?',
+				    success: function (res) {
+				        if (res.confirm) {
+							uni.navigateTo({
+								url:'/otherPages/chooseFood/myFoodsInfo'
+							})
+				        } else if (res.cancel) {
+				            console.log('用户点击取消');
+				        }
+				    }
+				});
+			}else{
+				this.currentAppr = item
+				this.assembleData()
+			}
+			
+		},
 		/*点击切换营养素占比和NRV**/
 		changeCate(item,index){
 			this.categoryTopIndex = index
+			if(item.type === 'NRV'){
+				this.currentAppr = this.approveData[0]
+			}
 		},
 		async getNutrientRecommended() {
 			let self = this;
@@ -440,11 +502,11 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				let result = res.data.data.filter(item => {
-					if ((item.sex && item.sex.indexOf(self.userInfo.sex) !== -1) || !item.sex) {
+					if ((item.sex && item.sex.indexOf(self.currentAppr.sex) !== -1) || !item.sex) {
 						if (item.age_start && item.age_end) {
-							return self.age >= item.age_start && self.age < item.age_end;
+							return self.currentAppr.age >= item.age_start && self.currentAppr.age < item.age_end;
 						} else if (item.age_start && !item.age_end) {
-							return self.age >= item.age_start;
+							return self.currentAppr.age >= item.age_start;
 						} else if (!item.age_start && !item.age_end) {
 							return true;
 						} else {
@@ -461,11 +523,17 @@ export default {
 					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'B3') {
 						endArr.push(currFood[nut.key]);
 					}
-					result.forEach(re => {
+					result.forEach(re => {						
 						if (nut.name === re.nutrient) {
-							num = ((Number(currFood[nut.key]) / Number(re.val_rni)) * 100).toFixed(1);
+							num = ((Number(currFood[nut.key]) / Number(re.val_rni)) * 100).toFixed(1);			
+							if(nut.name === '蛋白质'){
+								num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
+							}
 							endArr.push(Number(num));
+							
 						}
+						
+						
 					});
 				});
 				// result.forEach(item => {
@@ -527,6 +595,7 @@ export default {
 			let currFood = self.currFood;
 			nutrientData.forEach(ele => {
 				if (currFood[ele.key]) {
+					// currFood[ele.key] = currFood[ele.key] * Number(this.choiceNum)
 					self.$set(ele, 'value', currFood[ele.key]);
 				} else {
 					self.$set(ele, 'value', 0);
@@ -537,8 +606,12 @@ export default {
 			option.series[0].data = currData.map(ser => {
 				return ser;
 			});
-			option.series.push(obj);
-			this.countDietNum('+1');
+			if(!option.series[1] ){
+				option.series.push(obj);
+			}
+			if(this.value1 == 0){
+				this.countDietNum('+1');
+			}
 			this.echartsIsShow = true;
 		},
 		/* 点击取消*/
@@ -631,6 +704,7 @@ export default {
 				if (value == 0) {
 					this.heatNum = 0;
 				}
+				
 				let addObj = {
 					name: '超标部分',
 					type: 'bar',
@@ -644,18 +718,35 @@ export default {
 				let result = this.result;
 				nutrientData.forEach(nut => {
 					let num = 0;
-					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'B3') {
-						addData.push(currFood[nut.key] * Number(self.choiceNum));
-					}
+					// if (nut.name === '碳水化合物' || nut.name === 'B3') {
+					// 	addData.push(currFood[nut.key] * Number(self.choiceNum));
+					// }
 					result.forEach(re => {
 						if (nut.name === re.nutrient) {
-							num = (((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100).toFixed(1);
+							num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100);
+							if(nut.name === '蛋白质'){
+								// num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
+								num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100)								
+							}
+							if(num > 100){
+								num  = (num - 100).toFixed(1)
+							}else{
+								num = 0
+							}
 							addData.push(Number(num));
 						}
 					});
 				});
 				addObj.data = addData;
-
+				
+				nutrientData.forEach(ele => {
+					if (currFood[ele.key]) {
+						currFood[ele.key] = currFood[ele.key] * Number(this.choiceNum)
+						self.$set(ele, 'value', currFood[ele.key]);
+					} else {
+						self.$set(ele, 'value', 0);
+					}
+				});
 				if (option.series[2] && option.series[2].type) {
 					option.series[2].data = addData;
 				} else {
@@ -1117,7 +1208,7 @@ export default {
 		display: flex;
 		margin-bottom: 15rpx;
 		text{
-			padding: 4rpx 20rpx;
+			padding: 8rpx 20rpx;
 			border: 1px solid #ccc;
 			margin-right: 20rpx;
 			border-radius: 30rpx;
@@ -1249,6 +1340,25 @@ export default {
 		text-align: center;
 		&:first-child {
 			margin-right: 90upx;
+		}
+	}
+}
+.uni-ec-canvas-wrap{
+	.uni-ec-canvas-top{
+		display: flex;
+		text{
+			padding: 5rpx 20rpx;
+			// background-color: #8dc63f;
+			border:1px solid #ccc;
+			color: #999;
+			margin-right: 10rpx;
+			border-radius: 20rpx;
+			
+		}
+		.active-approve{
+			background-color: #8dc63f;
+			color: #fff;
+			border-color: #8dc63f;
 		}
 	}
 }

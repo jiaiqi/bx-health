@@ -23,13 +23,7 @@
 						<u-icon name="arrow-down-fill" size="28" :class="{ active: showUserList }"></u-icon>
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
-						<view
-							class="menu-item"
-							:class="{ 'current-user': userInfo.name === item.name }"
-							@click.stop="clickUserMenu(item)"
-							v-for="(item, index) in userMenuList"
-							:key="index"
-						>
+						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -78,13 +72,7 @@
 							style="display: flex; width: 90px; justify-content: space-between"
 						>
 							<text style="flex: 1">
-								{{
-									energyChange === 0
-										? '0.0'
-										: parseFloat(energyChange / 7.7) > 0
-										? `+${parseFloat(energyChange / 7.7).toFixed(1)}`
-										: parseFloat(energyChange / 7.7).toFixed(1)
-								}}
+								{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
 							</text>
 							<text class="units">g脂肪</text>
 						</view>
@@ -157,13 +145,7 @@
 													}"
 												>
 													{{
-														alone.value === 0
-															? alone.shortName === 'E'
-																? 0 + 'mg/d'
-																: '0'
-															: alone.shortName === 'E'
-															? alone.value.toFixed(1) + 'mg/d'
-															: alone.value.toFixed(1)
+														alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1)
 													}}
 												</view>
 											</view>
@@ -930,30 +912,35 @@ export default {
 		async buildCurrenDietChartOption() {
 			let currentDiet = this.deepClone(this.currentRecord);
 			let dietRecordList = this.deepClone(this.dietRecord);
-			let foodType = [];
-			if (Array.isArray(this.foodType) && this.foodType.length > 0) {
-				foodType = this.deepClone(this.foodType);
-			} else {
-				let record = this.dietRecord;
-				let condition = null;
-				if (Array.isArray(record) && record.length > 0) {
-					let names = record.map(item => item.name);
-					condition = [
-						{
-							colName: 'name',
-							ruleType: 'in',
-							value: names.toString()
-						}
-					];
-					foodType = await this.getFoodType(condition);
-				}
+			let serviceName = '';
+			let condition = [{}];
+			if (currentDiet.diret_type === 'diet_contents') {
+				// 食材
+				serviceName = 'srvhealth_diet_contents_select';
+				condition[0] = {
+					colName: 'food_no',
+					ruleType: 'eq',
+					value: currentDiet.diet_contents_no
+				};
+			} else if (currentDiet.diret_type === 'mixed_food') {
+				// 混合食物
+				serviceName = 'srvhealth_mixed_food_nutrition_contents_select';
+				condition[0] = {
+					colName: 'meal_no',
+					ruleType: 'eq',
+					value: currentDiet.mixed_food_no
+				};
 			}
+			let foodType = [];
+			let foodInfo = await this.getFoodType(condition, serviceName);
+			if (Array.isArray(foodInfo) && foodInfo.length > 0) {
+				foodInfo = foodInfo[0];
+			} else {
+				// 没查到食物记录对应的食物信息
+				return;
+			}
+			currentDiet = { ...foodInfo, ...currentDiet };
 			let energyList = await this.buildDietData();
-			foodType.forEach(food => {
-				if (currentDiet.name === food.name) {
-					currentDiet = { ...food, ...currentDiet };
-				}
-			});
 			// 构建echarts需要的数据格式
 			energyList = this.deepClone(this.energyListWrap);
 			let eleArr = [];
@@ -981,7 +968,6 @@ export default {
 				switch (le) {
 					case '其它食物':
 						obj.data = eleArr.map(item => {
-							debugger;
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
 							// item.value = item.value - ratio * currentDiet[item.key];
 							item.value = item.value - currentDiet[item.key];
@@ -994,6 +980,7 @@ export default {
 						break;
 					case '当前食物':
 						obj.data = eleArr.map(item => {
+							debugger
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
 							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
 							return Math.abs(num);
@@ -1695,7 +1682,25 @@ export default {
 					value: dietInfo.name
 				}
 			];
-			let recordType = await this.getFoodType(cond);
+			let serv = '';
+			if (dietInfo.diret_type === 'diet_contents') {
+				// 食材
+				serv = 'srvhealth_diet_contents_select';
+				cond[0] = {
+					colName: 'food_no',
+					ruleType: 'eq',
+					value: dietInfo.diet_contents_no
+				};
+			} else if (dietInfo.diret_type === 'mixed_food') {
+				// 混合食物
+				serv = 'srvhealth_mixed_food_nutrition_contents_select';
+				cond[0] = {
+					colName: 'meal_no',
+					ruleType: 'eq',
+					value: dietInfo.mixed_food_no
+				};
+			}
+			let recordType = await this.getFoodType(cond,serv);
 			let ele = null;
 			if (this.currentRecordType === 'sport') {
 				serviceName = 'srvhealth_body_activity_record_update';
@@ -1735,8 +1740,6 @@ export default {
 						unit: dietInfo.unit
 					}
 				];
-				// unit_weight_g:dietInfo.unit_weight_g,
-				// unit:dietInfo.unit
 			}
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
@@ -1869,20 +1872,29 @@ export default {
 		async getBaseInfo() {
 			// 使用user_no查找基本信息
 			await this.getNutrientRecommended();
-			this.getDietRecord().then(res => {
-				let condition = null;
-				if (Array.isArray(res) && res.length > 0) {
-					let names = res.map(item => item.name);
-					condition = [
-						{
-							colName: 'name',
-							ruleType: 'in',
-							value: names.toString()
-						}
-					];
-					this.getFoodType(condition);
-				}
-			});
+			let res = await this.getDietRecord();
+			if (Array.isArray(res) && res.length > 0) {
+				let names = res.map(item => item.name);
+				let mixDietList = res.filter(item => item.diret_type === 'mixed_food');
+				let basicDietList = res.filter(item => item.diret_type === 'diet_contents');
+				let condition1 = [
+					{
+						colName: 'name',
+						ruleType: 'in',
+						value: mixDietList.map(item => item.name).toString()
+					}
+				];
+				let condition2 = [
+					{
+						colName: 'name',
+						ruleType: 'in',
+						value: basicDietList.map(item => item.name).toString()
+					}
+				];
+				let mix = await this.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
+				let basic = await this.getFoodType(condition2);
+				this.foodType = [...mix, ...basic];
+			}
 			this.getSportsRecord().then(res => {
 				let condition = null;
 				if (Array.isArray(res) && res.length > 0) {
@@ -1937,11 +1949,7 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni
-										? item.val_rni * self.userInfo.weight
-										: item.val_ear
-										? item.val_ear * self.userInfo.weight
-										: mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -1974,6 +1982,7 @@ export default {
 					}
 				]
 			};
+
 			let res = await this.$http.post(url, req);
 			console.log('res-------', res.data.data);
 			return res.data.data;
@@ -2243,11 +2252,15 @@ export default {
 			}
 			return res.data.data;
 		},
-		async getFoodType(cond) {
+		async getFoodType(cond, serv) {
 			// 食物类型
-			let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
+			let serviceName = 'srvhealth_diet_contents_select';
+			if (serv) {
+				serviceName = serv;
+			}
+			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
-				serviceName: 'srvhealth_diet_contents_select',
+				serviceName: serviceName,
 				colNames: ['*'],
 				condition: [],
 				order: []
@@ -2256,11 +2269,11 @@ export default {
 				req.condition = cond;
 			}
 			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
+			if (res.data.state === 'SUCCESS' && res.data.data.length > 0 && !serv) {
 				console.log(res.data.data);
-				this.foodType = res.data.data;
+				// this.foodType = res.data.data;
 			}
-			return res.data.data;
+			return res.data.data?res.data.data:[];
 		},
 		async getSportType(cond) {
 			// 运动类型

@@ -105,11 +105,25 @@
 					<!-- <view class="move foods-move"><view @click.stop="toFoodsDetail(food)" class="bg-grey">详情</view></view> -->
 					<!-- </view> -->
 				</view>
-				<view v-if="!isSeekValue" @click="tofeedback" class="seek-wrap">
+				<view 
+					@click.stop="tofeedback"
+					class="cu-item boxfood couple-boxfood"
+					v-if="isLoad"
+				>
+					<view class="smallbox couple-smallbox">
+						<view class="smallbox-couple-top">
+							<u-icon size="70" name="plus"></u-icon>
+						</view>
+						<view class="smallbox-couple-bot">
+							<text>反馈</text>
+						</view>
+					</view>
+				</view>
+				<!-- <view v-if="!isSeekValue" @click="tofeedback" class="seek-wrap">
 					<text>没搜索到想要的内容？快去</text>
 					<text class="seek-back">反馈</text>
 					<text>吧</text>
-				</view>
+				</view> -->
 			</view>
 		</sPullScroll>
 		<!-- </scroll-view> -->
@@ -139,37 +153,14 @@
 							<view class="calorie">{{ heatNum ? heatNum.toFixed(1) :''}}千卡</view>
 						</view>
 					</view>					
-					<!-- <view class="calculate">
-						<view class="amount">
-							<view class="input-box">
-								<view class="key-left">
-									<text @click="countDietNum('-1')">-1</text>
-									<text @click="countDietNum('-0.5')">-0.5</text>
-								</view>
-								<u-input placeholder=" " :border="true" maxlength="20" v-model="choiceNum" type="number"   />
-								<view class="key-right">
-									<text @click="countDietNum('+1')"> +1 </text>
-									<text @click="countDietNum('+0.5')"> +0.5 </text>
-								</view>					
-							</view>
-						</view>
-						<view @click="changeUnit(currFood)" class="weight">
-							<view style="padding-right: 8upx;" class="unit">{{ radioLabel?(radioLabel.unit_amount?radioLabel.unit_amount+radioLabel.unit:radioLabel.unit):currFood.unit_amount+currFood.unit }}</view>
-							<view class="unit-change">
-							<u-icon size="24" name="arrow-down-fill"></u-icon>
-							</view>
-						</view>
-					</view> -->
 					<view class="calculate">						
 							<view  class="weight">
 								<view class="calculate-l">
 									单位：
 								</view>
 								<view @click="changeUnit(u,ids)" v-for="(u,ids) in unitList" :key="ids" :class="currIndex==ids?'active-unit':''" class="unit">
-									{{u.unit_amount?u.unit_amount+u.unit:u.unit}}
-									<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
+									{{u.unit_amount?u.unit_amount+u.unit:u.unit}}								
 								</view>
-								<!-- <view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view> -->
 							</view>
 						
 					</view>
@@ -302,8 +293,9 @@ export default {
 			value1:0,
 			list: [],
 			current: 0,
+			isLoad:false,
 			currIndex:'',
-			topNum:380,
+			topNum:440,
 			colData: [],
 			currFoodLabel: {},
 			listTouchStart: 0,
@@ -690,9 +682,14 @@ export default {
 							type:"food",
 							children:[
 								{
+									title:'食材',
+									value:'matter',
+									choose:true
+								},
+								{
 									title: '食物',
 									value: 'foods',
-									choose:true
+									choose:false
 								},																															
 								{
 									title: '蔬菜',
@@ -934,7 +931,7 @@ export default {
 						]
 						this.copyData = JSON.parse(JSON.stringify(menuData))
 						this.menuAgList = menuData
-						this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
+						// this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
 					if (query.order) {
 						this.order = query.order;
 					}
@@ -990,13 +987,13 @@ export default {
 			this.childChooseArrLength = newValue.length
 			if(newValue.length > 0){
 				if(this.pageType == 'food'){
-					this.topNum = 450
+					this.topNum = 500
 				}else if(this.pageType== 'sport'){
 					this.topNum = 240
 				}
 			}else{
 				if(this.pageType == 'food'){
-					this.topNum = 450
+					this.topNum = 430
 				}else if(this.pageType== 'sport'){
 					this.topNum = 180
 				}
@@ -1158,8 +1155,13 @@ export default {
 					}
 				})				
 			}
-			if(child.value === 'foods'){	
-				this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
+			if(child.value === 'foods' || child.value === 'matter'){
+				if(child.value === 'foods'){
+					this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
+				}else if(child.value === 'matter'){
+					this.searchArg.serviceName = 'srvhealth_diet_contents_select'
+				}
+				this.condObj = null
 				this.classifyCond = null
 				this.menuAgList.forEach(m=>{
 					this.copyData.forEach(n=>{
@@ -1169,7 +1171,7 @@ export default {
 					})
 				})				
 				console.log("this.menuAgList-----",this.menuAgList)
-				this.getFoodsList(null,null,null,'srvhealth_mixed_food_nutrition_contents_select')
+				this.onRefresh();
 				
 			}else if(child.value !== 'matter' && !child.current_num  && !this.menuAgList[0].children[0].choose) {
 				this.searchArg.serviceName = 'srvhealth_diet_contents_select'
@@ -1366,6 +1368,7 @@ export default {
 				this.getFoodsList(this.order?this.order:order, this.condObj, 'filtrate');
 			}
 			}
+			this.onRefresh();
 			console.log("parent:",parent,"child",child)
 		},
 		tabSelect(e) {
@@ -1592,6 +1595,7 @@ export default {
 				],
 			};
 			let res = await this.$http.post(url, req);
+			this.isLoad = true
 			if (res.data.state === 'SUCCESS' && res.data.data.length >= 0) {
 				this.chooseFoodArr = res.data.data;
 				for (let i = 0; i < this.chooseFoodArr.length; i++) {
@@ -1663,6 +1667,7 @@ export default {
 				this.getSearchValue(serValue);
 			} else {
 				this.isSeekValue = true
+				this.pageInfo.pageNo = 1
 				this.getFoodsList(null,this.classifyCond);
 			}
 		},
@@ -2008,108 +2013,7 @@ export default {
 			this.serBtn = false;
 			this.searchValue = '';
 		},
-		// getDoubleData(){
-		// 	let self = this;
-		// 	let url = this.getServiceUrl('health',this.searchArg.serviceName, 'select');
-		// 	let req = {
-		// 		serviceName: this.searchArg.serviceName,
-		// 		colNames: ['*'],
-		// 		// condition: [],
-		// 		relation_condition:{
-		// 			relation: "OR",
-		// 			data:[]
-		// 		},
-		// 		order: []
-		// 	}
-
-		// 	if(order && order.col){
-		// 		req.order = [{
-		// 			colName:order.col,
-		// 			orderType:order.type
-		// 		}]
-		// 	}
-		// 	if(cond){
-		// 		req.relation_condition.data.push(cond)
-		// 	}
-		// 	let res = await this.$http.post(url, req);
-		// 	let data = res.data.data;
-		// 	if(data.length > 0){
-		// 		this.foodList = res.data.data;
-		// 		for (var i = 0; i < data.length; i++) {
-		// 			if (data[i].image) {
-		// 				let fileDatas = await self.getFilePath(data[i].image);
-		// 				console.log('img---', fileDatas);
-		// 				url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-		// 				// let url = this.$api.serverURL + '/file/download?filePath=' + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
-		// 				self.$set(data[i], 'imgurl', url);
-		// 			}
-		// 		}
-		// 	}
-		// },
 		result(val) {
-			console.log('filter_result:', val);
-			this.pageInfo.pageNo = 1;
-			if (val[0].result.jobType) {
-				let order = '';
-				if (val[0].result.jobType != 'default') {
-					order = {
-						col: val[0].result.jobType,
-						type: 'asc'
-					};
-				}
-				this.order = order;
-				this.onRefresh();
-				this.getFoodsList(order, this.condObj);
-			}
-			if (val[1].title === 'salary' || val[1].title === 'single' || val[1].title === 'sort') {
-				let arr = ['salary', 'single', 'sort'];
-				let cond = {
-					relation: 'AND',
-					data: []
-				};
-
-				let salary_data = val[0].result;
-				let hasValue = false;
-				let filterArr = [];
-				arr.forEach(classify => {
-					if (salary_data[classify] && salary_data[classify].length > 0) {
-						filterArr = [...filterArr, ...salary_data[classify]];
-						hasValue = true;
-						salary_data[classify].forEach(item => {
-							this.menuList.forEach(men => {
-								if (men.key === classify) {
-									men.detailList.forEach(det => {
-										if (det.value === item) {
-											let obj = {
-												colName: item,
-												ruleType: 'ge',
-												value: det.num
-											};
-											cond.data.push(obj);
-										}
-									});
-								}
-							});
-						});
-					}
-				});
-				this.filterArr = filterArr;
-				console.log('选中的过滤条件', filterArr);
-				if (hasValue) {
-					let order = null;
-					if (cond.data.length === 1) {
-						order = {
-							col: cond.data[0].colName,
-							type: 'desc'
-						};
-					}
-					this.getFoodsList(order, cond, 'filtrate');
-				} else {
-					this.getFoodsList();
-				}
-				console.log('组装之后的condition---', cond);
-			}
-			this.filterResult = JSON.stringify(val, null, 2);
 		}
 	}
 };
@@ -2272,6 +2176,20 @@ export default {
 		display: flex;
 		flex-direction: column;
 		width: 100%;
+		.smallbox-couple-top{
+			width: 100%;
+			min-height: 100rpx;			
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-bottom: 1px dashed #ccc;
+		}
+		.smallbox-couple-bot{
+			font-weight: 700;
+			width: 100%;
+			text-align: center;
+			padding: 26rpx 0;
+		}
 		.smallbox-img{
 			width: 100%;
 			height: 100upx;
@@ -2324,8 +2242,16 @@ export default {
 			}
 		}
 	}
+	.couple-smallbox{
+		border: 1px dashed #fff;
+		
+	}
 }
-
+.couple-boxfood{
+	border-radius: 0;
+	border-bottom-left-radius: 20rpx;
+	border-bottom-right-radius: 20rpx;
+}
 .bottom-modal {
 	.cu-dialog {
 		height: 100vh;
