@@ -3,7 +3,7 @@ import mixin from './libs/mixin/mixin.js'
 // 引入关于是否mixin集成小程序分享的配置
 // import wxshare from './libs/mixin/mpShare.js'
 // 全局挂载引入http相关请求拦截插件
-import http from './libs/request'
+// import http from './libs/request'
 
 function wranning(str) {
 	// 开发环境进行信息输出,主要是一些报错信息
@@ -24,9 +24,9 @@ function wranning(str) {
 // }
 
 // post类型对象参数转为get类型url参数
-import queryParams from './libs/function/queryParams.js'
+// import queryParams from './libs/function/queryParams.js'
 // 路由封装
-import route from './libs/function/route.js'
+// import route from './libs/function/route.js'
 // 时间格式化
 import timeFormat from './libs/function/timeFormat.js'
 // 时间戳格式化,返回多久之前
@@ -49,25 +49,25 @@ import deepMerge from './libs/function/deepMerge.js'
 import addUnit from './libs/function/addUnit.js'
 
 // 规则检验
-import test from './libs/function/test.js'
+// import test from './libs/function/test.js'
 // 随机数
 import random from './libs/function/random.js'
 // 去除空格
 import trim from './libs/function/trim.js'
 // toast提示，对uni.showToast的封装
-import toast from './libs/function/toast.js'
+// import toast from './libs/function/toast.js'
 // 获取父组件参数
 import getParent from './libs/function/getParent.js'
 // 获取整个父组件
-import $parent from './libs/function/$parent.js'
+// import $parent from './libs/function/$parent.js'
 // 获取sys()和os()工具方法
 // 获取设备信息，挂载到$u的sys()(system的缩写)属性中，
 // 同时把安卓和ios平台的名称"ios"和"android"挂到$u.os()中，方便取用
-import {sys, os} from './libs/function/sys.js'
+// import {sys, os} from './libs/function/sys.js'
 // 防抖方法
-import debounce from './libs/function/debounce.js'
+// import debounce from './libs/function/debounce.js'
 // 节流方法
-import throttle from './libs/function/throttle.js'
+// import throttle from './libs/function/throttle.js'
 
 
 // 配置信息
@@ -76,46 +76,46 @@ import config from './libs/config/config.js'
 import zIndex from './libs/config/zIndex.js'
 
 const $u = {
-	queryParams: queryParams,
-	route: route,
+	// queryParams: queryParams,
+	// route: route,
 	timeFormat: timeFormat,
 	date: timeFormat, // 另名date
 	timeFrom,
 	colorGradient: colorGradient.colorGradient,
-	guid,
+	// guid,
 	color,
-	sys,
-	os,
+	// sys,
+	// os,
 	type2icon,
 	randomArray,
 	wranning,
-	get: http.get,
-	post: http.post,
-	put: http.put,
-	'delete': http.delete,
+	// get: http.get,
+	// post: http.post,
+	// put: http.put,
+	// 'delete': http.delete,
 	hexToRgb: colorGradient.hexToRgb,
 	rgbToHex: colorGradient.rgbToHex,
-	test,
-	random,
-	deepClone,
-	deepMerge,
+	// test,
+	// random,
+	// deepClone,
+	// deepMerge,
 	getParent,
-	$parent,
+	// $parent,
 	addUnit,
 	trim,
 	type: ['primary', 'success', 'error', 'warning', 'info'],
-	http,
-	toast,
+	// http,
+	// toast,
 	config, // uView配置信息相关，比如版本号
 	zIndex,
-	debounce,
-	throttle,
+	// debounce,
+	// throttle,
 }
 
 const install = Vue => {
 	Vue.mixin(mixin) 
 	if (Vue.prototype.openShare) {
-		Vue.mixin(mpShare);
+		// Vue.mixin(mpShare);
 	}
 	// Vue.mixin(vuexStore);
 	// 时间格式化，同时两个名称，date和timeFormat

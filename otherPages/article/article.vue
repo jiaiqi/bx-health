@@ -3,7 +3,7 @@
 		<view class="header">
 			<!-- 	<u-search placeholder="输入关键词进行搜索" :animation="true" v-model="keyword" shape="square" @custom="searchWithKeywords"></u-search> -->
 			<view class="title" v-if="tabList.length > 1">
-				<u-tabs name="title" :list="tabList" :is-scroll="true" :current="showType" @change="changeShowType"></u-tabs>
+				<!-- <u-tabs name="title" :list="tabList" :is-scroll="true" :current="showType" @change="changeShowType"></u-tabs> -->
 				<!-- 	<view class="tab-item" @tap="changeShowType(index)" :class="showType == index ? 'activeContent' : ''" v-for="(item, index) in tabList" :key="item.title">
 					<view :class="showType == index ? 'activeTitle' : ''" class="tab-title">{{ item.title }}</view>
 					<view :class="showType == index ? 'activeHr' : ''" class="hr"></view>

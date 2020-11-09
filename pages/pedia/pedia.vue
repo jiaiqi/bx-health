@@ -14,7 +14,14 @@
 			:key="index"
 		>
 			<view class="page-slide">
-				<u-swiper
+				<swiper class="screen-swiper item-box" :height="300" :class="dotStyle?'square-dot':'round-dot'" :indicator-dots="true" :circular="true"
+				 :autoplay="true" interval="5000" duration="500"
+				 v-if="pageItem.div_type === 'carousel'">
+					<swiper-item v-for="(item,index) in pageItem.carousel" :key="index">
+						<image :src="item.picUrl" mode="scaleToFill"></image>
+					</swiper-item>
+				</swiper>
+			<!-- 	<u-swiper
 					:list="pageItem.carousel"
 					border-radius="10"
 					interval="3000"
@@ -25,7 +32,7 @@
 					:name="'picUrl'"
 					class="item-box"
 					v-if="pageItem.div_type === 'carousel'"
-				></u-swiper>
+				></u-swiper> -->
 			</view>
 			<view class="page-menu" v-if="pageItem.div_type === 'buttons'">
 				<view class="title">{{ pageItem.item_name }}</view>

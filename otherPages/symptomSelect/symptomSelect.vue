@@ -65,7 +65,6 @@
 		</view> -->
 		<view class="symptom-bot-wrap">
 			
-			<!-- <u-tabs active-color="#42b983" :show-bar="false" :list="symptomList" :is-scroll="false" :current="currentTab" @change="change"></u-tabs> -->
 			<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[currentTab].children.length > 0 && !isSearch">
 				<view v-if="symptomList[currentTab].is_show && items.is_leaf === '否'" :key="index" v-for="(items, index) in symptomList[currentTab].children" class="wrapCont">
 					<view v-if="items.is_leaf === '否' && items.children.length > 0" class="wrapCont_row">
@@ -127,7 +126,6 @@
 				<text @click="changeMenu(item,index)" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomList" :key="index">{{item.name}}</text>
 			</view>
 		</u-popup>
-		<u-toast ref="uToast" />
 	</view>
 </template>
 
@@ -542,10 +540,11 @@ export default {
 						must.isfail = true;
 					}
 				});
-				this.$refs.uToast.show({
+				uni.showToast({
 					title: '请完善信息',
-					type: 'error'
-				});
+					icon:'none',
+					duration:1000
+				})
 			}
 		}
 	}

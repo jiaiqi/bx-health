@@ -32,7 +32,6 @@
                 </view>
             </view>
         </view>
-		<u-toast ref="uToast" />
         <!-- <image src="https://i.loli.net/2020/07/16/2MmZsucVTlRjSwK.png" mode="scaleToFill" v-if="collapsible" @click="toggle" class="weektoggle" :class="{ down: monthOpen }"></image> -->
     </view>
 </template>

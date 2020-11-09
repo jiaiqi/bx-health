@@ -11,8 +11,9 @@
 		<view class="create-time">{{ articleData.create_time }}</view>
 
 		<view class="content" v-if="articleData.content">
-			<u-parse :html="articleData.content"></u-parse>
-			<!-- <view class="" v-html="JSON.parse(JSON.stringify(articleData.content).replace(/\<img/gi, '<img width=100% height=100%'))"></view> -->
+			
+			<!-- <u-parse :html="articleData.content"></u-parse> -->
+			<view class="" v-html="JSON.parse(JSON.stringify(articleData.content).replace(/\<img/gi, '<img width=100% height=100%'))"></view>
 		</view>
 		<view class="content" v-if="articleData.introduce">
 			<view class="" v-html="JSON.parse(JSON.stringify(articleData.introduce).replace(/\<img/gi, '<img width=100% height=100%'))"></view>

@@ -147,9 +147,6 @@
 						{{ item.name }}
 					</label>
 				</checkbox-group>
-				<!-- 			<u-checkbox-group @change="checkboxGroupChange" max="3">
-					<u-checkbox v-model="item.checked" v-for="(item, index) in checkboxList" :key="index" :name="item.name">{{ item.name }}</u-checkbox>
-				</u-checkbox-group> -->
 			</view>
 		</u-popup>
 	</view>
@@ -164,7 +161,6 @@ export default {
 			showUserHealtManagePopup: false,
 			userList: [],
 			currentUser: {},
-			// chartOption: chartOption,
 			loginUserInfo: {},
 			checkboxList: [
 				{

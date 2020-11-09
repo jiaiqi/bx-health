@@ -134,7 +134,7 @@
 				</view>
 			</view>
 		</view>
-		<u-calendar v-model="showCalender" :mode="'date'" @change="changeBirthday"></u-calendar>
+		<!-- <u-calendar v-model="showCalender" :mode="'date'" @change="changeBirthday"></u-calendar> -->
 		<u-select v-model="showSexModal" :list="sexList" @confirm="changeSex"></u-select>
 		<u-modal v-model="showModel" :mask-close-able="true" :show-title="false" :show-cancel-button="true" @confirm="changeInput">
 			<view class="slot-content">

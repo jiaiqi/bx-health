@@ -51,28 +51,30 @@
 		},
 		{
 			"root": "archivesPages",
-			"pages": [{
-				"path": "old-home/old-home",
-				"style": {
-					"navigationBarTitleText": "健康档案",
-					"enablePullDownRefresh": false
-				}
-			}, {
-				"path": "archives-history/archives-history",
-				"style": {
-					"navigationBarTitleText": "健康记录",
-					"navigationStyle": "custom",
-					"enablePullDownRefresh": false
-				}
+			"pages": [
+				// 	{
+				// 	"path": "old-home/old-home",
+				// 	"style": {
+				// 		"navigationBarTitleText": "健康档案",
+				// 		"enablePullDownRefresh": false
+				// 	}
+				// }, 
+				{
+					"path": "archives-history/archives-history",
+					"style": {
+						"navigationBarTitleText": "健康记录",
+						"enablePullDownRefresh": false
+					}
 
-			},
-			{
-				"path": "illnessDetaiList/illnessDetaiList",
-				"style": {
-					"navigationBarTitleText": "相关病症",
-					"enablePullDownRefresh": false
+				},
+				{
+					"path": "illnessDetaiList/illnessDetaiList",
+					"style": {
+						"navigationBarTitleText": "相关病症",
+						"enablePullDownRefresh": false
+					}
 				}
-			}]
+			]
 		},
 		{
 			"root": "pregnancy",
@@ -114,18 +116,19 @@
 						"navigationBarBackgroundColor": "#0bc99d"
 					}
 				},
+				// {
+				// 	"path": "balancedDiet/balancedDiet",
+				// 	"style": {
+				// 		"navigationStyle": "custom",
+				// 		"navigationBarTitleText": "今日概览",
+				// 		"navigationBarBackgroundColor": "#0bc99d"
+				// 	}
+				// },
+				// {
+				// 	"path": "mineSelf/mineSelf",
+				// 	"style": {}
+				// }, 
 				{
-					"path": "balancedDiet/balancedDiet",
-					"style": {
-						"navigationStyle": "custom",
-						"navigationBarTitleText": "今日概览",
-						"navigationBarBackgroundColor": "#0bc99d"
-					}
-				},
-				{
-					"path": "mineSelf/mineSelf",
-					"style": {}
-				}, {
 					"path": "tool/toolOne/toolOne",
 					"style": {
 						"navigationBarTitleText": "卡路里计算"
@@ -165,12 +168,14 @@
 					"style": {
 						"navigationBarTitleText": "食物详情"
 					}
-				}, {
-					"path": "sportsDetail/sportsDetail",
-					"style": {
-						"navigationBarTitleText": "运动详情"
-					}
-				}, {
+				},
+				// {
+				// 	"path": "sportsDetail/sportsDetail",
+				// 	"style": {
+				// 		"navigationBarTitleText": "运动详情"
+				// 	}
+				// }, 
+				{
 					"path": "otherIndicator/otherIndicator",
 					"style": {
 						"navigationBarTitleText": "身体指标"
@@ -258,7 +263,7 @@
 				{
 					"path": "chooseFood/myFoodList",
 					"style": {}
-				},{
+				}, {
 					"path": "chooseFood/myFoodsInfo",
 					"style": {}
 				},

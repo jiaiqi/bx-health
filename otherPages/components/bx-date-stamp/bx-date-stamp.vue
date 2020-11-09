@@ -32,7 +32,6 @@
                 </view>
             </view>
         </view>
-		<u-toast ref="uToast" />
         <!-- <image src="https://i.loli.net/2020/07/16/2MmZsucVTlRjSwK.png" mode="scaleToFill" v-if="collapsible" @click="toggle" class="weektoggle" :class="{ down: monthOpen }"></image> -->
     </view>
 </template>
@@ -255,9 +254,9 @@ export default {
                     this.$emit('onDayClick', response);
                 }
             }else if(chooseDate.indexOf(response.date) < 0 && this.isMarkDays){
-				this.$refs.uToast.show({
+				uni.showToast({
 					title: '暂无记录数据',
-					type: 'warning',
+					icon:'none',
 					duration:1000
 				})
 				return false;

@@ -1,36 +1,5 @@
 <template>
 	<view class="balanced-diet" :class="{ 'component-page': pageType }">
-		<u-navbar
-			v-if="!pageType"
-			back-text="返回"
-			:back-text-style="backTextStyle"
-			:back-icon-color="backTextStyle.color"
-			:is-back="true"
-			:border-bottom="true"
-			:background="navBackground"
-		>
-			<view class="header-wrap">
-				<!-- #ifdef H5 -->
-				<view class="switch-date" @click="changeSignDate">
-					<text>{{ selectDate }}</text>
-					<u-icon name="calendar-fill" size="30"></u-icon>
-				</view>
-				<!-- #endif -->
-				<view class="user-info" @click.stop="showUserList = !showUserList">
-					<u-avatar :src="profile_url" mode="circle" :size="60"></u-avatar>
-					<view class="user-name" data-event="showUserList">
-						<text class="text" data-event="showUserList">{{ userInfo.name }}</text>
-						<u-icon name="arrow-down-fill" size="28" :class="{ active: showUserList }"></u-icon>
-					</view>
-					<view class="user-list" :class="{ active: showUserList }">
-						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
-							{{ item.name }}
-						</view>
-						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
-					</view>
-				</view>
-			</view>
-		</u-navbar>
 		<!-- #ifdef MP-WEIXIN -->
 		<view class="switch-date" @click="changeSignDate">
 			<text>{{ selectDate }}</text>
