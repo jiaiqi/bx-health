@@ -531,7 +531,11 @@ export default {
 			};
 			if (type === 'date') {
 				return o.yy + '-' + o.MM + '-' + o.dd + ' '
-			} else if (type === 'dateTime') {
+			} else if (type === 'YY-MM') {
+				return o.yy + '-' + o.MM
+			}else if (type === 'MM-DD') {
+				return o.MM+ '-' + o.dd
+			}else if (type === 'dateTime') {
 				return o.HH + ':' + o.mm
 			} else {
 				return o.yy + '-' + o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm + ':' + o.ss;

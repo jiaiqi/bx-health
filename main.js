@@ -5,7 +5,6 @@ import api from '@/common/api.js' // 导入api清单
 import common from '@/common/common.js' // 公共方法
 import bxUtil from '@/common/util.js' // 公共方法
 import fly from '@/common/http.js' // fly 请求拦截
-import dateUtils from '@/common/date_utils.js'
 import cuCustom from './colorui/components/cu-custom.vue'
 Vue.component('cu-custom', cuCustom)
 import uView from "uview-ui";

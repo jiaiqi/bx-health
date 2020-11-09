@@ -268,11 +268,11 @@ export default {
 				url: '/questionnaire/couple/couple'
 			});
 		},
-		toOldHome() {
-			uni.navigateTo({
-				url: '/archivesPages/old-home/old-home'
-			});
-		},
+		// toOldHome() {
+		// 	uni.navigateTo({
+		// 		url: '/archivesPages/old-home/old-home'
+		// 	});
+		// },
 		getavatarUrl(fileNo) {
 			if (fileNo) {
 				return this.$api.downloadFile + fileNo + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');

@@ -101,7 +101,8 @@
 import uniEcCharts from '@/archivesPages/components/uni-ec-canvas/uni-echart.vue';
 import energyListWrap from './totalEnergyList.js';
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet';
-var dayjs = require('dayjs');
+// var dayjs = require('../static/dayjs');
+import * as dayjs from '../static/dayjs'
 export default {
 	components: {
 		uniEcCharts,
@@ -524,7 +525,7 @@ export default {
 						return item.weight;
 					});
 					this.weightChartData.series = series;
-					this.weightChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
+					this.weightChartData.categories = res.data.data.map(item =>  dayjs(item.create_time).format('MM-DD'));
 					this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
 				} else if (type === 'bloodPressure') {
 					series = this.BPChartData.series;

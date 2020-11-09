@@ -259,7 +259,9 @@
 								点击添加运动记录
 							</view>
 							<view class="row" v-for="(item, index) in sportsRecord" :key="index">
-								<view class="readonly" @click="(showEditModal = true), (currentRecord = deepClone(item)), (currentRecordType = 'sport')">
+								<view class="readonly" 
+								@click="clickSportRecordItem(item)"
+								>
 									<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
 									<view class="column center">
 										<view class="name">{{ item.name }}</view>
@@ -281,7 +283,7 @@
 								class="diet-item"
 								v-for="(item, index) in sportsRecord"
 								:key="index"
-								@click="(showEditModal = true), (currentRecord = deepClone(item)), (currentRecordType = 'sport')"
+								@click="clickSportRecordItem(item)"
 							>
 								<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
 								<view class="diet-detail">
@@ -1377,7 +1379,9 @@ export default {
 			} else {
 				this.currentRecord.amount = Number((this.currentRecord.amount + step).toFixed(1));
 			}
-			this.buildCurrenDietChartOption();
+			if(this.currentRecordType==='food'){
+				this.buildCurrenDietChartOption();
+			}
 		},
 
 		toDetail(e, item) {
@@ -1673,6 +1677,7 @@ export default {
 		},
 		async UpdateDietInfo() {
 			let self = this;
+			debugger
 			let dietInfo = this.deepClone(this.currentRecord);
 			let serviceName = 'srvhealth_diet_record_update';
 			let cond = [
@@ -1713,7 +1718,7 @@ export default {
 			};
 			if (Array.isArray(recordType) && recordType.length > 0) {
 				ele = recordType[0];
-				if (currentUnit.unit != 'g') {
+				if (this.currentRecordType === 'food'&&currentUnit.unit != 'g') {
 					ele.unit_energy = (currentUnit.amount / 100) * ele.unit_energy;
 				}
 				dietInfo.energy = dietInfo.amount * ele.unit_energy;
@@ -1741,6 +1746,7 @@ export default {
 					}
 				];
 			}
+			debugger
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				await self.getDietRecord();
@@ -2340,6 +2346,12 @@ export default {
 				this.getSportsRecord(this.selectDate);
 			}
 			this.showUserList = false;
+		},
+		clickSportRecordItem(item){
+			this.showEditModal = true;
+			this.currentRecord = this.deepClone(item);
+			this.currentRecordType = 'sport';
+			debugger
 		},
 		async clickDietRecordItem(item) {
 			let unitList = await this.getFoodUnit(item);
