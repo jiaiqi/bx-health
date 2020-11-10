@@ -2,94 +2,149 @@
 	<view class="other-wrap">
 		<view class="other-top">
 			<view v-if="type && type === 'weight'" class="item-wrap">
-				<view class="item-list">
-					<text>体重(千克)</text>
-					<input type="text" value="" v-model="inputVal.weight" />
+				
+				<view class="item-list" @click="showWeightSelect = true">
+					<text>衣着穿戴</text>
+					<u-select v-model="showWeightSelect" :list="list" @confirm="confirmChoose($event,'clothing')"></u-select>
+					<view class="item-list-bot">
+						<input type="text" value="" disabled />
+					</view>
+				</view>
+				
+				<view class="item-list" @click="showWeightDigSelect = true">
+					<text>消化道情况</text>
+					<u-select v-model="showWeightDigSelect" :list="DigList" @confirm="confirmChoose($event,'digestion')"></u-select>
+					<view class="item-list-bot">
+						<input type="text" value="" disabled />
+					</view>
 				</view>
 				<view class="item-list">
+					<text>体重(千克)</text>
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.weight" />
+					</view>
+				</view>
+				<view class="item-list">					
 					<text>体脂率(%)</text>
-					<input type="text" value="" v-model="inputVal.body_fat_rate" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.body_fat_rate" />
+					</view>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'sleep'" class="item-wrap">
 				<view class="item-list">
 					<text>入睡时间</text>
-					<input type="text" value="" />
+					<view class="item-list-bot">
+						<input type="text" value="" />
+					</view>
 				</view>
 				<view class="item-list">
 					<text>起床时间</text>
-					<input type="text" value="" />
+					<view class="item-list-bot">
+						<input type="text" value="" />
+					</view>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'heartRate'" class="item-wrap">
 				<view class="item-list" @click="openTime({ type: 'heartRate', field: 'date' })">
 					<text>日期和时间</text>
-					<input type="text" value="" />
+					<view class="item-list-bot">
+						<input type="text" value="" />
+					</view>
 				</view>
 				<view class="item-list">
 					<text>心率(次/分)</text>
-					<input type="text" value="" />
+					<view class="item-list-bot">
+						<input type="text" value="" />
+					</view>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'pressure'" class="item-wrap">
 				<!-- 血压 -->
 				<view class="item-list">
-					<text>心率</text>
-					<input type="text" value="" v-model="inputVal.heart_rate" />
-				</view>
-				<view class="item-list">
 					<text>收缩压(高压 毫米汞柱)</text>
-					<input type="text" value="" v-model="inputVal.systolic_pressure" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.systolic_pressure" />
+					</view>
 				</view>
 				<view class="item-list">
 					<text>舒张压(低压 毫米汞柱)</text>
-					<input type="text" value="" v-model="inputVal.diastolic_pressure" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.diastolic_pressure" />
+					</view>
 				</view>
 				<view class="item-list">
+					<text>心率</text>
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.heart_rate" />
+					</view>
+				</view>								
+				<view class="item-list">
 					<text>说明</text>
-					<input type="text" value="" v-model="inputVal.remark" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.remark" />
+					</view>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'oxygen'" class="item-wrap">
 				<view class="item-list" @click="openTime({ type: 'oxygen', field: 'start_time' })">
 					<text>开始时间</text>
-					<input type="text" value="" v-model="inputVal.start_time" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.start_time" />
+					</view>
 				</view>
 				<view class="item-list" @click="openTime({ type: 'oxygen', field: 'end_time' })">
 					<text>结束时间</text>
-					<input type="text" value="" v-model="inputVal.end_time" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.end_time" />
+					</view>
 				</view>
-				<view class="item-list">
+				<view class="item-list">					
 					<text>血氧饱和度最大值(%)</text>
-					<input type="text" value="" v-model="inputVal.oxygen_saturation_max" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.oxygen_saturation_max" />
+					</view>
 				</view>
 				<view class="item-list">
 					<text>血氧饱和度最小值(%)</text>
-					<input type="text" value="" v-model="inputVal.oxygen_saturation_min" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.oxygen_saturation_min" />
+					</view>
 				</view>
 				<view class="item-list">
 					<text>血氧饱和度平均(%)</text>
-					<input type="text" value="" v-model="inputVal.oxygen_saturation_avg" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.oxygen_saturation_avg" />
+					</view>
 				</view>
 				<view class="item-list">
 					<text>说明</text>
-					<input type="text" value="" v-model="inputVal.remark" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.remark" />
+					</view>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'glucose'" class="item-wrap">
 				<!-- 血糖 -->
 				<u-select v-model="showSelect" :list="glucose_time_option" @confirm="confirmSelect"></u-select>
+				<!-- <u-select v-model="showSelect" :list="glucose_time_option"></u-select> -->
 				<view class="item-list" @click="showSelect = true">
 					<text>测量时机</text>
-					<input type="text" value="" disabled v-model="inputVal.glucose_time" />
+					<view class="item-list-bot">
+						<input type="text" value="" disabled v-model="inputVal.glucose_time" />
+					</view>
 				</view>
 				<view class="item-list">
 					<text>血糖值(mmol/l)</text>
-					<input type="text" value="" v-model="inputVal.blood_glucose_val" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.blood_glucose_val" />
+					</view>
 				</view>
 				<view class="item-list">
 					<text>说明</text>
-					<input type="text" value="" v-model="inputVal.remark" />
+					<view class="item-list-bot">
+						<input type="text" value="" v-model="inputVal.remark" />
+					</view>
 				</view>
 			</view>
 		</view>
@@ -135,7 +190,9 @@ export default {
 				oxygen_saturation_avg: '', // 血氧饱和度平均值%
 				heart_rate: '', // 血压- 心率
 				diastolic_pressure: '', //血压 - 舒张压
-				systolic_pressure: '' //血压-收缩压
+				systolic_pressure: '', //血压-收缩压
+				wearing:'', // 体重体脂 - 衣着穿戴
+				alimentary_canal:'' // 体重体脂-  消化道情况
 			},
 			showSelect: false,
 			glucose_time_option: [{ label: '空腹', value: '空腹' }, { label: '餐后2小时', value: '餐后2小时' }, { label: '其他', value: '其他' }],
@@ -149,10 +206,33 @@ export default {
 			currTime: '',
 			dateTimeField: '',
 			dateTime: this.formateDate(new Date(), 'dates'),
-			isSubmit: false
+			isSubmit: false,
+			showWeightSelect:false,
+			showWeightDigSelect:false,
+			list: [
+				{
+					value: '穿鞋',
+					label: '穿鞋'
+				},
+				{
+					value: '穿外套外衣',
+					label: '穿外套外衣'
+				},
+				{
+					value: '穿轻薄内衣',
+					label: '穿轻薄内衣'
+				}
+			],
+			DigList:[{
+				value: '空腹',
+				label: '空腹'
+			},{
+				value: '排空大小便',
+				label: '排空大小便'
+			}]
 		};
 	},
-	computed: {
+	computed: {		
 		canSave() {
 			let result = true;
 			switch (this.type) {
@@ -180,6 +260,16 @@ export default {
 		}
 	},
 	methods: {
+		confirmChoose(e,type){
+			switch (type) {
+				case 'clothing':
+				this.inputVal.wearing = e[0].value
+				break;
+				case 'digestion':
+				this.inputVal.alimentary_canal = e[0].value
+				break;
+			}
+		},
 		confirmSelect(e) {
 			console.log(e);
 			if (Array.isArray(e) && e.length > 0) {
@@ -386,13 +476,18 @@ export default {
 		min-height: 85vh;
 		.item-wrap {
 			.item-list {
-				border-bottom: 1px solid #cfcfcf;
+				// border-bottom: 1px solid #cfcfcf;
 				display: flex;
 				flex-direction: column;
 				margin-top: 30upx;
 				text {
 					color: #5e5e5e;
 					margin-bottom: 10upx;
+					font-weight: 700;
+				}
+				.item-list-bot{
+					border: 1px solid #ccc;
+					padding: 10rpx;
 				}
 			}
 		}
@@ -404,7 +499,8 @@ export default {
 			width: 70%;
 			height: 70upx;
 			color: #fff;
-			background-image: linear-gradient(90deg, #70c6ff, #0081ff);
+			// background-image: linear-gradient(90deg, #70c6ff, #0081ff);
+			background-color: #0081ff;
 			border-radius: 50upx;
 			box-shadow: 3px 3px 4px rgba(10, 141, 255, 0.2);
 			&.disabled{

@@ -147,16 +147,16 @@
 						</view> 
 					</view>
 				</view>
-				<view class="uni-ec-canvas-wrap">
+				<view v-if="categoryTopIndex == 0" class="uni-ec-canvas-wrap">
 					<view class="uni-ec-canvas-top">
 						<text @click="changeApprove(item,index)" :class="currentAppr.name === item.name?'active-approve':''" v-for="(item,index) in approveData" :key="index">{{item.name}}</text>
 					</view>
 					<view class="uni-ec-canvas-bot">
 						<!-- #ifdef MP-WEIXIN -->
-							<uniEcCanvas v-if="echartsIsShow && categoryTopIndex === 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+							<uniEcCanvas v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
 						<!-- #endif -->
 						<!-- #ifdef H5 -->
-							<uniEcharts v-if="echartsIsShow && categoryTopIndex === 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
+							<uniEcharts v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
 						<!-- #endif -->
 					</view>
 					
@@ -249,7 +249,7 @@ export default {
 				type:'woman',
 				sex:'女',
 				age:18,
-				weight:50
+				weight:55
 			},{
 				name:'我的',
 				type:'mine',
@@ -339,9 +339,9 @@ export default {
 			echartsIsShow: false,
 			stepData: {
 				option: {
-					color: ['#92d050', '#4f81bd', '#f79646'],
+					color: ['#f79646', '#4f81bd'],
 					title: {
-						text: 'NRV占比'
+						// text: 'NRV占比'
 					},
 					tooltip: {
 						trigger: 'axis',
@@ -520,20 +520,17 @@ export default {
 				let nutrientData = this.nutrientData;
 				nutrientData.forEach(nut => {
 					let num = 0;
-					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'B3') {
+					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'VB3') {
 						endArr.push(currFood[nut.key]);
 					}
-					result.forEach(re => {						
+					result.forEach(re => {			
 						if (nut.name === re.nutrient) {
 							num = ((Number(currFood[nut.key]) / Number(re.val_rni)) * 100).toFixed(1);			
 							if(nut.name === '蛋白质'){
-								num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
+								num = Number(((Number(currFood[nut.key]) / Number(re.val_rni)) * 100 / self.currentAppr.weight)).toFixed(1)
 							}
-							endArr.push(Number(num));
-							
-						}
-						
-						
+							endArr.push(Number(num));						
+						}												
 					});
 				});
 				// result.forEach(item => {
@@ -603,16 +600,17 @@ export default {
 			});
 			let currData = await this.getNutrientRecommended();
 			console.log('currData======>', currData);
-			option.series[0].data = currData.map(ser => {
-				return ser;
-			});
+			// option.series[0].data = currData.map(ser => {
+			// 	return ser;
+			// });
 			if(!option.series[1] ){
 				option.series.push(obj);
 			}
 			if(this.value1 == 0){
 				this.countDietNum('+1');
+			}else{
+				this.originalData()
 			}
-			this.echartsIsShow = true;
 		},
 		/* 点击取消*/
 		showBottomModal() {
@@ -673,6 +671,7 @@ export default {
 		/* 点击食物选择数字加减**/
 		countDietNum(num) {
 			let self = this;
+			this.isCountDiet = true
 			let value = Number(this.value1);
 			if (value >= 0) {
 				if (num === '-0.1') {
@@ -703,55 +702,58 @@ export default {
 				}
 				if (value == 0) {
 					this.heatNum = 0;
+				}		
+				this.originalData()
+			}
+		},
+		originalData(){
+			let self = this
+			let addObj = {
+				name: '超标部分',
+				type: 'bar',
+				stack: '总数',
+				data: []
+			};
+			let addData = [];
+			let option = this.stepData.option;
+			let currFood = this.currFood;
+			let nutrientData = this.nutrientData;
+			let result = this.result;
+			nutrientData.forEach(nut => {
+				let num = 0;
+				// if (nut.name === '碳水化合物' || nut.name === 'VB3') {
+					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'VB3'){
+					addData.push(currFood[nut.key] * Number(self.choiceNum));
 				}
-				
-				let addObj = {
-					name: '超标部分',
-					type: 'bar',
-					stack: '总数',
-					data: []
-				};
-				let addData = [];
-				let option = this.stepData.option;
-				let currFood = this.currFood;
-				let nutrientData = this.nutrientData;
-				let result = this.result;
-				nutrientData.forEach(nut => {
-					let num = 0;
-					// if (nut.name === '碳水化合物' || nut.name === 'B3') {
-					// 	addData.push(currFood[nut.key] * Number(self.choiceNum));
-					// }
-					result.forEach(re => {
-						if (nut.name === re.nutrient) {
-							num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100);
-							if(nut.name === '蛋白质'){
-								// num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
-								num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100)								
-							}
-							if(num > 100){
-								num  = (num - 100).toFixed(1)
-							}else{
-								num = 0
-							}
-							addData.push(Number(num));
+				result.forEach(re => {
+					if (nut.name === re.nutrient) {
+						num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100);
+						if(nut.name === '蛋白质'){
+							// num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
+							num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100)								
 						}
-					});
-				});
-				addObj.data = addData;
-				
-				nutrientData.forEach(ele => {
-					if (currFood[ele.key]) {
-						currFood[ele.key] = currFood[ele.key] * Number(this.choiceNum)
-						self.$set(ele, 'value', currFood[ele.key]);
-					} else {
-						self.$set(ele, 'value', 0);
+						if(num > 100){
+							num  = (num - 100).toFixed(1)
+						}else{
+							num = num.toFixed(1)
+						}
+						addData.push(Number(num));
 					}
 				});
-				if (option.series[2] && option.series[2].type) {
-					option.series[2].data = addData;
+			});
+			addObj.data = addData;
+			nutrientData.forEach(ele => {
+				if (currFood[ele.key]) {
+					// currFood[ele.key] = currFood[ele.key] * Number(this.choiceNum)
+					self.$set(ele, 'value', currFood[ele.key]);
 				} else {
-					option.series.push(addObj);
+					self.$set(ele, 'value', 0);
 				}
+			});
+			if (option.series[0] && option.series[0].type) {
+				option.series[0].data = addData;
+			} else {
+				option.series.push(addObj);
 			}
 		},
 		async goBalanceDiet() {
@@ -764,7 +766,7 @@ export default {
 						htime: this.currTime ? this.currTime : this.nowDateTime,
 						name: item.name,
 						amount: item.amount,
-						unit: item.unit,
+						unit: this.radioLabel.unit?this.radioLabel.unit:item.unit,
 						energy: item.heatNum,
 						user_name: uni.getStorageSync('current_user'),
 						image: item.image,
@@ -1206,16 +1208,19 @@ export default {
 	// padding: 20upx 0;
 	.ele-text-top-tit{
 		display: flex;
-		margin-bottom: 15rpx;
+		margin-bottom: 30rpx;
 		text{
+			font-size: 30rpx;
 			padding: 8rpx 20rpx;
-			border: 1px solid #ccc;
+			border-bottom: 1px solid transparent;
 			margin-right: 20rpx;
-			border-radius: 30rpx;
+			
+			// border-radius: 30rpx;
 		}
 		.active-text-top-tit{
-			background-color: #fbbd08;
-			color: white;
+			// background-color: #fbbd08;
+			color: #FBBD08;
+			font-weight: 700;
 			border-color: #FBBD08;
 		}
 	}
@@ -1347,11 +1352,11 @@ export default {
 	.uni-ec-canvas-top{
 		display: flex;
 		text{
-			padding: 5rpx 20rpx;
+			padding: 8rpx 20rpx;
 			// background-color: #8dc63f;
 			border:1px solid #ccc;
 			color: #999;
-			margin-right: 10rpx;
+			margin-right: 20rpx;
 			border-radius: 20rpx;
 			
 		}
@@ -1360,6 +1365,10 @@ export default {
 			color: #fff;
 			border-color: #8dc63f;
 		}
+	}
+	.uni-ec-canvas-bot{
+		width: 710rpx;
+		height: 540rpx;
 	}
 }
 .uni-ec-canvas {

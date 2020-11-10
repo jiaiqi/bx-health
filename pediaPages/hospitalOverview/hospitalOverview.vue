@@ -22,7 +22,9 @@
 			<view class="introduction">
 				<view class="title">医院简介</view>
 				<view class="content">
-					<u-read-more close-text="查看详细介绍" :toggle="true" show-height="400"><rich-text :nodes="hospitalData.introduction"></rich-text></u-read-more>
+				<!-- 	<u-read-more close-text="查看详细介绍" :toggle="true" show-height="400">
+						<rich-text :nodes="hospitalData.introduction"></rich-text>
+						</u-read-more> -->
 				</view>
 			</view>
 			<view class="introduction">

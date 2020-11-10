@@ -42,20 +42,20 @@
 				</view>
 			</view>
 			<sPullScroll
+			
 				ref="pullScroll"
 				:heightStyle="heightStyle"
 				:pullDown="pullDown"
 				:pullUp="loadData"
 				:enablePullDown="true"
 				:enablePullUp="true"
-				:top="650"
+				:top="600"
 				:fixed="true"
 				:bottom="0"
 				finishText="我是有底线的..."
 			>
-			<view :class="changeType==='singleRow'?'':'doubleRow'" class="shop-main-list">
-				
-				<view v-if="shopList.length > 0" class="shop-main-list-wrap">
+			<view v-if="shopList.length > 0" :class="changeType==='singleRow'?'':'doubleRow'" class="shop-main-list">				
+				<view  class="shop-main-list-wrap">
 					<view @click="toDetail(item)" v-for="(item,index) in shopList" class="shop-main-list-item">
 						<view class="item-left">
 							<image v-if="!item.imgurl" src="/otherPages/static/img/none.png" mode=""></image>
@@ -90,12 +90,16 @@
 							</view>
 						</view>
 					</view>	
+				</view>					
+			</view>
+			<view v-else class="detail-none">
+				<view class="detail-none-t">
+					<image src="/otherPages/static/img/noneData.png" mode=""></image>
+					<text>暂无数据</text>
 				</view>
-				<!-- <view v-else class="none-rest">
-					暂无菜品
-				</view> -->
 			</view>
 			</sPullScroll>
+			
 		</view>
 		<view v-if="queryType === 'myShop'" class="public-button-box">
 			<view @click="addFoods" class="add-button">
@@ -556,7 +560,7 @@
 	}
 	.header{
 		position: relative;
-		min-height: 230px;
+		// min-height: 230px;
 		&-bg{
 			position: absolute;
 			left: 0;
@@ -701,6 +705,23 @@
 			 margin-left: -2px;
 			 margin-top: -15px;
 			 border-left: 5px solid
+		}
+	}
+	.detail-none{
+		.detail-none-t{
+			min-height: calc(100vh - 660rpx) ;
+			display: flex;
+			flex: 1;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			image{
+				width: 140upx;
+				height: 140upx;
+			}
+			text{
+				color: #b0b0b0;
+			}
 		}
 	}
 </style>

@@ -46,7 +46,10 @@
 			>
 				<view @click="toShopDetail(store)"  class=" item-box" v-for="(store, i) in storeList" :key="i">
 					<view class="container top-box">
-						<view class="left"><image src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image></view>
+						<view class="left">
+							<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
+							<image v-else :src="store.imgurl" mode="aspectFill"></image>
+						</view>
 						<view class="right">
 							<text class="tit">{{ store.name }}</text>
 							<view class="column store-r-b">
@@ -79,7 +82,10 @@
 			>
 			<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in myStoreList" :key="i">
 				<view class="container top-box">
-					<view class="left"><image src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image></view>
+					<view class="left">
+						<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
+						<image v-else :src="store.imgurl" mode="aspectFill"></image>
+					</view>
 					<view class="right">
 						<text class="tit">{{ store.name }}</text>
 						<view class="column store-r-b store-r-b-my">
@@ -321,6 +327,13 @@ export default {
 				}
 				if (res.data.state === 'SUCCESS') {
 					console.log('商户列表-----', res.data.data);
+					res.data.data.forEach(item=>{
+						if(item.image){
+							let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+							this.$set(item, 'imgurl', urls);
+						}
+						
+					})
 					this.storeList = [...this.storeList,...res.data.data]
 				}
 			}
@@ -357,6 +370,13 @@ export default {
 			
 			if (res.data.state === 'SUCCESS') {
 				console.log('我的商户列表-----', res.data.data);
+				res.data.data.forEach(item=>{
+					if(item.image){
+						let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+						this.$set(item, 'imgurl', urls);
+					}
+					
+				})
 				this.myStoreList = [...this.myStoreList,...res.data.data]
 				if(this.myStoreList.length == 0){
 					this.current_tit={ tit: '商户',type:'shop' }

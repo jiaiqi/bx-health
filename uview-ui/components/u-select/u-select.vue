@@ -212,7 +212,7 @@ export default {
 		setDefaultSelector() {
 			// 如果没有传入默认选中的值，生成长度为columnNum，用0填充的数组
 			this.defaultSelector = this.defaultValue.length == this.columnNum ? this.defaultValue : Array(this.columnNum).fill(0);
-			this.lastSelectIndex = this.$u.deepClone(this.defaultSelector);
+			this.lastSelectIndex = this.deepClone(this.defaultSelector);
 		},
 		// 计算列数
 		setColumnNum() {

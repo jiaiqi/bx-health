@@ -96,9 +96,9 @@
 			},
 			addFoods(){
 				let cond = [{
-					colName:"meal_no",
+					colName:"unit",
 					ruleType:"eq",
-					value:this.currFood.meal_no
+					value:''
 				}]
 					uni.navigateTo({
 					  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))

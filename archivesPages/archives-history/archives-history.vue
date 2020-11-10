@@ -40,8 +40,8 @@
 							<text class="cuIcon-time margin-right-xs"></text>
 							{{ historyRecord[0].create_time.slice(0, 16) }}
 						</view>
-						<button class="button" @click="toPages('pressure')" v-if="pageType==='bp'">记录数据</button>
-						<button class="button" @click="toPages('weight')" v-if="pageType==='weight'">记录数据</button>
+						<button class="button" @click="toPages('pressure')" v-if="pageType === 'bp'">记录数据</button>
+						<button class="button" @click="toPages('weight')" v-if="pageType === 'weight'">记录数据</button>
 					</view>
 					<view class="bmi-box" v-if="pageType === 'weight'">
 						<view class="bmi-box-item" v-if="bmi">
@@ -60,16 +60,16 @@
 						<view class="title">历史数据</view>
 						<u-empty mode="history" v-if="historyRecord && historyRecord.length === 0"></u-empty>
 						<view class="list-box" v-if="historyRecord && historyRecord.length > 0">
-							<view class="list-item" v-for="(item, index) in historyRecord.slice(1)" :key="index">
+							<view class="list-item" v-for="(item, index) in historyRecord" :key="index">
 								<image src="../static/icon/xueya.png" mode="" class="icon" v-if="pageType === 'bp'"></image>
 								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
 								<image src="../static/icon/tizhong.png" mode="" class="icon" v-if="pageType === 'weight'"></image>
 								<view class="item">
-									<text class="digital" v-if="pageType === 'bp'">{{ item.systolic_pressure }}</text>
+									<text class="digital" v-if="pageType === 'bp' && item && item.systolic_pressure">{{ item.systolic_pressure }}</text>
 									<text class="digital" v-if="pageType === 'weight'">{{ item.weight }}</text>
 								</view>
 
-								<view class="item" v-if="pageType === 'bp'">
+								<view class="item" v-if="pageType === 'bp' && item && item.diastolic_pressure">
 									/
 									<text class="digital">{{ item.diastolic_pressure }}</text>
 								</view>
@@ -102,7 +102,8 @@ import uniEcCharts from '@/archivesPages/components/uni-ec-canvas/uni-echart.vue
 import energyListWrap from './totalEnergyList.js';
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet';
 // var dayjs = require('../static/dayjs');
-import * as dayjs from '../static/dayjs'
+// import * as dayjs from '../static/dayjs'
+import dayjs from '../static/dayjs';
 export default {
 	components: {
 		uniEcCharts,
@@ -302,58 +303,41 @@ export default {
 			switch (type) {
 				case 'step':
 					this.pageType = 'sport';
-					if (this.currentChart === 'stepChart') {
-					} else {
-						this.currentChart = 'stepChart';
-						this.getwxStepInfoList();
-					}
+					this.currentChart = 'stepChart';
+					this.getwxStepInfoList();
 					this.currentType = '运动';
 					break;
 				case 'weight':
 					this.pageType = 'weight';
-					if (this.currentChart === 'canvasLineA') {
-						// this.currentChart = '';
-					} else {
-						this.currentChart = 'canvasLineA';
-						this.getChartData('weight').then(_ => {
-							this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
-						}); // 体重
-					}
+					this.currentChart = 'canvasLineA';
+					this.getChartData('weight').then(_ => {
+						this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
+					}); // 体重
 					this.currentType = '体重';
 					break;
 				case 'BP':
 					this.pageType = 'bp';
-					if (this.currentChart === 'canvasLineB') {
-						// this.currentChart = '';
-					} else {
-						this.currentChart = 'canvasLineB';
-						this.getChartData('bloodPressure').then(_ => {
-							this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
-						}); // 血压
-					}
+					this.currentChart = 'canvasLineB';
+					this.getChartData('bloodPressure').then(_ => {
+						this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+					}); // 血压
 					this.currentType = '血压';
 					break;
 				case 'sleep':
-					if (this.currentChart === 'canvasLineC') {
-					} else {
-						this.currentChart = 'canvasLineC';
-						this.getChartData('sleep').then(_ => {
-							// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
-						}); // 血压
-						this.chartData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
-					}
+					this.currentChart = 'canvasLineC';
+					this.getChartData('sleep').then(_ => {
+						// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+					}); // 血压
+					this.chartData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
 					this.pageType = 'sleep';
 					this.currentType = '睡眠';
 					break;
 				case 'calories':
 					this.pageType = 'diet';
-					if (this.currentChart === 'canvasColumnD') {
-					} else {
-						this.currentChart = 'canvasColumnD';
-						this.getDietSportRecordList().then(_ => {
-							this.chartData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
-						});
-					}
+					this.currentChart = 'canvasColumnD';
+					this.getDietSportRecordList().then(_ => {
+						this.chartData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
+					});
 					this.currentType = '饮食';
 					break;
 			}
@@ -432,14 +416,51 @@ export default {
 					label: { show: true },
 					data: item.data
 				};
+				if (unit === '步') {
+					obj.label.show = false;
+				}
 				if (item.data.length > 10) {
-					option.dataZoom = [
-						{
-							type: 'inside',
-							start: 80,
-							end: 100
-						}
-					];
+					if (item.data.length > 10 && item.data.length <= 20) {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 60,
+								end: 100
+							}
+						];
+					} else if (item.data.length > 20 && item.data.length <= 30) {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 70,
+								end: 100
+							}
+						];
+					} else if (item.data.length > 30 && item.data.length <= 40) {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 80,
+								end: 100
+							}
+						];
+					} else if (item.data.length > 40 && item.data.length <= 50) {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 90,
+								end: 100
+							}
+						];
+					} else {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 95,
+								end: 100
+							}
+						];
+					}
 				} else {
 					option.dataZoom = [
 						{
@@ -508,35 +529,37 @@ export default {
 				order: [
 					{
 						colName: 'create_time',
-						orderType: 'asc' // asc升序  desc降序
+						orderType: 'desc' // asc升序  desc降序
 					}
 				],
 				page: {
-					rownumber: 7
+					pageNo: 1,
+					rownumber: 100
 				}
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				this.historyRecord = res.data.data.reverse();
+				res.data.data = res.data.data.reverse();
 				let series = [];
 				if (type === 'weight') {
 					series = this.weightChartData.series;
 					series[0].data = res.data.data.map(item => {
-						return item.weight;
+						return Number(item.weight.toFixed(1));
 					});
 					this.weightChartData.series = series;
-					this.weightChartData.categories = res.data.data.map(item =>  dayjs(item.create_time).format('MM-DD'));
+					this.weightChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
 					this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
 				} else if (type === 'bloodPressure') {
 					series = this.BPChartData.series;
 					series[0].data = res.data.data.map(item => {
-						return item.systolic_pressure;
+						return Number(item.systolic_pressure.toFixed(1));
 					});
-					series[1].data = res.data.data.map(item => item.diastolic_pressure);
+					series[1].data = res.data.data.map(item => Number(item.diastolic_pressure.toFixed(1)));
 					this.BPChartData.series = series;
 					this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
 					this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
 				}
+				this.historyRecord = this.deepClone(res.data.data).reverse();
 			} else {
 				this.historyRecord = [];
 			}
@@ -619,7 +642,7 @@ export default {
 				.reverse();
 			console.log(series);
 			series = series.map(item => {
-				item.data = item.data.reverse();
+				item.data = item.data.map(num => Number(num.toFixed(1))).reverse();
 				return item;
 			});
 			this.caloriesChartData.series = series;
@@ -962,6 +985,7 @@ export default {
 					// #endif
 				}
 			}
+			console.log(this.pageType);
 			switch (this.pageType) {
 				case 'diet':
 					this.pageName = '饮食记录';

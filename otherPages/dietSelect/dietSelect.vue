@@ -115,6 +115,7 @@
 							<u-icon size="70" name="plus"></u-icon>
 						</view>
 						<view class="smallbox-couple-bot">
+							<text>没有找到想要的?去</text>
 							<text>反馈</text>
 						</view>
 					</view>
@@ -2188,7 +2189,12 @@ export default {
 			font-weight: 700;
 			width: 100%;
 			text-align: center;
-			padding: 26rpx 0;
+			padding: 10rpx 0;
+			text{
+				&:last-child{
+					color: #0081FF;
+				}
+			}
 		}
 		.smallbox-img{
 			width: 100%;

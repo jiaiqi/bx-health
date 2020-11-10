@@ -168,7 +168,7 @@
 						<text class="cuIcon-apps" :class="{ 'active-layout': dietLayout === 'grid' }" @click="dietLayout = 'grid'"></text>
 					</view>
 				</view>
-				<u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more">
+				<!-- <u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more"> -->
 					<view class="record-box" @click.self="clickDietBox">
 						<view class="table" v-if="dietLayout === 'list'">
 							<view class="no-data" v-if="!dietRecord || dietRecord.length === 0" @click="toPages('food')">
@@ -210,7 +210,7 @@
 							<view class="diet-item" @click="toPages('food')"><text class="cuIcon-add add-icon"></text></view>
 						</view>
 					</view>
-				</u-read-more>
+				<!-- </u-read-more> -->
 			</view>
 			<view class="main-box symptom" v-if="!pageType || pageType === 'sport'">
 				<view class="title">
@@ -220,7 +220,7 @@
 						<text class="cuIcon-apps" :class="{ 'active-layout': sportLayout === 'grid' }" @click="sportLayout = 'grid'"></text>
 					</view>
 				</view>
-				<u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more">
+				<!-- <u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more"> -->
 					<view class="record-box" @click.self="clickSportBox">
 						<view class="table" v-if="sportLayout === 'list'">
 							<view class="no-data" v-if="!sportsRecord || sportsRecord.length === 0" @click="toPages('sport')">
@@ -228,9 +228,7 @@
 								点击添加运动记录
 							</view>
 							<view class="row" v-for="(item, index) in sportsRecord" :key="index">
-								<view class="readonly" 
-								@click="clickSportRecordItem(item)"
-								>
+								<view class="readonly" @click="clickSportRecordItem(item)">
 									<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
 									<view class="column center">
 										<view class="name">{{ item.name }}</view>
@@ -248,12 +246,7 @@
 							</view>
 						</view>
 						<view class="table grid-layout" v-if="sportsRecord && sportLayout === 'grid'">
-							<view
-								class="diet-item"
-								v-for="(item, index) in sportsRecord"
-								:key="index"
-								@click="clickSportRecordItem(item)"
-							>
+							<view class="diet-item" v-for="(item, index) in sportsRecord" :key="index" @click="clickSportRecordItem(item)">
 								<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
 								<view class="diet-detail">
 									<view class="name">{{ item.name }}</view>
@@ -269,7 +262,7 @@
 							<view class="diet-item" @click="toPages('sport')"><text class="cuIcon-add add-icon"></text></view>
 						</view>
 					</view>
-				</u-read-more>
+				<!-- </u-read-more> -->
 			</view>
 			<view class="main-box symptom" v-if="!pageType || pageType === 'symptom'">
 				<view class="title">症状</view>
@@ -951,10 +944,10 @@ export default {
 						break;
 					case '当前食物':
 						obj.data = eleArr.map(item => {
-							debugger
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
 							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
-							return Math.abs(num);
+							num = Math.abs(parseFloat(num.toFixed(1)));
+							return num;
 						});
 						break;
 					case 'NRV%达标线':
@@ -1159,11 +1152,20 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			let unitList = [];
-			// unitList.push(item);
+			if(item.unit!=='g'){
+				let basicUnit = this.deepClone(item)
+				basicUnit.unit = 'g'
+				basicUnit.amount = 1
+				basicUnit.energy = item.energy*100/item.unit_weight_g
+				basicUnit.unit_weight_g=100
+				unitList.push(basicUnit);
+			}else{
+				unitList.push(item);
+			}
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				unitList = [...res.data.data];
+				unitList = [...unitList, ...res.data.data];
 			} else {
-				unitList = [item];
+				// unitList = [item];
 			}
 			this.unitList = unitList;
 			return unitList;
@@ -1348,7 +1350,7 @@ export default {
 			} else {
 				this.currentRecord.amount = Number((this.currentRecord.amount + step).toFixed(1));
 			}
-			if(this.currentRecordType==='food'){
+			if (this.currentRecordType === 'food') {
 				this.buildCurrenDietChartOption();
 			}
 		},
@@ -1646,7 +1648,6 @@ export default {
 		},
 		async UpdateDietInfo() {
 			let self = this;
-			debugger
 			let dietInfo = this.deepClone(this.currentRecord);
 			let serviceName = 'srvhealth_diet_record_update';
 			let cond = [
@@ -1674,7 +1675,7 @@ export default {
 					value: dietInfo.mixed_food_no
 				};
 			}
-			let recordType = await this.getFoodType(cond,serv);
+			let recordType = await this.getFoodType(cond, serv);
 			let ele = null;
 			if (this.currentRecordType === 'sport') {
 				serviceName = 'srvhealth_body_activity_record_update';
@@ -1687,7 +1688,7 @@ export default {
 			};
 			if (Array.isArray(recordType) && recordType.length > 0) {
 				ele = recordType[0];
-				if (this.currentRecordType === 'food'&&currentUnit.unit != 'g') {
+				if (this.currentRecordType === 'food' && currentUnit.unit != 'g') {
 					ele.unit_energy = (currentUnit.amount / 100) * ele.unit_energy;
 				}
 				dietInfo.energy = dietInfo.amount * ele.unit_energy;
@@ -1715,7 +1716,6 @@ export default {
 					}
 				];
 			}
-			debugger
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				await self.getDietRecord();
@@ -2248,7 +2248,7 @@ export default {
 				console.log(res.data.data);
 				// this.foodType = res.data.data;
 			}
-			return res.data.data?res.data.data:[];
+			return res.data.data ? res.data.data : [];
 		},
 		async getSportType(cond) {
 			// 运动类型
@@ -2316,11 +2316,10 @@ export default {
 			}
 			this.showUserList = false;
 		},
-		clickSportRecordItem(item){
+		clickSportRecordItem(item) {
 			this.showEditModal = true;
 			this.currentRecord = this.deepClone(item);
 			this.currentRecordType = 'sport';
-			debugger
 		},
 		async clickDietRecordItem(item) {
 			let unitList = await this.getFoodUnit(item);
@@ -3487,8 +3486,8 @@ uni-checkbox::before {
 }
 .current-diet-detail {
 	width: 100vw;
-	max-height: 90vh;
 	overflow: scroll;
+	height: 100%;
 	.title-bar {
 		display: flex;
 		justify-content: center;
@@ -3652,9 +3651,9 @@ uni-checkbox::before {
 		justify-content: space-between;
 		align-items: center;
 		font-size: 50rpx;
-		padding-top: 50rpx;
+		padding-top: 30rpx;
 		// height: 150rpx;
-		margin-bottom: 200rpx;
+		margin-bottom: 100rpx;
 		.btn {
 			padding: 10rpx 30rpx;
 			border-radius: 10rpx;

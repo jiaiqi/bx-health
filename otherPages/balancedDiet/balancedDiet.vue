@@ -1,13 +1,6 @@
 <template>
 	<view class="balanced-diet">
-		<u-navbar
-			back-text="返回"
-			:back-text-style="backTextStyle"
-			:back-icon-color="backTextStyle.color"
-			:is-back="true"
-			:border-bottom="true"
-			:background="navBackground"
-		>
+		<u-navbar back-text="返回" :back-text-style="backTextStyle" :back-icon-color="backTextStyle.color" :is-back="true" :border-bottom="true" :background="navBackground">
 			<view class="header-wrap">
 				<!-- #ifdef H5 -->
 				<view class="switch-date" @click="changeSignDate">
@@ -22,13 +15,7 @@
 						<u-icon name="arrow-down-fill" size="28" :class="{ active: showUserList }"></u-icon>
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
-						<view
-							class="menu-item"
-							:class="{ 'current-user': userInfo.name === item.name }"
-							@click.stop="clickUserMenu(item)"
-							v-for="(item, index) in userMenuList"
-							:key="index"
-						>
+						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -77,13 +64,7 @@
 							style="display: flex; width: 90px; justify-content: space-between"
 						>
 							<text style="flex: 1">
-								{{
-									energyChange === 0
-										? '0.0'
-										: parseFloat(energyChange / 7.7) > 0
-										? `+${parseFloat(energyChange / 7.7).toFixed(1)}`
-										: parseFloat(energyChange / 7.7).toFixed(1)
-								}}
+								{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
 							</text>
 							<text class="units">g脂肪</text>
 						</view>
@@ -103,9 +84,7 @@
 						<text class="cuIcon-rankfill"></text>
 					</view>
 				</view>
-				<view class="chart-box">
-					<uni-ec-canvas class="uni-ec-canvas" @click-chart="clickCharts" canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
-				</view>
+				<view class="chart-box"><uni-ec-canvas class="uni-ec-canvas" @click-chart="clickCharts" canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-ec-canvas></view>
 				<view class="indicator">
 					<view
 						class="btn"
@@ -151,13 +130,7 @@
 													}"
 												>
 													{{
-														alone.value === 0
-															? alone.shortName === 'E'
-																? 0 + 'mg/d'
-																: '0'
-															: alone.shortName === 'E'
-															? alone.value.toFixed(1) + 'mg/d'
-															: alone.value.toFixed(1)
+														alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1)
 													}}
 												</view>
 											</view>
@@ -211,7 +184,7 @@
 						<text class="cuIcon-apps" :class="{ 'active-layout': dietLayout === 'grid' }" @click="dietLayout = 'grid'"></text>
 					</view>
 				</view>
-				<u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more">
+				<!-- <u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more"> -->
 					<view class="record-box" @click.self="clickDietBox">
 						<view class="table" v-if="dietLayout === 'list'">
 							<view class="no-data" v-if="!dietRecord || dietRecord.length === 0" @click="toPages('food')">
@@ -253,7 +226,7 @@
 							<view class="diet-item" @click="toPages('food')"><text class="cuIcon-add add-icon"></text></view>
 						</view>
 					</view>
-				</u-read-more>
+				<!-- </u-read-more> -->
 			</view>
 			<view class="main-box symptom">
 				<view class="title">
@@ -263,7 +236,7 @@
 						<text class="cuIcon-apps" :class="{ 'active-layout': sportLayout === 'grid' }" @click="sportLayout = 'grid'"></text>
 					</view>
 				</view>
-				<u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more">
+				<!-- <u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more"> -->
 					<view class="record-box" @click.self="clickSportBox">
 						<view class="table" v-if="sportLayout === 'list'">
 							<view class="no-data" v-if="!sportsRecord || sportsRecord.length === 0" @click="toPages('sport')">
@@ -310,7 +283,7 @@
 							<view class="diet-item" @click="toPages('sport')"><text class="cuIcon-add add-icon"></text></view>
 						</view>
 					</view>
-				</u-read-more>
+				<!-- </u-read-more> -->
 			</view>
 			<view class="main-box symptom">
 				<view class="title">症状</view>
@@ -356,9 +329,7 @@
 							<text class="unit">{{ currentRecord.unit }}</text>
 						</view>
 					</view>
-					<view class="chart-box">
-						<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-ec-canvas>
-					</view>
+					<view class="chart-box"><uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-ec-canvas></view>
 					<view class="unit-box" v-if="currentRecordType === 'food'">
 						<view class="title">单位:</view>
 						<view class="unit-item" :class="{ 'active-unit': currentUnitIndex === index }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">
@@ -381,7 +352,7 @@
 					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
 			</view>
-		<!-- </u-popup> -->
+			<!-- </u-popup> -->
 		</view>
 		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
 		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
@@ -436,7 +407,7 @@ let self;
 export default {
 	components: {
 		bxDateStamp,
-		uniEcCanvas,
+		uniEcCanvas
 	},
 	data() {
 		return {
@@ -951,16 +922,16 @@ export default {
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
 							item.value = item.value - currentDiet[item.key];
 							let num = (item.value * 100) / Number(item.EAR);
-							num = parseFloat(num.toFixed(1));
-							if (typeof num === 'number' && num.toString() === 'NaN') {
-							}
+							num = Math.abs(parseFloat(num.toFixed(1)));
 							return num;
 						});
 						break;
 					case '当前食物':
 						obj.data = eleArr.map(item => {
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							return currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
+							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
+							num = Math.abs(parseFloat(num.toFixed(1)));
+							return num;
 						});
 						break;
 					case 'NRV%达标线':
@@ -1899,11 +1870,7 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni
-										? item.val_rni * self.userInfo.weight
-										: item.val_ear
-										? item.val_ear * self.userInfo.weight
-										: mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -3455,7 +3422,6 @@ uni-checkbox::before {
 }
 .current-diet-detail {
 	width: 100vw;
-	max-height: 90vh;
 	.title-bar {
 		display: flex;
 		justify-content: center;

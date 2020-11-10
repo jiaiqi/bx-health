@@ -5,11 +5,11 @@
 				<view class="avatar" @click="showUserListPopup = true"><u-avatar class="avatar" :src="avatarUrl" size="60"></u-avatar></view>
 				<view class="user-name" @click="showUserListPopup = true">{{ currentUser.name }}</view>
 				<view class="switch-icon cuIcon-right" @click="showUserListPopup = true"></view>
-				<view class="tag-box">
-					<text class="tag-item" v-for="item in checkboxList" :key="item.name" v-show="item.checked">{{ item.name }}</text>
+				<view class="tag-box" @click="showUserHealtManagePopup = true">
+					<text class="tag-item" v-for="item in selectedTags" :key="item.value">{{ item.label }}</text>
 				</view>
 			</view>
-			<view class="right" @click="showUserHealtManagePopup = true">健康标签管理</view>
+			<view class="right" @click="showUserHealtManagePopup = true" v-if="selectedTags.length === 0">健康标签管理</view>
 		</view>
 		<view class="health-overall-score">
 			<!-- <view class="title">健康分数</view> -->
@@ -81,11 +81,11 @@
 					<view class="data text-gray">0</view>
 					<view class="action"></view>
 				</view> -->
-				<view class="grid-item" @click="toOldHome">
+				<!-- 		<view class="grid-item" @click="toOldHome">
 					<view class="title">旧版主页</view>
 					<view class="data"></view>
 					<view class="action"></view>
-				</view>
+				</view> -->
 			</view>
 		</view>
 		<view class="health-archive-item ">
@@ -120,33 +120,31 @@
 				</view>
 			</view>
 		</view>
-		<u-popup v-model="showUserListPopup" border-radius="40" mode="top" closeable>
+		<u-popup v-model="showUserListPopup" border-radius="40" mode="top">
 			<view class="user-list">
 				<view class="user-item" @click="currentUser = item" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === currentUser.name }">
 					<image class="avatar" :src="getavatarUrl(item.profile_url)" size="60"></image>
 					{{ item.name }}
 				</view>
 			</view>
-			<view class="button-box"><u-button shape="circle" :ripple="true" ripple-bg-color="#f3f3f3">添加新用户</u-button></view>
+			<view class="button-box"><button class="cu-btn bg-white text-blue" @click="toAddPage">添加新用户</button></view>
 		</u-popup>
-		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="top" closeable>
+		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="bottom">
 			<view class="health-item">
 				<view class="tips">
 					<text class="cuIcon-info"></text>
-					最多只能勾选三项
+					最多只能勾选五项
 				</view>
-				<checkbox-group @change="checkboxGroupChange">
-					<label v-for="(item, index) in checkboxList" :key="index">
-						<checkbox
-							:value="item.name"
-							:checked="item.checked"
-							color="#FFCC33"
-							style="transform:scale(0.7)"
-							:disabled="disabledTag&&!checkedList.includes(item.name)"
-						/>
-						{{ item.name }}
+				<checkbox-group @change="checkboxGroupChange" class="check-box-group">
+					<label v-for="(item, index) in checkboxList" :key="index" class="check-box-item">
+						<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" :disabled="disabledTag && !checkedList.includes(item.value)" />
+						{{ item.label }}
 					</label>
 				</checkbox-group>
+				<view class="button-box">
+					<button class="cu-btn bg-gray" @click="cancelSelectTag">取消</button>
+					<button class="cu-btn bg-blue" @click="changeSelectedTag">确定</button>
+				</view>
 			</view>
 		</u-popup>
 	</view>
@@ -164,28 +162,29 @@ export default {
 			loginUserInfo: {},
 			checkboxList: [
 				{
-					name: '备孕',
+					value: '备孕',
 					checked: false
 				},
 				{
-					name: '孕期',
+					value: '孕期',
 					checked: false
 				},
 				{
-					name: '哺乳期',
+					value: '哺乳期',
 					checked: false
 				},
 				{
-					name: '肥胖',
+					value: '肥胖',
 					checked: false
 				}
 			],
+			selectedTags: [],
 			checkedList: []
 		};
 	},
 	computed: {
-		disabledTag(){
-			return this.checkedList.length === 3
+		disabledTag() {
+			return this.checkedList.length >= 5;
 		},
 		avatarUrl() {
 			if (this.loginUserInfo.headimgurl) {
@@ -198,6 +197,30 @@ export default {
 		}
 	},
 	methods: {
+		async getCheckboxList() {
+			let url = this.getServiceUrl('health', 'srvsys_service_columnex_v2_select', 'select');
+			let req = {
+				serviceName: 'srvsys_service_columnex_v2_select',
+				colNames: ['*'],
+				condition: [{ colName: 'service_name', value: 'srvhealth_person_info_select', ruleType: 'eq' }, { colName: 'use_type', value: 'list', ruleType: 'eq' }],
+				order: [{ colName: 'seq', orderType: 'asc' }]
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.resultCode === 'SUCCESS' && Array.isArray(res.data.data.srv_cols)) {
+				let { srv_cols } = res.data.data;
+				let requirement = null;
+				if (Array.isArray(srv_cols) && srv_cols.length > 0) {
+					srv_cols.forEach(item => {
+						if (item.columns === 'requirement') {
+							this.checkboxList = item.option_list_v2.map(item => {
+								item['checked'] = false;
+								return item;
+							});
+						}
+					});
+				}
+			}
+		},
 		toPages(e) {
 			let condType = {};
 			let url = '';
@@ -236,20 +259,65 @@ export default {
 				url: '/otherPages/symptomSelect/symptomSelect?term=' + encodeURIComponent(JSON.stringify(term))
 			});
 		},
+		changeSelectedTag() {
+			this.selectedTags = this.checkboxList.filter(item => item.checked);
+			this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.label);
+			this.updataUserTags().then(res => {
+				this.showUserHealtManagePopup = false;
+			});
+		},
+		async updataUserTags() {
+			let url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
+			let requirement = this.selectedTags.map(item => item.value);
+			if (Array.isArray(requirement) && requirement.length > 0) {
+				let req = [
+					{
+						serviceName: 'srvhealth_person_info_update',
+						condition: [{ colName: 'no', ruleType: 'eq', value: this.currentUser.no }],
+						data: [{ requirement: requirement.toString() }]
+					}
+				];
+				if (this.currentUser.no) {
+					let res = await this.$http.post(url, req);
+					if (res.data.state === 'SUCCESS') {
+						return res.data;
+					}
+				}
+			}
+		},
+		cancelSelectTag() {
+			if (Array.isArray(this.selectedTags) && this.selectedTags.length === 0) {
+				this.checkboxList = this.checkboxList.map(item => {
+					item.checked = false;
+					return item;
+				});
+			} else if (Array.isArray(this.selectedTags) && this.selectedTags.length > 0) {
+				this.checkboxList = this.checkboxList.map(item => {
+					item.checked = false;
+					this.selectedTags.forEach(sel => {
+						if (item.label === sel.label) {
+							item.checked = true;
+						}
+					});
+					return item;
+				});
+			}
+			this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.label);
+			this.showUserHealtManagePopup = false;
+		},
 		checkboxGroupChange(e) {
 			console.log(e);
 			var items = this.checkboxList,
 				values = e.detail.value;
 			for (var i = 0, lenI = items.length; i < lenI; ++i) {
 				const item = items[i];
-				if (values.includes(item.name)) {
+				if (values.includes(item.label)) {
 					this.$set(item, 'checked', true);
 				} else {
 					this.$set(item, 'checked', false);
 				}
 			}
-
-			this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.name);
+			this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.label);
 		},
 		navPages(type = 'history') {
 			if (type === 'history') {
@@ -295,6 +363,7 @@ export default {
 					res.data.data.forEach(item => {
 						if (item.name === uni.getStorageSync('current_user')) {
 							uni.setStorageSync('current_user', item.name);
+							console.log(this.checkboxList);
 							this.currentUser = item;
 						}
 					});
@@ -302,6 +371,17 @@ export default {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					uni.setStorageSync('current_user', res.data.data[0].name);
 					this.currentUser = res.data.data[0];
+				}
+				if (this.currentUser && this.currentUser.requirement) {
+					let tags = this.currentUser.requirement.split(',');
+					if (Array.isArray(this.checkboxList) && this.checkboxList.length > 0) {
+						this.selectedTags = this.checkboxList.filter(item => {
+							if (tags.includes(item.value)) {
+								item.checked = true;
+								return true;
+							}
+						});
+					}
 				}
 				uni.setStorageSync('user_info_list', res.data.data);
 				this.userList = res.data.data;
@@ -377,9 +457,11 @@ export default {
 			}
 			if (userInfo) {
 				this.loginUserInfo = userInfo;
-				this.selectUserList();
+				await this.getCheckboxList();
+				await this.selectUserList();
 			}
-		}
+		},
+		toAddPage() {}
 	},
 	onShow() {
 		this.initPage();
@@ -437,35 +519,33 @@ export default {
 					border-radius: 5rpx;
 					margin-left: 10rpx;
 					font-size: 20rpx;
-					&:nth-child(1) {
-						color: #409eff;
-						background: #ecf5ff;
-						border-color: #b3d8ff;
-					}
-					&:nth-child(2) {
-						color: #67c23a;
-						background: #f0f9eb;
-						border-color: #c2e7b0;
-					}
-					&:nth-child(3) {
-						color: #909399;
-						background: #f4f4f5;
-						border-color: #d3d4d6;
-					}
-					&:nth-child(4) {
-						color: #e6a23c;
-						background: #fdf6ec;
-						border-color: #f5dab1;
-					}
-					&:nth-child(5) {
-						color: #f56c6c;
-						background: #fef0f0;
-						border-color: #fbc4c4;
-					}
-					&:nth-child(6) {
-						color: #409eff;
-						background: #ecf5ff;
-						border-color: #b3d8ff;
+					@for $i from 1 through 20 {
+						.item-#{$i} {
+							width: 2em * $i;
+						}
+						&:nth-child(#{$i}) {
+							@if $i%2==1 {
+								color: #409eff;
+								background: #ecf5ff;
+								border-color: #b3d8ff;
+							} @else if $i%2==0 {
+								color: #67c23a;
+								background: #f0f9eb;
+								border-color: #c2e7b0;
+							} @else if $i%3==0 {
+								color: #909399;
+								background: #f4f4f5;
+								border-color: #d3d4d6;
+							} @else if $i%4==0 {
+								color: #e6a23c;
+								background: #fdf6ec;
+								border-color: #f5dab1;
+							} @else if $i%5==0 {
+								color: #f56c6c;
+								background: #fef0f0;
+								border-color: #fbc4c4;
+							}
+						}
 					}
 				}
 			}
@@ -682,10 +762,18 @@ export default {
 		color: #999;
 		padding: 20rpx 0;
 	}
+	.check-box-group {
+		display: flex;
+		flex-wrap: wrap;
+		.check-box-item {
+			margin-right: 20rpx;
+			min-width: 30%;
+		}
+	}
 }
 .user-list {
 	min-height: 300rpx;
-	padding: 40rpx 30rpx 20rpx;
+	padding: 50rpx 30rpx 30rpx;
 	.user-item {
 		text-indent: 40rpx;
 		display: flex;
@@ -705,7 +793,14 @@ export default {
 }
 .button-box {
 	width: 100%;
-	padding: 20rpx 30rpx;
+	padding: 30rpx;
 	font-weight: bold;
+	text-align: center;
+	.cu-btn {
+		margin-right: 50rpx;
+		&:last-child {
+			margin-right: 0;
+		}
+	}
 }
 </style>
