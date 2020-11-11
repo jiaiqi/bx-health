@@ -1,7 +1,12 @@
 <template>
 	<view class="history-wrap">
-		<!-- <u-navbar back-text="返回" :back-text-style="backTextStyle" :back-icon-color="backTextStyle.color" :title="pageName" :background="navBackground" title-color="#fff"></u-navbar> -->
-		<view class="history-chart" v-if="isAllPages"><uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" :ec="echartsData"></uniEcCharts></view>
+		<view class="history-chart" v-if="isAllPages">
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'stepChart'" :ec="stepEcData"></uniEcCharts>
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasLineA'" :ec="weightEcData"></uniEcCharts>
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasLineB'" :ec="bpEcData"></uniEcCharts>
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasColumnD'" :ec="caloriesEcData"></uniEcCharts>
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasLineC'" :ec="sleepEcData"></uniEcCharts>
+		</view>
 		<view class="button-box" v-if="isAllPages">
 			<button class="button" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
 				{{ item.name }}
@@ -101,9 +106,8 @@
 import uniEcCharts from '@/archivesPages/components/uni-ec-canvas/uni-echart.vue';
 import energyListWrap from './totalEnergyList.js';
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet';
-// var dayjs = require('../static/dayjs');
-// import * as dayjs from '../static/dayjs'
-import dayjs from '../static/dayjs';
+import dayjs from '../static/dayjs/esm/index.js';
+// import dayjs from '../static/dayjs';
 export default {
 	components: {
 		uniEcCharts,
@@ -156,6 +160,11 @@ export default {
 			loginUserInfo: {},
 			userInfo: {},
 			wxUserInfo: {},
+			stepEcData: {},
+			weightEcData: {},
+			bpEcData: {},
+			caloriesEcData: {},
+			sleepEcData: {},
 			weightChartData: {
 				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
 				series: [
@@ -311,7 +320,8 @@ export default {
 					this.pageType = 'weight';
 					this.currentChart = 'canvasLineA';
 					this.getChartData('weight').then(_ => {
-						this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
+						this.weightEcData = this.buildEcData(this.weightChartData, 'kg', '体重');
+						// this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
 					}); // 体重
 					this.currentType = '体重';
 					break;
@@ -319,7 +329,8 @@ export default {
 					this.pageType = 'bp';
 					this.currentChart = 'canvasLineB';
 					this.getChartData('bloodPressure').then(_ => {
-						this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+						this.bpEcData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+						// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
 					}); // 血压
 					this.currentType = '血压';
 					break;
@@ -328,7 +339,8 @@ export default {
 					this.getChartData('sleep').then(_ => {
 						// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
 					}); // 血压
-					this.chartData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
+					this.sleepEcData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
+					// this.chartData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
 					this.pageType = 'sleep';
 					this.currentType = '睡眠';
 					break;
@@ -336,7 +348,8 @@ export default {
 					this.pageType = 'diet';
 					this.currentChart = 'canvasColumnD';
 					this.getDietSportRecordList().then(_ => {
-						this.chartData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
+						this.caloriesEcData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
+						// this.chartData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
 					});
 					this.currentType = '饮食';
 					break;
@@ -691,7 +704,8 @@ export default {
 						};
 						chartData.series[0].data = stepList.map(item => item.step);
 						this.wxRunData = chartData;
-						this.chartData = this.buildEcData(this.wxRunData, '步', '步数');
+						this.stepEcData = this.buildEcData(this.wxRunData, '步', '步数');
+						// this.chartData = this.buildEcData(this.wxRunData, '步', '步数');
 						return stepList;
 					} else {
 						return false;
