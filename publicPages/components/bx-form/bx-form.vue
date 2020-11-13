@@ -10,6 +10,7 @@
 				:service="service"
 				:detailFiledData="detailFiledData"
 				ref="fitem"
+				@seatPostion="getSeatInfo"
 				@on-form-item="onItemButtons($event)"
 				@on-value-change="onValChange($event)"
 				@on-value-blur="onValBlur($event)"
@@ -24,6 +25,7 @@
 <script>
 import formItem from './bx-form-item.vue';
 import evaluatorTo from '@/common/evaluator.js';
+import amap from '@/publicPages/map/amap-wx.js'
 export default {
 	name: 'bx-form',
 	components: { formItem },
@@ -96,7 +98,9 @@ export default {
 			oldField: [],
 			oldFieldModel: {},
 			specialCol: [],
-			more_config: {
+			amapPlugin:null,
+			key:'7ec9d87d88962a082a1e9faea774b4e9', //高德key
+			more_config: { 
 				col_relation: [
 					{
 						watch_col: ['page_end', 'page_start'], //相关字段
@@ -184,7 +188,43 @@ export default {
 		}
 		this.getAllField();
 	},
+	mounted() {
+		this.amapPlugin = new amap.AMapWX({
+			key: this.key  
+		});
+	},
 	methods: {
+		getSeatInfo(e){
+			uni.showLoading({
+					title: '获取信息中'  
+				});
+				this.amapPlugin.getRegeo({  
+				success: (data) => {  
+					console.log("---高德---",data)
+					// if(e.column === 'address'){
+						this.allField.forEach(item=>{
+							if(item.column === 'address'){
+								item.value = data[0].name
+							}else if(item.column === 'longitude'){
+								item.value = data[0].longitude
+							} else if(item.column === 'latitude'){
+								item.value = data[0].latitude
+							}
+							
+						})
+					// }
+					uni.hideLoading();  
+				},
+				fail:(e)=>{
+					uni.showToast({
+						title:'获取位置信息失败,确认定位服务是否开启后重试',
+						icon:'none',
+						duration: 2000
+					})
+					console.log("error------",e)
+				}
+			});
+		},
 		pickerchange(oriData) {
 			console.log('oriData------', oriData, this.allField);
 			let filed = this.allField;
@@ -396,7 +436,10 @@ export default {
 						}
 					});
 					/*针对添加我的食物时对餐馆编号隐藏*/
-					if(this.addType && (itemData.column === 'restaurant_no' || itemData.column === 'price' || itemData.column === 'mark' )){
+					if(this.addType && (itemData.column === 'restaurant_no' || itemData.column === 'price' || itemData.column === 'mark')){
+						itemData['display'] = false
+					}
+					if(this.service && (this.service.indexOf("srvhealth_mixed_food_nutrition_contents") >-1) && itemData.column==='owner'){
 						itemData['display'] = false
 					}
 					return itemData;

@@ -1,20 +1,17 @@
 export default {
   install (Vue, options) {
     Vue.prototype.pageTitle = '加载中…'   // 可以自定义变量
- 
     Vue.prototype.getQueryString = function (name) {
       var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i')
       var r = window.location.search.substr(1).match(reg)
       if (r != null) return unescape(r[2]); return null
     }
-   
     Vue.prototype.getFooterBtns = function (e) {
       // type : "duplicate" | edit | delete | detail
       let btns = e
       let footerBtns = btns.filter((item) => item.permission === true && (item.button_type === 'edit' || item.button_type === 'delete' || item.button_type === 'deletedraft' || item.button_type === 'closeproc' || item.button_type === 'deleteproc' || item.button_type === 'startproc' || item.button_type === 'customize'))
       return footerBtns
     }
-
     Vue.prototype.getImageUrl = async function (fileNo) {
       let self = this
       let req = {}

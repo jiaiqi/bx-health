@@ -54,12 +54,17 @@
 							<text class="tit">{{ store.name }}</text>
 							<view class="column store-r-b">
 								<view class="store-r-b-t">
-									<u-icon name="star-fill"></u-icon>	
-									<text>{{store.grade}}</text>
+									<text class="cuIcon-favorfill"></text>	
+									<!-- <u-icon name="star-fill"></u-icon>	 -->
+									<text>{{store.grade?store.grade:0}}</text>
 								</view>
 								<view class="store-r-b-b">
-									<text>月售{{store.sale_num}}</text>
+									<text>月售{{store.sale_num?store.sale_num:0}}</text>
 								</view>
+							</view>
+							<view class="store-r-b-b">
+								<text>地址:</text>
+								<text>{{store.address?store.address:'暂无地址'}}</text>
 							</view>
 						</view>
 					</view>
@@ -90,7 +95,8 @@
 						<text class="tit">{{ store.name }}</text>
 						<view class="column store-r-b store-r-b-my">
 							<view class="store-r-b-t">
-								<u-icon name="star-fill"></u-icon>	
+								<!-- <u-icon name="star-fill"></u-icon>	 -->
+								<text class="cuIcon-favorfill"></text>
 								<text>{{store.grade}}</text>
 							</view>
 							<view class="store-r-b-b">
@@ -113,7 +119,8 @@
 		<view class="footzw"></view>
 		<view class="public-button-box">
 			<view @click="addShop" class="add-button">
-				<u-icon name="plus"></u-icon>
+				<!-- <u-icon name="plus"></u-icon> -->
+				<text class="cuIcon-add"></text>
 				<!-- <text class="add-button-num"></text> -->
 			</view>
 		</view>
@@ -488,6 +495,8 @@ page {
 	}
 }
 .store-r-b{
+	display: flex;
+	align-items: center;
 	.store-r-b-t{
 		color: #f98c00;
 		font-weight: 700;
@@ -498,7 +507,7 @@ page {
 	}
 	.store-r-b-b{
 		color: #848484;
-		margin-top: 10upx;
+		// margin-top: 10upx;
 	}
 }
 .store-r-b-my{

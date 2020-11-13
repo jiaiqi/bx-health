@@ -14,7 +14,7 @@
 					
 					<view class="textbox">
 						<view class="title-food">
-							{{ item.name }}								
+							{{ item.name }}
 						</view>
 						<!-- <view v-if="lockEledata " class="lock-ele">
 							(
@@ -39,8 +39,8 @@
 		</view>
 		<view class="public-button-box">
 			<view @click="addFood" class="add-button">
-				<u-icon name="plus"></u-icon>
-				<!-- <text class="add-button-num"></text> -->
+				<!-- <u-icon name="plus"></u-icon> -->
+				<text class="cuIcon-add"></text>
 			</view>
 		</view>
 	</view>

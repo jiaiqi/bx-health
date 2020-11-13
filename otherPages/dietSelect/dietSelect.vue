@@ -18,13 +18,13 @@
 						</view>
 						<view class="action">
 							<text style="margin-right: 20rpx;" @click="search">搜索</text>
-							<!-- <button v-if="serBtn" @click.stop="searchEnd" class="cu-btn bg-orange shadow-blur round">取消</button> -->
 							<text @click="showfilter">筛选</text>
 						</view>
 					</view>
 				</view>
 			</view>
 		</view>
+		<!-- <bx-filtrate :menuAgList='menuAgList' :childChooseArr='childChooseArr' @clickMenu="chooseMenu" @clickTag="tagClick"></bx-filtrate> -->
 		<view class="filtrate-wrap">
 			<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 				<text>已选择：</text>
@@ -40,7 +40,6 @@
 					<view class="" style="display: flex;  flex-flow: wrap;">
 						<view @click="chooseMenu(item,cate)" v-for="(cate,i) in item.children" :class="cate.choose?'cate-active':''" class="filtrate-item-right">
 							<text>{{cate.title}}</text>
-							<!-- arrow-down-fill -->
 							<u-icon size="24" v-show="cate.current_num == 1 && item.type !=='food' && childChooseArrLength == 1" name="arrow-downward"></u-icon>
 							<u-icon size="24" v-show="cate.current_num == 2 && item.type !=='food' && childChooseArrLength == 1" name="arrow-upward"></u-icon>
 							<text v-show="cate.current_num == 1 && item.type !=='food' && childChooseArrLength >= 2">(高)</text>
@@ -73,8 +72,6 @@
 					v-for="(food, idx) in foodList"
 					:key="idx"
 				>
-					<!-- <view class="cu-item boxfood-item" :class="modalName=='move-box-'+ idx?'move-cur':''" :key="idx"
-						 @touchstart="ListTouchStart" @touchmove="ListTouchMove" @touchend="ListTouchEnd" :data-target="'move-box-' + idx"> -->
 					<view class="smallbox">
 						<view class="smallbox-img">
 							<u-image width="100%" height="100%" v-if="!food.imgurl" src="/otherPages/static/img/none.png"></u-image>
@@ -97,13 +94,7 @@
 								<text class="utis">/{{ food.unit_amount + food.unit }}</text>
 							</view>
 						</view>
-					</view>										
-					<!-- <view @click.stop="toFoodsDetail(food)" class="relian">
-						<text class="status" :style="{ background: food.number > 200 ? '#fdc627' : '#00da43' }"></text>
-						<uni-text class="lg text-gray cuIcon-right"><span></span></uni-text>
-					</view> -->
-					<!-- <view class="move foods-move"><view @click.stop="toFoodsDetail(food)" class="bg-grey">详情</view></view> -->
-					<!-- </view> -->
+					</view>	
 				</view>
 				<view 
 					@click.stop="tofeedback"
@@ -114,17 +105,16 @@
 						<view class="smallbox-couple-top">
 							<u-icon size="70" name="plus"></u-icon>
 						</view>
-						<view class="smallbox-couple-bot">
+						<view v-if="!isShowMyList" class="smallbox-couple-bot">
 							<text>没有找到想要的?去</text>
 							<text>反馈</text>
 						</view>
+						<view v-else class="smallbox-couple-bot">
+							<text>没有找到想要的?去</text>
+							<text>添加</text>
+						</view>
 					</view>
 				</view>
-				<!-- <view v-if="!isSeekValue" @click="tofeedback" class="seek-wrap">
-					<text>没搜索到想要的内容？快去</text>
-					<text class="seek-back">反馈</text>
-					<text>吧</text>
-				</view> -->
 			</view>
 		</sPullScroll>
 		<!-- </scroll-view> -->
@@ -253,6 +243,7 @@
 </template>
 
 <script>
+import bxFiltrate from '@/otherPages/components/bx-filtrate/bx-filtrate.vue'
 import MxDatePicker from '@/otherPages/components/mx-datepicker/mx-datepicker.vue';
 import jumpBall from '@/otherPages/components/hx-jump-ball/hx-jump-ball.vue';
 import sPullScroll from '@/otherPages/components/s-pull-scroll';
@@ -260,7 +251,8 @@ export default {
 	components: {
 		sPullScroll,			
 		MxDatePicker,
-		jumpBall
+		jumpBall,
+		bxFiltrate
 	},
 	computed: {
 		carName() {
@@ -656,7 +648,8 @@ export default {
 			childChooseArr:[],
 			childChooseArrLength:0,
 			classifyCond:null,
-			copyData:[]
+			copyData:[],
+			isShowMyList:false
 		};
 	},
 	onShow() {
@@ -691,15 +684,24 @@ export default {
 									title: '食物',
 									value: 'foods',
 									choose:false
-								},																															
-								{
+								}																																															
+							]
+						},
+						{
+							classify_name:'子类',
+							type:'subclass',
+							children:[{
+								title: '全部',
+								value: '全部',
+								choose:true
+							},{
 									title: '蔬菜',
 									value: '蔬菜',
 									choose:false
 								},
 								{
-									title: '水果',
-									value: '水果',
+									title: '水果干果',
+									value: '水果干果',
 									choose:false
 								},
 								
@@ -713,35 +715,14 @@ export default {
 									value: '坚果',
 									choose:false
 								},
-								
 								{
-									title: '干果',
-									value: '干果',
+									title: '谷薯类',
+									value: '谷薯类',
 									choose:false
 								},
 								{
-									title: '谷类',
-									value: '谷类',
-									choose:false
-								},
-								{
-									title: '薯类',
-									value: '薯类',
-									choose:false
-								},
-								{
-									title: '杂豆类',
-									value: '杂豆类',
-									choose:false
-								},
-								{
-									title: '乳品',
-									value: '乳品',
-									choose:false
-								},
-								{
-									title: '蛋类',
-									value: '蛋类',
+									title: '蛋奶类',
+									value: '蛋奶类',
 									choose:false
 								},
 								{
@@ -770,16 +751,10 @@ export default {
 									choose:false
 								},
 								{
-									title: '饭馆饭菜',
-									value: '饭馆饭菜',
+									title: '其他',
+									value: '其他',
 									choose:false
-								},
-								{
-									title: '我的饭菜',
-									value: '我的饭菜',
-									choose:false
-								},
-							]
+								}]
 						},
 						{
 						classify_name:'宏量成分',
@@ -1005,15 +980,33 @@ export default {
 		/*点击前往反馈页面**/
 		tofeedback(){
 			let no = null
+			let cond = [{
+				colName:"restaurant_no",
+				ruleType:"eq",
+				value:""
+			}]
 			if(this.pageType === 'food'){
 				no = '20201105113648000165'
+				let obj = {
+					colName:"owner",
+					ruleType:"eq",
+					value:"我的"
+				}
+				cond.push(obj)
 			}else if(this.pageType === 'sport'){
 				no = '20201105115133000167'
 			}
 			let url = `/questionnaire/index/index?formType=form&activity_no=${no}&status=进行中`;
-			uni.navigateTo({
-				url: url
-			});
+			if(!this.isShowMyList){
+				uni.navigateTo({
+					url: url
+				});
+			}else{				
+				uni.navigateTo({
+				  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&cond='+decodeURIComponent(JSON.stringify(cond))
+				});
+			}
+			
 		},
 		countDietNum(num){
 			let value = Number(this.value1)
@@ -1088,9 +1081,7 @@ export default {
 					}					
 				})
 				
-			})
-			
-			
+			})						
 			if(childChooseArr.length === 0){
 				this.getFoodsList()
 			}else{
@@ -1118,19 +1109,21 @@ export default {
 			console.log("--标签--")
 		},
 		/* 顶部菜单点击**/
-		chooseMenu(parent,child){	
+		chooseMenu(parent,child){			
 			if(child.value === '饭馆饭菜'){
 				uni.switchTab({
 					url:'/pages/store/store'
 				})
-			}else if(child.value === '我的饭菜'){
-				uni.navigateTo({
-					url:'/otherPages/chooseFood/myFoodList'
-				})
-			}else{				
+			}else{
 			console.log(parent,child,'parent,childparent,child')					
 			this.pageInfo.pageNo = 1
-			if(child.value!='不限' && child.value != 'default'){
+			if(parent.type === 'subclass'){
+				// if(child.value !== '全部'){
+				// 	child.choose = !child.choose
+				// }else{
+				// 	child.choose = true
+				// }
+			}else if(child.value!='不限' && child.value != 'default'){
 				child.current_num += 1
 				if(child.current_num == 5){
 					child.current_num  = 0
@@ -1140,7 +1133,7 @@ export default {
 			}
 			let menuData = this.menuAgList
 			let order = ''
-			if(parent.type==='food'){				
+			if(parent.type==='food' || parent.type === 'subclass'){				
 				child.choose = !child.choose
 				menuData.forEach(par=>{
 					if(par.type === parent.type){
@@ -1156,43 +1149,148 @@ export default {
 					}
 				})				
 			}
+			if(child.value === '我的饭菜'){
+				this.isShowMyList = true
+				debugger
+				this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
+				let cond = [{
+						colName:'owner',
+						ruleType:'eq',
+						value:'我的'
+					},{
+						colName:'create_user',
+						ruleType:'eq',
+						value:uni.getStorageSync('current_user_info').userno
+					}]
+				this.condObj = cond
+			}else if(child.value === '公共饭菜'){
+				this.condObj = null
+			}
 			if(child.value === 'foods' || child.value === 'matter'){
+				let foodsArr = []
 				if(child.value === 'foods'){
+					 foodsArr = [{
+										title: '公共饭菜',
+										value: '公共饭菜',
+										choose:true
+									},{
+										title: '饭馆饭菜',
+										value: '饭馆饭菜',
+										choose:false
+									},
+									{
+										title: '我的饭菜',
+										value: '我的饭菜',
+										choose:false
+									}]											
+					console.log("-------------",this.menuAgList)
 					this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
 				}else if(child.value === 'matter'){
+					foodsArr = [{
+								title: '全部',
+								value: '全部',
+								choose:true
+							},{
+									title: '蔬菜',
+									value: '蔬菜',
+									choose:false
+								},
+								{
+									title: '水果干果',
+									value: '水果干果',
+									choose:false
+								},
+								
+								{
+									title: '菌藻类',
+									value: '菌藻类',
+									choose:false
+								},
+								{
+									title: '坚果',
+									value: '坚果',
+									choose:false
+								},
+								{
+									title: '谷薯类',
+									value: '谷薯类',
+									choose:false
+								},
+								{
+									title: '蛋奶类',
+									value: '蛋奶类',
+									choose:false
+								},
+								{
+									title: '畜禽肉',
+									value: '畜禽肉',
+									choose:false
+								},
+								{
+									title: '水产品',
+									value: '水产品',
+									choose:false
+								},
+								{
+									title: '调味品',
+									value: '调味品',
+									choose:false
+								},
+								{
+									title: '饮品',
+									value: '饮品',
+									choose:false
+								},
+								{
+									title: '糕点类',
+									value: '糕点类',
+									choose:false
+								},
+								{
+									title: '其他',
+									value: '其他',
+									choose:false
+								}]				
 					this.searchArg.serviceName = 'srvhealth_diet_contents_select'
 				}
+				this.menuAgList = this.menuAgList.map(c=>{
+					if(c.type === 'subclass'){
+						c.children = foodsArr
+					}
+					return c
+				})
 				this.condObj = null
-				this.classifyCond = null
-				this.menuAgList.forEach(m=>{
-					this.copyData.forEach(n=>{
-						if(m.classify_name != '分类' && m.classify_name === n.classify_name){
-							m.children = n.children
-						}
-					})
-				})				
+				this.classifyCond = null	
 				console.log("this.menuAgList-----",this.menuAgList)
 				this.onRefresh();
 				
-			}else if(child.value !== 'matter' && !child.current_num  && !this.menuAgList[0].children[0].choose) {
+			}else if(parent.type == 'subclass' && this.menuAgList[0].children[0].choose) {
 				this.searchArg.serviceName = 'srvhealth_diet_contents_select'
-				let cond = {
-					colName:"classify",
-					ruleType:"eq",
-					value:child.value
-				}
-				this.condObj = cond
-				this.classifyCond = cond
-				this.menuAgList.forEach(m=>{
-					this.copyData.forEach(n=>{
-						if(m.classify_name != '分类' && m.classify_name === n.classify_name){
-							m = n
-						}
+				if(child.value === '全部'){
+					this.condObj = null
+					this.classifyCond = null
+					this.getFoodsList()
+				}else{
+					let cond = {
+						colName:"classify",
+						ruleType:"eq",
+						value:child.value
+					}
+					this.condObj = cond
+					this.classifyCond = cond
+					this.menuAgList.forEach(m=>{
+						this.copyData.forEach(n=>{
+							if(m.classify_name != '分类' && m.classify_name === n.classify_name){
+								m = n
+							}
+						})
 					})
-				})
-				this.getFoodsList(null,cond)
-				console.log("点击素材")
+					this.getFoodsList(null,cond)
+					console.log("点击素材")
+				}
+				
 			}
+			debugger
 			if(parent.type === 'capacity' || parent.type === 'vitamin' || parent.type === 'mineral' ||parent.type === 'mingle'){
 				console.log(333,'par.type === parent.type')
 				let isHas = false
@@ -1293,13 +1391,10 @@ export default {
 					// }
 				})
 				
-				let cond = {
+				let condOrder = {
 					relation: 'AND',
 					data: []
 				};
-				// if((child.value === '不限') ){
-				// 	childChooseArr = []
-				// }
 				if(childChooseArr.length > 0 ){
 					if(childChooseArr.length === 1){						
 						if(child.current_num === 1){
@@ -1337,16 +1432,16 @@ export default {
 								}]
 							}
 							// cond.data.push(obj)
-							cond.data = [...cond.data,...obj]
+							condOrder.data = [...condOrder.data,...obj]
 						})
 					}
 					
 					
 				}
 				
-				if (cond.data.length === 1) {
+				if (condOrder.data.length === 1) {
 					order = {
-						col: cond.data[0].colName,
+						col: condOrder.data[0].colName,
 						type: 'desc'
 					};
 				}
@@ -1360,13 +1455,15 @@ export default {
 						type: order_type
 					};
 				}
-				if(cond.data.length === 0){
-					cond = null
+				if(condOrder.data.length === 0){
+					condOrder = null
 				}
+				console.log("-----order-----",condOrder)
 				this.childChooseArr = childChooseArr
-				this.condObj =this.classifyCond?this.classifyCond:cond
+				this.order = order
+				this.condObj =this.classifyCond?this.classifyCond:condOrder
 				console.log('childChooseArr-----',order)
-				this.getFoodsList(this.order?this.order:order, this.condObj, 'filtrate');
+				// this.getFoodsList(this.order?this.order:order, this.condObj, 'filtrate');
 			}
 			}
 			this.onRefresh();
@@ -1836,7 +1933,22 @@ export default {
 			if (this.searchArg.order) {
 				req.order = this.searchArg.order;
 			}
-			if (cond) {
+			if (Array.isArray(this.condObj)) {
+				req = {
+					serviceName: 'srvhealth_mixed_food_nutrition_contents_select',
+					colNames: ['*'],
+					condition:[{
+						colName:'owner',
+						ruleType:'eq',
+						value:'我的'
+					},{
+						colName:'create_user',
+						ruleType:'eq',
+						value:uni.getStorageSync('current_user_info').userno
+					}]
+				}
+				// req.relation_condition.data = this.condObj
+			}else if(cond){				
 				req.relation_condition.data.push(cond);
 			}
 			let res = await this.$http.post(url, req);
@@ -1931,9 +2043,16 @@ export default {
 			this.currFood.hdate = this.selectDate
 			if(this.pageType === 'food'){
 				let food = encodeURIComponent(JSON.stringify(this.currFood))
-				uni.navigateTo({
-					url:'/otherPages/chooseFood/chooseFood?currFood=' + food
-				})
+				if(!this.isShowMyList){
+					uni.navigateTo({
+						url:'/otherPages/chooseFood/chooseFood?currFood=' + food
+					})
+				}else{
+					uni.navigateTo({
+						url:'/otherPages/chooseFood/chooseFood?currFood=' + food + '&type=owner'
+					})
+				}
+				
 			}
 			this.selectCurrFoodUnit(e)
 			console.log('选择食物：', e);

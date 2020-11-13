@@ -5,14 +5,15 @@
 				<!-- #ifdef H5 -->
 				<view class="switch-date" @click="changeSignDate">
 					<text>{{ selectDate }}</text>
-					<u-icon name="calendar-fill" size="30"></u-icon>
+					<text class="cuIcon-calendar" color="#333" size="30"></text>
 				</view>
 				<!-- #endif -->
 				<view class="user-info" @click.stop="showUserList = !showUserList">
-					<u-avatar :src="profile_url" mode="circle" :size="60"></u-avatar>
+					<image :src="profile_url" style="width: 60rpx;height: 60rpx;border-radius: 50%F;" mode=""></image>
+					<!-- <u-avatar :src="profile_url" mode="circle" :size="60"></u-avatar> -->
 					<view class="user-name" data-event="showUserList">
 						<text class="text" data-event="showUserList">{{ userInfo.name }}</text>
-						<u-icon name="arrow-down-fill" size="28" :class="{ active: showUserList }"></u-icon>
+						<text class="cuIcon-triangledownfill" color="#333" size="28" :class="{ active: showUserList }"></text>
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
 						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
@@ -26,7 +27,7 @@
 		<!-- #ifdef MP-WEIXIN -->
 		<view class="switch-date" @click="changeSignDate">
 			<text>{{ selectDate }}</text>
-			<u-icon name="calendar-fill" color="#333" size="30"></u-icon>
+			<text class="cuIcon-calendar" color="#333" size="30"></text>
 		</view>
 		<!-- #endif -->
 		<view class="diet-wrap">
@@ -3582,7 +3583,8 @@ uni-checkbox::before {
 	}
 	.delete-bar {
 		flex: 1;
-		padding: 10rpx 20rpx;
+		padding: 15rpx 30rpx;
+		letter-spacing: 2px;
 		color: #999;
 		border-top: 1px solid #f1f1f1;
 		display: flex;

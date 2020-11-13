@@ -133,6 +133,7 @@
 							var completeImages = 0
 							
 							for(let i=0; i<imagePathArr.length;i++){
+								
 								console.log('--->',imagePathArr[i],_self.serverUrl,_self.header,_self.formData)
 								_self.formData['thumbnailType'] = 'fwsu_100'
 								promiseWorkList.push(new Promise((resolve, reject)=>{

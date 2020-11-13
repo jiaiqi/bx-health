@@ -1,13 +1,13 @@
 <template>
 	<view class="food_wrap">
-		<view class="cu-bar bg-white">
-			<!-- <view class=" text-cyan button" >取消</view> -->
+		<view  class="cu-bar bg-white food_wrap_top">
+			<view @click="clickTop('edit')" v-if="pageType" class=" button" >编辑</view>
 			<view class="date-time">
 				<view class="date-time-rq">{{ nowDate }}</view>
 				/
 				<view class="date-time-rq">{{ currTime ? currTime : nowDateTime }}</view>
 			</view>
-			<!-- <view @click="confirms" class=" text-cyan button confir-btn">确定</view> -->
+			<view @click="clickTop('add')" v-if="pageType" class=" button confir-btn">增加食材</view>
 		</view>
 
 		<view class="content">
@@ -26,6 +26,7 @@
 			</view>
 			<view class="ele-text-wrap">
 				<view class="ele-text-top-tit">
+					
 					<text @click="changeCate(item,index)" v-for="(item,index) in categoryTop" :key="index" :class="categoryTopIndex === index?'active-text-top-tit':''">{{item.name}}</text>					
 				</view>
 				<!-- <view class="ele-text-top">主要维生素含量如下：</view> -->
@@ -149,7 +150,15 @@
 				</view>
 				<view v-if="categoryTopIndex == 0" class="uni-ec-canvas-wrap">
 					<view class="uni-ec-canvas-top">
-						<text @click="changeApprove(item,index)" :class="currentAppr.name === item.name?'active-approve':''" v-for="(item,index) in approveData" :key="index">{{item.name}}</text>
+						<view @click="changeApprove(item,index)" v-for="(item,index) in approveData" class="uni-ec-canvas-top-item" :key="index" :class="currentAppr.name === item.name?'active-approve':''" >
+							<view class="uni-ec-canvas-top-t">
+								<text>{{item.name}}</text>
+							</view>
+							<view class="uni-ec-canvas-top-b">
+								<!-- <text>年龄:{{item.age?item.age:'??'}}</text> -->
+								<text>({{item.weight?item.weight:'??'}}kg)</text>
+							</view>
+						</view>
 					</view>
 					<view class="uni-ec-canvas-bot">
 						<!-- #ifdef MP-WEIXIN -->
@@ -164,16 +173,25 @@
 			
 			</view>
 			<view class="calculate">
+				<view v-if="!currFood.meal_no" @click="chooseCook" class="cook weight">
+					<view class="calculate-l">烹调方式：</view>
+					<text>{{currFood.cook_method}}</text>
+					<text class="lg text-gray" :class="'cuIcon-right'"></text>
+					<!-- <view @click="chooseCook(cooks, c)" v-for="(cooks, c) in cookData" :key="c" :class="currentCookData == cooks.value ? 'active-unit' : ''" class="unit">
+						{{cooks.value}}						
+					</view> -->
+				</view>
 				<view class="weight">
 					<view class="calculate-l">单位：</view>
 					<view @click="chooseUnit(u, ids)" v-for="(u, ids) in unitList" :key="ids" :class="currIndex == ids ? 'active-unit' : ''" class="unit">
-						{{ u.unit_amount ? u.unit_amount + u.unit : u.unit }}
-						<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
+						{{ u.unit_amount ? u.unit_amount + u.unit : u.unit }}						
 					</view>
-					<!-- <view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view> -->
 				</view>
 			</view>
 			<view class="amount">
+				<view class="amount-left">
+					<text>数量：</text>
+				</view>
 				<view class="input-box">
 					<view class="key-left">
 						<text @click="countDietNum('-0.1')">-0.1</text>
@@ -203,6 +221,23 @@
 						</view>
 					</view>
 				</radio-group>
+			</view>
+		</view>
+		
+		<view class="cu-modal bottom-modal" :class="isShowCookType?'show':''">
+			<view class="cu-dialog">
+				<view class="cu-bar bg-white cook-top">
+					<view class="action text-blue" @tap="hideCookModel">取消</view>
+					<text>常见烹调方式</text>
+					<view class="action text-green" @tap="configCookFood"></view>
+				</view>
+				<view class="padding-xl">
+					<view class="cook-wrap">
+						<view @click="chooseCookFood(cook)" v-for="(cook,c) in cookData" :key="c" class="cook-item" :class="currFood.cook_method.indexOf(cook.value)>-1?'active-cook-item':''">
+							<text>{{cook.value}}</text>
+						</view>
+					</view>
+				</view>
 			</view>
 		</view>
 	</view>
@@ -238,14 +273,14 @@ export default {
 				type:'purity'
 			}],
 			approveData:[{
-				name:'成年男性',
+				name:'男性',
 				type:'man',
 				sex:'男',
 				age:18,
 				weight:65
 				
 			},{
-				name:'成年女性',
+				name:'女性',
 				type:'woman',
 				sex:'女',
 				age:18,
@@ -416,7 +451,11 @@ export default {
 			},
 			currIndex: '', //选择单位index
 			userInfo: '',
-			result: ''
+			result: '',
+			cookData:[], //烹饪方式
+			currentCookData:null,
+			isShowCookType:false,
+			pageType:''
 		};
 	},
 	onShow() {
@@ -436,6 +475,9 @@ export default {
 			}
 		}
 		console.log('option-----', option.currFood);
+		if(option.type){
+			this.pageType = option.type
+		}
 		let query = JSON.parse(decodeURIComponent(option.currFood));
 		if (query.hdate) {
 			this.nowDate = query.hdate;
@@ -445,6 +487,7 @@ export default {
 			this.currentAppr = this.approveData[0]
 			this.assembleData();
 			this.selectCurrFoodUnit(this.currFood);
+			this.getFoodsV2()
 			// this.getNutrientRecommended()
 		}
 	},
@@ -457,6 +500,54 @@ export default {
 		}
 	},
 	methods: {
+		hideCookModel(){
+			this.isShowCookType = false
+		},
+		configCookFood(){
+			this.isShowCookType = false
+		},
+		async getFoodsV2(){
+			let self = this
+			let colVs = await this.getServiceV2('srvhealth_diet_contents_select', 'list', 'list', 'health');
+			let colData = colVs.srv_cols
+			colData.forEach(item=>{
+				if(item.columns === 'cook_method'){
+					self.cookData = item.option_list_v2
+					this.currentCookData = this.currFood.cook_method
+				}
+			})
+		},
+		clickTop(type){
+			if(type === 'edit'){
+				let cond = [{
+					colName:"id",
+					ruleType:"in",
+					value:this.currFood.id
+				}]
+				let params = {
+				  type: 'update',
+				  condition: cond,
+				  serviceName: 'srvhealth_mixed_food_nutrition_contents_update',
+				  defaultVal: this.currFood
+				};
+				uni.navigateTo({
+				  url: '/publicPages/form/form?type=update&params='+ encodeURIComponent(JSON.stringify(params)) 
+				});
+			}else if(type === 'add'){
+				let cond = [{
+					colName:"unit",
+					ruleType:"eq",
+					value:''
+				},{
+					colName:"meal_no",
+					ruleType:"eq",
+					value:this.currFood.meal_no
+				}]
+				uni.navigateTo({
+				  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
+				});	
+			}
+		},
 		/*点击切换图表顶部类型**/
 		changeApprove(item,index){
 			if(item.type === 'mine' && (!item.age || !item.sex)){
@@ -626,6 +717,30 @@ export default {
 		RadiohideModal() {
 			this.modalName = '';
 		},
+		chooseCook(){
+			console.log("点击烹调方式")
+			this.isShowCookType = true
+		},
+		chooseCookFood(item){
+			let currData = this.currFood
+			let cook_method_str = currData.cook_method.split(',')
+			
+			let end_str = ""
+			if(currData.cook_method.indexOf(item.value) > -1){
+				cook_method_str.forEach((c,i)=>{
+					if(c == item.value){
+						cook_method_str.splice(i,1)
+					}
+				})
+				end_str = cook_method_str.join(',')
+			}else{
+				let endArr = []
+				endArr.push(item.value)
+				end_str = [...cook_method_str,...endArr].join(',')
+			}
+			this.$set(this.currFood,'cook_method',end_str)
+			console.log("----------",end_str,this.currFood)
+		},
 		/*选择单位*/
 		chooseUnit(item, i) {
 			console.log('单位选择----', item);
@@ -779,6 +894,7 @@ export default {
 					} else {
 						obj['diet_contents_no'] = item.food_no;
 						obj['diret_type'] = 'diet_contents';
+						obj['cook_method'] = item.cook_method
 					}
 					// }
 					arr.push(obj);
@@ -829,6 +945,13 @@ export default {
 .food_wrap {
 	background-color: #f8f8f8;
 	height: 100vh;
+}
+.food_wrap_top{
+	display: flex;
+	justify-content: space-between!important;
+	font-weight: 700;
+	color: #000;
+	font-size: 30rpx;
 }
 .contents {
 	// overflow: hidden;
@@ -1043,7 +1166,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-right: 20upx;
+			margin-right: 10upx;
 			border-radius: 5px;
 		}
 	}
@@ -1055,7 +1178,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-left: 20upx;
+			margin-left: 10upx;
 			border-radius: 5px;
 		}
 	}
@@ -1265,15 +1388,18 @@ export default {
 	display: flex;
 	justify-content: flex-start;
 	// flex-wrap: wrap;
-	padding: 20upx 20upx;
+	padding: 20upx 10upx;
 	min-height: 100upx;
-	align-items: center;
+	align-items: flex-start;
 	font-size: 36upx;
 	margin-right: 20upx;
 	color: #999;
+	flex-direction: column;
 	.calculate-l {
-		width: 100rpx;
+		// width: 100rpx;
 		font-size: 28upx;
+		font-weight: 600;
+		color: #000;
 	}
 	.calorie {
 		min-width: 115upx;
@@ -1317,10 +1443,36 @@ export default {
 			margin-left: 20upx;
 		}
 	}
+	.cook{
+		margin-bottom: 16rpx;
+		.calculate-l{
+			margin-bottom: 0;
+		}
+		.unit{
+			padding: 0rpx 30rpx;
+		}
+		text{
+			&:nth-child(2){
+				font-weight: 700;
+				color: #f37b1d;
+				margin-right: 8rpx;
+			}
+			&:last-child{
+				margin-bottom: -10rpx;
+				font-weight: 700;
+			}
+		}
+	}
 }
 .amount {
 	color: #009688;
 	font-weight: 800;
+	display: flex;
+	align-items: center;
+	margin-left: 10rpx;
+	.amount-left{
+		color: #000;
+	}
 	.number {
 		padding: 0 20upx;
 		font-size: 34upx;
@@ -1351,14 +1503,15 @@ export default {
 .uni-ec-canvas-wrap{
 	.uni-ec-canvas-top{
 		display: flex;
-		text{
-			padding: 8rpx 20rpx;
-			// background-color: #8dc63f;
-			border:1px solid #ccc;
-			color: #999;
-			margin-right: 20rpx;
-			border-radius: 20rpx;
-			
+		.uni-ec-canvas-top-item{
+			display: flex;
+			align-items: center;
+			padding: 5px 10px;
+			border-radius: 22px;
+			text-align: center;
+			color: #ccc;
+			border: 1px solid #ccc;
+			margin-right: 14rpx;
 		}
 		.active-approve{
 			background-color: #8dc63f;
@@ -1374,5 +1527,25 @@ export default {
 .uni-ec-canvas {
 	width: 710rpx;
 	height: 540rpx;
+}
+.cook-top{
+	padding: 0 15rpx;
+	justify-content: space-between;
+}
+.cook-wrap{
+	display: flex;
+	flex-wrap: wrap;
+	.cook-item{
+		padding: 4rpx 20rpx;
+		border: 1px solid #ccc;
+		margin-right: 10rpx;
+		margin-bottom: 10rpx;
+		text{
+			
+		}
+	}
+	.active-cook-item{
+		color: red;
+	}
 }
 </style>

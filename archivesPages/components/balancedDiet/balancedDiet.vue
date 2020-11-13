@@ -1,11 +1,9 @@
 <template>
 	<view class="balanced-diet" :class="{ 'component-page': pageType }">
-		<!-- #ifdef MP-WEIXIN -->
 		<view class="switch-date" @click="changeSignDate">
 			<text>{{ selectDate }}</text>
-			<u-icon name="calendar-fill" color="#333" size="30"></u-icon>
+			<text class="cuIcon-calendar" color="#333" size="30"></text>
 		</view>
-		<!-- #endif -->
 		<view class="diet-wrap" v-if="pageType == 'diet' || pageType == 'sport'">
 			<view class="main-box">
 				<view class="main-content main-content-t">
@@ -169,47 +167,47 @@
 					</view>
 				</view>
 				<!-- <u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more"> -->
-					<view class="record-box" @click.self="clickDietBox">
-						<view class="table" v-if="dietLayout === 'list'">
-							<view class="no-data" v-if="!dietRecord || dietRecord.length === 0" @click="toPages('food')">
-								<view class="cuIcon-add text-black" style="font-size: 38rpx"></view>
-								点击添加饮食记录
-							</view>
-							<view class="row" v-for="(item, index) in dietRecord" :key="index">
-								<view class="readonly" @click="clickDietRecordItem(item)">
-									<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
-									<view class="column center">
-										<view class="name">{{ item.name }}</view>
-										<view class="number">{{ item.unit !== 'g' ? item.amount + item.unit : item.amount * item.unit_weight_g + item.unit }}</view>
-									</view>
-									<view class="column time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
-									<view class="column">
-										<text class="heat">
-											<text class="text text-orange">{{ item.energy }}</text>
-											千卡
-										</text>
-										<text class="cuIcon-right" v-if="dietLayout === 'list'"></text>
-									</view>
-								</view>
-							</view>
+				<view class="record-box" @click.self="clickDietBox">
+					<view class="table" v-if="dietLayout === 'list'">
+						<view class="no-data" v-if="!dietRecord || dietRecord.length === 0" @click="toPages('food')">
+							<view class="cuIcon-add text-black" style="font-size: 38rpx"></view>
+							点击添加饮食记录
 						</view>
-						<view class="table grid-layout" v-if="dietLayout === 'grid'">
-							<view class="diet-item" v-for="(item, index) in dietRecord" :key="index" @click="clickDietRecordItem(item)">
-								<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
-								<view class="diet-detail">
+						<view class="row" v-for="(item, index) in dietRecord" :key="index">
+							<view class="readonly" @click="clickDietRecordItem(item)">
+								<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
+								<view class="column center">
 									<view class="name">{{ item.name }}</view>
-									<view class="number">
-										<text class="heat">{{ item.energy }}千卡</text>
-									</view>
-									<view class="number">
-										<text>{{ item.unit !== 'g' ? item.amount + item.unit : item.amount * item.unit_weight_g + item.unit }}</text>
-										<text class="time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</text>
-									</view>
+									<view class="number">{{ item.unit !== 'g' ? item.amount + item.unit : item.amount * item.unit_weight_g + item.unit }}</view>
+								</view>
+								<view class="column time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
+								<view class="column">
+									<text class="heat">
+										<text class="text text-orange">{{ item.energy }}</text>
+										千卡
+									</text>
+									<text class="cuIcon-right" v-if="dietLayout === 'list'"></text>
 								</view>
 							</view>
-							<view class="diet-item" @click="toPages('food')"><text class="cuIcon-add add-icon"></text></view>
 						</view>
 					</view>
+					<view class="table grid-layout" v-if="dietLayout === 'grid'">
+						<view class="diet-item" v-for="(item, index) in dietRecord" :key="index" @click="clickDietRecordItem(item)">
+							<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
+							<view class="diet-detail">
+								<view class="name">{{ item.name }}</view>
+								<view class="number">
+									<text class="heat">{{ item.energy }}千卡</text>
+								</view>
+								<view class="number">
+									<text>{{ item.unit !== 'g' ? item.amount + item.unit : item.amount * item.unit_weight_g + item.unit }}</text>
+									<text class="time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</text>
+								</view>
+							</view>
+						</view>
+						<view class="diet-item" @click="toPages('food')"><text class="cuIcon-add add-icon"></text></view>
+					</view>
+				</view>
 				<!-- </u-read-more> -->
 			</view>
 			<view class="main-box symptom" v-if="!pageType || pageType === 'sport'">
@@ -221,47 +219,47 @@
 					</view>
 				</view>
 				<!-- <u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more"> -->
-					<view class="record-box" @click.self="clickSportBox">
-						<view class="table" v-if="sportLayout === 'list'">
-							<view class="no-data" v-if="!sportsRecord || sportsRecord.length === 0" @click="toPages('sport')">
-								<view class="cuIcon-add text-black" style="font-size: 38rpx"></view>
-								点击添加运动记录
-							</view>
-							<view class="row" v-for="(item, index) in sportsRecord" :key="index">
-								<view class="readonly" @click="clickSportRecordItem(item)">
-									<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
-									<view class="column center">
-										<view class="name">{{ item.name }}</view>
-										<view class="number">{{ item.amount + item.unit }}</view>
-									</view>
-									<view class="column time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
-									<view class="column">
-										<text class="heat">
-											<text class="text text-green">{{ item.energy }}</text>
-											千卡
-										</text>
-										<text class="cuIcon-right"></text>
-									</view>
-								</view>
-							</view>
+				<view class="record-box" @click.self="clickSportBox">
+					<view class="table" v-if="sportLayout === 'list'">
+						<view class="no-data" v-if="!sportsRecord || sportsRecord.length === 0" @click="toPages('sport')">
+							<view class="cuIcon-add text-black" style="font-size: 38rpx"></view>
+							点击添加运动记录
 						</view>
-						<view class="table grid-layout" v-if="sportsRecord && sportLayout === 'grid'">
-							<view class="diet-item" v-for="(item, index) in sportsRecord" :key="index" @click="clickSportRecordItem(item)">
-								<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
-								<view class="diet-detail">
+						<view class="row" v-for="(item, index) in sportsRecord" :key="index">
+							<view class="readonly" @click="clickSportRecordItem(item)">
+								<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
+								<view class="column center">
 									<view class="name">{{ item.name }}</view>
-									<view class="number">
-										<text class="heat">{{ item.energy }}千卡</text>
-									</view>
-									<view class="number">
-										<text>{{ item.amount + item.unit }}</text>
-										<text class="time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</text>
-									</view>
+									<view class="number">{{ item.amount + item.unit }}</view>
+								</view>
+								<view class="column time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</view>
+								<view class="column">
+									<text class="heat">
+										<text class="text text-green">{{ item.energy }}</text>
+										千卡
+									</text>
+									<text class="cuIcon-right"></text>
 								</view>
 							</view>
-							<view class="diet-item" @click="toPages('sport')"><text class="cuIcon-add add-icon"></text></view>
 						</view>
 					</view>
+					<view class="table grid-layout" v-if="sportsRecord && sportLayout === 'grid'">
+						<view class="diet-item" v-for="(item, index) in sportsRecord" :key="index" @click="clickSportRecordItem(item)">
+							<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
+							<view class="diet-detail">
+								<view class="name">{{ item.name }}</view>
+								<view class="number">
+									<text class="heat">{{ item.energy }}千卡</text>
+								</view>
+								<view class="number">
+									<text>{{ item.amount + item.unit }}</text>
+									<text class="time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</text>
+								</view>
+							</view>
+						</view>
+						<view class="diet-item" @click="toPages('sport')"><text class="cuIcon-add add-icon"></text></view>
+					</view>
+				</view>
 				<!-- </u-read-more> -->
 			</view>
 			<view class="main-box symptom" v-if="!pageType || pageType === 'symptom'">
@@ -302,9 +300,9 @@
 								<text class="unit">千卡</text>
 							</text>
 						</view>
+
 						<view class="">
 							<text class="label text-bold margin-right-xs">单位:</text>
-							<!-- {{ currentRecord.unit_weight_g ? currentRecord.amount * currentRecord.unit_weight_g : currentRecord.amount }} -->
 							<text class="unit">{{ currentRecord.unit }}</text>
 						</view>
 					</view>
@@ -315,6 +313,11 @@
 						<!-- #ifdef H5 -->
 						<uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-echarts>
 						<!-- #endif -->
+					</view>
+					<view class="cook-type-box" v-if="currentRecordType === 'food'">
+						<view class="title">烹调方式:</view>
+						<view class="current-cook-type" @click="isShowCookType = true">{{ currentRecord.cook_method }}</view>
+						<text class="lg text-gray cuIcon-right"></text>
 					</view>
 					<view class="unit-box" v-if="currentRecordType === 'food'">
 						<view class="title">单位:</view>
@@ -334,11 +337,18 @@
 					</view>
 				</view>
 				<view class="delete-bar">
-					<view class="btn bg-grey" @click="(showEditModal = false), (currentRecord = null)">取消</view>
+					<view
+						class="btn bg-grey"
+						@click="
+							showEditModal = false;
+							currentRecord = null;
+						"
+					>
+						取消
+					</view>
 					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
 			</view>
-			<!-- </u-popup> -->
 		</view>
 		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
 		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
@@ -383,6 +393,26 @@
 				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :markDays="markDays" :headerBar="true" @onDayClick="onDayClick"></bx-date-stamp>
 			</view>
 		</view>
+		<view class="cu-modal bottom-modal" :class="isShowCookType ? 'show' : ''">
+			<view class="cu-dialog">
+				<view class="cu-bar bg-white cook-top">
+					<view class="action text-blue" @tap="isShowCookType = false">取消</view>
+					<text>常见烹调方式</text>
+					<view class="action text-green" @tap="isShowCookType = false"></view>
+				</view>
+				<view class="cooktype-wrap" v-if="currentRecord">
+					<view
+						@click="chooseCookType(cook)"
+						v-for="(cook, c) in cookTypes"
+						:key="c"
+						class="cook-item"
+						:class="currentRecord.cook_method && currentRecord.cook_method.indexOf(cook.value) > -1 ? 'active-cook-item' : ''"
+					>
+						<text>{{ cook.value }}</text>
+					</view>
+				</view>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -409,10 +439,40 @@ export default {
 	},
 	data() {
 		return {
+			isShowCookType: false,
+			cookTypes: [], //烹调方式集合
 			unitList: [],
 			dietLayout: 'grid',
 			sportLayout: 'grid', //grid,list
-			nutrientsChartOption: {},
+			nutrientsChartOption: {
+				option: {
+					color: ['#92d050', '#f79646', '#4f81bd'],
+					title: { text: '' },
+					legend: { data: ['已选', '超标部分', 'NRV%达标线'] },
+					grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
+					xAxis: [
+						{
+							type: 'category',
+							data: ['蛋白', '脂肪', '碳水', 'VA', 'VE', 'VB1', 'B2', '烟酸', '叶酸', 'VC', '钙', '磷', '镁', '钾', '铁', '锌', '硒', '铜', '锰'],
+							axisLabel: { rotate: 70, interval: 0, fontSize: 10 }
+						}
+					],
+					yAxis: [
+						{
+							type: 'value',
+							max: function(value) {
+								return value.max + 20;
+							},
+							axisLabel: { formatter: '{value}%' }
+						}
+					],
+					series: [
+						{ name: '已选', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
+						{ name: '超标部分', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
+						{ name: 'NRV%达标线', data: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100], type: 'line', stack: false }
+					]
+				}
+			},
 			currentDietChartData: {},
 			currentUnitIndex: 0,
 			showUserList: false,
@@ -999,6 +1059,9 @@ export default {
 				],
 				yAxis: [
 					{
+						max: function(value) {
+							return value.max + 20;
+						},
 						type: 'value',
 						axisLabel: {
 							formatter: `{value}%`
@@ -1114,6 +1177,9 @@ export default {
 				],
 				yAxis: [
 					{
+						max: function(value) {
+							return value.max + 20;
+						},
 						type: 'value',
 						axisLabel: {
 							formatter: `{value}%`
@@ -1129,6 +1195,12 @@ export default {
 			this.nutrientsChartOption = result;
 			return result;
 		},
+
+		chooseCookType(e) {
+			// 选择食物烹调方式
+			this.currentRecord.cook_method = e.value;
+			this.isShowCookType = false;
+		},
 		checkUnit(item, index) {
 			// 切换单位
 			this.currentUnitIndex = index;
@@ -1141,6 +1213,15 @@ export default {
 			// this.currentRecord.energy = currentUnit.amount / 100;
 			this.buildCurrenDietChartOption();
 		},
+		async getCookTypes() {
+			let colVs = await this.getServiceV2('srvhealth_diet_contents_select', 'list', 'list', 'health');
+			let colData = colVs.srv_cols;
+			colData.forEach(item => {
+				if (item.columns === 'cook_method') {
+					this.cookTypes = item.option_list_v2;
+				}
+			});
+		},
 		async getFoodUnit(item) {
 			// 查找当前食物的单位
 			let url = this.getServiceUrl('health', 'srvhealth_food_unit_amount_estimate_select', 'select');
@@ -1152,14 +1233,14 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			let unitList = [];
-			if(item.unit!=='g'){
-				let basicUnit = this.deepClone(item)
-				basicUnit.unit = 'g'
-				basicUnit.amount = 1
-				basicUnit.energy = item.energy*100/item.unit_weight_g
-				basicUnit.unit_weight_g=100
+			if (item.unit !== 'g') {
+				let basicUnit = this.deepClone(item);
+				basicUnit.unit = 'g';
+				basicUnit.amount = 1;
+				basicUnit.energy = (item.energy * 100) / item.unit_weight_g;
+				basicUnit.unit_weight_g = 100;
 				unitList.push(basicUnit);
-			}else{
+			} else {
 				unitList.push(item);
 			}
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
@@ -1262,6 +1343,9 @@ export default {
 						type: 'category'
 					},
 					yAxis: {
+						max: function(value) {
+							return value.max + 20;
+						},
 						type: 'value'
 					},
 					series: []
@@ -1712,7 +1796,8 @@ export default {
 						amount: dietInfo.amount,
 						energy: dietInfo.energy,
 						unit_weight_g: dietInfo.unit_weight_g,
-						unit: dietInfo.unit
+						unit: dietInfo.unit,
+						cook_method: dietInfo.cook_method
 					}
 				];
 			}
@@ -2094,6 +2179,7 @@ export default {
 		},
 		async getDietRecord(chooseDate = null) {
 			//饮食记录
+			this.getCookTypes();
 			if (chooseDate) {
 				this.selectDate = chooseDate;
 			}
@@ -3484,6 +3570,28 @@ uni-checkbox::before {
 .cu-modal.show {
 	z-index: 999;
 }
+.cooktype-wrap {
+	display: flex;
+	flex-wrap: wrap;
+	background-color: #fff;
+	padding: 20rpx;
+	.cook-item {
+		background-color: #f1f1f1;
+		padding: 5rpx 30rpx;
+		margin-right: 20rpx;
+		margin-bottom: 20rpx;
+		border-radius: 10rpx;
+		transition: all 1s;
+		letter-spacing: 2rpx;
+		&:active {
+			transform: scale(1.2);
+		}
+		&.active-cook-item {
+			background-color: #007aff;
+			color: #fff;
+		}
+	}
+}
 .current-diet-detail {
 	width: 100vw;
 	overflow: scroll;
@@ -3613,6 +3721,17 @@ uni-checkbox::before {
 				}
 			}
 		}
+		.cook-type-box {
+			width: 100%;
+			display: flex;
+			padding: 20rpx;
+			flex-wrap: wrap;
+			align-items: center;
+			.current-cook-type {
+				color: #007aff;
+				padding: 0 10rpx;
+			}
+		}
 		.unit-box {
 			width: 100%;
 			display: flex;
@@ -3655,7 +3774,8 @@ uni-checkbox::before {
 		// height: 150rpx;
 		margin-bottom: 100rpx;
 		.btn {
-			padding: 10rpx 30rpx;
+			padding: 15rpx 30rpx;
+			letter-spacing: 2px;
 			border-radius: 10rpx;
 			font-size: 28rpx;
 			flex: 1;

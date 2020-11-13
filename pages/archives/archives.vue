@@ -2,7 +2,7 @@
 	<view class="health-archive-wrap">
 		<view class="top text-bold">
 			<view class="left">
-				<view class="avatar" @click="showUserListPopup = true"><u-avatar class="avatar" :src="avatarUrl" size="60"></u-avatar></view>
+				<view class="avatar" @click="showUserListPopup = true"><image class="avatar" :src="avatarUrl"></image></view>
 				<view class="user-name" @click="showUserListPopup = true">{{ currentUser.name }}</view>
 				<view class="switch-icon cuIcon-right" @click="showUserListPopup = true"></view>
 				<view class="tag-box" @click="showUserHealtManagePopup = true">
@@ -12,23 +12,21 @@
 			<view class="right" @click="showUserHealtManagePopup = true" v-if="selectedTags.length === 0">健康标签管理</view>
 		</view>
 		<view class="health-overall-score">
-			<!-- <view class="title">健康分数</view> -->
 			<view class="content">
-				<view class="score-item">
-					<text class="label">健康分</text>
+				<view class="score-item" @click="toPages('score-compose')">
+					<text class="label">整体健康分</text>
 					<text class="value text-blue">86</text>
-					<!-- 	<view class="thend">
-						<text class="cuIcon-pullup text-white"></text>
-						<text>2分</text>
+					<view class="trend">
+						<view class="cuIcon-refresharrow text-blue text-icon"></view>
+						<text class="text">较上次评测增加两分</text>
+						<!-- <text class="cuIcon-forwardfill text-blue"></text> -->
 					</view>
-					<text>上次更新 2020年11月6日</text> -->
 				</view>
-				<!-- <text class="separator">/</text> -->
 				<view class="score-item" @click="toPages('basic-info')">
-					<text class="label">信息完整度</text>
-					<text class="value  text-orange">
-						32
-						<text class="ratio">%</text>
+					<text class="label">今日健康分</text>
+					<text class="value  text-cyan">
+						64
+						<text class="ratio"></text>
 					</text>
 				</view>
 			</view>
@@ -39,7 +37,7 @@
 		</view>
 		<view class="health-archive-item health-score">
 			<view class="subtitle">
-				<text class="title-text">今日健康指数</text>
+				<text class="title-text">近日健康指数</text>
 				<view class="title-action" @click="navPages('history')">
 					<text class="cuIcon-time"></text>
 					<text class="see-histroy">查看历史</text>
@@ -236,6 +234,9 @@ export default {
 				case 'basic-info':
 					url = '/questionnaire/couple/couple';
 					break;
+				case 'score-compose':
+					url = '/archivesPages/healthCompose/healthCompose';
+					break;
 			}
 			if (!url) {
 				// uni.navigateTo({
@@ -332,11 +333,6 @@ export default {
 				url: '/questionnaire/couple/couple'
 			});
 		},
-		// toOldHome() {
-		// 	uni.navigateTo({
-		// 		url: '/archivesPages/old-home/old-home'
-		// 	});
-		// },
 		getavatarUrl(fileNo) {
 			if (fileNo) {
 				return this.$api.downloadFile + fileNo + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
@@ -443,7 +439,7 @@ export default {
 			}
 			// #endif
 			if (!userInfo || !uni.getStorageSync('isLogin')) {
-				// 未登录
+				// 未登录 h5跳转到登录页,小程序端进行静默登录
 				// #ifdef MP-WEIXIN
 				const result = await wx.login();
 				if (result.code) {
@@ -451,6 +447,11 @@ export default {
 					await this.wxLogin({ code: result.code });
 					await this.initPage();
 				}
+				// #endif
+				// #ifdef H5
+				uni.navigateTo({
+					url: '/publicPages/accountExec/accountExec'
+				});
 				// #endif
 			} else {
 				this.isLogin = true;
@@ -465,17 +466,6 @@ export default {
 	},
 	onShow() {
 		this.initPage();
-	},
-	async onLoad() {
-		// if (chartOption) {
-		// 	this.chartOption = chartOption;
-		// }
-		// uni.setTabBarStyle({
-		//   color: '#333',
-		//   selectedColor: '#fff',
-		//   backgroundColor: '#0e1327',
-		//   borderStyle: 'white'
-		// })
 	}
 };
 </script>
@@ -596,6 +586,7 @@ export default {
 				// border: 1px solid #f1f1f1;
 				background-color: #fff;
 				box-shadow: 4px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+				position: relative;
 				&:last-child {
 					margin-right: 0;
 				}
@@ -608,11 +599,20 @@ export default {
 				.value {
 					font-size: 150rpx;
 				}
-				.ratio {
-					font-size: 50rpx;
-				}
-				.thend {
-					font-size: 20rpx;
+				.trend {
+					font-size: 30rpx;
+					position: absolute;
+					bottom: 10%;
+					left: 10%;
+					.text-icon{
+						display: inline-block;
+						transform: rotate(180deg) scale(1, 1.5);
+					}
+					.text{
+						transform: rotate(0) scale(1);
+						font-size: 24rpx;
+						color: #999;
+					}
 				}
 			}
 		}

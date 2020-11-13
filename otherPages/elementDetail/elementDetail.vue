@@ -1012,7 +1012,8 @@ export default {
 		}
 		.delete-bar {
 			flex: 1;
-			padding: 10rpx 20rpx;
+			padding: 15rpx 30rpx;
+			letter-spacing: 2px;
 			color: #999;
 			border-top: 1px solid #f1f1f1;
 			display: flex;

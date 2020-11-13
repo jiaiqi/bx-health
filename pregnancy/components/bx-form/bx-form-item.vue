@@ -9,8 +9,8 @@
 			<!-- 图片描述 -->
 			<block class="img-explain" v-if="fieldData.option_img_explain">
 				<view class="option_img_explain" @click="showOption_img = !showOption_img">
-					<u-icon name="play-right-fill" color="#666" size="28" v-if="!showOption_img"></u-icon>
-					<u-icon name="arrow-down-fill" color="#666" size="28" v-if="showOption_img"></u-icon>
+<!-- 					<u-icon name="play-right-fill" color="#666" size="28" v-if="!showOption_img"></u-icon>
+					<u-icon name="arrow-down-fill" color="#666" size="28" v-if="showOption_img"></u-icon> -->
 					<text class="margin-left-xs">图片描述</text>
 				</view>
 				<u-image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></u-image>

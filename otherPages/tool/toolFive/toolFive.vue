@@ -30,10 +30,12 @@
 			<view class="tag">
 				<view class="name">
 					<view class="">{{clickitem.title}}</view>
-					<u-icon name="tags-fill" color="#2979ff" size="28"></u-icon>
+					<text class="cuIcon-tagfill" color="#2979ff" size="28"></text>
+					<!-- <u-icon name="tags-fill" color="#2979ff" size="28"></u-icon> -->
 				</view>
 				<view class="tags" v-for="(item,index) in clickitem.tags">
-					<u-tag  :text="item.title"  shape="circle" size="mini" mode="dark" :type="item.color" />
+					<text class="cu-tag circle" >{{item.title}}</text>
+					<!-- <u-tag :text="item.title"  shape="circle" size="mini" mode="dark" :type="item.color" /> -->
 				</view>
 			</view>
 		</view>

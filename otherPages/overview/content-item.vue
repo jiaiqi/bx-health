@@ -81,9 +81,6 @@ export default {
 		}
 	},
 	created() {
-		// this.$bus.$on('questionnaireData', this.setReason);
-		// uni.$on('questionnaireData', this.setReason);
-		// this.contentData = this.deepClone(this.content);
 	},
 	watch: {
 		'content.list': {

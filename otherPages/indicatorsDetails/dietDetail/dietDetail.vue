@@ -4,7 +4,8 @@
 			<picker class="date-picker" mode="date" :value="date" :start="startDate" :end="endDate" @change="bindDateChange">
 				<view class="uni-input">
 					<text class="u-margin-10">{{ date }}</text>
-					<u-icon name="arrow-down-fill" color="#333" size="28"></u-icon>
+					<!-- <u-icon name="arrow-down-fill" color="#333" size="28"></u-icon> -->
+					<text class="cuIcon-triangledownfill" color="#333" size="28"></text>
 				</view>
 			</picker>
 		</view>

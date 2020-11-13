@@ -37,16 +37,14 @@
 							<text class="unit">kg</text>
 						</view>
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'sleep'">
-							<text class="digital"></text>
-							<text class="unit">小时</text>
+							<text class="digital">{{ historyRecord[0].sleep_time.slice(0,5) }}</text>
+							<text class="unit">(时长)</text>
 						</view>
-
 						<view class="date" v-if="historyRecord && historyRecord.length > 0">
 							<text class="cuIcon-time margin-right-xs"></text>
 							{{ historyRecord[0].create_time.slice(0, 16) }}
 						</view>
-						<button class="button" @click="toPages('pressure')" v-if="pageType === 'bp'">记录数据</button>
-						<button class="button" @click="toPages('weight')" v-if="pageType === 'weight'">记录数据</button>
+						<button class="nav-button" @click="toPages(pageType)">记录数据</button>
 					</view>
 					<view class="bmi-box" v-if="pageType === 'weight'">
 						<view class="bmi-box-item" v-if="bmi">
@@ -70,18 +68,18 @@
 								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
 								<image src="../static/icon/tizhong.png" mode="" class="icon" v-if="pageType === 'weight'"></image>
 								<view class="item">
-									<text class="digital" v-if="pageType === 'bp' && item && item.systolic_pressure">{{ item.systolic_pressure }}</text>
-									<text class="digital" v-if="pageType === 'weight'">{{ item.weight }}</text>
+									<text class="digital" v-if="pageType === 'bp' && item && item.systolic_pressure">{{ item.systolic_pressure ? item.systolic_pressure : '-' }}</text>
+									<text class="digital" v-if="pageType === 'weight'">{{ item.weight ? item.weight : '-' }}</text>
+									<text class="digital" v-if="pageType === 'sleep'">{{ item.sleep_time ? item.sleep_time.slice(0, 5) : '-' }}</text>
 								</view>
-
 								<view class="item" v-if="pageType === 'bp' && item && item.diastolic_pressure">
 									/
-									<text class="digital">{{ item.diastolic_pressure }}</text>
+									<text class="digital">{{ item.diastolic_pressure ? item.diastolic_pressure : '-' }}</text>
 								</view>
 								<view class="unit">
 									<text v-if="pageType === 'bp'">mmHg</text>
 									<text v-if="pageType === 'weight'">kg</text>
-									<text v-if="pageType === 'sleep'">小时</text>
+									<text v-if="pageType === 'sleep'" >（时长）</text>
 								</view>
 								<view class="item">
 									<text>{{ item.create_time.slice(0, 16) }}</text>
@@ -279,6 +277,9 @@ export default {
 			}
 			this.showPopup = false;
 			if (e !== 'food' && e !== 'sport') {
+				if (e === 'pressure') {
+					e = bp;
+				}
 				uni.navigateTo({
 					url: '/otherPages/otherIndicator/otherIndicator?type=' + e
 				});
@@ -413,6 +414,9 @@ export default {
 					splitLine: {
 						// 网格线
 						show: true
+					},
+					max: function(value) {
+						return value.max + 20;
 					}
 				},
 				series: []
@@ -531,7 +535,8 @@ export default {
 		async getChartData(type) {
 			let serviceObj = {
 				weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
-				bloodPressure: 'srvhealth_blood_pressure_record_select' // 血压
+				bloodPressure: 'srvhealth_blood_pressure_record_select', // 血压
+				sleep: 'srvhealth_sleep_record_select' // 血压
 			};
 			let serviceName = serviceObj[type];
 			let url = this.getServiceUrl('health', serviceName, 'select');
@@ -1180,17 +1185,16 @@ export default {
 					color: #999;
 					fons: 24rpx;
 				}
-
-				.button {
-					background-color: #0bc99d;
-					color: #fff;
-					border-radius: 50rpx;
-					margin-top: 50rpx;
-					width: 200rpx;
-					height: 50rpx;
-					line-height: 50rpx;
-					font-size: 28rpx;
-				}
+			}
+			.nav-button {
+				background-color: #0bc99d;
+				color: #fff;
+				border-radius: 50rpx;
+				margin-top: 50rpx;
+				width: 200rpx;
+				height: 50rpx;
+				line-height: 50rpx;
+				font-size: 28rpx;
 			}
 			.bmi-box {
 				width: 100%;
@@ -1247,6 +1251,10 @@ export default {
 								text-align: right;
 								font-weight: normal;
 								color: #999;
+							}
+							.label{
+								font-size: 28rpx;
+								margin: 10rpx;
 							}
 							.digital {
 								font-size: 40rpx;

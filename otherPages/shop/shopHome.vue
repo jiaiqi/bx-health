@@ -295,6 +295,10 @@
 					colName:"restaurant_no",
 					ruleType:"eq",
 					value:this.rest_no
+				},{
+					colName:"owner",
+					ruleType:"eq",
+					value:"店铺"
 				}]
 				uni.navigateTo({
 				  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))

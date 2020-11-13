@@ -33,8 +33,10 @@
 					</scroll-view>
 				</view>
 				<view class="symptom-bot-wrap-top-r">
-					<u-icon :top="4" v-if="!menuIsShow" size="48" @click="showMore('open')" name="list"></u-icon>
-					<u-icon :top="4" v-else size="48" @click="showMore('close')" name="close"></u-icon>
+					<!-- <u-icon :top="4" v-if="!menuIsShow" size="48" @click="showMore('open')" name="list"></u-icon> -->
+					<text  v-if="!menuIsShow" size="48" @click="showMore('open')" class="cuIcon-sort"></text>
+					<text v-else size="48" @click="showMore('close')" class="cuIcon-close"></text>
+					<!-- <u-icon :top="4" v-else size="48" @click="showMore('close')" name="close"></u-icon> -->
 				</view>
 			</view>
 		</view>
