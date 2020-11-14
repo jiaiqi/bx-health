@@ -29,7 +29,7 @@
 					<view class="record-title">最新数据</view>
 					<view class="record-data">
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'bp'">
-							<text class="digital">{{ historyRecord[0].systolic_pressure }} / {{ getFixedNum(historyRecord[0].diastolic_pressure) }}</text>
+							<text class="digital">{{ getFixedNum(historyRecord[0].systolic_pressure) }} / {{ getFixedNum(historyRecord[0].diastolic_pressure) }}</text>
 							<text class="unit">毫米汞柱</text>
 						</view>
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'weight'">

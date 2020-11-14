@@ -1211,5 +1211,12 @@ export default {
 			return str.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi, '').replace(/<[^>]+?>/g, '').replace(
 				/\s+/g, ' ').replace(/ /g, ' ').replace(/>/g, ' ')
 		}
+		Vue.prototype.getFixedNum = (num)=>{
+			if(num){
+				return Number(num.toFixed(1))
+			}else{
+				return 0
+			}
+		}
 	}
 }

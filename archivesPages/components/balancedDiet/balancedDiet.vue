@@ -260,7 +260,7 @@
 					</view>
 					<view class="table grid-layout" v-if="sportsRecord && sportLayout === 'grid'">
 						<view class="diet-item" v-for="(item, index) in sportsRecord" :key="index" @click="clickSportRecordItem(item)">
-							<image  class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></image>
+							<image class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></image>
 							<view class="diet-detail">
 								<view class="name">{{ item.name }}</view>
 								<view class="number">
@@ -423,7 +423,7 @@
 						:key="c"
 						class="cook-item"
 						:class="{
-							'active-cook-item': currentRecord && currentRecord.cook_method && currentRecord.cook_method===cook.value
+							'active-cook-item': currentRecord && currentRecord.cook_method && currentRecord.cook_method === cook.value
 						}"
 					>
 						<text>{{ cook.value }}</text>
@@ -467,6 +467,10 @@ export default {
 					color: ['#92d050', '#f79646', '#4f81bd'],
 					title: { text: '' },
 					legend: { data: ['已选', '超标部分', 'NRV%达标线'] },
+					tooltip: {
+						show: true,
+						trigger: 'axis'
+					},
 					grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
 					xAxis: [
 						{
@@ -489,7 +493,37 @@ export default {
 					]
 				}
 			},
-			currentDietChartData: {},
+			currentDietChartData: {
+				option: {
+					color: ['#92d050', '#f79646', '#4f81bd'],
+					title: { text: '' },
+					legend: { data: ['其他食物', '当前食物', 'NRV%达标线'] },
+					tooltip: {
+						show: true,
+						trigger: 'axis'
+					},
+					grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
+					xAxis: [
+						{
+							type: 'category',
+							data: ['蛋白', '脂肪', '碳水', 'VA', 'VE', 'VB1', 'B2', '烟酸', '叶酸', 'VC', '钙', '磷', '镁', '钾', '铁', '锌', '硒', '铜', '锰'],
+							axisLabel: { rotate: 70, interval: 0, fontSize: 10 }
+						}
+					],
+					yAxis: [
+						{
+							type: 'value',
+							max: 120,
+							axisLabel: { formatter: '{value}%' }
+						}
+					],
+					series: [
+						{ name: '其他食物', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
+						{ name: '当前食物', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
+						{ name: 'NRV%达标线', data: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100], type: 'line', stack: false }
+					]
+				}
+			},
 			currentUnitIndex: 0,
 			showUserList: false,
 			backTextStyle: {
@@ -1011,22 +1045,30 @@ export default {
 				});
 				switch (le) {
 					case '其它食物':
-						obj.data = eleArr.map(item => {
-							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							// item.value = item.value - ratio * currentDiet[item.key];
-							item.value = item.value - currentDiet[item.key];
-							let num = (item.value * 100) / Number(item.EAR);
-							num = Math.abs(parseFloat(num.toFixed(1)));
-							if (typeof num === 'number' && num.toString() === 'NaN') {
+						obj.data = eleArr.map(ele => {
+							let cur = this.deepClone(ele);
+							if (cur.name === '蛋白') {
+								debugger;
 							}
+							let ratio = currentDiet.unit_weight_g / 100;
+							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
+							let num = (val * 100) / Number(cur.EAR);
+							num = parseFloat(num.toFixed(1));
+							// num = Math.abs(parseFloat(num.toFixed(1)));
 							return num;
 						});
 						break;
 					case '当前食物':
-						obj.data = eleArr.map(item => {
-							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
-							num = Math.abs(parseFloat(num.toFixed(1)));
+						obj.data = eleArr.map(ele => {
+							let cur = this.deepClone(ele);
+							if (cur.name === '蛋白') {
+								debugger;
+							}
+							let ratio = currentDiet.unit_weight_g / 100;
+							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
+							let num = (val * 100) / Number(cur.EAR);
+							num = parseFloat(num.toFixed(1));
+							// num = Math.abs(parseFloat(num.toFixed(1)));
 							return num;
 						});
 						break;
@@ -1176,6 +1218,10 @@ export default {
 				},
 				legend: {
 					data: legendData
+				},
+				tooltip: {
+					show: true,
+					trigger: 'axis'
 				},
 				grid: {
 					left: '3%',
@@ -2073,7 +2119,7 @@ export default {
 			return res.data.data;
 		},
 		async buildDietData() {
-			let data = this.dietRecord;
+			let data = this.deepClone(this.dietRecord);
 			let strArr = [];
 			data.forEach(item => {
 				item['editable'] = false;
@@ -2086,7 +2132,10 @@ export default {
 					a.forEach(food => {
 						data.forEach(re => {
 							if (food.name === re.name) {
+								let ratio = re['unit_weight_g'] / food['unit_amount'];
 								food['amount'] = food['amount'] ? food['amount'] + re.amount : re.amount;
+								food['amount'] = ratio * food['amount'];
+								food['unit'] = re['unit'] ? re['unit'] : food['unit'];
 							}
 						});
 					});
@@ -2100,6 +2149,9 @@ export default {
 									for (let a in fod) {
 										if (mat.key && mat.key == a) {
 											mat.value = Number(mat.value) + Number(fod.amount) * Number(fod[a]);
+											if (mat.name === '蛋白') {
+												// debugger;
+											}
 											/**
 											 * 共计 mat.EAR*2 + mat.UL-mat.EAR --> mat.EAR+mat.UL
 											 * 左/右： mat.EAR
