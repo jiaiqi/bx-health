@@ -14,25 +14,19 @@
 			:key="index"
 		>
 			<view class="page-slide">
-				<swiper class="screen-swiper item-box" :height="300" :class="dotStyle?'square-dot':'round-dot'" :indicator-dots="true" :circular="true"
-				 :autoplay="true" interval="5000" duration="500"
-				 v-if="pageItem.div_type === 'carousel'">
-					<swiper-item v-for="(item,index) in pageItem.carousel" :key="index">
-						<image :src="item.picUrl" mode="scaleToFill"></image>
-					</swiper-item>
-				</swiper>
-			<!-- 	<u-swiper
-					:list="pageItem.carousel"
-					border-radius="10"
-					interval="3000"
-					duration="500"
-					img-mode="scaleToFill"
-					:effect3d="false"
+				<swiper
+					class="screen-swiper item-box"
 					:height="300"
-					:name="'picUrl'"
-					class="item-box"
+					:class="'round-dot'"
+					:indicator-dots="true"
+					:circular="true"
+					:autoplay="true"
+					interval="5000"
+					duration="500"
 					v-if="pageItem.div_type === 'carousel'"
-				></u-swiper> -->
+				>
+					<swiper-item v-for="(item, index) in pageItem.carousel" :key="index"><image :src="item.picUrl" mode="scaleToFill"></image></swiper-item>
+				</swiper>
 			</view>
 			<view class="page-menu" v-if="pageItem.div_type === 'buttons'">
 				<view class="title">{{ pageItem.item_name }}</view>
@@ -43,7 +37,7 @@
 				>
 					<view class="swiper-item" v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
 						<view @click="skip(btn)" class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
-							<u-image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></u-image>
+							<image class="image" :src="getMenuImagePath(btn)"></image>
 							<text class="btn-name">{{ btn.dest_menu_no }}</text>
 						</view>
 					</view>
@@ -52,7 +46,7 @@
 					<swiper-item v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
 						<view class="swiper-item">
 							<view @click="skip(btn)" class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
-								<u-image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></u-image>
+								<image class="image" height="60rpx" :src="getMenuImagePath(btn)"></image>
 								<text class="btn-name">{{ btn.dest_menu_no }}</text>
 							</view>
 						</view>
@@ -69,7 +63,8 @@ export default {
 	// 通用站点首页
 	data() {
 		return {
-			pageItemList: [] // 页面项
+			pageItemList: [], // 页面项
+			code: '' // 微信登录用
 		};
 	},
 	methods: {
@@ -182,10 +177,113 @@ export default {
 					return itemList;
 				}
 			}
+		},
+		async initPage() {
+			let userInfo = uni.getStorageSync('login_user_info');
+			// #ifdef MP-WEIXIN
+			let res = await wx.getSetting();
+			if (!res.authSetting['scope.userInfo']) {
+				// 没有获取用户信息授权
+				uni.showModal({
+					title: '提示',
+					content: '请登录并授权获取用户信息后再进行查看',
+					confirmText: '去登录',
+					confirmColor: '#02D199',
+					success(res) {
+						if (res.confirm) {
+							// 确认 跳转到登录页
+							uni.navigateTo({
+								url: '/publicPages/accountExec/accountExec'
+							});
+						}
+					}
+				});
+				return;
+			}
+			// #endif
+			if (!userInfo || !uni.getStorageSync('isLogin')) {
+				// 未登录 h5跳转到登录页,小程序端进行静默登录
+				// #ifdef MP-WEIXIN
+				const result = await wx.login();
+				if (result.code) {
+					this.code = result.code;
+					await this.wxLogin({ code: result.code });
+					await this.initPage();
+				}
+				// #endif
+				// #ifdef H5
+				uni.navigateTo({
+					url: '/publicPages/accountExec/accountExec'
+				});
+				// #endif
+			}
+			if (userInfo && userInfo.user_no) {
+				this.loginUserInfo = userInfo;
+				await this.selectUserList(userInfo);
+			}
+		},
+		// 查找当前帐号建立的用户列表
+		async selectUserList(userInfo) {
+			const url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_person_info_select',
+				colNames: ['*'],
+				condition: [{ colName: 'userno', ruleType: 'eq', value: userInfo.user_no }],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'asc'
+					}
+				]
+			};
+			const res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				// 有数据
+				if (uni.getStorageSync('current_user')) {
+					res.data.data.forEach(item => {
+						if (item.name === uni.getStorageSync('current_user')) {
+							uni.setStorageSync('current_user', item.name);
+						}
+					});
+				} else {
+					uni.setStorageSync('current_user_info', res.data.data[0]);
+					uni.setStorageSync('current_user', res.data.data[0].name);
+				}
+				uni.setStorageSync('user_info_list', res.data.data);
+				return res.data.data;
+			} else if (res.data.resultCode === '0011') {
+				// 登录失效 进行静默登录
+				uni.setStorageSync('isLogin', false);
+				// #ifdef MP-WEIXIN
+				const result = await wx.login();
+				if (result.code) {
+					this.code = result.code;
+					await this.wxLogin({ code: result.code });
+					await this.initPage();
+				}
+				// #endif
+			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
+				// 没有角色 提示跳转到创建角色页面
+				uni.showModal({
+					title: '提示',
+					content: '当前账号未登记个人信息，是否跳转到信息登记页面',
+					success(res) {
+						if (res.confirm) {
+							let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+							uni.navigateTo({
+								url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
+							});
+						}
+					}
+				});
+			}
 		}
 	},
 	created() {
 		this.getPageItem();
+	},
+	onShow() {
+		this.initPage()
 	},
 	onLoad() {
 		// #ifdef MP-WEIXIN
@@ -242,8 +340,11 @@ export default {
 				display: flex;
 				flex-wrap: wrap;
 				padding: 0 calc((100% - 680rpx) / 2);
+				.image{
+					width: 60rpx;
+					height: 60rpx;
+				}
 				.swiper-button {
-					// background-color: #f1f1f1;
 					width: 150rpx;
 					height: 150rpx;
 					display: inline-flex;

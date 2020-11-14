@@ -1,13 +1,13 @@
 <template>
 	<view class="food_wrap">
-		<view class="cu-bar bg-white">
-			<!-- <view class=" text-cyan button" >取消</view> -->
+		<view  class="cu-bar bg-white food_wrap_top" :class="pageType?'':'ingredient'">
+			<view @click="clickTop('edit')" v-if="pageType" class=" button" >编辑</view>
 			<view class="date-time">
 				<view class="date-time-rq">{{ nowDate }}</view>
 				/
 				<view class="date-time-rq">{{ currTime ? currTime : nowDateTime }}</view>
 			</view>
-			<!-- <view @click="confirms" class=" text-cyan button confir-btn">确定</view> -->
+			<view @click="clickTop('add')" v-if="pageType" class=" button confir-btn">增加食材</view>
 		</view>
 
 		<view class="content">
@@ -26,6 +26,7 @@
 			</view>
 			<view class="ele-text-wrap">
 				<view class="ele-text-top-tit">
+					
 					<text @click="changeCate(item,index)" v-for="(item,index) in categoryTop" :key="index" :class="categoryTopIndex === index?'active-text-top-tit':''">{{item.name}}</text>					
 				</view>
 				<!-- <view class="ele-text-top">主要维生素含量如下：</view> -->
@@ -147,16 +148,24 @@
 						</view> 
 					</view>
 				</view>
-				<view class="uni-ec-canvas-wrap">
+				<view v-if="categoryTopIndex == 0" class="uni-ec-canvas-wrap">
 					<view class="uni-ec-canvas-top">
-						<text @click="changeApprove(item,index)" :class="currentAppr.name === item.name?'active-approve':''" v-for="(item,index) in approveData" :key="index">{{item.name}}</text>
+						<view @click="changeApprove(item,index)" v-for="(item,index) in approveData" class="uni-ec-canvas-top-item" :key="index" :class="currentAppr.name === item.name?'active-approve':''" >
+							<view class="uni-ec-canvas-top-t">
+								<text>{{item.name}}</text>
+							</view>
+							<view class="uni-ec-canvas-top-b">
+								<!-- <text>年龄:{{item.age?item.age:'??'}}</text> -->
+								<text>({{item.weight?item.weight:'??'}}kg)</text>
+							</view>
+						</view>
 					</view>
 					<view class="uni-ec-canvas-bot">
 						<!-- #ifdef MP-WEIXIN -->
-							<uniEcCanvas v-if="echartsIsShow && categoryTopIndex === 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+							<uniEcCanvas v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
 						<!-- #endif -->
 						<!-- #ifdef H5 -->
-							<uniEcharts v-if="echartsIsShow && categoryTopIndex === 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
+							<uniEcharts v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
 						<!-- #endif -->
 					</view>
 					
@@ -164,16 +173,26 @@
 			
 			</view>
 			<view class="calculate">
+				<view v-if="!currFood.meal_no" class="cook weight">
+					<view class="calculate-l">烹调方式：</view>
+					<text v-if="currentCookData" @click.stop="clickCook" :class="isCookDataChoose?'active-cook-data':''">{{currentCookData}}</text>
+					<text @click="chooseCook">更多</text>
+					<!-- <text class="lg text-gray" :class="'cuIcon-right'"></text> -->
+					<!-- <view @click="chooseCook(cooks, c)" v-for="(cooks, c) in cookData" :key="c" :class="currentCookData == cooks.value ? 'active-unit' : ''" class="unit">
+						{{cooks.value}}						
+					</view> -->
+				</view>
 				<view class="weight">
 					<view class="calculate-l">单位：</view>
 					<view @click="chooseUnit(u, ids)" v-for="(u, ids) in unitList" :key="ids" :class="currIndex == ids ? 'active-unit' : ''" class="unit">
-						{{ u.unit_amount ? u.unit_amount + u.unit : u.unit }}
-						<!-- {{ radioLabel ? (radioLabel.unit_amount ? radioLabel.unit_amount + radioLabel.unit : radioLabel.unit) : currFood.unit_amount + currFood.unit }} -->
+						{{ u.unit_amount ? u.unit_amount + u.unit : u.unit }}						
 					</view>
-					<!-- <view class="unit-change"><u-icon size="24" name="arrow-down-fill"></u-icon></view> -->
 				</view>
 			</view>
 			<view class="amount">
+				<view class="amount-left">
+					<text>数量：</text>
+				</view>
 				<view class="input-box">
 					<view class="key-left">
 						<text @click="countDietNum('-0.1')">-0.1</text>
@@ -203,6 +222,23 @@
 						</view>
 					</view>
 				</radio-group>
+			</view>
+		</view>
+		
+		<view v-if="!currFood.meal_no" class="cu-modal bottom-modal" :class="isShowCookType?'show':''">
+			<view class="cu-dialog">
+				<view class="cu-bar bg-white cook-top">
+					<view class="action text-blue" @tap="hideCookModel">取消</view>
+					<text>常见烹调方式</text>
+					<view class="action text-green" @tap="configCookFood"></view>
+				</view>
+				<view class="padding-xl">
+					<view class="cook-wrap">
+						<view @click="chooseCookFood(cook)" v-for="(cook,c) in cookData" :key="c" class="cook-item" :class="currentCookData==cook.value&&isCookDataChoose?'active-cook-item':''">
+							<text>{{cook.value}}</text>
+						</view>
+					</view>
+				</view>
 			</view>
 		</view>
 	</view>
@@ -238,18 +274,18 @@ export default {
 				type:'purity'
 			}],
 			approveData:[{
-				name:'成年男性',
+				name:'男性',
 				type:'man',
 				sex:'男',
 				age:18,
 				weight:65
 				
 			},{
-				name:'成年女性',
+				name:'女性',
 				type:'woman',
 				sex:'女',
 				age:18,
-				weight:50
+				weight:55
 			},{
 				name:'我的',
 				type:'mine',
@@ -276,13 +312,14 @@ export default {
 					key: 'protein'
 				},
 				{
-					name: '碳水化合物',
-					key: 'carbohydrate'
-				},
-				{
 					name: '脂肪',
 					key: 'axunge'
 				},
+				{
+					name: '碳水化合物',
+					key: 'carbohydrate'
+				},
+				
 				{
 					name: 'VA',
 					key: 'vitamin_a'
@@ -300,21 +337,30 @@ export default {
 					key: 'vitamin_b2'
 				},
 				{
-					name: 'VB3',
+					name: '烟酸',
 					key: 'vitamin_b3'
+				},
+				{
+					name: '叶酸',
+					key: 'folic_acid'
+				},
+				{
+					name: 'VC',
+					key: 'vitamin_c'
 				},
 				{
 					name: '钙',
 					key: 'element_ca'
 				},
 				{
-					name: '镁',
-					key: 'element_mg'
-				},
-				{
 					name: '磷',
 					key: 'element_p'
 				},
+				{
+					name: '镁',
+					key: 'element_mg'
+				},
+				
 				{
 					name: '钾',
 					key: 'element_k'
@@ -325,6 +371,10 @@ export default {
 				},
 				{
 					name: '锌',
+					key: 'element_zn'
+				},
+				{
+					name: '硒',
 					key: 'element_se'
 				},
 				{
@@ -339,9 +389,9 @@ export default {
 			echartsIsShow: false,
 			stepData: {
 				option: {
-					color: ['#92d050', '#4f81bd', '#f79646'],
+					color: ['#f79646', '#4f81bd'],
 					title: {
-						text: 'NRV占比'
+						// text: 'NRV占比'
 					},
 					tooltip: {
 						trigger: 'axis',
@@ -409,20 +459,39 @@ export default {
 							name: '食物含量',
 							type: 'bar',
 							stack: '总数',
-							data: []
+							data: [],
+						// 	itemStyle: {
+						// 	normal: {
+						// 		label: {
+						// 			show: true, //开启显示
+						// 			position: 'top', //在上方显示
+						// 			textStyle: { //数值样式
+						// 				color: 'black',
+						// 				fontSize: 16
+						// 			}
+						// 		}
+						// 	}
+						// },
 						}
 					]
 				}
 			},
 			currIndex: '', //选择单位index
 			userInfo: '',
-			result: ''
+			result: '',
+			cookData:[], //烹饪方式
+			currentCookData:null,
+			isShowCookType:false,
+			pageType:'',
+			currFoodNo:null,
+			isCookDataChoose:false
 		};
 	},
 	onShow() {
 		this.approveData[2].sex = this.userInfo.sex
 		this.approveData[2].age = this.age
 		this.approveData[2].weight = this.userInfo.weight
+		this.getCurrentFood(this.currFoodNo)
 	},
 	onLoad(option) {
 		if (uni.getStorageSync('current_user_info')) {
@@ -436,17 +505,22 @@ export default {
 			}
 		}
 		console.log('option-----', option.currFood);
+		if(option.type){
+			this.pageType = option.type
+		}
 		let query = JSON.parse(decodeURIComponent(option.currFood));
 		if (query.hdate) {
 			this.nowDate = query.hdate;
 		}
-		this.currFood = JSON.parse(decodeURIComponent(option.currFood));
-		if (this.currFood) {
+		this.currFoodNo = query;
+		
+		
+		// if (this.currFood) {
 			this.currentAppr = this.approveData[0]
-			this.assembleData();
-			this.selectCurrFoodUnit(this.currFood);
+			this.getCurrentFood(this.currFoodNo)
+			
 			// this.getNutrientRecommended()
-		}
+		// }
 	},
 	computed: {
 		age() {
@@ -457,6 +531,83 @@ export default {
 		}
 	},
 	methods: {
+		async getCurrentFood(item){
+			let self = this;
+			let serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
+			if(!item.meal_no){
+				serviceName = 'srvhealth_diet_contents_select'
+			}
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: serviceName,
+				colNames: ['*'],
+				condition:[{
+					colName:"id",
+					ruleType:"eq",
+					value:item.id
+				}]
+			};
+			let res = await this.$http.post(url, req);
+			let urls = self.$api.downloadFile + res.data.data[0].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +"&thumbnailType=fwsu_100";
+			this.$set(res.data.data[0], 'imgurl', urls);
+			this.currFood = res.data.data[0]
+			if(!this.currFood.meal_no){
+				this.getFoodsV2()
+			}
+			this.assembleData();
+			this.selectCurrFoodUnit(this.currFood);
+		},
+		hideCookModel(){
+			this.isShowCookType = false
+		},
+		configCookFood(){
+			this.isShowCookType = false
+		},
+		async getFoodsV2(){
+			let self = this
+			let colVs = await this.getServiceV2('srvhealth_diet_contents_select', 'list', 'list', 'health');
+			let colData = colVs.srv_cols
+			colData.forEach(item=>{
+				if(item.columns === 'cook_method'){
+					self.cookData = item.option_list_v2
+					this.currentCookData = self.currFood.cook_method.split(',')[0]
+				}
+			})
+		},
+		clickTop(type){
+			if(type === 'edit'){
+				let cond = [{
+					colName:"id",
+					ruleType:"in",
+					value:this.currFood.id
+				}]
+				let params = {
+				  type: 'update',
+				  condition: cond,
+				  serviceName: 'srvhealth_mixed_food_nutrition_contents_update',
+				  defaultVal: this.currFood
+				};
+				uni.navigateTo({
+				  url: '/publicPages/form/form?type=update&params='+ encodeURIComponent(JSON.stringify(params)) 
+				});
+			}else if(type === 'add'){
+				// let cond = [{
+				// 	colName:"unit",
+				// 	ruleType:"eq",
+				// 	value:''
+				// },{
+				// 	colName:"meal_no",
+				// 	ruleType:"eq",
+				// 	value:this.currFood.meal_no
+				// }]
+				uni.navigateTo({
+					url:'/otherPages/shop/foodMaterial?itemFood=' + encodeURIComponent(JSON.stringify(this.currFood))
+				})
+				// uni.navigateTo({
+				//   url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
+				// });	
+			}
+		},
 		/*点击切换图表顶部类型**/
 		changeApprove(item,index){
 			if(item.type === 'mine' && (!item.age || !item.sex)){
@@ -500,13 +651,17 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
+			let age = self.currentAppr.age
+			if(age < 18){
+				age = 18
+			}
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-				let result = res.data.data.filter(item => {
+				let result = res.data.data.filter(item => {					
 					if ((item.sex && item.sex.indexOf(self.currentAppr.sex) !== -1) || !item.sex) {
-						if (item.age_start && item.age_end) {
-							return self.currentAppr.age >= item.age_start && self.currentAppr.age < item.age_end;
+						if (item.age_start && item.age_end) {							
+							return age >= item.age_start && age < item.age_end;
 						} else if (item.age_start && !item.age_end) {
-							return self.currentAppr.age >= item.age_start;
+							return age >= item.age_start;
 						} else if (!item.age_start && !item.age_end) {
 							return true;
 						} else {
@@ -514,26 +669,24 @@ export default {
 						}
 					}
 				});
+				// console.log("res-----",)
 				this.result = result;
 				let endArr = [];
 				let currFood = this.currFood;
 				let nutrientData = this.nutrientData;
 				nutrientData.forEach(nut => {
 					let num = 0;
-					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'B3') {
+					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === '烟酸') {
 						endArr.push(currFood[nut.key]);
 					}
-					result.forEach(re => {						
+					result.forEach(re => {			
 						if (nut.name === re.nutrient) {
 							num = ((Number(currFood[nut.key]) / Number(re.val_rni)) * 100).toFixed(1);			
 							if(nut.name === '蛋白质'){
-								num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
+								num = Number(((Number(currFood[nut.key]) / Number(re.val_rni)) * 100 / self.currentAppr.weight)).toFixed(1)
 							}
-							endArr.push(Number(num));
-							
-						}
-						
-						
+							endArr.push(Number(num));						
+						}												
 					});
 				});
 				// result.forEach(item => {
@@ -603,16 +756,17 @@ export default {
 			});
 			let currData = await this.getNutrientRecommended();
 			console.log('currData======>', currData);
-			option.series[0].data = currData.map(ser => {
-				return ser;
-			});
+			// option.series[0].data = currData.map(ser => {
+			// 	return ser;
+			// });
 			if(!option.series[1] ){
 				option.series.push(obj);
 			}
 			if(this.value1 == 0){
 				this.countDietNum('+1');
+			}else{
+				this.originalData()
 			}
-			this.echartsIsShow = true;
 		},
 		/* 点击取消*/
 		showBottomModal() {
@@ -627,6 +781,19 @@ export default {
 		/*关闭弹窗**/
 		RadiohideModal() {
 			this.modalName = '';
+		},
+		chooseCook(){
+			console.log("点击烹调方式")
+			this.isShowCookType = true
+		},
+		clickCook(){
+			this.isCookDataChoose = !this.isCookDataChoose
+		},
+		chooseCookFood(item){
+			this.currentCookData = item.value
+			this.isCookDataChoose = true
+			this.isShowCookType = false
+			
 		},
 		/*选择单位*/
 		chooseUnit(item, i) {
@@ -673,6 +840,7 @@ export default {
 		/* 点击食物选择数字加减**/
 		countDietNum(num) {
 			let self = this;
+			this.isCountDiet = true
 			let value = Number(this.value1);
 			if (value >= 0) {
 				if (num === '-0.1') {
@@ -703,55 +871,67 @@ export default {
 				}
 				if (value == 0) {
 					this.heatNum = 0;
+				}		
+				this.originalData()
+			}
+		},
+		originalData(){
+			let self = this
+			let addObj = {
+				name: '超标部分',
+				type: 'bar',
+				stack: '总数',
+				data: []
+			};
+			let addData = [];
+			let option = this.stepData.option;
+			let currFood = this.currFood;
+			let nutrientData = this.nutrientData;
+			let result = this.result;
+			nutrientData.forEach(nut => {
+				let num = 0;
+				let a = 0
+				// if (nut.name === '碳水化合物' || nut.name === 'VB3') {
+					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === '烟酸'){
+					addData.push(currFood[nut.key] * Number(self.choiceNum));
 				}
-				
-				let addObj = {
-					name: '超标部分',
-					type: 'bar',
-					stack: '总数',
-					data: []
-				};
-				let addData = [];
-				let option = this.stepData.option;
-				let currFood = this.currFood;
-				let nutrientData = this.nutrientData;
-				let result = this.result;
-				nutrientData.forEach(nut => {
-					let num = 0;
-					// if (nut.name === '碳水化合物' || nut.name === 'B3') {
-					// 	addData.push(currFood[nut.key] * Number(self.choiceNum));
-					// }
-					result.forEach(re => {
-						if (nut.name === re.nutrient) {
-							num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100);
-							if(nut.name === '蛋白质'){
-								// num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
-								num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100)								
+				result.forEach(re => {
+					
+					if (nut.name === re.nutrient) {
+						num =(((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100);
+						if(nut.name === '蛋白质'){
+							// num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
+							num = (((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100)								
+						}
+						num = parseInt(num*10) / 10												
+						if(re.nutrient === '叶酸'){							
+							if(a == 0){
+								addData.push(Number(num))
 							}
-							if(num > 100){
-								num  = (num - 100).toFixed(1)
-							}else{
-								num = 0
-							}
+							a++
+						}else{
 							addData.push(Number(num));
 						}
-					});
-				});
-				addObj.data = addData;
-				
-				nutrientData.forEach(ele => {
-					if (currFood[ele.key]) {
-						currFood[ele.key] = currFood[ele.key] * Number(this.choiceNum)
-						self.$set(ele, 'value', currFood[ele.key]);
-					} else {
-						self.$set(ele, 'value', 0);
+						// if(num > 100){
+						// 	num  = (num - 100).toFixed(1)
+						// }else{
+						// }
 					}
 				});
-				if (option.series[2] && option.series[2].type) {
-					option.series[2].data = addData;
+			});
+			addObj.data = addData;
+			nutrientData.forEach(ele => {
+				if (currFood[ele.key]) {
+					// currFood[ele.key] = currFood[ele.key] * Number(this.choiceNum)
+					self.$set(ele, 'value', currFood[ele.key]);
 				} else {
-					option.series.push(addObj);
+					self.$set(ele, 'value', 0);
 				}
+			});
+			if (option.series[0] && option.series[0].type) {
+				option.series[0].data = addData;
+			} else {
+				option.series.push(addObj);
 			}
 		},
 		async goBalanceDiet() {
@@ -764,7 +944,7 @@ export default {
 						htime: this.currTime ? this.currTime : this.nowDateTime,
 						name: item.name,
 						amount: item.amount,
-						unit: item.unit,
+						unit: this.radioLabel.unit?this.radioLabel.unit:item.unit,
 						energy: item.heatNum,
 						user_name: uni.getStorageSync('current_user'),
 						image: item.image,
@@ -777,6 +957,9 @@ export default {
 					} else {
 						obj['diet_contents_no'] = item.food_no;
 						obj['diret_type'] = 'diet_contents';
+						if(this.isCookDataChoose){
+							obj['cook_method'] = this.currentCookData
+						}
 					}
 					// }
 					arr.push(obj);
@@ -827,6 +1010,16 @@ export default {
 .food_wrap {
 	background-color: #f8f8f8;
 	height: 100vh;
+}
+.food_wrap_top{
+	display: flex;
+	justify-content: space-between!important;
+	font-weight: 700;
+	color: #000;
+	font-size: 30rpx;
+}
+.ingredient{
+	justify-content: center!important;
 }
 .contents {
 	// overflow: hidden;
@@ -1041,7 +1234,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-right: 20upx;
+			margin-right: 10upx;
 			border-radius: 5px;
 		}
 	}
@@ -1053,7 +1246,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-left: 20upx;
+			margin-left: 10upx;
 			border-radius: 5px;
 		}
 	}
@@ -1206,16 +1399,19 @@ export default {
 	// padding: 20upx 0;
 	.ele-text-top-tit{
 		display: flex;
-		margin-bottom: 15rpx;
+		margin-bottom: 30rpx;
 		text{
+			font-size: 30rpx;
 			padding: 8rpx 20rpx;
-			border: 1px solid #ccc;
+			border-bottom: 1px solid transparent;
 			margin-right: 20rpx;
-			border-radius: 30rpx;
+			
+			// border-radius: 30rpx;
 		}
 		.active-text-top-tit{
-			background-color: #fbbd08;
-			color: white;
+			// background-color: #fbbd08;
+			color: #FBBD08;
+			font-weight: 700;
 			border-color: #FBBD08;
 		}
 	}
@@ -1260,15 +1456,18 @@ export default {
 	display: flex;
 	justify-content: flex-start;
 	// flex-wrap: wrap;
-	padding: 20upx 20upx;
+	padding: 20upx 10upx;
 	min-height: 100upx;
-	align-items: center;
+	align-items: flex-start;
 	font-size: 36upx;
 	margin-right: 20upx;
 	color: #999;
+	flex-direction: column;
 	.calculate-l {
-		width: 100rpx;
+		// width: 100rpx;
 		font-size: 28upx;
+		font-weight: 600;
+		color: #000;
 	}
 	.calorie {
 		min-width: 115upx;
@@ -1312,10 +1511,47 @@ export default {
 			margin-left: 20upx;
 		}
 	}
+	.cook{
+		margin-bottom: 16rpx;
+		.calculate-l{
+			margin-bottom: 0;
+		}
+		.unit{
+			padding: 0rpx 30rpx;
+		}
+		text{
+			&:nth-child(2){
+				color: #999;
+				margin-right: 8rpx;
+				border: 1px solid #999;
+				padding: 4rpx 30rpx;
+				border-radius: 24rpx;
+			}
+			
+			&:last-child{
+				// margin-bottom: -10rpx;
+				// font-weight: 700;
+				border: 1px solid #999;
+				padding: 4rpx 30rpx;
+				border-radius: 24rpx;
+			}
+		}
+		.active-cook-data{
+			background-color: coral;
+			color: white!important;
+			border-color: coral!important;
+		}
+	}
 }
 .amount {
 	color: #009688;
 	font-weight: 800;
+	display: flex;
+	align-items: center;
+	margin-left: 10rpx;
+	.amount-left{
+		color: #000;
+	}
 	.number {
 		padding: 0 20upx;
 		font-size: 34upx;
@@ -1346,14 +1582,15 @@ export default {
 .uni-ec-canvas-wrap{
 	.uni-ec-canvas-top{
 		display: flex;
-		text{
-			padding: 5rpx 20rpx;
-			// background-color: #8dc63f;
-			border:1px solid #ccc;
-			color: #999;
-			margin-right: 10rpx;
-			border-radius: 20rpx;
-			
+		.uni-ec-canvas-top-item{
+			display: flex;
+			align-items: center;
+			padding: 5px 10px;
+			border-radius: 22px;
+			text-align: center;
+			color: #ccc;
+			border: 1px solid #ccc;
+			margin-right: 14rpx;
 		}
 		.active-approve{
 			background-color: #8dc63f;
@@ -1361,9 +1598,34 @@ export default {
 			border-color: #8dc63f;
 		}
 	}
+	.uni-ec-canvas-bot{
+		width: 710rpx;
+		height: 540rpx;
+	}
 }
 .uni-ec-canvas {
 	width: 710rpx;
 	height: 540rpx;
+}
+.cook-top{
+	padding: 0 15rpx;
+	justify-content: space-between;
+}
+.cook-wrap{
+	display: flex;
+	flex-wrap: wrap;
+	.cook-item{
+		padding: 4rpx 30rpx;
+		border: 1px solid #ccc;
+		margin-right: 20rpx;
+		margin-bottom: 10rpx;
+		text{
+			
+		}
+	}
+	.active-cook-item{
+		color: red;
+		border-color: red;
+	}
 }
 </style>

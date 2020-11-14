@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<bxform ref="bxForm" :addType="addType" :pageType="type" :BxformType="type" :fields="fields" :moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"></bxform>
+		<bxform ref="bxForm" :service="serviceName" :addType="addType" :pageType="type" :BxformType="type" :fields="fields" :moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"></bxform>
 		<bxButtons :buttons="buttons" @on-button-change="onButton($event)"></bxButtons>
 	</view>
 </template>

@@ -46,17 +46,25 @@
 			>
 				<view @click="toShopDetail(store)"  class=" item-box" v-for="(store, i) in storeList" :key="i">
 					<view class="container top-box">
-						<view class="left"><image src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image></view>
+						<view class="left">
+							<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
+							<image v-else :src="store.imgurl" mode="aspectFill"></image>
+						</view>
 						<view class="right">
 							<text class="tit">{{ store.name }}</text>
 							<view class="column store-r-b">
 								<view class="store-r-b-t">
-									<u-icon name="star-fill"></u-icon>	
-									<text>{{store.grade}}</text>
+									<text class="cuIcon-favorfill"></text>	
+									<!-- <u-icon name="star-fill"></u-icon>	 -->
+									<text>{{store.grade?store.grade:0}}</text>
 								</view>
 								<view class="store-r-b-b">
-									<text>月售{{store.sale_num}}</text>
+									<text>月售{{store.sale_num?store.sale_num:0}}</text>
 								</view>
+							</view>
+							<view class="store-r-b-b">
+								<text>地址:</text>
+								<text>{{store.address?store.address:'暂无地址'}}</text>
 							</view>
 						</view>
 					</view>
@@ -79,12 +87,16 @@
 			>
 			<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in myStoreList" :key="i">
 				<view class="container top-box">
-					<view class="left"><image src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image></view>
+					<view class="left">
+						<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
+						<image v-else :src="store.imgurl" mode="aspectFill"></image>
+					</view>
 					<view class="right">
 						<text class="tit">{{ store.name }}</text>
 						<view class="column store-r-b store-r-b-my">
 							<view class="store-r-b-t">
-								<u-icon name="star-fill"></u-icon>	
+								<!-- <u-icon name="star-fill"></u-icon>	 -->
+								<text class="cuIcon-favorfill"></text>
 								<text>{{store.grade}}</text>
 							</view>
 							<view class="store-r-b-b">
@@ -107,7 +119,8 @@
 		<view class="footzw"></view>
 		<view class="public-button-box">
 			<view @click="addShop" class="add-button">
-				<u-icon name="plus"></u-icon>
+				<!-- <u-icon name="plus"></u-icon> -->
+				<text class="cuIcon-add"></text>
 				<!-- <text class="add-button-num"></text> -->
 			</view>
 		</view>
@@ -321,6 +334,13 @@ export default {
 				}
 				if (res.data.state === 'SUCCESS') {
 					console.log('商户列表-----', res.data.data);
+					res.data.data.forEach(item=>{
+						if(item.image){
+							let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+							this.$set(item, 'imgurl', urls);
+						}
+						
+					})
 					this.storeList = [...this.storeList,...res.data.data]
 				}
 			}
@@ -357,6 +377,13 @@ export default {
 			
 			if (res.data.state === 'SUCCESS') {
 				console.log('我的商户列表-----', res.data.data);
+				res.data.data.forEach(item=>{
+					if(item.image){
+						let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+						this.$set(item, 'imgurl', urls);
+					}
+					
+				})
 				this.myStoreList = [...this.myStoreList,...res.data.data]
 				if(this.myStoreList.length == 0){
 					this.current_tit={ tit: '商户',type:'shop' }
@@ -468,6 +495,8 @@ page {
 	}
 }
 .store-r-b{
+	display: flex;
+	align-items: center;
 	.store-r-b-t{
 		color: #f98c00;
 		font-weight: 700;
@@ -478,7 +507,7 @@ page {
 	}
 	.store-r-b-b{
 		color: #848484;
-		margin-top: 10upx;
+		// margin-top: 10upx;
 	}
 }
 .store-r-b-my{

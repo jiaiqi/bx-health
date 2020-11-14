@@ -14,9 +14,21 @@
 			}
 		},
 		{
-			"path": "pages/health-archives/health-archives",
+			"path": "pages/archives/archives",
 			"style": {
 				"navigationBarTitleText": "健康档案",
+				"enablePullDownRefresh": false
+			}
+		}, {
+			"path": "pages/personal/personal",
+			"style": {
+				"navigationBarTitleText": "个人中心",
+				"enablePullDownRefresh": false
+			}
+		}, {
+			"path": "pages/management/management",
+			"style": {
+				"navigationBarTitleText": "病人管理",
 				"enablePullDownRefresh": false
 			}
 		}
@@ -74,7 +86,16 @@
 						"enablePullDownRefresh": false
 					}
 				}
-			]
+			    ,{
+                    "path" : "healthCompose/healthCompose",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "pregnancy",
@@ -106,6 +127,35 @@
 					"style": {}
 				}
 			]
+		},
+		{
+			"root": "personalPages",
+			"pages": [{
+				"path": "myDoctor/myDoctor",
+				"style": {
+					"navigationBarTitleText": "我的医生",
+					"enablePullDownRefresh": true
+				}
+
+			}    ,{
+                    "path" : "nameCard/nameCard",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "医生名片",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+                ,{
+                    "path" : "patientsInfo/patientsInfo",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "患者信息",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "otherPages",
@@ -191,13 +241,13 @@
 						"navigationBarTitleText": "营养素详情"
 					}
 				},
-				{
-					"path": "symptomSelect/symptomSelect",
-					"style": {
-						"navigationBarTitleText": "症状选择",
-						"navigationStyle": "custom"
-					}
-				},
+				// {
+				// 	"path": "symptomSelect/symptomSelect",
+				// 	"style": {
+				// 		"navigationBarTitleText": "症状选择",
+				// 		"navigationStyle": "custom"
+				// 	}
+				// },
 				{
 					"path": "indicatorsDetails/dietUp/dietUp",
 					"style": {}
@@ -212,10 +262,12 @@
 				{
 					"path": "sportDetail/sportDetail",
 					"style": {}
-				}, {
+				},
+				{
 					"path": "dietSelect/dietSelect",
 					"style": {}
-				}, {
+				},
+				{
 					"path": "articleList/articleList",
 					"style": {}
 				}, {
@@ -266,7 +318,8 @@
 				}, {
 					"path": "chooseFood/myFoodsInfo",
 					"style": {}
-				},
+				}
+				// ,
 				// {
 				// 	"path": "pregnant/pregnant",
 				// 	"style": {}
@@ -291,13 +344,14 @@
 				// {
 				// 	"path": "pregnant/symptomDetail",
 				// 	"style": {}
-				// },
-				{
-					"path": "personal/personal",
-					"style": {
-						"navigationBarTitleText": "个人资料"
-					}
-				}
+				// }
+				// ,
+				// {
+				// 	"path": "personal/personal",
+				// 	"style": {
+				// 		"navigationBarTitleText": "个人资料"
+				// 	}
+				// }
 			]
 		},
 		{
@@ -306,7 +360,10 @@
 			"pages": [{
 				"path": "hospitalOverview/hospitalOverview",
 				"style": {
-					"navigationBarTitleText": "医院简介"
+					// "navigationStyle":"custom",
+					"navigationBarBackgroundColor": "#0094ff",
+					"navigationBarTitleText": "医院简介",
+					"transparentTitle": "auto"
 				}
 			}]
 		},
@@ -334,37 +391,51 @@
 					"style": {
 						"enablePullDownRefresh": false
 					}
+				},
+				{
+					"path": "mapPage/mapPage",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationBarTitleText": "位置选择"
+					}
 				}
 			]
-		},
-		{
-			"root": "storePages",
-			"pages": []
 		}
 	],
 	"tabBar": {
-		"color": "#7A7E83",
-		"selectedColor": "#0bc99d",
+		"color": "#999",
+		"selectedColor": "#facc31",
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
 		"list": [{
 				"pagePath": "pages/pedia/pedia",
-				"iconPath": "/static/icon/find.png",
-				"selectedIconPath": "static/icon/find_active.png",
-				"text": "健康宝典"
+				"iconPath": "/static/icon/baodian.png",
+				"selectedIconPath": "static/icon/baodian_selected.png",
+				"text": "宝典"
 			},
 			{
-				"pagePath": "pages/health-archives/health-archives",
-				// "pagePath": "pages/home/home",
-				"iconPath": "/static/icon/health.png",
-				"selectedIconPath": "static/icon/health_active.png",
-				"text": "健康档案"
+				"pagePath": "pages/archives/archives",
+				"iconPath": "/static/icon/geren.png",
+				"selectedIconPath": "static/icon/geren_selected.png",
+				"text": "个人"
+			},
+			{
+				"pagePath": "pages/management/management",
+				"iconPath": "/static/icon/yonghu.png",
+				"selectedIconPath": "static/icon/yonghu_selected.png",
+				"text": "用户"
 			},
 			{
 				"pagePath": "pages/store/store",
-				"iconPath": "/static/icon/live.png",
-				"selectedIconPath": "static/icon/live_active.png",
-				"text": "健康生活"
+				"iconPath": "/static/icon/shenghuo.png",
+				"selectedIconPath": "static/icon/shenghuo_selected.png",
+				"text": "生活"
+			},
+			{
+				"pagePath": "pages/personal/personal",
+				"iconPath": "/static/icon/wode.png",
+				"selectedIconPath": "static/icon/wode_selected.png",
+				"text": "我的"
 			}
 		]
 	},

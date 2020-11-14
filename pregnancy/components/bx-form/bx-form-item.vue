@@ -9,11 +9,11 @@
 			<!-- 图片描述 -->
 			<block class="img-explain" v-if="fieldData.option_img_explain">
 				<view class="option_img_explain" @click="showOption_img = !showOption_img">
-					<u-icon name="play-right-fill" color="#666" size="28" v-if="!showOption_img"></u-icon>
-					<u-icon name="arrow-down-fill" color="#666" size="28" v-if="showOption_img"></u-icon>
+<!-- 					<u-icon name="play-right-fill" color="#666" size="28" v-if="!showOption_img"></u-icon>
+					<u-icon name="arrow-down-fill" color="#666" size="28" v-if="showOption_img"></u-icon> -->
 					<text class="margin-left-xs">图片描述</text>
 				</view>
-				<u-image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></u-image>
+				<image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></image>
 			</block>
 			<view v-if="pageFormType === 'detail'" class="detail-text">
 				<text class=" text-xl" v-if="pageFormType === 'detail' && fieldData.type !== 'images' && fieldData.type !== 'snote' && fieldData.type !== 'Note'">
@@ -69,7 +69,7 @@
 						v-model="fieldData.value"
 					>
 						{{ itema.label ? itema.label : itema.value }}
-						<u-image width="100%" height="300rpx" v-if="itema.option_img_explain" :src="getOptionImgExplain(itema.option_img_explain)" mode="aspectFit"></u-image>
+						<image width="100%" height="300rpx" v-if="itema.option_img_explain" :src="getOptionImgExplain(itema.option_img_explain)" mode="aspectFit"></image>
 					</u-radio>
 				</u-radio-group>
 				<!-- 			<radio-group @change="radioChange" v-else-if="fieldData.type === 'radioFk'" :class="!valid.valid ? 'valid_error' : ''">

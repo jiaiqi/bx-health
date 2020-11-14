@@ -102,7 +102,8 @@
 				</view>
 			</view>
 		</view>
-		<u-popup v-model="showEditModal" mode="bottom" border-radius="50">
+		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
+			<!-- <u-popup v-model="showEditModal" mode="bottom" border-radius="50"> -->
 			<!-- <view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentDiet = null)"> -->
 			<view class="cu-dialog current-diet-detail" v-if="currentDiet">
 				<view class="title-bar" v-if="currentDiet.hdate && currentDiet.htime">
@@ -163,8 +164,8 @@
 				<view class="number-bar"></view>
 				<view class="unit-bar"></view>
 			</view>
-		</u-popup>
-		<!-- </view> -->
+			<!-- </u-popup> -->
+		</view>
 	</view>
 </template>
 
@@ -259,11 +260,11 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			let unitList = [];
-			// unitList.push(item);
+			unitList.push(item);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				unitList = [...res.data.data];
+				unitList = [...unitList,...res.data.data];
 			} else {
-				unitList = [item];
+				// unitList = [item];
 			}
 			this.unitList = unitList;
 			return unitList;
@@ -354,10 +355,7 @@ export default {
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
 							item.value = item.value - currentDiet[item.key];
 							let num = (item.value * 100) / Number(item.EAR);
-							num = parseFloat(num.toFixed(1));
-							if (typeof num === 'number' && num.toString() === 'NaN') {
-								num = 0;
-							}
+							num = Math.abs(parseFloat(num.toFixed(1)));
 							return num;
 						});
 						break;
@@ -365,6 +363,7 @@ export default {
 						obj.data = eleArr.map(item => {
 							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
 							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
+							num = Math.abs(parseFloat(num.toFixed(1)));
 							return num;
 						});
 						break;
@@ -464,11 +463,7 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni
-										? item.val_rni * self.userInfo.weight
-										: item.val_ear
-										? item.val_ear * self.userInfo.weight
-										: mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -566,7 +561,10 @@ export default {
 					condition: [{ colName: 'id', ruleType: 'eq', value: dietInfo.id }],
 					data: [
 						{
-							amount: dietInfo.amount
+							amount: dietInfo.amount,
+							energy: dietInfo.energy,
+							unit_weight_g: dietInfo.unit_weight_g,
+							unit: dietInfo.unit
 						}
 					]
 				}
@@ -857,7 +855,7 @@ export default {
 	}
 	.current-diet-detail {
 		width: 100vw;
-		max-height: 90vh;
+		height: 100%;
 		overflow: scroll;
 		.title-bar {
 			display: flex;
@@ -1014,14 +1012,16 @@ export default {
 		}
 		.delete-bar {
 			flex: 1;
-			padding: 10rpx 20rpx;
+			padding: 15rpx 30rpx;
+			letter-spacing: 2px;
 			color: #999;
 			border-top: 1px solid #f1f1f1;
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 			font-size: 50rpx;
-			margin-bottom: 50rpx;
+			padding-top: 30rpx;
+			margin-bottom: 100rpx;
 			.btn {
 				padding: 10rpx 30rpx;
 				border-radius: 10rpx;

@@ -17,16 +17,29 @@
 						</view>
 					</view>
 				</view>
-				<view class="right"><u-icon name="phone" @click="makePhoneCall"></u-icon></view>
+				<view class="right">
+					<text class="cuIcon-pic" @click="makePhoneCall"></text>
+					<!-- <u-icon name="phone" @click="makePhoneCall"></u-icon> -->
+					</view>
 			</view>
 			<view class="introduction">
 				<view class="title">医院简介</view>
 				<view class="content">
-					<u-read-more close-text="查看详细介绍" :toggle="true" show-height="400"><rich-text :nodes="hospitalData.introduction"></rich-text></u-read-more>
+					<view class="rich-text">
+						{{hospitalData.introduction}}
+					</view>
+				<!-- 	<u-read-more close-text="查看详细介绍" :toggle="true" show-height="400">
+						<rich-text :nodes="hospitalData.introduction"></rich-text>
+						</u-read-more> -->
 				</view>
 			</view>
 			<view class="introduction">
-				<view class="title"><u-section title="科室列表" sub-title="查看更多" @click="toPages('department')"></u-section></view>
+				<view class="title">
+					<view class="">
+						科室列表
+					</view>
+					<!-- <u-section title="科室列表" sub-title="查看更多" @click="toPages('department')"></u-section> -->
+				</view>
 				<view class="content">
 					<!-- <u-read-more close-text="查看所有科室" :toggle="true" show-height="400"> -->
 					<view class="depart-box">
@@ -36,7 +49,12 @@
 				</view>
 			</view>
 			<view class="introduction">
-				<view class="title"><u-section title="专家团队" sub-title="查看更多" @click="toPages('professor')"></u-section></view>
+				<view class="title">
+					<view class="">
+						专家团队
+					</view>
+					<!-- <u-section title="专家团队" sub-title="查看更多" @click="toPages('professor')"></u-section> -->
+					</view>
 				<view class="content">
 					<view class="professor-box">
 						<view class="professor-item" v-for="item in professorList" :key="item.docCode">
@@ -207,6 +225,10 @@ export default {
 			color: rgb(48, 49, 51);
 		}
 		.content {
+			.rich-text{
+				height: 300rpx;
+				overflow: scroll;
+			}
 			.depart-box {
 				width: 100%;
 				text-align: left;

@@ -79,7 +79,7 @@
         "devServer" : {
             "disableHostCheck" : true
         },
-        "template" : "template.html",
+        "template" : "",
         "optimization" : {
             "subPackages" : true, // HBuilderX 2.7.12+ 支持
             "treeShaking" : {

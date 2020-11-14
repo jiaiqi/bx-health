@@ -47,10 +47,6 @@
 			<u-form-item class="border-bottom date-bottom" v-if="itemType.type === 'date'||itemType.type === 'time' ||itemType.type === 'dateTime'" :right-icon-style="rightIcon"  right-icon="calendar">
 				<u-input @click="openTime" :height="100" :border="true" height="20" :disabled="true" :placeholder="'请选择'+itemType.title" v-model="itemType.value"/>
 			</u-form-item>
-			<!-- <view class="date-item">
-				<text>请选择开始时间</text>
-				<u-icon name="photo" color="#2979ff" size="28"></u-icon>
-			</view> -->
 			<mx-date-picker
 				style="z-index: 15000;"
 				:format="dateFormat"

@@ -4,7 +4,7 @@
 			<view class="date">{{ recordDetail.hdate + ' ' + recordDetail.htime.slice(0, 5) }}</view>
 		</view>
 		<view class="diet-info">
-			<view class="img"><u-image width="100%" height="100%" :src="imgPath"></u-image></view>
+			<view class="img"><image width="100%" height="100%" :src="imgPath"></image></view>
 			<view class="info">
 				<view class="name">
 					{{ recordDetail.name }}

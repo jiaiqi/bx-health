@@ -13,7 +13,7 @@
 					<u-icon name="arrow-down-fill" color="#666" size="28" v-if="showOption_img"></u-icon>
 					<text class="margin-left-xs">图片描述</text>
 				</view>
-				<u-image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></u-image>
+				<image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></image>
 			</block>
 			<view v-if="pageFormType === 'detail'" class="detail-text">
 				<text class=" text-xl" v-if="pageFormType === 'detail' && fieldData.type !== 'images' && fieldData.type !== 'snote' && fieldData.type !== 'Note'">
@@ -41,12 +41,12 @@
 				}"
 				v-if="pageFormType === 'form' || pageFormType === 'add' || pageFormType === 'update'"
 			>
-				<u-radio-group v-model="fieldData.value" @change="radioChange" v-if="fieldData.type === 'radio'" :class="!valid.valid ? 'valid_error' : ''">
+				<!-- <u-radio-group v-model="fieldData.value" @change="radioChange" v-if="fieldData.type === 'radio'" :class="!valid.valid ? 'valid_error' : ''">
 					<u-radio color="#0bc99d" :disabled="fieldData.disabled ? fieldData.disabled : false" v-for="(itema, index) in fieldData.options" :name="itema" v-model="fieldData.value">
 						{{ itema }}
 					</u-radio>
-				</u-radio-group>
-				<!-- 				<radio-group @change="radioChange" v-if="fieldData.type === 'radio'" :class="!valid.valid ? 'valid_error' : ''">
+				</u-radio-group> -->
+								<radio-group @change="radioChange" v-if="fieldData.type === 'radio'" :class="!valid.valid ? 'valid_error' : ''">
 					<radio
 						color="#0bc99d"
 						:key="index"
@@ -55,11 +55,12 @@
 						class="radio"
 						:checked="itema === fieldData.value"
 						:value="itema"
+						style="transform: scale(0.7);"
 					>
-						<span style="flex: 1;padding-left: 10rpx;">{{ itema }}</span>
+						<span style="flex: 1;padding-left: 10rpx;transform: scale(1.2)">{{ itema }}</span>
 					</radio>
-				</radio-group> -->
-				<u-radio-group v-model="fieldData.value" @change="radioChange" v-if="fieldData.type === 'radioFk'" :class="!valid.valid ? 'valid_error' : ''">
+				</radio-group>
+				<!-- <u-radio-group v-model="fieldData.value" @change="radioChange" v-if="fieldData.type === 'radioFk'" :class="!valid.valid ? 'valid_error' : ''">
 					<u-radio
 						class="radio"
 						color="#2979ff"
@@ -71,8 +72,8 @@
 						{{ itema.label ? itema.label : itema.value }}
 						<u-image width="100%" height="300rpx" v-if="itema.option_img_explain" :src="getOptionImgExplain(itema.option_img_explain)" mode="aspectFit"></u-image>
 					</u-radio>
-				</u-radio-group>
-				<!-- 			<radio-group @change="radioChange" v-else-if="fieldData.type === 'radioFk'" :class="!valid.valid ? 'valid_error' : ''">
+				</u-radio-group> -->
+							<radio-group @change="radioChange" v-else-if="fieldData.type === 'radioFk'" :class="!valid.valid ? 'valid_error' : ''">
 					<radio
 						color="#2979ff"
 						class="blue radio"
@@ -82,13 +83,14 @@
 						v-for="(itema, index) in fieldData.options"
 						:class="{ 'has-img': itema.option_img_explain }"
 						:key="index"
+						style="transform: scale(0.7);"
 					>
 						<view class="radio-content ">
-							<span style="flex: 1;padding-left: 10rpx;">{{ itema.label }}</span>
-							<u-image width="100%" height="300rpx" v-if="itema.option_img_explain" :src="getOptionImgExplain(itema.option_img_explain)" mode="aspectFit"></u-image>
+							<span style="flex: 1;padding-left: 10rpx;font-size: 14px;margin-left: 5px;">{{ itema.label }}</span>
+							<image width="100%" height="300rpx" v-if="itema.option_img_explain" :src="getOptionImgExplain(itema.option_img_explain)" mode="aspectFit"></image>
 						</view>
 					</radio>
-				</radio-group> -->
+				</radio-group>
 				<checkbox-group name="checkbox-group" class="checkbox-group" v-else-if="fieldData.type === 'checkbox'" :class="!valid.valid ? 'valid_error' : ''">
 					<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox" @click="radioChange(item)">
 						<checkbox color="#2979ff" :value="item" :disabled="fieldData.disabled ? fieldData.disabled : false" :checked="fieldData.value.indexOf(item) !== -1" />
@@ -872,11 +874,12 @@ export default {
 			}
 		},
 		radioChange(e, index) {
+			debugger
 			if (this.fieldData.disabled) {
 				return;
 			}
 			if (this.fieldData.type === 'radioFk') {
-				// this.fieldData.value = e.target.value;
+				this.fieldData.value = e.target.value;
 				// this.fieldData.defaultValue = e.target.value;
 				this.$emit('on-value-change', this.fieldData);
 			} else {
@@ -1310,6 +1313,7 @@ export default {
 		min-width: calc(33% - 40rpx);
 		margin-right: 20rpx;
 		max-width: 700rpx;
+		display: contents;
 		&.has-img {
 			width: 100%;
 			::v-deep .uni-radio-wrapper {
@@ -1324,7 +1328,7 @@ export default {
 			line-height: 70rpx;
 		}
 		.radio-content {
-			display: flex;
+			display: contents;
 			flex-direction: column;
 		}
 	}
@@ -1474,6 +1478,14 @@ uni-text.input-icon {
 }
 .cu-form-group uni-picker::after {
 	display: none !important;
+}
+.cu-form-group /deep/ uni-radio-group{
+	display: flex!important;
+	flex-wrap: wrap!important;
+	justify-content: start;
+}
+.cu-form-group /deep/ .uni-radio-input {
+	transform: scale(0.7);
 }
 .uni-popup {
 	z-index: 10000;

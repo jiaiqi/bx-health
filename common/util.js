@@ -1,9 +1,6 @@
-import bus from '@/common/bus.js'
 export default {
 	install(Vue, options) {
-		Vue.prototype.$bus = bus
 		Vue.prototype.pageTitle = '加载中…' // 可以自定义变量
-
 		/**
 		 *@param {Array} loginInfoList 要存储的登录信息 [{key:'',value:''}]
 		 */
@@ -533,9 +530,9 @@ export default {
 				return o.yy + '-' + o.MM + '-' + o.dd + ' '
 			} else if (type === 'YY-MM') {
 				return o.yy + '-' + o.MM
-			}else if (type === 'MM-DD') {
-				return o.MM+ '-' + o.dd
-			}else if (type === 'dateTime') {
+			} else if (type === 'MM-DD') {
+				return o.MM + '-' + o.dd
+			} else if (type === 'dateTime') {
 				return o.HH + ':' + o.mm
 			} else {
 				return o.yy + '-' + o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm + ':' + o.ss;
@@ -582,16 +579,15 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.resultCode === 'SUCCESS') {
 				// 登录成功
+				uni.setStorageSync('isLogin', true);
 				let resData = res.data.response[0].response;
 				if (resData.login_user_info.user_no) {
 					uni.setStorageSync('login_user_info', resData.login_user_info);
-					console.log('resData.login_user_info', resData.login_user_info);
 				}
 				uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
 				if (resData.login_user_info.data) {
 					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 				}
-				uni.setStorageSync('isLogin', true);
 				return {
 					status: 'success',
 					response: resData

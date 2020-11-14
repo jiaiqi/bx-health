@@ -8,7 +8,7 @@
 					<view :class="showType == index ? 'activeTitle' : ''" class="tab-title">{{ item.title }}</view>
 					<view :class="showType == index ? 'activeHr' : ''" class="hr"></view>
 				</view> -->
-			</view>
+			</view> 
 		</view>
 		<!-- 多个tab切换的时候，注意插件的isTab属性， 它可以用来防止两个tab之间用手滑动时造成的误操作-->
 		<swiper :current="showType" @change="onChange" class="container">

@@ -460,11 +460,12 @@
 				this.showPicker = false;
 			},
 			pickerCancel(){
+				let self = this
+				self.showPicker = false;
 				this.$emit("cancel",{
 					checkArr:this.checkArr,
 					defaultVal:this.pickVal
 				});
-				this.showPicker = false;
 			},
 			pickerConfirm(e){
 				if(!this.confirmFlag){

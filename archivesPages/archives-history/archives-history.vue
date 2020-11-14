@@ -1,7 +1,12 @@
 <template>
 	<view class="history-wrap">
-		<!-- <u-navbar back-text="返回" :back-text-style="backTextStyle" :back-icon-color="backTextStyle.color" :title="pageName" :background="navBackground" title-color="#fff"></u-navbar> -->
-		<view class="history-chart" v-if="isAllPages"><uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" :ec="echartsData"></uniEcCharts></view>
+		<view class="history-chart" v-if="isAllPages">
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'stepChart'" :ec="stepEcData"></uniEcCharts>
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasLineA'" :ec="weightEcData"></uniEcCharts>
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasLineB'" :ec="bpEcData"></uniEcCharts>
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasColumnD'" :ec="caloriesEcData"></uniEcCharts>
+			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasLineC'" :ec="sleepEcData"></uniEcCharts>
+		</view>
 		<view class="button-box" v-if="isAllPages">
 			<button class="button" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
 				{{ item.name }}
@@ -24,59 +29,108 @@
 					<view class="record-title">最新数据</view>
 					<view class="record-data">
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'bp'">
-							<text class="digital">{{ historyRecord[0].systolic_pressure }} / {{ historyRecord[0].diastolic_pressure }}</text>
+							<text class="digital">{{ historyRecord[0].systolic_pressure }} / {{ getFixedNum(historyRecord[0].diastolic_pressure) }}</text>
 							<text class="unit">毫米汞柱</text>
 						</view>
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'weight'">
-							<text class="digital">{{ historyRecord[0].weight }}</text>
+							<text class="digital">{{ getFixedNum(historyRecord[0].weight) }}</text>
 							<text class="unit">kg</text>
 						</view>
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'sleep'">
-							<text class="digital"></text>
-							<text class="unit">小时</text>
+							<text class="digital">{{ historyRecord[0].sleep_time.slice(0,5) }}</text>
+							<text class="unit">(时长)</text>
 						</view>
-
 						<view class="date" v-if="historyRecord && historyRecord.length > 0">
 							<text class="cuIcon-time margin-right-xs"></text>
 							{{ historyRecord[0].create_time.slice(0, 16) }}
 						</view>
-						<button class="button" @click="toPages('pressure')" v-if="pageType==='bp'">记录数据</button>
-						<button class="button" @click="toPages('weight')" v-if="pageType==='weight'">记录数据</button>
+						<button class="nav-button" @click="toPages(pageType)">记录数据</button>
 					</view>
 					<view class="bmi-box" v-if="pageType === 'weight'">
-						<view class="bmi-box-item" v-if="bmi">
+						<view class="bmi-bar-box">
+								<view class="bmi-box-item" v-if="bmi">
+									<view class="title">BMI</view>
+									<view class="digit bmi">{{ bmi }}</view>
+								</view>
+								<view class="bmi-bar">
+									<view class="bar1 bar-box">
+										<view class="label" :class="{'active-label':bmi<18.5}">
+											偏瘦
+										</view>
+										<view class="bar">
+											
+										</view>
+									</view>
+									<view class="bar2 bar-box">
+										<view class="label" :class="{'active-label':bmi>=18.5&&bmi<=24}">
+											正常
+										</view>
+										<view class="bar">
+											
+										</view>
+									</view>
+									<view class="bar3 bar-box">
+										<view class="label" :class="{'active-label':bmi<28&&bmi>24}">
+											超重
+										</view>
+										<view class="bar">
+											
+										</view>
+									</view>
+									<view class="bar4 bar-box">
+										<view class="label" :class="{'active-label':bmi>28}">
+											肥胖
+										</view>
+										<view class="bar">
+											
+										</view>
+									</view>
+								</view>
+								<view class="explain-box">
+									<view class="explain">
+										18.5
+									</view>
+									<view class="explain">
+										24.0
+									</view>
+									<view class="explain">
+										28.0
+									</view>
+								</view>
+						</view>
+					<!-- 	<view class="bmi-box-item" v-if="bmi">
 							<view class="title">BMI</view>
 							<view class="digit">{{ bmi }}</view>
-						</view>
-						<view class="bmi-box-item" v-if="standardWeight">
+						</view> -->
+						
+						<!-- <view class="bmi-box-item" v-if="standardWeight">
 							<view class="title">
 								建议体重
-								<!-- 标准体重=(身高cm-100)x0.9(kg) -->
 							</view>
-							<view class="digit">{{ standardWeight }}kg</view>
-						</view>
+							<view class="digit">{{ getFixedNum(standardWeight) }}kg</view>
+						</view> -->
 					</view>
 					<view class="history-record">
 						<view class="title">历史数据</view>
 						<u-empty mode="history" v-if="historyRecord && historyRecord.length === 0"></u-empty>
 						<view class="list-box" v-if="historyRecord && historyRecord.length > 0">
-							<view class="list-item" v-for="(item, index) in historyRecord.slice(1)" :key="index">
+							<view class="list-item" v-for="(item, index) in historyRecord" :key="index">
 								<image src="../static/icon/xueya.png" mode="" class="icon" v-if="pageType === 'bp'"></image>
 								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
 								<image src="../static/icon/tizhong.png" mode="" class="icon" v-if="pageType === 'weight'"></image>
 								<view class="item">
-									<text class="digital" v-if="pageType === 'bp'">{{ item.systolic_pressure }}</text>
-									<text class="digital" v-if="pageType === 'weight'">{{ item.weight }}</text>
+									<text class="digital" v-if="pageType === 'bp' && item && item.systolic_pressure">{{ item.systolic_pressure ? getFixedNum(item.systolic_pressure) : '-' }}</text>
+									<text class="digital" v-if="pageType === 'weight'">{{ item.weight ? getFixedNum(item.weight) : '-' }}</text>
+									<text class="digital" v-if="pageType === 'sleep'">{{ item.sleep_time ? item.sleep_time.slice(0, 5) : '-' }}</text>
 								</view>
-
-								<view class="item" v-if="pageType === 'bp'">
+								<view class="item" v-if="pageType === 'bp' && item && item.diastolic_pressure">
 									/
-									<text class="digital">{{ item.diastolic_pressure }}</text>
+									<text class="digital">{{ item.diastolic_pressure ? getFixedNum(item.diastolic_pressure ) : '-' }}</text>
 								</view>
 								<view class="unit">
 									<text v-if="pageType === 'bp'">mmHg</text>
 									<text v-if="pageType === 'weight'">kg</text>
-									<text v-if="pageType === 'sleep'">小时</text>
+									<text v-if="pageType === 'sleep'" >（时长）</text>
 								</view>
 								<view class="item">
 									<text>{{ item.create_time.slice(0, 16) }}</text>
@@ -101,8 +155,8 @@
 import uniEcCharts from '@/archivesPages/components/uni-ec-canvas/uni-echart.vue';
 import energyListWrap from './totalEnergyList.js';
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet';
-// var dayjs = require('../static/dayjs');
-import * as dayjs from '../static/dayjs'
+import dayjs from '../static/dayjs/esm/index.js';
+// import dayjs from '../static/dayjs';
 export default {
 	components: {
 		uniEcCharts,
@@ -155,6 +209,11 @@ export default {
 			loginUserInfo: {},
 			userInfo: {},
 			wxUserInfo: {},
+			stepEcData: {},
+			weightEcData: {},
+			bpEcData: {},
+			caloriesEcData: {},
+			sleepEcData: {},
 			weightChartData: {
 				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
 				series: [
@@ -232,6 +291,13 @@ export default {
 		}
 	},
 	methods: {
+		getFixedNum(num){
+			if(num){
+				return Number(num.toFixed(1))
+			}else{
+				return 0
+			}
+		},
 		toPages(e) {
 			let condType = {};
 			let url = '';
@@ -269,6 +335,9 @@ export default {
 			}
 			this.showPopup = false;
 			if (e !== 'food' && e !== 'sport') {
+				if (e === 'pressure') {
+					e = bp;
+				}
 				uni.navigateTo({
 					url: '/otherPages/otherIndicator/otherIndicator?type=' + e
 				});
@@ -302,58 +371,45 @@ export default {
 			switch (type) {
 				case 'step':
 					this.pageType = 'sport';
-					if (this.currentChart === 'stepChart') {
-					} else {
-						this.currentChart = 'stepChart';
-						this.getwxStepInfoList();
-					}
+					this.currentChart = 'stepChart';
+					this.getwxStepInfoList();
 					this.currentType = '运动';
 					break;
 				case 'weight':
 					this.pageType = 'weight';
-					if (this.currentChart === 'canvasLineA') {
-						// this.currentChart = '';
-					} else {
-						this.currentChart = 'canvasLineA';
-						this.getChartData('weight').then(_ => {
-							this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
-						}); // 体重
-					}
+					this.currentChart = 'canvasLineA';
+					this.getChartData('weight').then(_ => {
+						this.weightEcData = this.buildEcData(this.weightChartData, 'kg', '体重');
+						// this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
+					}); // 体重
 					this.currentType = '体重';
 					break;
 				case 'BP':
 					this.pageType = 'bp';
-					if (this.currentChart === 'canvasLineB') {
-						// this.currentChart = '';
-					} else {
-						this.currentChart = 'canvasLineB';
-						this.getChartData('bloodPressure').then(_ => {
-							this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
-						}); // 血压
-					}
+					this.currentChart = 'canvasLineB';
+					this.getChartData('bloodPressure').then(_ => {
+						this.bpEcData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+						// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+					}); // 血压
 					this.currentType = '血压';
 					break;
 				case 'sleep':
-					if (this.currentChart === 'canvasLineC') {
-					} else {
-						this.currentChart = 'canvasLineC';
-						this.getChartData('sleep').then(_ => {
-							// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
-						}); // 血压
-						this.chartData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
-					}
+					this.currentChart = 'canvasLineC';
+					this.getChartData('sleep').then(_ => {
+						// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+					}); // 血压
+					this.sleepEcData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
+					// this.chartData = this.buildEcData(this.sleepChartData, '小时', '睡眠');
 					this.pageType = 'sleep';
 					this.currentType = '睡眠';
 					break;
 				case 'calories':
 					this.pageType = 'diet';
-					if (this.currentChart === 'canvasColumnD') {
-					} else {
-						this.currentChart = 'canvasColumnD';
-						this.getDietSportRecordList().then(_ => {
-							this.chartData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
-						});
-					}
+					this.currentChart = 'canvasColumnD';
+					this.getDietSportRecordList().then(_ => {
+						this.caloriesEcData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
+						// this.chartData = this.buildEcData(this.caloriesChartData, '大卡', '热量');
+					});
 					this.currentType = '饮食';
 					break;
 			}
@@ -416,6 +472,9 @@ export default {
 					splitLine: {
 						// 网格线
 						show: true
+					},
+					max: function(value) {
+						return value.max + 20;
 					}
 				},
 				series: []
@@ -432,14 +491,51 @@ export default {
 					label: { show: true },
 					data: item.data
 				};
+				if (unit === '步') {
+					obj.label.show = false;
+				}
 				if (item.data.length > 10) {
-					option.dataZoom = [
-						{
-							type: 'inside',
-							start: 80,
-							end: 100
-						}
-					];
+					if (item.data.length > 10 && item.data.length <= 20) {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 60,
+								end: 100
+							}
+						];
+					} else if (item.data.length > 20 && item.data.length <= 30) {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 70,
+								end: 100
+							}
+						];
+					} else if (item.data.length > 30 && item.data.length <= 40) {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 80,
+								end: 100
+							}
+						];
+					} else if (item.data.length > 40 && item.data.length <= 50) {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 90,
+								end: 100
+							}
+						];
+					} else {
+						option.dataZoom = [
+							{
+								type: 'inside',
+								start: 95,
+								end: 100
+							}
+						];
+					}
 				} else {
 					option.dataZoom = [
 						{
@@ -497,7 +593,8 @@ export default {
 		async getChartData(type) {
 			let serviceObj = {
 				weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
-				bloodPressure: 'srvhealth_blood_pressure_record_select' // 血压
+				bloodPressure: 'srvhealth_blood_pressure_record_select', // 血压
+				sleep: 'srvhealth_sleep_record_select' // 血压
 			};
 			let serviceName = serviceObj[type];
 			let url = this.getServiceUrl('health', serviceName, 'select');
@@ -508,35 +605,37 @@ export default {
 				order: [
 					{
 						colName: 'create_time',
-						orderType: 'asc' // asc升序  desc降序
+						orderType: 'desc' // asc升序  desc降序
 					}
 				],
 				page: {
-					rownumber: 7
+					pageNo: 1,
+					rownumber: 100
 				}
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				this.historyRecord = res.data.data.reverse();
+				res.data.data = res.data.data.reverse();
 				let series = [];
 				if (type === 'weight') {
 					series = this.weightChartData.series;
 					series[0].data = res.data.data.map(item => {
-						return item.weight;
+						return Number(item.weight.toFixed(1));
 					});
 					this.weightChartData.series = series;
-					this.weightChartData.categories = res.data.data.map(item =>  dayjs(item.create_time).format('MM-DD'));
+					this.weightChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
 					this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
 				} else if (type === 'bloodPressure') {
 					series = this.BPChartData.series;
 					series[0].data = res.data.data.map(item => {
-						return item.systolic_pressure;
+						return Number(item.systolic_pressure.toFixed(1));
 					});
-					series[1].data = res.data.data.map(item => item.diastolic_pressure);
+					series[1].data = res.data.data.map(item => Number(item.diastolic_pressure.toFixed(1)));
 					this.BPChartData.series = series;
 					this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
 					this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
 				}
+				this.historyRecord = this.deepClone(res.data.data).reverse();
 			} else {
 				this.historyRecord = [];
 			}
@@ -619,7 +718,7 @@ export default {
 				.reverse();
 			console.log(series);
 			series = series.map(item => {
-				item.data = item.data.reverse();
+				item.data = item.data.map(num => Number(num.toFixed(1))).reverse();
 				return item;
 			});
 			this.caloriesChartData.series = series;
@@ -668,7 +767,8 @@ export default {
 						};
 						chartData.series[0].data = stepList.map(item => item.step);
 						this.wxRunData = chartData;
-						this.chartData = this.buildEcData(this.wxRunData, '步', '步数');
+						this.stepEcData = this.buildEcData(this.wxRunData, '步', '步数');
+						// this.chartData = this.buildEcData(this.wxRunData, '步', '步数');
 						return stepList;
 					} else {
 						return false;
@@ -962,6 +1062,7 @@ export default {
 					// #endif
 				}
 			}
+			console.log(this.pageType);
 			switch (this.pageType) {
 				case 'diet':
 					this.pageName = '饮食记录';
@@ -1127,7 +1228,7 @@ export default {
 				justify-content: flex-end;
 				border-radius: 0 0 20rpx 20rpx;
 				.last-data {
-					padding: 30rpx 0;
+					padding: 0 0 10rpx;
 					flex: 1;
 					.digital {
 						font-size: 60rpx;
@@ -1142,17 +1243,16 @@ export default {
 					color: #999;
 					fons: 24rpx;
 				}
-
-				.button {
-					background-color: #0bc99d;
-					color: #fff;
-					border-radius: 50rpx;
-					margin-top: 50rpx;
-					width: 200rpx;
-					height: 50rpx;
-					line-height: 50rpx;
-					font-size: 28rpx;
-				}
+			}
+			.nav-button {
+				background-color: #0bc99d;
+				color: #fff;
+				border-radius: 50rpx;
+				margin-top: 50rpx;
+				width: 200rpx;
+				height: 50rpx;
+				line-height: 50rpx;
+				font-size: 28rpx;
 			}
 			.bmi-box {
 				width: 100%;
@@ -1176,6 +1276,85 @@ export default {
 						color: #333;
 						font-weight: 700;
 						font-size: 30rpx;
+						&.bmi{
+							font-size: 60rpx;
+						}
+					}
+				}
+				.bmi-bar-box{
+					width: 100%;
+					display: flex;
+					flex-direction: column;
+					text-align: center;
+					justify-content: center;
+					align-items: center;
+					font-weight: normal;
+					.explain-box{
+						display: flex;
+						width: 75%;
+						color: #999;
+						.explain{
+							flex: 1;
+						}
+					}
+					.bmi-bar{
+						padding: 20rpx 0;
+						display: flex;
+						width: 100%;
+						.bar-box{
+							flex: 1;
+							.bar{
+								height: 40rpx;
+							}
+							.label{
+								padding: 10rpx 0;
+								margin: 20rpx 10rpx;
+								border-radius: 30rpx;
+								&.active-label{
+									color: #fff;
+								}
+							}
+						}
+						.bar1 {
+							margin-right:4rpx;
+							.bar{
+								background-color: #40c0fd;
+								border-top-left-radius: 50rpx;
+								border-bottom-left-radius: 50rpx;
+							}
+							.active-label{
+								background-color: #40c0fd;
+							}
+						}
+						.bar2 {
+							margin-right:4rpx;
+							.bar{
+								background-color: #4ACDBA;
+							}
+							.active-label{
+								background-color: #4ACDBA;
+							}
+						}
+						.bar3 {
+							margin-right:4rpx;
+							.bar{
+								background-color: #FAD650;
+							}
+							.active-label{
+								background-color: #FAD650;
+							}
+						}
+						.bar4{
+							.bar{
+								background-color: #F7B235;
+								border-top-right-radius: 50rpx;
+								border-bottom-right-radius: 50rpx;
+							}
+							.active-label{
+								background-color: #F7B235;
+							}
+						}
+						
 					}
 				}
 			}
@@ -1209,6 +1388,10 @@ export default {
 								text-align: right;
 								font-weight: normal;
 								color: #999;
+							}
+							.label{
+								font-size: 28rpx;
+								margin: 10rpx;
 							}
 							.digital {
 								font-size: 40rpx;

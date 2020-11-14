@@ -135,7 +135,7 @@
 			</view>
 		</view>
 		<!-- <u-calendar v-model="showCalender" :mode="'date'" @change="changeBirthday"></u-calendar> -->
-		<u-select v-model="showSexModal" :list="sexList" @confirm="changeSex"></u-select>
+		<!-- <u-select v-model="showSexModal" :list="sexList" @confirm="changeSex"></u-select> -->
 		<u-modal v-model="showModel" :mask-close-able="true" :show-title="false" :show-cancel-button="true" @confirm="changeInput">
 			<view class="slot-content">
 				<u-input v-model="modifyUserInfo.name" :type="modelInputType" :border="false" :placeholder="modelInputHint" v-if="currentModel === 'name'" />

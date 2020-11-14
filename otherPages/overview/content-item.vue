@@ -3,7 +3,7 @@
 		<view class="title">
 			<text class="title-text">{{ content.title }}</text>
 			<view class="add">
-				<u-button size="mini" :ripple="true" @click="addItem(content)" v-for="(btn, btnIndex) in content.headButton" :key="btnIndex">{{ btn.label }}</u-button>
+				<button class="cu-btn " @click="addItem(content)" v-for="(btn, btnIndex) in content.headButton" :key="btnIndex">{{ btn.label }}</button>
 			</view>
 		</view>
 		<view
@@ -81,9 +81,6 @@ export default {
 		}
 	},
 	created() {
-		// this.$bus.$on('questionnaireData', this.setReason);
-		// uni.$on('questionnaireData', this.setReason);
-		// this.contentData = this.deepClone(this.content);
 	},
 	watch: {
 		'content.list': {
