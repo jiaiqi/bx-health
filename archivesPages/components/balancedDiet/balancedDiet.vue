@@ -293,7 +293,7 @@
 			</view> -->
 		</view>
 		<!-- <u-popup v-model="showEditModal" mode="bottom"> -->
-		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
+		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }">
 			<view class="cu-dialog current-diet-detail" v-if="currentRecord">
 				<view class="title-bar" v-if="currentRecord.hdate && currentRecord.htime">
 					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
@@ -353,15 +353,7 @@
 					</view>
 				</view>
 				<view class="delete-bar">
-					<view
-						class="btn bg-grey"
-						@click="
-							showEditModal = false;
-							currentRecord = null;
-						"
-					>
-						取消
-					</view>
+					<view class="btn bg-grey" @click="hideRecordDetailModal">取消</view>
 					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
 			</view>
@@ -979,6 +971,13 @@ export default {
 		}
 	},
 	methods: {
+		hideRecordDetailModal() {
+			this.showEditModal = false;
+			this.currentRecord = {};
+			this.currentDietChartData = {
+				option: {}
+			};
+		},
 		showCookTypes() {
 			this.isShowCookType = true;
 			console.log(this.cookTypes);
@@ -996,6 +995,7 @@ export default {
 			let dietRecordList = this.deepClone(this.dietRecord);
 			let energyList = this.deepClone(this.energyListWrap);
 			let eleArr = [];
+			debugger;
 			energyList.forEach(item => {
 				item.matterList.forEach(ele => {
 					ele.value = 0;
@@ -1019,8 +1019,8 @@ export default {
 					// debugger
 					foodTypes.forEach(food => {
 						if (food.food_no === diet.diet_contents_no || food.food_no === diet.mixed_food_no) {
-							let ratio = diet.unit_weight_g / food.unit_amount;
-							ele.value += food[ele['key']] * ratio * diet.amount;
+							let ratio = (diet.unit_weight_g * diet.amount) / food.unit_amount;
+							ele.value = ele.value + food[ele['key']] * ratio;
 						}
 					});
 				});
@@ -1078,7 +1078,6 @@ export default {
 					num = parseFloat(num.toFixed(1));
 					return num;
 				});
-				debugger;
 				switch (le) {
 					case '其它食物':
 						debugger;
@@ -1088,7 +1087,7 @@ export default {
 								// debugger;
 							}
 							if (cur.name === '叶酸') {
-								debugger;
+								// debugger;
 							}
 							let ratio = currentDiet.unit_weight_g / 100;
 							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
@@ -1099,13 +1098,14 @@ export default {
 						});
 						break;
 					case '当前食物':
+						debugger;
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
 							if (cur.name === '蛋白') {
 								// debugger;
 							}
 							if (cur.name === '叶酸') {
-								debugger;
+								// debugger;
 							}
 							let ratio = currentDiet.unit_weight_g / 100;
 							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
@@ -1130,16 +1130,6 @@ export default {
 				// color: ['#92d050', '#00b050', '#f79646', '#4f81bd'],
 				title: {
 					text: ''
-				},
-				tooltip: {
-					// show: true,
-					// trigger: 'axis'
-					// axisPointer: {
-					// 	type: 'cross',
-					// 	label: {
-					// 		backgroundColor: '#6a7985'
-					// 	}
-					// }
 				},
 				legend: {
 					data: legendData
@@ -1909,10 +1899,10 @@ export default {
 				];
 			}
 			let res = await this.$http.post(url, req);
+			self.hideRecordDetailModal();
 			if (res.data.state === 'SUCCESS') {
 				await self.getDietRecord();
 				await self.getSportsRecord();
-				self.showEditModal = false;
 			}
 		},
 		deleteItem(item) {
@@ -1927,7 +1917,7 @@ export default {
 							mask: true,
 							title: '正在删除...'
 						});
-						self.showEditModal = false;
+						self.hideRecordDetailModal();
 						let serviceName = '';
 						let url = '';
 						if (type === 'food') {
@@ -2060,6 +2050,7 @@ export default {
 				];
 				let mix = await this.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
 				let basic = await this.getFoodType(condition2);
+				debugger
 				this.foodType = [...mix, ...basic];
 			}
 			this.getSportsRecord().then(res => {
@@ -2677,6 +2668,7 @@ export default {
 		uni.$on('dietUpdate', () => {
 			//饮食记录已改变，刷新数据
 			this.getDietRecord();
+			this.getBaseInfo();
 		});
 		uni.$on('sportUpdate', () => {
 			//运动记录已改变，刷新数据

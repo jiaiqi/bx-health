@@ -51,7 +51,7 @@
 					<view class="item-list-bot"><input type="text" value="" /></view>
 				</view>
 			</view>
-			<view v-else-if="type && type === 'pressure'" class="item-wrap">
+			<view v-else-if="type && (type === 'pressure'||type === 'bp')" class="item-wrap">
 				<!-- 血压 -->
 				<view class="item-list">
 					<text>收缩压(高压 毫米汞柱)</text>
