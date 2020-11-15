@@ -482,7 +482,9 @@ export default {
 					yAxis: [
 						{
 							type: 'value',
-							max: 120,
+							max: function(value) {
+								return value.max + 20;
+							},
 							axisLabel: { formatter: '{value}%' }
 						}
 					],
@@ -513,7 +515,9 @@ export default {
 					yAxis: [
 						{
 							type: 'value',
-							max: 120,
+							max: function(value) {
+								return value.max + 20;
+							},
 							axisLabel: { formatter: '{value}%' }
 						}
 					],
@@ -987,9 +991,48 @@ export default {
 		clickCharts(e) {
 			this.toDetail(e);
 		},
-		async buildCurrenDietChartOption() {
+		getEnergyListValue(foodInfo) {
 			let currentDiet = this.deepClone(this.currentRecord);
 			let dietRecordList = this.deepClone(this.dietRecord);
+			let energyList = this.deepClone(this.energyListWrap);
+			let eleArr = [];
+			energyList.forEach(item => {
+				item.matterList.forEach(ele => {
+					ele.value = 0;
+					eleArr.push(ele);
+				});
+			});
+			dietRecordList = dietRecordList.map(item => {
+				if (item.id === currentDiet.id) {
+					item = currentDiet;
+				}
+				return item;
+			});
+			// debugger
+			let foodTypes = this.deepClone(this.foodType);
+			eleArr = eleArr.map(ele => {
+				// debugger
+				dietRecordList.forEach(diet => {
+					if (diet.id === currentDiet.id) {
+						diet = currentDiet;
+					}
+					// debugger
+					foodTypes.forEach(food => {
+						if (food.food_no === diet.diet_contents_no || food.food_no === diet.mixed_food_no) {
+							let ratio = diet.unit_weight_g / food.unit_amount;
+							ele.value += food[ele['key']] * ratio * diet.amount;
+						}
+					});
+				});
+				return ele;
+			});
+
+			console.log(eleArr);
+			return eleArr;
+		},
+		async buildCurrenDietChartOption() {
+			let currentDiet = this.deepClone(this.currentRecord);
+			// let dietRecordList = this.deepClone(this.dietRecord);
 			let serviceName = '';
 			let condition = [{}];
 			if (currentDiet.diret_type === 'diet_contents') {
@@ -1009,7 +1052,7 @@ export default {
 					value: currentDiet.mixed_food_no
 				};
 			}
-			let foodType = [];
+			// let foodType = [];
 			let foodInfo = await this.getFoodType(condition, serviceName);
 			if (Array.isArray(foodInfo) && foodInfo.length > 0) {
 				foodInfo = foodInfo[0];
@@ -1018,15 +1061,7 @@ export default {
 				return;
 			}
 			currentDiet = { ...foodInfo, ...currentDiet };
-			let energyList = await this.buildDietData();
-			// 构建echarts需要的数据格式
-			energyList = this.deepClone(this.energyListWrap);
-			let eleArr = [];
-			energyList.forEach(item => {
-				item.matterList.forEach(ele => {
-					eleArr.push(ele);
-				});
-			});
+			let eleArr = this.getEnergyListValue();
 			let category = eleArr.map(item => {
 				return item.name;
 			});
@@ -1043,11 +1078,16 @@ export default {
 					num = parseFloat(num.toFixed(1));
 					return num;
 				});
+				debugger;
 				switch (le) {
 					case '其它食物':
+						debugger;
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
 							if (cur.name === '蛋白') {
+								// debugger;
+							}
+							if (cur.name === '叶酸') {
 								debugger;
 							}
 							let ratio = currentDiet.unit_weight_g / 100;
@@ -1062,6 +1102,9 @@ export default {
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
 							if (cur.name === '蛋白') {
+								// debugger;
+							}
+							if (cur.name === '叶酸') {
 								debugger;
 							}
 							let ratio = currentDiet.unit_weight_g / 100;
@@ -1089,8 +1132,8 @@ export default {
 					text: ''
 				},
 				tooltip: {
-					show: true,
-					trigger: 'axis'
+					// show: true,
+					// trigger: 'axis'
 					// axisPointer: {
 					// 	type: 'cross',
 					// 	label: {
@@ -1271,12 +1314,9 @@ export default {
 			// 切换单位
 			this.currentUnitIndex = index;
 			let currentUnit = this.unitList[index];
-			console.log(this.currentRecord);
 			//TODO 动态改变热量
-			// this.currentRecord.energy  this.currentRecord.unit_weight_g/100
 			this.currentRecord.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
 			this.currentRecord.unit = item.unit;
-			// this.currentRecord.energy = currentUnit.amount / 100;
 			this.buildCurrenDietChartOption();
 		},
 		async getCookTypes() {
@@ -2118,6 +2158,7 @@ export default {
 			console.log('res-------', res.data.data);
 			return res.data.data;
 		},
+
 		async buildDietData() {
 			let data = this.deepClone(this.dietRecord);
 			let strArr = [];
@@ -2132,6 +2173,13 @@ export default {
 					a.forEach(food => {
 						data.forEach(re => {
 							if (food.name === re.name) {
+								food.id = re.id;
+								let currentDiet = this.deepClone(this.currentRecord);
+								if (currentDiet && currentDiet.id === food.id) {
+									re.amount = currentDiet.amount;
+									re['unit'] = currentDiet.unit;
+									re['unit_weight_g'] = currentDiet['unit_weight_g'];
+								}
 								let ratio = re['unit_weight_g'] / food['unit_amount'];
 								food['amount'] = food['amount'] ? food['amount'] + re.amount : re.amount;
 								food['amount'] = ratio * food['amount'];
@@ -2149,7 +2197,7 @@ export default {
 									for (let a in fod) {
 										if (mat.key && mat.key == a) {
 											mat.value = Number(mat.value) + Number(fod.amount) * Number(fod[a]);
-											if (mat.name === '蛋白') {
+											if (mat.name === '叶酸') {
 												// debugger;
 											}
 											/**
