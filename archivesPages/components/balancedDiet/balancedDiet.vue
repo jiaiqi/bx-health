@@ -58,7 +58,7 @@
 					</view>
 				</view>
 			</view>
-			<view class="main-box main-box-plus" v-if="!pageType || pageType === 'diet'">
+			<view class="main-box main-box-plus" v-if="pageType === 'diet'">
 				<view class="title">
 					<view class="label">
 						营养素摄入情况分析
@@ -321,7 +321,7 @@
 							<text class="unit">{{ currentRecord.unit }}</text>
 						</view>
 					</view>
-					<view class="chart-box">
+					<view class="chart-box" v-if="currentRecord && currentRecordType === 'food'">
 						<!-- #ifdef MP-WEIXIN -->
 						<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-ec-canvas>
 						<!-- #endif -->
@@ -366,8 +366,8 @@
 				</view>
 			</view>
 		</view>
-		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
-		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
+		<!-- <view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view> -->
+		<!-- <u-popup v-model="showPopup" mode="bottom" border-radius="50">
 			<view class="popup-box">
 				<view class="icon-item" @click="toPages('food')">
 					<image src="@/archivesPages/static/icon/yinshi.png" mode="" class="icon"></image>
@@ -403,7 +403,7 @@
 				</view>
 			</view>
 			<view class="close-icon"><text @click="showPopup = false" class="cuIcon-close"></text></view>
-		</u-popup>
+		</u-popup> -->
 		<view @click.self="closeDay" class="cu-modal" style="display: flex; align-items: center" :class="modalName == 'Modal' ? 'show' : ''">
 			<view style="height: 43vh" class="cu-dialog">
 				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :markDays="markDays" :headerBar="true" @onDayClick="onDayClick"></bx-date-stamp>

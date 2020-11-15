@@ -1070,12 +1070,7 @@ export default {
 					break;
 				case 'sport':
 					this.pageName = '运动记录';
-					// #ifdef H5
-					this.showCanvas('calories');
-					// #endif
-					// #ifdef MP-WEIXIN
 					this.showCanvas('step');
-					// #endif
 					break;
 				case 'weight':
 					this.pageName = '体重记录';
