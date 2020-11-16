@@ -34,7 +34,12 @@
 				</view>
 			</view>
 			<view class="introduction">
-				<view class="title"><u-section title="科室列表" sub-title="查看更多" @click="toPages('department')"></u-section></view>
+				<view class="title">
+					<view class="">
+						科室列表
+					</view>
+					<!-- <u-section title="科室列表" sub-title="查看更多" @click="toPages('department')"></u-section> -->
+				</view>
 				<view class="content">
 					<!-- <u-read-more close-text="查看所有科室" :toggle="true" show-height="400"> -->
 					<view class="depart-box">
@@ -44,7 +49,12 @@
 				</view>
 			</view>
 			<view class="introduction">
-				<view class="title"><u-section title="专家团队" sub-title="查看更多" @click="toPages('professor')"></u-section></view>
+				<view class="title">
+					<view class="">
+						专家团队
+					</view>
+					<!-- <u-section title="专家团队" sub-title="查看更多" @click="toPages('professor')"></u-section> -->
+					</view>
 				<view class="content">
 					<view class="professor-box">
 						<view class="professor-item" v-for="item in professorList" :key="item.docCode">

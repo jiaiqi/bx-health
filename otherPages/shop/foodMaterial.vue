@@ -96,6 +96,10 @@
 			},
 			addFoods(){
 				let cond = [{
+					colName:"meal_no",
+					ruleType:"eq",
+					value:this.currFood.meal_no
+				},{
 					colName:"unit",
 					ruleType:"eq",
 					value:''

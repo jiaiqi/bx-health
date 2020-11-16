@@ -52,7 +52,7 @@
 					</view>
 				</view>
 			</view>
-			<view class="main-box main-box-plus" v-if="!pageType || pageType === 'diet'">
+			<view class="main-box main-box-plus" v-if="pageType === 'diet'">
 				<view class="title">
 					<view class="label">
 						营养素摄入情况分析
@@ -64,7 +64,13 @@
 					<uni-ec-canvas class="uni-ec-canvas" @click-chart="clickCharts" canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
 					<!-- #endif -->
 					<!-- #ifdef H5 -->
-					<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-echarts>
+					<uni-echarts
+						@click-chart="clickCharts"
+						class="uni-ec-canvas"
+						canvas-id="nutrients-canvas"
+						:ec="nutrientsChartOption"
+						v-if="nutrientsChartOption && nutrientsChartOption.option"
+					></uni-echarts>
 					<!-- #endif -->
 				</view>
 				<view class="indicator">
@@ -166,7 +172,6 @@
 						<text class="cuIcon-apps" :class="{ 'active-layout': dietLayout === 'grid' }" @click="dietLayout = 'grid'"></text>
 					</view>
 				</view>
-				<!-- <u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more"> -->
 				<view class="record-box" @click.self="clickDietBox">
 					<view class="table" v-if="dietLayout === 'list'">
 						<view class="no-data" v-if="!dietRecord || dietRecord.length === 0" @click="toPages('food')">
@@ -175,7 +180,7 @@
 						</view>
 						<view class="row" v-for="(item, index) in dietRecord" :key="index">
 							<view class="readonly" @click="clickDietRecordItem(item)">
-								<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
+								<view class="img"><image mode="scaleToFill" class="img" :src="getDownloadPath(item)"></image></view>
 								<view class="column center">
 									<view class="name">{{ item.name }}</view>
 									<view class="number">{{ item.unit !== 'g' ? item.amount + item.unit : item.amount * item.unit_weight_g + item.unit }}</view>
@@ -193,7 +198,7 @@
 					</view>
 					<view class="table grid-layout" v-if="dietLayout === 'grid'">
 						<view class="diet-item" v-for="(item, index) in dietRecord" :key="index" @click="clickDietRecordItem(item)">
-							<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
+							<image class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></image>
 							<view class="diet-detail">
 								<view class="name">{{ item.name }}</view>
 								<view class="number">
@@ -208,7 +213,6 @@
 						<view class="diet-item" @click="toPages('food')"><text class="cuIcon-add add-icon"></text></view>
 					</view>
 				</view>
-				<!-- </u-read-more> -->
 			</view>
 			<view class="main-box symptom" v-if="!pageType || pageType === 'sport'">
 				<view class="title">
@@ -218,7 +222,6 @@
 						<text class="cuIcon-apps" :class="{ 'active-layout': sportLayout === 'grid' }" @click="sportLayout = 'grid'"></text>
 					</view>
 				</view>
-				<!-- <u-read-more close-text="点击查看全部记录" open-text="收起" class="read-more"> -->
 				<view class="record-box" @click.self="clickSportBox">
 					<view class="table" v-if="sportLayout === 'list'">
 						<view class="no-data" v-if="!sportsRecord || sportsRecord.length === 0" @click="toPages('sport')">
@@ -227,7 +230,7 @@
 						</view>
 						<view class="row" v-for="(item, index) in sportsRecord" :key="index">
 							<view class="readonly" @click="clickSportRecordItem(item)">
-								<view class="img"><u-image width="100%" height="100%" :src="getDownloadPath(item)"></u-image></view>
+								<view class="img"><image class="img" mode="aspectFit" :src="getDownloadPath(item)"></image></view>
 								<view class="column center">
 									<view class="name">{{ item.name }}</view>
 									<view class="number">{{ item.amount + item.unit }}</view>
@@ -245,7 +248,7 @@
 					</view>
 					<view class="table grid-layout" v-if="sportsRecord && sportLayout === 'grid'">
 						<view class="diet-item" v-for="(item, index) in sportsRecord" :key="index" @click="clickSportRecordItem(item)">
-							<u-image width="100%" height="100rpx" class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></u-image>
+							<image class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></image>
 							<view class="diet-detail">
 								<view class="name">{{ item.name }}</view>
 								<view class="number">
@@ -278,13 +281,13 @@
 			</view> -->
 		</view>
 		<!-- <u-popup v-model="showEditModal" mode="bottom"> -->
-		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
+		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }">
 			<view class="cu-dialog current-diet-detail" v-if="currentRecord">
 				<view class="title-bar" v-if="currentRecord.hdate && currentRecord.htime">
 					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
 				</view>
 				<view class="diet-info">
-					<view class="img"><u-image width="100%" height="100%" :src="currentDietImgUrl"></u-image></view>
+					<view class="img"><image mode="aspectFit" class="img" :src="currentDietImgUrl"></image></view>
 					<view class="info">
 						<view class="name">
 							{{ currentRecord.name }}
@@ -306,7 +309,7 @@
 							<text class="unit">{{ currentRecord.unit }}</text>
 						</view>
 					</view>
-					<view class="chart-box">
+					<view class="chart-box" v-if="currentRecord && currentRecordType === 'food'">
 						<!-- #ifdef MP-WEIXIN -->
 						<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-ec-canvas>
 						<!-- #endif -->
@@ -314,10 +317,11 @@
 						<uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-echarts>
 						<!-- #endif -->
 					</view>
-					<view class="cook-type-box" v-if="currentRecordType === 'food'">
+					<view class="cook-type-box" v-if="currentRecord && currentRecordType === 'food'">
 						<view class="title">烹调方式:</view>
-						<view class="current-cook-type" @click="isShowCookType = true">{{ currentRecord.cook_method }}</view>
-						<text class="lg text-gray cuIcon-right"></text>
+						<view class="current-cook-type" v-if="currentRecord.cook_method" @click="showCookTypes">{{ currentRecord.cook_method }}</view>
+						<text class="" v-if="!currentRecord.cook_method" @click="showCookTypes">(点击选择烹调方式)</text>
+						<text class="lg text-gray cuIcon-right" v-if="cookTypes.length > 0"></text>
 					</view>
 					<view class="unit-box" v-if="currentRecordType === 'food'">
 						<view class="title">单位:</view>
@@ -337,21 +341,13 @@
 					</view>
 				</view>
 				<view class="delete-bar">
-					<view
-						class="btn bg-grey"
-						@click="
-							showEditModal = false;
-							currentRecord = null;
-						"
-					>
-						取消
-					</view>
+					<view class="btn bg-grey" @click="hideRecordDetailModal">取消</view>
 					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
 			</view>
 		</view>
-		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
-		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
+		<!-- <view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view> -->
+		<!-- <u-popup v-model="showPopup" mode="bottom" border-radius="50">
 			<view class="popup-box">
 				<view class="icon-item" @click="toPages('food')">
 					<image src="@/archivesPages/static/icon/yinshi.png" mode="" class="icon"></image>
@@ -387,7 +383,7 @@
 				</view>
 			</view>
 			<view class="close-icon"><text @click="showPopup = false" class="cuIcon-close"></text></view>
-		</u-popup>
+		</u-popup> -->
 		<view @click.self="closeDay" class="cu-modal" style="display: flex; align-items: center" :class="modalName == 'Modal' ? 'show' : ''">
 			<view style="height: 43vh" class="cu-dialog">
 				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :markDays="markDays" :headerBar="true" @onDayClick="onDayClick"></bx-date-stamp>
@@ -406,7 +402,9 @@
 						v-for="(cook, c) in cookTypes"
 						:key="c"
 						class="cook-item"
-						:class="currentRecord.cook_method && currentRecord.cook_method.indexOf(cook.value) > -1 ? 'active-cook-item' : ''"
+						:class="{
+							'active-cook-item': currentRecord && currentRecord.cook_method && currentRecord.cook_method === cook.value
+						}"
 					>
 						<text>{{ cook.value }}</text>
 					</view>
@@ -449,6 +447,10 @@ export default {
 					color: ['#92d050', '#f79646', '#4f81bd'],
 					title: { text: '' },
 					legend: { data: ['已选', '超标部分', 'NRV%达标线'] },
+					tooltip: {
+						show: true,
+						trigger: 'axis'
+					},
 					grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
 					xAxis: [
 						{
@@ -473,7 +475,39 @@ export default {
 					]
 				}
 			},
-			currentDietChartData: {},
+			currentDietChartData: {
+				option: {
+					color: ['#92d050', '#f79646', '#4f81bd'],
+					title: { text: '' },
+					legend: { data: ['其他食物', '当前食物', 'NRV%达标线'] },
+					tooltip: {
+						show: true,
+						trigger: 'axis'
+					},
+					grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
+					xAxis: [
+						{
+							type: 'category',
+							data: ['蛋白', '脂肪', '碳水', 'VA', 'VE', 'VB1', 'B2', '烟酸', '叶酸', 'VC', '钙', '磷', '镁', '钾', '铁', '锌', '硒', '铜', '锰'],
+							axisLabel: { rotate: 70, interval: 0, fontSize: 10 }
+						}
+					],
+					yAxis: [
+						{
+							type: 'value',
+							max: function(value) {
+								return value.max + 20;
+							},
+							axisLabel: { formatter: '{value}%' }
+						}
+					],
+					series: [
+						{ name: '其他食物', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
+						{ name: '当前食物', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
+						{ name: 'NRV%达标线', data: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100], type: 'line', stack: false }
+					]
+				}
+			},
 			currentUnitIndex: 0,
 			showUserList: false,
 			backTextStyle: {
@@ -925,6 +959,17 @@ export default {
 		}
 	},
 	methods: {
+		hideRecordDetailModal() {
+			this.showEditModal = false;
+			this.currentRecord = {};
+			this.currentDietChartData = {
+				option: {}
+			};
+		},
+		showCookTypes() {
+			this.isShowCookType = true;
+			console.log(this.cookTypes);
+		},
 		changePageType(e) {
 			if (this.pageType && this.pageType !== e) {
 				this.$emit('changePageType', e);
@@ -933,9 +978,47 @@ export default {
 		clickCharts(e) {
 			this.toDetail(e);
 		},
-		async buildCurrenDietChartOption() {
+		getEnergyListValue(foodInfo) {
 			let currentDiet = this.deepClone(this.currentRecord);
 			let dietRecordList = this.deepClone(this.dietRecord);
+			let energyList = this.deepClone(this.energyListWrap);
+			let eleArr = [];
+			energyList.forEach(item => {
+				item.matterList.forEach(ele => {
+					ele.value = 0;
+					eleArr.push(ele);
+				});
+			});
+			dietRecordList = dietRecordList.map(item => {
+				if (item.id === currentDiet.id) {
+					item = currentDiet;
+				}
+				return item;
+			});
+			let foodTypes = this.deepClone(this.foodType);
+			eleArr = eleArr.map(ele => {
+				dietRecordList.forEach(diet => {
+					if (diet.id === currentDiet.id) {
+						diet = currentDiet;
+					}
+					foodTypes.forEach(food => {
+						if (food.food_no === diet.diet_contents_no || food.meal_no === diet.mixed_food_no) {
+							let ratio = 1;
+							if (food['unit'] === 'g') {
+								ratio = (diet.unit_weight_g * diet.amount) / food.unit_amount;
+							}
+							ele.value = ele.value + food[ele['key']] * ratio;
+						}
+					});
+				});
+				return ele;
+			});
+			console.log(eleArr);
+			return eleArr;
+		},
+		async buildCurrenDietChartOption() {
+			let currentDiet = this.deepClone(this.currentRecord);
+			// let dietRecordList = this.deepClone(this.dietRecord);
 			let serviceName = '';
 			let condition = [{}];
 			if (currentDiet.diret_type === 'diet_contents') {
@@ -955,7 +1038,7 @@ export default {
 					value: currentDiet.mixed_food_no
 				};
 			}
-			let foodType = [];
+			// let foodType = [];
 			let foodInfo = await this.getFoodType(condition, serviceName);
 			if (Array.isArray(foodInfo) && foodInfo.length > 0) {
 				foodInfo = foodInfo[0];
@@ -964,15 +1047,7 @@ export default {
 				return;
 			}
 			currentDiet = { ...foodInfo, ...currentDiet };
-			let energyList = await this.buildDietData();
-			// 构建echarts需要的数据格式
-			energyList = this.deepClone(this.energyListWrap);
-			let eleArr = [];
-			energyList.forEach(item => {
-				item.matterList.forEach(ele => {
-					eleArr.push(ele);
-				});
-			});
+			let eleArr = this.getEnergyListValue();
 			let category = eleArr.map(item => {
 				return item.name;
 			});
@@ -991,22 +1066,22 @@ export default {
 				});
 				switch (le) {
 					case '其它食物':
-						obj.data = eleArr.map(item => {
-							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							// item.value = item.value - ratio * currentDiet[item.key];
-							item.value = item.value - currentDiet[item.key];
-							let num = (item.value * 100) / Number(item.EAR);
-							num = Math.abs(parseFloat(num.toFixed(1)));
-							if (typeof num === 'number' && num.toString() === 'NaN') {
-							}
+						obj.data = eleArr.map(ele => {
+							let cur = this.deepClone(ele);
+							let ratio = currentDiet.unit_weight_g / 100;
+							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
+							let num = (val * 100) / Number(cur.EAR);
+							num = parseFloat(num.toFixed(1));
 							return num;
 						});
 						break;
 					case '当前食物':
-						obj.data = eleArr.map(item => {
-							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
-							num = Math.abs(parseFloat(num.toFixed(1)));
+						obj.data = eleArr.map(ele => {
+							let cur = this.deepClone(ele);
+							let ratio = currentDiet.unit_weight_g / 100;
+							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
+							let num = (val * 100) / Number(cur.EAR);
+							num = parseFloat(num.toFixed(1));
 							return num;
 						});
 						break;
@@ -1026,16 +1101,12 @@ export default {
 				title: {
 					text: ''
 				},
+				// #ifdef h5
 				tooltip: {
 					show: true,
 					trigger: 'axis'
-					// axisPointer: {
-					// 	type: 'cross',
-					// 	label: {
-					// 		backgroundColor: '#6a7985'
-					// 	}
-					// }
 				},
+				// #endif
 				legend: {
 					data: legendData
 				},
@@ -1157,6 +1228,10 @@ export default {
 				legend: {
 					data: legendData
 				},
+				tooltip: {
+					show: true,
+					trigger: 'axis'
+				},
 				grid: {
 					left: '3%',
 					right: '4%',
@@ -1205,12 +1280,9 @@ export default {
 			// 切换单位
 			this.currentUnitIndex = index;
 			let currentUnit = this.unitList[index];
-			console.log(this.currentRecord);
 			//TODO 动态改变热量
-			// this.currentRecord.energy  this.currentRecord.unit_weight_g/100
 			this.currentRecord.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
 			this.currentRecord.unit = item.unit;
-			// this.currentRecord.energy = currentUnit.amount / 100;
 			this.buildCurrenDietChartOption();
 		},
 		async getCookTypes() {
@@ -1438,7 +1510,6 @@ export default {
 				this.buildCurrenDietChartOption();
 			}
 		},
-
 		toDetail(e, item) {
 			if (!item) {
 				let name = e.name;
@@ -1466,6 +1537,7 @@ export default {
 		},
 		async getDietAllRecord() {
 			//饮食记录
+			this.getCookTypes();
 			let url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_diet_record_select',
@@ -1802,10 +1874,10 @@ export default {
 				];
 			}
 			let res = await this.$http.post(url, req);
+			self.hideRecordDetailModal();
 			if (res.data.state === 'SUCCESS') {
 				await self.getDietRecord();
 				await self.getSportsRecord();
-				self.showEditModal = false;
 			}
 		},
 		deleteItem(item) {
@@ -1820,7 +1892,7 @@ export default {
 							mask: true,
 							title: '正在删除...'
 						});
-						self.showEditModal = false;
+						self.hideRecordDetailModal();
 						let serviceName = '';
 						let url = '';
 						if (type === 'food') {
@@ -2030,25 +2102,50 @@ export default {
 		},
 		/* 根据饮食记录查找食物**/
 		async getChooseFood(str) {
-			let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_diet_contents_select',
-				colNames: ['*'],
-				condition: [
+			let dietRecord = this.dietRecord;
+			if (Array.isArray(dietRecord) && dietRecord.length > 0) {
+				let names = dietRecord.map(item => item.name);
+				let mixDietList = dietRecord.filter(item => item.diret_type === 'mixed_food');
+				let basicDietList = dietRecord.filter(item => item.diret_type === 'diet_contents');
+				let condition1 = [
 					{
 						colName: 'name',
 						ruleType: 'in',
-						value: str
+						value: mixDietList.map(item => item.name).toString()
 					}
-				]
-			};
+				];
+				let condition2 = [
+					{
+						colName: 'name',
+						ruleType: 'in',
+						value: basicDietList.map(item => item.name).toString()
+					}
+				];
+				let mix = await this.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
+				let basic = await this.getFoodType(condition2);
+				this.foodType = [...mix, ...basic];
+				return this.foodType;
+			}
+			// let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
+			// let req = {
+			// 	serviceName: 'srvhealth_diet_contents_select',
+			// 	colNames: ['*'],
+			// 	condition: [
+			// 		{
+			// 			colName: 'name',
+			// 			ruleType: 'in',
+			// 			value: str
+			// 		}
+			// 	]
+			// };
 
-			let res = await this.$http.post(url, req);
-			console.log('res-------', res.data.data);
-			return res.data.data;
+			// let res = await this.$http.post(url, req);
+			// console.log('res-------', res.data.data);
+			// return res.data.data;
 		},
+
 		async buildDietData() {
-			let data = this.dietRecord;
+			let data = this.deepClone(this.dietRecord);
 			let strArr = [];
 			data.forEach(item => {
 				item['editable'] = false;
@@ -2061,7 +2158,20 @@ export default {
 					a.forEach(food => {
 						data.forEach(re => {
 							if (food.name === re.name) {
+								food.id = re.id;
+								let currentDiet = this.deepClone(this.currentRecord);
+								if (currentDiet && currentDiet.id === food.id) {
+									re.amount = currentDiet.amount;
+									re['unit'] = currentDiet.unit;
+									re['unit_weight_g'] = currentDiet['unit_weight_g'];
+								}
+								let ratio = 1;
+								if (food['unit'] === 'g') {
+									ratio = re['unit_weight_g'] / food['unit_amount'];
+								}
 								food['amount'] = food['amount'] ? food['amount'] + re.amount : re.amount;
+								food['amount'] = ratio * food['amount'];
+								food['unit'] = re['unit'] ? re['unit'] : food['unit'];
 							}
 						});
 					});
@@ -2179,7 +2289,6 @@ export default {
 		},
 		async getDietRecord(chooseDate = null) {
 			//饮食记录
-			this.getCookTypes();
 			if (chooseDate) {
 				this.selectDate = chooseDate;
 			}
@@ -2243,7 +2352,6 @@ export default {
 				});
 				this.dietIn = dietIn;
 				uni.$emit('dietInChange', dietIn);
-				console.log(this.foodType);
 				this.dietRecord = res.data.data;
 			} else if (res.data.state === 'SUCCESS' && res.data.data.length === 0) {
 				this.dietRecord = [];
@@ -2553,6 +2661,7 @@ export default {
 		uni.$on('dietUpdate', () => {
 			//饮食记录已改变，刷新数据
 			this.getDietRecord();
+			this.getBaseInfo();
 		});
 		uni.$on('sportUpdate', () => {
 			//运动记录已改变，刷新数据
@@ -2587,8 +2696,6 @@ export default {
 					}
 				}
 				this.getDietAllRecord();
-				// this.getDietRecord(this.selectDate);
-				// this.getSportsRecord(this.selectDate);
 			});
 		} else {
 			alert('未发现登录用户信息');
@@ -2879,9 +2986,6 @@ export default {
 					font-size: 30rpx;
 					letter-spacing: 2px;
 					box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
-					// &:last-child{
-					// 	margin-right: 5rpx;
-					// }
 					&:active {
 						transform: translate(1px, 2px);
 					}
@@ -2923,7 +3027,7 @@ export default {
 								color: #cecece;
 							}
 							.u-image {
-								width: 100%;
+								width: 100rpx;
 								height: 100rpx;
 							}
 							.diet-detail {

@@ -29,7 +29,8 @@
 			<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 				<text>已选择：</text>
 				<view v-for="(item,index) in childChooseArr" class="filtrate-choose-item">
-					<u-tag :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"/>
+					<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"></text>
+					<!-- <u-tag :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"/> -->
 				</view>
 			</view>
 			<view class="filtrate-item-wrap">
@@ -74,8 +75,8 @@
 				>
 					<view class="smallbox">
 						<view class="smallbox-img">
-							<u-image width="100%" height="100%" v-if="!food.imgurl" src="/otherPages/static/img/none.png"></u-image>
-							<u-image width="100%" height="100%" v-else :src="food.imgurl"></u-image>
+							<image width="100%" height="100%" v-if="!food.imgurl" src="/otherPages/static/img/none.png"></image>
+							<image width="100%" height="100%" v-else :src="food.imgurl"></image>
 						</view>
 						
 						<view class="textbox">
@@ -655,7 +656,7 @@ export default {
 	onShow() {
 		this.getChooseFoodList();
 		this.getElementLabel();
-		// this.onRefresh();
+		this.onRefresh();
 	},
 	onLoad(option) {
 		let query = JSON.parse(decodeURIComponent(option.condType));
@@ -1110,7 +1111,7 @@ export default {
 		},
 		/* 顶部菜单点击**/
 		chooseMenu(parent,child){			
-			if(child.value === '饭馆饭菜'){
+			if(child.value === '饭馆'){
 				uni.switchTab({
 					url:'/pages/store/store'
 				})
@@ -1149,9 +1150,8 @@ export default {
 					}
 				})				
 			}
-			if(child.value === '我的饭菜'){
+			if(child.value === '我的'){
 				this.isShowMyList = true
-				debugger
 				this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
 				let cond = [{
 						colName:'owner',
@@ -1163,24 +1163,32 @@ export default {
 						value:uni.getStorageSync('current_user_info').userno
 					}]
 				this.condObj = cond
-			}else if(child.value === '公共饭菜'){
-				this.condObj = null
+			}else if(child.value === '公共'){
+				this.condObj = {
+					colName:'owner',
+					ruleType:'eq',
+					value:'公共'
+				}
 			}
 			if(child.value === 'foods' || child.value === 'matter'){
 				let foodsArr = []
 				if(child.value === 'foods'){
 					 foodsArr = [{
-										title: '公共饭菜',
-										value: '公共饭菜',
+										title: '全部',
+										value: '全部',
 										choose:true
 									},{
+										title: '公共饭菜',
+										value: '公共',
+										choose:false
+									},{
 										title: '饭馆饭菜',
-										value: '饭馆饭菜',
+										value: '饭馆',
 										choose:false
 									},
 									{
 										title: '我的饭菜',
-										value: '我的饭菜',
+										value: '我的',
 										choose:false
 									}]											
 					console.log("-------------",this.menuAgList)
@@ -1264,13 +1272,17 @@ export default {
 				console.log("this.menuAgList-----",this.menuAgList)
 				this.onRefresh();
 				
-			}else if(parent.type == 'subclass' && this.menuAgList[0].children[0].choose) {
-				this.searchArg.serviceName = 'srvhealth_diet_contents_select'
+			}else if(parent.type == 'subclass') {
+				if(this.menuAgList[0].children[0].choose){
+					this.searchArg.serviceName = 'srvhealth_diet_contents_select'
+				}else{
+					this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
+				}
 				if(child.value === '全部'){
 					this.condObj = null
 					this.classifyCond = null
 					this.getFoodsList()
-				}else{
+				}else if(this.menuAgList[0].children[0].choose){
 					let cond = {
 						colName:"classify",
 						ruleType:"eq",
@@ -1290,7 +1302,6 @@ export default {
 				}
 				
 			}
-			debugger
 			if(parent.type === 'capacity' || parent.type === 'vitamin' || parent.type === 'mineral' ||parent.type === 'mingle'){
 				console.log(333,'par.type === parent.type')
 				let isHas = false

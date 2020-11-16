@@ -12,7 +12,7 @@
 					脆糯营养，口感好，健康绿色
 				</view>
 				<view class="cen-score">
-					{{foodObj.mark}}分
+					{{foodObj.mark?foodObj.mark:0}}分
 				</view>
 				<view class="cen-money">
 					<text>￥</text>
@@ -20,6 +20,9 @@
 				</view>
 			</view>		
 			<view class="shop-detail-cen-rig">
+				<view @click="toMyTodayFood" class="shop-detail-hod">
+					添加至今日饮食
+				</view>
 				<view v-if="!isJoin" @click="joinCar" class="shop-detail-btn">
 					加入购物车
 				</view>
@@ -214,6 +217,8 @@
 				num:0,
 				carNum:0,
 				element: [],
+				nowDate: this.formateDate(new Date(), 'date').replace(/\s*/g, ''),
+				nowDateTime: this.formateDate(new Date(), 'dateTime'),
 				isJoin:false,
 				approveData:[{
 					name:'成年男性',
@@ -605,6 +610,36 @@
 			subtract(e){
 				this.carNum--
 			},
+			/*添加到今日饮食记录**/
+			async toMyTodayFood(){
+				let current_food = this.currFood
+				let obj = [{
+					userno: uni.getStorageSync('login_user_info').user_no,
+					hdate: this.nowDate,
+					htime: this.nowDateTime,
+					name: current_food.name,
+					amount: 1,
+					unit: current_food.unit,
+					energy: current_food.unit_energy,
+					user_name: uni.getStorageSync('current_user'),
+					image: current_food.image,
+					unit_weight_g: 100,
+					mixed_food_no :current_food.meal_no,
+					diret_type: 'mixed_food'
+				}];
+				let serviceName = 'srvhealth_diet_record_add';
+				let url = this.getServiceUrl('health', serviceName, 'operate');
+				let req = [{ serviceName: serviceName, colNames: ['*'], data: obj }];
+				let res = await this.$http.post(url, req);
+				if(res.data.state === 'SUCCESS'){
+					uni.showToast({
+					    title: '添加成功',
+					    duration: 2000,
+						icon:'none'
+					});
+				}
+				
+			},
 			/* 点击加入购物车**/
 			joinCar(){				
 				this.element = ['.shop-detail-cen-rig', '.add-button'];
@@ -742,6 +777,16 @@
 				background-color: #fed061;
 				border-radius: 5px;
 				font-weight: 700;
+				text-align: center;
+			}
+			.shop-detail-hod{
+				background: #fed061;
+				text-align: center;
+				border-radius: 10rpx;
+				padding: 10rpx;
+				margin-right: 20rpx;
+				font-weight: 700;
+				margin-bottom: 20rpx;
 			}
 			.counter{
 				margin-right: 20upx;

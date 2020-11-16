@@ -19,7 +19,7 @@
 		<view class="title">人体七大营养素</view>
 		<view class="tagBox">
 			<view class="box" v-for="(item,index) in serlist" @click="tagPage(item,index)">
-				<u-tag  :text="item.title"  shape="square" mode="dark" :type="item.status" />
+				<text class="cu-tag"  :text="item.title"  shape="square" mode="dark" :type="item.status" ></text>
 			</view>
 		</view>
 		<view class="contentDetail">

@@ -23,7 +23,7 @@
 			<view class="title">搜索历史</view>
 			<view class="tagBox">
 				<view class="box" v-for="(item,index) in serlist"  @click="tagPage(item.title)">
-					<u-tag shape="circle" :text="item.title" type="info" />
+					<text class="cu-tag" shape="circle" :text="item.title" type="info" ></text>
 				</view>
 			</view>
 			<view class="title">大家都在搜</view>
@@ -43,7 +43,7 @@
 			<view class="">
 				<view class="tagBox" v-if="selectAnswer.length">
 					<view class="box" v-for="(item,index) in selectAnswer" >
-						<u-tag shape="circle" :text="item.name"  type="success" />
+						<text class="cu-tag" shape="circle" :text="item.name"  type="success" ></text>
 					</view>
 				</view>
 				<view class="more" v-else>

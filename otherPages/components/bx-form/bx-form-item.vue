@@ -15,7 +15,7 @@
 					<text class="cuIcon-triangledownfill" color="#666" size="28" v-if="showOption_img"></text>
 					<text class="margin-left-xs">图片描述</text>
 				</view>
-				<u-image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></u-image>
+				<image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></image>
 			</block>
 			<view v-if="pageFormType === 'detail'" class="detail-text">
 				<text class=" text-xl" v-if="pageFormType === 'detail' && fieldData.type !== 'images' && fieldData.type !== 'snote' && fieldData.type !== 'Note'">

@@ -3,7 +3,7 @@
 		<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 			<text>已选择：</text>
 			<view v-for="(item,index) in childChooseArr" class="filtrate-choose-item">
-				<u-tag :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"/>
+				<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"></text>
 			</view>
 		</view>
 		<view class="filtrate-item-wrap">
@@ -49,8 +49,8 @@
 				>
 					<view class="smallbox">
 						<view class="smallbox-img">
-							<u-image width="100%" height="100%" v-if="!food.imgurl" src="/otherPages/static/img/none.png"></u-image>
-							<u-image width="100%" height="100%" v-else :src="food.imgurl"></u-image>
+							<image width="100%" height="100%" v-if="!food.imgurl" src="/otherPages/static/img/none.png"></image>
+							<image width="100%" height="100%" v-else :src="food.imgurl"></image>
 						</view>
 						
 						<view class="textbox">

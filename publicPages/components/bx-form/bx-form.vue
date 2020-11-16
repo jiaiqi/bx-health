@@ -25,7 +25,7 @@
 <script>
 import formItem from './bx-form-item.vue';
 import evaluatorTo from '@/common/evaluator.js';
-import amap from '@/publicPages/map/amap-wx.js'
+// import amap from '@/publicPages/map/amap-wx.js'
 export default {
 	name: 'bx-form',
 	components: { formItem },
@@ -189,41 +189,85 @@ export default {
 		this.getAllField();
 	},
 	mounted() {
-		this.amapPlugin = new amap.AMapWX({
-			key: this.key  
-		});
+		// this.amapPlugin = new amap.AMapWX({
+		// 	key: this.key  
+		// });
 	},
 	methods: {
 		getSeatInfo(e){
-			uni.showLoading({
-					title: '获取信息中'  
-				});
-				this.amapPlugin.getRegeo({  
-				success: (data) => {  
-					console.log("---高德---",data)
-					// if(e.column === 'address'){
-						this.allField.forEach(item=>{
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			let self = this
+			uni.getLocation({
+			    type: 'gcj02',
+			    success: function (res) {
+					let latitude = res.latitude 
+					let longitude = res.longitude
+					uni.navigateTo({
+						url:'/publicPages/mapPage/mapPage?latitude='+latitude+'&longitude='+longitude
+					})
+			    },
+				fail:function(error){
+					uni.showToast({
+						title:'获取定位失败',
+						icon:'none'
+					})
+				}
+			});
+			
+			
+			
+			   uni.$once('update',function(data){
+			        console.log(data);
+					let locationData = JSON.parse(data)
+				self.allField.forEach(item=>{
 							if(item.column === 'address'){
-								item.value = data[0].name
+								item.value = locationData.address
 							}else if(item.column === 'longitude'){
-								item.value = data[0].longitude
+								item.value = locationData.location.lng
 							} else if(item.column === 'latitude'){
-								item.value = data[0].latitude
+								item.value = locationData.location.lat
 							}
 							
 						})
-					// }
-					uni.hideLoading();  
-				},
-				fail:(e)=>{
-					uni.showToast({
-						title:'获取位置信息失败,确认定位服务是否开启后重试',
-						icon:'none',
-						duration: 2000
-					})
-					console.log("error------",e)
-				}
-			});
+			    })
+			
+			
+			
+			
+			// 	this.amapPlugin.getRegeo({  
+			// 	success: (data) => {  
+			// 		console.log("---高德---",data)
+			// 		// if(e.column === 'address'){
+			// 			this.allField.forEach(item=>{
+			// 				if(item.column === 'address'){
+			// 					item.value = data[0].name
+			// 				}else if(item.column === 'longitude'){
+			// 					item.value = data[0].longitude
+			// 				} else if(item.column === 'latitude'){
+			// 					item.value = data[0].latitude
+			// 				}
+							
+			// 			})
+			// 		// }
+			// 		uni.hideLoading();  
+			// 	},
+			// 	fail:(e)=>{
+			// 		uni.showToast({
+			// 			title:'获取位置信息失败,确认定位服务是否开启后重试',
+			// 			icon:'none',
+			// 			duration: 2000
+			// 		})
+			// 		console.log("error------",e)
+			// 	}
+			// });
 		},
 		pickerchange(oriData) {
 			console.log('oriData------', oriData, this.allField);

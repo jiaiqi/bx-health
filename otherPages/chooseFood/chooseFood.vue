@@ -1,6 +1,6 @@
 <template>
 	<view class="food_wrap">
-		<view  class="cu-bar bg-white food_wrap_top">
+		<view  class="cu-bar bg-white food_wrap_top" :class="pageType?'':'ingredient'">
 			<view @click="clickTop('edit')" v-if="pageType" class=" button" >编辑</view>
 			<view class="date-time">
 				<view class="date-time-rq">{{ nowDate }}</view>
@@ -173,10 +173,11 @@
 			
 			</view>
 			<view class="calculate">
-				<view v-if="!currFood.meal_no" @click="chooseCook" class="cook weight">
+				<view v-if="!currFood.meal_no" class="cook weight">
 					<view class="calculate-l">烹调方式：</view>
-					<text>{{currFood.cook_method}}</text>
-					<text class="lg text-gray" :class="'cuIcon-right'"></text>
+					<text v-if="currentCookData" @click.stop="clickCook" :class="isCookDataChoose?'active-cook-data':''">{{currentCookData}}</text>
+					<text @click="chooseCook">更多</text>
+					<!-- <text class="lg text-gray" :class="'cuIcon-right'"></text> -->
 					<!-- <view @click="chooseCook(cooks, c)" v-for="(cooks, c) in cookData" :key="c" :class="currentCookData == cooks.value ? 'active-unit' : ''" class="unit">
 						{{cooks.value}}						
 					</view> -->
@@ -224,7 +225,7 @@
 			</view>
 		</view>
 		
-		<view class="cu-modal bottom-modal" :class="isShowCookType?'show':''">
+		<view v-if="!currFood.meal_no" class="cu-modal bottom-modal" :class="isShowCookType?'show':''">
 			<view class="cu-dialog">
 				<view class="cu-bar bg-white cook-top">
 					<view class="action text-blue" @tap="hideCookModel">取消</view>
@@ -233,7 +234,7 @@
 				</view>
 				<view class="padding-xl">
 					<view class="cook-wrap">
-						<view @click="chooseCookFood(cook)" v-for="(cook,c) in cookData" :key="c" class="cook-item" :class="currFood.cook_method.indexOf(cook.value)>-1?'active-cook-item':''">
+						<view @click="chooseCookFood(cook)" v-for="(cook,c) in cookData" :key="c" class="cook-item" :class="currentCookData==cook.value&&isCookDataChoose?'active-cook-item':''">
 							<text>{{cook.value}}</text>
 						</view>
 					</view>
@@ -311,13 +312,14 @@ export default {
 					key: 'protein'
 				},
 				{
-					name: '碳水化合物',
-					key: 'carbohydrate'
-				},
-				{
 					name: '脂肪',
 					key: 'axunge'
 				},
+				{
+					name: '碳水化合物',
+					key: 'carbohydrate'
+				},
+				
 				{
 					name: 'VA',
 					key: 'vitamin_a'
@@ -335,21 +337,30 @@ export default {
 					key: 'vitamin_b2'
 				},
 				{
-					name: 'VB3',
+					name: '烟酸',
 					key: 'vitamin_b3'
+				},
+				{
+					name: '叶酸',
+					key: 'folic_acid'
+				},
+				{
+					name: 'VC',
+					key: 'vitamin_c'
 				},
 				{
 					name: '钙',
 					key: 'element_ca'
 				},
 				{
-					name: '镁',
-					key: 'element_mg'
-				},
-				{
 					name: '磷',
 					key: 'element_p'
 				},
+				{
+					name: '镁',
+					key: 'element_mg'
+				},
+				
 				{
 					name: '钾',
 					key: 'element_k'
@@ -360,6 +371,10 @@ export default {
 				},
 				{
 					name: '锌',
+					key: 'element_zn'
+				},
+				{
+					name: '硒',
 					key: 'element_se'
 				},
 				{
@@ -444,7 +459,19 @@ export default {
 							name: '食物含量',
 							type: 'bar',
 							stack: '总数',
-							data: []
+							data: [],
+						// 	itemStyle: {
+						// 	normal: {
+						// 		label: {
+						// 			show: true, //开启显示
+						// 			position: 'top', //在上方显示
+						// 			textStyle: { //数值样式
+						// 				color: 'black',
+						// 				fontSize: 16
+						// 			}
+						// 		}
+						// 	}
+						// },
 						}
 					]
 				}
@@ -455,13 +482,16 @@ export default {
 			cookData:[], //烹饪方式
 			currentCookData:null,
 			isShowCookType:false,
-			pageType:''
+			pageType:'',
+			currFoodNo:null,
+			isCookDataChoose:false
 		};
 	},
 	onShow() {
 		this.approveData[2].sex = this.userInfo.sex
 		this.approveData[2].age = this.age
 		this.approveData[2].weight = this.userInfo.weight
+		this.getCurrentFood(this.currFoodNo)
 	},
 	onLoad(option) {
 		if (uni.getStorageSync('current_user_info')) {
@@ -482,14 +512,15 @@ export default {
 		if (query.hdate) {
 			this.nowDate = query.hdate;
 		}
-		this.currFood = JSON.parse(decodeURIComponent(option.currFood));
-		if (this.currFood) {
+		this.currFoodNo = query;
+		
+		
+		// if (this.currFood) {
 			this.currentAppr = this.approveData[0]
-			this.assembleData();
-			this.selectCurrFoodUnit(this.currFood);
-			this.getFoodsV2()
+			this.getCurrentFood(this.currFoodNo)
+			
 			// this.getNutrientRecommended()
-		}
+		// }
 	},
 	computed: {
 		age() {
@@ -500,6 +531,32 @@ export default {
 		}
 	},
 	methods: {
+		async getCurrentFood(item){
+			let self = this;
+			let serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
+			if(!item.meal_no){
+				serviceName = 'srvhealth_diet_contents_select'
+			}
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: serviceName,
+				colNames: ['*'],
+				condition:[{
+					colName:"id",
+					ruleType:"eq",
+					value:item.id
+				}]
+			};
+			let res = await this.$http.post(url, req);
+			let urls = self.$api.downloadFile + res.data.data[0].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +"&thumbnailType=fwsu_100";
+			this.$set(res.data.data[0], 'imgurl', urls);
+			this.currFood = res.data.data[0]
+			if(!this.currFood.meal_no){
+				this.getFoodsV2()
+			}
+			this.assembleData();
+			this.selectCurrFoodUnit(this.currFood);
+		},
 		hideCookModel(){
 			this.isShowCookType = false
 		},
@@ -513,7 +570,7 @@ export default {
 			colData.forEach(item=>{
 				if(item.columns === 'cook_method'){
 					self.cookData = item.option_list_v2
-					this.currentCookData = this.currFood.cook_method
+					this.currentCookData = self.currFood.cook_method.split(',')[0]
 				}
 			})
 		},
@@ -534,18 +591,21 @@ export default {
 				  url: '/publicPages/form/form?type=update&params='+ encodeURIComponent(JSON.stringify(params)) 
 				});
 			}else if(type === 'add'){
-				let cond = [{
-					colName:"unit",
-					ruleType:"eq",
-					value:''
-				},{
-					colName:"meal_no",
-					ruleType:"eq",
-					value:this.currFood.meal_no
-				}]
+				// let cond = [{
+				// 	colName:"unit",
+				// 	ruleType:"eq",
+				// 	value:''
+				// },{
+				// 	colName:"meal_no",
+				// 	ruleType:"eq",
+				// 	value:this.currFood.meal_no
+				// }]
 				uni.navigateTo({
-				  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
-				});	
+					url:'/otherPages/shop/foodMaterial?itemFood=' + encodeURIComponent(JSON.stringify(this.currFood))
+				})
+				// uni.navigateTo({
+				//   url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
+				// });	
 			}
 		},
 		/*点击切换图表顶部类型**/
@@ -591,13 +651,17 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
+			let age = self.currentAppr.age
+			if(age < 18){
+				age = 18
+			}
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-				let result = res.data.data.filter(item => {
+				let result = res.data.data.filter(item => {					
 					if ((item.sex && item.sex.indexOf(self.currentAppr.sex) !== -1) || !item.sex) {
-						if (item.age_start && item.age_end) {
-							return self.currentAppr.age >= item.age_start && self.currentAppr.age < item.age_end;
+						if (item.age_start && item.age_end) {							
+							return age >= item.age_start && age < item.age_end;
 						} else if (item.age_start && !item.age_end) {
-							return self.currentAppr.age >= item.age_start;
+							return age >= item.age_start;
 						} else if (!item.age_start && !item.age_end) {
 							return true;
 						} else {
@@ -605,13 +669,14 @@ export default {
 						}
 					}
 				});
+				// console.log("res-----",)
 				this.result = result;
 				let endArr = [];
 				let currFood = this.currFood;
 				let nutrientData = this.nutrientData;
 				nutrientData.forEach(nut => {
 					let num = 0;
-					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'VB3') {
+					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === '烟酸') {
 						endArr.push(currFood[nut.key]);
 					}
 					result.forEach(re => {			
@@ -721,25 +786,14 @@ export default {
 			console.log("点击烹调方式")
 			this.isShowCookType = true
 		},
+		clickCook(){
+			this.isCookDataChoose = !this.isCookDataChoose
+		},
 		chooseCookFood(item){
-			let currData = this.currFood
-			let cook_method_str = currData.cook_method.split(',')
+			this.currentCookData = item.value
+			this.isCookDataChoose = true
+			this.isShowCookType = false
 			
-			let end_str = ""
-			if(currData.cook_method.indexOf(item.value) > -1){
-				cook_method_str.forEach((c,i)=>{
-					if(c == item.value){
-						cook_method_str.splice(i,1)
-					}
-				})
-				end_str = cook_method_str.join(',')
-			}else{
-				let endArr = []
-				endArr.push(item.value)
-				end_str = [...cook_method_str,...endArr].join(',')
-			}
-			this.$set(this.currFood,'cook_method',end_str)
-			console.log("----------",end_str,this.currFood)
 		},
 		/*选择单位*/
 		chooseUnit(item, i) {
@@ -836,23 +890,32 @@ export default {
 			let result = this.result;
 			nutrientData.forEach(nut => {
 				let num = 0;
+				let a = 0
 				// if (nut.name === '碳水化合物' || nut.name === 'VB3') {
-					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === 'VB3'){
+					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === '烟酸'){
 					addData.push(currFood[nut.key] * Number(self.choiceNum));
 				}
 				result.forEach(re => {
+					
 					if (nut.name === re.nutrient) {
-						num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100);
+						num =(((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100);
 						if(nut.name === '蛋白质'){
 							// num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
-							num = Number(this.choiceNum) * (((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100)								
+							num = (((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100)								
 						}
-						if(num > 100){
-							num  = (num - 100).toFixed(1)
+						num = parseInt(num*10) / 10												
+						if(re.nutrient === '叶酸'){							
+							if(a == 0){
+								addData.push(Number(num))
+							}
+							a++
 						}else{
-							num = num.toFixed(1)
+							addData.push(Number(num));
 						}
-						addData.push(Number(num));
+						// if(num > 100){
+						// 	num  = (num - 100).toFixed(1)
+						// }else{
+						// }
 					}
 				});
 			});
@@ -888,13 +951,15 @@ export default {
 						unit_weight_g: this.radioLabel ? this.radioLabel.amount : 100
 					};
 					// if (this.searchArg.type === 'food') {
-					if (item.classify && item.classify === 'mixed_food') {
+					if (item.meal_no) {
 						obj['mixed_food_no'] = item.meal_no;
-						obj['diret_type'] = item.classify;
+						obj['diret_type'] = "mixed_food";
 					} else {
 						obj['diet_contents_no'] = item.food_no;
 						obj['diret_type'] = 'diet_contents';
-						obj['cook_method'] = item.cook_method
+						if(this.isCookDataChoose){
+							obj['cook_method'] = this.currentCookData
+						}
 					}
 					// }
 					arr.push(obj);
@@ -952,6 +1017,9 @@ export default {
 	font-weight: 700;
 	color: #000;
 	font-size: 30rpx;
+}
+.ingredient{
+	justify-content: center!important;
 }
 .contents {
 	// overflow: hidden;
@@ -1453,14 +1521,25 @@ export default {
 		}
 		text{
 			&:nth-child(2){
-				font-weight: 700;
-				color: #f37b1d;
+				color: #999;
 				margin-right: 8rpx;
+				border: 1px solid #999;
+				padding: 4rpx 30rpx;
+				border-radius: 24rpx;
 			}
+			
 			&:last-child{
-				margin-bottom: -10rpx;
-				font-weight: 700;
+				// margin-bottom: -10rpx;
+				// font-weight: 700;
+				border: 1px solid #999;
+				padding: 4rpx 30rpx;
+				border-radius: 24rpx;
 			}
+		}
+		.active-cook-data{
+			background-color: coral;
+			color: white!important;
+			border-color: coral!important;
 		}
 	}
 }
@@ -1536,9 +1615,9 @@ export default {
 	display: flex;
 	flex-wrap: wrap;
 	.cook-item{
-		padding: 4rpx 20rpx;
+		padding: 4rpx 30rpx;
 		border: 1px solid #ccc;
-		margin-right: 10rpx;
+		margin-right: 20rpx;
 		margin-bottom: 10rpx;
 		text{
 			
@@ -1546,6 +1625,7 @@ export default {
 	}
 	.active-cook-item{
 		color: red;
+		border-color: red;
 	}
 }
 </style>

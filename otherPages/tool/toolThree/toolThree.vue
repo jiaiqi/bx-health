@@ -4,7 +4,7 @@
 			<view class="title">年龄(月/岁)</view>
 			<input placeholder="请选择婴儿年龄查询" @click="show = true" v-model="age" name="input"></input>
 		</view>
-		<u-select v-model="show"  :list="merchantList" @confirm="confirmMerchant"></u-select>
+		<!-- <u-select v-model="show"  :list="merchantList" @confirm="confirmMerchant"></u-select> -->
 		<view class="footerbg">
 			<!-- <image src="/static/img/ber.png" mode=""></image> -->
 		</view>

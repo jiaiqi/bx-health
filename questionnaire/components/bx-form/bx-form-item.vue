@@ -13,7 +13,7 @@
 					<u-icon name="arrow-down-fill" color="#666" size="28" v-if="showOption_img"></u-icon>
 					<text class="margin-left-xs">图片描述</text>
 				</view>
-				<u-image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></u-image>
+				<image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></image>
 			</block>
 			<view v-if="pageFormType === 'detail'" class="detail-text">
 				<text class=" text-xl" v-if="pageFormType === 'detail' && fieldData.type !== 'images' && fieldData.type !== 'snote' && fieldData.type !== 'Note'">
@@ -87,7 +87,7 @@
 					>
 						<view class="radio-content ">
 							<span style="flex: 1;padding-left: 10rpx;font-size: 14px;margin-left: 5px;">{{ itema.label }}</span>
-							<u-image width="100%" height="300rpx" v-if="itema.option_img_explain" :src="getOptionImgExplain(itema.option_img_explain)" mode="aspectFit"></u-image>
+							<image width="100%" height="300rpx" v-if="itema.option_img_explain" :src="getOptionImgExplain(itema.option_img_explain)" mode="aspectFit"></image>
 						</view>
 					</radio>
 				</radio-group>

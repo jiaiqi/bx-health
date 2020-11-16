@@ -16,7 +16,7 @@
 			<view class="title">性别</view>
 			<input placeholder="请选择你的性别" @click="show = true" v-model="info.sex" />
 		</view>
-		<u-select v-model="show" :list="merchantList" @confirm="confirmMerchant"></u-select>
+		<!-- <u-select v-model="show" :list="merchantList" @confirm="confirmMerchant"></u-select> -->
 		<view class="contents">
 			<view class="" v-if="BMI">
 				<view class="titlec">你的BMI为：</view>

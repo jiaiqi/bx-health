@@ -8,8 +8,8 @@
 			<view class="my-food-list-main-item">
 				<view @click="toFoodDetail(item)" v-for="(item,index) in foodList" :key="index" class="smallbox">
 					<view class="smallbox-img">
-						<u-image width="100%" height="100%" v-if="!item.imgurl" src="/otherPages/static/img/none.png"></u-image>
-						<u-image width="100%" height="100%" v-else :src="item.imgurl"></u-image>
+						<image width="100%" height="100%" v-if="!item.imgurl" src="/otherPages/static/img/none.png"></image>
+						<image width="100%" height="100%" v-else :src="item.imgurl"></image>
 					</view>
 					
 					<view class="textbox">

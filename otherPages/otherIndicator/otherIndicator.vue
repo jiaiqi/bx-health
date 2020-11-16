@@ -4,14 +4,27 @@
 			<view v-if="type && type === 'weight'" class="item-wrap">
 				<view class="item-list" @click="showWeightSelect = true">
 					<text>衣着穿戴</text>
-					<u-select v-model="showWeightSelect" :list="list" @confirm="confirmChoose($event, 'clothing')"></u-select>
-					<view class="item-list-bot"><input type="text" value="" disabled /></view>
+					<!-- <u-select v-model="showWeightSelect" :list="list" @confirm="confirmChoose($event, 'clothing')"></u-select> -->
+					<radio-group class="block weight-radio-group" @change="RadioChange($event,'clothing')">
+						<view v-for="(item,index) in list" :key="index" class="weight-radio-group-item">
+							<view class="title">{{item.value}}</view>
+							<radio :class="weightCurrentRadio==item.value?'checked':''" :checked="weightCurrentRadio==item.value?true:false" :value="item.value"></radio>
+						</view>
+					</radio-group>
+					<!-- <view class="item-list-bot"><input type="text" value="" disabled /></view> -->
 				</view>
 
 				<view class="item-list" @click="showWeightDigSelect = true">
 					<text>消化道情况</text>
-					<u-select v-model="showWeightDigSelect" :list="DigList" @confirm="confirmChoose($event, 'digestion')"></u-select>
-					<view class="item-list-bot"><input type="text" value="" disabled /></view>
+					
+					<radio-group class="block weight-radio-group" @change="RadioChange($event,'digestion')">
+						<view v-for="(item,index) in DigList" :key="index" class="weight-radio-group-item">
+							<view class="title">{{item.value}}</view>
+							<radio :class="digeCurrentRadio==item.value?'checked':''" :checked="digeCurrentRadio==item.value?true:false" :value="item.value"></radio>
+						</view>
+					</radio-group>
+					<!-- <u-select v-model="showWeightDigSelect" :list="DigList" @confirm="confirmChoose($event, 'digestion')"></u-select> -->
+					<!-- <view class="item-list-bot"><input type="text" value="" disabled /></view> -->
 				</view>
 				<view class="item-list">
 					<text>体重(千克)</text>
@@ -51,7 +64,7 @@
 					<view class="item-list-bot"><input type="text" value="" /></view>
 				</view>
 			</view>
-			<view v-else-if="type && type === 'pressure'" class="item-wrap">
+			<view v-else-if="type && (type === 'pressure'||type === 'bp')" class="item-wrap">
 				<!-- 血压 -->
 				<view class="item-list">
 					<text>收缩压(高压 毫米汞柱)</text>
@@ -98,7 +111,7 @@
 			</view>
 			<view v-else-if="type && type === 'glucose'" class="item-wrap">
 				<!-- 血糖 -->
-				<u-select v-model="showSelect" :list="glucose_time_option" @confirm="confirmSelect"></u-select>
+				<!-- <u-select v-model="showSelect" :list="glucose_time_option" @confirm="confirmSelect"></u-select> -->
 				<!-- <u-select v-model="showSelect" :list="glucose_time_option"></u-select> -->
 				<view class="item-list" @click="showSelect = true">
 					<text>测量时机</text>
@@ -178,6 +191,8 @@ export default {
 			isSubmit: false,
 			showWeightSelect: false,
 			showWeightDigSelect: false,
+			weightCurrentRadio:'',
+			digeCurrentRadio:'',
 			list: [
 				{
 					value: '穿鞋',
@@ -236,6 +251,15 @@ export default {
 		sleepyRadioChange(evt) {
 			this.inputVal.sleepy_daytime = evt.target.value;
 		},
+		RadioChange(e,type){
+			if(type === 'clothing'){
+				this.inputVal.wearing = e.detail.value;
+				this.weightCurrentRadio = e.detail.value
+			}else if(type === 'digestion'){
+				this.inputVal.alimentary_canal = e.detail.value;
+				this.digeCurrentRadio = e.detail.value
+			}
+		},
 		confirmChoose(e, type) {
 			switch (type) {
 				case 'clothing':
@@ -292,7 +316,6 @@ export default {
 			}
 		},
 		second2Time(second) {
-			debugger;
 			if (!second) {
 				return false;
 			} else {
@@ -336,7 +359,7 @@ export default {
 					req = [
 						{
 							serviceName: 'srvhealth_body_fat_measurement_record_add',
-							data: [{ service_no: this.serviceLog.no, name: this.serviceLog.name, weight: this.inputVal.weight, body_fat_rate: this.inputVal.body_fat_rate }]
+							data: [{ service_no: this.serviceLog.no, name: this.serviceLog.name, weight: this.inputVal.weight, body_fat_rate: this.inputVal.body_fat_rate,wearing:this.inputVal.wearing,alimentary_canal:this.inputVal.alimentary_canal }]
 						}
 					];
 					break;
@@ -511,6 +534,24 @@ export default {
 				.item-list-bot {
 					border: 1px solid #ccc;
 					padding: 10rpx;
+				}
+				.weight-radio-group{
+					display: flex;
+					margin-bottom: 10rpx;
+					.weight-radio-group-item{
+						margin-right: 20rpx;
+						display: flex;
+						align-items: center;
+						/deep/ .uni-radio-input{
+							transform: scale(0.8);
+							.uni-radio-input-checked{
+								background-color: rgb(0, 122, 255)!important;
+							}
+						}
+						.title{
+							margin-right: 4rpx;
+						}
+					}
 				}
 			}
 		}

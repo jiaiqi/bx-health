@@ -29,15 +29,15 @@
 					<view class="record-title">最新数据</view>
 					<view class="record-data">
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'bp'">
-							<text class="digital">{{ historyRecord[0].systolic_pressure }} / {{ historyRecord[0].diastolic_pressure }}</text>
+							<text class="digital">{{ getFixedNum(historyRecord[0].systolic_pressure) }} / {{ getFixedNum(historyRecord[0].diastolic_pressure) }}</text>
 							<text class="unit">毫米汞柱</text>
 						</view>
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'weight'">
-							<text class="digital">{{ historyRecord[0].weight }}</text>
+							<text class="digital">{{ getFixedNum(historyRecord[0].weight) }}</text>
 							<text class="unit">kg</text>
 						</view>
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'sleep'">
-							<text class="digital">{{ historyRecord[0].sleep_time.slice(0,5) }}</text>
+							<text class="digital">{{ historyRecord[0].sleep_time.slice(0, 5) }}</text>
 							<text class="unit">(时长)</text>
 						</view>
 						<view class="date" v-if="historyRecord && historyRecord.length > 0">
@@ -47,16 +47,39 @@
 						<button class="nav-button" @click="toPages(pageType)">记录数据</button>
 					</view>
 					<view class="bmi-box" v-if="pageType === 'weight'">
-						<view class="bmi-box-item" v-if="bmi">
-							<view class="title">BMI</view>
-							<view class="digit">{{ bmi }}</view>
-						</view>
-						<view class="bmi-box-item" v-if="standardWeight">
-							<view class="title">
-								建议体重
-								<!-- 标准体重=(身高cm-100)x0.9(kg) -->
+						<view class="bmi-bar-box" v-if="bmi">
+							<view class="bmi-box-item" v-if="bmi">
+								<view class="title">BMI</view>
+								<view class="digit bmi">{{ bmi }}</view>
 							</view>
-							<view class="digit">{{ standardWeight }}kg</view>
+							<view class="bmi-label" v-if="isArray(weightForBmi)">
+								<view class="label">BMI</view>
+								<view class="value" v-for="item in weightForBmi" :key="item.bmi">{{ item.bmi }}</view>
+							</view>
+							<view class="bmi-bar">
+								<view class="bar1 bar-box">
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi < 18.5"><text class="cuIcon-triangledownfill"></text></view>
+									<view class="bar">偏瘦</view>
+								</view>
+								<view class="bar2 bar-box">
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5&&bmi<=24"><text class="cuIcon-triangledownfill"></text></view>
+									<view class="bar">正常</view>
+								</view>
+								<view class="bar3 bar-box">
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi <= 28&&bmi>24"><text class="cuIcon-triangledownfill"></text></view>
+									<view class="bar">超重</view>
+								</view>
+								<view class="bar4 bar-box">
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi > 28"><text class="cuIcon-triangledownfill"></text></view>
+									<view class="bar">肥胖</view>
+								</view>
+							</view>
+							<view class="bmi-label" v-if="isArray(weightForBmi)">
+								<view class="label">体重</view>
+								<view class="value" v-for="item in weightForBmi" :key="item.bmi">
+									<text v-if="item.weight && isString(item.weight)">{{ item.weight }}</text>
+								</view>
+							</view>
 						</view>
 					</view>
 					<view class="history-record">
@@ -68,18 +91,18 @@
 								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
 								<image src="../static/icon/tizhong.png" mode="" class="icon" v-if="pageType === 'weight'"></image>
 								<view class="item">
-									<text class="digital" v-if="pageType === 'bp' && item && item.systolic_pressure">{{ item.systolic_pressure ? item.systolic_pressure : '-' }}</text>
-									<text class="digital" v-if="pageType === 'weight'">{{ item.weight ? item.weight : '-' }}</text>
+									<text class="digital" v-if="pageType === 'bp' && item && item.systolic_pressure">{{ item.systolic_pressure ? getFixedNum(item.systolic_pressure) : '-' }}</text>
+									<text class="digital" v-if="pageType === 'weight'">{{ item.weight ? getFixedNum(item.weight) : '-' }}</text>
 									<text class="digital" v-if="pageType === 'sleep'">{{ item.sleep_time ? item.sleep_time.slice(0, 5) : '-' }}</text>
 								</view>
 								<view class="item" v-if="pageType === 'bp' && item && item.diastolic_pressure">
 									/
-									<text class="digital">{{ item.diastolic_pressure ? item.diastolic_pressure : '-' }}</text>
+									<text class="digital">{{ item.diastolic_pressure ? getFixedNum(item.diastolic_pressure) : '-' }}</text>
 								</view>
 								<view class="unit">
 									<text v-if="pageType === 'bp'">mmHg</text>
 									<text v-if="pageType === 'weight'">kg</text>
-									<text v-if="pageType === 'sleep'" >（时长）</text>
+									<text v-if="pageType === 'sleep'">（时长）</text>
 								</view>
 								<view class="item">
 									<text>{{ item.create_time.slice(0, 16) }}</text>
@@ -232,14 +255,53 @@ export default {
 			}
 			return 0;
 		},
+
 		bmi() {
 			// 体重（kg）/身高*身高（m）
 			if (this.userInfo.weight && this.userInfo.height) {
 				return Number(((this.userInfo.weight * 10000) / this.userInfo.height ** 2).toFixed(1));
 			}
+		},
+		weightForBmi() {
+			let bmiList = [18.5, 24, 28];
+			let weightList = [];
+			if (this.bmi && this.userInfo && this.userInfo.height) {
+				bmiList.forEach(bmi => {
+					let weight = ((bmi * this.userInfo.height ** 2) / 10000).toFixed(1) + 'kg';
+					weightList.push({
+						bmi,
+						weight
+					});
+				});
+			}
+			return weightList;
+		},
+		bmiScale() {
+			let result = 0;
+			if (this.bmi) {
+				let bmi = Number(this.bmi);
+				if (bmi < 18.5) {
+					result = bmi / 18.5;
+				} else if (bmi >= 18.5 && bmi <= 24) {
+					result = (bmi - 18.5) / 5.5;
+				} else if (bmi > 24 && bmi <= 28) {
+					result = (bmi - 24) / 4;
+				} else if (bmi > 28) {
+					result = bmi / 18.5;
+				}
+				result = result * 150;
+			}
+			return `${result}rpx`;
 		}
 	},
 	methods: {
+		getFixedNum(num) {
+			if (num) {
+				return num.toFixed(1);
+			} else {
+				return 0;
+			}
+		},
 		toPages(e) {
 			let condType = {};
 			let url = '';
@@ -1012,12 +1074,7 @@ export default {
 					break;
 				case 'sport':
 					this.pageName = '运动记录';
-					// #ifdef H5
-					this.showCanvas('calories');
-					// #endif
-					// #ifdef MP-WEIXIN
 					this.showCanvas('step');
-					// #endif
 					break;
 				case 'weight':
 					this.pageName = '体重记录';
@@ -1164,13 +1221,13 @@ export default {
 				align-items: center;
 				flex-direction: column;
 				font-weight: normal;
-				min-height: 200rpx;
+				min-height: 250rpx;
 				padding: 0 20rpx 40rpx;
 				flex: 1;
 				justify-content: flex-end;
 				border-radius: 0 0 20rpx 20rpx;
 				.last-data {
-					padding: 30rpx 0;
+					padding: 0 0 10rpx;
 					flex: 1;
 					.digital {
 						font-size: 60rpx;
@@ -1199,16 +1256,19 @@ export default {
 			.bmi-box {
 				width: 100%;
 				display: flex;
-				padding: 20rpx;
+				padding: 40rpx 20rpx 80rpx;
 				background-color: #fff;
 				margin: 20rpx 0;
 				border-radius: 20rpx;
+				height: 410rpx;
 				.bmi-box-item {
 					flex: 1;
 					display: flex;
 					flex-direction: column;
 					justify-content: center;
 					text-align: center;
+					margin: 20rpx 0;
+					height: 100rpx;
 					.title {
 						color: #999;
 						font-size: 24rpx;
@@ -1218,6 +1278,95 @@ export default {
 						color: #333;
 						font-weight: 700;
 						font-size: 30rpx;
+						&.bmi {
+							font-size: 60rpx;
+						}
+					}
+				}
+				.bmi-bar-box {
+					width: 100%;
+					display: flex;
+					flex-direction: column;
+					text-align: center;
+					justify-content: center;
+					align-items: center;
+					font-weight: normal;
+					.bmi-label {
+						display: flex;
+						position: relative;
+						width: 500rpx;
+						height: 40rpx;
+						line-height: 40rpx;
+						color: #666;
+						font-size: 24rpx;
+						.label {
+							position: absolute;
+							left: -80rpx;
+						}
+						.value {
+							flex: 1;
+						}
+					}
+					.bmi-bar {
+						padding: 10rpx 0;
+						display: flex;
+						width: 100%;
+						justify-content: center;
+						.bar-box {
+							width: 150rpx;
+							position: relative;
+							margin-top: 10rpx;
+							.scale {
+								position: absolute;
+								top: -40rpx;
+								font-size: 50rpx;
+								left: 0;
+								transition: left 2s ease;
+							}
+							.bar {
+								height: 40rpx;
+								color: #f1f1f1;
+							}
+						}
+						.bar1 {
+							margin-right: 4rpx;
+							.bar {
+								background-color: #40c0fd;
+								border-top-left-radius: 50rpx;
+								border-bottom-left-radius: 50rpx;
+							}
+							.active-label {
+								background-color: #40c0fd;
+							}
+						}
+						.bar2 {
+							margin-right: 4rpx;
+							.bar {
+								background-color: #4acdba;
+							}
+							.active-label {
+								background-color: #4acdba;
+							}
+						}
+						.bar3 {
+							margin-right: 4rpx;
+							.bar {
+								background-color: #fad650;
+							}
+							.active-label {
+								background-color: #fad650;
+							}
+						}
+						.bar4 {
+							.bar {
+								background-color: #f7b235;
+								border-top-right-radius: 50rpx;
+								border-bottom-right-radius: 50rpx;
+							}
+							.active-label {
+								background-color: #f7b235;
+							}
+						}
 					}
 				}
 			}
@@ -1252,7 +1401,7 @@ export default {
 								font-weight: normal;
 								color: #999;
 							}
-							.label{
+							.label {
 								font-size: 28rpx;
 								margin: 10rpx;
 							}

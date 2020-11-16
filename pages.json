@@ -391,6 +391,13 @@
 					"style": {
 						"enablePullDownRefresh": false
 					}
+				},
+				{
+					"path": "mapPage/mapPage",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationBarTitleText": "位置选择"
+					}
 				}
 			]
 		}

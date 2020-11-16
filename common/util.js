@@ -975,6 +975,9 @@ export default {
 				return false
 			}
 		}
+		Vue.prototype.isString = function(e) {
+			return typeof e === 'string'
+		}
 		Vue.prototype.isArray = function(e) {
 			return Array.isArray(e)
 		}
@@ -1210,6 +1213,13 @@ export default {
 		Vue.prototype.html2text = (str) => {
 			return str.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi, '').replace(/<[^>]+?>/g, '').replace(
 				/\s+/g, ' ').replace(/ /g, ' ').replace(/>/g, ' ')
+		}
+		Vue.prototype.getFixedNum = (num) => {
+			if (num) {
+				return num.toFixed(1)
+			} else {
+				return 0
+			}
 		}
 	}
 }

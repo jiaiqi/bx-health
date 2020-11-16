@@ -27,18 +27,6 @@
 				>
 					<swiper-item v-for="(item, index) in pageItem.carousel" :key="index"><image :src="item.picUrl" mode="scaleToFill"></image></swiper-item>
 				</swiper>
-				<!-- 	<u-swiper
-					:list="pageItem.carousel"
-					border-radius="10"
-					interval="3000"
-					duration="500"
-					img-mode="scaleToFill"
-					:effect3d="false"
-					:height="300"
-					:name="'picUrl'"
-					class="item-box"
-					v-if="pageItem.div_type === 'carousel'"
-				></u-swiper> -->
 			</view>
 			<view class="page-menu" v-if="pageItem.div_type === 'buttons'">
 				<view class="title">{{ pageItem.item_name }}</view>
@@ -49,7 +37,7 @@
 				>
 					<view class="swiper-item" v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
 						<view @click="skip(btn)" class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
-							<u-image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></u-image>
+							<image class="image" :src="getMenuImagePath(btn)"></image>
 							<text class="btn-name">{{ btn.dest_menu_no }}</text>
 						</view>
 					</view>
@@ -58,7 +46,7 @@
 					<swiper-item v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
 						<view class="swiper-item">
 							<view @click="skip(btn)" class="swiper-button" v-for="btn in swiperItem.buttons" :key="btn.button_no">
-								<u-image width="60rpx" height="60rpx" :src="getMenuImagePath(btn)"></u-image>
+								<image class="image" height="60rpx" :src="getMenuImagePath(btn)"></image>
 								<text class="btn-name">{{ btn.dest_menu_no }}</text>
 							</view>
 						</view>
@@ -352,8 +340,11 @@ export default {
 				display: flex;
 				flex-wrap: wrap;
 				padding: 0 calc((100% - 680rpx) / 2);
+				.image{
+					width: 60rpx;
+					height: 60rpx;
+				}
 				.swiper-button {
-					// background-color: #f1f1f1;
 					width: 150rpx;
 					height: 150rpx;
 					display: inline-flex;
