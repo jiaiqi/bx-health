@@ -1,6 +1,14 @@
 <template>
 	<view>
-		<bxform ref="bxForm" :service="serviceName" :addType="addType" :pageType="type" :BxformType="type" :fields="fields" :moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"></bxform>
+		<bxform
+			ref="bxForm"
+			:service="serviceName"
+			:addType="addType"
+			:pageType="type"
+			:BxformType="type"
+			:fields="fields"
+			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
+		></bxform>
 		<bxButtons :buttons="buttons" @on-button-change="onButton($event)"></bxButtons>
 	</view>
 </template>
@@ -21,7 +29,7 @@ export default {
 			condition: [],
 			defaultCondition: [],
 			params: {},
-			addType:''
+			addType: ''
 		};
 	},
 	computed: {
@@ -77,8 +85,8 @@ export default {
 		if (option.params) {
 			this.params = JSON.parse(decodeURIComponent(option.params));
 		}
-		if(option.addType){
-			this.addType = option.addType
+		if (option.addType) {
+			this.addType = option.addType;
 		}
 		if (option.cond) {
 			this.defaultCondition = JSON.parse(option.cond);
@@ -128,6 +136,11 @@ export default {
 			let colVs = await this.getServiceV2(this.serviceName, this.type, this.type, app);
 			let defaultVal = null;
 			this.colsV2Data = colVs;
+			if (colVs.service_view_name) {
+				uni.setNavigationBarTitle({
+					title: colVs.service_view_name
+				});
+			}
 			switch (this.type) {
 				case 'update':
 					defaultVal = await this.getDefaultVal();

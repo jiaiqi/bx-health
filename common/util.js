@@ -1223,8 +1223,7 @@ export default {
 		}
 		Vue.prototype.selectBasicUserList = async () => {
 			const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
-			const user_no = uni.getStorageSync('login_user_info') ?.user_no
-			debugger
+			const user_no = uni.getStorageSync('login_user_info').user_no
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
 				colNames: ['*'],
@@ -1255,6 +1254,35 @@ export default {
 						current_user_info = res.data.data[0]
 					}
 					return current_user_info
+				} else if (res.data.resultCode === '0011') {
+					// 登录失效 进行静默登录
+					const result = await wx.login();
+					if (result.code) {
+						await Vue.prototype.wxLogin({
+							code: result.code
+						});
+					}
+				} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
+					// 没有角色 提示跳转到创建角色页面
+					uni.showModal({
+						title: '提示',
+						content: '当前账号未登记个人信息，即将跳转到信息登记页面',
+						showCancel: false,
+						success(res) {
+							if (res.confirm) {
+								let condition = [{
+									colName: 'userno',
+									ruleType: 'eq',
+									value: uni.getStorageSync('login_user_info').user_no
+								}];
+								uni.setStorageSync('activeApp', 'health');
+								uni.navigateTo({
+									url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(
+										JSON.stringify(condition))
+								});
+							}
+						}
+					});
 				}
 			}
 		}

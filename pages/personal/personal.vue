@@ -40,7 +40,7 @@
 							<text class="text-grey">身体数据</text>
 						</view>
 					</view>
-					<view class="cu-item arrow">
+					<view class="cu-item arrow" @click="toPages('beDoctor')">
 						<view class="content">
 							<text class="cuIcon-text"></text>
 							<text class="text-grey">成为医生</text>
@@ -86,6 +86,10 @@ export default {
 						url: '/personalPages/nameCard/nameCard'
 					});
 					break;
+				case 'beDoctor':
+					uni.navigateTo({
+						url: '/publicPages/form/form?serviceName=srvhealth_doctor_add&type=add&cond='
+					});
 				// case 'pinggu':
 				// uni.navigateTo({
 				// 	url: '/otherPages/healthQuestionnaire/healthQuestionnaire'

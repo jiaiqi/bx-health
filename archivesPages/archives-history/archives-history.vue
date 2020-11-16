@@ -29,7 +29,7 @@
 					<view class="record-title">最新数据</view>
 					<view class="record-data">
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'bp'">
-							<text class="digital">{{ getFixedNum(historyRecord[0].systolic_pressure) }} / {{ getFixedNum(historyRecord[0].diastolic_pressure) }}</text>
+							<text class="digital ">{{ getFixedNum(historyRecord[0].systolic_pressure) }} / {{ getFixedNum(historyRecord[0].diastolic_pressure) }}</text>
 							<text class="unit">毫米汞柱</text>
 						</view>
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'weight'">
@@ -54,7 +54,7 @@
 								<view class="digit bmi">{{ bmi }}</view>
 							</view>
 							<view class="bmi-label" v-if="isArray(weightForBmi)">
-								<view class="label">BMI</view>
+								<view class="label text-bold">BMI:</view>
 								<view class="value" v-for="item in weightForBmi" :key="item.bmi">{{ item.bmi }}</view>
 							</view>
 							<view class="bmi-bar">
@@ -76,7 +76,7 @@
 								</view>
 							</view>
 							<view class="bmi-label" v-if="isArray(weightForBmi)">
-								<view class="label">体重</view>
+								<view class="label text-bold">体重:</view>
 								<view class="value" v-for="item in weightForBmi" :key="item.bmi">
 									<text v-if="item.weight && isString(item.weight)">{{ item.weight }}</text>
 								</view>
@@ -92,13 +92,31 @@
 								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
 								<image src="../static/icon/tizhong.png" mode="" class="icon" v-if="pageType === 'weight'"></image>
 								<view class="item">
-									<text class="digital" v-if="pageType === 'bp' && item && item.systolic_pressure">{{ item.systolic_pressure ? getFixedNum(item.systolic_pressure) : '-' }}</text>
+									<text
+										class="digital"
+										:class="{
+											'text-green': item.systolic_pressure < 120 && item.diastolic_pressure < 80,
+											'text-orange': (item.systolic_pressure >= 120 && item.systolic_pressure < 140) || (item.diastolic_pressure < 90 && item.diastolic_pressure >= 80),
+											'text-red': item.systolic_pressure >= 140 || item.diastolic_pressure >= 90
+										}"
+										v-if="pageType === 'bp' && item && item.systolic_pressure"
+									>
+										{{ item.systolic_pressure ? getFixedNum(item.systolic_pressure) : '-' }}
+									</text>
 									<text class="digital" v-if="pageType === 'weight'">{{ item.weight ? getFixedNum(item.weight) : '-' }}</text>
 									<text class="digital" v-if="pageType === 'sleep'">{{ item.sleep_time ? item.sleep_time.slice(0, 5) : '-' }}</text>
 								</view>
-								<view class="item" v-if="pageType === 'bp' && item && item.diastolic_pressure">
+								<view
+									class="item"
+									:class="{
+										'text-green': item.systolic_pressure < 120 && item.diastolic_pressure < 80,
+										'text-orange': (item.systolic_pressure >= 120 && item.systolic_pressure < 140) || (item.diastolic_pressure < 90 && item.diastolic_pressure >= 80),
+										'text-red': item.systolic_pressure >= 140 || item.diastolic_pressure >= 90
+									}"
+									v-if="pageType === 'bp' && item && item.diastolic_pressure"
+								>
 									/
-									<text class="digital">{{ item.diastolic_pressure ? getFixedNum(item.diastolic_pressure) : '-' }}</text>
+									<text class="digital bp">{{ item.diastolic_pressure ? getFixedNum(item.diastolic_pressure) : '-' }}</text>
 								</view>
 								<view class="unit">
 									<text v-if="pageType === 'bp'">mmHg</text>
@@ -291,7 +309,7 @@ export default {
 				} else if (bmi > 28) {
 					result = bmi / 18.5;
 				}
-				result = result * 150;
+				result = result * 150 - 24;
 			}
 			return `${result}rpx`;
 		}
@@ -1039,7 +1057,7 @@ export default {
 				if (userInfo && userInfo.user_no) {
 					this.loginUserInfo = userInfo;
 					uni.setStorageSync('activeApp', 'health');
-					await this.getCurrUserInfo(); // 查找健康app个人基本信息
+					// await this.getCurrUserInfo(); // 查找健康app个人基本信息
 					let userInfo = await this.selectBasicUserList();
 					if (userInfo) {
 						this.userInfo = userInfo;
