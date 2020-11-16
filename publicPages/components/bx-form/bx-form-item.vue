@@ -481,13 +481,13 @@ export default {
 			picker: ['网络状况较差，请稍后进行选择'],
 			modelData: '',
 			oriPicker: [],
-			addressName:'',
+			addressName: '',
 			treeSelectorShowValue: '', //属性选择器input框中显示的值
 			treePageInfo: {
 				total: 0,
 				rownumber: 20,
 				pageNo: 1
-			},
+			}
 		};
 	},
 	updated() {},
@@ -549,7 +549,7 @@ export default {
 			return datas;
 		}
 	},
-	mounted() {		
+	mounted() {
 		console.log('procDataprocDataprocData', this.procData);
 		if (this.fieldData.type === 'poupchange') {
 			this.getpoupInfo(this.fieldData.option_list_v2);
@@ -628,9 +628,8 @@ export default {
 	},
 	methods: {
 		/*获取位置信息**/
-		getPostion(e){
-			this.$emit('seatPostion',e)
-			
+		getPostion(e) {
+			this.$emit('seatPostion', e);
 		},
 		getOptionImgExplain(e) {
 			if (e) {
@@ -1177,12 +1176,13 @@ export default {
 					return;
 				}
 			}
-			if (relation_condition && typeof relation_condition === 'object') {
-				req.relation_condition = relation_condition;
-			}
 			if (req.serviceName === 'srvsso_user_select') {
 				req.condition = [{ colName: 'dept_no', ruleType: 'like', value: 'bx100sys' }];
 				appName = 'sso';
+			}
+			if (relation_condition && typeof relation_condition === 'object') {
+				req.relation_condition = relation_condition;
+				delete req.condition
 			}
 			let res = await self.onRequest('select', req.serviceName, req, appName);
 			if (res.data.state === 'SUCCESS' && res.data.page && res.data.page.total > res.data.page.rownumber * res.data.page.pageNo) {
@@ -1322,7 +1322,7 @@ export default {
 	}
 	.radio {
 		min-width: calc(33% - 40rpx);
-		margin-right: 20rpx; 
+		margin-right: 20rpx;
 		max-width: 700rpx;
 		&.has-img {
 			width: 100%;
@@ -1330,14 +1330,12 @@ export default {
 				display: flex;
 				width: 100%;
 				align-items: flex-start;
-				
 			}
 			.radio-content {
 				flex: 1;
 			}
 		}
-		.radio-content{
-			
+		.radio-content {
 		}
 		label {
 			line-height: 70rpx;
@@ -1349,7 +1347,6 @@ export default {
 	}
 	& /deep/ .uni-radio-input-checked {
 		background-color: red;
-		
 	}
 }
 
@@ -1450,7 +1447,7 @@ uni-text.input-icon {
 		color: #ff0000;
 	}
 }
-.address-pos{
+.address-pos {
 	flex: 1;
 	text-align: right;
 }
@@ -1505,12 +1502,11 @@ uni-text.input-icon {
 	z-index: 10000;
 }
 /* #ifdef MP-WEIXIN */
-	.cu-form-group{
-		/deep/ .uni-radio-input-checked::after{
-			left:-127rpx;
-			z-index: -1 !important;
-		}
+.cu-form-group {
+	/deep/ .uni-radio-input-checked::after {
+		left: -127rpx;
+		z-index: -1 !important;
 	}
+}
 /* #endif */
-
 </style>

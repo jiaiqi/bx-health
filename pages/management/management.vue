@@ -86,7 +86,7 @@ export default {
 			}
 		}
 	},
-	created() {
+	onShow() {
 		let userInfo = uni.getStorageSync('wxUserInfo');
 		this.userInfo = userInfo;
 		let userList = uni.getStorageSync('user_info_list');
@@ -101,7 +101,7 @@ export default {
 				}
 			});
 		}
-	}
+	},
 };
 </script>
 
