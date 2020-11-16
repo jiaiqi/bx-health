@@ -3832,8 +3832,13 @@ uni-checkbox::before {
 			flex-wrap: wrap;
 			align-items: center;
 			.current-cook-type {
-				color: #007aff;
-				padding: 0 10rpx;
+				color: #fff;
+				padding: 5rpx 30rpx;
+				font-size: 26rpx;
+				background-color: #f37b1d;
+				border-radius: 50rpx;
+				text-align: center;
+				min-width: 80rpx;
 			}
 		}
 		.unit-box {

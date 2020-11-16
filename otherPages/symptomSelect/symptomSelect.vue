@@ -21,7 +21,6 @@
 						/>
 					</view>
 					<view class="action">
-						<!-- <button @click.stop="changeListType" class="cu-btn bg-olive shadow-blur round">切换</button> -->
 						<button v-if="isSearch" @click.stop="searchEnd" class="cu-btn bg-orange shadow-blur round">取消</button>
 					</view>
 				</view>
@@ -33,44 +32,17 @@
 					</scroll-view>
 				</view>
 				<view class="symptom-bot-wrap-top-r">
-					<!-- <u-icon :top="4" v-if="!menuIsShow" size="48" @click="showMore('open')" name="list"></u-icon> -->
 					<text  v-if="!menuIsShow" size="48" @click="showMore('open')" class="cuIcon-sort"></text>
 					<text v-else size="48" @click="showMore('close')" class="cuIcon-close"></text>
-					<!-- <u-icon :top="4" v-else size="48" @click="showMore('close')" name="close"></u-icon> -->
 				</view>
 			</view>
 		</view>
 
-		<!-- <view v-if="isChunk" class="symptom-bot-wrap">
-			<view class="" v-if="symptomList.length > 0 && !isSearch">
-				<view v-if="item.is_show" v-for="(item, index) in symptomList" class="wrapCont" :key="index">
-					<view class="wrapCont-top">{{ item[query.key] }}</view>
-					<view v-if="alone.is_leaf === '否' && alone.children.length > 0" v-for="(alone, i) in item.children" class="wrapCont_row" :key="i">
-						<text>{{ alone[query.key] }}</text>
-						<view class="wrapCont_row_item_wrap">
-							<view @click="chooseItem(single)" v-for="(single, idx) in alone.children" :key="idx" :class="single.is_checked ? 'actived' : ''" class="wrapCont_row_item">
-								{{ single.name }}
-							</view>
-						</view>
-					</view>
-				</view>
-			</view>
-			<view v-else class="wrapCont">
-				<view class="box" v-show="serseData.length > 0">
-					<view @click="chooseItem(item)" v-for="(item, index) in serseData" :key="index" class="wrapCont_row_item" :class="item.is_checked ? 'actived' : ''">
-						{{ item[query.key] }}
-					</view>
-				</view>
-				<view class="box normalstyle" v-show="serseData.length == 0">没有找到相关内容</view>
-			</view>
-			<view class="boxbtn"><view class="btns" @click="lookobj">完成</view></view>
-		</view> -->
 		<view class="symptom-bot-wrap">
 			
 			<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[currentTab].children.length > 0 && !isSearch">
 				<view v-if="symptomList[currentTab].is_show && items.is_leaf === '否'" :key="index" v-for="(items, index) in symptomList[currentTab].children" class="wrapCont">
 					<view v-if="items.is_leaf === '否' && items.children.length > 0" class="wrapCont_row">
-						<!-- <text>{{ items[query.key] }}</text> -->
 						<view class="wrapCont-top">{{ items[query.key] }}</view>
 						<view class="wrapCont-main-no">
 							<view v-for="(noillnes,nos) in items.children" :key="nos" v-if="!Array.isArray(noillnes.children) || noillnes.children.length <= 0" class="wrapCont_row_item_wrap-b">
@@ -134,7 +106,6 @@
 <script>
 import Thetable from '../components/Thetable/Thetable.vue';
 import symFrom from '../components/bx-sym-from/bx-sym-from.vue';
-// import template from "@/common/addFile.js";
 export default {
 	components: {
 		Thetable,
@@ -321,7 +292,8 @@ export default {
 				serviceName: this.query.serviceName,
 				colNames: ['*'],
 				relation_condition: {},
-				order: []
+				order: [],
+				page:{pageNo: 1, rownumber: 500}
 			};
 			let chooseData = uni.getStorageSync('symptomList');
 			let res = await this.$http.post(url, req);
@@ -474,7 +446,10 @@ export default {
 						ruleType: 'like',
 						value: searchVal
 					}
-				]
+				],
+				page:{
+					pageNo: 1, rownumber: 50
+				}
 			};
 			if (searchVal) {
 				this.$http.post(url, req).then(res => {

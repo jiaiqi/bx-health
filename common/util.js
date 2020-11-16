@@ -1221,5 +1221,42 @@ export default {
 				return 0
 			}
 		}
+		Vue.prototype.selectBasicUserList = async () => {
+			const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
+			const user_no = uni.getStorageSync('login_user_info') ?.user_no
+			debugger
+			let req = {
+				serviceName: 'srvhealth_person_info_select',
+				colNames: ['*'],
+				condition: [{
+					colName: 'userno',
+					ruleType: 'eq',
+					value: user_no
+				}],
+				order: [{
+					colName: 'create_time',
+					orderType: 'asc'
+				}]
+			};
+			if (user_no) {
+				const res = await Vue.prototype.$http.post(url, req);
+				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+					let current_user_info = null
+					if (uni.getStorageSync('current_user')) {
+						res.data.data.forEach(item => {
+							if (item.name === uni.getStorageSync('current_user')) {
+								uni.setStorageSync('current_user_info', item);
+								current_user_info = item
+							}
+						});
+					} else {
+						uni.setStorageSync('current_user_info', res.data.data[0]);
+						uni.setStorageSync('current_user', res.data.data[0].name);
+						current_user_info = res.data.data[0]
+					}
+					return current_user_info
+				}
+			}
+		}
 	}
 }

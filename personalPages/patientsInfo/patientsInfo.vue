@@ -1,6 +1,39 @@
 <template>
 	<view class="health-archive-wrap">
-		<view class="health-archive-item basic-info"></view>
+		<view class="avatar-box">
+			<view class="bg-view" :style="{ 'background-image': `url(${avatorPath})` }"></view>
+			<view class="content-box">
+				<view class="avatar-bar">
+					<image :src="avatorPath" mode="aspectFit" class="avatar-iamge"></image>
+					<view class="info">
+						<text class="username">{{ userInfo.name }}</text>
+						<view class="other-info">
+							<view class="info-item">
+								<text class="label">性别:</text>
+								<text class="value">{{ userInfo.sex }}</text>
+							</view>
+							<view class="info-item">
+								<text class="label">年龄:</text>
+								<text class="value">{{ age }}</text>
+							</view>
+							<view class="info-item">
+								<text class="label">职业:</text>
+								<text class="value">{{ userInfo.job }}</text>
+							</view>
+						</view>
+					</view>
+				</view>
+				<view class="profile-box">
+					<view class="title">
+						<view class="text">标签</view>
+						<!-- <view class="icon"><text class="cuIcon-right"></text></view> -->
+					</view>
+					<view class="requirement-box">
+						<view class="require-item" v-for="item in requirement" :key="item">{{ item }}</view>
+					</view>
+				</view>
+			</view>
+		</view>
 		<view class="health-archive-item health-score">
 			<view class="subtitle">
 				<text class="title-text">近日健康指数</text>
@@ -10,27 +43,27 @@
 				</view>
 			</view>
 			<view class="content grid-layout">
-				<view class="grid-item" @click="toPages('diet')">
+				<view class="grid-item" @click="navPages('diet')">
 					<view class="title">饮食</view>
 					<view class="data text-green">71</view>
 					<view class="action"></view>
 				</view>
-				<view class="grid-item" @click="toPages('sport')">
+				<view class="grid-item" @click="navPages('sport')">
 					<view class="title">运动</view>
 					<view class="data text-red">20</view>
 					<view class="action"></view>
 				</view>
-				<view class="grid-item" @click="toPages('weight')">
+				<view class="grid-item" @click="navPages('weight')">
 					<view class="title">体重</view>
 					<view class="data text-gray">0</view>
 					<view class="action"></view>
 				</view>
-				<view class="grid-item" @click="toPages('bp')">
+				<view class="grid-item" @click="navPages('bp')">
 					<view class="title">血压</view>
 					<view class="data text-gray">0</view>
 					<view class="action"></view>
 				</view>
-				<view class="grid-item" @click="toPages('sleep')">
+				<view class="grid-item" @click="navPages('sleep')">
 					<view class="title">睡眠</view>
 					<view class="data text-blue">85</view>
 					<view class="action"></view>
@@ -44,6 +77,40 @@
 		</view>
 		<view class="health-archive-item ">
 			<view class="subtitle">
+				<text class="title-text">咨询记录</text>
+				<view class=""></view>
+			</view>
+			<view class="content disease-risk">
+				<view class="disease-item record"><text class="date">2020-11-13</text></view>
+				<view class="disease-item record"><text class="date">2020-10-19</text></view>
+				<view class="disease-item record"><text class="date">更多<text class="cuIcon-right margin-left-xs"></text></text></view>
+			</view>
+		</view>
+		<view class="health-archive-item">
+			<view class="subtitle">
+				<text class="title-text">诊断记录</text>
+				<view class=""></view>
+			</view>
+			<view class="content disease-risk">
+				<view class="disease-item record"><text class="date">2020-11-13</text></view>
+				<view class="disease-item record"><text class="date">2020-10-19</text></view>
+				<view class="disease-item record"><text class="date">更多<text class="cuIcon-right margin-left-xs"></text></text></view>
+			</view>
+		</view>
+		<view class="health-archive-item ">
+			<view class="subtitle">
+				<text class="title-text">用药记录</text>
+				<view class=""></view>
+			</view>
+			<view class="content disease-risk">
+				<view class="disease-item record"><text class="date">2020-11-13</text></view>
+				<view class="disease-item record"><text class="date">2020-10-19</text></view>
+				<view class="disease-item record"><text class="date">更多<text class="cuIcon-right margin-left-xs"></text></text></view>
+			</view>
+		</view>
+
+<!-- 		<view class="health-archive-item ">
+			<view class="subtitle">
 				<text class="title-text">疾病风险提示</text>
 				<view class=""></view>
 			</view>
@@ -51,7 +118,6 @@
 				<view class="disease-item text-red">
 					<view class="disease-name">高血压</view>
 					<view class="number">
-						<!-- 风险: -->
 						<text class="digit">90</text>
 						%
 					</view>
@@ -59,13 +125,12 @@
 				<view class="disease-item text-orange">
 					<view class="disease-name">肥胖</view>
 					<view class="number">
-						<!-- 风险: -->
 						<text class="digit">75</text>
 						%
 					</view>
 				</view>
 			</view>
-		</view>
+		</view> -->
 	</view>
 </template>
 
@@ -78,11 +143,29 @@ export default {
 		};
 	},
 	computed: {
-		avatorPath(){
+		age() {
+			if (this.userInfo.birthday) {
+				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
+				return age;
+			}
+		},
+		avatorPath() {
 			return this.$api.downloadFile + this.userInfo.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+		},
+		requirement() {
+			if (this.userInfo.requirement) {
+				return this.userInfo.requirement.split(',');
+			}
 		}
 	},
 	methods: {
+		navPages(type = 'history') {
+			if (type === 'history') {
+				uni.navigateTo({
+					url: '/archivesPages/archives-history/archives-history?isAll=true&customer_no=' + this.customer_no
+				});
+			}
+		},
 		async getUserInfo(customer_no) {
 			let url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 			let req = {
@@ -95,6 +178,11 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.userInfo = res.data.data[0];
 				return res.data.data[0];
+			}else{
+				uni.showToast({
+					title:'未找到患者信息',
+					icon:'none'
+				})
 			}
 		}
 	},
@@ -115,9 +203,133 @@ export default {
 	width: 100%;
 	min-height: 100vh;
 	background-color: #f1f1f1;
-	padding-bottom: 20rpx;
+	padding-bottom: 50rpx;
 	max-width: 1080rpx;
 	margin: 0 auto;
+	.avatar-box {
+		position: relative;
+		height: 500rpx;
+		.bg-view {
+			width: 100%;
+			height: 400rpx;
+			background-size: 100% 400rpx;
+			background-repeat: no-repeat;
+			filter: blur(20rpx);
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 1;
+		}
+		.content-box {
+			z-index: 2;
+			position: absolute;
+			top: 100rpx;
+			left: 0;
+			height: 400rpx;
+			width: 100%;
+			padding: 20rpx;
+			.avatar-bar {
+				display: flex;
+				.other-info {
+					color: #fff;
+					display: flex;
+					align-items: center;
+					flex-wrap: wrap;
+					.info-item {
+						margin-right: 40rpx;
+						.value{
+							margin-left: 10rpx;
+						}
+					}
+				}
+				.avatar-iamge {
+					width: 150rpx;
+					height: 150rpx;
+					border-radius: 100rpx;
+				}
+				.info {
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+					padding-left: 20rpx;
+					align-items: flex-start;
+					flex: 1;
+					.username {
+						display: inline-block;
+						color: #fff;
+						font-weight: 600;
+						font-size: 38rpx;
+						padding: 10rpx 20rpx;
+						// background-color: #666;
+						border-top-right-radius: 20rpx;
+						border-top-left-radius: 20rpx;
+					}
+					.other-info{
+						padding: 20rpx;
+						// background-color: #666;
+						border-bottom-left-radius: 20rpx;
+						border-bottom-right-radius: 20rpx;
+						border-top-right-radius: 20rpx;
+					}
+				}
+			}
+
+			.profile-box {
+				margin-top: 20rpx;
+				width: 100%;
+				height: 200rpx;
+				background-color: #ffff;
+				border-radius: 20rpx;
+				.title {
+					width: 100%;
+					padding: 10rpx 20rpx;
+					display: flex;
+					justify-content: space-between;
+					color: #333;
+					font-size: 34rpx;
+					font-weight: 600;
+				}
+				.requirement-box {
+					display: flex;
+					align-items: flex-start;
+					flex: 1;
+					.require-item {
+						margin: 10rpx;
+						padding: 10rpx 20rpx;
+						@for $i from 1 through 20 {
+							&:nth-child(#{$i}) {
+								@if $i%2==1 {
+									color: #409eff;
+									background: #ecf5ff;
+									border-color: #b3d8ff;
+								}
+								@if $i%2==0 {
+									color: #67c23a;
+									background: #f0f9eb;
+									border-color: #c2e7b0;
+								}
+								@if $i%3==0 {
+									color: #909399;
+									background: #f4f4f5;
+									border-color: #d3d4d6;
+								}
+								@if $i%4==0 {
+									color: #e6a23c;
+									background: #fdf6ec;
+									border-color: #f5dab1;
+								}
+								@if $i%5==0 {
+									color: #f56c6c;
+									background: #fef0f0;
+									border-color: #fbc4c4;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	.health-overall-score {
 		width: calc(100% - 40rpx);
 		margin: 0 20rpx;
@@ -280,6 +492,14 @@ export default {
 					flex-direction: column;
 					border-radius: 20rpx;
 					min-height: 150rpx;
+					&.record {
+						min-height: 80rpx;
+						background-color: #f8f8f8;
+						justify-content: center;
+						align-items: center;
+						border: none;
+						box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+					}
 					&.text-red {
 						border-color: #e54d42;
 					}

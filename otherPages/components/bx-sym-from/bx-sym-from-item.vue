@@ -5,7 +5,7 @@
 				<text :class="itemType.isfail?'must-fill':''" v-if="itemType.required">(必填)</text>
 				<text v-else>(选填)</text>
 			</view>
-			<u-checkbox-group v-if="itemType.type === 'checked'">
+		<!-- 	<u-checkbox-group v-if="itemType.type === 'checked'">
 				<u-checkbox 
 					@change="checkboxChange($event,itemType)" 
 					v-model="item.checked" 
@@ -15,7 +15,6 @@
 			</u-checkbox-group>
 			
 			<u-form-item class="border-bottom" v-if="itemType.type === 'num'" >
-				<!-- <u-input height="20" type="number" :placeholder="'请输入'+itemType.title" v-model="itemType.value"/> -->
 				<u-number-box :positive-integer="false" :step="activeStep" v-model="itemType.value"></u-number-box>
 				<view class="step-wrap">
 					<view class="steps">
@@ -27,7 +26,6 @@
 					</view>
 				</view>
 			</u-form-item>
-			
 			<u-radio-group v-model="itemType.value" v-if="itemType.type === 'radio'">
 				<u-radio 
 					@change="radioChange" 
@@ -38,15 +36,12 @@
 					{{item.name}}
 				</u-radio>
 			</u-radio-group>
-			
 			<u-form-item class="border-bottom" v-if="itemType.type === 'text'" >
 				<u-input height="auto-height" :height="100" :border="true" type="textarea" :placeholder="'请输入'+itemType.title" v-model="itemType.value"/>
 			</u-form-item>
-			
-			
 			<u-form-item class="border-bottom date-bottom" v-if="itemType.type === 'date'||itemType.type === 'time' ||itemType.type === 'dateTime'" :right-icon-style="rightIcon"  right-icon="calendar">
 				<u-input @click="openTime" :height="100" :border="true" height="20" :disabled="true" :placeholder="'请选择'+itemType.title" v-model="itemType.value"/>
-			</u-form-item>
+			</u-form-item> -->
 			<mx-date-picker
 				style="z-index: 15000;"
 				:format="dateFormat"

@@ -1,5 +1,5 @@
 <template>
-	<view><bx-filter :searchArg="searchArg" v-if="searchArg" :menuAgList="menuAgList" @clickItem="toPages('patients',$event)" @click-add-item="clickAddItem"></bx-filter></view>
+	<view><bx-filter :searchArg="searchArg" v-if="searchArg" :menuAgList="menuAgList" @clickItem="toPages('patients', $event)" @click-add-item="clickAddItem"></bx-filter></view>
 </template>
 
 <script>
@@ -18,10 +18,10 @@ export default {
 		};
 	},
 	methods: {
-		toPages(type,item){
-			if(type==='patients'&&item.customer_no){
+		toPages(type, item) {
+			if (type === 'patients' && item.customer_no) {
 				uni.navigateTo({
-					url: '/personalPages/patientsInfo/patientsInfo?customer_no='+item.customer_no
+					url: '/personalPages/patientsInfo/patientsInfo?customer_no=' + item.customer_no
 				});
 			}
 		},
@@ -36,14 +36,16 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_doctor_select',
 				colNames: ['*'],
-				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.userInfo.userno }],
+				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.userInfo.user_no ? this.userInfo.user_no : this.currentUser.userno }],
 				page: { pageNo: 1, rownumber: 10 }
 			};
-			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				return res.data.data[0];
-			} else {
-				return false;
+			if (req.condition[0].value) {
+				let res = await this.$http.post(url, req);
+				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+					return res.data.data[0];
+				} else {
+					return false;
+				}
 			}
 		},
 		buildMenuAgList() {
@@ -88,12 +90,9 @@ export default {
 		let userInfo = uni.getStorageSync('wxUserInfo');
 		this.userInfo = userInfo;
 		let userList = uni.getStorageSync('user_info_list');
-		let current_user = uni.getStorageSync('current_user');
+		let current_user = uni.getStorageSync('current_user_info');
 		if (userList && current_user) {
-			let currentUser = userList.filter(item => {
-				return item.name === current_user;
-			});
-			if (Array.isArray(currentUser) && currentUser.length > 0) this.currentUser = currentUser[0];
+			this.currentUser = current_user;
 			this.getDoctorInfo().then(res => {
 				if (res && res.dt_no) {
 					this.doctorInfo = res;

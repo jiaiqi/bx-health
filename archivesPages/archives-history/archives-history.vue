@@ -44,7 +44,8 @@
 							<text class="cuIcon-time margin-right-xs"></text>
 							{{ historyRecord[0].create_time.slice(0, 16) }}
 						</view>
-						<button class="nav-button" @click="toPages(pageType)">记录数据</button>
+						<!-- customer_no:患者编号,有患者编号时意味着是医生账号从患者列表进入此页面,则没有记录数据的权限 -->
+						<button class="nav-button" @click="toPages(pageType)" v-if="!this.customer_no">记录数据</button>
 					</view>
 					<view class="bmi-box" v-if="pageType === 'weight'">
 						<view class="bmi-bar-box" v-if="bmi">
@@ -62,11 +63,11 @@
 									<view class="bar">偏瘦</view>
 								</view>
 								<view class="bar2 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5&&bmi<=24"><text class="cuIcon-triangledownfill"></text></view>
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24"><text class="cuIcon-triangledownfill"></text></view>
 									<view class="bar">正常</view>
 								</view>
 								<view class="bar3 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi <= 28&&bmi>24"><text class="cuIcon-triangledownfill"></text></view>
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi <= 28 && bmi > 24"><text class="cuIcon-triangledownfill"></text></view>
 									<view class="bar">超重</view>
 								</view>
 								<view class="bar4 bar-box">
@@ -136,6 +137,7 @@ export default {
 	},
 	data() {
 		return {
+			customer_no: '',
 			isAllPages: false,
 			backTextStyle: {
 				width: '100rpx',
@@ -563,7 +565,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_service_record_select',
 				colNames: ['*'],
-				condition: [{ colName: 'user_info_no', ruleType: 'like', value: this.userInfo.no }],
+				condition: [{ colName: 'user_info_no', ruleType: 'like', value: this.customer_no ? this.customer_no : this.userInfo.no }],
 				page: { pageNo: 1, rownumber: 100 }
 			};
 			let res = await this.$http.post(url, req);
@@ -586,7 +588,14 @@ export default {
 				{
 					serviceName: 'srvhealth_service_record_add',
 					condition: [],
-					data: [{ user_info_no: this.userInfo.no, user_no: this.userInfo.userno, name: this.userInfo.name, time: this.formateDate(new Date(), 'dateTimes') }]
+					data: [
+						{
+							user_info_no: this.customer_no ? this.customer_no : this.userInfo.no,
+							user_no: this.userInfo.userno,
+							name: this.userInfo.name,
+							time: this.formateDate(new Date(), 'dateTimes')
+						}
+					]
 				}
 			];
 			let res = await this.$http.post(url, req);
@@ -1031,27 +1040,31 @@ export default {
 					this.loginUserInfo = userInfo;
 					uni.setStorageSync('activeApp', 'health');
 					await this.getCurrUserInfo(); // 查找健康app个人基本信息
-					if (uni.getStorageSync('current_user_info')) {
-						this.userInfo = uni.getStorageSync('current_user_info');
-					} else {
-						let userList = uni.getStorageSync('user_info_list');
-						if (Array.isArray(userList) && userList.length > 0) {
-							let name = uni.getStorageSync('current_user');
-							if (name) {
-								userList.forEach(item => {
-									if (item.name === name) {
-										uni.setStorageSync('current_user', item.name);
-										uni.setStorageSync('current_user_info', item);
-										this.userInfo = item;
-									}
-								});
-							} else {
-								uni.setStorageSync('current_user_info', userList[0]);
-								uni.setStorageSync('current_user', userList[0].name);
-								this.userInfo = userList[0];
-							}
-						}
+					let userInfo = await this.selectBasicUserList();
+					if (userInfo) {
+						this.userInfo = userInfo;
 					}
+					// if (uni.getStorageSync('current_user_info')) {
+					// 	this.userInfo = uni.getStorageSync('current_user_info');
+					// } else {
+					// 	let userList = uni.getStorageSync('user_info_list');
+					// 	if (Array.isArray(userList) && userList.length > 0) {
+					// 		let name = uni.getStorageSync('current_user');
+					// 		if (name) {
+					// 			userList.forEach(item => {
+					// 				if (item.name === name) {
+					// 					uni.setStorageSync('current_user', item.name);
+					// 					uni.setStorageSync('current_user_info', item);
+					// 					this.userInfo = item;
+					// 				}
+					// 			});
+					// 		} else {
+					// 			uni.setStorageSync('current_user_info', userList[0]);
+					// 			uni.setStorageSync('current_user', userList[0].name);
+					// 			this.userInfo = userList[0];
+					// 		}
+					// 	}
+					// }
 					if (!this.wxUserInfo) {
 						await this.getUserInfo(); //查找微信用户基本信息
 					}
@@ -1127,7 +1140,6 @@ export default {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 				}
 				uni.setStorageSync('user_info_list', res.data.data);
-				self.userMenuList = res.data.data;
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {
 				// 登录失效 进行静默登录
@@ -1147,6 +1159,7 @@ export default {
 					success(res) {
 						if (res.confirm) {
 							let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+							uni.setStorageSync('activeApp', 'health');
 							uni.navigateTo({
 								url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
 							});
@@ -1162,6 +1175,9 @@ export default {
 	onLoad(option) {
 		if (option.isAll) {
 			this.isAllPages = true;
+		}
+		if (option.customer_no) {
+			this.customer_no = option.customer_no;
 		}
 		if (option.pageType) {
 			this.pageType = option.pageType;
@@ -1229,6 +1245,9 @@ export default {
 				.last-data {
 					padding: 0 0 10rpx;
 					flex: 1;
+					display: flex;
+					justify-content: center;
+					align-items: center;
 					.digital {
 						font-size: 60rpx;
 						font-weight: 700;

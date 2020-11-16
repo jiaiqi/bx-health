@@ -5,10 +5,10 @@
 				<view class="item-list" @click="showWeightSelect = true">
 					<text>衣着穿戴</text>
 					<!-- <u-select v-model="showWeightSelect" :list="list" @confirm="confirmChoose($event, 'clothing')"></u-select> -->
-					<radio-group class="block weight-radio-group" @change="RadioChange($event,'clothing')">
-						<view v-for="(item,index) in list" :key="index" class="weight-radio-group-item">
-							<view class="title">{{item.value}}</view>
-							<radio :class="weightCurrentRadio==item.value?'checked':''" :checked="weightCurrentRadio==item.value?true:false" :value="item.value"></radio>
+					<radio-group class="block weight-radio-group" @change="RadioChange($event, 'clothing')">
+						<view v-for="(item, index) in list" :key="index" class="weight-radio-group-item">
+							<view class="title">{{ item.value }}</view>
+							<radio :class="weightCurrentRadio == item.value ? 'checked' : ''" :checked="weightCurrentRadio == item.value ? true : false" :value="item.value"></radio>
 						</view>
 					</radio-group>
 					<!-- <view class="item-list-bot"><input type="text" value="" disabled /></view> -->
@@ -16,11 +16,11 @@
 
 				<view class="item-list" @click="showWeightDigSelect = true">
 					<text>消化道情况</text>
-					
-					<radio-group class="block weight-radio-group" @change="RadioChange($event,'digestion')">
-						<view v-for="(item,index) in DigList" :key="index" class="weight-radio-group-item">
-							<view class="title">{{item.value}}</view>
-							<radio :class="digeCurrentRadio==item.value?'checked':''" :checked="digeCurrentRadio==item.value?true:false" :value="item.value"></radio>
+
+					<radio-group class="block weight-radio-group" @change="RadioChange($event, 'digestion')">
+						<view v-for="(item, index) in DigList" :key="index" class="weight-radio-group-item">
+							<view class="title">{{ item.value }}</view>
+							<radio :class="digeCurrentRadio == item.value ? 'checked' : ''" :checked="digeCurrentRadio == item.value ? true : false" :value="item.value"></radio>
 						</view>
 					</radio-group>
 					<!-- <u-select v-model="showWeightDigSelect" :list="DigList" @confirm="confirmChoose($event, 'digestion')"></u-select> -->
@@ -64,7 +64,7 @@
 					<view class="item-list-bot"><input type="text" value="" /></view>
 				</view>
 			</view>
-			<view v-else-if="type && (type === 'pressure'||type === 'bp')" class="item-wrap">
+			<view v-else-if="type && (type === 'pressure' || type === 'bp')" class="item-wrap">
 				<!-- 血压 -->
 				<view class="item-list">
 					<text>收缩压(高压 毫米汞柱)</text>
@@ -191,8 +191,8 @@ export default {
 			isSubmit: false,
 			showWeightSelect: false,
 			showWeightDigSelect: false,
-			weightCurrentRadio:'',
-			digeCurrentRadio:'',
+			weightCurrentRadio: '',
+			digeCurrentRadio: '',
 			list: [
 				{
 					value: '穿鞋',
@@ -251,13 +251,13 @@ export default {
 		sleepyRadioChange(evt) {
 			this.inputVal.sleepy_daytime = evt.target.value;
 		},
-		RadioChange(e,type){
-			if(type === 'clothing'){
+		RadioChange(e, type) {
+			if (type === 'clothing') {
 				this.inputVal.wearing = e.detail.value;
-				this.weightCurrentRadio = e.detail.value
-			}else if(type === 'digestion'){
+				this.weightCurrentRadio = e.detail.value;
+			} else if (type === 'digestion') {
 				this.inputVal.alimentary_canal = e.detail.value;
-				this.digeCurrentRadio = e.detail.value
+				this.digeCurrentRadio = e.detail.value;
 			}
 		},
 		confirmChoose(e, type) {
@@ -343,7 +343,7 @@ export default {
 				if (Math.round(ss) < 10) {
 					ss = '0' + ss;
 				}
-				return  hh + ':' + mm + ':' + ss
+				return hh + ':' + mm + ':' + ss;
 			}
 		},
 		async submitRecord() {
@@ -359,7 +359,16 @@ export default {
 					req = [
 						{
 							serviceName: 'srvhealth_body_fat_measurement_record_add',
-							data: [{ service_no: this.serviceLog.no, name: this.serviceLog.name, weight: this.inputVal.weight, body_fat_rate: this.inputVal.body_fat_rate,wearing:this.inputVal.wearing,alimentary_canal:this.inputVal.alimentary_canal }]
+							data: [
+								{
+									service_no: this.serviceLog.no,
+									name: this.serviceLog.name,
+									weight: this.inputVal.weight,
+									body_fat_rate: this.inputVal.body_fat_rate,
+									wearing: this.inputVal.wearing,
+									alimentary_canal: this.inputVal.alimentary_canal
+								}
+							]
 						}
 					];
 					break;
@@ -386,6 +395,7 @@ export default {
 				case 'heartRate':
 					serviceName = '';
 					break;
+				case 'bp':
 				case 'pressure':
 					// 血压
 					serviceName = 'srvhealth_blood_pressure_record_add';
@@ -448,6 +458,9 @@ export default {
 			if (serviceName) {
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.response) && res.data.response.length > 0) {
+					if(this.type==='weight'){
+						this.changeWeightForBasicInfo(this.inputVal.weight)
+					}
 					uni.showToast({
 						title: '提交成功'
 					});
@@ -459,6 +472,18 @@ export default {
 					icon: 'none'
 				});
 			}
+		},
+		changeWeightForBasicInfo(weight){
+			let url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
+			let req = [{"serviceName":"srvhealth_person_info_update","condition":[{"colName":"userno","ruleType":"eq","value":this.currentUserInfo.userno}],"data":[{"weight":weight}]}]
+			this.$http.post(url,req).then(res=>{
+				if(res.data.state === 'SUCCESS'){
+					this.selectBasicUserList()
+					uni.showToast({
+						title:'体重数据已更新',
+					})
+				}
+			})
 		},
 		openTime(e) {
 			this.showTimePicker = true;
@@ -535,20 +560,20 @@ export default {
 					border: 1px solid #ccc;
 					padding: 10rpx;
 				}
-				.weight-radio-group{
+				.weight-radio-group {
 					display: flex;
 					margin-bottom: 10rpx;
-					.weight-radio-group-item{
+					.weight-radio-group-item {
 						margin-right: 20rpx;
 						display: flex;
 						align-items: center;
-						/deep/ .uni-radio-input{
+						/deep/ .uni-radio-input {
 							transform: scale(0.8);
-							.uni-radio-input-checked{
-								background-color: rgb(0, 122, 255)!important;
+							.uni-radio-input-checked {
+								background-color: rgb(0, 122, 255) !important;
 							}
 						}
-						.title{
+						.title {
 							margin-right: 4rpx;
 						}
 					}

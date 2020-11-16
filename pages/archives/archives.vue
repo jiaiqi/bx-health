@@ -185,12 +185,10 @@ export default {
 			return this.checkedList.length >= 5;
 		},
 		avatarUrl() {
-			if (this.loginUserInfo.headimgurl) {
+			if (this.currentUser.profile_url) {
+				return this.$api.downloadFile + this.currentUser.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+			} else if (this.loginUserInfo.headimgurl) {
 				return this.loginUserInfo.headimgurl;
-			} else {
-				if (this.currentUser.profile_url) {
-					return this.$api.downloadFile + this.currentUser.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-				}
 			}
 		}
 	},
@@ -510,9 +508,6 @@ export default {
 					margin-left: 10rpx;
 					font-size: 20rpx;
 					@for $i from 1 through 20 {
-						.item-#{$i} {
-							width: 2em * $i;
-						}
 						&:nth-child(#{$i}) {
 							@if $i%2==1 {
 								color: #409eff;
@@ -604,11 +599,11 @@ export default {
 					position: absolute;
 					bottom: 10%;
 					left: 10%;
-					.text-icon{
+					.text-icon {
 						display: inline-block;
 						transform: rotate(180deg) scale(1, 1.5);
 					}
-					.text{
+					.text {
 						transform: rotate(0) scale(1);
 						font-size: 24rpx;
 						color: #999;
