@@ -102,7 +102,6 @@ export default {
 		} else if (option.serviceName && option.type) {
 			this.serviceName = option.serviceName;
 			this.type = option.type;
-			console.log('------serviece-name----', this.serviceName, this.type);
 			this.getFieldsV2();
 		} else {
 			uni.showToast({
@@ -111,7 +110,6 @@ export default {
 			});
 		}
 	},
-
 	methods: {
 		async getDefaultVal() {
 			if (this.type === 'detail' || this.type === 'update') {

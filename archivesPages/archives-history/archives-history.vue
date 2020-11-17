@@ -29,7 +29,19 @@
 					<view class="record-title">最新数据</view>
 					<view class="record-data">
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'bp'">
-							<text class="digital ">{{ getFixedNum(historyRecord[0].systolic_pressure) }} / {{ getFixedNum(historyRecord[0].diastolic_pressure) }}</text>
+							<text class="digital ">
+								<text
+									:class="{
+										'text-green': historyRecord[0].systolic_pressure < 120 && historyRecord[0].diastolic_pressure < 80,
+										'text-orange':
+											(historyRecord[0].systolic_pressure >= 120 && historyRecord[0].systolic_pressure < 140) ||
+											(historyRecord[0].diastolic_pressure < 90 && historyRecord[0].diastolic_pressure >= 80),
+										'text-red': historyRecord[0].systolic_pressure >= 140 || historyRecord[0].diastolic_pressure >= 90
+									}"
+								>
+									{{ getFixedNum(historyRecord[0].systolic_pressure) }} / {{ getFixedNum(historyRecord[0].diastolic_pressure) }}
+								</text>
+							</text>
 							<text class="unit">毫米汞柱</text>
 						</view>
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'weight'">
@@ -696,7 +708,7 @@ export default {
 					serviceName: serviceName,
 					colNames: ['*'],
 					condition: [
-						{ colName: 'userno', ruleType: 'like', value: this.loginUserInfo.user_no },
+						{ colName: 'userno', ruleType: 'like', value: this.userInfo.userno },
 						{ colName: 'user_name', ruleType: 'like', value: this.userInfo.name },
 						{ colName: 'hdate', ruleType: 'gt', value: timeRange.start },
 						{ colName: 'hdate', ruleType: 'lt', value: timeRange.end }
@@ -1265,14 +1277,16 @@ export default {
 					flex: 1;
 					display: flex;
 					justify-content: center;
-					align-items: center;
+					align-items: flex-end;
 					.digital {
 						font-size: 60rpx;
 						font-weight: 700;
 						color: #0081ff;
 					}
 					.unit {
-						color: #0081ff;
+						font-size: 30rpx;
+						color: #66abff;
+						margin-left: 10rpx;
 					}
 				}
 				.date {

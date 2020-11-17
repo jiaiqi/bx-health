@@ -16,10 +16,11 @@
 		<view class="search-box" :class="{ QZBG: GDHEAD }" :style="GDHEAD ? 'padding-right: ' + MPPR + 'px' : ''">
 			<!-- <view class="navbar" ></view> -->
 			<view class="ctn">
-				<view class="hx-search-box" @click="goSearch">
+				<view class="hx-search-box">
 					<text class="cuIcon-search" style="color: #666;font-size: 22;"></text>
 					<!-- <uni-icons type="search" size="22" color="#666666" /> -->
-					<text>输入搜索关键词</text>
+					<!-- <text>输入搜索关键词</text> -->
+					<input @input="goSearch" v-model="searchVal" type="text" placeholder="输入搜索关键词" value="" />
 				</view>
 			</view>
 		</view>
@@ -39,7 +40,7 @@
 				:pullUp="loadData"
 				:enablePullDown="true"
 				:enablePullUp="true"
-				:top="300"
+				:top="310"
 				:fixed="true"
 				:bottom="0"
 				finishText="我是有底线的..."
@@ -136,6 +137,7 @@ export default {
 		return {
 			isLogin: false, //是否已经登录
 			MPPR: 0,
+			searchVal:'', //搜索内容
 			heightStyle: 'calc(100vh-620upx)',
 			GDHEAD: 0,
 			pageInfo: {
@@ -284,6 +286,14 @@ export default {
 				})
 			}
 		},
+		goSearch(){
+			if(this.current_tit.type === 'shop'){
+				this.getShopList("search",this.searchVal)
+			}else if(this.current_tit.type === 'myShop'){
+				this.getMyShopList("search",this.searchVal)
+			}
+			console.log("-=========>")
+		},
 		/* 点击顶部切换商铺和我得商铺列表**/
 		tapTitItem(item,i){
 			this.current_tit = item
@@ -299,7 +309,7 @@ export default {
 			});
 		},
 		/* 获取商户列表**/
-		async getShopList() {
+		async getShopList(type=null,search_val) {
 			let self = this
 			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
 			let req = {
@@ -309,6 +319,13 @@ export default {
 				order: [],
 				page:self.pageInfo
 			};
+			if(type && type === 'search'){
+				req.condition = [{
+					colName:'name',
+					ruleType:'like',
+					value:search_val
+				}]
+			}
 			let res = await this.$http.post(url, req);
 			if(res.data.resultCode === '0011'){
 				this.isLogin = false;
@@ -347,7 +364,7 @@ export default {
 			
 		},
 		/* 获取当前登录人得商铺**/
-		async getMyShopList() {
+		async getMyShopList(type=null,search_val) {
 			let self = this
 			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
 			let req = {
@@ -361,6 +378,14 @@ export default {
 				order: [],
 				page:self.pageInfo
 			};
+			if(type && type === 'search'){
+				let obj = {
+					colName:'name',
+					ruleType:'like',
+					value:search_val
+				}
+				req.condition.push(obj)
+			}
 			let res = await this.$http.post(url, req);
 			if(self.pageInfo.pageNo === 1){
 				self.myStoreList = []
@@ -537,6 +562,10 @@ page {
 			flex: 1;
 			color: #888888;
 			font-size: 14px;
+			input{
+				padding: 0 10rpx;
+				font-size: 28rpx;
+			}
 		}
 	}
 }
@@ -633,7 +662,7 @@ page {
 .sort-box {
 	display: flex;
 	flex-direction: row;
-	margin-top: 12px;
+	margin-top:12px;
 	.item-box {
 		margin-right: 16px;
 		.tit {

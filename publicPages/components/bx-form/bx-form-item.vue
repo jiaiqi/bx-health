@@ -51,6 +51,7 @@
 						{{ itema }}
 					</u-radio>
 				</u-radio-group> -->
+
 				<radio-group @change="radioChange" v-if="fieldData.type === 'radio'" :class="!valid.valid ? 'valid_error' : ''">
 					<radio
 						color="#0bc99d"
@@ -380,7 +381,6 @@ import robbyImageUpload from '@/publicPages/components/robby-image-upload/robby-
 import cascaderSelector from '@/publicPages/components/cascader/cascaderSelector.vue';
 import uniPopup from '@/publicPages/components/uni-popup/uni-popup.vue';
 import bxTreeSelector from '@/publicPages/components/tree-selector/tree-selector.vue';
-
 let _this = null;
 export default {
 	name: 'bxFormItem',
@@ -389,9 +389,7 @@ export default {
 		robbyImageUpload,
 		cascaderSelector,
 		uniPopup,
-		// bxEditor,
 		bxTreeSelector
-		// attachment
 	},
 	props: {
 		field: {
@@ -1182,7 +1180,7 @@ export default {
 			}
 			if (relation_condition && typeof relation_condition === 'object') {
 				req.relation_condition = relation_condition;
-				delete req.condition
+				delete req.condition;
 			}
 			let res = await self.onRequest('select', req.serviceName, req, appName);
 			if (res.data.state === 'SUCCESS' && res.data.page && res.data.page.total > res.data.page.rownumber * res.data.page.pageNo) {

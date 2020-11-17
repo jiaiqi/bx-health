@@ -5,6 +5,11 @@
 				<text class="text-red text-shadow" v-show="fieldData.isRequire">*</text>
 				{{ fieldData.label }}:
 				<text v-show="!valid.valid">({{ valid.msg }})</text>
+				<text @click="getPostion(fieldData)" class="address-pos" v-if="fieldData.column === 'address'">
+					<text class="lg text-blue cuIcon-location"></text>
+					<text>获取位置</text>
+					<!-- 获取位置{{addressName}} -->
+				</text>
 			</view>
 			<!-- 图片描述 -->
 			<block class="img-explain" v-if="fieldData.option_img_explain">
@@ -46,7 +51,8 @@
 						{{ itema }}
 					</u-radio>
 				</u-radio-group> -->
-								<radio-group @change="radioChange" v-if="fieldData.type === 'radio'" :class="!valid.valid ? 'valid_error' : ''">
+
+				<radio-group @change="radioChange" v-if="fieldData.type === 'radio'" :class="!valid.valid ? 'valid_error' : ''">
 					<radio
 						color="#0bc99d"
 						:key="index"
@@ -73,7 +79,20 @@
 						<u-image width="100%" height="300rpx" v-if="itema.option_img_explain" :src="getOptionImgExplain(itema.option_img_explain)" mode="aspectFit"></u-image>
 					</u-radio>
 				</u-radio-group> -->
-							<radio-group @change="radioChange" v-else-if="fieldData.type === 'radioFk'" :class="!valid.valid ? 'valid_error' : ''">
+				<bx-radio-group v-model="fieldData.value" v-else-if="fieldData.type === 'radioFk'" :class="!valid.valid ? 'valid_error' : ''">
+					<bx-radio
+						class="radio"
+						color="#2979ff"
+						v-for="item in fieldData.options"
+						:disabled="fieldData.disabled ? fieldData.disabled : false"
+						:key="item.id"
+						:name="item.value"
+						:serial-char="item.serialChar"
+					>
+						{{ item.label }}
+					</bx-radio>
+				</bx-radio-group>
+				<!-- 			<radio-group @change="radioChange" v-else-if="fieldData.type === 'radioFk'" :class="!valid.valid ? 'valid_error' : ''">
 					<radio
 						color="#2979ff"
 						class="blue radio"
@@ -86,11 +105,11 @@
 						style="transform: scale(0.7);"
 					>
 						<view class="radio-content ">
-							<span style="flex: 1;padding-left: 10rpx;font-size: 14px;margin-left: 5px;">{{ itema.label }}</span>
+							<span style="flex: 1;padding-left: 10rpx;transform: scale(1.2);margin-left: 5px;">{{ itema.label }}</span>
 							<image width="100%" height="300rpx" v-if="itema.option_img_explain" :src="getOptionImgExplain(itema.option_img_explain)" mode="aspectFit"></image>
 						</view>
 					</radio>
-				</radio-group>
+				</radio-group> -->
 				<checkbox-group name="checkbox-group" class="checkbox-group" v-else-if="fieldData.type === 'checkbox'" :class="!valid.valid ? 'valid_error' : ''">
 					<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox" @click="radioChange(item)">
 						<checkbox color="#2979ff" :value="item" :disabled="fieldData.disabled ? fieldData.disabled : false" :checked="fieldData.value.indexOf(item) !== -1" />
@@ -375,6 +394,8 @@ import robbyImageUpload from '@/questionnaire/components/robby-image-upload/robb
 import cascaderSelector from '@/questionnaire/components/cascader/cascaderSelector.vue';
 import uniPopup from '@/questionnaire/components/uni-popup/uni-popup.vue';
 import bxTreeSelector from '@/questionnaire/components/tree-selector/tree-selector.vue';
+import bxRadio from '@/questionnaire/components/bx-radio/bx-radio.vue';
+import bxRadioGroup from '@/questionnaire/components/bx-radio-group/bx-radio-group.vue';
 let _this = null;
 export default {
 	name: 'bxFormItem',
@@ -384,7 +405,9 @@ export default {
 		cascaderSelector,
 		uniPopup,
 		// bxEditor,
-		bxTreeSelector
+		bxTreeSelector,
+		bxRadio,
+		bxRadioGroup
 		// attachment
 	},
 	props: {
@@ -475,6 +498,7 @@ export default {
 			picker: ['网络状况较差，请稍后进行选择'],
 			modelData: '',
 			oriPicker: [],
+			addressName: '',
 			treeSelectorShowValue: '', //属性选择器input框中显示的值
 			treePageInfo: {
 				total: 0,
@@ -620,6 +644,10 @@ export default {
 		this.getDefVal();
 	},
 	methods: {
+		/*获取位置信息**/
+		getPostion(e) {
+			this.$emit('seatPostion', e);
+		},
 		getOptionImgExplain(e) {
 			if (e) {
 				return this.$api.downloadFile + e + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
@@ -874,7 +902,6 @@ export default {
 			}
 		},
 		radioChange(e, index) {
-			debugger
 			if (this.fieldData.disabled) {
 				return;
 			}
@@ -1166,12 +1193,13 @@ export default {
 					return;
 				}
 			}
-			if (relation_condition && typeof relation_condition === 'object') {
-				req.relation_condition = relation_condition;
-			}
 			if (req.serviceName === 'srvsso_user_select') {
 				req.condition = [{ colName: 'dept_no', ruleType: 'like', value: 'bx100sys' }];
 				appName = 'sso';
+			}
+			if (relation_condition && typeof relation_condition === 'object') {
+				req.relation_condition = relation_condition;
+				delete req.condition;
 			}
 			let res = await self.onRequest('select', req.serviceName, req, appName);
 			if (res.data.state === 'SUCCESS' && res.data.page && res.data.page.total > res.data.page.rownumber * res.data.page.pageNo) {
@@ -1310,13 +1338,13 @@ export default {
 		width: 100%;
 	}
 	.radio {
-		min-width: calc(33% - 40rpx);
+		min-width: calc(50% - 40rpx);
 		margin-right: 20rpx;
 		max-width: 700rpx;
-		display: contents;
 		&.has-img {
 			width: 100%;
 			::v-deep .uni-radio-wrapper {
+				display: flex;
 				width: 100%;
 				align-items: flex-start;
 			}
@@ -1324,11 +1352,13 @@ export default {
 				flex: 1;
 			}
 		}
+		.radio-content {
+		}
 		label {
 			line-height: 70rpx;
 		}
 		.radio-content {
-			display: contents;
+			display: flex;
 			flex-direction: column;
 		}
 	}
@@ -1425,6 +1455,7 @@ uni-text.input-icon {
 .cu-form-group .title {
 	display: flex;
 	align-items: flex-end;
+	width: 100%;
 	height: auto;
 	margin: 20rpx 0 0upx;
 	color: #333;
@@ -1432,6 +1463,10 @@ uni-text.input-icon {
 	&.valid_error {
 		color: #ff0000;
 	}
+}
+.address-pos {
+	flex: 1;
+	text-align: right;
 }
 .cu-form-group.form-detail {
 	display: flex;
@@ -1479,15 +1514,16 @@ uni-text.input-icon {
 .cu-form-group uni-picker::after {
 	display: none !important;
 }
-.cu-form-group /deep/ uni-radio-group{
-	display: flex!important;
-	flex-wrap: wrap!important;
-	justify-content: start;
-}
-.cu-form-group /deep/ .uni-radio-input {
-	transform: scale(0.7);
-}
+
 .uni-popup {
 	z-index: 10000;
 }
+/* #ifdef MP-WEIXIN */
+.cu-form-group {
+	/deep/ .uni-radio-input-checked::after {
+		left: -127rpx;
+		z-index: -1 !important;
+	}
+}
+/* #endif */
 </style>

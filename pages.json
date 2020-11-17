@@ -158,6 +158,24 @@
 			]
 		},
 		{
+			"root": "disease",
+			"pages": [
+				{
+					"path": "pathogen/pathogen",
+					"style": {
+						"navigationBarTitleText": "病因",
+						"enablePullDownRefresh": false
+					}
+				},{
+					"path": "pathogen/pathogenDetail",
+					"style": {
+						"navigationBarTitleText": "病因详情",
+						"enablePullDownRefresh": false
+					}
+				}				
+			]
+		},
+		{
 			"root": "otherPages",
 			"pages": [{
 					"path": "index/index",
@@ -307,10 +325,10 @@
 					"path": "shop/shopDetail",
 					"style": {}
 				},
-				{
-					"path": "shop/shopCarList",
-					"style": {}
-				},
+				// {
+				// 	"path": "shop/shopCarList",
+				// 	"style": {}
+				// },
 				{
 					"path": "shop/foodMaterial",
 					"style": {}

@@ -49,7 +49,7 @@
 				:pullUp="loadData"
 				:enablePullDown="true"
 				:enablePullUp="true"
-				:top="600"
+				:top="510"
 				:fixed="true"
 				:bottom="0"
 				finishText="我是有底线的..."
@@ -565,13 +565,14 @@
 	.header{
 		position: relative;
 		// min-height: 230px;
+		height: 320rpx;
 		&-bg{
 			position: absolute;
 			left: 0;
 			top: 0;
 			z-index: 2;
 			width: 100%;
-			height: 142px;
+			height: 120px;
 		}
 		&-bg-black{
 			position: absolute;
@@ -600,11 +601,13 @@
 			position: relative;
 			z-index: 2;
 			background: #ffffff;
-			height: 100px;
+			height: 160rpx;
 			border-radius: 6px;
 			padding: 12px;
-			margin-bottom: 4px;
+			// margin-bottom: 4px;
 			transition: all 0.2s;
+			top: -50rpx;
+			
 			.shrink-box{
 				position: absolute;
 				bottom: 0;

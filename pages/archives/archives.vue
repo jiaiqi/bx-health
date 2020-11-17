@@ -11,6 +11,12 @@
 			</view>
 			<view class="right" @click="showUserHealtManagePopup = true" v-if="selectedTags.length === 0">健康标签管理</view>
 		</view>
+		<view class="user-info-tip">
+			<text class="tips" @click="toPages('basic-info')">
+				<text class="cuIcon-info"></text>
+				<text class="text">信息完整度: 75%</text>
+			</text>
+		</view>
 		<view class="health-overall-score">
 			<view class="content">
 				<view class="score-item" @click="toPages('score-compose')">
@@ -22,7 +28,7 @@
 						<!-- <text class="cuIcon-forwardfill text-blue"></text> -->
 					</view>
 				</view>
-				<view class="score-item" @click="toPages('basic-info')">
+				<view class="score-item">
 					<text class="label">今日健康分</text>
 					<text class="value  text-cyan">
 						64
@@ -478,28 +484,52 @@ export default {
 	padding-bottom: 20rpx;
 	max-width: 1080rpx;
 	margin: 0 auto;
-	.avatar {
-		width: 60rpx;
-		height: 60rpx;
-		border-radius: 100%;
+	.user-info-tip {
+		width: 100%;
+		display: flex;
+		justify-content: flex-start;
+		margin-bottom: 20rpx;
+		.tips {
+			min-width: 33%;
+			color: #fff;
+			border-top-right-radius: 50rpx;
+			border-bottom-right-radius: 50rpx;
+			// border-top-left-radius: 50rpx;
+			// border-bottom-left-radius: 50rpx;
+			background-color: #2b85e4;
+			padding: 10rpx 20rpx;
+			animation: 2s ease slidein;
+			.text {
+				margin-left: 10rpx;
+			}
+		}
 	}
-	// background-image: linear-gradient(#0e1327,#0e1327,#fff);
+	@keyframes slidein {
+		from {
+			transform:translateX(-300px);
+		}
+		to {
+			transform:translateX(0);
+		}
+	}
 	.top {
 		display: flex;
-		padding: 20rpx;
-		height: 100rpx;
+		padding: 20rpx 0;
 		background-color: #fff;
 		justify-content: space-between;
 		margin-bottom: 20rpx;
+		flex-wrap: wrap;
 		.left {
 			display: flex;
 			align-items: center;
 			font-size: 30rpx;
 			line-height: 30rpx;
+			margin: 0 20rpx;
 			.avatar {
-				// width:80rpx;
-				// height: 80rpx;
 				margin-right: 10rpx;
+				width: 60rpx;
+				height: 60rpx;
+				border-radius: 100%;
 			}
 			.tag-box {
 				.tag-item {

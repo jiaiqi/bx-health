@@ -1,49 +1,49 @@
 <template>
 	<view class="cu-card">
 		<view class="page-wrap">
-				<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
-					<view class="desc" style="text-align: justify;">
-						<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
-						<view class="date-box">
-							<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
-							<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
-						</view>
+			<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
+				<view class="desc" style="text-align: justify;">
+					<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
+					<view class="date-box">
+						<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
+						<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
 					</view>
 				</view>
-				<view class="content form-wrap" style="box-sizing: border-box;">
-					<bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform>
+			</view>
+			<view class="content form-wrap" style="box-sizing: border-box;">
+				<bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform>
+			</view>
+			<view class="content" style="padding:30upx;" v-if="formData.end_remark">
+				<view class="desc">
+					<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
 				</view>
-				<view class="content" style="padding:30upx;" v-if="formData.end_remark">
-					<view class="desc">
-						<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
-					</view>
+			</view>
+			<view
+				class="button-box"
+				style="margin: 30upx;"
+				v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
+			>
+				<button class="button" type="" @click="submitForm()">提交</button>
+			</view>
+			<view
+				class="button-box"
+				style="margin: 30upx;"
+				v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
+			>
+				<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
+			</view>
+			<view
+				class="button-box"
+				style="margin: 30upx;"
+				v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
+			>
+				<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
+				<view class="score-box" v-if="scoreInfo.score || scoreInfo.score === 0">
+					得分：
+					<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
 				</view>
-				<view
-					class="button-box"
-					style="margin: 30upx;"
-					v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
-				>
-					<button class="button" type="" @click="submitForm()">提交</button>
-				</view>
-				<view
-					class="button-box"
-					style="margin: 30upx;"
-					v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
-				>
-					<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
-				</view>
-				<view
-					class="button-box"
-					style="margin: 30upx;"
-					v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
-				>
-					<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
-					<view class="score-box" v-if="scoreInfo.score || scoreInfo.score === 0">
-						得分：
-						<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
-					</view>
-				</view>
-				<view class="to-history" v-if="configCols && configCols.length > 0 && formType === 'form'" @click="toHistory">点击查看历史提交</view>
+			</view>
+			<view class="to-history" v-if="configCols && configCols.length > 0 && formType === 'form'" @click="toHistory">点击查看历史提交</view>
 		</view>
 		<u-empty :text="emptyText" v-if="!configCols || configCols.length === 0"></u-empty>
 	</view>
@@ -78,26 +78,26 @@ export default {
 			scoreInfo: {} // 得分情况
 		};
 	},
-	props:{
+	props: {
 		activityNo: {
 			type: String,
-			default:''
+			default: ''
 		},
-		comfromType:{
+		comfromType: {
 			type: String,
-			default:''
+			default: ''
 		}
 	},
 	watch: {
 		activityNo(newValue, oldValue) {
-			if(this.activityNo){
+			if (this.activityNo) {
 				this.emptyText = '正在请求问卷配置数据';
 				setTimeout(() => {
 					this.emptyText = '未找到问卷配置数据';
 				}, 3000);
 				this.formType = this.comfromType;
-				this.status = '进行中'
-				this.activity_no = this.activityNo
+				this.status = '进行中';
+				this.activity_no = this.activityNo;
 				this.getQuestionnaireData();
 			}
 		}
@@ -386,14 +386,19 @@ export default {
 									if (this.formType === 'detail') {
 										item.disabled = true;
 									}
-
 									data.user_data.forEach(items => {
 										if (item.column === items.item_no) {
 											if (item.item_type_attr && item.item_type_attr.radioType === 'multi') {
-												item.value = items.option_data;
-												console.log('items.option_data', items.option_data);
+												item.value = items.option_data.map((opt, optIndex) => {
+													if (opt.option_view_no) {
+														opt.serialChar = opt.option_view_no;
+													} else if (opt.option_seq) {
+														opt.serialChar = opt.option_seq;
+													} else {
+														opt.serialChar = optIndex;
+													}
+												});
 											} else {
-												console.log('item_type', item);
 												item.value = items.option_data[0];
 											}
 										}
@@ -552,10 +557,18 @@ export default {
 					break;
 				case '选项':
 					config.type = e.item_type_attr.radioType && e.item_type_attr.radioType === 'multi' ? 'checkboxFk' : 'radioFk';
-					config.options = e.option_data.map(item => {
+					config.options = e.option_data.map((item, optIndex) => {
 						item.value = item.option_value;
 						item.showimg = false;
-						item.label = item.option_view_no ? item.option_view_no + '. ' + item.option_value : item.option_value;
+						item.label = item.option_value;
+
+						if (item.option_view_no) {
+							item.serialChar = item.option_view_no;
+						} else if (item.option_seq) {
+							item.serialChar = item.option_seq;
+						} else {
+							item.serialChar = optIndex;
+						}
 						return item;
 						// return item.option_value;
 					});
@@ -630,19 +643,18 @@ export default {
 		uni.setStorageSync('fill_batch_no', '');
 	},
 	mounted() {
-		if(this.activityNo){
+		if (this.activityNo) {
 			this.emptyText = '正在请求问卷配置数据';
 			setTimeout(() => {
 				this.emptyText = '未找到问卷配置数据';
 			}, 3000);
 			this.formType = this.comfromType;
-			this.status = '进行中'
-			this.activity_no = this.activityNo
+			this.status = '进行中';
+			this.activity_no = this.activityNo;
 			this.getQuestionnaireData();
 		}
 	},
 	onLoad(option) {
-		
 		this.emptyText = '正在请求问卷配置数据';
 		setTimeout(() => {
 			this.emptyText = '未找到问卷配置数据';
@@ -672,7 +684,7 @@ export default {
 				console.log('status', this.status);
 			}
 			if (option.activity_no) {
-				this.activity_no = option.activity_no
+				this.activity_no = option.activity_no;
 				this.getQuestionnaireData();
 			} else if (this.questionData.activity_no) {
 				this.status = '已完成';
@@ -700,7 +712,7 @@ export default {
 	background-color: #fff;
 	color: #fff;
 	height: 100vh;
-	.page-wrap{
+	.page-wrap {
 		height: 100%;
 		overflow-y: scroll;
 	}
@@ -814,7 +826,7 @@ export default {
 		font-weight: 700;
 	}
 }
-.u-empty{
+.u-empty {
 	height: 100%;
 }
 </style>

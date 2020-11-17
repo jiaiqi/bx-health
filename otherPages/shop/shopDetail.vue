@@ -40,7 +40,7 @@
 					<uniEcCanvas class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
 				<!-- #endif -->
 				<!-- #ifdef H5 -->
-					<uniEcharts  class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
+					<uniEcharts class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
 				<!-- #endif -->
 			</view>
 			<!-- <view class="shop-detail-bot-t">

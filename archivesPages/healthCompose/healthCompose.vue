@@ -17,7 +17,12 @@
 						class="couple-cen-item"
 					>
 						<view v-if="item.name !== '其它'" class="couple-cen-item-t" :class="item.grade === 0 ? '' : item.grade >= 0 && item.grade <= 5 ? 'risk' : 'normal'">
-							<text>{{ item.grade }}</text>
+							<text v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">{{ item.grade }}</text>
+							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
+							<view class="unfilled" v-if="!item.finished" @click="toQuestionnaire(item.no)">
+								<text class="text-icon cuIcon-edit"></text>
+								<text class="text">点击填写</text>
+							</view>
 						</view>
 						<view class="couple-cen-item-b">
 							<text>{{ item.name }}</text>
@@ -33,64 +38,227 @@
 export default {
 	data() {
 		return {
+			userInfo: '',
 			coupleData: [
 				{
 					name: '体重',
-					grade: 10,
-					no: '20201105104133000163',
+					grade: null,
+					fullMark: 20,
+					finished: false,
 					detail: {}
 				},
 				{
 					name: '年龄',
-					grade: 5,
-					no: '20201105115153000168'
+					grade: null,
+					fullMark: 5,
+					finished: false
 				},
 				{
 					name: '家族史',
-					grade: 5,
-					no: '20201105111540000164'
+					grade: null,
+					fullMark: 5,
+					no: '20201105111540000164',
+					finished: false
 				},
 				{
 					name: '疾病史',
-					grade: 5,
-					no: '20201109095316000178'
+					finished: false,
+					no: '20201027152801000160',
+					grade: null,
+					fullMark: 5
 				},
 				{
 					name: '饮食',
-					grade: 15,
-					no: '20201106142616000177'
+					finished: false,
+					no: '20201106104133000174',
+					grade: null,
+					fullMark: 20
 				},
 				{
 					name: '运动',
-					grade: 10,
-					no: '20201109105128000186'
+					finished: false,
+					no: '20201109095316000178',
+					grade: null,
+					fullMark: 10
 				},
 				{
 					name: '睡眠',
-					grade: 10,
-					no: '20201109104327000185'
+					finished: false,
+					no: '20201109104327000185',
+					grade: null,
+					fullMark: 10
 				},
 				{
 					name: '吸烟情况',
-					grade: 5,
-					no: '20201109103435000184'
+					finished: false,
+					no: '20201106115503000176',
+					grade: null,
+					fullMark: 5
 				},
 				{
 					name: '饮酒情况',
-					grade: 3,
-					no: '20201109103435000184'
+					finished: false,
+					no: '20201106142616000177',
+					grade: null,
+					fullMark: 5
 				},
 				{
 					name: '心理',
-					grade: 5,
-					no: '20201109103435000184'
+					finished: false,
+					no: '20201109103435000184',
+					grade: null,
+					fullMark: 10
+				},
+				{
+					name: '健康素养',
+					finished: false,
+					no: '20201109105128000186',
+					grade: null,
+					fullMark: 5
 				}
 			],
+			scoreInfo: {},
 			currentItem: {},
 			currIndex: 0
 		};
 	},
+	computed: {
+		bmi() {
+			if (this.userInfo.weight && this.userInfo.height) {
+				return (Number(this.userInfo.weight) / Math.pow(Number(this.userInfo.height) / 100, 2)).toFixed(1);
+			}
+		},
+		age() {
+			if (this.userInfo.birthday) {
+				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
+				return age;
+			}
+		}
+	},
+
 	methods: {
+		toQuestionnaire(no) {
+			if (no) {
+				uni.navigateTo({
+					url: `/questionnaire/index/index?formType=form&activity_no=${no}&status=进行中`
+				});
+			} else {
+				uni.showToast({
+					title: '未知编号，请刷新重试',
+					icon: 'none'
+				});
+			}
+		},
+		async getScoreFromQuestionRecord(no) {
+			// 以user_no和问卷编号为条件拿到最新的问卷填写记录信息
+			let url = this.getServiceUrl('daq', 'srvdaq_record_reply_select', 'select');
+			let req = {
+				serviceName: 'srvdaq_record_reply_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'activity_no',
+						ruleType: 'eq',
+						value: no
+					},
+					{
+						colName: 'state',
+						ruleType: 'eq',
+						value: '完成'
+					},
+					{
+						colName: 'user_no',
+						ruleType: 'eq',
+						value: this.userInfo.userno
+					}
+				],
+				page: { pageNo: 1, rownumber: 10 },
+				order: [{ colName: 'end_time', orderType: 'desc' }]
+			};
+			let res = await this.$http.post(url, req);
+			debugger;
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				return res.data.data[0];
+			} else {
+				return false;
+			}
+		},
+		getWeightScore() {
+			// 计算体重分数
+			if (this.bmi) {
+				let bmi = this.bmi;
+				let result = 0;
+				if (bmi >= 28 && bmi < 38) {
+					result = (38 - bmi) / 2;
+				} else if (bmi < 28 && bmi >= 24) {
+					result = 5 + (4 * (28 - bmi)) / 5;
+				} else if (bmi >= 18.5 && bmi < 21) {
+					result = 10 + ((bmi - 18.5) * 10) / 2.5;
+				} else if (bmi >= 21 && bmi < 24) {
+					result = 20 - ((bmi - 21) * 10) / 3;
+				} else if (bmi < 18.5 && bmi >= 10) {
+					result = (Math.abs(10 - bmi) * 5) / 8.5;
+				}
+				return Number(result.toFixed(1));
+			}
+		},
+		getAgeScore() {
+			if (this.age) {
+				let age = this.age;
+				let result = 0;
+				if (age <= 40) {
+					result = 5;
+				} else if (age > 40 && age <= 50) {
+					result = 4;
+				} else if (age > 50 && age <= 65) {
+					result = 3;
+				} else if (age > 65 && age <= 80) {
+					result = 3 - ((age - 65) * 3) / 15;
+				}
+				return Number(result.toFixed(1));
+			}
+		},
+		questionScore2grade(score, total) {
+			if (total && (score || score === 0)) {
+				return (score * total) / 100;
+			}
+		},
+		async getScoreInfo() {
+			let scoreInfo = {};
+			let coupleData = this.coupleData;
+			for (let item of coupleData) {
+				switch (item.name) {
+					case '体重':
+						item.grade = this.getWeightScore();
+						break;
+					case '年龄':
+						item.grade = this.getAgeScore();
+						break;
+					case '家族史':
+					case '疾病史':
+					case '饮食':
+					case '运动':
+					case '睡眠':
+					case '心理':
+					case '吸烟情况':
+					case '饮酒情况':
+						let res = await this.getScoreFromQuestionRecord(item.no);
+						scoreInfo[item.name] = res;
+						if (res && (res.score || res.score === 0)) {
+							item.grade = this.questionScore2grade(res.score, item.fullMark);
+						}
+						if (res.state === '完成') {
+							item.finished = true;
+						}
+						break;
+				}
+				if (item.grade || item.grade === 0) {
+					item.finished = true;
+				}
+			}
+			this.scoreInfo = scoreInfo;
+		},
+
 		clickItem(item) {
 			if (item.name === this.currentItem.name) {
 				this.currentItem = {};
@@ -126,7 +294,18 @@ export default {
 			return res.data.data;
 		}
 	},
-	onLoad() {}
+	async created() {
+		let userInfo = await this.selectBasicUserList();
+		if (userInfo && userInfo.userno) {
+			this.userInfo = userInfo;
+			this.getScoreInfo();
+		}
+	},
+	onShow() {
+		if (this.userInfo && this.userInfo.userno) {
+			this.getScoreInfo();
+		}
+	}
 };
 </script>
 
@@ -156,6 +335,20 @@ export default {
 				font-size: 72rpx;
 				color: #ccc;
 				font-weight: 600;
+				.text {
+					font-size: 34rpx;
+				}
+				.unfilled {
+					font-size: 24rpx;
+					color: #999;
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					font-weight: normal;
+					.text-icon {
+						font-size: 48rpx;
+					}
+				}
 			}
 			.risk {
 				color: #e54d42;

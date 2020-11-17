@@ -28,7 +28,7 @@
 			<view class="symptom-bot-wrap-top">
 				<view class="symptom-bot-wrap-top-l">
 					<scroll-view :scroll-with-animation="true" style="height: 60upx;" scroll-x :scroll-left="scrollMenuLeft">
-						<text @click="changeMenu(item,index)" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomList" :key="index">{{item.name}}</text>
+						<text @click="changeMenu(item,index)" v-if="item.name !== '导入数据'" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomTitList" :key="index">{{item.name}}</text>
 					</scroll-view>
 				</view>
 				<view class="symptom-bot-wrap-top-r">
@@ -40,8 +40,8 @@
 
 		<view class="symptom-bot-wrap">
 			
-			<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[currentTab].children.length > 0 && !isSearch">
-				<view v-if="symptomList[currentTab].is_show && items.is_leaf === '否'" :key="index" v-for="(items, index) in symptomList[currentTab].children" class="wrapCont">
+			<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[0].children.length > 0 && !isSearch">
+				<view v-if="symptomList[0].is_show && items.is_leaf === '否'" :key="index" v-for="(items, index) in symptomList[0].children" class="wrapCont">
 					<view v-if="items.is_leaf === '否' && items.children.length > 0" class="wrapCont_row">
 						<view class="wrapCont-top">{{ items[query.key] }}</view>
 						<view class="wrapCont-main-no">
@@ -97,7 +97,7 @@
 		</view>
 		<u-popup v-model="menuIsShow" :closeable="true" mode="bottom">
 			<view class="pregnant-main-top-item-poup">
-				<text @click="changeMenu(item,index)" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomList" :key="index">{{item.name}}</text>
+				<text @click="changeMenu(item,index)" v-if="item.name !== '导入数据'" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomTitList" :key="index">{{item.name}}</text>
 			</view>
 		</u-popup>
 	</view>
@@ -126,6 +126,7 @@ export default {
 			oriData: [],
 			serBtn: false,
 			serseData: [],
+			symptomTitList:[],
 			symptomList: [],
 			chooseArr: uni.getStorageSync('symptomList') ? uni.getStorageSync('symptomList') : [],
 			query: '',
@@ -134,13 +135,15 @@ export default {
 			current_item: '',
 			menuIsShow:false,
 			activeIndex:0,
+			currentTopTab:'',
 			fromTypeData: '' //表单类型和数据
 		};
 	},
 	created() {},
 	mounted(e) {
 		if (this.query.type === 'symptom') {
-			this.getSymptomList();
+			this.getSymptomTitList()
+			// this.getSymptomList();
 			uni.setStorageSync('is_chunk', this.isChunk);
 		}
 	},
@@ -190,9 +193,52 @@ export default {
 			this.activeIndex = i;
 			this.scrollMenuLeft = (i - 1) * 85
 			this.currentTab = i;
+			this.currentTopTab = item
+			this.getCurrentTabList(item)
 			if(this.menuIsShow){
 				this.menuIsShow = false
 			}
+		},
+		/*获取点击顶部菜单数据**/
+		async getCurrentTabList(item){
+			let no = item.no
+			let url = this.getServiceUrl(this.query.srvApp, this.query.serviceName, 'select');
+			let req = {
+				serviceName: this.query.serviceName,
+				colNames: ['*'],
+				condition:[{
+					colName:'path',
+					ruleType:'like',
+					value:no
+				}],
+				order: [],
+				page:{pageNo: 1, rownumber: 6000}
+			};
+			let res = await this.$http.post(url, req);
+			let chooseData = uni.getStorageSync('symptomList');
+			console.log("======>点击顶部数据",res.data.data)
+			res.data.data.forEach(item => {
+				item['is_checked'] = false;
+				if (chooseData && chooseData.length > 0) {
+					chooseData.forEach(choose => {
+						if (item.id === choose.id) {
+							item.is_checked = true;
+						}
+					});
+				}
+			});
+			if(this.chooseArr.length > 0){
+				this.chooseArr.forEach(s=>{
+					res.data.data.forEach(o=>{
+						if(o.id === s.id){
+							o.is_checked = true;
+						}
+					})
+				})
+				
+			}
+			let parentNodeData = this.assemblyData(res.data.data)
+			this.symptomList = parentNodeData
 		},
 		change(index) {
 			this.currentTab = index;
@@ -203,6 +249,7 @@ export default {
 		/** 复选框事件*/
 		checkedItemChange(e, item) {
 			console.log(e, item);
+			debugger
 			let self = this;
 			let checkedData = this.checkedData;
 			let data = this.fromTypeData;
@@ -284,7 +331,23 @@ export default {
 				}
 			});
 		},
-
+		async getSymptomTitList(){
+			let url = this.getServiceUrl(this.query.srvApp, this.query.serviceName, 'select');
+			let req = {
+				serviceName: this.query.serviceName,
+				colNames: ['*'],
+				condition:[{
+					colName:'parent_no',
+					ruleType:'isnull'
+				}],
+				order: [],
+				// page:{pageNo: 1, rownumber: 500}
+			};
+			let res = await this.$http.post(url, req);
+			this.symptomTitList = res.data.data
+			this.getCurrentTabList(res.data.data[0])
+			console.log("---标题---",this.symptomTitList)
+		},
 		async getSymptomList(symptomList) {
 			// 请求疾病列表
 			let url = this.getServiceUrl(this.query.srvApp, this.query.serviceName, 'select');
@@ -293,7 +356,7 @@ export default {
 				colNames: ['*'],
 				relation_condition: {},
 				order: [],
-				page:{pageNo: 1, rownumber: 500}
+				// page:{pageNo: 1, rownumber: 500}
 			};
 			let chooseData = uni.getStorageSync('symptomList');
 			let res = await this.$http.post(url, req);
@@ -366,6 +429,7 @@ export default {
 		 * 对扁平化数组进行重新组装
 		 * */
 		assemblyData(arr) {
+			debugger
 			let flattArr = arr;
 			let parentNode = flattArr.filter(item => !item.parent_no);
 			parentNode.forEach(parent => {
