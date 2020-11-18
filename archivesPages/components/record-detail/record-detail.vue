@@ -51,7 +51,8 @@
 </template>
 
 <script>
-import uniEcCanvas from '../uni-ec-canvas/uni-echart.vue';
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-echart.vue';
+// import uniEcCanvas from '../uni-ec-canvas/uni-echart.vue';
 export default {
 	components: {
 		uniEcCanvas

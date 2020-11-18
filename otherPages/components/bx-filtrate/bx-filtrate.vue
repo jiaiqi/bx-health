@@ -89,7 +89,7 @@
 </template>
 
 <script>
-	import sPullScroll from '@/otherPages/components/s-pull-scroll';
+	import sPullScroll from '@/components/s-pull-scroll';
 	export default {		
 		name:'bx-filtrate',
 		components: {

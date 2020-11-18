@@ -9,15 +9,19 @@
 			:fields="fields"
 			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
 		></bxform>
-		<bxButtons :buttons="buttons" @on-button-change="onButton($event)"></bxButtons>
+		<view class="button-box">
+			<view v-for="(item, index) in buttons" :key="index">
+				<button v-if="item.display !== false" @click="onclick(item)" class="cu-btn bg-blue">{{ item.button_name }}</button>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
-import bxform from '../components/bx-form/bx-form.vue';
-import bxButtons from '../components/bx-buttons/bx-buttons.vue';
+import bxform from '@/components/bx-form/bx-form.vue';
+// import bxButtons from '../components/bx-buttons/bx-buttons.vue';
 export default {
-	components: { bxform, bxButtons },
+	components: { bxform },
 	props: {},
 	data() {
 		return {
@@ -274,4 +278,15 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss">
+	.button-box {
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+		min-height: 200upx;
+		background-color: #fff;
+		.cu-btn{
+			flex: 1;
+			}
+	}
+</style>

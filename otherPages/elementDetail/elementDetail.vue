@@ -172,10 +172,12 @@
 <script>
 var _self;
 // #ifdef MP-WEIXIN
-import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+// import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #endif
 // #ifdef H5
-import uniEcharts from '@/otherPages/components/uni-ec-canvas/uni-echarts.vue';
+import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+// import uniEcharts from '@/otherPages/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
 import energyListWrap from '../static/js/totalEnergyList.js';
 export default {

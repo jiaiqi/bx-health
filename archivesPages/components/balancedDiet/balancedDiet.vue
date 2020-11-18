@@ -529,10 +529,12 @@
 import bxDateStamp from '@/archivesPages/components/bx-date-stamp/bx-date-stamp.vue';
 import xflSelect from '@/archivesPages/components/xfl-select/xfl-select.vue';
 // #ifdef MP-WEIXIN
-import uniEcCanvas from '@/archivesPages/components/uni-ec-canvas/uni-ec-canvas.vue';
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+// import uniEcCanvas from '@/archivesPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #endif
 // #ifdef H5
-import uniEcharts from '@/archivesPages/components/uni-ec-canvas/uni-echarts.vue';
+import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+// import uniEcharts from '@/archivesPages/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
 let self;
 export default {

@@ -223,10 +223,12 @@
 <script>
 var self;
 // #ifdef MP-WEIXIN
-import uniEcCanvas from '@/archivesPages/components/uni-ec-canvas/uni-ec-canvas.vue';
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+// import uniEcCanvas from '@/archivesPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #endif
 // #ifdef H5
-import uniEcharts from '@/archivesPages/components/uni-ec-canvas/uni-echarts.vue';
+import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
+// import uniEcharts from '@/archivesPages/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
 var _self;
 import dayjs from '../static/dayjs/esm/index.js'

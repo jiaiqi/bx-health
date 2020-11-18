@@ -155,7 +155,8 @@
 </template>
 
 <script>
-import uniEcCharts from '@/archivesPages/components/uni-ec-canvas/uni-echart.vue';
+import uniEcCharts from '@/components/uni-ec-canvas/uni-echart.vue';
+// import uniEcCharts from '@/archivesPages/components/uni-ec-canvas/uni-echart.vue';
 import energyListWrap from './totalEnergyList.js';
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet';
 import dayjs from '../static/dayjs/esm/index.js';

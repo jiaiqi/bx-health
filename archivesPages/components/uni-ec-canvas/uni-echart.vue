@@ -9,10 +9,12 @@
 
 <script>
 // #ifdef MP-WEIXIN
-import uniEcCanvas from './uni-ec-canvas.vue';
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+// import uniEcCharts from '@/components/uni-ec-canvas/uni-echart.vue';
 // #endif
 // #ifdef H5
-import uniEcharts from './uni-echarts.vue';
+// import uniEcharts from './uni-echarts.vue';
+import uniEcharts from '@/components/uni-ec-canvas/uni-echarts';
 // #endif
 export default {
 	components: {

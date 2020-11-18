@@ -423,7 +423,8 @@
 
 <script>
 import bxDateStamp from '@/otherPages/components/bx-date-stamp/bx-date-stamp.vue';
-import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
+import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
+// import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 let self;
 export default {
 	components: {

@@ -77,7 +77,7 @@
 
 <script>
 import listItem from './bx-list-item.vue';
-import sPullScroll from '../s-pull-scroll';
+import sPullScroll from '@/components/s-pull-scroll';
 export default {
   name: 'List',
   components: { listItem, sPullScroll },
