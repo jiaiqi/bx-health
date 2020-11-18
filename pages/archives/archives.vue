@@ -3,7 +3,7 @@
 		<view class="top text-bold">
 			<view class="left">
 				<view class="avatar" @click="showUserListPopup = true"><image class="avatar" :src="avatarUrl"></image></view>
-				<view class="user-name" @click="showUserListPopup = true">{{ currentUser.name }}</view>
+				<view class="user-name" @click="showUserListPopup = true">{{ userInfo.name }}</view>
 				<view class="switch-icon cuIcon-right" @click="showUserListPopup = true"></view>
 				<view class="tag-box" @click="showUserHealtManagePopup = true">
 					<text class="tag-item" v-for="item in selectedTags" :key="item.value">{{ item.label }}</text>
@@ -129,7 +129,7 @@
 		</view>
 		<u-popup v-model="showUserListPopup" border-radius="40" mode="top">
 			<view class="user-list">
-				<view class="user-item" @click="currentUser = item" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === currentUser.name }">
+				<view class="user-item" @click="userInfo = item" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
 					<image class="avatar" :src="getavatarUrl(item.profile_url)" size="60"></image>
 					{{ item.name }}
 				</view>
@@ -166,7 +166,7 @@ export default {
 			showUserHealtManagePopup: false,
 			healthTotalScore: null,
 			userList: [],
-			currentUser: {},
+			userInfo: {},
 			loginUserInfo: {},
 			checkboxList: [
 				{
@@ -195,8 +195,8 @@ export default {
 			return this.checkedList.length >= 5;
 		},
 		avatarUrl() {
-			if (this.currentUser.profile_url) {
-				return this.$api.downloadFile + this.currentUser.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+			if (this.userInfo.profile_url) {
+				return this.$api.downloadFile + this.userInfo.profile_url + '&thumbnailType=fwsu_100'+ '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			} else if (this.loginUserInfo.headimgurl) {
 				return this.loginUserInfo.headimgurl;
 			}
@@ -293,11 +293,11 @@ export default {
 				let req = [
 					{
 						serviceName: 'srvhealth_person_info_update',
-						condition: [{ colName: 'no', ruleType: 'eq', value: this.currentUser.no }],
+						condition: [{ colName: 'no', ruleType: 'eq', value: this.userInfo.no }],
 						data: [{ requirement: requirement.toString() }]
 					}
 				];
-				if (this.currentUser.no) {
+				if (this.userInfo.no) {
 					let res = await this.$http.post(url, req);
 					if (res.data.state === 'SUCCESS') {
 						return res.data;
@@ -354,7 +354,7 @@ export default {
 		},
 		getavatarUrl(fileNo) {
 			if (fileNo) {
-				return this.$api.downloadFile + fileNo + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+				return this.$api.downloadFile + fileNo + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+ '&thumbnailType=fwsu_100';
 			}
 		},
 		// 查找当前帐号建立的用户列表
@@ -379,16 +379,16 @@ export default {
 						if (item.name === uni.getStorageSync('current_user')) {
 							uni.setStorageSync('current_user', item.name);
 							console.log(this.checkboxList);
-							this.currentUser = item;
+							this.userInfo = item;
 						}
 					});
 				} else {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					uni.setStorageSync('current_user', res.data.data[0].name);
-					this.currentUser = res.data.data[0];
+					this.userInfo = res.data.data[0];
 				}
-				if (this.currentUser && this.currentUser.requirement) {
-					let tags = this.currentUser.requirement.split(',');
+				if (this.userInfo && this.userInfo.requirement) {
+					let tags = this.userInfo.requirement.split(',');
 					if (Array.isArray(this.checkboxList) && this.checkboxList.length > 0) {
 						this.selectedTags = this.checkboxList.filter(item => {
 							if (tags.includes(item.value)) {
@@ -538,9 +538,16 @@ export default {
 			transform: translateX(0);
 		}
 	}
+	.avatar {
+		margin-right: 10rpx;
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 100%;
+	}
 	.top {
 		display: flex;
 		padding: 20rpx 0;
+		padding-right: 20rpx;
 		background-color: #fff;
 		justify-content: space-between;
 		margin-bottom: 20rpx;
@@ -551,12 +558,6 @@ export default {
 			font-size: 30rpx;
 			line-height: 30rpx;
 			margin: 0 20rpx;
-			.avatar {
-				margin-right: 10rpx;
-				width: 60rpx;
-				height: 60rpx;
-				border-radius: 100%;
-			}
 			.tag-box {
 				.tag-item {
 					padding: 10rpx;

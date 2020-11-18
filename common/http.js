@@ -29,7 +29,7 @@ fly.interceptors.request.use((request) => {
 	]
 	// if (!ignoreUrlList.includes(request.url)) {
 	if (request.url.indexOf('srvfile_attachment_select') === -1 && request.url.indexOf('srvdaq_page_item_buttons_select') ===
-		-1) {
+		-1&&request.url.indexOf('srvdaq_record_reply_select')===-1) {
 		uni.showLoading({
 			// mask: true
 			title:'加载中...'
