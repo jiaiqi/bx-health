@@ -21,15 +21,18 @@
 			<view class="content">
 				<view class="score-item" @click="toPages('score-compose')">
 					<text class="label">整体健康分</text>
-					<text class="value text-blue">86</text>
-					<view class="trend">
+					<text class="value text-blue" v-if="healthTotalScore || healthTotalScore === 0">{{ healthTotalScore }}</text>
+					<text class="valuetip text-blue" v-else>
+						<text class="cuIcon-all"></text>
+						点击评测
+					</text>
+					<view class="trend" v-if="healthTotalScore">
 						<view class="cuIcon-refresharrow text-blue text-icon"></view>
 						<text class="text">较上次评测增加两分</text>
-						<!-- <text class="cuIcon-forwardfill text-blue"></text> -->
 					</view>
 				</view>
 				<view class="score-item">
-					<text class="label">今日健康分</text>
+					<text class="label">近日健康分</text>
 					<text class="value  text-cyan">
 						64
 						<text class="ratio"></text>
@@ -51,45 +54,53 @@
 			</view>
 			<view class="content grid-layout">
 				<view class="grid-item" @click="toPages('diet')">
-					<view class="title">饮食</view>
+					<view class="title">
+						饮食
+						<text class="ratio">[50%]</text>
+					</view>
 					<view class="data text-green">71</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item" @click="toPages('sport')">
-					<view class="title">运动</view>
+					<view class="title">
+						运动
+						<text class="ratio">[20%]</text>
+					</view>
 					<view class="data text-red">20</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item" @click="toPages('weight')">
-					<view class="title">体重</view>
+					<view class="title">
+						体重
+						<text class="ratio">[5%]</text>
+					</view>
 					<view class="data text-gray">0</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item" @click="toPages('bp')">
-					<view class="title">血压</view>
+					<view class="title">
+						血压
+						<text class="ratio">[5%]</text>
+					</view>
 					<view class="data text-gray">0</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item" @click="toPages('sleep')">
-					<view class="title">睡眠</view>
+					<view class="title">
+						睡眠
+						<text class="ratio">[10%]</text>
+					</view>
 					<view class="data text-blue">85</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item">
-					<view class="title">症状</view>
+					<view class="title">
+						症状
+						<text class="ratio">[10%]</text>
+					</view>
 					<view class="data text-orange">45</view>
 					<view class="action"></view>
 				</view>
-				<!-- 	<view class="grid-item">
-					<view class="title">其它</view>
-					<view class="data text-gray">0</view>
-					<view class="action"></view>
-				</view> -->
-				<!-- 		<view class="grid-item" @click="toOldHome">
-					<view class="title">旧版主页</view>
-					<view class="data"></view>
-					<view class="action"></view>
-				</view> -->
 			</view>
 		</view>
 		<view class="health-archive-item ">
@@ -105,10 +116,6 @@
 						<text class="digit">90</text>
 						%
 					</view>
-					<!-- 	<view class="to-detail">
-						查看详情
-						<text class="cuIcon-roundright margin-left-xs"></text>
-					</view> -->
 				</view>
 				<view class="disease-item text-orange">
 					<view class="disease-name">肥胖</view>
@@ -117,10 +124,6 @@
 						<text class="digit">75</text>
 						%
 					</view>
-					<!-- 	<view class="to-detail">
-						查看详情
-						<text class="cuIcon-roundright margin-left-xs"></text>
-					</view> -->
 				</view>
 			</view>
 		</view>
@@ -161,6 +164,7 @@ export default {
 			isLogin: false,
 			showUserListPopup: false,
 			showUserHealtManagePopup: false,
+			healthTotalScore: null,
 			userList: [],
 			currentUser: {},
 			loginUserInfo: {},
@@ -195,6 +199,17 @@ export default {
 				return this.$api.downloadFile + this.currentUser.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			} else if (this.loginUserInfo.headimgurl) {
 				return this.loginUserInfo.headimgurl;
+			}
+		},
+		bmi() {
+			if (this.userInfo.weight && this.userInfo.height) {
+				return (Number(this.userInfo.weight) / Math.pow(Number(this.userInfo.height) / 100, 2)).toFixed(1);
+			}
+		},
+		age() {
+			if (this.userInfo.birthday) {
+				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
+				return age;
 			}
 		}
 	},
@@ -468,6 +483,17 @@ export default {
 		},
 		toAddPage() {}
 	},
+	created() {
+		uni.$on('healthTotalScoreChanged', result => {
+			if (result) {
+				this.healthTotalScore = result;
+			}
+		});
+		let score = uni.getStorageSync('healthTotalScore');
+		if (score) {
+			this.healthTotalScore = score;
+		}
+	},
 	onShow() {
 		this.initPage();
 	}
@@ -506,10 +532,10 @@ export default {
 	}
 	@keyframes slidein {
 		from {
-			transform:translateX(-300px);
+			transform: translateX(-300px);
 		}
 		to {
-			transform:translateX(0);
+			transform: translateX(0);
 		}
 	}
 	.top {
@@ -624,6 +650,14 @@ export default {
 				.value {
 					font-size: 150rpx;
 				}
+				.valuetip {
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					font-size: 28rpx;
+					height: 160rpx;
+					width: 160rpx;
+				}
 				.trend {
 					font-size: 30rpx;
 					position: absolute;
@@ -717,6 +751,10 @@ export default {
 					flex-direction: column;
 					.title {
 						text-align: left;
+						.ratio {
+							font-size: 24rpx;
+							color: #999;
+						}
 					}
 					.data {
 						flex: 1;

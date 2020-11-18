@@ -1,5 +1,10 @@
 <template>
 	<view class="couple-wrap">
+		<view class="total-score text-blue">
+			{{ totalScore }}
+			<text class="unit">分</text>
+		</view>
+		<view class="tips"><text class="cuIcon-creative">提示： 总分为100分，下方每一项右侧显示的百分数代表当前项占总分的比例</text></view>
 		<view class="couple-more-wrap">
 			<view class="couple-more-top">
 				<text></text>
@@ -16,8 +21,44 @@
 						}"
 						class="couple-cen-item"
 					>
+						<view v-if="item.name !== '其它'" class="couple-cen-item-t">
+							<text class="text-blue score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">
+								{{ item.grade }}
+								<text class="unit">分</text>
+							</text>
+							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
+							<view class="unfilled" v-if="!item.finished" @click="toQuestionnaire(item.no)">
+								<text class="text-icon cuIcon-edit"></text>
+								<text class="text">点击填写</text>
+							</view>
+						</view>
+						<view class="couple-cen-item-b">
+							<text>{{ item.name }}</text>
+							<text class="ratio">[{{ item.fullMark ? Number(item.fullMark.toFixed(1)) : '' }}%]</text>
+						</view>
+					</view>
+				</view>
+			</view>
+			<view class="couple-more-top">
+				<text></text>
+				<text>体质健康评测</text>
+			</view>
+			<view class="more-couple-cen-wrap">
+				<view class="couple-cen more-couple-cen">
+					<view
+						@click="clickItem(item)"
+						v-for="(item, index) in corporeity"
+						:key="index"
+						:class="{
+							'couple-cen-item-active': item.name === currentItem.name
+						}"
+						class="couple-cen-item"
+					>
 						<view v-if="item.name !== '其它'" class="couple-cen-item-t" :class="item.grade === 0 ? '' : item.grade >= 0 && item.grade <= 5 ? 'risk' : 'normal'">
-							<text v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">{{ item.grade }}</text>
+							<text class="score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">
+								{{ item.grade }}
+								<text class="unit">分</text>
+							</text>
 							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
 							<view class="unfilled" v-if="!item.finished" @click="toQuestionnaire(item.no)">
 								<text class="text-icon cuIcon-edit"></text>
@@ -117,6 +158,53 @@ export default {
 					fullMark: 5
 				}
 			],
+			corporeity: [
+				{
+					name: '阴虚质体质',
+					grade: null,
+					no: '20201112110542000192'
+				},
+				{
+					name: '气郁质体质',
+					grade: null,
+					no: '20201112112218000193'
+				},
+				{
+					name: '血瘀质体质',
+					grade: null,
+					no: '20201112113200000194'
+				},
+				{
+					name: '痰湿质体质',
+					grade: null,
+					no: '20201112114401000195'
+				},
+				{
+					name: '湿热质体质',
+					grade: null,
+					no: '20201112143740000196'
+				},
+				{
+					name: '特禀质体质',
+					grade: null,
+					no: '20201112145435000197'
+				},
+				{
+					name: '阳虚质体质',
+					grade: null,
+					no: '20201112105018000191'
+				},
+				{
+					name: '气虚质体质',
+					grade: null,
+					no: '20201112104036000190'
+				},
+				{
+					name: '平和质体质',
+					grade: null,
+					no: '20201112103143000189'
+				}
+			],
 			scoreInfo: {},
 			currentItem: {},
 			currIndex: 0
@@ -133,6 +221,12 @@ export default {
 				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
 				return age;
 			}
+		},
+		totalScore() {
+			let result = this.coupleData.map(a => (a.grade ? a.grade : 0)).reduce((a, b) => a + b, 0);
+			uni.$emit('healthTotalScoreChanged', result);
+			uni.setStorageSync('healthTotalScore', result);
+			return result;
 		}
 	},
 
@@ -176,7 +270,6 @@ export default {
 				order: [{ colName: 'end_time', orderType: 'desc' }]
 			};
 			let res = await this.$http.post(url, req);
-			debugger;
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				return res.data.data[0];
 			} else {
@@ -223,8 +316,24 @@ export default {
 				return (score * total) / 100;
 			}
 		},
+		async getCorporeityScore() {
+			let scoreInfo = this.scoreInfo || {};
+			let corporeity = this.corporeity;
+			for (let item of corporeity) {
+				if (!item.grade) {
+					let res = await this.getScoreFromQuestionRecord(item.no);
+					scoreInfo[item.name] = res;
+					if (res && (res.score || res.score === 0)) {
+						item.grade = res.score;
+					}
+					if (res.state === '完成') {
+						item.finished = true;
+					}
+				}
+			}
+		},
 		async getScoreInfo() {
-			let scoreInfo = {};
+			let scoreInfo = this.scoreInfo || {};
 			let coupleData = this.coupleData;
 			for (let item of coupleData) {
 				switch (item.name) {
@@ -242,13 +351,15 @@ export default {
 					case '心理':
 					case '吸烟情况':
 					case '饮酒情况':
-						let res = await this.getScoreFromQuestionRecord(item.no);
-						scoreInfo[item.name] = res;
-						if (res && (res.score || res.score === 0)) {
-							item.grade = this.questionScore2grade(res.score, item.fullMark);
-						}
-						if (res.state === '完成') {
-							item.finished = true;
+						if (!item.grade) {
+							let res = await this.getScoreFromQuestionRecord(item.no);
+							scoreInfo[item.name] = res;
+							if (res && (res.score || res.score === 0)) {
+								item.grade = this.questionScore2grade(res.score, item.fullMark);
+							}
+							if (res.state === '完成') {
+								item.finished = true;
+							}
 						}
 						break;
 				}
@@ -258,7 +369,6 @@ export default {
 			}
 			this.scoreInfo = scoreInfo;
 		},
-
 		clickItem(item) {
 			if (item.name === this.currentItem.name) {
 				this.currentItem = {};
@@ -299,11 +409,13 @@ export default {
 		if (userInfo && userInfo.userno) {
 			this.userInfo = userInfo;
 			this.getScoreInfo();
+			this.getCorporeityScore();
 		}
 	},
 	onShow() {
 		if (this.userInfo && this.userInfo.userno) {
 			this.getScoreInfo();
+			this.getCorporeityScore();
 		}
 	}
 };
@@ -313,6 +425,26 @@ export default {
 .couple-wrap {
 	background-color: white;
 	min-height: 100vh;
+	padding-top: 20rpx;
+	.tips {
+		padding: 20rpx;
+		color: #67c23a;
+		background: #f0f9eb;
+		border-color: #c2e7b0;
+		margin: 20rpx;
+	}
+	.total-score {
+		width: 50%;
+		margin: 0 auto 0;
+		text-align: center;
+		padding: 40rpx 0;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		font-size: 80rpx;
+		border-radius: 100rpx;
+		.unit {
+			font-size: 28rpx;
+		}
+	}
 	.couple-cen {
 		display: grid;
 		grid-template-columns: repeat(3, calc(33.33% - 20rpx));
@@ -335,8 +467,17 @@ export default {
 				font-size: 72rpx;
 				color: #ccc;
 				font-weight: 600;
+				.score-detail {
+					position: relative;
+					.unit {
+						font-size: 24rpx;
+						font-weight: normal;
+						position: absolute;
+						bottom: 0;
+					}
+				}
 				.text {
-					font-size: 34rpx;
+					font-size: 14rpx;
 				}
 				.unfilled {
 					font-size: 24rpx;
@@ -359,6 +500,11 @@ export default {
 			.couple-cen-item-b {
 				font-size: 32rpx;
 				font-weight: 700;
+				position: relative;
+				.ratio {
+					font-size: 24rpx;
+					color: #999;
+				}
 			}
 		}
 		.couple-cen-item-active {

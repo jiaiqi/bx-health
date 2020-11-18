@@ -198,7 +198,7 @@
 					</view>
 					<view class="table grid-layout" v-if="dietLayout === 'grid'">
 						<view class="diet-item" v-for="(item, index) in dietRecord" :key="index" @click="clickDietRecordItem(item)">
-							<image class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></image>
+							<image class="u-image" :src="getDownloadPath(item)" mode="aspectFill"></image>
 							<view class="diet-detail">
 								<view class="name">{{ item.name }}</view>
 								<view class="number">
@@ -248,7 +248,7 @@
 					</view>
 					<view class="table grid-layout" v-if="sportsRecord && sportLayout === 'grid'">
 						<view class="diet-item" v-for="(item, index) in sportsRecord" :key="index" @click="clickSportRecordItem(item)">
-							<image class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></image>
+							<image class="u-image" :src="getDownloadPath(item)" mode="aspectFill"></image>
 							<view class="diet-detail">
 								<view class="name">{{ item.name }}</view>
 								<view class="number">
@@ -280,14 +280,13 @@
 				</view>
 			</view> -->
 		</view>
-		<!-- <u-popup v-model="showEditModal" mode="bottom"> -->
 		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }">
 			<view class="cu-dialog current-diet-detail" v-if="currentRecord">
 				<view class="title-bar" v-if="currentRecord.hdate && currentRecord.htime">
 					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
 				</view>
 				<view class="diet-info">
-					<view class="img"><image mode="aspectFit" class="img" :src="currentDietImgUrl"></image></view>
+					<view class="img"><image mode="aspectFill" class="img" :src="getDownloadPath(currentRecord)"></image></view>
 					<view class="info">
 						<view class="name">
 							{{ currentRecord.name }}
@@ -303,13 +302,125 @@
 								<text class="unit">千卡</text>
 							</text>
 						</view>
-
 						<view class="">
 							<text class="label text-bold margin-right-xs">单位:</text>
 							<text class="unit">{{ currentRecord.unit }}</text>
 						</view>
 					</view>
-					<view class="chart-box" v-if="currentRecord && currentRecordType === 'food'">
+					<view class="view-tabs">
+						<view class="view-tab" :class="{ 'active-tab': showChart }" @click="showChartView(true)">NRV%占比</view>
+						<view class="view-tab" :class="{ 'active-tab': !showChart }" @click="showChartView(false)">营养素含量</view>
+					</view>
+					<view class="element-detail-box" v-if="currentRecord && currentRecordType === 'food' && !showChart">
+						<view class="title">产能营养素</view>
+						<view class="content">
+							<view class="ele-item">
+								<text class="label">蛋白质</text>
+								<text class="value">{{ currentRecord.protein ? Number(currentRecord.protein).toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.protein >= 30.1 ? '高' : currentRecord.protein >= 15.5 && currentRecord.protein < 30.1 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">碳水化合物</text>
+								<text class="value">{{ currentRecord.carbohydrate ? currentRecord.carbohydrate.toFixed(1) : '' }}</text>
+								<text class="text-red">
+									({{ currentRecord.carbohydrate >= 51.9 ? '高' : currentRecord.carbohydrate >= 25.74 && currentRecord.carbohydrate < 51.9 ? '中' : '低' }})
+								</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">脂肪</text>
+								<text class="value">{{ currentRecord.axunge ? currentRecord.axunge.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.axunge >= 35.3 ? '高' : currentRecord.axunge >= 17.6 && currentRecord.axunge < 35.3 ? '中' : '低' }})</text>
+							</view>
+						</view>
+						<view class="title">脂溶性维生素</view>
+						<view class="content">
+							<view class="ele-item">
+								<text class="label">VA</text>
+								<text class="value">{{ currentRecord.vitamin_a ? currentRecord.vitamin_a.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.vitamin_a >= 915 ? '高' : currentRecord.vitamin_a >= 457 && currentRecord.vitamin_a < 915 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">VE</text>
+								<text class="value">{{ currentRecord.vitamin_e ? currentRecord.vitamin_e.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.vitamin_e >= 27.9 ? '高' : currentRecord.vitamin_e >= 13.9 && currentRecord.vitamin_e < 27.9 ? '中' : '低' }})</text>
+							</view>
+						</view>
+						<view class="title">水溶性维生素</view>
+						<view class="content">
+							<view class="ele-item">
+								<text class="label">VB1</text>
+								<text class="value">{{ currentRecord.vitamin_b1 ? currentRecord.vitamin_b1.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.vitamin_b1 >= 0.61 ? '高' : currentRecord.vitamin_b1 >= 0.32 && currentRecord.vitamin_b1 < 0.61 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">VB2</text>
+								<text class="value">{{ currentRecord.vitamin_b2 ? currentRecord.vitamin_b2.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.vitamin_b2 >= 0.79 ? '高' : currentRecord.vitamin_b2 >= 0.4 && currentRecord.vitamin_b2 < 0.79 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">VB3</text>
+								<text class="value">{{ currentRecord.vitamin_b3 ? currentRecord.vitamin_b3.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.vitamin_b3 >= 4.52 ? '高' : currentRecord.vitamin_b3 >= 2.26 && currentRecord.vitamin_b3 < 4.52 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">VC</text>
+								<text class="value">{{ currentRecord.vitamin_c ? currentRecord.vitamin_c.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.vitamin_c >= 61.2 ? '高' : currentRecord.vitamin_c >= 30.6 && currentRecord.vitamin_c < 61.2 ? '中' : '低' }})</text>
+							</view>
+						</view>
+						<view class="title">常量矿物质</view>
+						<view class="content">
+							<view class="ele-item">
+								<text class="label">钙</text>
+								<text class="value">{{ currentRecord.element_ca ? currentRecord.element_ca.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.element_ca >= 381 ? '高' : currentRecord.element_ca >= 190.5 && currentRecord.element_ca < 381 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">镁</text>
+								<text class="value">{{ currentRecord.element_mg ? currentRecord.element_mg.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.element_mg >= 111.6 ? '高' : currentRecord.element_mg >= 55.8 && currentRecord.element_mg < 111.6 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">磷</text>
+								<text class="value">{{ currentRecord.element_p ? currentRecord.element_p.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.element_p >= 296.4 ? '高' : currentRecord.element_p >= 148.2 && currentRecord.element_p < 296.4 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">钾</text>
+								<text class="value">{{ currentRecord.element_k ? currentRecord.element_k.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.element_k >= 526.2 ? '高' : currentRecord.element_k >= 263.1 && currentRecord.element_k < 526.2 ? '中' : '低' }})</text>
+							</view>
+						</view>
+						<view class="title">微量元素</view>
+						<view class="content">
+							<view class="ele-item">
+								<text class="label">铁</text>
+								<text class="value">{{ currentRecord.element_fe ? currentRecord.element_fe.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.element_fe >= 7.2 ? '高' : currentRecord.element_fe >= 3.6 && currentRecord.element_fe < 7.2 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">锌</text>
+								<text class="value">{{ currentRecord.element_zn ? currentRecord.element_zn.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.element_zn >= 6 ? '高' : currentRecord.element_zn >= 3 && currentRecord.element_zn < 6 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">硒</text>
+								<text class="value">{{ currentRecord.element_se ? currentRecord.element_se.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.element_se >= 23.82 ? '高' : currentRecord.element_se >= 11.91 && currentRecord.element_se < 23.82 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">铜</text>
+								<text class="value">{{ currentRecord.element_cu ? currentRecord.element_cu.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.element_cu >= 1.12 ? '高' : currentRecord.element_cu >= 0.56 && currentRecord.element_cu < 1.12 ? '中' : '低' }})</text>
+							</view>
+							<view class="ele-item">
+								<text class="label">锰</text>
+								<text class="value">{{ currentRecord.element_mn ? currentRecord.element_mn.toFixed(1) : '' }}</text>
+								<text class="text-red">({{ currentRecord.element_mn >= 4.44 ? '高' : currentRecord.element_mn >= 2.22 && currentRecord.element_mn < 4.44 ? '中' : '低' }})</text>
+							</view>
+						</view>
+					</view>
+					<view class="chart-box" v-if="currentRecord && currentRecordType === 'food' && showChart">
 						<!-- #ifdef MP-WEIXIN -->
 						<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-ec-canvas>
 						<!-- #endif -->
@@ -437,6 +548,7 @@ export default {
 	},
 	data() {
 		return {
+			showChart: true,
 			isShowCookType: false,
 			cookTypes: [], //烹调方式集合
 			unitList: [],
@@ -602,7 +714,7 @@ export default {
 			diseaseList: [],
 			energyListWrap: [
 				{
-					title: '有机大分子',
+					title: '产能营养素',
 					units: 'g/d',
 					matterList: [
 						{
@@ -851,7 +963,7 @@ export default {
 		currentDietImgUrl() {
 			let currentDiet = this.currentRecord;
 			if (currentDiet && currentDiet.image) {
-				return this.$api.downloadFile + currentDiet['image'] + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+				return this.$api.downloadFile + currentDiet['image'] + '&thumbnailType=fwsu_100' + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			}
 		},
 		hasRecord() {
@@ -1047,6 +1159,13 @@ export default {
 				return;
 			}
 			currentDiet = { ...foodInfo, ...currentDiet };
+			let currentRecord = this.deepClone(currentDiet);
+			Object.keys(currentRecord).forEach(key => {
+				if (typeof currentRecord[key] === 'string' && Number(currentRecord[key]) - currentRecord[key] === 0&&key!=='image') {
+					currentRecord[key] = Number(currentRecord[key]);
+				}
+			});
+			this.currentRecord = currentRecord;
 			let eleArr = this.getEnergyListValue();
 			let category = eleArr.map(item => {
 				return item.name;
@@ -1324,7 +1443,9 @@ export default {
 			return unitList;
 		},
 		getDownloadPath(e) {
-			return this.$api.downloadFile + e['image'] + '&bx_auth_ticket=' + this.bx_auth_ticket + '&thumbnailType=fwsu_100';
+			if( e['image'] ){
+				return this.$api.downloadFile + e['image'] + '&bx_auth_ticket=' + this.bx_auth_ticket + '&thumbnailType=fwsu_100';
+			}
 		},
 		toAddDiet() {
 			// 跳转到选餐页面
@@ -1498,7 +1619,7 @@ export default {
 		},
 		changeCurrentVal(e, step = 1) {
 			if (e === 'minus') {
-				if (this.currentRecord.amount >= 1) {
+				if (this.currentRecord.amount - step > 0) {
 					this.currentRecord.amount = Number((this.currentRecord.amount - step).toFixed(1));
 				} else {
 					return;
@@ -2333,7 +2454,7 @@ export default {
 						mat['left_width'] = 30;
 						mat['center_width'] = 90;
 					}
-					if (item.title === '有机大分子') {
+					if (item.title === '产能营养素') {
 						mat['right_width'] = 0;
 						mat['left_width'] = 50;
 						mat['center_width'] = 70;
@@ -2642,6 +2763,9 @@ export default {
 				// this.getSignature();
 				// #endif
 			}
+		},
+		showChartView(val) {
+			this.showChart = val;
 		},
 		clickUserList(e) {
 			console.log(e);
@@ -3027,7 +3151,7 @@ export default {
 								color: #cecece;
 							}
 							.u-image {
-								width: 100rpx;
+								width: 100%;
 								height: 100rpx;
 							}
 							.diet-detail {
@@ -3722,8 +3846,8 @@ uni-checkbox::before {
 		justify-content: space-around;
 		flex-wrap: wrap;
 		.img {
-			width: 200rpx;
-			height: 200rpx;
+			width: 150rpx;
+			height: 150rpx;
 			border-radius: 10rpx;
 			overflow: hidden;
 			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
@@ -3780,6 +3904,51 @@ uni-checkbox::before {
 				}
 			}
 		}
+		.view-tabs {
+			display: flex;
+			width: 100%;
+			margin: 30rpx 20rpx 30rpx;
+			.view-tab {
+				text-align: center;
+				line-height: 30rpx;
+				font-size: 30rpx;
+				border-bottom: 1px solid transparent;
+				margin-right: 10px;
+				color: #999;
+				padding: 10rpx 0;
+				&.active-tab {
+					color: #fbbd08;
+					font-weight: 700;
+					border-color: #fbbd08;
+				}
+			}
+		}
+		.element-detail-box {
+			display: flex;
+			flex-direction: column;
+			font-weight: normal;
+			width: 100%;
+			padding-left: 20rpx;
+			padding-top: 20rpx;
+			height: 550rpx;
+			.title {
+				color: #000;
+				width: 100%;
+				font-weight: 700;
+			}
+			.content {
+				width: 100%;
+				display: flex;
+				flex-wrap: wrap;
+				padding: 10rpx 20rpx;
+				.ele-item {
+					color: #909399;
+					font-size: 26rpx;
+					margin-right: 30rpx;
+					margin-bottom: 10rpx;
+				}
+			}
+		}
 		.amount {
 			display: flex;
 			align-items: center;
@@ -3832,13 +4001,19 @@ uni-checkbox::before {
 			flex-wrap: wrap;
 			align-items: center;
 			.current-cook-type {
-				color: #fff;
-				padding: 5rpx 30rpx;
+				margin-right: 5px;
+				border-radius: 20px;
+				padding: 0px 8px;
+				min-height: 27px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin-bottom: 5px;
+				min-width: 100rpx;
 				font-size: 26rpx;
+				border: 1px solid #f37b1d;
 				background-color: #f37b1d;
-				border-radius: 50rpx;
-				text-align: center;
-				min-width: 80rpx;
+				color: #fff;
 			}
 		}
 		.unit-box {
@@ -3859,8 +4034,10 @@ uni-checkbox::before {
 				min-height: 27px;
 				display: flex;
 				align-items: center;
+				justify-content: center;
 				margin-bottom: 5px;
 				font-size: 20rpx;
+				min-width: 100rpx;
 			}
 			.active-unit {
 				font-size: 26rpx;
@@ -3880,14 +4057,13 @@ uni-checkbox::before {
 		align-items: center;
 		font-size: 50rpx;
 		padding-top: 30rpx;
-		// height: 150rpx;
 		margin-bottom: 100rpx;
 		.btn {
 			padding: 15rpx 30rpx;
 			letter-spacing: 2px;
 			border-radius: 10rpx;
 			font-size: 28rpx;
-			flex: 1;
+			width: 300rpx;
 			margin-right: 20rpx;
 			text-align: center;
 			&:last-child {

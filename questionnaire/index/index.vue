@@ -389,15 +389,7 @@ export default {
 									data.user_data.forEach(items => {
 										if (item.column === items.item_no) {
 											if (item.item_type_attr && item.item_type_attr.radioType === 'multi') {
-												item.value = items.option_data.map((opt, optIndex) => {
-													if (opt.option_view_no) {
-														opt.serialChar = opt.option_view_no;
-													} else if (opt.option_seq) {
-														opt.serialChar = opt.option_seq;
-													} else {
-														opt.serialChar = optIndex;
-													}
-												});
+												item.value = items.option_data
 											} else {
 												item.value = items.option_data[0];
 											}
@@ -561,7 +553,6 @@ export default {
 						item.value = item.option_value;
 						item.showimg = false;
 						item.label = item.option_value;
-
 						if (item.option_view_no) {
 							item.serialChar = item.option_view_no;
 						} else if (item.option_seq) {
