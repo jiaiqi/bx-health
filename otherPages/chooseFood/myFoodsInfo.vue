@@ -59,7 +59,7 @@
 </template>
 
 <script>
-	import wPicker from '@/otherPages/components/w-picker/w-picker.vue';
+	import wPicker from '@/components/w-picker/w-picker.vue';
 	export default {
 		name:'myFoodsInfo',
 		data(){

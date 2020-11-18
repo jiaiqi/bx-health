@@ -73,7 +73,7 @@
 </template>
 
 <script>
-	import MxDatePicker from '@/otherPages/components/mx-datepicker/mx-datepicker.vue';
+	import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
 	export default {
 		name:"symFromItem",
 		components:{MxDatePicker},

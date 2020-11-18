@@ -245,7 +245,7 @@
 
 <script>
 import bxFiltrate from '@/otherPages/components/bx-filtrate/bx-filtrate.vue'
-import MxDatePicker from '@/otherPages/components/mx-datepicker/mx-datepicker.vue';
+import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
 import jumpBall from '@/otherPages/components/hx-jump-ball/hx-jump-ball.vue';
 import sPullScroll from '@/components/s-pull-scroll';
 export default {
