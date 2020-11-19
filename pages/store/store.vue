@@ -565,6 +565,8 @@ page {
 			input{
 				padding: 0 10rpx;
 				font-size: 28rpx;
+				height: 68rpx;
+				width: 100%;
 			}
 		}
 	}

@@ -121,6 +121,7 @@ export default {
 					switch (res.data.data[index].div_type) {
 						case 'buttons':
 							let swiperList = [];
+							result = result.filter(item=>item.display!=='隐藏')
 							let length = Math.ceil(result.length / 8); //向上取整
 							if (length > 0) {
 								for (var i = 0; i < length; i++) {

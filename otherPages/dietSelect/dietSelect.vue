@@ -28,8 +28,10 @@
 		<view class="filtrate-wrap">
 			<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 				<text>已选择：</text>
-				<view v-for="(item,index) in childChooseArr" class="filtrate-choose-item">
-					<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"></text>
+				<view @click="tagClick(item)" v-for="(item,index) in childChooseArr" class="filtrate-choose-item">
+					
+					<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning"  mode="light">{{item.title}}</text>
+					<text class="lg text-gray cuIcon-close filtrate-close"></text>
 					<!-- <u-tag :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"/> -->
 				</view>
 			</view>
@@ -289,7 +291,7 @@ export default {
 			current: 0,
 			isLoad:false,
 			currIndex:'',
-			topNum:440,
+			topNum:450,
 			colData: [],
 			currFoodLabel: {},
 			listTouchStart: 0,
@@ -1110,7 +1112,7 @@ export default {
 			console.log("--标签--")
 		},
 		/* 顶部菜单点击**/
-		chooseMenu(parent,child){			
+		chooseMenu(parent,child){		
 			if(child.value === '饭馆'){
 				uni.switchTab({
 					url:'/pages/store/store'
@@ -1142,8 +1144,10 @@ export default {
 							if(p.value !== child.value){
 								p.choose = false
 							}
-							if(!child.choose){
+							if(!child.choose && p.value === child.value){
 								par.children[0].choose = true
+								this.condObj = null
+								this.classifyCond = null
 								this.getFoodsList()
 							}
 						})
@@ -1282,7 +1286,7 @@ export default {
 					this.condObj = null
 					this.classifyCond = null
 					this.getFoodsList()
-				}else if(this.menuAgList[0].children[0].choose){
+				}else if(this.menuAgList[0].children[0].choose && child.choose){
 					let cond = {
 						colName:"classify",
 						ruleType:"eq",
@@ -2160,9 +2164,22 @@ export default {
 	.filtrate-choose{
 		display: flex;
 		align-items: center;
+		padding: 10upx;
 		padding-left: 20upx;
 		.filtrate-choose-item{
-			padding: 10upx;
+			// padding: 10upx;
+			display: flex;
+			align-items: center;
+			border: 1px solid #ff9900;
+			background-color: rgb(253,246,236);
+			.cu-tag{
+				background-color: rgb(253,246,236);
+				color:#ff9900 ;
+			}
+			.filtrate-close{
+				color:#ff9900 ;
+				margin-right: 4rpx;
+			}
 		}
 	}
 	.filtrate-item-wrap{

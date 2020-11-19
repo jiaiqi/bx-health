@@ -30,16 +30,26 @@
 					<view class="record-data">
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'bp'">
 							<text class="digital ">
-								<text
-									:class="{
-										'text-green': historyRecord[0].systolic_pressure < 120 && historyRecord[0].diastolic_pressure < 80,
-										'text-orange':
-											(historyRecord[0].systolic_pressure >= 120 && historyRecord[0].systolic_pressure < 140) ||
-											(historyRecord[0].diastolic_pressure < 90 && historyRecord[0].diastolic_pressure >= 80),
-										'text-red': historyRecord[0].systolic_pressure >= 140 || historyRecord[0].diastolic_pressure >= 90
-									}"
-								>
-									{{ getFixedNum(historyRecord[0].systolic_pressure) }} / {{ getFixedNum(historyRecord[0].diastolic_pressure) }}
+								<text>
+									<text
+										:class="{
+											'text-green': historyRecord[0].systolic_pressure < 120,
+											'text-yellow': historyRecord[0].systolic_pressure >= 120 && historyRecord[0].systolic_pressure < 140,
+											'text-red': historyRecord[0].systolic_pressure >= 140
+										}"
+									>
+										{{ getFixedNum(historyRecord[0].systolic_pressure) }}
+									</text>
+									<text class="text-gray">/</text>
+									<text
+										:class="{
+											'text-green': historyRecord[0].diastolic_pressure < 80,
+											'text-yellow': historyRecord[0].diastolic_pressure < 90 && historyRecord[0].diastolic_pressure >= 80,
+											'text-red': historyRecord[0].diastolic_pressure >= 90
+										}"
+									>
+										{{ getFixedNum(historyRecord[0].diastolic_pressure) }}
+									</text>
 								</text>
 							</text>
 							<text class="unit">毫米汞柱</text>
@@ -107,9 +117,9 @@
 									<text
 										class="digital"
 										:class="{
-											'text-green': item.systolic_pressure < 120 && item.diastolic_pressure < 80,
-											'text-orange': (item.systolic_pressure >= 120 && item.systolic_pressure < 140) || (item.diastolic_pressure < 90 && item.diastolic_pressure >= 80),
-											'text-red': item.systolic_pressure >= 140 || item.diastolic_pressure >= 90
+											'text-green': item.systolic_pressure < 120,
+											'text-yellow': item.systolic_pressure >= 120 && item.systolic_pressure < 140,
+											'text-red': item.systolic_pressure >= 140
 										}"
 										v-if="pageType === 'bp' && item && item.systolic_pressure"
 									>
@@ -118,17 +128,18 @@
 									<text class="digital" v-if="pageType === 'weight'">{{ item.weight ? getFixedNum(item.weight) : '-' }}</text>
 									<text class="digital" v-if="pageType === 'sleep'">{{ item.sleep_time ? item.sleep_time.slice(0, 5) : '-' }}</text>
 								</view>
-								<view
-									class="item"
-									:class="{
-										'text-green': item.systolic_pressure < 120 && item.diastolic_pressure < 80,
-										'text-orange': (item.systolic_pressure >= 120 && item.systolic_pressure < 140) || (item.diastolic_pressure < 90 && item.diastolic_pressure >= 80),
-										'text-red': item.systolic_pressure >= 140 || item.diastolic_pressure >= 90
-									}"
-									v-if="pageType === 'bp' && item && item.diastolic_pressure"
-								>
-									/
-									<text class="digital bp">{{ item.diastolic_pressure ? getFixedNum(item.diastolic_pressure) : '-' }}</text>
+								<view class="item" v-if="pageType === 'bp' && item && item.diastolic_pressure">
+									<text class="text-gray">/</text>
+									<text
+										:class="{
+											'text-green': item.diastolic_pressure < 80,
+											'text-yellow': item.diastolic_pressure < 90 && item.diastolic_pressure >= 80,
+											'text-red': item.diastolic_pressure >= 90
+										}"
+										class="digital bp"
+									>
+										{{ item.diastolic_pressure ? getFixedNum(item.diastolic_pressure) : '-' }}
+									</text>
 								</view>
 								<view class="unit">
 									<text v-if="pageType === 'bp'">mmHg</text>

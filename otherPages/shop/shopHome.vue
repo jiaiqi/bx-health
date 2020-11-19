@@ -74,13 +74,13 @@
 									<uni-rate size="14" :value="Number(item.mark)"></uni-rate>
 								</view>
 								<view class="hx-comment_basic-info_center_item_right">
-									<text>{{item.mark}}</text>
+									<text>{{item.mark?item.mark:'0'}}</text>
 								</view>
 							</view>
 							<view class="item-right-bot">
 								<view class="item-right-bot-left">
 									<text>￥</text>
-									<text>{{item.price}}</text>
+									<text>{{item.price?item.price:'0'}}</text>
 								</view>
 								<view v-if="queryType === 'myShop'" class="item-right-bot-rig">
 									<text @click.stop="addIngredient(item)">食材管理</text>
@@ -280,12 +280,13 @@
 					// this.shopList = res.data.data
 					this.shopList = [...this.shopList,...res.data.data]
 					this.shopList.forEach((item,index)=>{
-						self.getFilePath(item.image).then(url=>{
-							let urls = self.$api.getFilePath + url[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
-							this.$set(this.shopList[index], 'imgurl', urls);
-						})
-					})
-					
+						if(item.image){
+							self.getFilePath(item.image).then(url=>{
+								let urls = self.$api.getFilePath + url[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+								this.$set(this.shopList[index], 'imgurl', urls);
+							})
+						}						
+					})					
 					console.log("food------",this.shopList)
 				}
 			},

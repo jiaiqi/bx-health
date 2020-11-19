@@ -1,33 +1,52 @@
 <template>
 	<view class="other-wrap">
 		<view class="other-top">
+			<view class="other-top-tit">
+				<text>*</text>
+				<text>{{topTitle}}</text>
+			</view>
 			<view v-if="type && type === 'weight'" class="item-wrap">
 				<view class="item-list" @click="showWeightSelect = true">
 					<text>衣着穿戴</text>
 					<!-- <u-select v-model="showWeightSelect" :list="list" @confirm="confirmChoose($event, 'clothing')"></u-select> -->
-					<radio-group class="block weight-radio-group" @change="RadioChange($event, 'clothing')">
+					<!-- <radio-group class="block weight-radio-group" @change="RadioChange($event, 'clothing')">
 						<view v-for="(item, index) in list" :key="index" class="weight-radio-group-item">
 							<view class="title">{{ item.value }}</view>
 							<radio :class="weightCurrentRadio == item.value ? 'checked' : ''" :checked="weightCurrentRadio == item.value ? true : false" :value="item.value"></radio>
 						</view>
-					</radio-group>
+					</radio-group> -->
+					<checkbox-group @change="checkboxGroupChange($event,'clothing')" class="check-box-group">
+						<label v-for="(item, index) in list" :key="item.value" class="check-box-item">
+							<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" />
+							{{ item.value }}
+						</label>
+					</checkbox-group>
 					<!-- <view class="item-list-bot"><input type="text" value="" disabled /></view> -->
 				</view>
 
 				<view class="item-list" @click="showWeightDigSelect = true">
 					<text>消化道情况</text>
-
-					<radio-group class="block weight-radio-group" @change="RadioChange($event, 'digestion')">
+					<checkbox-group @change="checkboxGroupChange($event,'digestion')" class="check-box-group">
+						<label v-for="(item, index) in DigList" :key="item.value" class="check-box-item">
+							<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" />
+							{{ item.value }}
+						</label>
+					</checkbox-group>
+					<!-- <radio-group class="block weight-radio-group" @change="RadioChange($event, 'digestion')">
 						<view v-for="(item, index) in DigList" :key="index" class="weight-radio-group-item">
 							<view class="title">{{ item.value }}</view>
 							<radio :class="digeCurrentRadio == item.value ? 'checked' : ''" :checked="digeCurrentRadio == item.value ? true : false" :value="item.value"></radio>
 						</view>
-					</radio-group>
+					</radio-group> -->
 					<!-- <u-select v-model="showWeightDigSelect" :list="DigList" @confirm="confirmChoose($event, 'digestion')"></u-select> -->
 					<!-- <view class="item-list-bot"><input type="text" value="" disabled /></view> -->
 				</view>
 				<view class="item-list">
-					<text>体重(千克)</text>
+					<view class="item-list-top">
+						<text>*</text>
+						<text>体重(千克)</text>
+					</view>
+					
 					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.weight" /></view>
 				</view>
 				<view class="item-list">
@@ -37,11 +56,19 @@
 			</view>
 			<view v-else-if="type && type === 'sleep'" class="item-wrap">
 				<view class="item-list" @click="openTime({ type: 'sleep', field: 'retire_time' })">
-					<text>就寝时间</text>
+					<view class="item-list-top">
+						<text>*</text>
+						<text>就寝时间</text>
+					</view>
+					<!-- <text>就寝时间</text> -->
 					<view class="item-list-bot"><input type="text" :value="inputVal.retire_time" /></view>
 				</view>
 				<view class="item-list" @click="openTime({ type: 'sleep', field: 'getup_time' })">
-					<text>起床时间</text>
+					<view class="item-list-top">
+						<text>*</text>
+						<text>起床时间</text>
+					</view>
+					<!-- <text>起床时间</text> -->
 					<view class="item-list-bot"><input type="text" :value="inputVal.getup_time" /></view>
 				</view>
 				<view class="item-list">
@@ -67,11 +94,19 @@
 			<view v-else-if="type && (type === 'pressure' || type === 'bp')" class="item-wrap">
 				<!-- 血压 -->
 				<view class="item-list">
-					<text>收缩压(高压 毫米汞柱)</text>
+					<view class="item-list-top">
+						<text>*</text>
+						<text>收缩压(高压 毫米汞柱)</text>
+					</view>
+					<!-- <text>收缩压(高压 毫米汞柱)</text> -->
 					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.systolic_pressure" /></view>
 				</view>
 				<view class="item-list">
-					<text>舒张压(低压 毫米汞柱)</text>
+					<view class="item-list-top">
+						<text>*</text>
+						<text>舒张压(低压 毫米汞柱)</text>
+					</view>
+					<!-- <text>舒张压(低压 毫米汞柱)</text> -->
 					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.diastolic_pressure" /></view>
 				</view>
 				<view class="item-list">
@@ -156,6 +191,7 @@ export default {
 	data() {
 		return {
 			inputVal: {
+				// top_title:'',
 				weight: '',
 				body_fat_rate: '',
 				glucose_time: '', //血糖 - 测量时机
@@ -224,7 +260,7 @@ export default {
 			let result = true;
 			switch (this.type) {
 				case 'weight':
-					result = this.inputVal.weight && this.inputVal.body_fat_rate ? true : false;
+					result = this.inputVal.weight ? true : false;
 					break;
 				case 'sleep':
 					result = this.inputVal.retire_time && this.inputVal.getup_time ? true : false;
@@ -243,11 +279,70 @@ export default {
 				case 'glucose':
 					result = this.inputVal.glucose_time && this.inputVal.blood_glucose_val ? true : false;
 					break;
+				case 'bp':
+					result = result = this.inputVal.systolic_pressure && this.inputVal.diastolic_pressure ? true : false;
+					break;
 			}
 			return result;
+		},
+		topTitle(){
+			let str = '';
+			switch (this.type) {
+				case 'weight':
+					str = '称体重时注意保持空腹并且不要穿太多得衣服哦,否则测量会有偏差。'
+					break;
+				case 'sleep':
+					str = '每天最少保证睡眠时间在7小时左右并且不要熬夜哦,可以有效地缓解疲劳'
+					break;
+				// case 'heartRate':
+				// 	break;
+				// case 'pressure':
+				// 	result = this.inputVal.systolic_pressure && this.inputVal.diastolic_pressure ? true : false;
+				// 	break;
+				// case 'oxygen':
+				// 	result =
+				// 		this.inputVal.start_time && this.inputVal.end_time && this.inputVal.oxygen_saturation_max && this.inputVal.oxygen_saturation_min && this.inputVal.oxygen_saturation_avg
+				// 			? true
+				// 			: false;
+				// 	break;
+				// case 'glucose':
+				// 	result = this.inputVal.glucose_time && this.inputVal.blood_glucose_val ? true : false;
+				// 	break;
+				case 'bp':
+					str = '测量血压时要注意保持心情平稳，测量前最好休息15分钟，避免情绪激动、劳累、吸烟、憋尿等。'
+					break;
+			}
+			return str;
 		}
 	},
 	methods: {
+		/*体重--衣着穿戴多选**/
+		checkboxGroupChange(e,type) {
+			let str = ""
+			if(e.detail.value.length > 0){
+				str = e.detail.value.join(',')
+			}
+			switch (type) {
+				case 'clothing':
+					this.inputVal.wearing = str;
+					break;
+				case 'digestion':
+					this.inputVal.alimentary_canal = str;
+					break;
+			}
+			
+			// var items = this.checkboxList,
+			// 	values = e.detail.value;
+			// for (var i = 0, lenI = items.length; i < lenI; ++i) {
+			// 	const item = items[i];
+			// 	if (values.includes(item.label)) {
+			// 		this.$set(item, 'checked', true);
+			// 	} else {
+			// 		this.$set(item, 'checked', false);
+			// 	}
+			// }
+			// this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.label);
+		},
 		sleepyRadioChange(evt) {
 			this.inputVal.sleepy_daytime = evt.target.value;
 		},
@@ -349,12 +444,18 @@ export default {
 		async submitRecord() {
 			// 提交并保存身体数据
 			if (!this.canSave) {
+				uni.showToast({
+					title:'请完善信息',
+					icon:'none'
+				})
 				return;
 			}
+			
 			let serviceName = '';
 			let req = [];
+			let verify = false
 			switch (this.type) {
-				case 'weight':
+				case 'weight':				
 					serviceName = 'srvhealth_body_fat_measurement_record_add';
 					req = [
 						{
@@ -456,16 +557,16 @@ export default {
 			}
 			let url = this.getServiceUrl('health', serviceName, 'operate');
 			if (serviceName) {
-				let res = await this.$http.post(url, req);
-				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.response) && res.data.response.length > 0) {
-					if(this.type==='weight'){
-						this.changeWeightForBasicInfo(this.inputVal.weight)
+					let res = await this.$http.post(url, req);
+					if (res.data.state === 'SUCCESS' && Array.isArray(res.data.response) && res.data.response.length > 0) {
+						if(this.type==='weight'){
+							this.changeWeightForBasicInfo(this.inputVal.weight)
+						}
+						uni.showToast({
+							title: '提交成功'
+						});
+						this.isSubmit = true;
 					}
-					uni.showToast({
-						title: '提交成功'
-					});
-					this.isSubmit = true;
-				}
 			} else {
 				uni.showToast({
 					title: '此功能正在开发中',
@@ -541,11 +642,23 @@ export default {
 	background-color: white;
 
 	.other-top {
-		width: 90%;
+		width: 100%;
 		padding-top: 30upx;
 		margin: 0 auto 0;
 		min-height: 85vh;
+		.other-top-tit{
+			background-color: #f5f5f5;
+			padding: 10rpx 20rpx;
+			text{
+				&:first-child{
+					color: red;
+					margin-right: 8rpx;
+				}
+			}
+		}
 		.item-wrap {
+			width: 90%;
+			margin: 0 auto;
 			.item-list {
 				// border-bottom: 1px solid #cfcfcf;
 				display: flex;
@@ -555,6 +668,15 @@ export default {
 					color: #5e5e5e;
 					margin-bottom: 10upx;
 					font-weight: 700;
+					
+				}
+				.item-list-top{
+					text{
+						&:first-child{
+							color: red;
+							margin-right: 8rpx;
+						}
+					}
 				}
 				.item-list-bot {
 					border: 1px solid #ccc;

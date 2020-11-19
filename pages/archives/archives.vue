@@ -27,7 +27,8 @@
 						点击评测
 					</text>
 					<view class="trend" v-if="healthTotalScore">
-						<view class="cuIcon-refresharrow text-blue text-icon"></view>
+						<!-- <image src="/static/icon/down3.png" mode="aspectFit" class="trend-icon" style="transform: rotate(180deg);"></image> -->
+						<image src="/static/icon/up3.png" mode="aspectFit" class="trend-icon"></image>
 						<text class="text">较上次评测增加两分</text>
 					</view>
 				</view>
@@ -74,7 +75,7 @@
 						体重
 						<text class="ratio">[5%]</text>
 					</view>
-					<view class="data text-gray">0</view>
+					<view class="data text-gray">{{ weightScore ? weightScore : 0 }}</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item" @click="toPages('bp')">
@@ -196,7 +197,7 @@ export default {
 		},
 		avatarUrl() {
 			if (this.userInfo.profile_url) {
-				return this.$api.downloadFile + this.userInfo.profile_url + '&thumbnailType=fwsu_100'+ '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+				return this.$api.downloadFile + this.userInfo.profile_url + '&thumbnailType=fwsu_100' + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			} else if (this.loginUserInfo.headimgurl) {
 				return this.loginUserInfo.headimgurl;
 			}
@@ -211,9 +212,62 @@ export default {
 				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
 				return age;
 			}
+		},
+		dietScore() {
+			return 0;
+		},
+		weightScore() {
+			// 计算体重分数
+			if (this.bmi) {
+				let bmi = this.bmi;
+				let result = 0;
+				// >28 及<10 都是0
+				if (bmi <= 28 && bmi >= 24) {
+					//0-2.5
+					result = (2.5 * (28 - bmi)) / 4;
+				} else if (bmi >= 21 && bmi < 24) {
+					// 5-2.5
+					result = 5 - (bmi - 21) / 3;
+				} else if (bmi >= 18.5 && bmi < 21) {
+					//2.5-5
+					result = 2.5 + bmi - 18.5;
+				} else if (bmi < 18.5 && bmi >= 10) {
+					//2.5-0
+					result = (Math.abs(10 - bmi) * 2.5) / 8.5;
+				}
+				return Number(result.toFixed(1));
+			}
 		}
 	},
 	methods: {
+		calcDietScore(){
+			// 满分 50
+			let result = 0
+			let bmi = this.bmi
+			// bmi 占10分
+			if(bmi>24&&bmi<=28){
+				// 超重 饮食热量需要比基础代谢低
+				
+			}else if(bmi>=18.5&&bmi<=24){
+				// 超重 饮食热量需要比基础代谢低
+				result +=10
+			}else if(bmi<18.5){
+				// 体重过轻 饮食热量需要比基础代谢高
+				
+			}
+			
+		},
+		calcSportScore(){
+			// 满分20
+			
+		},
+		calcSleepScore(){
+			// 满分10分 睡觉时间：7小时以内每小时1分;11点前2分，12点1分
+			
+		},
+		getDietRecord(){
+			// 查找饮食记录
+		},
 		async getCheckboxList() {
 			let url = this.getServiceUrl('health', 'srvsys_service_columnex_v2_select', 'select');
 			let req = {
@@ -354,7 +408,7 @@ export default {
 		},
 		getavatarUrl(fileNo) {
 			if (fileNo) {
-				return this.$api.downloadFile + fileNo + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+ '&thumbnailType=fwsu_100';
+				return this.$api.downloadFile + fileNo + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 			}
 		},
 		// 查找当前帐号建立的用户列表
@@ -664,6 +718,12 @@ export default {
 					position: absolute;
 					bottom: 10%;
 					left: 10%;
+					display: flex;
+					align-items: center;
+					.trend-icon {
+						width: 32rpx;
+						height: 32rpx;
+					}
 					.text-icon {
 						display: inline-block;
 						transform: rotate(180deg) scale(1, 1.5);
@@ -753,6 +813,7 @@ export default {
 					.title {
 						text-align: left;
 						.ratio {
+							font-weight: normal;
 							font-size: 24rpx;
 							color: #999;
 						}

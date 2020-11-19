@@ -16,7 +16,7 @@
 			</view>
 		</view>
 		<map id='map' @updated="Dataupdated" :scale='map.scale' :show-location='map.showLocation' :longitude='map.longitude' :latitude='map.latitude'
-		 :width='map.width' :height='map.height' :controls='map.controls' :markers='map.markers' @regionchange='mapChange'>
+		 :width='map.width' :height='map.height' :controls='map.controls' :markers='map.markers' @regionchange='mapChange' @end="mapChange" @begin="mapChange">
 				<cover-image src="/static/icon_position.png" class="icon-img"></cover-image>
 		</map>
 		
@@ -73,6 +73,9 @@
 			uni.setNavigationBarTitle({
 				title: '查询地址'
 			})
+			uni.showLoading({
+				title:'请稍后'
+			})
 		},
 		mounted() {
 			// this.mapChange()
@@ -93,10 +96,12 @@
 		},
 		methods: {
 			Dataupdated(){
+				console.log("map加载完成")
 				this.map.longitude = this.map.longitude +10
 				this.map.latitude = this.map.latitude+10
 			},
 			getAddressList(s = 0) {
+				console.log('周围地点列表')
 				let that = this
 				let position = that.position
 				qqmapsdk.reverseGeocoder({
@@ -124,6 +129,7 @@
 						setTimeout(() => {
 							that.scrollTop = 1
 						}, 1000)
+						uni.hideLoading()
 					},
 					fail: err => {
 						console.log(err)
@@ -131,6 +137,7 @@
 				})
 			},
 			mapChange(e) {
+				console.log('mapChange拖动')
 				let that = this
 				console.log(this.mapStatus);
 				clearTimeout(this.timer)

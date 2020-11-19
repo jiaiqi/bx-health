@@ -79,7 +79,7 @@
 			<view class="boxbtn"><view class="btns" @click="lookobj">完成</view></view>
 		</view>
 		<view class="symptom_from">
-			<u-popup v-model="show" width="85%" border-radius="14" mode="center">
+			<!-- <u-popup v-model="show" width="85%" border-radius="14" mode="center">
 				<view class="select">请完善</view>
 				<view class="contentpop">
 					<view class="contentpop_title">发烧症状</view>
@@ -93,7 +93,7 @@
 					<view class="btn concel" @tap="confirm">提交</view>
 					<view class="btn" @tap="cancel">取消</view>
 				</view>
-			</u-popup>
+			</u-popup> -->
 		</view>
 		<u-popup v-model="menuIsShow" :closeable="true" mode="bottom">
 			<view class="pregnant-main-top-item-poup">

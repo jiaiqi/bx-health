@@ -4,7 +4,7 @@
 			{{ totalScore }}
 			<text class="unit">分</text>
 		</view>
-		<view class="tips"><text class="cuIcon-creative">提示： 总分为100分，下方每一项右侧显示的百分数代表当前项占总分的比例</text></view>
+		<view class="tips"><text class="cuIcon-creative">提示：总分为100分，下方每一项右侧显示的百分数代表当前项占总分的比例</text></view>
 		<view class="couple-more-wrap">
 			<view class="couple-more-top">
 				<text></text>
@@ -12,30 +12,33 @@
 			</view>
 			<view class="more-couple-cen-wrap">
 				<view class="couple-cen more-couple-cen">
-					<view
+					<view @click="toQuestionnaire(item.no)" v-for="(item, index) in coupleData" :key="index" class="couple-cen-item">
+						<!-- <view
 						@click="clickItem(item)"
 						v-for="(item, index) in coupleData"
 						:key="index"
-						:class="{
-							'couple-cen-item-active': item.name === currentItem.name
-						}"
 						class="couple-cen-item"
-					>
+					> -->
+						<view class="couple-cen-item-b">
+							<text>{{ item.name }}</text>
+							<!-- <text class="item-total-score"><text>总分:</text>{{item.fullMark ? Number(item.fullMark.toFixed(1)) : ''}}分</text> -->
+							<!-- <text class="ratio">[{{ item.fullMark ? Number(item.fullMark.toFixed(1)) : '' }}%]</text> -->
+						</view>
 						<view v-if="item.name !== '其它'" class="couple-cen-item-t">
 							<text class="text-blue score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">
 								{{ item.grade }}
 								<text class="unit">分</text>
 							</text>
 							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
-							<view class="unfilled" v-if="!item.finished" @click="toQuestionnaire(item.no)">
+							<view class="unfilled" v-if="!item.finished">
 								<text class="text-icon cuIcon-edit"></text>
 								<text class="text">点击填写</text>
 							</view>
 						</view>
-						<view class="couple-cen-item-b">
-							<text>{{ item.name }}</text>
-							<text class="ratio">[{{ item.fullMark ? Number(item.fullMark.toFixed(1)) : '' }}%]</text>
-						</view>
+						<text class="item-total-score">
+							<text>总分:</text>
+							{{ item.fullMark ? Number(item.fullMark.toFixed(1)) : '' }}分
+						</text>
 					</view>
 				</view>
 			</view>
@@ -54,6 +57,9 @@
 						}"
 						class="couple-cen-item"
 					>
+						<view class="couple-cen-item-b">
+							<text>{{ item.name }}</text>
+						</view>
 						<view v-if="item.name !== '其它'" class="couple-cen-item-t" :class="item.grade === 0 ? '' : item.grade >= 0 && item.grade <= 5 ? 'risk' : 'normal'">
 							<text class="score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">
 								{{ item.grade }}
@@ -64,9 +70,6 @@
 								<text class="text-icon cuIcon-edit"></text>
 								<text class="text">点击填写</text>
 							</view>
-						</view>
-						<view class="couple-cen-item-b">
-							<text>{{ item.name }}</text>
 						</view>
 					</view>
 				</view>
@@ -460,13 +463,13 @@ export default {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			justify-content: center;
-			padding: 20rpx 0;
+			padding: 10rpx;
 			border: 1px solid transparent;
 			.couple-cen-item-t {
 				font-size: 72rpx;
 				color: #ccc;
 				font-weight: 600;
+
 				.score-detail {
 					position: relative;
 					.unit {
@@ -498,13 +501,20 @@ export default {
 				color: #39b54a;
 			}
 			.couple-cen-item-b {
-				font-size: 32rpx;
+				font-size: 30rpx;
 				font-weight: 700;
 				position: relative;
+				width: 100%;
 				.ratio {
+					font-weight: normal;
 					font-size: 24rpx;
 					color: #999;
 				}
+			}
+			.item-total-score {
+				font-weight: normal;
+				font-size: 24rpx;
+				color: #999;
 			}
 		}
 		.couple-cen-item-active {

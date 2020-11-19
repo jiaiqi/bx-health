@@ -6,7 +6,7 @@
 				<text v-else>(选填)</text>
 			</view>
 			
-			<checkbox-group @change="checkboxChange" v-if="itemType.type === 'checked'">
+			<!-- <checkbox-group @change="checkboxChange" v-if="itemType.type === 'checked'">
 				<checkbox 
 					:class="item.checked?'checked':''" :checked="item.checked?true:false"
 					v-model="item.checked" 
@@ -14,7 +14,7 @@
 					:name="item.name"
 					:value="item.name"
 				>{{item.name}}</checkbox>
-			</checkbox-group>
+			</checkbox-group> -->
 			
 			<view class="border-bottom" v-if="itemType.type === 'num'" >
 				<!-- <input type="text" v-model="itemType.value" value="" /> -->
@@ -28,7 +28,7 @@
 						<text :class="activeStep===0.1?'active-text':''" @click="chooseSteps(itemType,0.1)">0.1</text>
 					</view>
 				</view> -->
-				<view class="input-box">
+				<!-- <view class="input-box">
 					<view class="key-left">
 						<text @click="countDietNum(itemType,'-0.1')">-0.1</text>
 						<text @click="countDietNum(itemType,'-1')">-1</text>
@@ -38,9 +38,9 @@
 						<text @click="countDietNum(itemType,'+1')">+1</text>
 						<text @click="countDietNum(itemType,'+0.1')">+0.1</text>
 					</view>
-				</view>
+				</view> -->
 			</view>
-			<radio-group @change="radioChange"  v-model="itemType.value" v-if="itemType.type === 'radio'">
+			<!-- <radio-group @change="radioChange"  v-model="itemType.value" v-if="itemType.type === 'radio'">
 				<radio 					
 					v-for="(item, index) in itemType.data" :key="index" 
 					:name="item.name"
@@ -49,13 +49,13 @@
 				>
 					{{item.name}}
 				</radio>
-			</radio-group>
-			<view class="border-bottom" v-if="itemType.type === 'text'" >
+			</radio-group> -->
+			<!-- <view class="border-bottom" v-if="itemType.type === 'text'" >
 				<input height="auto-height" :height="100" :border="true" type="textarea" :placeholder="'请输入'+itemType.title" v-model="itemType.value"/>
 			</view>
 			<view class="border-bottom date-bottom" v-if="itemType.type === 'date'||itemType.type === 'time' ||itemType.type === 'dateTime'" :right-icon-style="rightIcon"  right-icon="calendar">
 				<input @click="openTime" :height="100" :border="true" height="20" :disabled="true" :placeholder="'请选择'+itemType.title" v-model="itemType.value"/>
-			</view>
+			</view> -->
 			<mx-date-picker
 				style="z-index: 15000;"
 				:format="dateFormat"

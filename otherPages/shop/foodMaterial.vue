@@ -60,7 +60,7 @@
 				};
 				let res = await this.$http.post(url, req);
 				let data = res.data.data
-				if(data.length > 0){	
+				if(data.length >= 0){	
 					this.foodChild = data
 				}
 			},
@@ -165,9 +165,8 @@
 					width: 95%;
 					margin: 0 auto;
 					text{
-						min-width: 33%;
-						text-align: center;
-						
+						width: 33%;
+						text-align: center;						
 					}
 					&:last-of-type{
 						border-bottom: none;

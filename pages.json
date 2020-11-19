@@ -427,15 +427,15 @@
 		}
 	],
 	"tabBar": {
-		"color": "#999",
-		"selectedColor": "#facc31",
-		"borderStyle": "black",
+		"color": "#999", //文字颜色
+		"selectedColor": "#facc31", //选中时文字颜色
+		"borderStyle": "black", 
 		"backgroundColor": "#ffffff",
 		"list": [{
-				"pagePath": "pages/pedia/pedia",
-				"iconPath": "/static/icon/baodian.png",
-				"selectedIconPath": "static/icon/baodian_selected.png",
-				"text": "宝典"
+				"pagePath": "pages/pedia/pedia", //页面路径
+				"iconPath": "/static/icon/baodian.png", //图标路径
+				"selectedIconPath": "static/icon/baodian_selected.png", //选中状态图标路径
+				"text": "宝典" //显示文字
 			},
 			{
 				"pagePath": "pages/archives/archives",

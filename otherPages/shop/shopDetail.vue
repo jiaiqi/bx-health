@@ -684,9 +684,13 @@
 			this.getMixChildFood()
 		},
 		onLoad(option) {
+			
 			let foodsDetail = JSON.parse(decodeURIComponent(option.itemData))
+			
 			this.queryType = option.type
-			foodsDetail.imgurl = foodsDetail.imgurl.substring(0,foodsDetail.imgurl.lastIndexOf("&"))
+			if(foodsDetail.imgurl){
+				foodsDetail.imgurl = foodsDetail.imgurl.substring(0,foodsDetail.imgurl.lastIndexOf("&"))
+			}
 			this.foodObj = foodsDetail
 			this.currFood = foodsDetail
 			if (uni.getStorageSync('current_user_info')) {

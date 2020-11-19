@@ -2,7 +2,7 @@
 	<view class="pathogen-wrap">
 		<view class="uni-ec-canvas-bot">
 			<!-- #ifdef MP-WEIXIN -->
-				<uniEcCanvas class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+				<uniEcCanvas @touchstart="test" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
 			<!-- #endif -->
 			<!-- #ifdef H5 -->
 				<uniEcharts @click-chart="test" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
@@ -50,7 +50,7 @@
 						                fontSize: 12
 						            },
 						            data: [{
-						                name: '家族史1、家族史2',
+						                name: '家族史1',
 						                x: 20,
 						                y: 40,
 										label:{
@@ -161,10 +161,11 @@
 		
 		methods:{
 			test(e){
-				uni.navigateTo({
-					url:'/disease/pathogen/pathogenDetail?detail=' + encodeURIComponent(JSON.stringify(e.data))
-				})
 				console.log("e------1212--",e)
+				debugger
+				// uni.navigateTo({
+				// 	url:'/disease/pathogen/pathogenDetail?detail=' + encodeURIComponent(JSON.stringify(e.data))
+				// })
 			}
 		}
 	}

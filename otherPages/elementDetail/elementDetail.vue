@@ -61,6 +61,11 @@
 				<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas" ref="canvasPie" canvas-id="canvasPie" :ec="ec"></uni-echarts>
 				<!-- #endif -->
 			</view>
+			<view class="tips" v-if="elementData.name === 'VA'">
+				<text class="cuIcon-creative">
+					<text>维生素A有促进生长、繁殖，维持骨骼、上皮组织、视力和粘膜上皮正常分泌等多种生理功能，维生素A及其类似物有阻止癌前期病变的作用。</text>
+				</text>
+			</view>
 		</view>
 		<view class="element-box">
 			<view class="element-name title">
@@ -103,8 +108,6 @@
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
-			<!-- <u-popup v-model="showEditModal" mode="bottom" border-radius="50"> -->
-			<!-- <view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentDiet = null)"> -->
 			<view class="cu-dialog current-diet-detail" v-if="currentDiet">
 				<view class="title-bar" v-if="currentDiet.hdate && currentDiet.htime">
 					<view class="date">{{ currentDiet.hdate + ' ' + currentDiet.htime.slice(0, 5) }}</view>
@@ -173,11 +176,9 @@
 var _self;
 // #ifdef MP-WEIXIN
 import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
-// import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #endif
 // #ifdef H5
 import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
-// import uniEcharts from '@/otherPages/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
 import energyListWrap from '../static/js/totalEnergyList.js';
 export default {
@@ -264,7 +265,7 @@ export default {
 			let unitList = [];
 			unitList.push(item);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				unitList = [...unitList,...res.data.data];
+				unitList = [...unitList, ...res.data.data];
 			} else {
 				// unitList = [item];
 			}
@@ -832,6 +833,12 @@ export default {
 	.element-box {
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		margin: 0 20rpx 20rpx;
+		.tips {
+			padding: 20rpx;
+			color: #67c23a;
+			background: #f0f9eb;
+			border-color: #c2e7b0;
+		}
 	}
 	.qiun-charts {
 		width: 100%;

@@ -412,7 +412,7 @@ export default {
 					grid: {
 						left: '6%',
 						right: '6%',
-						top: '20%',
+						top: '25%',
 						bottom: '6%',
 						containLabel: true
 					},
@@ -1603,6 +1603,7 @@ export default {
 	.uni-ec-canvas-bot{
 		width: 710rpx;
 		height: 540rpx;
+		margin-top: 20rpx;
 	}
 }
 .uni-ec-canvas {
