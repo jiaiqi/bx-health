@@ -19,7 +19,6 @@
 						<image src="../../static/doctor_default.jpg" mode=""></image>
 					</view>
 				</view>
-				
 			</view>
 		</view>
 		<view class="person-chat-bot" :class="doctor_no?'person-doctor-chat-bot':''">
@@ -39,7 +38,6 @@
 	export default {
 		name:'personchat',
 		components:{
-			
 		},
 		props:{
 			customer_no: {

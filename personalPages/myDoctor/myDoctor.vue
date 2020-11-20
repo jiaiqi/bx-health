@@ -60,7 +60,6 @@ export default {
 		/*点击前往聊天页面**/
 		toChatPage(item){			
 			let no = this.userInfo.no
-			debugger
 			uni.navigateTo({
 				url:'/personalPages/myDoctor/doctorChat?no=' + no +'&doctor=' + item
 			})
@@ -96,6 +95,10 @@ export default {
 					colName:'sender_account',
 					ruleType:'eq',
 					value:userNo
+				},{
+					colName:'msg_state',
+					ruleType:'eq',
+					value:"未读"
 				}],				
 				order:[{
 					colName:'create_time',
@@ -222,6 +225,9 @@ export default {
 			});
 		}
 	},
+	onShow() {
+		this.getBindDoctor();
+	},
 	onReachBottom() {
 		// 下拉到底部
 		console.log('下拉到底部');
@@ -229,6 +235,7 @@ export default {
 	onPullDownRefresh() {
 		// 下拉
 		this.getBindDoctor();
+		
 		setTimeout(() => {
 			uni.stopPullDownRefresh();
 		}, 1000);

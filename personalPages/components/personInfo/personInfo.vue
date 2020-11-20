@@ -75,7 +75,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="health-archive-item-wrap">			
+		<view class="health-archive-item-wrap">
 			<view class="health-archive-item ">
 				<view class="subtitle">
 					<text class="title-text">咨询记录</text>
@@ -84,7 +84,25 @@
 				<view class="content disease-risk">
 					<view class="disease-item record"><text class="date">2020-11-13</text></view>
 					<view class="disease-item record"><text class="date">2020-10-19</text></view>
-					<view @click="toChatList" class="disease-item record"><text class="date">更多<text class="cuIcon-right margin-left-xs"></text></text></view>
+					<view @click="toChatList" class="disease-item record">
+						<text class="date">
+							更多
+							<text class="cuIcon-right margin-left-xs"></text>
+						</text>
+					</view>
+				</view>
+			</view>
+			<view class="health-archive-item ">
+				<view class="subtitle">
+					<text class="title-text">检查报告</text>
+					<view class=""></view>
+				</view>
+				<view class="content disease-risk">
+					<view class="disease-item record" v-for="item in inspectReportRecord" :key="item.id" @click="toRecord(item)">
+						<view class="title">{{ item.name }}</view>
+						<view class="date">{{ item.end_time.slice(0, 10) }}</view>
+					</view>
+					<!-- <view v-if="inspectReportRecord&&inspectReportRecord.length>6" @click="toChatList" class="disease-item record"><text class="date">更多<text class="cuIcon-right margin-left-xs"></text></text></view> -->
 				</view>
 			</view>
 			<view class="health-archive-item">
@@ -95,7 +113,12 @@
 				<view class="content disease-risk">
 					<view class="disease-item record"><text class="date">2020-11-13</text></view>
 					<view class="disease-item record"><text class="date">2020-10-19</text></view>
-					<view class="disease-item record"><text class="date">更多<text class="cuIcon-right margin-left-xs"></text></text></view>
+					<view class="disease-item record">
+						<text class="date">
+							更多
+							<text class="cuIcon-right margin-left-xs"></text>
+						</text>
+					</view>
 				</view>
 			</view>
 			<view class="health-archive-item ">
@@ -106,11 +129,16 @@
 				<view class="content disease-risk">
 					<view class="disease-item record"><text class="date">2020-11-13</text></view>
 					<view class="disease-item record"><text class="date">2020-10-19</text></view>
-					<view class="disease-item record"><text class="date">更多<text class="cuIcon-right margin-left-xs"></text></text></view>
+					<view class="disease-item record">
+						<text class="date">
+							更多
+							<text class="cuIcon-right margin-left-xs"></text>
+						</text>
+					</view>
 				</view>
 			</view>
-		</view>		
-<!-- 		<view class="health-archive-item ">
+		</view>
+		<!-- 		<view class="health-archive-item ">
 			<view class="subtitle">
 				<text class="title-text">疾病风险提示</text>
 				<view class=""></view>
@@ -141,10 +169,12 @@ export default {
 		return {
 			// customer_no: '',
 			userInfo: {},
-			
+			isLoad: false,
+			inspectReportRecord: [],
+			totalInspectReportRecord: []
 		};
 	},
-	props:{
+	props: {
 		customer_no: {
 			type: String,
 			default() {
@@ -152,7 +182,7 @@ export default {
 			}
 		}
 	},
-	
+
 	computed: {
 		age() {
 			if (this.userInfo.birthday) {
@@ -170,12 +200,76 @@ export default {
 		}
 	},
 	methods: {
-		
+		async selectInspectionReport() {
+			// 查询检查报告
+			let url = this.getServiceUrl('health', 'srvhealth_see_doctor_lab_examination_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_see_doctor_lab_examination_select',
+				colNames: ['*'],
+				condition: [{ colName: 'daq_survey_activity_no', ruleType: 'notnull', value: '' }]
+			};
+			let res = await this.$http.post(url, req);
+			if (this.requestSuccess(res)) {
+				let list = res.data.data;
+				if (res.data.data.length > 0) {
+					let no = list.map(item => item.daq_survey_activity_no).toString();
+					let result = await this.getQuestRecord(no);
+					this.isLoad = true;
+					if (result) {
+						this.totalInspectReportRecord = result.map(item => {
+							list.forEach(record => {
+								if (record.daq_survey_activity_no === item.activity_no) {
+									item.name = record.name;
+									item.attention = record.attention;
+									item.examination_type = record.examination_type;
+									item.content_desc = record.content_desc;
+									item.specimen = record.specimen;
+									item.ref_price = record.ref_price;
+								}
+							});
+							return item;
+						});
+						// this.inspectReportRecord = this.totalInspectReportRecord.slice(0,6)
+						this.inspectReportRecord = this.totalInspectReportRecord;
+					}
+				}
+			} else {
+				this.isLoad = true;
+			}
+		},
+		async getQuestRecord(no) {
+			let url = this.getServiceUrl('daq', 'srvdaq_record_reply_select', 'select');
+			let req = {
+				serviceName: 'srvdaq_record_reply_select',
+				colNames: ['*'],
+				condition: [
+					{ colName: 'activity_no', ruleType: 'in', value: no },
+					{ colName: 'state', ruleType: 'eq', value: '完成' },
+					{ colName: 'user_no', ruleType: 'eq', value: this.userInfo.userno }
+				]
+			};
+			let res = await this.$http.post(url, req);
+			if (this.requestSuccess(res)) {
+				let list = res.data.data;
+				if (res.data.data.length > 0) {
+					return res.data.data;
+				}
+			}
+		},
+		toRecord(item) {
+			// 跳转到检查记录页面。
+			// fill_batch_no activity_no
+			if (item.activity_no && item.fill_batch_no) {
+				uni.navigateTo({
+					url: `/questionnaire/index/index?formType=detail&activity_no=${item.activity_no}&status=完成&fill_batch_no=${item.fill_batch_no}`
+				});
+			}
+		},
 		/*点击前往聊天列表**/
-		toChatList(){
+		toChatList() {
 			uni.navigateTo({
-				url:'/personalPages/chat/chatList'
-			})
+				url: '/personalPages/chat/chatList'
+			});
 		},
 		navPages(type = 'history') {
 			if (type === 'history') {
@@ -185,7 +279,6 @@ export default {
 			}
 		},
 		async getUserInfo(customer_no) {
-			
 			let url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
@@ -196,17 +289,18 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.userInfo = res.data.data[0];
+				this.selectInspectionReport();
 				return res.data.data[0];
-			}else{
+			} else {
 				uni.showToast({
-					title:'未找到患者信息',
-					icon:'none'
-				})
+					title: '未找到患者信息',
+					icon: 'none'
+				});
 			}
 		}
 	},
 	mounted() {
-		if(this.customer_no){
+		if (this.customer_no) {
 			this.getUserInfo(this.customer_no);
 		}
 	},
@@ -260,7 +354,7 @@ export default {
 					flex-wrap: wrap;
 					.info-item {
 						margin-right: 40rpx;
-						.value{
+						.value {
 							margin-left: 10rpx;
 						}
 					}
@@ -287,7 +381,7 @@ export default {
 						border-top-right-radius: 20rpx;
 						border-top-left-radius: 20rpx;
 					}
-					.other-info{
+					.other-info {
 						padding: 20rpx;
 						// background-color: #666;
 						border-bottom-left-radius: 20rpx;
@@ -599,7 +693,7 @@ export default {
 		}
 	}
 }
-.health-bottom{
+.health-bottom {
 	display: flex;
 	position: fixed;
 	bottom: 0;
@@ -609,15 +703,15 @@ export default {
 	height: 80rpx;
 	justify-content: space-around;
 	border-top: 1px solid rgba(0, 0, 0, 0.33);
-	text{
+	text {
 		width: 49%;
 		text-align: center;
 		line-height: 80rpx;
-		&:first-child{
+		&:first-child {
 			border-right: 1px solid rgba(0, 0, 0, 0.33);
 		}
 	}
-	.active-text{
+	.active-text {
 		color: chocolate;
 	}
 }
