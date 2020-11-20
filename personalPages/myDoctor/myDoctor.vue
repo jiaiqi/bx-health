@@ -8,7 +8,13 @@
 			<view class="doctor-item" v-for="item in doctorList" :key="item.id">
 				<view class="profile"><image class="image" :src="getPicPath(item.dt_pic)" mode="aspectFit"></image></view>
 				<view class="content">
-					<text class="doctor-name">{{ item.dt_name }}</text>
+					<view class="content-left">
+						<text class="doctor-name">{{ item.dt_name }}</text>
+					</view>
+					<view @click="toChatPage(item.owner_account)" class="content-right">
+						<text v-if="item.count_num !==0" style="z-index: 1;">{{item.count_num}}</text>
+						<image src="../static/chat.png" mode=""></image>
+					</view>
 				</view>
 				<view class="content"><text class="hospital-address">xx市xx区xx路xx医院</text></view>
 			</view>
@@ -51,6 +57,14 @@ export default {
 				}
 			}
 		},
+		/*点击前往聊天页面**/
+		toChatPage(item){			
+			let no = this.userInfo.no
+			debugger
+			uni.navigateTo({
+				url:'/personalPages/myDoctor/doctorChat?no=' + no +'&doctor=' + item
+			})
+		},
 		toScan() {
 			// 调起客户端扫码功能,允许从相机和相册扫码
 			let self = this;
@@ -72,6 +86,24 @@ export default {
 				}
 			});
 			// #endif
+		},
+		async getDoctorRecod(userNo){
+			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_consultation_chat_record_select',
+				colNames: ['*'],
+				condition:[{
+					colName:'sender_account',
+					ruleType:'eq',
+					value:userNo
+				}],				
+				order:[{
+					colName:'create_time',
+					orderType:'asc'
+				}]
+			};
+			let res = await this.$http.post(url, req);
+			return res.data.data.length
 		},
 		async bindDoctor(docInfo) {
 			if (!docInfo) {
@@ -151,6 +183,12 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				if (isSelf === true) {
 					this.doctorList = res.data.data;
+					this.doctorList.forEach(item=>{
+						this.getDoctorRecod(item.owner_account).then(length=>{
+							this.$set(item,'count_num',length)
+							// console.log("-----------------length---",length)
+						})
+					})
 				}
 				return res.data.data[0];
 			} else {
@@ -241,7 +279,36 @@ export default {
 				}
 			}
 			.content {
+				display: flex;
 				padding-top: 10rpx;
+				.content-left{
+					
+				}
+				.content-right{
+					display: flex;
+					position: relative;
+					text{
+						background: red;
+						min-width: 30rpx;
+						height: 30rpx;
+						color: #fff;
+						font-weight: 600;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						border-radius: 20rpx;
+						font-size: 24rpx;
+						padding: 0 4rpx;
+						position: absolute;
+						left: 50%;
+						top: -10rpx;
+						z-index: 1px!important;
+					}
+					image{
+						width: 50rpx;
+						height: 50rpx;
+					}
+				}
 			}
 		}
 	}

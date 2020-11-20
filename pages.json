@@ -154,6 +154,22 @@
 						"navigationBarTitleText": "患者信息",
 						"enablePullDownRefresh": false
 					}
+				},
+				{
+					"path": "chat/chatList",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "聊天列表",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "myDoctor/doctorChat",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "聊天列表",
+						"enablePullDownRefresh": false
+					}
 				}
 			]
 		},

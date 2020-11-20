@@ -212,10 +212,12 @@ export default {
 
 		touchStart(e) {
 			if (this.ec.stopTouchEvent) {
+				
 				e.preventDefault();
 				e.stopPropagation();
 				return;
 			}
+			console.log("e-----",e)
 			this.$emit('touchstart', e);
 			if (this.$curChart && e.touches.length > 0) {
 				var touch = e.touches[0];
@@ -288,6 +290,7 @@ export default {
 				console.log(e); // 这里就可以收到echart发来的事件了
 				this.$emit('click-chart', e);
 			});
+			
 			canvas.setChart(this.$curChart);
 			this.$curChart.setOption(this.ec.option);
 		}

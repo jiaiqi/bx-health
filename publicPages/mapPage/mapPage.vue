@@ -1,46 +1,15 @@
 <template>
 	<view class='container'>
-		<view class='header bg-ff'>
-			<view class='row padding border-b font-26' style="display: flex; align-items: center; justify-content: center;">
-				<view class='col ellipsis-1'>
-					<view class='ellipsis-1'>
-						<view class=''>
-							<text class='color'>[当前] </text>{{address.title?address.title:'拖动地图即可选择店铺位置信息'}}
-						</view>
-						<view class='color-99 ellipsis-1'>
-							{{address.address}}
-						</view>
-					</view>
-				</view>
-				<view class='bg color-ff padding-lr btn border' @click='submit(address)'>确定</view>
-			</view>
-		</view>
-		<map id='map' @updated="Dataupdated" :scale='map.scale' :show-location='map.showLocation' :longitude='map.longitude' :latitude='map.latitude'
-		 :width='map.width' :height='map.height' :controls='map.controls' :markers='map.markers' @regionchange='mapChange' @end="mapChange" @begin="mapChange">
-				<cover-image src="/static/icon_position.png" class="icon-img"></cover-image>
-		</map>
 		
-		<view class='footer bg-ff font-26'>
-			<scroll-view scroll-y class='scroll' :scroll-top='scrollTop'>
-				<view class="">
-					<view class='padding border-b position-r' v-for='(item, index) in list' :key='index' @click='bindAddress(index)'>
-						<view class='row'>{{item.title}}</view>
-						<view class='row color-99'>{{item.address}}</view>
-						<icon type='success' color='#E74246' size='22' class='icon_circle' v-if='checked === index' />
-					</view>
-				</view>
-				
-			</scroll-view>
-		</view>
 	</view>
 </template>
 
 <script>
-	const app = getApp()
-	var QQMapWX = require('./js/qqmap-wx-jssdk.min.js')
-	var qqmapsdk = new QQMapWX({
-	  key: 'LXCBZ-NNIKD-UZ64F-H6AFI-UNJLH-OCFGE'
-	})
+	// const app = getApp()
+	// var QQMapWX = require('./js/qqmap-wx-jssdk.min.js')
+	// var qqmapsdk = new QQMapWX({
+	//   key: 'LXCBZ-NNIKD-UZ64F-H6AFI-UNJLH-OCFGE'
+	// })
 	export default {
 		data() {
 			return {
@@ -66,19 +35,29 @@
 				},
 				checked: 0,
 				scrollTop: 0,
-				mapStatus: 1 // 控制选择地址时 地图不加载附近列表
+				mapStatus: 1, // 控制选择地址时 地图不加载附近列表
+				islocation:10
 			}
 		},
 		created() {
 			uni.setNavigationBarTitle({
 				title: '查询地址'
 			})
-			uni.showLoading({
-				title:'请稍后'
-			})
+			
 		},
 		mounted() {
 			// this.mapChange()
+			uni.chooseLocation({
+			    success: function (res) {
+			        console.log('位置名称：' + res.name);
+			        console.log('详细地址：' + res.address);
+			        console.log('纬度：' + res.latitude);
+			        console.log('经度：' + res.longitude);
+					let data = JSON.stringify(res)
+					 uni.$emit('update',data)
+					 uni.navigateBack()
+			    }
+			});
 		},
 		onLoad(options) {
 			let map = this.map
@@ -92,13 +71,14 @@
 			// })
 			this.map.longitude = options.longitude
 			this.map.latitude = options.latitude
+			console.log(options.longitude,'------------------')
 			
 		},
 		methods: {
 			Dataupdated(){
 				console.log("map加载完成")
-				this.map.longitude = this.map.longitude +10
-				this.map.latitude = this.map.latitude+10
+				this.map.longitude = this.map.longitude +this.islocation
+				this.map.latitude = this.map.latitude+this.islocation
 			},
 			getAddressList(s = 0) {
 				console.log('周围地点列表')

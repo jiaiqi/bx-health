@@ -107,13 +107,26 @@
 		<view class="health-archive-item ">
 			<view class="subtitle">
 				<text class="title-text">检查报告</text>
-				<view class=""></view>
+				<view
+					class="title-action"
+					@click="
+						showAddRecord = true;
+						getTreeSelectorData();
+					"
+				>
+					<text class="cuIcon-add "></text>
+					<text class="see-histroy">添加</text>
+				</view>
 			</view>
 			<view class="content inspection-report">
 				<view class="report-item" v-for="item in inspectReportRecord" :key="item.id" @click="toRecord(item)">
-					<view class="images"><image class="image" src="../../static/xuehzi.png" mode="scaleToFill"></image></view>
-					<view class="title">{{ item.name + item.examination_type }}记录</view>
+					<view class="images"><image class="image" src="../../static/xuehzi.png" mode="aspectFill"></image></view>
+					<view class="title">{{ item.name + item.examination_type }}</view>
 					<view class="date">{{ item.end_time.slice(0, 10) }}</view>
+				</view>
+				<view class="empty-data" v-if="inspectReportRecord.length === 0 || !inspectReportRecord">
+					<view class="cu-load" :class="!isLoad ? 'loading' : ''"></view>
+					<view class="" v-if="isLoad">未找到您的检查报告</view>
 				</view>
 			</view>
 		</view>
@@ -141,6 +154,33 @@
 				</view>
 			</view>
 		</view>
+		<!-- 	<view class="cu-modal bottom-modal" :class="{ show: showAddRecord }">
+		
+		</view> -->
+		<u-popup v-model="showAddRecord" mode="bottom">
+			<view class="cu-dialog inspect-record">
+				<view class="title">选择检查报告类型</view>
+				<view class="cu-bar search bg-white">
+					<view class="search-form round">
+						<text class="cuIcon-search"></text>
+						<input @focus="InputFocus" @blur="InputBlur" :adjust-position="false" type="text" placeholder="搜索检查报告类型" confirm-type="search" />
+					</view>
+					<view class="action"><button class="cu-btn bg-green shadow-blur round">搜索</button></view>
+				</view>
+				<tree-selector
+					:srvInfo="isArray(configCols.option_list_v2) ? null : configCols.option_list_v2"
+					:treeData="treeSelectorData"
+					:childNodeCol="'_childNode'"
+					:disColName="configCols && configCols.option_list_v2 && configCols.option_list_v2['key_disp_col'] ? configCols.option_list_v2['key_disp_col'] : ''"
+					:nodeKey="configCols.option_list_v2 && configCols.option_list_v2['refed_col'] ? configCols.option_list_v2['refed_col'] : 'no'"
+					@clickLastNode="confirmTree"
+				></tree-selector>
+				<view class="button-box">
+					<button class="cu-btn bg-grey" @tap="showAddRecord = false">取消</button>
+					<button class="cu-btn bg-blue" @tap="toQuestionnaire">确定</button>
+				</view>
+			</view>
+		</u-popup>
 		<u-popup v-model="showUserListPopup" border-radius="40" mode="top">
 			<view class="user-list">
 				<view class="user-item" @click="userInfo = item" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
@@ -191,7 +231,25 @@ export default {
 			sportScore: 0,
 			sleepScore: 0,
 			BPScore: 0,
-			inspectReportRecord: []
+			inspectReportRecord: [],
+			isLoad: false,
+			showAddRecord: false,
+			treeSelectorData: [],
+			treePageInfo: {
+				pageNo: 1,
+				rownumber: 5
+			},
+			configCols: {
+				column: 'activity_no',
+				label: '选择检查报告类型',
+				srvInfo: { serviceName: 'srvdaq_activity_result_submit', appNo: 'daq' },
+				type: 'treeSelector',
+				isRequire: false,
+				display: true,
+				option_list_v2: { refed_col: 'daq_survey_activity_no', srv_app: 'health', serviceName: 'srvhealth_see_doctor_lab_examination_select', key_disp_col: 'name' },
+				showExp: true,
+				value: ''
+			}
 		};
 	},
 	computed: {
@@ -244,6 +302,58 @@ export default {
 		}
 	},
 	methods: {
+		saveValue(e) {
+			console.log(e);
+		},
+		InputFocus(e) {},
+		InputBlur(e) {
+			let value = e.detail.value;
+			if (e.detail.value) {
+				let cond = [{ colName: 'name', ruleType: 'eq', value: value }];
+				this.getTreeSelectorData(cond);
+			}
+		},
+		async getTreeSelectorData(cond) {
+			let self = this;
+			let req = {
+				serviceName: self.configCols.option_list_v2.serviceName,
+				colNames: ['*'],
+				condition: [{ colName: 'daq_survey_activity_no', ruleType: 'notnull', value: '' }],
+				page: { pageNo: this.treePageInfo.pageNo, rownumber: this.treePageInfo.rownumber }
+			};
+			if (cond) {
+				req.condition = [...req.condition, ...cond];
+			}
+			let appName = self.configCols.option_list_v2.srv_app;
+			let res = await self.onRequest('select', req.serviceName, req, appName);
+			if (res.data.state === 'SUCCESS') {
+				if (res.data.page) {
+					this.treePageInfo = res.data.page;
+				}
+				if (res.data.page && res.data.page.pageNo > 1) {
+					let data = res.data.data;
+					self.treeSelectorData = [...self.treeSelectorData, ...data];
+				} else {
+					if (res.data.data.length === 0) {
+						uni.showToast({
+							title: '没有找到相关数据',
+							icon: 'none'
+						});
+					}
+					self.treeSelectorData = res.data.data;
+				}
+			}
+		},
+		confirmTree(e) {
+			if (e.item && e.item.daq_survey_activity_no) {
+				this.selectedQuestNo = e.item.daq_survey_activity_no;
+			}
+		},
+		toQuestionnaire() {
+			uni.navigateTo({
+				url: `/questionnaire/index/index?formType=form&activity_no=${this.selectedQuestNo}&status=进行中`
+			});
+		},
 		toRecord(item) {
 			// 跳转到血脂检查记录页面。
 			// fill_batch_no activity_no
@@ -267,6 +377,7 @@ export default {
 				if (res.data.data.length > 0) {
 					let no = list.map(item => item.daq_survey_activity_no).toString();
 					let result = await this.getQuestRecord(no);
+					this.isLoad = true;
 					if (result) {
 						this.inspectReportRecord = result.map(item => {
 							list.forEach(record => {
@@ -283,6 +394,8 @@ export default {
 						});
 					}
 				}
+			} else {
+				this.isLoad = true;
 			}
 		},
 		async getQuestRecord(no) {
@@ -383,7 +496,7 @@ export default {
 		async calcBPScore() {
 			let item = await this.getSleepRecord('bloodPressure');
 			let result = 0;
-			if (item.no) {
+			if (item && item.no) {
 				// diastolic_pressure
 				if (item.diastolic_pressure < 80) {
 					result += 2.5;
@@ -1145,6 +1258,7 @@ export default {
 				}
 				.see-histroy {
 					font-size: 24rpx;
+					text-indent: 0;
 				}
 			}
 		}
@@ -1234,21 +1348,32 @@ export default {
 				display: flex;
 				height: auto;
 				justify-content: flex-start;
+				flex-wrap: wrap;
+				.empty-data {
+					width: 100%;
+					text-align: center;
+					font-weight: normal;
+					color: #999;
+				}
 				.report-item {
-					width: calc(33% - 10rpx);
+					width: calc(25% - 10rpx);
 					overflow: hidden;
-					margin: 10rpx 10rpx 0 0;
+					margin: 0 10rpx 10rpx 0;
 					display: flex;
 					flex-direction: column;
 					box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 					border-radius: 20rpx;
 					padding-bottom: 20rpx;
+					&:nth-child(4n) {
+						margin-right: 0;
+					}
 					.image {
 						width: 100%;
-						height: 200rpx;
+						height: 100rpx;
 					}
 					.title {
 						text-indent: 10rpx;
+						padding: 5rpx 0;
 					}
 					.date {
 						font-size: 24rpx;
@@ -1313,6 +1438,33 @@ export default {
 		margin-right: 50rpx;
 		&:last-child {
 			margin-right: 0;
+		}
+	}
+}
+.inspect-record {
+	width: 100%;
+	background-color: #fff;
+	height: 100vh;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	padding-bottom: 200rpx;
+	.title {
+		width: 100%;
+		text-align: center;
+		font-size: 36rpx;
+		font-weight: 700;
+		padding: 20rpx;
+	}
+	.bx-form {
+		// position: absolute;
+		// bottom: 500rpx;
+	}
+	.button-box {
+		position: absolute;
+		bottom: 100rpx;
+		.cu-btn {
+			width: 45%;
 		}
 	}
 }

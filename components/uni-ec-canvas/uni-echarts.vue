@@ -38,7 +38,6 @@ export default {
 		initChart() {
 			this.chartInstance = echarts.init(document.getElementById(this.canvasId));
 			this.chartInstance.on('click', e => {
-				debugger
 				console.log(e); // 这里就可以收到echart发来的事件了
 				this.$emit('click-chart', e);
 			});

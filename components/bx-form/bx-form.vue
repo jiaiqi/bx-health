@@ -202,41 +202,27 @@ export default {
 			
 			
 			
+			let  self  = this
 			
-			
-			let self = this
-			uni.getLocation({
-			    type: 'gcj02',
+			uni.chooseLocation({
 			    success: function (res) {
-					let latitude = res.latitude 
-					let longitude = res.longitude
-					uni.navigateTo({
-						url:'/publicPages/mapPage/mapPage?latitude='+latitude+'&longitude='+longitude
+			        self.allField.forEach(item=>{
+						if(item.column === 'address'){
+							item.value = res.address
+						}else if(item.column === 'longitude'){
+							item.value = res.longitude
+						} else if(item.column === 'latitude'){
+							item.value = res.latitude
+						}
 					})
-			    },
-				fail:function(error){
-					uni.showToast({
-						title:'获取定位失败',
-						icon:'none'
-					})
-				}
+			    }
 			});
-			
 			
 			
 			   uni.$once('update',function(data){
 			        console.log(data);
 					let locationData = JSON.parse(data)
-				self.allField.forEach(item=>{
-							if(item.column === 'address'){
-								item.value = locationData.address
-							}else if(item.column === 'longitude'){
-								item.value = locationData.location.lng
-							} else if(item.column === 'latitude'){
-								item.value = locationData.location.lat
-							}
-							
-						})
+				
 			    })
 			
 			

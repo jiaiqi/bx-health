@@ -811,7 +811,6 @@ export default {
 							item.date = this.formateDate(item.timestamp * 1000);
 							return item;
 						});
-						console.log('stepList', this.deepClone(stepList));
 						this.stepInfoList = stepList;
 						let chartData = { categories: [], series: [{}] };
 						chartData.categories = stepList.map(item => item.date.slice(5));
@@ -823,7 +822,6 @@ export default {
 						chartData.series[0].data = stepList.map(item => item.step);
 						this.wxRunData = chartData;
 						this.stepEcData = this.buildEcData(this.wxRunData, '步', '步数');
-						// this.chartData = this.buildEcData(this.wxRunData, '步', '步数');
 						return stepList;
 					} else {
 						return false;
