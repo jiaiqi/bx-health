@@ -1,7 +1,7 @@
 <template>
 	<view class="health-archive-page-wrap">
 		<patients-info :customer_no="customer_no" v-if="current_tab == 0"></patients-info>
-		<person-chat :customer_no="customer_no" v-if="current_tab == 1"></person-chat>
+		<person-chat ref="chat" :customer_no="customer_no" v-if="current_tab == 1"></person-chat>
 		<view class="health-bottom">
 			<text @click="changeTab(index)" v-for="(item,index) in bottom_tab_data" :key="index" :class="current_tab==index?'active-text':''">{{item.name}}</text>
 		</view>
@@ -39,6 +39,15 @@ export default {
 			this.customer_no = option.customer_no;
 		}
 	},
+	onPullDownRefresh() {
+		// 下拉
+		setTimeout(() => {
+			if(this.current_tab == 1){
+				this.$refs.chat.getUserInfo(this.customer_no);
+			}
+			uni.stopPullDownRefresh();
+		}, 1000);
+	}
 };
 </script>
 

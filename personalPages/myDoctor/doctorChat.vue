@@ -1,6 +1,6 @@
 <template>
 	<view class="doctor-wrap">
-		<person-chat :customer_no="no" :doctor_no="doctor_no" pageType="patient"></person-chat>
+		<person-chat :customer_no="no" ref="chat" :doctor_no="doctor_no" pageType="patient"></person-chat>
 	</view>
 </template>
 
@@ -24,6 +24,13 @@
 			if(option.doctor){
 				this.doctor_no = option.doctor
 			}
+		},
+		onPullDownRefresh() {
+			// 下拉
+			setTimeout(() => {
+					this.$refs.chat.getUserInfo(this.no);
+				uni.stopPullDownRefresh();
+			}, 1000);
 		}
 	}
 </script>

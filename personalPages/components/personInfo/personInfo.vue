@@ -267,9 +267,9 @@ export default {
 		},
 		/*点击前往聊天列表**/
 		toChatList() {
-			uni.navigateTo({
-				url: '/personalPages/chat/chatList'
-			});
+			// uni.navigateTo({
+			// 	url: '/personalPages/chat/chatList'
+			// });
 		},
 		navPages(type = 'history') {
 			if (type === 'history') {
