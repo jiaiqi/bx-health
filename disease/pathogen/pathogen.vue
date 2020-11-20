@@ -2,7 +2,7 @@
 	<view class="pathogen-wrap">
 		<view class="uni-ec-canvas-bot">
 			<!-- #ifdef MP-WEIXIN -->
-				<uniEcCanvas @touchstart="test" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+				<uniEcCanvas @click-chart="test1" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
 			<!-- #endif -->
 			<!-- #ifdef H5 -->
 				<uniEcharts @click-chart="test" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
@@ -29,8 +29,9 @@
 						title: {
 						        text: '病因展示'
 						    },
-						    tooltip: {},
-							clickable :true,
+						    tooltip: {
+								show:false
+							},
 						    animationDurationUpdate: 1500,
 						    animationEasingUpdate: 'quinticInOut',
 						    series: [
@@ -160,12 +161,18 @@
 		},
 		
 		methods:{
-			test(e){
+			test1(e){
+				console.log("点击图表------------")
 				console.log("e------1212--",e)
-				debugger
-				// uni.navigateTo({
-				// 	url:'/disease/pathogen/pathogenDetail?detail=' + encodeURIComponent(JSON.stringify(e.data))
-				// })
+				if(e.data){
+					uni.navigateTo({
+						url:'/disease/pathogen/pathogenDetail?detail=' + encodeURIComponent(JSON.stringify(e.data))
+					})
+				}
+				
+			},
+			test(e){
+				
 			}
 		}
 	}

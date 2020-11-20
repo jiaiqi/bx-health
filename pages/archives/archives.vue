@@ -35,7 +35,7 @@
 				<view class="score-item">
 					<text class="label">近日健康分</text>
 					<text class="value  text-cyan">
-						64
+						{{ todayTotalScore ? todayTotalScore : 0 }}
 						<text class="ratio"></text>
 					</text>
 				</view>
@@ -59,7 +59,7 @@
 						饮食
 						<text class="ratio">[50%]</text>
 					</view>
-					<view class="data text-green">71</view>
+					<view class="data text-green">{{ dietScore ? dietScore : '0' }}</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item" @click="toPages('sport')">
@@ -67,7 +67,7 @@
 						运动
 						<text class="ratio">[20%]</text>
 					</view>
-					<view class="data text-red">20</view>
+					<view class="data text-red">{{ sportScore ? sportScore : 0 }}</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item" @click="toPages('weight')">
@@ -83,7 +83,7 @@
 						血压
 						<text class="ratio">[5%]</text>
 					</view>
-					<view class="data text-gray">0</view>
+					<view class="data text-gray">{{ BPScore ? BPScore : 0 }}</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item" @click="toPages('sleep')">
@@ -91,7 +91,7 @@
 						睡眠
 						<text class="ratio">[10%]</text>
 					</view>
-					<view class="data text-blue">85</view>
+					<view class="data text-blue">{{ sleepScore ? sleepScore : 0 }}</view>
 					<view class="action"></view>
 				</view>
 				<view class="grid-item">
@@ -99,8 +99,21 @@
 						症状
 						<text class="ratio">[10%]</text>
 					</view>
-					<view class="data text-orange">45</view>
+					<view class="data text-orange">10</view>
 					<view class="action"></view>
+				</view>
+			</view>
+		</view>
+		<view class="health-archive-item ">
+			<view class="subtitle">
+				<text class="title-text">检查报告</text>
+				<view class=""></view>
+			</view>
+			<view class="content inspection-report">
+				<view class="report-item" v-for="item in inspectReportRecord" :key="item.id" @click="toRecord(item)">
+					<view class="images"><image class="image" src="../../static/xuehzi.png" mode="scaleToFill"></image></view>
+					<view class="title">{{ item.name + item.examination_type }}记录</view>
+					<view class="date">{{ item.end_time.slice(0, 10) }}</view>
 				</view>
 			</view>
 		</view>
@@ -159,6 +172,7 @@
 </template>
 
 <script>
+import energyListWrap from '@/static/js/element_info.js';
 export default {
 	data() {
 		return {
@@ -169,26 +183,15 @@ export default {
 			userList: [],
 			userInfo: {},
 			loginUserInfo: {},
-			checkboxList: [
-				{
-					value: '备孕',
-					checked: false
-				},
-				{
-					value: '孕期',
-					checked: false
-				},
-				{
-					value: '哺乳期',
-					checked: false
-				},
-				{
-					value: '肥胖',
-					checked: false
-				}
-			],
+			checkboxList: [],
 			selectedTags: [],
-			checkedList: []
+			checkedList: [],
+			energyListWrap: energyListWrap,
+			dietScore: 0,
+			sportScore: 0,
+			sleepScore: 0,
+			BPScore: 0,
+			inspectReportRecord: []
 		};
 	},
 	computed: {
@@ -213,8 +216,9 @@ export default {
 				return age;
 			}
 		},
-		dietScore() {
-			return 0;
+		todayTotalScore() {
+			let result = this.dietScore + this.sportScore + this.weightScore + this.BPScore + this.sleepScore + 10;
+			return Number(result.toFixed(1));
 		},
 		weightScore() {
 			// 计算体重分数
@@ -240,33 +244,382 @@ export default {
 		}
 	},
 	methods: {
-		calcDietScore(){
-			// 满分 50
-			let result = 0
-			let bmi = this.bmi
-			// bmi 占10分
-			if(bmi>24&&bmi<=28){
-				// 超重 饮食热量需要比基础代谢低
-				
-			}else if(bmi>=18.5&&bmi<=24){
-				// 超重 饮食热量需要比基础代谢低
-				result +=10
-			}else if(bmi<18.5){
-				// 体重过轻 饮食热量需要比基础代谢高
-				
+		toRecord(item) {
+			// 跳转到血脂检查记录页面。
+			// fill_batch_no activity_no
+			if (item.activity_no && item.fill_batch_no) {
+				uni.navigateTo({
+					url: `/questionnaire/index/index?formType=detail&activity_no=${item.activity_no}&status=完成&fill_batch_no=${item.fill_batch_no}`
+				});
 			}
-			
 		},
-		calcSportScore(){
+		async selectInspectionReport() {
+			// 查询检查报告
+			let url = this.getServiceUrl('health', 'srvhealth_see_doctor_lab_examination_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_see_doctor_lab_examination_select',
+				colNames: ['*'],
+				condition: [{ colName: 'daq_survey_activity_no', ruleType: 'notnull', value: '' }]
+			};
+			let res = await this.$http.post(url, req);
+			if (this.requestSuccess(res)) {
+				let list = res.data.data;
+				if (res.data.data.length > 0) {
+					let no = list.map(item => item.daq_survey_activity_no).toString();
+					let result = await this.getQuestRecord(no);
+					if (result) {
+						this.inspectReportRecord = result.map(item => {
+							list.forEach(record => {
+								if (record.daq_survey_activity_no === item.activity_no) {
+									item.name = record.name;
+									item.attention = record.attention;
+									item.examination_type = record.examination_type;
+									item.content_desc = record.content_desc;
+									item.specimen = record.specimen;
+									item.ref_price = record.ref_price;
+								}
+							});
+							return item;
+						});
+					}
+				}
+			}
+		},
+		async getQuestRecord(no) {
+			let url = this.getServiceUrl('daq', 'srvdaq_record_reply_select', 'select');
+			let req = {
+				serviceName: 'srvdaq_record_reply_select',
+				colNames: ['*'],
+				condition: [
+					{ colName: 'activity_no', ruleType: 'in', value: no },
+					{ colName: 'state', ruleType: 'eq', value: '完成' },
+					{ colName: 'user_no', ruleType: 'eq', value: this.userInfo.userno }
+				]
+			};
+			let res = await this.$http.post(url, req);
+			if (this.requestSuccess(res)) {
+				let list = res.data.data;
+				if (res.data.data.length > 0) {
+					return res.data.data;
+				}
+			}
+		},
+		async calcDietScore() {
+			// 满分 50
+			let result = 0;
+			let bmi = this.bmi;
+			// bmi 占10分
+			// >28 及<10 都是0
+			if (bmi <= 28 && bmi >= 24) {
+				//0-5
+				result = (5 * (28 - bmi)) / 4;
+			} else if (bmi >= 21 && bmi < 24) {
+				//10-5
+				result = 10 - ((bmi - 21) * 5) / 3;
+			} else if (bmi >= 18.5 && bmi < 21) {
+				//5-10
+				result = 5 + (bmi - 18.5) * 2;
+			} else if (bmi < 18.5 && bmi >= 10) {
+				//5-0
+				result = (Math.abs(10 - bmi) * 5) / 8.5;
+			}
+			let energyInfo = await this.getDietRecord();
+			if (Array.isArray(energyInfo) && energyInfo.length > 0) {
+				energyInfo.forEach(ele => {
+					if (ele.key === 'protein') {
+						if (ele.EAR < ele.value && ele.value < ele.EAR * 2) {
+							result += 10;
+						} else if (ele.EAR > ele.value) {
+							result += (ele.value * 10) / ele.EAR;
+						}
+					} else {
+						if (ele.EAR < ele.value && ele.value < ele.EAR * 2) {
+							result += 2;
+						} else if (ele.EAR > ele.value) {
+							result += (ele.value * 2) / ele.EAR;
+						}
+					}
+				});
+			}
+			return Number(result.toFixed(1));
+		},
+		async calcSportScore() {
 			// 满分20
-			
+			let sportRecord = await this.getSportRecord();
+			if (Array.isArray(sportRecord)) {
+				let result = sportRecord.reduce((a, b) => a + b.amount * b.energy, 0);
+				if (result > 200) {
+					result = 200;
+				}
+				return (result * 20) / 200;
+			} else {
+				return 0;
+			}
 		},
-		calcSleepScore(){
+		async calcSleepScore() {
 			// 满分10分 睡觉时间：7小时以内每小时1分;11点前2分，12点1分
-			
+			let record = await this.getSleepRecord('sleep');
+			let result = 0;
+			if (record && record.id) {
+				let sleep_time = (new Date(record.getup_time) - new Date(record.retire_time)) / 1000; // 秒数
+				if (sleep_time > 25200) {
+					// 大于七小时;
+					result += 7;
+				} else {
+					result += Number((sleep_time / 3600).toFixed(1));
+				}
+				if (record.sleepy_daytime === '很少') {
+					result += 3;
+				} else if (record.sleepy_daytime === '从不') {
+					result += 2;
+				} else if (record.sleepy_daytime === '经常') {
+					result += 1;
+				} else if (record.sleepy_daytime === '严重') {
+					result += 0;
+				}
+			}
+			return result;
 		},
-		getDietRecord(){
+		async calcBPScore() {
+			let item = await this.getSleepRecord('bloodPressure');
+			let result = 0;
+			if (item.no) {
+				// diastolic_pressure
+				if (item.diastolic_pressure < 80) {
+					result += 2.5;
+				} else if (item.diastolic_pressure < 90 && item.diastolic_pressure >= 80) {
+					result += 1;
+				} else if (item.diastolic_pressure >= 90) {
+				}
+				if (item.systolic_pressure < 120) {
+					result += 2.5;
+				} else if (item.systolic_pressure >= 120 && item.systolic_pressure < 140) {
+					result += 1;
+				} else if (item.systolic_pressure >= 140) {
+				}
+			}
+			return result;
+		},
+		async getSleepRecord(type = 'sleep') {
+			let serviceObj = {
+				weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
+				bloodPressure: 'srvhealth_blood_pressure_record_select', // 血压
+				sleep: 'srvhealth_sleep_record_select' // 血压
+			};
+			let serviceName = serviceObj[type];
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: serviceName,
+				colNames: ['*'],
+				condition: [],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'desc' // asc升序  desc降序
+					}
+				],
+				page: {
+					pageNo: 1,
+					rownumber: 2
+				}
+			};
+			if (type === 'sleep') {
+				req.condition = [
+					{ colName: 'user_info_no', ruleType: 'like', value: this.userInfo.no },
+					{ colName: 'getup_time', ruleType: 'like', value: this.formateDate(new Date(), 'date').trim() }
+				];
+			} else if (type === 'bloodPressure') {
+				req.condition = [{ colName: 'create_user', ruleType: 'like', value: this.userInfo.userno }, { colName: 'name', ruleType: 'like', value: this.userInfo.name }];
+			}
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				return res.data.data[0];
+			}
+		},
+		async getSportRecord() {
+			// 运动记录
+			let url = this.getServiceUrl('health', 'srvhealth_body_activity_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_body_activity_record_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'userno',
+						ruleType: 'like',
+						value: this.loginUserInfo.user_no
+					},
+					{
+						colName: 'user_name',
+						ruleType: 'like',
+						value: this.userInfo.name
+					},
+					{
+						colName: 'hdate',
+						ruleType: 'like',
+						value: this.formateDate(new Date(), 'date').trim()
+					}
+				],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'desc'
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				return res.data.data;
+			}
+		},
+		async getDietRecord() {
 			// 查找饮食记录
+			let self = this;
+			let url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_diet_record_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'userno',
+						ruleType: 'like',
+						value: this.loginUserInfo.user_no
+					},
+					{
+						colName: 'user_name',
+						ruleType: 'like',
+						value: this.userInfo.name
+					},
+					{
+						colName: 'hdate',
+						ruleType: 'like',
+						value: this.formateDate(new Date(), 'date').trim()
+					}
+				],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'desc'
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			let dietRecord = [];
+			let foodType = [];
+			if (Array.isArray(res.data.data)) {
+				dietRecord = res.data.data;
+				if (Array.isArray(dietRecord) && dietRecord.length > 0) {
+					foodType = await this.getFoodsDetail(dietRecord);
+				}
+			}
+			let eleArr = [];
+			let energyListWrap = await this.getNutrientRecommended();
+			energyListWrap = this.energyListWrap.map(item => {
+				item.matterList = item.matterList.map(ele => {
+					energyListWrap.forEach(ene => {
+						if (ene.nutrient === ele.name || ene.nutrient.indexOf(ele.name) !== -1) {
+							ele.UL = ene.val_ul ? ene.val_ul : ele.UL;
+							ele.EAR = ene.val_rni ? ene.val_rni : ele.EAR;
+							if (item.title !== '水溶性维生素') {
+								ele.UL = ene.val_ul ? ene.val_ul : ele.UL;
+							} else {
+								ele.UL = 0;
+							}
+							if (ele.name === '蛋白') {
+								ele.EAR = ene.val_rni ? ene.val_rni * self.userInfo.weight : ene.val_ear ? ene.val_ear * self.userInfo.weight : ele.EAR * self.userInfo.weight;
+								ele.UL = 0;
+							}
+						} else {
+							if (ele.name === '脂肪') {
+								ele.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
+								ele.UL = 0;
+							}
+							if (ele.name === '碳水') {
+								ele.EAR = self.userInfo.weight * 4;
+								ele.UL = 0;
+							}
+						}
+					});
+					return ele;
+				});
+				return item;
+			});
+			energyListWrap.forEach(ele => {
+				eleArr = this.deepClone([...eleArr, ...ele.matterList]);
+			});
+			eleArr = eleArr.map(ele => {
+				dietRecord.forEach(diet => {
+					foodType.forEach(food => {
+						if (food.food_no === diet.diet_contents_no || food.meal_no === diet.mixed_food_no) {
+							let ratio = 1;
+							if (food['unit'] === 'g') {
+								ratio = (diet.unit_weight_g * diet.amount) / food.unit_amount;
+							}
+							ele.value = ele.value + food[ele['key']] * ratio;
+						}
+					});
+				});
+				return ele;
+			});
+			return eleArr;
+		},
+		async getNutrientRecommended() {
+			let self = this;
+			let url = this.getServiceUrl('health', 'srvhealth_nutrient_values_recommended_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_nutrient_values_recommended_select',
+				colNames: ['*'],
+				order: [
+					{
+						colName: 'nutrient',
+						orderType: 'desc' // asc升序  desc降序
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				let result = res.data.data.filter(item => {
+					if ((item.sex && item.sex.indexOf(self.userInfo.sex) !== -1) || !item.sex) {
+						if (item.age_start && item.age_end) {
+							return self.age >= item.age_start && self.age < item.age_end;
+						} else if (item.age_start && !item.age_end) {
+							return self.age >= item.age_start;
+						} else if (!item.age_start && !item.age_end) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				});
+				result.forEach(item => {
+					self.energyListWrap.forEach(energy => {
+						energy.matterList.forEach(mat => {
+							if (item.nutrient === mat.name || item.nutrient.indexOf(mat.name) !== -1) {
+								mat.UL = item.val_ul ? item.val_ul : mat.UL;
+								mat.EAR = item.val_rni ? item.val_rni : mat.EAR;
+								if (energy.title !== '水溶性维生素') {
+									mat.UL = item.val_ul ? item.val_ul : mat.UL;
+								} else {
+									mat.UL = 0;
+								}
+								if (mat.name === '蛋白') {
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.UL = 0;
+								}
+							} else {
+								if (mat.name === '脂肪') {
+									mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
+									mat.UL = 0;
+								}
+								if (mat.name === '碳水') {
+									mat.EAR = self.userInfo.weight * 4;
+									mat.UL = 0;
+								}
+							}
+						});
+					});
+				});
+				return result;
+			}
 		},
 		async getCheckboxList() {
 			let url = this.getServiceUrl('health', 'srvsys_service_columnex_v2_select', 'select');
@@ -533,6 +886,11 @@ export default {
 				this.loginUserInfo = userInfo;
 				await this.getCheckboxList();
 				await this.selectUserList();
+				this.dietScore = await this.calcDietScore();
+				this.sportScore = await this.calcSportScore();
+				this.sleepScore = await this.calcSleepScore();
+				this.BPScore = await this.calcBPScore();
+				this.selectInspectionReport();
 			}
 		},
 		toAddPage() {}
@@ -764,7 +1122,8 @@ export default {
 					content: '';
 					position: absolute;
 					left: 0;
-					height: 100%;
+					top: 10%;
+					height: 80%;
 					width: 5px;
 					background-color: #0081ff;
 					border-radius: 5rpx;
@@ -866,6 +1225,35 @@ export default {
 						.digit {
 							font-size: 60rpx;
 						}
+					}
+				}
+			}
+			&.inspection-report {
+				// 检查报告
+				width: 100%;
+				display: flex;
+				height: auto;
+				justify-content: flex-start;
+				.report-item {
+					width: calc(33% - 10rpx);
+					overflow: hidden;
+					margin: 10rpx 10rpx 0 0;
+					display: flex;
+					flex-direction: column;
+					box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+					border-radius: 20rpx;
+					padding-bottom: 20rpx;
+					.image {
+						width: 100%;
+						height: 200rpx;
+					}
+					.title {
+						text-indent: 10rpx;
+					}
+					.date {
+						font-size: 24rpx;
+						color: #999;
+						text-indent: 10rpx;
 					}
 				}
 			}

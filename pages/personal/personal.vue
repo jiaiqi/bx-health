@@ -1,9 +1,9 @@
 <template>
 	<view class="container">
 		<view class="container-top">
-			<view class="top-left"><image v-if="userInfo" :src="userInfo.headimgurl" mode=""></image></view>
+			<view class="top-left"><image v-if="userInfo" :src="getImagePath(userInfo.profile_url)" mode=""></image></view>
 			<view class="top-right">
-				<view v-if="userInfo" class="top-right-name">{{ userInfo.nickname }}</view>
+				<view v-if="userInfo" class="top-right-name">{{ userInfo.name }}</view>
 			</view>
 		</view>
 		<view class="container-cen">
@@ -15,12 +15,10 @@
 				</view>
 				<view class="container-cen-top-list">
 					<text class="cuIcon-comment text-green" style="font-size: 70rpx;"></text>
-					<!-- <image src="/otherPages/static/img/sm.png" mode=""></image> -->
 					<text>健康咨询</text>
 				</view>
 				<view class="container-cen-top-list" @click="toPages('pinggu')">
 					<text class="cuIcon-addressbook text-orange" style="font-size: 70rpx;"></text>
-					<!-- <image src="/otherPages/static/img/pg.png" mode=""></image> -->
 					<text>家庭成员</text>
 				</view>
 			</view>
@@ -29,14 +27,12 @@
 					<view @click="toPersonDetail('person')" class="cu-item arrow">
 						<view class="content">
 							<text class="cuIcon-news"></text>
-							<!-- <image src="/otherPages/static/img/zl.png" mode=""></image> -->
 							<text class="text-grey">基本信息</text>
 						</view>
 					</view>
 					<view @click="toPersonDetail('corp')" class="cu-item arrow">
 						<view class="content">
 							<text class="cuIcon-rank"></text>
-							<!-- <image src="/otherPages/static/img/st.png" mode=""></image> -->
 							<text class="text-grey">身体数据</text>
 						</view>
 					</view>
@@ -69,6 +65,7 @@ export default {
 	name: 'mine-info',
 	data() {
 		return {
+			wxUserInfo: '',
 			userInfo: '',
 			currentUser: null
 		};
@@ -90,16 +87,6 @@ export default {
 					uni.navigateTo({
 						url: '/publicPages/form/form?serviceName=srvhealth_doctor_add&type=add&cond='
 					});
-				// case 'pinggu':
-				// uni.navigateTo({
-				// 	url: '/otherPages/healthQuestionnaire/healthQuestionnaire'
-				// });
-				// break;
-				// case 'yundong':
-				// 	uni.navigateTo({
-				// 		url: '/otherPages/sportDetail/sportDetail?title=运动'
-				// 	});
-				// 	break;
 			}
 		},
 		toPersonDetail(type) {
@@ -125,17 +112,24 @@ export default {
 			}
 		}
 	},
-	created() {
+	async created() {
 		let userInfo = uni.getStorageSync('wxUserInfo');
-		this.userInfo = userInfo;
+		this.wxUserInfo = userInfo;
 		let userList = uni.getStorageSync('user_info_list');
-		let current_user = uni.getStorageSync('current_user');
-		if (userList && current_user) {
-			let currentUser = userList.filter(item => {
-				return item.name === current_user;
-			});
-			if (Array.isArray(currentUser) && currentUser.length > 0) this.currentUser = currentUser[0];
+		let current_user_info = uni.getStorageSync('current_user_info');
+		let currentUserInfo = await this.selectBasicUserList();
+		if (currentUserInfo) {
+			current_user_info = currentUserInfo;
 		}
+		if (current_user_info) {
+			this.userInfo = current_user_info;
+		}
+		// if (userList && current_user) {
+		// 	let currentUser = userList.filter(item => {
+		// 		return item.name === current_user;
+		// 	});
+		// 	if (Array.isArray(currentUser) && currentUser.length > 0) this.currentUser = currentUser[0];
+		// }
 		// this.initPage();
 	}
 };

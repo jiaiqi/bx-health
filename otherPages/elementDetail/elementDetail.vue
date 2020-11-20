@@ -4,6 +4,16 @@
 			<view class="element-name">
 				<text class="text">{{ elementData.label }}({{ elementData.units }})</text>
 			</view>
+			<view class="desc-box" v-if="elementData&&elementData.UL&&elementData.value>elementData.UL&&eleDetail&&eleDetail.excess_title">
+				 <view class="desc-detail" v-html="eleDetail.excess_title">
+					 <text class="cuIcon-creative"></text>
+				</view>
+			</view>
+			<view class="desc-box" v-if="elementData&&elementData.value<elementData.EAR&&eleDetail&&eleDetail.excess_title">
+				 <view class="desc-detail" v-html="eleDetail.excess_title">
+					 <text class="cuIcon-creative"></text>
+				</view>
+			</view>
 			<view class="ele-item-wrap" v-if="elementData.label !== '钠'">
 				<text class="ele-item-name">{{ elementData.name }}</text>
 				<view class="probar">
@@ -61,6 +71,11 @@
 				<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas" ref="canvasPie" canvas-id="canvasPie" :ec="ec"></uni-echarts>
 				<!-- #endif -->
 			</view>
+			<view class="desc-box" v-if="eleDetail&&eleDetail.desc">
+				 <view class="desc-detail" v-html="eleDetail.desc">
+					 <text class="cuIcon-creative"></text>
+				</view>
+			</view>
 			<view class="tips" v-if="elementData.name === 'VA'">
 				<text class="cuIcon-creative">
 					<text>维生素A有促进生长、繁殖，维持骨骼、上皮组织、视力和粘膜上皮正常分泌等多种生理功能，维生素A及其类似物有阻止癌前期病变的作用。</text>
@@ -106,6 +121,7 @@
 					<view class="column heat">{{ totalCalories }}千卡</view>
 				</view>
 			</view>
+		
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
 			<view class="cu-dialog current-diet-detail" v-if="currentDiet">
@@ -237,6 +253,7 @@ export default {
 				series: []
 			},
 			elementData: {},
+			eleDetail:{},
 			copyElementData: {},
 			user_no: '',
 			date: '',
@@ -774,6 +791,20 @@ export default {
 			this.ec = result;
 			return result;
 		},
+		async getElementDetail(){
+			let url = this.getServiceUrl('health', 'srvhealth_biochemical_substance_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_biochemical_substance_select',
+				colNames: ['*'],
+				condition: [
+					{ colName: 'name', ruleType: 'like', value: this.copyElementData.name }
+				]
+			};
+			let res  = await this.$http.post(url,req)
+			if(Array.isArray(res.data.data)&&res.data.data.length>0){
+				this.eleDetail = res.data.data[0]
+			}
+		},
 		// ListTouch触摸开始
 		ListTouchStart(e) {
 			this.listTouchStart = e.touches[0].pageX;
@@ -811,6 +842,7 @@ export default {
 					_self.elementData.value_left = JSON.parse(e.data).value_left;
 				}, 1000);
 				this.copyElementData = JSON.parse(e.data);
+				this.getElementDetail()
 			} catch (e) {
 				//TODO handle the exception
 			}
@@ -839,7 +871,17 @@ export default {
 			background: #f0f9eb;
 			border-color: #c2e7b0;
 		}
+		.desc-box{
+			padding: 20rpx;
+			display: flex;
+			color: #67c23a;
+			background: #f0f9eb;
+			border-color: #c2e7b0;
+			max-height: 200rpx;
+			overflow: scroll;
+		}
 	}
+
 	.qiun-charts {
 		width: 100%;
 		height: 500rpx;

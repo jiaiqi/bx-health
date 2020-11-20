@@ -282,19 +282,17 @@
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }">
 			<view class="cu-dialog current-diet-detail" v-if="currentRecord">
-				<view class="title-bar" v-if="currentRecord.hdate && currentRecord.htime">
-					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
+				<view class="title-bar">
+					<view class="date" v-if="currentRecord.hdate && currentRecord.htime">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
+					<view class="delete-icon" @click="deleteItem(currentRecord)">
+						<text class="text">删除记录</text>
+						<text class="cuIcon-delete"></text>
+					</view>
 				</view>
 				<view class="diet-info">
 					<view class="img"><image mode="aspectFill" class="img" :src="getDownloadPath(currentRecord)"></image></view>
 					<view class="info">
-						<view class="name">
-							{{ currentRecord.name }}
-							<view class="delete-icon" @click="deleteItem(currentRecord)">
-								<text class="text">删除记录</text>
-								<text class="cuIcon-delete"></text>
-							</view>
-						</view>
+						<view class="name">{{ currentRecord.name }}</view>
 						<view class="weight">
 							<text class="label margin-right-xs">热量:</text>
 							<text class="heat">
@@ -1163,7 +1161,7 @@ export default {
 			currentDiet = { ...foodInfo, ...currentDiet };
 			let currentRecord = this.deepClone(currentDiet);
 			Object.keys(currentRecord).forEach(key => {
-				if (typeof currentRecord[key] === 'string' && Number(currentRecord[key]) - currentRecord[key] === 0&&key!=='image') {
+				if (typeof currentRecord[key] === 'string' && Number(currentRecord[key]) - currentRecord[key] === 0 && key !== 'image') {
 					currentRecord[key] = Number(currentRecord[key]);
 				}
 			});
@@ -1445,7 +1443,7 @@ export default {
 			return unitList;
 		},
 		getDownloadPath(e) {
-			if( e['image'] ){
+			if (e['image']) {
 				return this.$api.downloadFile + e['image'] + '&bx_auth_ticket=' + this.bx_auth_ticket + '&thumbnailType=fwsu_100';
 			}
 		},
@@ -1490,28 +1488,28 @@ export default {
 				url: url
 			});
 		},
-		async getFoodList(diet) {
-			let foodNameList = diet.map(item => item.name);
-			let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_diet_contents_select',
-				colNames: ['*'],
-				condition: [{ colName: 'name', ruleType: 'in', value: foodNameList.toString() }]
-			};
-			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS') {
-				diet = diet.map(item => {
-					let obj = null;
-					res.data.data.map(food => {
-						if (food.name === item.name) {
-							obj = Object.assign(food, item);
-						}
-					});
-					return obj;
-				});
-				return diet;
-			}
-		},
+		// async getFoodList(diet) {
+		// 	let foodNameList = diet.map(item => item.name);
+		// 	let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
+		// 	let req = {
+		// 		serviceName: 'srvhealth_diet_contents_select',
+		// 		colNames: ['*'],
+		// 		condition: [{ colName: 'name', ruleType: 'in', value: foodNameList.toString() }]
+		// 	};
+		// 	let res = await this.$http.post(url, req);
+		// 	if (res.data.state === 'SUCCESS') {
+		// 		diet = diet.map(item => {
+		// 			let obj = null;
+		// 			res.data.data.map(food => {
+		// 				if (food.name === item.name) {
+		// 					obj = Object.assign(food, item);
+		// 				}
+		// 			});
+		// 			return obj;
+		// 		});
+		// 		return diet;
+		// 	}
+		// },
 		async buildChartData(e) {
 			let { energy, diet } = e;
 			let normalData = {
@@ -2129,21 +2127,20 @@ export default {
 			await this.getNutrientRecommended();
 			let res = await this.getDietRecord();
 			if (Array.isArray(res) && res.length > 0) {
-				let names = res.map(item => item.name);
 				let mixDietList = res.filter(item => item.diret_type === 'mixed_food');
 				let basicDietList = res.filter(item => item.diret_type === 'diet_contents');
 				let condition1 = [
 					{
-						colName: 'name',
+						colName: 'meal_no',
 						ruleType: 'in',
-						value: mixDietList.map(item => item.name).toString()
+						value: mixDietList.map(item => item.mixed_food_no).toString()
 					}
 				];
 				let condition2 = [
 					{
-						colName: 'name',
+						colName: 'food_no',
 						ruleType: 'in',
-						value: basicDietList.map(item => item.name).toString()
+						value: basicDietList.map(item => item.diet_contents_no).toString()
 					}
 				];
 				let mix = await this.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
@@ -2227,21 +2224,20 @@ export default {
 		async getChooseFood(str) {
 			let dietRecord = this.dietRecord;
 			if (Array.isArray(dietRecord) && dietRecord.length > 0) {
-				let names = dietRecord.map(item => item.name);
 				let mixDietList = dietRecord.filter(item => item.diret_type === 'mixed_food');
 				let basicDietList = dietRecord.filter(item => item.diret_type === 'diet_contents');
 				let condition1 = [
 					{
-						colName: 'name',
+						colName: 'meal_no',
 						ruleType: 'in',
-						value: mixDietList.map(item => item.name).toString()
+						value: mixDietList.map(item => item.mixed_food_no).toString()
 					}
 				];
 				let condition2 = [
 					{
-						colName: 'name',
+						colName: 'food_no',
 						ruleType: 'in',
-						value: basicDietList.map(item => item.name).toString()
+						value: basicDietList.map(item => item.diet_contents_no).toString()
 					}
 				];
 				let mix = await this.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
@@ -2280,6 +2276,7 @@ export default {
 				if (Array.isArray(a) && a.length > 0) {
 					a.forEach(food => {
 						data.forEach(re => {
+							// food.food_no === re.diet_contents_no ||re.mixed_food_no
 							if (food.name === re.name) {
 								food.id = re.id;
 								let currentDiet = this.deepClone(this.currentRecord);
@@ -2544,29 +2541,29 @@ export default {
 			}
 			return res.data.data;
 		},
-		async getFoodType(cond, serv) {
-			// 食物类型
-			let serviceName = 'srvhealth_diet_contents_select';
-			if (serv) {
-				serviceName = serv;
-			}
-			let url = this.getServiceUrl('health', serviceName, 'select');
-			let req = {
-				serviceName: serviceName,
-				colNames: ['*'],
-				condition: [],
-				order: []
-			};
-			if (cond) {
-				req.condition = cond;
-			}
-			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && res.data.data.length > 0 && !serv) {
-				console.log(res.data.data);
-				// this.foodType = res.data.data;
-			}
-			return res.data.data ? res.data.data : [];
-		},
+		// async getFoodType(cond, serv) {
+		// 	// 食物类型
+		// 	let serviceName = 'srvhealth_diet_contents_select';
+		// 	if (serv) {
+		// 		serviceName = serv;
+		// 	}
+		// 	let url = this.getServiceUrl('health', serviceName, 'select');
+		// 	let req = {
+		// 		serviceName: serviceName,
+		// 		colNames: ['*'],
+		// 		condition: [],
+		// 		order: []
+		// 	};
+		// 	if (cond) {
+		// 		req.condition = cond;
+		// 	}
+		// 	let res = await this.$http.post(url, req);
+		// 	if (res.data.state === 'SUCCESS' && res.data.data.length > 0 && !serv) {
+		// 		console.log(res.data.data);
+		// 		// this.foodType = res.data.data;
+		// 	}
+		// 	return res.data.data ? res.data.data : [];
+		// },
 		async getSportType(cond) {
 			// 运动类型
 			let url = this.getServiceUrl('health', 'srvhealth_body_activity_contents_select', 'select');
@@ -3832,6 +3829,7 @@ uni-checkbox::before {
 		min-height: 80rpx;
 		align-items: center;
 		background-color: #fff;
+		position: relative;
 		.date {
 			font-size: 28rpx;
 			font-weight: bold;
@@ -3840,6 +3838,35 @@ uni-checkbox::before {
 			padding: 030rpx;
 			color: #0081ff;
 			font-size: 28rpx;
+		}
+		.delete-icon {
+			position: absolute;
+			right: 0;
+			padding: 10rpx 20rpx;
+			background-color: #fff;
+			font-size: 24rpx;
+			border-radius: 60rpx;
+			text-align: center;
+			transition: all 0.5s;
+			color: #0081ff;
+			&:active {
+				background-color: #0081ff;
+				color: #fff;
+				transform: scale(1.1);
+				box-shadow: 0 0 10px #6eb4ff;
+			}
+			// border: 1rpx solid #e54d42;
+			// color: #f56c6c;
+			// background: #fef0f0;
+			// border-color: #fbc4c4;
+			// &:active {
+			// 	background-color: #e54d42;
+			// 	color: #fff;
+			// 	transform: scale(1.1);
+			// 	box-shadow: 0 0 10px #e54d42;
+			// }
+			.text {
+			}
 		}
 	}
 	.diet-info {
@@ -3859,43 +3886,18 @@ uni-checkbox::before {
 			padding-left: 50rpx;
 			display: flex;
 			flex-direction: column;
-			.delete-icon {
-				padding: 10rpx 20rpx;
-				background-color: #fff;
-				font-size: 24rpx;
-				border-radius: 60rpx;
-				text-align: center;
-				transition: all 0.5s;
-				border: 1rpx solid #e54d42;
-				color: #f56c6c;
-				background: #fef0f0;
-				border-color: #fbc4c4;
-				&:active {
-					background-color: #e54d42;
-					color: #fff;
-					transform: scale(1.1);
-					box-shadow: 0 0 10px #e54d42;
-				}
-				.text {
-				}
-			}
-			.cuIcon-delete {
-				display: inline-block;
-				text-align: center;
-				border-radius: 100%;
-			}
 			.name {
 				font-weight: 700;
+				max-width: 400rpx;
 				font-size: 16px;
 				display: flex;
-				justify-content: space-between;
+				flex-wrap: wrap;
 			}
 			.element {
 				color: #8dc63f;
 			}
 			.weight {
 				padding: 10rpx 0;
-				// color: #999;
 				color: #ffb347;
 				.heat {
 					color: #ffb347;

@@ -1256,12 +1256,14 @@ export default {
 					return current_user_info
 				} else if (res.data.resultCode === '0011') {
 					// 登录失效 进行静默登录
+					// #ifdef MP-WEIXIN
 					const result = await wx.login();
 					if (result.code) {
 						await Vue.prototype.wxLogin({
 							code: result.code
 						});
 					}
+					// #endif
 				} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 					// 没有角色 提示跳转到创建角色页面
 					uni.showModal({
@@ -1284,7 +1286,72 @@ export default {
 						}
 					});
 				}
+			} else {
+				// 没有user_no 跳转到登录页面
+				// #ifdef MP-WEIXIN
+				const result = await wx.login();
+				if (result.code) {
+					await Vue.prototype.wxLogin({
+						code: result.code
+					});
+				}
+				// #endif
+				// #ifdef H5
+				uni.navigateTo({
+					url: '/publicPages/accountExec/accountExec'
+				});
+				// #endif
+
 			}
 		}
+		Vue.prototype.getFoodsDetail = async (dietRecord) => {
+			// 根据饮食记录得到食物编号查找食物详细数据
+			if (Array.isArray(dietRecord) && dietRecord.length > 0) {
+				let mixDietList = dietRecord.filter(item => item.diret_type === 'mixed_food');
+				let basicDietList = dietRecord.filter(item => item.diret_type === 'diet_contents');
+				let condition1 = [{
+					colName: 'meal_no',
+					ruleType: 'in',
+					value: mixDietList.map(item => item.mixed_food_no).toString()
+				}];
+				let condition2 = [{
+					colName: 'food_no',
+					ruleType: 'in',
+					value: basicDietList.map(item => item.diet_contents_no).toString()
+				}];
+				let mix = await Vue.prototype.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
+				let basic = await Vue.prototype.getFoodType(condition2);
+				let foodType = [...mix, ...basic];
+				return foodType;
+			}
+		}
+		Vue.prototype.getFoodType = async (cond, serv) => {
+			// 食物类型
+			let serviceName = 'srvhealth_diet_contents_select';
+			if (serv) {
+				serviceName = serv;
+			}
+			let url = Vue.prototype.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: serviceName,
+				colNames: ['*'],
+				condition: [],
+				order: []
+			};
+			if (cond) {
+				req.condition = cond;
+			}
+			let res = await Vue.prototype.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && res.data.data.length > 0 && !serv) {
+				console.log(res.data.data);
+			}
+			return res.data.data ? res.data.data : [];
+		}
+		Vue.prototype.getImagePath = (no) => {
+			return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+		}
+		Vue.prototype.requestSuccess = (res)=>{
+			return res.data.state==='SUCCESS'&&Array.isArray(res.data.data)
+		}  
 	}
 }

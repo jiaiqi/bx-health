@@ -11,7 +11,7 @@
 		></bxform>
 		<view class="button-box">
 			<view v-for="(item, index) in buttons" :key="index">
-				<button v-if="item.display !== false" @click="onclick(item)" class="cu-btn bg-blue">{{ item.button_name }}</button>
+				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue">{{ item.button_name }}</button>
 			</view>
 		</view>
 	</view>

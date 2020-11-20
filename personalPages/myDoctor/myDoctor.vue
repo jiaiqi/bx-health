@@ -22,6 +22,7 @@ export default {
 		return {
 			userInfo: {},
 			docInfo: {},
+			qrcodeParams: '',
 			doctorList: []
 		};
 	},
@@ -29,7 +30,7 @@ export default {
 		getPicPath(no) {
 			return this.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 		},
-		getBindDoctor() {
+		async getBindDoctor() {
 			// 查找医生信息
 			let url = this.getServiceUrl('health', 'srvhealth_patient_doctor_select', 'select');
 			let req = {
@@ -39,14 +40,16 @@ export default {
 				page: { pageNo: 1, rownumber: 10 },
 				order: []
 			};
-			this.$http.post(url, req).then(res => {
-				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
-					this.doctorList = res.data.data;
-					let noList = res.data.data.map(item => item.manager_no);
-					let noStr = noList.toString();
-					this.getDoctorInfo(noStr, true);
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
+				// this.doctorList = res.data.data;
+				let noList = res.data.data.map(item => item.manager_no);
+				let noStr = noList.toString();
+				let doctorList = await this.getDoctorInfo(noStr, true);
+				if (Array.isArray(doctorList)) {
+					this.doctorList = doctorList;
 				}
-			});
+			}
 		},
 		toScan() {
 			// 调起客户端扫码功能,允许从相机和相册扫码
@@ -57,38 +60,13 @@ export default {
 					console.log('条码类型：' + res.scanType);
 					console.log('条码内容：' + res.result);
 					if (res.result && res.result.indexOf('DT') !== -1) {
-						let hasBind = false;
-						let doctorList = self.deepClone(self.doctorList);
-						if (Array.isArray(doctorList) && doctorList.length > 0) {
-							doctorList.forEach(item => {
-								if (item.dt_no === res.result) {
-									hasBind = true;
-								}
-							});
-						}
-						if (hasBind) {
-							// 已绑定此医生
-							uni.showModal({
-								title: '提示',
-								content: '已绑定此医生,请不要重复绑定',
-								showCancel: false,
-								confirmText: '知道了'
-							});
+						// 进行绑定
+						if (res.result.indexOf('https://wx2.100xsys.cn/mpwc/' !== -1)) {
+							let result = res.result.split('https://wx2.100xsys.cn/mpwc/')[1];
+							self.qrcodeParams = result;
+							self.toBindDoctor(result);
 						} else {
-							// 进行绑定
-							self.getDoctorInfo(res.result).then(docInfo => {
-								self.docInfo = docInfo;
-								uni.showModal({
-									title: '提示',
-									content: '确认是否绑定' + docInfo.dt_name + '为您的医生',
-									confirmText: '绑定',
-									success(res) {
-										if (res.confirm) {
-											self.bindDoctor(docInfo);
-										}
-									}
-								});
-							});
+							self.toBindDoctor(res.result);
 						}
 					}
 				}
@@ -119,6 +97,47 @@ export default {
 				});
 			}
 		},
+		toBindDoctor(dtno) {
+			let self = this;
+			let hasBind = false;
+			let doctorList = self.deepClone(self.doctorList);
+			if (Array.isArray(doctorList) && doctorList.length > 0) {
+				doctorList.forEach(item => {
+					if (item.dt_no === dtno) {
+						hasBind = true;
+					}
+				});
+			}
+			if (hasBind) {
+				// 已绑定此医生
+				uni.showModal({
+					title: '提示',
+					content: '已绑定此医生,请不要重复绑定',
+					showCancel: false,
+					confirmText: '知道了'
+				});
+			} else {
+				this.getDoctorInfo(dtno).then(docInfo => {
+					if (docInfo && docInfo.dt_no) {
+						uni.showModal({
+							title: '提示',
+							content: '确认是否绑定' + docInfo.dt_name + '为您的医生',
+							confirmText: '绑定',
+							success(res) {
+								if (res.confirm) {
+									self.bindDoctor(docInfo);
+								}
+							}
+						});
+					} else {
+						uni.showModal({
+							title: '提示',
+							content: JSON.stringify(docInfo)
+						});
+					}
+				});
+			}
+		},
 		async getDoctorInfo(no, isSelf) {
 			// 查找医生信息
 			let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
@@ -139,11 +158,25 @@ export default {
 			}
 		}
 	},
-	onLoad() {
+	async onLoad(options) {
 		let userInfo = uni.getStorageSync('current_user_info');
+		let current_user_info = await this.selectBasicUserList();
+		if (current_user_info && current_user_info.userno) {
+			userInfo = current_user_info;
+		}
+		let self = this;
 		if (userInfo) {
 			this.userInfo = userInfo;
-			this.getBindDoctor();
+			this.getBindDoctor().then(_ => {
+				if (options.q) {
+					let text = decodeURIComponent(options.q);
+					if (text.indexOf('https://wx2.100xsys.cn/mpwc/' !== -1)) {
+						let result = text.split('https://wx2.100xsys.cn/mpwc/')[1];
+						self.qrcodeParams = result;
+						self.toBindDoctor(result);
+					}
+				}
+			});
 		} else {
 			uni.showToast({
 				title: '未发现用户信息',
@@ -157,6 +190,7 @@ export default {
 	},
 	onPullDownRefresh() {
 		// 下拉
+		this.getBindDoctor();
 		setTimeout(() => {
 			uni.stopPullDownRefresh();
 		}, 1000);

@@ -1,6 +1,7 @@
 <template>
 	<view class="pathogen-detail-wrap">
-		<text>{{query.name}}</text>
+		<text v-if="query">{{query.name}}</text>
+		<!-- <text>详情</text>s -->
 	</view>
 </template>
 
@@ -9,13 +10,15 @@
 		name:'pathogenDetail',
 		data(){
 			return {
-				detailObj:''
+				detailObj:'',
+				query:''
 			}
 		},
 		onLoad(option) {
+			
 			let query = JSON.parse(decodeURIComponent(option.detail))
 			this.query = query
-			console.log("option=====>",query)
+			console.log("option=====>",option.detail)
 		}
 	}
 </script>

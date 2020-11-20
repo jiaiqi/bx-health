@@ -8,14 +8,7 @@
 				</view>
 			</view>
 			<view class="qr-code" v-if="doctoreInfo && doctoreInfo.dt_no">
-				<uni-qrcode
-					cid="qrcodeCanvas"
-					:text="doctoreInfo.dt_no"
-					:size="size"
-					foregroundColor="#333"
-					makeOnLoad
-					@makeComplete="qrcodeCanvasComplete"
-				></uni-qrcode>
+				<uni-qrcode cid="qrcodeCanvas" :text="doctoreInfo.dt_no" :size="size" foregroundColor="#333" makeOnLoad @makeComplete="qrcodeCanvasComplete"></uni-qrcode>
 			</view>
 			<view class="tips">扫描上方二维码关注当前医生</view>
 		</view>
@@ -64,10 +57,15 @@ export default {
 	},
 	async onLoad() {
 		let userInfo = uni.getStorageSync('current_user_info');
+		let current_user_info = await this.selectBasicUserList();
+		if (current_user_info && current_user_info.userno) {
+			userInfo = current_user_info;
+		}
 		if (userInfo) {
 			this.userInfo = userInfo;
 			let docInfo = await this.getDoctorInfo();
-			if (docInfo) {
+			if (docInfo && docInfo.dt_no) {
+				docInfo.dt_no = `https://wx2.100xsys.cn/mpwc/${docInfo.dt_no}`;
 				this.doctoreInfo = docInfo;
 			}
 		} else {

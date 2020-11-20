@@ -19,20 +19,36 @@ let FormateDate = function(date) {
 	};
 	return o.yy + '-' + o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm + ':' + o.ss;
 };
+let ignoreServiceName = (url) => {
+	let ignoreUrlList = [
+		"srvsys_service_columnex_v2_select",
+		"srvfile_attachment_select",
+		"srvdaq_page_item_buttons_select",
+		"srvdaq_record_reply_select",
+		"srvhealth_diet_record_select",
+		"srvhealth_diet_contents_select",
+		"srvhealth_mixed_food_nutrition_contents_select",
+		"srvhealth_nutrient_values_recommended_select",
+		"srvhealth_body_activity_record_select",
+		"srvhealth_sleep_record_select"
+	]
+	let result = true
+	ignoreUrlList.forEach(srv => {
+		if (url.indexOf(srv) !== -1) {
+			result = false
+		}
+	})
+	return result
+}
 //添加请求拦截器
 fly.interceptors.request.use((request) => {
 	//给所有请求添加自定义header
 	console.log("request: ", request)
-	let ignoreUrlList = [
-		"srvfile_attachment_select",
-		"srvdaq_page_item_buttons_select"
-	]
 	// if (!ignoreUrlList.includes(request.url)) {
-	if (request.url.indexOf('srvfile_attachment_select') === -1 && request.url.indexOf('srvdaq_page_item_buttons_select') ===
-		-1&&request.url.indexOf('srvdaq_record_reply_select')===-1) {
+	if (ignoreServiceName(request.url)) {
 		uni.showLoading({
 			// mask: true
-			title:'加载中...'
+			title: '加载中...'
 		})
 	}
 	// 如果是浏览器运行的记录 请求的页面path和参数
