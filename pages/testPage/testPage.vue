@@ -223,7 +223,7 @@ export default {
 			];
 			let option = {
 				title: {
-					text: '关系图'
+					text: this.currentNodes
 				},
 				legend: [
 					{
