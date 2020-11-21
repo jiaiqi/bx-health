@@ -125,14 +125,14 @@ export default {
 							name: item.target_name,
 							nodeNo:item.target_node_no,
 							category: 1,
-							label: `${item.path_name} (${item.path_value ? item.path_value : '0'})`
+							label: `${item.path_name?item.path_name:''} (${item.path_value ? item.path_value : '0'})`
 						});
 					} else {
 						nodes.push({
 							name: item.target_name,
 							nodeNo:item.target_node_no,
 							category: 2,
-							label: `${item.path_name} (${item.path_value ? item.path_value : '0'})`
+							label: `${item.path_name?item.path_name:''} (${item.path_value ? item.path_value : '0'})`
 						});
 					}
 					nameArr.push(item.target_name);
@@ -146,18 +146,18 @@ export default {
 						target_node_no: item.target_node_no,
 						source_node_no: item.source_node_no,
 						category: 0,
-						label: `${item.path_name} (${item.path_value ? item.path_value : '0'})`
+						label: `${item.path_name?item.path_name:''} (${item.path_value ? item.path_value : '0'})`
 					});
 					nameArr.push(item.source_name);
 				}
 			});
 			let links = data.map(item => {
 				return {
-					value: `${item.path_name} (${item.path_value ? item.path_value : '0'})`,
+					value: `${item.path_name?item.path_name:''} (${item.path_value ? item.path_value : '0'})`,
 					label: { show: true },
 					source: item.source_name,
 					target: item.target_name,
-					name: `${item.path_name} (${item.path_value ? item.path_value : '0'})`
+					name: `${item.path_name?item.path_name:''} (${item.path_value ? item.path_value : '0'})`
 				};
 			});
 			const color1 = '#006acc';
