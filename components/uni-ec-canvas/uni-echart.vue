@@ -1,9 +1,9 @@
 <template>
 	<!-- #ifdef H5 -->
-	<uni-echarts class="uni-ec-canvas" :ec="ec" :canvasId="canvasId" v-if="clientEnv === 'web'"></uni-echarts>
+	<uni-echarts class="uni-ec-canvas" :ec="ec" :canvasId="canvasId" v-if="clientEnv === 'web'" @click-chart="clickChart"></uni-echarts>
 	<!-- #endif -->
 	<!-- #ifdef MP-WEIXIN -->
-	<uni-ec-canvas class="uni-ec-canvas" :ec="ec" :canvasId="canvasId" v-else-if="clientEnv === 'wxmp'"></uni-ec-canvas>
+	<uni-ec-canvas class="uni-ec-canvas" :ec="ec" :canvasId="canvasId" v-else-if="clientEnv === 'wxmp'"  @click-chart="clickChart"></uni-ec-canvas>
 	<!-- #endif -->
 </template>
 
@@ -45,7 +45,12 @@ export default {
 			deep: true,
 			handler(val, oldVal) {}
 		}
-	}
+	},
+	methods: {
+		clickChart(e) {
+			this.$emit('click-chart',e)
+		}
+	},
 };
 </script>
 

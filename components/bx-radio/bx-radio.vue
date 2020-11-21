@@ -1,7 +1,8 @@
 <template>
 	<view class="bx-radio" :style="[radioStyle]">
-		<view class="bx-radio-icon" :class="{checked:name===parentData.value}" @tap="toggle">
+		<view class="bx-radio-icon" :class="{checked:name===parentData.value,'has-char':serialChar,'no-char':!serialChar}" @tap="toggle">
 			<text v-if="serialChar">{{serialChar}}</text>
+			<text v-if="!serialChar&&name===parentData.value" class="bx-radio-checked"></text>
 		</view>
 		<view
 			class="bx-radio__label"
@@ -15,8 +16,7 @@
 <script>
 /**
  * radio 单选框
- * @description 单选框用于有一个选择，用户只能选择其中一个的场景。搭配u-radio-group使用
- * @tutorial https://www.uviewui.com/components/radio.html
+ * @description 单选框用于有一个选择，用户只能选择其中一个的场景。搭配bx-radio-group使用
  * @property {String Number} icon-size 图标大小，单位rpx（默认24）
  * @property {String Number} label-size label字体大小，单位rpx（默认28）
  * @property {String Number} name radio组件的标示符
@@ -25,7 +25,7 @@
  * @property {Boolean} label-disabled 点击文本是否可以操作radio（默认true）
  * @property {String} active-color 选中时的颜色，如设置parent的active-color将失效
  * @event {Function} change 某个radio状态发生变化时触发(选中状态)
- * @example <u-radio :label-disabled="false">门掩黄昏，无计留春住</u-radio>
+ * @example <bx-radio :label-disabled="false"></bx-radio>
  */
 export default {
 	name: 'bx-radio',
@@ -90,7 +90,7 @@ export default {
 		};
 	},
 	computed: {
-		// 是否禁用，如果父组件u-raios-group禁用的话，将会忽略子组件的配置
+		// 是否禁用，如果父组件bx-raios-group禁用的话，将会忽略子组件的配置
 		elDisabled() {
 			return this.disabled !== '' ? this.disabled : this.parentData.disabled !== null ? this.parentData.disabled : false;
 		},
@@ -113,29 +113,6 @@ export default {
 		// 组件的形状
 		elShape() {
 			return this.shape ? this.shape : this.parentData.shape ? this.parentData.shape : 'circle';
-		},
-		// 设置radio的状态，要求radio的name等于parent的value时才为选中状态
-		iconStyle() {
-			let style = {};
-			if (this.elActiveColor && this.parentData.value == this.name && !this.elDisabled) {
-				style.borderColor = this.elActiveColor;
-				style.backgroundColor = this.elActiveColor;
-			}
-			style.width = this.$u.addUnit(this.elSize);
-			style.height = this.$u.addUnit(this.elSize);
-			return style;
-		},
-		iconColor() {
-			return this.name == this.parentData.value ? '#ffffff' : 'transparent';
-		},
-		iconClass() {
-			let classes = [];
-			classes.push('u-radio__icon-wrap--' + this.elShape);
-			if (this.name == this.parentData.value) classes.push('u-radio__icon-wrap--checked');
-			if (this.elDisabled) classes.push('u-radio__icon-wrap--disabled');
-			if (this.name == this.parentData.value && this.elDisabled) classes.push('u-radio__icon-wrap--disabled--checked');
-			// 支付宝小程序无法动态绑定一个数组类名，否则解析出来的结果会带有","，而导致失效
-			return classes.join(' ');
 		},
 		radioStyle() {
 			let style = {};
@@ -210,12 +187,12 @@ export default {
 			}
 		},
 		emitEvent() {
-			// u-radio的name不等于父组件的v-model的值时(意味着未选中)，才发出事件，避免多次点击触发事件
+			// bx-radio的name不等于父组件的v-model的值时(意味着未选中)，才发出事件，避免多次点击触发事件
 			if (this.parentData.value != this.name) this.$emit('change', this.name);
 		},
 		// 改变组件选中状态
-		// 这里的改变的依据是，更改本组件的parentData.value值为本组件的name值，同时通过父组件遍历所有u-radio实例
-		// 将本组件外的其他u-radio的parentData.value都设置为空(由computed计算后，都被取消选中状态)，因而只剩下一个为选中状态
+		// 这里的改变的依据是，更改本组件的parentData.value值为本组件的name值，同时通过父组件遍历所有bx-radio实例
+		// 将本组件外的其他bx-radio的parentData.value都设置为空(由computed计算后，都被取消选中状态)，因而只剩下一个为选中状态
 		setRadioCheckedStatus() {
 			this.emitEvent();
 			if (this.parent) {
@@ -231,21 +208,36 @@ export default {
 .bx-radio {
 	display: flex;
 	align-items: center;
-	padding: 10rpx 20rpx;
+	padding: 10rpx;
+	min-width: 50%;
 }
 .bx-radio-icon {
-	width: 50rpx;
-	height: 50rpx;
-	line-height: 50rpx;
-	text-align: center;
+	width: 40rpx;
+	height: 40rpx;
 	border-radius: 60rpx;
-	border: 1rpx solid #999;
-	color: #999;
+	border: 2rpx solid #888;
+	color: #888;
 	margin-right: 20rpx;
-	&.checked {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 24rpx;
+	&.checked.has-char {
 		border: none;
 		background-color: #007aff;
 		color: #fff;
 	}
+	&.checked.no-char{
+		border-color: #007aff;
+		border-width: 4rpx;
+		.bx-radio-checked{
+			display: inline-block;
+			width: 12rpx;
+			height: 12rpx;
+			border-radius: 12rpx;
+			background-color: #007aff;
+		}
+	}
+	
 }
 </style>

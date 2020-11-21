@@ -22,8 +22,8 @@
 				<view class="score-item" @click="toPages('score-compose')">
 					<text class="label">整体健康分</text>
 					<text class="value text-blue" v-if="healthTotalScore || healthTotalScore === 0">
-						<text class="int" v-if="totalScore&&totalScore.number">{{ totalScore.number }}</text>
-						<text class="float" v-if="totalScore&&totalScore.digit">.{{ totalScore.digit }}</text>
+						<text class="int" v-if="totalScore && totalScore.number">{{ totalScore.number }}</text>
+						<text class="float" v-if="totalScore && totalScore.digit">.{{ totalScore.digit }}</text>
 					</text>
 					<text class="valuetip text-blue" v-else>
 						<text class="cuIcon-all"></text>
@@ -38,8 +38,8 @@
 				<view class="score-item">
 					<text class="label">近日健康分</text>
 					<text class="value  text-cyan">
-						<text class="int" v-if="todayScore&&todayScore.number">{{ todayScore.number }}</text>
-						<text class="float" v-if="todayScore&&todayScore.digit">.{{ todayScore.digit }}</text>
+						<text class="int" v-if="todayScore && todayScore.number">{{ todayScore.number }}</text>
+						<text class="float" v-if="todayScore && todayScore.digit">.{{ todayScore.digit }}</text>
 						<!-- <text class="ratio"></text> -->
 					</text>
 				</view>
@@ -128,7 +128,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="health-archive-item ">
+		<view class="health-archive-item " >
 			<view class="subtitle">
 				<text class="title-text">疾病风险提示</text>
 				<view class=""></view>
@@ -264,6 +264,11 @@ export default {
 							digit: arr[1]
 						};
 					}
+				} else {
+					return {
+						number: this.healthTotalScore,
+						digit: 0
+					};
 				}
 			}
 		},
@@ -280,6 +285,11 @@ export default {
 							digit: arr[1]
 						};
 					}
+				} else {
+					return {
+						number: this.todayTotalScore,
+						digit: 0
+					};
 				}
 			}
 		},
@@ -811,6 +821,9 @@ export default {
 					break;
 				case 'score-compose':
 					url = '/archivesPages/healthCompose/healthCompose';
+					break;
+				case 'test':
+					url = '/pages/testPage/testPage';
 					break;
 			}
 			if (!url) {

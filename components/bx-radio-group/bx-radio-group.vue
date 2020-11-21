@@ -60,7 +60,7 @@ export default {
 			type: [String, Number],
 			default: 20
 		},
-		// 每个checkbox占u-checkbox-group的宽度
+		// 每个checkbox占bx-checkbox-group的宽度
 		width: {
 			type: [String, Number],
 			default: 'auto'
@@ -79,8 +79,8 @@ export default {
 		this.children = [];
 	},
 	computed: {
-		// 这里computed的变量，都是子组件u-radio需要用到的，由于头条小程序的兼容性差异，子组件无法实时监听父组件参数的变化
-		// 所以需要手动通知子组件，这里返回一个parentData变量，供watch监听，在其中去通知每一个子组件重新从父组件(u-radio-group)
+		// 这里computed的变量，都是子组件bx-radio需要用到的，由于头条小程序的兼容性差异，子组件无法实时监听父组件参数的变化
+		// 所以需要手动通知子组件，这里返回一个parentData变量，供watch监听，在其中去通知每一个子组件重新从父组件(bx-radio-group)
 		// 拉取父组件新的变化后的参数
 		parentData() {
 			return [this.value, this.disabled, this.activeColor, this.size, this.labelDisabled, this.shape, this.iconSize, this.width, this.wrap];
@@ -90,7 +90,7 @@ export default {
 		// 该方法有子组件radio调用，当一个radio被选中的时候，给父组件设置value值(props传递的value)
 		setValue(val) {
 			// 通过子组件传递过来的val值(此被选中的子组件内部已将parentValue设置等于val的值)，将其他
-			// u-radio设置未选中的状态
+			// bx-radio设置未选中的状态
 			this.children.map(child => {
 				if (child.parentData.value != val) child.parentData.value = '';
 			});
@@ -100,7 +100,7 @@ export default {
 			// 等待下一个周期再执行，因为this.$emit('input')作用于父组件，再反馈到子组件内部，需要时间
 			// 由于头条小程序执行迟钝，故需要用几十毫秒的延时
 			setTimeout(() => {
-				// 将当前的值发送到 u-form-item 进行校验
+				// 将当前的值发送到 bx-form-item 进行校验
 				this.dispatch('bx-form-item', 'on-form-change', val);
 			}, 60);
 		}
@@ -110,7 +110,7 @@ export default {
 		parentData() {
 			if (this.children.length) {
 				this.children.map(child => {
-					// 判断子组件(u-radio)如果有updateParentData方法的话，就就执行(执行的结果是子组件重新从父组件拉取了最新的值)
+					// 判断子组件(bx-radio)如果有updateParentData方法的话，就就执行(执行的结果是子组件重新从父组件拉取了最新的值)
 					typeof child.updateParentData == 'function' && child.updateParentData();
 				});
 			}

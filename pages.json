@@ -34,6 +34,13 @@
 				"navigationBarTitleText": "病人管理",
 				"enablePullDownRefresh": false
 			}
+		},
+		{
+			"path": "pages/testPage/testPage",
+			"style": {
+				"navigationBarTitleText": "测试页面",
+				"enablePullDownRefresh": false
+			}
 		}
 	],
 	"subPackages": [{
