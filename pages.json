@@ -38,7 +38,7 @@
 		{
 			"path": "pages/testPage/testPage",
 			"style": {
-				"navigationBarTitleText": "测试页面",
+				"navigationBarTitleText": "健康图谱",
 				"enablePullDownRefresh": false
 			}
 		}
