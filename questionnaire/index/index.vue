@@ -389,7 +389,7 @@ export default {
 									data.user_data.forEach(items => {
 										if (item.column === items.item_no) {
 											if (item.item_type_attr && item.item_type_attr.radioType === 'multi') {
-												item.value = items.option_data
+												item.value = items.option_data;
 											} else {
 												item.value = items.option_data[0];
 											}
@@ -406,6 +406,19 @@ export default {
 							if (data.user_state === '完成' && data.answer_times !== '多次') {
 								this.formType = 'detail';
 							}
+							configCols.forEach((item, index) => {
+								item.itemIndex = index+1
+								if (item.label && item.label.slice(0, 1) != (index + 1).toString() && item.label.slice(0, 2) != (index + 1).toString()) {
+									item.label = (index + 1).toString() + '.' + item.label;
+								}
+								if (item.type === 'digit' && item.item_type_attr.decimal && item.value) {
+									item.value = Number(item.value).toFixed(item.item_type_attr.decimal);
+								} else if (item.type === 'digit' && !item.item_type_attr.decimal && item.value) {
+									item.value = Number(item.value).toFixed(1);
+								} else if (item.type === 'number' && item.value) {
+									item.value = parseInt(item.value).toString() !== 'NaN' ? parseInt(item.value) : 0;
+								}
+							});
 							this.configCols = configCols;
 							// alert("即将获取用户信息")
 							this.getUserInfo();

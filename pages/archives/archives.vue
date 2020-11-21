@@ -21,7 +21,10 @@
 			<view class="content">
 				<view class="score-item" @click="toPages('score-compose')">
 					<text class="label">整体健康分</text>
-					<text class="value text-blue" v-if="healthTotalScore || healthTotalScore === 0">{{ healthTotalScore }}</text>
+					<text class="value text-blue" v-if="healthTotalScore || healthTotalScore === 0">
+						<text class="int" v-if="totalScore&&totalScore.number">{{ totalScore.number }}</text>
+						<text class="float" v-if="totalScore&&totalScore.digit">.{{ totalScore.digit }}</text>
+					</text>
 					<text class="valuetip text-blue" v-else>
 						<text class="cuIcon-all"></text>
 						点击评测
@@ -35,8 +38,9 @@
 				<view class="score-item">
 					<text class="label">近日健康分</text>
 					<text class="value  text-cyan">
-						{{ todayTotalScore ? todayTotalScore : 0 }}
-						<text class="ratio"></text>
+						<text class="int" v-if="todayScore&&todayScore.number">{{ todayScore.number }}</text>
+						<text class="float" v-if="todayScore&&todayScore.digit">.{{ todayScore.digit }}</text>
+						<!-- <text class="ratio"></text> -->
 					</text>
 				</view>
 			</view>
@@ -107,13 +111,7 @@
 		<view class="health-archive-item ">
 			<view class="subtitle">
 				<text class="title-text">检查报告</text>
-				<view
-					class="title-action"
-					@click="
-						showAddRecord = true;
-						getTreeSelectorData();
-					"
-				>
+				<view class="title-action" @click="showAddRecordLayout">
 					<text class="cuIcon-add "></text>
 					<text class="see-histroy">添加</text>
 				</view>
@@ -154,33 +152,33 @@
 				</view>
 			</view>
 		</view>
-		<!-- 	<view class="cu-modal bottom-modal" :class="{ show: showAddRecord }">
-		
-		</view> -->
-		<u-popup v-model="showAddRecord" mode="bottom">
-			<view class="cu-dialog inspect-record">
-				<view class="title">选择检查报告类型</view>
-				<view class="cu-bar search bg-white">
-					<view class="search-form round">
-						<text class="cuIcon-search"></text>
-						<input @focus="InputFocus" @blur="InputBlur" :adjust-position="false" type="text" placeholder="搜索检查报告类型" confirm-type="search" />
+		<view class="cu-modal bottom-modal" :class="{ show: showAddRecord }">
+			<view class="cu-dialog ">
+				<view class="inspect-record">
+					<view class="title">选择检查报告类型</view>
+					<view class="cu-bar search bg-white">
+						<view class="search-form round">
+							<text class="cuIcon-search"></text>
+							<input @focus="InputFocus" @blur="InputBlur" :adjust-position="false" type="text" placeholder="搜索检查报告类型" confirm-type="search" />
+						</view>
+						<view class="action"><button class="cu-btn bg-green shadow-blur round">搜索</button></view>
 					</view>
-					<view class="action"><button class="cu-btn bg-green shadow-blur round">搜索</button></view>
-				</view>
-				<tree-selector
-					:srvInfo="isArray(configCols.option_list_v2) ? null : configCols.option_list_v2"
-					:treeData="treeSelectorData"
-					:childNodeCol="'_childNode'"
-					:disColName="configCols && configCols.option_list_v2 && configCols.option_list_v2['key_disp_col'] ? configCols.option_list_v2['key_disp_col'] : ''"
-					:nodeKey="configCols.option_list_v2 && configCols.option_list_v2['refed_col'] ? configCols.option_list_v2['refed_col'] : 'no'"
-					@clickLastNode="confirmTree"
-				></tree-selector>
-				<view class="button-box">
-					<button class="cu-btn bg-grey" @tap="showAddRecord = false">取消</button>
-					<button class="cu-btn bg-blue" @tap="toQuestionnaire">确定</button>
+					<tree-selector
+						class="selector-wrap"
+						:srvInfo="isArray(configCols.option_list_v2) ? null : configCols.option_list_v2"
+						:treeData="treeSelectorData"
+						:childNodeCol="'_childNode'"
+						:disColName="configCols && configCols.option_list_v2 && configCols.option_list_v2['key_disp_col'] ? configCols.option_list_v2['key_disp_col'] : ''"
+						:nodeKey="configCols.option_list_v2 && configCols.option_list_v2['refed_col'] ? configCols.option_list_v2['refed_col'] : 'no'"
+						@clickLastNode="confirmTree"
+					></tree-selector>
+					<view class="button-box"><button class="cu-btn bg-grey" @tap="showAddRecord = false">取消</button></view>
 				</view>
 			</view>
-		</u-popup>
+		</view>
+		<!-- 		<u-popup v-model="showAddRecord" mode="center">
+			
+		</u-popup> -->
 		<u-popup v-model="showUserListPopup" border-radius="40" mode="top">
 			<view class="user-list">
 				<view class="user-item" @click="userInfo = item" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
@@ -236,8 +234,8 @@ export default {
 			showAddRecord: false,
 			treeSelectorData: [],
 			treePageInfo: {
-				pageNo: 1,
-				rownumber: 5
+				pageNo: 1
+				// rownumber: 5
 			},
 			configCols: {
 				column: 'activity_no',
@@ -253,6 +251,38 @@ export default {
 		};
 	},
 	computed: {
+		totalScore() {
+			if (this.healthTotalScore && typeof this.healthTotalScore === 'number') {
+				let score = this.healthTotalScore;
+				let obj = {};
+				if (Number(score) !== parseInt(score)) {
+					// 小数
+					let arr = score.toString().split('.');
+					if (arr.length == 2) {
+						return {
+							number: arr[0],
+							digit: arr[1]
+						};
+					}
+				}
+			}
+		},
+		todayScore() {
+			if (this.todayTotalScore && typeof this.todayTotalScore === 'number') {
+				let score = this.todayTotalScore;
+				let obj = {};
+				if (Number(score) !== parseInt(score)) {
+					// 小数
+					let arr = score.toString().split('.');
+					if (arr.length == 2) {
+						return {
+							number: arr[0],
+							digit: arr[1]
+						};
+					}
+				}
+			}
+		},
 		disabledTag() {
 			return this.checkedList.length >= 5;
 		},
@@ -302,6 +332,10 @@ export default {
 		}
 	},
 	methods: {
+		showAddRecordLayout() {
+			this.showAddRecord = true;
+			this.getTreeSelectorData();
+		},
 		saveValue(e) {
 			console.log(e);
 		},
@@ -318,7 +352,8 @@ export default {
 			let req = {
 				serviceName: self.configCols.option_list_v2.serviceName,
 				colNames: ['*'],
-				condition: [{ colName: 'daq_survey_activity_no', ruleType: 'notnull', value: '' }],
+				condition: [],
+				// condition: [{ colName: 'daq_survey_activity_no', ruleType: 'notnull', value: '' }],
 				page: { pageNo: this.treePageInfo.pageNo, rownumber: this.treePageInfo.rownumber }
 			};
 			if (cond) {
@@ -347,9 +382,10 @@ export default {
 		confirmTree(e) {
 			if (e.item && e.item.daq_survey_activity_no) {
 				this.selectedQuestNo = e.item.daq_survey_activity_no;
+				this.toQuestionnaire(e.item.daq_survey_activity_no);
 			}
 		},
-		toQuestionnaire() {
+		toQuestionnaire(no) {
 			uni.navigateTo({
 				url: `/questionnaire/index/index?formType=form&activity_no=${this.selectedQuestNo}&status=进行中`
 			});
@@ -1011,6 +1047,10 @@ export default {
 	created() {
 		uni.$on('healthTotalScoreChanged', result => {
 			if (result) {
+				if (parseInt(result !== parseFloat(result))) {
+					// 有小数
+					let arr = result.toString().split('.');
+				}
 				this.healthTotalScore = result;
 			}
 		});
@@ -1018,6 +1058,14 @@ export default {
 		if (score) {
 			this.healthTotalScore = score;
 		}
+	},
+	onReady() {
+		// #ifdef MP-WEIXIN
+		wx.showShareMenu({
+			withShareTicket: true,
+			menus: ['shareAppMessage', 'shareTimeline']
+		});
+		// #endif
 	},
 	onShow() {
 		this.initPage();
@@ -1175,6 +1223,10 @@ export default {
 				}
 				.value {
 					font-size: 150rpx;
+					display: flex;
+					.float {
+						font-size: 40rpx;
+					}
 				}
 				.valuetip {
 					display: flex;
@@ -1444,11 +1496,14 @@ export default {
 .inspect-record {
 	width: 100%;
 	background-color: #fff;
-	height: 100vh;
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	padding-bottom: 200rpx;
+	max-height: 80vh;
+	.selector-wrap {
+		overflow: scroll;
+		flex: 1;
+	}
 	.title {
 		width: 100%;
 		text-align: center;
@@ -1456,13 +1511,9 @@ export default {
 		font-weight: 700;
 		padding: 20rpx;
 	}
-	.bx-form {
-		// position: absolute;
-		// bottom: 500rpx;
-	}
 	.button-box {
-		position: absolute;
-		bottom: 100rpx;
+		// position: absolute;
+		// bottom: 20rpx;
 		.cu-btn {
 			width: 45%;
 		}

@@ -169,13 +169,13 @@
 					:disabled="fieldData.disabled ? fieldData.disabled : false"
 					:class="!valid.valid ? 'valid_error' : ''"
 					v-else-if="fieldData.type === 'textarea' && showTextarea"
-					:placeholder="'输入' + fieldData.label"
+					:placeholder="'输入' + placeholderValue"
 				></textarea>
 				<input
 					@click="showRichText = true"
 					type="text"
 					v-if="(fieldData.type === 'snote' || fieldData.type === 'Note') && !fieldData.disabled"
-					:placeholder="'点击编辑' + fieldData.label"
+					:placeholder="'点击编辑' + placeholderValue"
 					:value="html2text(fieldData.value)"
 					:class="!valid.valid ? 'valid_error' : ''"
 					name="input"
@@ -183,7 +183,7 @@
 				/>
 				<picker class="pickers" @change="PickerChange($event, fieldData)" :value="index" :range="picker" v-if="fieldData.type === 'poupchange'">
 					<!-- <view class="picker">{{ index > -1 ? picker[index] : '请选择' }}</view> -->
-					<input type="text" :placeholder="'点击编辑' + fieldData.label" :value="picker[index]" :class="!valid.valid ? 'valid_error' : ''" name="input" :disabled="true" />
+					<input type="text" :placeholder="'点击编辑' + placeholderValue" :value="picker[index]" :class="!valid.valid ? 'valid_error' : ''" name="input" :disabled="true" />
 				</picker>
 				<!--  <bx-editor
           :field="fieldData"
@@ -203,7 +203,7 @@
 						disabled
 						class="date-input"
 						@click.stop="fieldData.disabled ? false : toggleTab(fieldData.type)"
-						:placeholder="'请选择' + fieldData.label"
+						:placeholder="'请选择' + placeholderValue"
 						:class="!valid.valid ? 'valid_error' : ''"
 						style="width: 100%;"
 						name="input"
@@ -265,7 +265,7 @@
 				<input
 					@blur="onInputBlur"
 					type="number"
-					:placeholder="'输入' + fieldData.label"
+					:placeholder="'输入' + placeholderValue"
 					@input="onInputChange"
 					:max="fieldData.item_type_attr && fieldData.item_type_attr.max ? fieldData.item_type_attr.max : 999"
 					:min="fieldData.item_type_attr && fieldData.item_type_attr.min ? fieldData.item_type_attr.min : 0"
@@ -278,7 +278,7 @@
 				<input
 					@blur="onInputBlur"
 					type="digit"
-					:placeholder="'输入' + fieldData.label"
+					:placeholder="'输入' + placeholderValue"
 					@input="onInputChange"
 					:disabled="fieldData.disabled ? fieldData.disabled : false"
 					:max="fieldData.item_type_attr && fieldData.item_type_attr.max ? fieldData.item_type_attr.max : 999"
@@ -290,7 +290,7 @@
 				/>
 				<view v-else-if="fieldData.type === 'treeSelector'" @click="openTreeSelector">
 					<input
-						:placeholder="'点击选择' + fieldData.label"
+						:placeholder="'点击选择' + placeholderValue"
 						:value="treeSelectorShowValue ? treeSelectorShowValue : fieldData.value"
 						disabled
 						:class="!valid.valid ? 'valid_error' : ''"
@@ -298,14 +298,14 @@
 					/>
 				</view>
 				<view v-else-if="fieldData.type === 'cascader'" @click="openCascader">
-					<input :placeholder="'点击选择' + fieldData.label" v-model="fieldData.value" disabled :class="!valid.valid ? 'valid_error' : ''" name="input" />
+					<input :placeholder="'点击选择' + placeholderValue" v-model="fieldData.value" disabled :class="!valid.valid ? 'valid_error' : ''" name="input" />
 				</view>
 				<view class="item-group flex align-center" style="" v-else-if="fieldData.type === 'input'">
 					<input
 						@blur="onInputBlur"
 						:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 100"
 						:disabled="fieldData.disabled ? fieldData.disabled : false"
-						:placeholder="'输入' + fieldData.label"
+						:placeholder="'输入' + placeholderValue"
 						v-model="fieldData.value"
 						@input="onInputChange"
 						:class="!valid.valid ? 'valid_error' : ''"
@@ -509,6 +509,22 @@ export default {
 	},
 	updated() {},
 	computed: {
+		placeholderValue: function() {
+			let item = this.deepClone(this.fieldData);
+			// item.label.slice(0, 2) == (index + 1).toString()
+			let label = ''
+			if (item.label && item.label.slice(0, 1) == item.itemIndex.toString()) {
+				label =  item.label.slice(1);
+			} else if (item.label && item.label.slice(0, 2) == item.itemIndex.toString()) {
+				label =  item.label.slice(2);
+			} else if (item.label) {
+				label =  item.label;
+			}
+			if(label.indexOf('.')!==-1&&label.indexOf('.')<2){
+				label = label.replace('.','')
+			}
+			return label
+		},
 		dictShowValue() {
 			let option_list_v2 = this.fieldData.option_list_v2;
 			if (option_list_v2 && Array.isArray(option_list_v2) && option_list_v2.length > 0 && this.fieldData.col_type === 'Dict') {

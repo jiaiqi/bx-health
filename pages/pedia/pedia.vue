@@ -137,7 +137,9 @@ export default {
 							res.data.data[index]['carousel'] = result;
 							break;
 					}
-					this.pageItemList.push(res.data.data[index]);
+					if(res.data.data[index].disp_flag!=='否'){
+						this.pageItemList.push(res.data.data[index]);
+					}
 				}
 				return res.data.data;
 			}

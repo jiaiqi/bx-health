@@ -1,6 +1,6 @@
 <template>
 	<view class="person-chat-wrap">
-		<view class="person-chat-top">
+		<view class="person-chat-top" :class="!doctor_no?'person-chat-top-w':''">
 			<view v-for="(item,index) in recordList" :key="index" class="person-chat-item" :class="item.sender_account === currentUserInfo.user_no?'person-chat-item-my':''">
 				<view v-if="doctor_no?item.sender_account === doctor_no : item.sender_account === userInfo.userno" class="person-chat-item-accept">
 					<view class="person-chat-item-left">
@@ -257,12 +257,13 @@
 
 <style lang="scss" scoped>
 	.person-chat-wrap{
-		min-height: 100vh;
+		height: 100vh;
 		background-color: #eeeeee;
 		.person-chat-top{
 			display: flex;
 			flex-direction: column;
-			max-height: calc(100vh - 180rpx);
+			max-height: calc(100vh - 100rpx);
+			overflow-y: scroll;
 			// margin: 10rpx;
 			.person-chat-item{	
 				// display: flex;
@@ -345,6 +346,9 @@
 				display: flex;
 				justify-content: flex-end;
 			}
+		}
+		.person-chat-top-w{
+			max-height: calc(100vh - 172rpx);
 		}
 		.person-chat-bot{
 			background-color: #f7f7f7;
