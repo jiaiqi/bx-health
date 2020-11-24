@@ -861,7 +861,9 @@ export default {
 		},
 		changeSelectedTag() {
 			this.selectedTags = this.checkboxList.filter(item => item.checked);
+			if(this.selectedTags.length>5) return;
 			this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.label);
+			
 			this.updataUserTags().then(res => {
 				this.showUserHealtManagePopup = false;
 			});

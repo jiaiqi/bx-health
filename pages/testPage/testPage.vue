@@ -3,9 +3,9 @@
 		<!-- <bx-radio-group v-model="radioValue">
 			<bx-radio v-for="item in options" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-radio>
 		</bx-radio-group> -->
-		<bx-checkbox-group  checkboxMode="button">
+	<!-- 	<bx-checkbox-group  checkboxMode="button">
 			<bx-checkbox v-for="item in options" v-model="item.checked" :key="item.id" :name="item.value">{{ item.label }}</bx-checkbox>
-		</bx-checkbox-group>
+		</bx-checkbox-group> -->
 		<view class="charts"><bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart></view>
 		<view class="detail-desc" v-if="nodeDetail && nodeDetail.node_desc"><view v-html="nodeDetail.node_desc"></view></view>
 	</view>
