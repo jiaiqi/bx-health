@@ -3,7 +3,13 @@
 		<patients-info :customer_no="customer_no" v-if="current_tab == 0"></patients-info>
 		<person-chat ref="chat" :customer_no="customer_no" v-if="current_tab == 1"></person-chat>
 		<view class="health-bottom">
-			<text @click="changeTab(index)" v-for="(item,index) in bottom_tab_data" :key="index" :class="current_tab==index?'active-text':''">{{item.name}}</text>
+			<view @click="changeTab(index)" v-for="(item,index) in bottom_tab_data" :key="index" class="info-bottom-tab" :class="current_tab==index?'active-text':''">
+				<image v-show="current_tab!=index && item.name==='交流'" src="../static/chats.png" mode=""></image>
+				<image v-show="current_tab==index && item.name==='交流'" src="../static/chat-active.png" mode=""></image>
+				<image v-show="current_tab!=index && item.name==='患者信息'" src="../static/record.png" mode=""></image>
+				<image v-show="current_tab==index && item.name==='患者信息'" src="../static/record-active.png" mode=""></image>
+				<text>{{item.name}}</text>
+			</view>
 		</view>
 	</view>
 </template>
@@ -63,16 +69,32 @@ export default {
 	height: 80rpx;
 	justify-content: space-around;
 	border-top: 1px solid rgba(0, 0, 0, 0.33);
-	text{
+	.info-bottom-tab{
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
 		width: 49%;
-		text-align: center;
-		line-height: 80rpx;
-		&:first-child{
-			border-right: 1px solid rgba(0, 0, 0, 0.33);
+		&:first-of-type{
+			// border-right:1px solid rgba(0, 0, 0, 0.33);
 		}
 	}
+	image{
+		width: 40rpx;
+		height: 40rpx;
+	}
+	
+	text{
+		// width: 49%;
+		// text-align: center;
+		// line-height: 80rpx;
+		font-size: 24rpx;
+		// &:first-child{
+		// 	border-right: 1px solid rgba(0, 0, 0, 0.33);
+		// }
+	}
 	.active-text{
-		color: chocolate;
+		color: #FACC31;
 	}
 }
 </style>

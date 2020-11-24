@@ -1,10 +1,10 @@
 <template>
 	<view class="bx-checkbox" :style="[checkboxStyle]" :class="checkboxClass">
-		<view class="bx-checkbox-icon" @tap="toggle" :class="{ checked: value }">
+		<view class="bx-checkbox-icon" @tap="toggle" :class="{ checked: value===true }">
 			<text v-if="serialChar">{{ serialChar }}</text>
 			<text class="cuIcon-check" v-if="value && !serialChar"></text>
 		</view>
-		<view class="bx-checkbox__label" @tap="onClickLabel" :class="{ checked: value, disabled: disabled }"><slot /></view>
+		<view class="bx-checkbox__label" @tap="onClickLabel" :class="{ checked: value===true , disabled: disabled }"><slot /></view>
 	</view>
 </template>
 
@@ -12,7 +12,6 @@
 /**
  * checkbox 复选框
  * @description 该组件需要搭配checkboxGroup组件使用，以便用户进行操作时，获得当前复选框组的选中情况。
- * @tutorial https://www.uviewui.com/components/checkbox.html
  * @property {String Number} icon-size 图标大小，单位rpx（默认20）
  * @property {String Number} label-size label字体大小，单位rpx（默认28）
  * @property {String Number} name checkbox组件的标示符
@@ -38,6 +37,11 @@ export default {
 		},
 		// 是否为选中状态
 		value: {
+			type: Boolean,
+			default: false
+		},
+		// 是否为选中状态
+		checked: {
 			type: Boolean,
 			default: false
 		},
@@ -80,13 +84,15 @@ export default {
 	data() {
 		return {
 			parentDisabled: false,
-			newParams: {}
+			newParams: {},
+			childIndex:null,
 		};
 	},
 	created() {
 		this.parent = this.theParent.call(this, 'bx-checkbox-group');
 		// 如果存在bx-checkbox-group，将本组件的this塞进父组件的children中
 		this.parent && this.parent.children.push(this);
+		this.childIndex = this.parent.children.length
 	},
 	computed: {
 		// 是否禁用，如果父组件bx-checkbox-group禁用的话，将会忽略子组件的配置
@@ -171,9 +177,11 @@ export default {
 		},
 		emitEvent() {
 			this.$emit('change', {
+				index:this.childIndex,
 				value: !this.value,
 				name: this.name
 			});
+			this.$emit('input', !this.value);
 			// 执行父组件bx-checkbox-group的事件方法
 			// 等待下一个周期再执行，因为this.$emit('input')作用于父组件，再反馈到子组件内部，需要时间
 			setTimeout(() => {
@@ -193,19 +201,15 @@ export default {
 			// 如果原来为选中状态，那么可以取消
 			if (this.value == true) {
 				this.emitEvent();
-				this.$emit('input', !this.value);
 			} else {
-				// 如果超出最多可选项，提示
+				this.emitEvent();
 				if (this.parent && checkedNum >= this.parent.max) {
+				// 如果原来为未选中状态，需要选中的数量少于父组件中设置的max值，才可以选中
 					uni.showToast({
 						title: `最多可选${this.parent.max}项`,
 						icon: 'none'
 					});
-					// return this.$u.toast(`最多可选${this.parent.max}项`);
 				}
-				// 如果原来为未选中状态，需要选中的数量少于父组件中设置的max值，才可以选中
-				this.emitEvent();
-				this.$emit('input', !this.value);
 			}
 		}
 	}
@@ -251,6 +255,7 @@ export default {
 				color: #409eff;
 				background: #ecf5ff;
 				border-color: #b3d8ff;
+				transform: scale(1.2);
 			}
 			&.checked {
 				color: #fff;

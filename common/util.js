@@ -1354,5 +1354,18 @@ export default {
 		Vue.prototype.requestSuccess = (res)=>{
 			return res.data.state==='SUCCESS'&&Array.isArray(res.data.data)
 		}  
+		Vue.prototype.getImageInfo = (item)=>{
+			return new Promise((resolve,reject)=>{
+				wx.getImageInfo({
+					src:item.url,
+					success:(res)=>{
+						resolve({name:item.name,src:res.path,height:res.height,width:res.width})
+					},
+					fail:(err)=>{
+						reject(err)
+					}
+				})
+			})
+		}
 	}
 }

@@ -102,9 +102,9 @@ export default {
 		this.children = [];
 	},
 	methods: {
-		emitEvent() {
+		emitEvent(childIndex,value) {
 			let values = [];
-			this.children.map(val => {
+			this.children.map((val,index) => {
 				if (val.value) values.push(val.name);
 			});
 			if(values.length>=this.max){
@@ -112,7 +112,7 @@ export default {
 			}else{
 				this.onMax = false
 			}
-			this.$emit('change', values);
+			// this.$emit('change', values);
 			this.$emit('input', values);
 		}
 	}

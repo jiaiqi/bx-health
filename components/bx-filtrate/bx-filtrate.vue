@@ -57,7 +57,7 @@
 				</view>
 				<view @click.stop="tofeedback" class="cu-item boxfood couple-boxfood">
 					<view class="add-btn"><text class="cuIcon-add"></text></view>
-					<view class="textbox"><view class="title-food">添加病人</view></view>
+					<view class="textbox"><view class="title-food">添加用户</view></view>
 				</view>
 			</view>
 		</sPullScroll>

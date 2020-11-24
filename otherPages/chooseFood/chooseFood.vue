@@ -27,7 +27,7 @@
 			<view class="ele-text-wrap">
 				<view class="ele-text-top-tit">
 					
-					<text @click="changeCate(item,index)" v-for="(item,index) in categoryTop" :key="index" :class="categoryTopIndex === index?'active-text-top-tit':''">{{item.name}}</text>					
+					<text @click="changeCate(item,index)" v-for="(item,index) in categoryTop" v-if="item.name === '食材组成'?currFood.meal_no:true" :key="index" :class="categoryTopIndex === index?'active-text-top-tit':''">{{item.name}}</text>					
 				</view>
 				<!-- <view class="ele-text-top">主要维生素含量如下：</view> -->
 				<view v-if="categoryTopIndex === 1" class="ele-text-cen">
@@ -36,17 +36,17 @@
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
 								<text>蛋白质:</text>
-								<text>{{ currFood.protein ? currFood.protein.toFixed(1) : '' }}g</text>
+								<text>{{ currFood.protein ? Number(currFood.protein).toFixed(1) : '' }}g</text>
 								<text style="color: red;">({{ currFood.protein >= 30.1 ? '高' : currFood.protein >= 15.5 && currFood.protein < 30.1 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>碳水化合物:</text>
-								<text>{{ currFood.carbohydrate ? currFood.carbohydrate.toFixed(1) : '' }}g</text>
+								<text>{{ currFood.carbohydrate ? Number(currFood.carbohydrate).toFixed(1) : '' }}g</text>
 								<text style="color: red;">({{ currFood.carbohydrate >= 51.9 ? '高' : currFood.carbohydrate >= 25.74 && currFood.carbohydrate < 51.9 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>脂肪:</text>
-								<text>{{ currFood.axunge ? currFood.axunge.toFixed(1) : '' }}g</text>
+								<text>{{ currFood.axunge ? Number(currFood.axunge).toFixed(1) : '' }}g</text>
 								<text style="color: red;">({{ currFood.axunge >= 35.3 ? '高' : currFood.axunge >= 17.6 && currFood.axunge < 35.3 ? '中' : '低' }})</text>
 							</view>
 						</view>
@@ -56,12 +56,12 @@
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
 								<text>VA:</text>
-								<text>{{ currFood.vitamin_a ? currFood.vitamin_a.toFixed(1) : '' }}ug</text>
+								<text>{{ currFood.vitamin_a ? Number(currFood.vitamin_a).toFixed(1) : '' }}ug</text>
 								<text style="color: red;">({{ currFood.vitamin_a >= 915 ? '高' : currFood.vitamin_a >= 457 && currFood.vitamin_a < 915 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>VE:</text>
-								<text>{{ currFood.vitamin_e ? currFood.vitamin_e.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.vitamin_e ? Number(currFood.vitamin_e).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.vitamin_e >= 27.9 ? '高' : currFood.vitamin_e >= 13.9 && currFood.vitamin_e < 27.9 ? '中' : '低' }})</text>
 							</view>
 						</view>
@@ -71,22 +71,22 @@
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
 								<text>VB1:</text>
-								<text>{{ currFood.vitamin_b1 ? currFood.vitamin_b1.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.vitamin_b1 ? Number(currFood.vitamin_b1).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.vitamin_b1 >= 0.61 ? '高' : currFood.vitamin_b1 >= 0.32 && currFood.vitamin_b1 < 0.61 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>VB2:</text>
-								<text>{{ currFood.vitamin_b2 ? currFood.vitamin_b2.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.vitamin_b2 ?Number(currFood.vitamin_b2).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.vitamin_b2 >= 0.79 ? '高' : currFood.vitamin_b2 >= 0.4 && currFood.vitamin_b2 < 0.79 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>VB3:</text>
-								<text>{{ currFood.vitamin_b3 ? currFood.vitamin_b3.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.vitamin_b3 ? Number(currFood.vitamin_b3).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.vitamin_b3 >= 4.52 ? '高' : currFood.vitamin_b3 >= 2.26 && currFood.vitamin_b3 < 4.52 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>VC:</text>
-								<text>{{ currFood.vitamin_c ? currFood.vitamin_c.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.vitamin_c ? Number(currFood.vitamin_c).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.vitamin_c >= 61.2 ? '高' : currFood.vitamin_c >= 30.6 && currFood.vitamin_c < 61.2 ? '中' : '低' }})</text>
 							</view>
 						</view>
@@ -96,22 +96,22 @@
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
 								<text>钙:</text>
-								<text>{{ currFood.element_ca ? currFood.element_ca.toFixed(1) : '' }}mg/</text>
+								<text>{{ currFood.element_ca ? Number(currFood.element_ca).toFixed(1) : '' }}mg/</text>
 								<text style="color: red;">({{ currFood.element_ca >= 381 ? '高' : currFood.element_ca >= 190.5 && currFood.element_ca < 381 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>镁:</text>
-								<text>{{ currFood.element_mg ? currFood.element_mg.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.element_mg ? Number(currFood.element_mg).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.element_mg >= 111.6 ? '高' : currFood.element_mg >= 55.8 && currFood.element_mg < 111.6 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>磷:</text>
-								<text>{{ currFood.element_p ? currFood.element_p.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.element_p ? Number(currFood.element_p).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.element_p >= 296.4 ? '高' : currFood.element_p >= 148.2 && currFood.element_p < 296.4 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>钾:</text>
-								<text>{{ currFood.element_k ? currFood.element_k.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.element_k ? Number(currFood.element_k).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.element_k >= 526.2 ? '高' : currFood.element_k >= 263.1 && currFood.element_k < 526.2 ? '中' : '低' }})</text>
 							</view>
 						</view>
@@ -122,27 +122,27 @@
 						<view class="ele-text-cen-item-cen">
 							<view class="ele-text">
 								<text>铁:</text>
-								<text>{{ currFood.element_fe ? currFood.element_fe.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.element_fe ? Number(currFood.element_fe).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.element_fe >= 7.2 ? '高' : currFood.element_fe >= 3.6 && currFood.element_fe < 7.2 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>锌:</text>
-								<text>{{ currFood.element_zn ? currFood.element_zn.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.element_zn ? Number(currFood.element_zn).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.element_zn >= 6 ? '高' : currFood.element_zn >= 3 && currFood.element_zn < 6 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>硒:</text>
-								<text>{{ currFood.element_se ? currFood.element_se.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.element_se ? Number(currFood.element_se).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.element_se >= 23.82 ? '高' : currFood.element_se >= 11.91 && currFood.element_se < 23.82 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>铜:</text>
-								<text>{{ currFood.element_cu ? currFood.element_cu.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.element_cu ? Number(currFood.element_cu).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.element_cu >= 1.12 ? '高' : currFood.element_cu >= 0.56 && currFood.element_cu < 1.12 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
 								<text>锰:</text>
-								<text>{{ currFood.element_mn ? currFood.element_mn.toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.element_mn ? Number(currFood.element_mn).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.element_mn >= 4.44 ? '高' : currFood.element_mn >= 2.22 && currFood.element_mn < 4.44 ? '中' : '低' }})</text>
 							</view>
 						</view> 
@@ -170,17 +170,40 @@
 					</view>
 					
 				</view>
-			
+				<view v-if="categoryTopIndex == 2 && currFood.meal_no" class="material-list-wrap">
+					<view class="shop-detail-bot-tab">
+						<view class="shop-detail-bot-tab-t">
+							<text>食材名称</text>
+							<text>食材含量</text>
+							<text>单位</text>
+						</view>
+						<view v-if="foodChild.length > 0" class="shop-detail-bot-tab-m">
+							<view v-for="(item,index) in foodChild" :key="index" class="shop-detail-bot-tab-m-item">
+								<text>{{item.name}}</text>
+								<text>{{item.unit_amount}}</text>
+								<text>{{item.unit}}</text>
+							</view>
+						</view>
+						<view v-else class="detail-none">
+							<view class="detail-none-t">
+								<image src="/otherPages/static/img/noneData.png" mode=""></image>
+								<text>暂无数据</text>
+							</view>
+						</view>
+					</view>
+				</view>			
 			</view>
 			<view class="calculate">
 				<view v-if="!currFood.meal_no" class="cook weight">
 					<view class="calculate-l">烹调方式：</view>
 					<text v-if="currentCookData" @click.stop="clickCook" :class="isCookDataChoose?'active-cook-data':''">{{currentCookData}}</text>
-					<text @click="chooseCook">更多</text>
-					<!-- <text class="lg text-gray" :class="'cuIcon-right'"></text> -->
-					<!-- <view @click="chooseCook(cooks, c)" v-for="(cooks, c) in cookData" :key="c" :class="currentCookData == cooks.value ? 'active-unit' : ''" class="unit">
-						{{cooks.value}}						
-					</view> -->
+					<text @click="chooseCook">更多</text>					
+				</view>
+				<view class="weight">
+					<view class="calculate-l">时间：</view>
+					<view @click="chooseTime(u, ids)" v-for="(u, ids) in dinnerTime" :key="ids" :class="currFoodTime == u.value ? 'active-unit' : ''" class="unit">
+						{{ u.value }}						
+					</view>
 				</view>
 				<view class="weight">
 					<view class="calculate-l">单位：</view>
@@ -266,7 +289,28 @@ export default {
 	data() {
 		return {
 			unitList: [],
+			currFoodTime:'',
+			dinnerTime:[{
+				value:'早餐',
+				type:'cereal'
+			},{
+				value:'中餐',
+				type:'lunch'
+			},{
+				value:'晚餐',
+				type:'dinner'
+			},{
+				value:'夜宵',
+				type:'midnight'
+			},{
+				value:'加餐',
+				type:'extra'
+			},{
+				value:'其他',
+				type:'other'
+			}],
 			list: [],
+			foodChild:[],
 			isShowInfo:false,
 			categoryTop:[{
 				name:'NRV%占比',
@@ -274,6 +318,9 @@ export default {
 			},{
 				name:'营养素含量',
 				type:'purity'
+			},{
+				name:'食材组成',
+				type:'material'
 			}],
 			approveData:[{
 				name:'男性',
@@ -533,6 +580,7 @@ export default {
 		}
 	},
 	methods: {
+		
 		async getCurrentFood(item){
 			let self = this;
 			let serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
@@ -553,9 +601,11 @@ export default {
 			let urls = self.$api.downloadFile + res.data.data[0].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +"&thumbnailType=fwsu_100";
 			this.$set(res.data.data[0], 'imgurl', urls);
 			this.currFood = res.data.data[0]
+			
 			if(!this.currFood.meal_no){
 				this.getFoodsV2()
 			}
+			this.calculateCurrTime()
 			this.assembleData();
 			this.selectCurrFoodUnit(this.currFood);
 		},
@@ -637,6 +687,8 @@ export default {
 			this.categoryTopIndex = index
 			if(item.type === 'NRV'){
 				this.currentAppr = this.approveData[0]
+			}else if(item.type === 'material'){
+				this.getMixChildFood()
 			}
 		},
 		async getNutrientRecommended() {
@@ -691,39 +743,6 @@ export default {
 						}												
 					});
 				});
-				// result.forEach(item => {
-				// 	self.energyListWrap.forEach(energy => {
-				// 		energy.matterList.forEach(mat => {
-				// 			if (item.nutrient === mat.name || item.nutrient.indexOf(mat.name) !== -1) {
-				// 				// mat.EAR = item.val_ear ? item.val_ear : mat.EAR;
-				// 				mat.UL = item.val_ul ? item.val_ul : mat.UL;
-				// 				mat.EAR = item.val_rni ? item.val_rni : mat.EAR;
-				// 				if (energy.title !== '水溶性维生素') {
-				// 					mat.UL = item.val_ul ? item.val_ul : mat.UL;
-				// 					// mat.UL = item.val_ul ? item.val_ul : mat.UL;
-				// 				} else {
-				// 					mat.UL = 0;
-				// 				}
-				// 				if (mat.name === '蛋白') {
-				// 					mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
-				// 					mat.UL = 0;
-				// 					// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
-				// 				}
-				// 			} else {
-				// 				if (mat.name === '脂肪') {
-				// 					mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
-				// 					mat.UL = 0;
-				// 					// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
-				// 				}
-				// 				if (mat.name === '碳水') {
-				// 					mat.EAR = self.userInfo.weight * 4;
-				// 					mat.UL = 0;
-				// 					// mat.UL = item.val_rni ? item.val_rni * self.userInfo.weight : mat.UL;
-				// 				}
-				// 			}
-				// 		});
-				// 	});
-				// });
 				return endArr;
 			}
 		},
@@ -797,6 +816,52 @@ export default {
 			this.isShowCookType = false
 			
 		},
+		/*选择餐食类别(早中晚)**/
+		chooseTime(item,i){
+			
+			this.currFoodTime = item.value
+		},
+		/*计算当前时间--早餐/午餐...**/
+		calculateCurrTime(){
+			let time = this.formateDate(new Date(), 'dateTime').split(":")[0]
+			console.log("计算时间--->",time)
+			let type = ''
+			/**
+			 * [{
+				value:'早餐',
+				type:'cereal'
+			},{
+				value:'中餐',
+				type:'lunch'
+			},{
+				value:'晚餐',
+				type:'dinner'
+			},{
+				value:'夜宵',
+				type:'midnight'
+			},{
+				value:'加餐',
+				type:'extra'
+			},{
+				value:'其他',
+				type:'other'
+			}],
+			 * */
+			if(time >=6 && time <= 9){
+				type = '早餐'
+			}else if(time >= 10 && time <= 11){
+				type = '加餐'
+			}else if(time >= 12 && time <= 14){
+				type = '中餐'
+			}else if(time >= 18 && time <= 20){
+				type = '晚餐'
+			}else if(time >= 21 && time <= 24){
+				type = '夜宵'
+			}else{
+				type = '其他'
+			}
+			this.currFoodTime = type
+		},
 		/*选择单位*/
 		chooseUnit(item, i) {
 			console.log('单位选择----', item);
@@ -838,6 +903,25 @@ export default {
 				this.chooseFoods.push(this.currFood);
 			}
 			this.goBalanceDiet();
+		},
+		/* 获取当前食物得食材含量**/
+		async getMixChildFood(){
+			let self = this
+			let url = this.getServiceUrl('health', 'srvhealth_mixed_food_nutrition_item_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_mixed_food_nutrition_item_select',
+				colNames: ['*'],
+				condition:[{
+					colName:"meal_no",
+					ruleType:"eq",
+					value:this.currFood.meal_no
+				}],
+			};
+			let res = await this.$http.post(url, req);
+			let data = res.data.data
+			if(data.length >= 0){	
+				this.foodChild = data
+			}
 		},
 		/* 点击食物选择数字加减**/
 		countDietNum(num) {
@@ -950,7 +1034,8 @@ export default {
 						energy: item.heatNum,
 						user_name: uni.getStorageSync('current_user'),
 						image: item.image,
-						unit_weight_g: this.radioLabel ? this.radioLabel.amount : 100
+						unit_weight_g: this.radioLabel ? this.radioLabel.amount : 100,
+						dining_type:this.currFoodTime
 					};
 					// if (this.searchArg.type === 'food') {
 					if (item.meal_no) {
@@ -1011,7 +1096,7 @@ export default {
 <style scoped lang="scss">
 .food_wrap {
 	background-color: #f8f8f8;
-	height: 100vh;
+	min-height: 100vh;
 }
 .food_wrap_top{
 	display: flex;
@@ -1253,7 +1338,7 @@ export default {
 		}
 	}
 	.digit {
-		width: 33%;
+		width: 50%;
 		padding: 20rpx 0;
 		display: flex;
 		justify-content: center;
@@ -1578,6 +1663,64 @@ export default {
 		text-align: center;
 		&:first-child {
 			margin-right: 90upx;
+		}
+	}
+}
+.material-list-wrap{
+	.shop-detail-bot-tab{
+		min-height: 300upx;
+		.shop-detail-bot-tab-t{
+			display: flex;
+			justify-content: space-around;
+			background-color: rgb(240,240,240);
+			padding: 5px 0;
+			width: 95%;
+			margin: 0 auto;
+			text{
+				width: 33%;
+				text-align: center;
+			}
+		}
+		.shop-detail-bot-tab-m{
+			.shop-detail-bot-tab-m-item{
+				display: flex;
+				justify-content: space-around;
+				padding: 10rpx 0;
+				border-bottom: 1px solid #f2f3f3;
+				width: 95%;
+				margin: 0 auto;
+				text{
+					width: 33%;
+					text-align: center;						
+				}
+				&:last-of-type{
+					border-bottom: none;
+				}
+			}
+			.operation-food{
+				width: 33%;
+				text-align: center;
+				text{
+					color: red;
+				}
+			}
+			
+		}
+		.detail-none{
+			.detail-none-t{
+				min-height: calc(100vh - 160upx) ;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				image{
+					width: 140upx;
+					height: 140upx;
+				}
+				text{
+					color: #b0b0b0;
+				}
+			}
 		}
 	}
 }

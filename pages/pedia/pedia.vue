@@ -71,6 +71,7 @@ export default {
 		skip(item) {
 			let dest_page = '';
 			let self = this;
+			debugger
 			if (item.dest_page && item.dest_page.indexOf('/pages/specific/health') !== -1) {
 				let index = item.dest_page.indexOf('/pages/specific/health');
 				dest_page = '/otherPages' + item.dest_page.slice(22);

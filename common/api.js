@@ -8,35 +8,38 @@ let remoteAddress = {
 	// serviceAddress: 'http://192.168.0.121:8101', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	// serviceAddress: 'https://srvms.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	frontEndAddress: 'https://wx2.100xsys.cn',
-	singleApp:true, // 是否单应用， true 时 所有请求均使用 appName 配置
-	appName:"health", //singleApp 为 true 时 必须配置
+	singleApp: true, // 是否单应用， true 时 所有请求均使用 appName 配置
+	appName: "health", //singleApp 为 true 时 必须配置
 	bx_auth_ticket: "e2cc16a3-6a87-42da-ae5f-99a6af84c5f8",
 	onTicket: false, // 是否使用配置的静态 bx_auth_ticket
 	// homePath:"/pages/public/homePage/homePage?website_no=WS2020031216030001",
-	isThirdParty:true,  // 是否必须第三方认证登录
-	thirdPartyType:['WeChat'],// 第三方类型
+	isThirdParty: true, // 是否必须第三方认证登录
+	thirdPartyType: ['WeChat'], // 第三方类型
 	// homePath:"/pages/home/home", // 首页路径， 配置完整路径
-	homePath:"/pages/pedia/pedia", // 首页路径，配置完整路径
+	homePath: "/pages/pedia/pedia", // 首页路径，配置完整路径
 }
 
 
 let ENV = {
-  backEndAddress:"https://login.100xsys.cn",//后台管理系统地址
+	backEndAddress: "https://login.100xsys.cn", //后台管理系统地址
 	frontEndAddress: remoteAddress.frontEndAddress, //前端线上地址
 	appNo: {
-		// wxmp: 'APPNO20201118193318', // 百想健康
-		wxmp: 'APPNO20200214122021', // 百想软件ai平台
-		wxh5: 'APPNO20200107181133', //微信公众号
+		wxmp: 'APPNO20201124160702', // 百想健康
+		// wxmp: 'APPNO20200214122021', // 百想软件ai平台
+		// wxmp: 'APPNO20200731153421' //生活能力评估
+
+		// wxh5: 'APPNO20200107181133', //微信公众号
 	},
 	appID: {
-		wxmp: 'wx8e6f993081f6e979', // 百想软件ai平台
-		// wxmp: 'wxa3c50c8177ef6739', // 百想健康
-		wxh5: 'wx78d1d4139f97ffca' //百想助理公众号
+		// wxmp: 'wx8e6f993081f6e979', // 百想软件ai平台
+		wxmp: 'wxa3c50c8177ef6739', // 百想健康
+		wxh5: 'wx78d1d4139f97ffca', //百想助理公众号
+		// wxmp: "wx08876efb5760ca75" //生活能力评估
 	},
-	isThirdParty:remoteAddress.isThirdParty,
-	homePath:remoteAddress.homePath, // 应用业务的入口页面 首页。
-	singleApp:remoteAddress.singleApp, // 是否单应用
-	appName:remoteAddress.appName, // 服务 app
+	isThirdParty: remoteAddress.isThirdParty,
+	homePath: remoteAddress.homePath, // 应用业务的入口页面 首页。
+	singleApp: remoteAddress.singleApp, // 是否单应用
+	appName: remoteAddress.appName, // 服务 app
 	getAuthorization: { //获取公众号授权
 		url: remoteAddress.serviceAddress + '/wx/operate/srvwx_public_page_authorization',
 		serviceName: 'srvwx_public_page_authorization'
@@ -49,9 +52,9 @@ let ENV = {
 		url: remoteAddress.serviceAddress + '/wx/operate/srvwx_app_login',
 		serviceName: 'srvwx_app_login'
 	},
-	getSignature:remoteAddress.serviceAddress+'/wx/select/srvwx_app_signature_select', //获取js-sdk签名
-	getUserInfo:remoteAddress.serviceAddress+'/wx/select/srvwx_basic_user_info_select', //获取用户信息
-	saveShareRecord:remoteAddress.serviceAddress + '/daq/add/srvdaq_record_share_add', //保存微信分享记录
+	getSignature: remoteAddress.serviceAddress + '/wx/select/srvwx_app_signature_select', //获取js-sdk签名
+	getUserInfo: remoteAddress.serviceAddress + '/wx/select/srvwx_basic_user_info_select', //获取用户信息
+	saveShareRecord: remoteAddress.serviceAddress + '/daq/add/srvdaq_record_share_add', //保存微信分享记录
 	downloadFile: remoteAddress.serviceAddress + '/file/download?fileNo=', // 根据fileNo直接下载图片，不用查找filePath
 
 	/**
@@ -91,10 +94,10 @@ let ENV = {
 	delete: remoteAddress.serviceAddress + '/bxsys/operate', // 删除
 	saveDraft: remoteAddress.serviceAddress + '/bxsys/saveDraft', // 保存草稿
 	upload: remoteAddress.serviceAddress + '/file/upload',
-  file:remoteAddress.serviceAddress + '/file/',
-	deleteFile:remoteAddress.serviceAddress + '/file/delete', // 删除文件
+	file: remoteAddress.serviceAddress + '/file/',
+	deleteFile: remoteAddress.serviceAddress + '/file/delete', // 删除文件
 	onTicket: remoteAddress.onTicket,
 	ticket: remoteAddress.bx_auth_ticket,
-	bindWxUser:remoteAddress.serviceAddress + "/wx/operate/srvwx_user_bind" // 绑定已有帐号
+	bindWxUser: remoteAddress.serviceAddress + "/wx/operate/srvwx_user_bind" // 绑定已有帐号
 }
 export default ENV

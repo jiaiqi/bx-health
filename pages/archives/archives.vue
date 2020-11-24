@@ -190,24 +190,22 @@
 		</u-popup>
 		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="bottom">
 			<view class="health-item">
-			<!-- 	<view class="tips">
+				<!-- 	<view class="tips">
 					<text class="cuIcon-info"></text>
 					最多只能勾选五项
 				</view> -->
-				<bx-checkbox-group @change="checkboxGroupChange" checkbox-mode="button" max="5">
-					<bx-checkbox v-for="item in checkboxList" v-model="item.checked" :key="item.id" :name="item.value" :disabled="disabledTag && !checkedList.includes(item.value)">
-						{{ item.label }}
-					</bx-checkbox>
+				<bx-checkbox-group max="5" checkboxMode="button">
+					<bx-checkbox v-for="item in checkboxList" v-model="item.checked" :key="item.id" :name="item.label" @change="checkboxGroupChange">{{ item.label }}</bx-checkbox>
 				</bx-checkbox-group>
-				<!-- 		<checkbox-group @change="checkboxGroupChange" class="check-box-group">
+<!-- 						<checkbox-group @change="checkboxGroupChange" class="check-box-group">
 					<label v-for="(item, index) in checkboxList" :key="index" class="check-box-item">
 						<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" :disabled="disabledTag && !checkedList.includes(item.value)" />
 						{{ item.label }}
 					</label>
 				</checkbox-group> -->
 				<view class="button-box">
-					<button class="cu-btn bg-gray" @click="cancelSelectTag">取消</button>
-					<button class="cu-btn bg-blue" @click="changeSelectedTag">确定</button>
+					<button class="cu-btn" @click="cancelSelectTag">取消</button>
+					<button class="cu-btn " @click="changeSelectedTag">确定</button>
 				</view>
 			</view>
 		</u-popup>
@@ -239,8 +237,8 @@ export default {
 			showAddRecord: false,
 			treeSelectorData: [],
 			treePageInfo: {
-				pageNo: 1
-				// rownumber: 5
+				pageNo: 1,
+				rownumber: 20
 			},
 			configCols: {
 				column: 'activity_no',
@@ -906,10 +904,13 @@ export default {
 		checkboxGroupChange(e) {
 			console.log(e);
 			let items = this.checkboxList;
-			// let	values = e.detail.value;
-			let values = e;
+			let	values = e.detail.value;
+			// let values = e;
 			for (var i = 0, lenI = items.length; i < lenI; ++i) {
 				const item = items[i];
+				if (item.label === e.name) {
+					// this.$set(item, 'checked', e.value);
+				}
 				if (values.includes(item.label)) {
 					this.$set(item, 'checked', true);
 				} else {
@@ -974,6 +975,12 @@ export default {
 								item.checked = true;
 								return true;
 							}
+						});
+						this.checkboxList = this.checkboxList.map(item => {
+							if (tags.includes(item.value)) {
+								item.checked = true;
+							}
+							return item;
 						});
 					}
 				}
@@ -1509,8 +1516,12 @@ export default {
 	padding: 30rpx;
 	font-weight: bold;
 	text-align: center;
+	display: flex;
 	.cu-btn {
+		background-color: #11c5bd;
+		color: #fff;
 		margin-right: 50rpx;
+		flex: 1;
 		&:last-child {
 			margin-right: 0;
 		}

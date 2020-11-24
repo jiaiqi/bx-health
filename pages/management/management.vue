@@ -37,7 +37,6 @@ export default {
 				serviceName: 'srvhealth_doctor_select',
 				colNames: ['*'],
 				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.userInfo.user_no ? this.userInfo.user_no : this.currentUser.userno }],
-				page: { pageNo: 1, rownumber: 10 }
 			};
 			if (req.condition[0].value) {
 				let res = await this.$http.post(url, req);

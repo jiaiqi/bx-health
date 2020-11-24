@@ -513,9 +513,9 @@ export default {
 			let item = this.deepClone(this.fieldData);
 			// item.label.slice(0, 2) == (index + 1).toString()
 			let label = ''
-			if (item.label && item.label.slice(0, 1) == item.itemIndex.toString()) {
+			if (item.label && item.itemIndex&&item.label.slice(0, 1) == item.itemIndex.toString()) {
 				label =  item.label.slice(1);
-			} else if (item.label && item.label.slice(0, 2) == item.itemIndex.toString()) {
+			} else if (item.label && item.itemIndex&&item.label.slice(0, 2) == item.itemIndex.toString()) {
 				label =  item.label.slice(2);
 			} else if (item.label) {
 				label =  item.label;

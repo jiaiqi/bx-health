@@ -1,26 +1,29 @@
 <template>
 	<view class="person-chat-wrap">
-		<cu-custom class="nav-chat-top" :isBack="true"><block slot="backText">返回</block><block slot="content">交流</block></cu-custom>
-		<view v-if="heightStyle" class="person-chat-top" :style="{height:heightStyle}" :class="!doctor_no?'person-chat-top-w':'person-chat-top-w-h'">
-			<view v-for="(item,index) in recordList" :key="index" class="person-chat-item" :class="item.sender_account === currentUserInfo.user_no?'person-chat-item-my':''">
-				<view v-if="doctor_no?item.sender_account === doctor_no : item.sender_account === userInfo.userno" class="person-chat-item-accept">
-					<view class="person-chat-item-left">
-						<image :src="userInfo.img_url?userInfo.img_url:'/personalPages/static/doctor_default.jpg'" mode=""></image>
+		<!-- <cu-custom class="nav-chat-top" bgColor="#0bc99d" :isBack="true"><block slot="backText">返回</block><block slot="content">交流</block></cu-custom> -->
+		<view class="person-chat-top" :style="{height:heightStyle}" :class="!doctor_no?'person-chat-top-w':'person-chat-top-w-h'">
+			<scroll-view scroll-y="true" :style="{height:heightStyle}" :scroll-into-view="chatTextBottom">
+				<view :id="`person-chat-item${index}`" v-for="(item,index) in recordList" :key="index" class="person-chat-item" :class="item.sender_account === currentUserInfo.user_no?'person-chat-item-my':''">
+					<view v-if="doctor_no?item.sender_account === doctor_no : item.sender_account === userInfo.userno" class="person-chat-item-accept">
+						<view class="person-chat-item-left">
+							<image :src="userInfo.img_url?userInfo.img_url:'/personalPages/static/doctor_default.jpg'" mode=""></image>
+						</view>
+						<view @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+							<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
+						</view>
 					</view>
-					<view @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
-						<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
+					<view v-else-if="item.sender_account === currentUserInfo.user_no" class="person-chat-item-send">
+						<text class="unread" v-if="item.msg_state === '未读'">{{item.msg_state}}</text>
+						<view @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+							<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
+						</view>
+						<view class="person-chat-item-left">
+							<image :src="currentUserInfo.headimgurl?currentUserInfo.headimgurl:'/personalPages/static/doctor_default.jpg'" mode=""></image>
+						</view>
 					</view>
 				</view>
-				<view v-else-if="item.sender_account === currentUserInfo.user_no" class="person-chat-item-send">
-					<text class="unread" v-if="item.msg_state === '未读'">{{item.msg_state}}</text>
-					<view @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
-						<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
-					</view>
-					<view class="person-chat-item-left">
-						<image :src="currentUserInfo.headimgurl?currentUserInfo.headimgurl:'/personalPages/static/doctor_default.jpg'" mode=""></image>
-					</view>
-				</view>
-			</view>
+			</scroll-view>
+			
 		</view>
 		<view class="person-chat-bot" :class="doctor_no?'person-doctor-chat-bot':''">
 			<view class="person-chat-bot-top">
@@ -141,11 +144,29 @@
 				current_type:'world',
 				userInfo:'',
 				recordList:[],
+				chatTextBottom:'',
 				currentUserInfo:uni.getStorageSync('login_user_info'),
 				recodeList:[]
 			}
 		},
-		methods:{			
+		methods:{
+		 uniqueArray(array, key){
+			  var result = [array[0]];
+			  for(var i = 1; i < array.length; i++){
+			    var item = array[i];
+			    var repeat = false;
+			    for (var j = 0; j < result.length; j++) {
+			      if (item[key] == result[j][key]) {
+			        repeat = true;
+			        break;
+			      }
+			    }
+			    if (!repeat) {
+			      result.push(item);
+			    }
+			  }
+			  return result;
+			 },
 			async getUserInfoList(){
 				const url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 				let req = {
@@ -256,6 +277,9 @@
 				}
 				let url = this.getServiceUrl(app, serviceName, 'select');				
 				let res = await this.$http.post(url,req)
+				if(this.currentSendType === 'bite'){
+					res.data.data = this.uniqueArray(res.data.data,'hdate')
+				}
 				this.recodeList = res.data.data
 				console.log("res======>",res.data.data)
 			},
@@ -266,9 +290,9 @@
 				//    uni.pageScrollTo({scrollTop: 99999999, duration: 0});
 				// }, 50);
 				if(this.doctor_no){
-					this.heightStyle = 'calc(100vh - 185px)'
+					this.heightStyle = 'calc(100vh - 140px)'
 				}else{
-					this.heightStyle = 'calc(100vh - 225px)'
+					this.heightStyle = 'calc(100vh - 200px)'
 				}
 				
 			},
@@ -282,9 +306,9 @@
 				this.chatText = "",
 				this.isSendLink = false
 				if(this.doctor_no){
-					this.heightStyle = 'calc(100vh - 95px)'
+					this.heightStyle = 'calc(100vh - 50px)'
 				}else{
-					this.heightStyle = 'calc(100vh - 140px)'
+					this.heightStyle = 'calc(100vh - 100px)'
 				}
 				// this.heightStyle = 'calc(100vh - 100px)'
 			},
@@ -295,9 +319,9 @@
 					this.isSendLink = false
 					
 					if(this.doctor_no){
-						this.heightStyle = 'calc(100vh - 90px)'
+						this.heightStyle = 'calc(100vh - 50px)'
 					}else{
-						this.heightStyle = 'calc(100vh - 140px)'
+						this.heightStyle = 'calc(100vh - 100px)'
 					}
 					
 				}
@@ -397,6 +421,7 @@
 				let res = await this.$http.post(url, req);
 				if(res.data.data.length > 0){
 					this.recordList = res.data.data
+					this.chatTextBottom ='person-chat-item' + (res.data.data.length - 1)
 					// this.getUserInfoList()
 					if(type && type === 'onLoad'){
 						this.updateMessageInfo()
@@ -460,12 +485,22 @@
 			if(this.customer_no){
 				this.getUserInfo(this.customer_no);
 			}
+			const query = uni.createSelectorQuery().in(this);
+			query.select('.person-chat-top').boundingClientRect(data => {
+			  console.log("得到布局位置信息" + JSON.stringify(data));
+			  console.log("节点离页面顶部的距离为" + data.top);
+			  uni.pageScrollTo({
+			      scrollTop: data.top,
+			      duration: 300
+			  });
+			}).exec();
+			
 			setTimeout(()=>{
 				this.$nextTick(()=>{
 					if(this.doctor_no){
-						this.heightStyle = 'calc(100vh - 180px);'
+						this.heightStyle = 'calc(100vh - 50px);'
 					}else{
-						this.heightStyle = 'calc(100vh - 140px);'
+						this.heightStyle = 'calc(100vh - 100px);'
 					}
 				})
 			},500)
@@ -488,7 +523,7 @@
 		height: 100vh;
 		background-color: #eeeeee;
 		.nav-chat-top{
-			background-color: rgb(11, 201, 157);
+			background-color: rgb(11, 201, 157)!important;
 			color: white;
 			font-weight: 700;
 		}
@@ -599,10 +634,10 @@
 			}
 		}
 		.person-chat-top-w{
-			max-height: calc(100vh - 260rpx);
+			// max-height: calc(100vh - 260rpx);
 		}
 		.person-chat-top-w-h{
-			max-height: calc(100vh - 180rpx);
+			// max-height: calc(100vh - 180rpx);
 		}
 		.person-chat-bot{
 			// background-color: #f7f7f7;
@@ -691,7 +726,7 @@
 		}
 	}
 	.recode-poup{
-		height: calc(100vh - 100px);
+		height: calc(100vh - 150px);
 		overflow-y: auto;
 		.recode-poup-list{
 			display: flex;

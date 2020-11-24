@@ -94,6 +94,38 @@
 			<view v-else-if="type && (type === 'pressure' || type === 'bp')" class="item-wrap">
 				<!-- 血压 -->
 				<view class="item-list">
+						<text>姿势</text>
+					<!-- <text>收缩压(高压 毫米汞柱)</text> -->
+					<bx-radio-group value="坐位" @change="radioChange($event,'posture')">
+						<bx-radio
+							class="radio"
+							color="#2979ff"
+							v-for="(item,i) in postList"							
+							:key="i"
+							:name="item.value"
+						>
+							{{ item.value }}
+						</bx-radio>
+					</bx-radio-group>
+					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.systolic_pressure" /></view> -->
+				</view>
+				<view class="item-list">
+						<text>测量位置</text>
+					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.systolic_pressure" /></view> -->
+					<bx-radio-group value="右上臂" @change="radioChange($event,'postion')">
+						<bx-radio
+							class="radio"
+							color="#2979ff"
+							v-for="(item,i) in measureList"							
+							:key="i"
+							:name="item.value"
+						>
+							{{ item.value }}
+						</bx-radio>
+					</bx-radio-group>
+				</view>
+				
+				<view class="item-list">
 					<view class="item-list-top">
 						<text>*</text>
 						<text>收缩压(高压 毫米汞柱)</text>
@@ -185,9 +217,11 @@
 
 <script>
 import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
+import bxRadio from '@/components/bx-radio/bx-radio.vue';
+import bxRadioGroup from '@/components/bx-radio-group/bx-radio-group.vue';
 export default {
 	name: 'otherIndicator',
-	components: { MxDatePicker },
+	components: { MxDatePicker,bxRadio,bxRadioGroup },
 	data() {
 		return {
 			inputVal: {
@@ -202,14 +236,16 @@ export default {
 				oxygen_saturation_max: '', // 血氧饱和度最大值%
 				oxygen_saturation_min: '', //血氧饱和度最小值%
 				oxygen_saturation_avg: '', // 血氧饱和度平均值%
-				heart_rate: '', // 血压- 心率
+				heart_rate: 0, // 血压- 心率
 				diastolic_pressure: '', //血压 - 舒张压
 				systolic_pressure: '', //血压-收缩压
 				wearing: '', // 体重体脂 - 衣着穿戴
 				alimentary_canal: '', // 体重体脂-  消化道情况
 				retire_time: '', //睡眠 - 就寝时间
 				getup_time: '', //睡眠 - 起床时间
-				sleepy_daytime: '' //睡眠 - 犯困情况
+				sleepy_daytime: '' ,//睡眠 - 犯困情况
+				posture:'坐位', //血压 - 姿势
+				measure_position:'右上臂' // 血压 - 测量位置
 			},
 			sleepy_option: [{ label: '从不', value: '从不' }, { label: '很少', value: '很少' }, { label: '经常', value: '经常' }, { label: '严重', value: '严重' }],
 			showSelect: false,
@@ -229,6 +265,29 @@ export default {
 			showWeightDigSelect: false,
 			weightCurrentRadio: '',
 			digeCurrentRadio: '',
+			measureList:[{
+				value:'右上臂',
+				label:'右上臂',
+			},{
+				value:'左上臂',
+				label:'左上臂',
+			},{
+				value:'右手腕',
+				label:'右手腕',
+			},{
+				value:'左手腕',
+				label:'左手腕',
+			}],
+			postList:[{
+				value:'坐位',
+				label:'坐位',
+			},{
+				value:'躺卧位',
+				label:'躺卧位',
+			},{
+				value:'站立位',
+				label:'站立位',
+			}],
 			list: [
 				{
 					value: '穿鞋',
@@ -316,6 +375,15 @@ export default {
 		}
 	},
 	methods: {
+		/*血压-姿势单选**/
+		radioChange(e,type){
+			console.log("e=====>",e)
+			if(type === 'posture'){
+				this.inputVal.posture = e
+			}else if(type === 'postion'){
+				this.inputVal.measure_position = e
+			}
+		},
 		/*体重--衣着穿戴多选**/
 		checkboxGroupChange(e,type) {
 			let str = ""
@@ -346,15 +414,15 @@ export default {
 		sleepyRadioChange(evt) {
 			this.inputVal.sleepy_daytime = evt.target.value;
 		},
-		RadioChange(e, type) {
-			if (type === 'clothing') {
-				this.inputVal.wearing = e.detail.value;
-				this.weightCurrentRadio = e.detail.value;
-			} else if (type === 'digestion') {
-				this.inputVal.alimentary_canal = e.detail.value;
-				this.digeCurrentRadio = e.detail.value;
-			}
-		},
+		// RadioChange(e, type) {
+		// 	if (type === 'clothing') {
+		// 		this.inputVal.wearing = e.detail.value;
+		// 		this.weightCurrentRadio = e.detail.value;
+		// 	} else if (type === 'digestion') {
+		// 		this.inputVal.alimentary_canal = e.detail.value;
+		// 		this.digeCurrentRadio = e.detail.value;
+		// 	}
+		// },
 		confirmChoose(e, type) {
 			switch (type) {
 				case 'clothing':
@@ -510,6 +578,8 @@ export default {
 									heart_rate: this.inputVal.heart_rate,
 									systolic_pressure: this.inputVal.systolic_pressure,
 									diastolic_pressure: this.inputVal.diastolic_pressure,
+									posture:this.inputVal.posture,
+									measure_position:this.inputVal.measure_position,
 									remark: this.inputVal.remark
 								}
 							]

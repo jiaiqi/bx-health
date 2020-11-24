@@ -32,17 +32,49 @@
 			</view>
 		</view>
 		<view class="shop-detail-bot">
-			<view class="uni-ec-canvas-top">
-				<text @click="changeApprove(item,index)" :class="currentAppr.name === item.name?'active-approve':''" v-for="(item,index) in approveData" :key="index">{{item.name}}</text>
+			<view class="ele-text-top-tit">					
+				<text @click="changeCate(item,index)" v-for="(item,index) in categoryTop" v-if="item.name === '食材组成'?currFood.meal_no:true" :key="index" :class="categoryTopIndex === index?'active-text-top-tit':''">{{item.name}}</text>					
 			</view>
-			<view class="uni-ec-canvas-bot">
-				<!-- #ifdef MP-WEIXIN -->
-					<uniEcCanvas class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
-				<!-- #endif -->
-				<!-- #ifdef H5 -->
-					<uniEcharts class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
-				<!-- #endif -->
+			<view v-if="categoryTopIndex == 0" class="">
+				<view class="uni-ec-canvas-top">
+					<text @click="changeApprove(item,index)" :class="currentAppr.name === item.name?'active-approve':''" v-for="(item,index) in approveData" :key="index">{{item.name}}</text>
+				</view>
+				<view class="uni-ec-canvas-bot">
+					<!-- #ifdef MP-WEIXIN -->
+						<uniEcCanvas class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+					<!-- #endif -->
+					<!-- #ifdef H5 -->
+						<uniEcharts class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
+					<!-- #endif -->
+				</view>
 			</view>
+			<view v-if="categoryTopIndex == 1" class="shop-detail-bot-b" :class="foodChild.length >=3?'bot-padd':''">
+				<view class="shop-detail-bot-b-t">
+					<text>食材含量</text>
+				</view>
+				<view class="shop-detail-bot-tab">
+					<view class="shop-detail-bot-tab-t">
+						<text>食材名称</text>
+						<text>食材含量</text>
+						<text>单位</text>
+					</view>
+					<view v-if="foodChild.length > 0" class="shop-detail-bot-tab-m">
+						<view v-for="(item,index) in foodChild" :key="index" class="shop-detail-bot-tab-m-item">
+							<text>{{item.name}}</text>
+							<text>{{item.unit_amount}}</text>
+							<text>{{item.unit}}</text>
+						</view>
+					</view>
+					<view v-else class="detail-none">
+						<view class="detail-none-t">
+							<image src="/otherPages/static/img/noneData.png" mode=""></image>
+							<text>暂无数据</text>
+						</view>
+						
+					</view>
+				</view>
+			</view>
+			
 			<!-- <view class="shop-detail-bot-t">
 				<view class="shop-detail-bot-t-t">
 					食物营养素含量
@@ -153,33 +185,7 @@
 					</view>	
 				</view>
 			</view>	 -->		
-		</view>
-		<view class="shop-detail-bot-b" :class="foodChild.length >=3?'bot-padd':''">
-			<view class="shop-detail-bot-b-t">
-				<text>食材含量</text>
-			</view>
-			<view class="shop-detail-bot-tab">
-				<view class="shop-detail-bot-tab-t">
-					<text>食材名称</text>
-					<text>食材含量</text>
-					<text>单位</text>
-				</view>
-				<view v-if="foodChild.length > 0" class="shop-detail-bot-tab-m">
-					<view v-for="(item,index) in foodChild" :key="index" class="shop-detail-bot-tab-m-item">
-						<text>{{item.name}}</text>
-						<text>{{item.unit_amount}}</text>
-						<text>{{item.unit}}</text>
-					</view>
-				</view>
-				<view v-else class="detail-none">
-					<view class="detail-none-t">
-						<image src="/otherPages/static/img/noneData.png" mode=""></image>
-						<text>暂无数据</text>
-					</view>
-					
-				</view>
-			</view>
-		</view>
+		</view>		
 		<jumpBall :backgroundColor="'red'" :start.sync="num" :element.sync="element" @msg="jbMsg" />
 		<view class="public-button-box">
 			<view @click="goCar" class="lg text-gray cuIcon-cart add-button">
@@ -212,6 +218,13 @@
 		},
 		data(){
 			return {
+				categoryTop:[{
+					name:'NRV%占比',
+					type:'NRV'
+				},{
+					name:'食材组成',
+					type:'material'
+				}],
 				foodObj:"",
 				foodChild:'',
 				queryType:'',
@@ -387,6 +400,7 @@
 				currFood:'',
 				userInfo: '',
 				result: '',
+				categoryTopIndex:0,
 				eleData:['protein','vitamin_b1','vitamin_b2','vitamin_b3','vitamin_c','element_mg','element_p','element_k','element_fe','element_zn','element_se','element_cu','element_mn']
 			}
 		},
@@ -399,6 +413,13 @@
 			}
 		},
 		methods:{
+			/*点击切换营养素占比和NRV**/
+			changeCate(item,index){
+				this.categoryTopIndex = index
+				if(item.type === 'NRV'){
+					this.currentAppr = this.approveData[0]
+				}
+			},
 			/*点击切换图表顶部类型**/
 			changeApprove(item,index){
 				if(item.type === 'mine' && (!item.age || !item.sex)){
@@ -955,5 +976,23 @@
 	.uni-ec-canvas-bot{
 		width: 710rpx;
 		height: 540rpx;
+	}
+	.ele-text-top-tit{
+		display: flex;
+		margin-bottom: 30rpx;
+		text{
+			font-size: 30rpx;
+			padding: 8rpx 20rpx;
+			border-bottom: 1px solid transparent;
+			margin-right: 20rpx;
+			
+			// border-radius: 30rpx;
+		}
+		.active-text-top-tit{
+			// background-color: #fbbd08;
+			color: #FBBD08;
+			font-weight: 700;
+			border-color: #FBBD08;
+		}
 	}
 </style>

@@ -113,6 +113,12 @@ export default {
 		}
 	},
 	async created() {
+		// #ifdef MP-WEIXIN
+		wx.showShareMenu({
+			withShareTicket: true,
+			menus: ['shareAppMessage', 'shareTimeline']
+		});
+		// #endif
 		let userInfo = uni.getStorageSync('wxUserInfo');
 		this.wxUserInfo = userInfo;
 		let userList = uni.getStorageSync('user_info_list');

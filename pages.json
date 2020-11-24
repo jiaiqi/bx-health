@@ -39,7 +39,10 @@
 			"path": "pages/testPage/testPage",
 			"style": {
 				"navigationBarTitleText": "健康图谱",
-				"enablePullDownRefresh": false
+				"enablePullDownRefresh": false,
+				"usingComponents": {
+					
+				}
 			}
 		}
 	],
@@ -157,7 +160,7 @@
 				{
 					"path": "patientsInfo/patientsInfo",
 					"style": {
-						"navigationStyle": "custom",
+						// "navigationStyle": "custom",
 						"navigationBarTitleText": "患者信息",
 						"enablePullDownRefresh": false
 					}
@@ -173,9 +176,10 @@
 				{
 					"path": "myDoctor/doctorChat",
 					"style": {
-						"navigationStyle": "custom",
+						// "navigationStyle": "custom",
 						"navigationBarTitleText": "聊天列表",
 						"enablePullDownRefresh": true
+						// "navigationBarBackgroundColor":"#0bc99d"
 					}
 				}
 			]
@@ -452,7 +456,7 @@
 	"tabBar": {
 		"color": "#999", //文字颜色
 		"selectedColor": "#facc31", //选中时文字颜色
-		"borderStyle": "black", 
+		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
 		"list": [{
 				"pagePath": "pages/pedia/pedia", //页面路径
