@@ -69,6 +69,10 @@ export default {
 		serialChar:{
 			type: [String, Number],
 			default: ''
+		},
+		wrap:{
+			type: [String, Boolean],
+			default: ''
 		}
 	},
 	data() {

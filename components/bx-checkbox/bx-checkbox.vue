@@ -1,10 +1,10 @@
 <template>
-	<view class="bx-checkbox" :style="[checkboxStyle]">
+	<view class="bx-checkbox" :style="[checkboxStyle]" :class="checkboxClass">
 		<view class="bx-checkbox-icon" @tap="toggle" :class="{ checked: value }">
 			<text v-if="serialChar">{{ serialChar }}</text>
 			<text class="cuIcon-check" v-if="value && !serialChar"></text>
 		</view>
-		<view class="bx-checkbox__label" @tap="onClickLabel"><slot /></view>
+		<view class="bx-checkbox__label" @tap="onClickLabel" :class="{ checked: value, disabled: disabled }"><slot /></view>
 	</view>
 </template>
 
@@ -113,6 +113,13 @@ export default {
 		elShape() {
 			return this.shape ? this.shape : this.parent ? this.parent.shape : 'square';
 		},
+		checkboxClass() {
+			if (this.parent && this.parent.checkboxMode) {
+				if (this.parent.checkboxMode === 'button') {
+					return 'button-mode';
+				}
+			}
+		},
 		checkboxStyle() {
 			let style = {};
 			if (this.parent && this.parent.width) {
@@ -126,6 +133,7 @@ export default {
 				style.flex = `0 0 ${this.parent.width}`;
 				// #endif
 			}
+
 			if (this.parent && this.parent.wrap) {
 				style.width = '100%';
 				// #ifndef MP
@@ -208,11 +216,7 @@ export default {
 .bx-checkbox {
 	display: flex;
 	margin: 10rpx;
-	min-width: calc(50% - 20rpx);
 	align-items: center;
-	&:nth-child(2n) {
-		margin-right: 0;
-	}
 	.bx-checkbox-icon {
 		border: 1rpx solid #888;
 		width: 40rpx;
@@ -229,6 +233,35 @@ export default {
 			border-color: #fff;
 			// color: #0081FF;
 			border: none;
+		}
+	}
+	&.button-mode {
+		.bx-checkbox-icon {
+			display: none;
+		}
+		.bx-checkbox__label {
+			color: #323233;
+			background-color: #fff;
+			border: 1px solid #ebedf0;
+			padding: 8rpx 20rpx;
+			border-radius: 50rpx;
+			letter-spacing: 1px;
+			transition: all 0.5s;
+			&:active {
+				color: #409eff;
+				background: #ecf5ff;
+				border-color: #b3d8ff;
+			}
+			&.checked {
+				color: #fff;
+				border-color: #0081ff;
+				background-color: #0081ff;
+			}
+			&.disabled {
+				color: #fff;
+				background-color: #a0cfff;
+				border-color: #a0cfff;
+			}
 		}
 	}
 }

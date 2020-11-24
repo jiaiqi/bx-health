@@ -947,6 +947,9 @@ export default {
 	props: {
 		pageType: {
 			type: String
+		},
+		chatChoseTime: {
+			type: String
 		}
 	},
 	computed: {
@@ -2798,6 +2801,9 @@ export default {
 	mounted() {
 		if (!this.pageType) {
 			return;
+		}
+		if(this.chatChoseTime){
+			this.selectDate = this.chatChoseTime
 		}
 		self = this;
 		this.procEleData();

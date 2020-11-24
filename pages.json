@@ -157,9 +157,9 @@
 				{
 					"path": "patientsInfo/patientsInfo",
 					"style": {
-						// "navigationStyle": "custom",
+						"navigationStyle": "custom",
 						"navigationBarTitleText": "患者信息",
-						"enablePullDownRefresh": true
+						"enablePullDownRefresh": false
 					}
 				},
 				{
@@ -173,7 +173,7 @@
 				{
 					"path": "myDoctor/doctorChat",
 					"style": {
-						// "navigationStyle": "custom",
+						"navigationStyle": "custom",
 						"navigationBarTitleText": "聊天列表",
 						"enablePullDownRefresh": true
 					}

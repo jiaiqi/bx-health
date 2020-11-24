@@ -128,7 +128,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="health-archive-item " >
+		<view class="health-archive-item ">
 			<view class="subtitle">
 				<text class="title-text">疾病风险提示</text>
 				<view class=""></view>
@@ -190,16 +190,21 @@
 		</u-popup>
 		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="bottom">
 			<view class="health-item">
-				<view class="tips">
+			<!-- 	<view class="tips">
 					<text class="cuIcon-info"></text>
 					最多只能勾选五项
-				</view>
-				<checkbox-group @change="checkboxGroupChange" class="check-box-group">
+				</view> -->
+				<bx-checkbox-group @change="checkboxGroupChange" checkbox-mode="button" max="5">
+					<bx-checkbox v-for="item in checkboxList" v-model="item.checked" :key="item.id" :name="item.value" :disabled="disabledTag && !checkedList.includes(item.value)">
+						{{ item.label }}
+					</bx-checkbox>
+				</bx-checkbox-group>
+				<!-- 		<checkbox-group @change="checkboxGroupChange" class="check-box-group">
 					<label v-for="(item, index) in checkboxList" :key="index" class="check-box-item">
 						<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" :disabled="disabledTag && !checkedList.includes(item.value)" />
 						{{ item.label }}
 					</label>
-				</checkbox-group>
+				</checkbox-group> -->
 				<view class="button-box">
 					<button class="cu-btn bg-gray" @click="cancelSelectTag">取消</button>
 					<button class="cu-btn bg-blue" @click="changeSelectedTag">确定</button>
@@ -294,7 +299,11 @@ export default {
 			}
 		},
 		disabledTag() {
-			return this.checkedList.length >= 5;
+			if (this.checkedList.length >= 5) {
+				return true;
+			} else {
+				return false;
+			}
 		},
 		avatarUrl() {
 			if (this.userInfo.profile_url) {
@@ -896,8 +905,9 @@ export default {
 		},
 		checkboxGroupChange(e) {
 			console.log(e);
-			var items = this.checkboxList,
-				values = e.detail.value;
+			let items = this.checkboxList;
+			// let	values = e.detail.value;
+			let values = e;
 			for (var i = 0, lenI = items.length; i < lenI; ++i) {
 				const item = items[i];
 				if (values.includes(item.label)) {

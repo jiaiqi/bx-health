@@ -15,7 +15,7 @@
 
 		<view class="history-box" v-if="pageType">
 			<view class="history-content">
-				<dietList :key="pageType" @changePageType="changePageType" :pageType="pageType" v-if="pageType === 'diet' || pageType === 'sport'"></dietList>
+				<dietList :chatChoseTime="chatChoseTime" :key="pageType" @changePageType="changePageType" :pageType="pageType" v-if="pageType === 'diet' || pageType === 'sport'"></dietList>
 				<view
 					class="other-record"
 					v-if="pageType === 'sleep' || pageType === 'bp' || pageType === 'weight'"
@@ -180,6 +180,7 @@ export default {
 	data() {
 		return {
 			customer_no: '',
+			chatChoseTime:'',
 			isAllPages: false,
 			backTextStyle: {
 				width: '100rpx',
@@ -1221,6 +1222,10 @@ export default {
 		}
 		if (option.pageType) {
 			this.pageType = option.pageType;
+		}
+		
+		if(option.chatChoseTime){
+			this.chatChoseTime = option.chatChoseTime
 		}
 	}
 };

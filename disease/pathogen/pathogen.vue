@@ -37,8 +37,9 @@
 						    series: [
 						        {
 						            type: 'graph',
-						            layout: 'none',
-						            // layout: 'circular',
+						            // layout: 'none',
+									// layout:'force',
+						            layout: 'circular',
 									symbol:'roundRect',//diamond---菱形、triangle---三角形、circle---圆形、rect---方形、roundRect---圆角方形
 						            symbolSize: '50',
 						            roam: false,

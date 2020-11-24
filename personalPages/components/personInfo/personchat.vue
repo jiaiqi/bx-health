@@ -1,40 +1,99 @@
 <template>
 	<view class="person-chat-wrap">
-		<view class="person-chat-top" :class="!doctor_no?'person-chat-top-w':''">
+		<cu-custom class="nav-chat-top" :isBack="true"><block slot="backText">返回</block><block slot="content">交流</block></cu-custom>
+		<view v-if="heightStyle" class="person-chat-top" :style="{height:heightStyle}" :class="!doctor_no?'person-chat-top-w':'person-chat-top-w-h'">
 			<view v-for="(item,index) in recordList" :key="index" class="person-chat-item" :class="item.sender_account === currentUserInfo.user_no?'person-chat-item-my':''">
 				<view v-if="doctor_no?item.sender_account === doctor_no : item.sender_account === userInfo.userno" class="person-chat-item-accept">
 					<view class="person-chat-item-left">
-						<image src="../../static/doctor_default.jpg" mode=""></image>
+						<image :src="userInfo.img_url?userInfo.img_url:'/personalPages/static/doctor_default.jpg'" mode=""></image>
 					</view>
-					<view class="person-chat-item-right">
-						<text>{{item.msg_content}}</text>
+					<view @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+						<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
 					</view>
 				</view>
 				<view v-else-if="item.sender_account === currentUserInfo.user_no" class="person-chat-item-send">
 					<text class="unread" v-if="item.msg_state === '未读'">{{item.msg_state}}</text>
-					<view class="person-chat-item-right">
-						<text>{{item.msg_content}}</text>
+					<view @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+						<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
 					</view>
 					<view class="person-chat-item-left">
-						<image src="../../static/doctor_default.jpg" mode=""></image>
+						<image :src="currentUserInfo.headimgurl?currentUserInfo.headimgurl:'/personalPages/static/doctor_default.jpg'" mode=""></image>
 					</view>
 				</view>
 			</view>
 		</view>
 		<view class="person-chat-bot" :class="doctor_no?'person-doctor-chat-bot':''">
-			<view class="person-chat-left">
-				<input @input="changeTest" v-model="chatText" type="text" value="" />
+			<view class="person-chat-bot-top">
+				<view class="person-chat-left">
+					<input v-if="!isSendLink" @input="changeTest" v-model="chatText" type="text" value="" />
+					<input v-else @input="changeTest" v-model="chatText" type="text" value="" />
+				</view>
+				<view class="person-chat-rig">
+					<view class="person-chat-rig-add-wrap">
+						<view @click="openLink" v-if="!isFeed" class="person-chat-rig-add">
+							<text class="lg text-gray" :class="'cuIcon-add'"></text>
+						</view>					
+					</view>
+					
+					<!-- <text @click="changeType('link')" v-if="!isFeed && current_type === 'world'">链接</text> -->
+					<!-- <text @click="changeType('world')" v-if="!isFeed && current_type === 'link'">文字</text> -->
+					<text class="send" @click="sendMessage" v-if="isFeed">发送</text>
+				</view>
 			</view>
-			<view class="person-chat-rig">
-				<text @click="changeType('link')" v-if="!isFeed && current_type === 'world'">链接</text>
-				<text @click="changeType('world')" v-if="!isFeed && current_type === 'link'">文字</text>
-				<text class="send" @click="sendMessage" v-if="isFeed">发送</text>
+			<view v-if="!isFeed && isSendLink" class="person-chat-bot-bot">
+				<view class="person-chat-bot-bot-item-w">
+					<view @click="openMenuPoup('question')" class="person-chat-bot-bot-item">
+						<view class="person-chat-bot-bot-item-top">
+							问
+						</view>
+						<view  class="person-chat-bot-bot-item-b">
+							<text>问卷记录</text>
+						</view>
+					</view>
+					<view @click="openMenuPoup('bite')" class="person-chat-bot-bot-item">
+						<view class="person-chat-bot-bot-item-top">
+							饮
+						</view>
+						<view  class="person-chat-bot-bot-item-b">
+							<text>饮食记录</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+		<view class="cu-modal bottom-modal" :class="showBottom?'show':''">
+			<view class="cu-dialog">
+				<view class="cu-bar bg-white">
+					<view class="action text-green" @click="confirmPoup">确定</view>
+					<view class="action text-blue" @tap="hideModal">取消</view>
+				</view>
+				<view class="padding-xl recode-poup">
+					<bx-radio-group @change="radioChange">
+						<bx-radio
+							class="radio"
+							color="#2979ff"
+							v-for="(item,i) in recodeList"							
+							:key="item.id"
+							:name="item.activity_no?item.activity_no:item.hdate"
+						>
+							{{ item.title?item.title:item.hdate }}
+						</bx-radio>
+					</bx-radio-group>
+					<!-- <checkbox-group @change="checkboxGroupChange" class="check-box-group recode-poup-list">
+						<label v-for="(item, index) in 5" :key="index" class="check-box-item">
+							<checkbox :value="index" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" />
+							{{ index }}
+						</label>
+					</checkbox-group> -->
+				</view>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
+	import bxRadio from '@/components/bx-radio/bx-radio.vue';
+	import bxRadioGroup from '@/components/bx-radio-group/bx-radio-group.vue';
 	export default {
 		name:'personchat',
 		components:{
@@ -72,15 +131,147 @@
 		},
 		data(){
 			return {
+				heightStyle:'',
+				checkRadioValue:'',
 				chatText:'',
+				isSendLink:false,
+				showBottom:false,
+				currentSendType:'',
 				// isFeed:false,
 				current_type:'world',
 				userInfo:'',
 				recordList:[],
-				currentUserInfo:uni.getStorageSync('login_user_info')
+				currentUserInfo:uni.getStorageSync('login_user_info'),
+				recodeList:[]
 			}
 		},
-		methods:{
+		methods:{			
+			async getUserInfoList(){
+				const url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
+				let req = {
+					serviceName: 'srvhealth_person_info_select',
+					colNames: ['*'],
+					condition: [],
+					order: [
+						{
+							colName: 'create_time',
+							orderType: 'asc'
+						}
+					]
+				};
+				const res = await this.$http.post(url, req);
+				console.log("userInfo=====>",res.data.data)
+			},
+			clickChatLink(item){
+				console.log("点击聊天----",item)
+				uni.navigateTo({
+					url:item.msg_link
+				})
+			},
+			radioChange(e){
+				this.checkRadioValue = e
+				console.log("e----------",e)
+				
+			},
+			checkboxGroupChange(){
+			},
+			openMenuPoup(type){
+				this.showBottom = true
+				this.currentSendType = type
+				// if(this.currentSendType === 'question'){
+					this.seleceMenuConent()
+				// }
+			},
+			confirmPoup(){
+				this.showBottom = false
+				// url:`/questionnaire/index/index?formType=form&activity_no=${item.no}&status=进行中`
+				let url = ''
+				if(this.currentSendType == 'question'){
+					url = `/questionnaire/index/index?formType=form&activity_no=${this.checkRadioValue}&status=进行中`
+				}else if(this.currentSendType == 'bite'){
+					// url = `/archivesPages/archives-history/archives-history?pageType=${e}`;
+					url = `/archivesPages/archives-history/archives-history?pageType=diet&chatChoseTime=` + this.checkRadioValue
+				}
+				this.chatText = url
+				// let linkData = {
+				// 	name:,
+				// 	url:url
+				// }
+				console.log("------url",url)
+				
+			},
+			hideModal(){
+				this.showBottom = false
+			},
+			async seleceMenuConent(){
+				let serviceName = null
+				let req = null
+				let app = null
+				if(this.currentSendType === 'question'){
+					serviceName = 'srvdaq_activity_cfg_select',
+					req = {
+						serviceName: serviceName,
+						colNames: ['*'],
+						condition:[
+						// {
+						// 	colName:'user_no',
+						// 	ruleType:'eq',
+						// 	value:uni.getStorageSync('login_user_info').user_no
+						// },
+						{
+							colName:'status',
+							ruleType:"eq",
+							value:'进行中'
+						},
+						{
+							colName:'info_collect_type',
+							ruleType:"eq",
+							value:'自测'
+						}
+						],
+						order:[{
+							colName:'create_time',
+							orderType:'asc'
+						}]
+					}
+					app = 'daq'
+				}else if(this.currentSendType === 'bite'){
+					app = 'health'
+					serviceName = 'srvhealth_diet_record_select',
+					req = {
+						serviceName: serviceName,
+						colNames: ['*'],
+						condition:[
+						{
+							colName:'userno',
+							ruleType:'eq',
+							value:uni.getStorageSync('login_user_info').user_no
+						},						
+						],
+						order:[{
+							colName:'create_time',
+							orderType:'desc'
+						}]
+					}
+				}
+				let url = this.getServiceUrl(app, serviceName, 'select');				
+				let res = await this.$http.post(url,req)
+				this.recodeList = res.data.data
+				console.log("res======>",res.data.data)
+			},
+			/*打开发送链接弹窗**/
+			openLink(){
+				this.isSendLink = true
+				// setTimeout(() => {
+				//    uni.pageScrollTo({scrollTop: 99999999, duration: 0});
+				// }, 50);
+				if(this.doctor_no){
+					this.heightStyle = 'calc(100vh - 185px)'
+				}else{
+					this.heightStyle = 'calc(100vh - 225px)'
+				}
+				
+			},
 			/*切换文字或者链接**/
 			changeType(type){
 				this.current_type = type
@@ -88,12 +279,28 @@
 			/*点击发送**/
 			sendMessage(){
 				this.sendMessageInfo()
-				this.chatText = ""
+				this.chatText = "",
+				this.isSendLink = false
+				if(this.doctor_no){
+					this.heightStyle = 'calc(100vh - 95px)'
+				}else{
+					this.heightStyle = 'calc(100vh - 140px)'
+				}
+				// this.heightStyle = 'calc(100vh - 100px)'
 			},
 			
 			/*input框内有没有内容**/
 			changeTest(){
-				
+				if(this.chatText){
+					this.isSendLink = false
+					
+					if(this.doctor_no){
+						this.heightStyle = 'calc(100vh - 90px)'
+					}else{
+						this.heightStyle = 'calc(100vh - 140px)'
+					}
+					
+				}
 			},
 			/*点击发送后添加数据**/
 			async sendMessageInfo(){
@@ -104,10 +311,10 @@
 					data:[{
 						sender_account:this.currentUserInfo.user_no,
 						receiver_account:this.doctor_no?this.doctor_no:this.userInfo.userno,
-						msg_content_type:this.current_type==='world'?'文本':'链接',
+						msg_content_type:!this.isSendLink?'文本':'链接',
 					}]
 				}];
-				if(this.current_type === 'world'){
+				if(!this.isSendLink){
 					req[0].data[0].msg_content=this.chatText
 				}else{
 					req[0].data[0].msg_link=this.chatText
@@ -115,6 +322,7 @@
 				console.log("res========>",req)
 				let res = await this.$http.post(url, req);
 				if(res.data.state === 'SUCCESS'){
+					
 					console.log("发送成功")
 					this.getMessageInfo()
 					
@@ -189,6 +397,7 @@
 				let res = await this.$http.post(url, req);
 				if(res.data.data.length > 0){
 					this.recordList = res.data.data
+					// this.getUserInfoList()
 					if(type && type === 'onLoad'){
 						this.updateMessageInfo()
 					}
@@ -215,6 +424,7 @@
 				}];
 				let res = await this.$http.post(url, req);
 				if(res.data.state === 'SUCCESS'){
+					
 					this.getMessageInfo()
 					console.log("更新成功")
 				}				
@@ -230,7 +440,11 @@
 				};
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+					if(res.data.data[0].profile_url){
+						res.data.data[0]['img_url'] = this.$api.downloadFile + res.data.data[0].profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
+					}					
 					this.userInfo = res.data.data[0];
+					
 					this.getMessageInfo('onLoad')
 					return res.data.data[0];
 				}else{
@@ -246,6 +460,20 @@
 			if(this.customer_no){
 				this.getUserInfo(this.customer_no);
 			}
+			setTimeout(()=>{
+				this.$nextTick(()=>{
+					if(this.doctor_no){
+						this.heightStyle = 'calc(100vh - 180px);'
+					}else{
+						this.heightStyle = 'calc(100vh - 140px);'
+					}
+				})
+			},500)
+			
+			
+			// setTimeout(() => {
+			//    uni.pageScrollTo({scrollTop: 99999999, duration: 0});
+			// }, 50);
 		},
 		onLoad(option) {
 			if(option.no){
@@ -259,6 +487,11 @@
 	.person-chat-wrap{
 		height: 100vh;
 		background-color: #eeeeee;
+		.nav-chat-top{
+			background-color: rgb(11, 201, 157);
+			color: white;
+			font-weight: 700;
+		}
 		.person-chat-top{
 			display: flex;
 			flex-direction: column;
@@ -300,6 +533,14 @@
 							top: 15px;
 						}
 					}
+					.person-chat-item-right-link{
+						text{
+							color: blue;
+							font-weight: 200;
+							font-style:italic;
+							text-decoration: underline;
+						}
+					}
 				}
 				.person-chat-item-send{
 					display: flex;
@@ -321,6 +562,8 @@
 					}
 					.person-chat-item-right{
 						min-width: 40%;
+						max-width: 75%;
+						word-wrap: break-word;
 						background: #07c062;
 						border-radius: 5px;
 						padding: 5px;
@@ -340,6 +583,14 @@
 							top: 15px;
 						}
 					}
+					.person-chat-item-right-link{
+						text{
+							color: blue;
+							font-weight: 200;
+							font-style:italic;
+							text-decoration: underline;
+						}
+					}
 				}
 			}
 			.person-chat-item-my{
@@ -348,17 +599,27 @@
 			}
 		}
 		.person-chat-top-w{
-			max-height: calc(100vh - 172rpx);
+			max-height: calc(100vh - 260rpx);
+		}
+		.person-chat-top-w-h{
+			max-height: calc(100vh - 180rpx);
 		}
 		.person-chat-bot{
-			background-color: #f7f7f7;
-			box-shadow: 0px 1px 4px rgba(26, 26, 26, 0.2);
+			// background-color: #f7f7f7;
+			// box-shadow: 0px 1px 4px rgba(26, 26, 26, 0.2);
 			position: fixed;
 			bottom: 80rpx;
 			width: 100%;
-			display: flex;
-			padding: 10rpx 20rpx;
-			align-items: center;
+			// display: flex;
+			// padding: 10rpx 20rpx;
+			// align-items: center;
+			.person-chat-bot-top{
+				background-color: #f7f7f7;
+				box-shadow: 0px 1px 4px rgba(26, 26, 26, 0.2);				
+				width: 100%;
+				display: flex;
+				padding: 10rpx 20rpx;
+				align-items: center;
 			.person-chat-left{
 				width: 85%;
 				// margin-right: 30rpx;
@@ -374,6 +635,20 @@
 			.person-chat-rig{
 				width: 15%;
 				text-align: center;
+				.person-chat-rig-add-wrap{
+					.person-chat-rig-add{
+						margin: 0 auto;
+						border: 1px solid #ccc;
+						width: 50rpx;
+						height: 50rpx;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						border-radius: 30rpx;
+						font-size: 40rpx;
+					}
+				}
+				
 				.send{
 					background-color: #07c062;
 					padding: 10rpx 20rpx;
@@ -383,8 +658,45 @@
 				}
 			}
 		}
+		.person-chat-bot-bot{
+			.person-chat-bot-bot-item-w{
+				display: flex;
+				border-top: 1px solid #ccc;
+				background-color: #f7f7f7;
+				.person-chat-bot-bot-item{
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					margin: 20rpx;
+					.person-chat-bot-bot-item-top{
+						padding: 5px;
+						background: #fff;
+						width: 50px;
+						height: 50px;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						font-size: 22px;
+						font-weight: 600;
+						border-radius: 10px;
+						margin-bottom: 5px;
+					}
+				}
+			}
+			
+		}
+	}
 		.person-doctor-chat-bot{
 			bottom: 0rpx;
+		}
+	}
+	.recode-poup{
+		height: calc(100vh - 100px);
+		overflow-y: auto;
+		.recode-poup-list{
+			display: flex;
+			flex-direction: column;
+			
 		}
 	}
 </style>
