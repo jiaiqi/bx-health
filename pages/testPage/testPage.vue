@@ -1,11 +1,11 @@
 <template>
 	<view class="test">
-<!-- 		<bx-radio-group v-model="radioValue">
+		<!-- <bx-radio-group v-model="radioValue">
 			<bx-radio v-for="item in options" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-radio>
-		</bx-radio-group>
-		<bx-checkbox-group v-model="vaL" checkboxMode="button">
+		</bx-radio-group> -->
+		<bx-checkbox-group  checkboxMode="button">
 			<bx-checkbox v-for="item in options" v-model="item.checked" :key="item.id" :name="item.value">{{ item.label }}</bx-checkbox>
-		</bx-checkbox-group> -->
+		</bx-checkbox-group>
 		<view class="charts"><bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart></view>
 		<view class="detail-desc" v-if="nodeDetail && nodeDetail.node_desc"><view v-html="nodeDetail.node_desc"></view></view>
 	</view>
@@ -38,7 +38,8 @@ export default {
 					option_view_no: 'A',
 					value: '没有或很少时间',
 					showimg: false,
-					label: '没有或很少时间'
+					label: '没有或很少时间',
+					checked: false
 				},
 				{
 					id: 1647,
@@ -51,7 +52,8 @@ export default {
 					option_view_no: 'B',
 					value: '小部分时间',
 					showimg: false,
-					label: '小部分时间'
+					label: '小部分时间',
+					checked: false
 				},
 				{
 					id: 1648,
@@ -64,7 +66,8 @@ export default {
 					option_view_no: 'C',
 					value: '相当多时间',
 					showimg: false,
-					label: '相当多时间'
+					label: '相当多时间',
+					checked: false
 				},
 				{
 					id: 1649,
@@ -77,7 +80,8 @@ export default {
 					option_view_no: 'D',
 					value: '绝大部分或全部时间',
 					showimg: false,
-					label: '绝大部分或全部时间'
+					label: '绝大部分或全部时间',
+					checked: false
 				}
 			],
 			nodeDetail: null
@@ -316,10 +320,10 @@ export default {
 		checkboxChange(e) {}
 	},
 
-	onLoad(options){
-		if(options.currentNode&&options.currentNodeNo){
-			this.currentNodes = options.currentNode
-			this.currentNodeNo = options.currentNodeNo
+	onLoad(options) {
+		if (options.currentNode && options.currentNodeNo) {
+			this.currentNodes = options.currentNode;
+			this.currentNodeNo = options.currentNodeNo;
 		}
 	},
 	onReady() {

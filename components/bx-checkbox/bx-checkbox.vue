@@ -176,11 +176,11 @@ export default {
 			}
 		},
 		emitEvent() {
-			this.$emit('change', {
-				index:this.childIndex,
-				value: !this.value,
-				name: this.name
-			});
+			// this.$emit('change', {
+			// 	index:this.childIndex,
+			// 	value: !this.value,
+			// 	name: this.name
+			// });
 			this.$emit('input', !this.value);
 			// 执行父组件bx-checkbox-group的事件方法
 			// 等待下一个周期再执行，因为this.$emit('input')作用于父组件，再反馈到子组件内部，需要时间

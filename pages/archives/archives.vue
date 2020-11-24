@@ -194,10 +194,10 @@
 					<text class="cuIcon-info"></text>
 					最多只能勾选五项
 				</view> -->
-				<bx-checkbox-group max="5" checkboxMode="button">
-					<bx-checkbox v-for="item in checkboxList" v-model="item.checked" :key="item.id" :name="item.label" @change="checkboxGroupChange">{{ item.label }}</bx-checkbox>
+				<bx-checkbox-group max="5" checkboxMode="button" v-model="checkedList">
+					<bx-checkbox v-model="item.checked" v-for="item in checkboxList" :key="item.value" :name="item.label" >{{ item.label }}</bx-checkbox>
 				</bx-checkbox-group>
-<!-- 						<checkbox-group @change="checkboxGroupChange" class="check-box-group">
+				<!-- 						<checkbox-group @change="checkboxGroupChange" class="check-box-group">
 					<label v-for="(item, index) in checkboxList" :key="index" class="check-box-item">
 						<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" :disabled="disabledTag && !checkedList.includes(item.value)" />
 						{{ item.label }}
@@ -768,7 +768,11 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni
+										? item.val_rni * self.userInfo.weight
+										: item.val_ear
+										? item.val_ear * self.userInfo.weight
+										: mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -901,15 +905,22 @@ export default {
 			this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.label);
 			this.showUserHealtManagePopup = false;
 		},
+		checkboxchange(e) {
+			console.log(e);
+			debugger;
+		},
 		checkboxGroupChange(e) {
 			console.log(e);
+			debugger;
 			let items = this.checkboxList;
-			let	values = e.detail.value;
-			// let values = e;
+			// let	values = e.detail.value;
+			let values = e;
+			// items[e.index].checked = e.value
+			// this.$set(this.checkboxList,e.index,items[e.index])
 			for (var i = 0, lenI = items.length; i < lenI; ++i) {
 				const item = items[i];
 				if (item.label === e.name) {
-					// this.$set(item, 'checked', e.value);
+					this.$set(item, 'checked', e.value);
 				}
 				if (values.includes(item.label)) {
 					this.$set(item, 'checked', true);
