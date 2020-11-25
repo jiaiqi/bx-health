@@ -1,5 +1,5 @@
 <template>
-	<view>
+	<view class="form-page">
 		<bxform
 			ref="bxForm"
 			:service="serviceName"
@@ -9,7 +9,7 @@
 			:fields="fields"
 			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
 		></bxform>
-		<view class="button-box" v-if="colsV2Data&&isArray(fields)&&fields.length>0">
+		<view class="button-box" v-if="colsV2Data && isArray(fields) && fields.length > 0">
 			<view v-for="(item, index) in buttons" :key="index" class="button">
 				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue">{{ item.button_name }}</button>
 			</view>
@@ -44,7 +44,7 @@ export default {
 			} else if (this.colsV2Data && this.colsV2Data._formButtons) {
 				buttons = this.colsV2Data._formButtons;
 			}
-			buttons = buttons.filter(item=>item.button_name!=='重置')
+			buttons = buttons.filter(item => item.button_name !== '重置');
 			let data = {};
 			this.fields.forEach(item => {
 				data[item['column']] = item['value'];
@@ -220,7 +220,7 @@ export default {
 					break;
 				case 'reset':
 					this.$refs.bxForm.onReset().then(res => {
-						debugger
+						debugger;
 						if (res) {
 							uni.showToast({
 								title: '已重置'
@@ -275,6 +275,10 @@ export default {
 </script>
 
 <style lang="scss">
+.form-page {
+	min-height: 100vh;
+	background-color: #fff;
+}
 .button-box {
 	display: flex;
 	justify-content: space-around;
@@ -284,7 +288,7 @@ export default {
 	flex-wrap: wrap;
 	.button {
 		width: 40%;
-		.cu-btn{
+		.cu-btn {
 			background-color: #14c4bd;
 			width: 100%;
 		}

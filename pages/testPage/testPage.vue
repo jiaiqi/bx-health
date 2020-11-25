@@ -3,11 +3,24 @@
 		<!-- <bx-radio-group v-model="radioValue">
 			<bx-radio v-for="item in options" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-radio>
 		</bx-radio-group> -->
-	<!-- 	<bx-checkbox-group  checkboxMode="button">
+		<!-- 	<bx-checkbox-group  checkboxMode="button">
 			<bx-checkbox v-for="item in options" v-model="item.checked" :key="item.id" :name="item.value">{{ item.label }}</bx-checkbox>
 		</bx-checkbox-group> -->
-		<view class="charts"><bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart></view>
-		<view class="detail-desc" v-if="nodeDetail && nodeDetail.node_desc"><view v-html="nodeDetail.node_desc"></view></view>
+		<view class="node-path">
+			<view class="path-item" v-for="(item, index) in linkPath" :key="item.no" @click="toPath(item)">
+				<view class="name">{{ item.name }}</view>
+				<view class="separator" v-if="index + 1 < linkPath.length">
+					<view class="line"></view>
+				</view>
+				<!-- <text class="separator cuIcon-right" v-if="index + 1 < linkPath.length"></text> -->
+			</view>
+		</view>
+		<view class="charts" v-if="nodeDetail && nutrientsChartOption.option && nutrientsChartOption.option.title">
+			<bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart>
+		</view>
+
+		<view class="detail-desc" v-if="nodeDetail && nodeDetail.node_desc"><view v-html="nodeDetail.node_desc" class="rich-text"></view></view>
+		<view class="data-empty" v-else><u-empty text="数据为空"></u-empty></view>
 	</view>
 </template>
 
@@ -84,12 +97,9 @@ export default {
 					checked: false
 				}
 			],
-			nodeDetail: null
+			nodeDetail: null,
+			linkPath: []
 		};
-	},
-	created() {
-		this.geteChartsData();
-		this.getNodeDetail(this.currentNodeNo);
 	},
 	methods: {
 		async getCurrentNodeInfo() {
@@ -127,11 +137,24 @@ export default {
 				if (!nameArr.includes(item.target_name)) {
 					if (item.target_name === this.currentNodes) {
 						nodes.push({
+							symbol:
+								data.length === 4
+									? 'path://M512 0.310115l511.689885 511.689885-511.689885 511.689885-511.689885-511.689885z'
+									: data.length === 5
+									? 'path://M512 51.146296 1023.462964 422.744598 828.099456 1024.005115 195.900544 1024.005115 0.537036 422.744598Z'
+									: data.length === 6
+									? 'path://M512.024475 0l445.413275 255.984641V768.015359l-445.413275 255.984641L66.508806 768.015359V256.046077z'
+									: data.length == 7
+									? 'path://M522.666667 0l416.981333 200.810667 102.976 451.2-288.554667 361.834666H291.264L2.709333 652.010667l102.976-451.2z'
+									: data.length === 8
+									? 'path://M1024 512l-149.9648 362.0352L512 1024 149.9648 874.0352 0 512 149.9648 149.9648 512 0l362.0352 149.9648z'
+									: data.length > 8
+									? 'circle'
+									: 'diamond',
+							// symbol: 'diamond', //中间的节点
 							name: item.target_name,
 							nodeNo: item.target_node_no,
-							category: 1,
-							x: 10,
-							y: 10
+							category: 1
 						});
 					} else {
 						nodes.push({
@@ -146,15 +169,8 @@ export default {
 			data.forEach((item, index) => {
 				if (!nameArr.includes(item.source_name)) {
 					nodes.push({
-						// symbol:self.getImageInfo({name:'大脑',url:'https://tse2-mm.cn.bing.net/th/id/OIP.7LO7HWiD7HGGkBHMMMseyAHaHa?pid=Api&rs=1'}), //'image://https://tse2-mm.cn.bing.net/th/id/OIP.7LO7HWiD7HGGkBHMMMseyAHaHa?pid=Api&rs=1',
-						// symbol:'path://M30.9,53.2C16.8,53.2,5.3,41.7,5.3,27.6S16.8,2,30.9,2C45,2,56.4,13.5,56.4,27.6S45,53.2,30.9,53.2z M30.9,3.5C17.6,3.5,6.8,14.4,6.8,27.6c0,13.3,10.8,24.1,24.101,24.1C44.2,51.7,55,40.9,55,27.6C54.9,14.4,44.1,3.5,30.9,3.5z M36.9,35.8c0,0.601-0.4,1-0.9,1h-1.3c-0.5,0-0.9-0.399-0.9-1V19.5c0-0.6,0.4-1,0.9-1H36c0.5,0,0.9,0.4,0.9,1V35.8z M27.8,35.8 c0,0.601-0.4,1-0.9,1h-1.3c-0.5,0-0.9-0.399-0.9-1V19.5c0-0.6,0.4-1,0.9-1H27c0.5,0,0.9,0.4,0.9,1L27.8,35.8L27.8,35.8z',
-						// #ifdef H5
-						symbol: 'image://https://tse2-mm.cn.bing.net/th/id/OIP.SaoRSpQ1Ff9hc-F2U6dI3QHaHa?pid=Api&rs=1',
-						// #endif
 						name: item.source_name,
 						nodeNo: item.source_node_no,
-						target_node_no: item.target_node_no,
-						source_node_no: item.source_node_no,
 						category: 0,
 						label: `${item.path_name ? item.path_name : ''} ${item.path_value ? `(${item.path_value})` : ''}`
 					});
@@ -163,10 +179,13 @@ export default {
 			});
 			let links = data.map(item => {
 				return {
-					value: `  ${item.path_name ? item.path_name : ''} (${item.path_value ? item.path_value : '0'})`,
+					value: `  ${item.path_name ? item.path_name : ''} ${item.path_value ? `(${item.path_value})` : ''}`,
 					label: { show: true },
 					source: item.source_name,
-					target: item.target_name
+					target: item.target_name,
+					lineStyle: {
+						color: item.source_name === self.currentNodes ? '#10a050' : '#006acc'
+					}
 				};
 			});
 			const color1 = '#006acc';
@@ -232,7 +251,8 @@ export default {
 			];
 			let option = {
 				title: {
-					text: this.currentNodes
+					show: false
+					// text: this.currentNodes
 				},
 				legend: [
 					{
@@ -251,7 +271,7 @@ export default {
 						symbolSize: 58,
 						// zoom: 0.5, //当前视角的缩放比例
 						draggable: false, //可拖拽
-						roam: 'scale', //是否开启鼠标缩放和平移漫游 默认false,可配置scale -缩放 move -移动 true
+						roam: 'true', //是否开启鼠标缩放和平移漫游 默认false,可配置scale -缩放 move -移动 true
 						// focusNodeAdjacency: true, // 是否在鼠标移到节点上的时候突出显示节点以及节点的边和邻接节点。
 						categories: categories,
 						edgeSymbol: ['circle', 'arrow'],
@@ -259,7 +279,6 @@ export default {
 						// animationDurationUpdate: 5000,
 						edgeLabel: {
 							normal: {
-								position: 'middle',
 								show: true,
 								textStyle: {
 									fontSize: 10
@@ -268,20 +287,46 @@ export default {
 							}
 						},
 						lineStyle: {
-							color: 'target',
+							// color: 'source', //target
 							width: 2,
 							type: 'solid', //'solid','dashed','dotted'
 							curveness: 0 //曲率
 						},
-						autoCurveness: 10,
 						label: {
 							show: true
 						},
 						force: {
 							// layoutAnimation: false,
-							gravity: 0.1, //节点受到的向中心的引力因子。该值越大节点越往中心点靠拢
-							repulsion: nodes.length < 5 ? 1000 : 800, // 节点之间的斥力因子,值越大斥力越大
-							edgeLength: [20, 150] //边的两个节点之间的距离，这个距离也会受 repulsion影响，支持设置成数组表达边长的范围，此时不同大小的值会线性映射到不同的长度。值越小则长度越长
+							initLayout: 'circular',
+							// gravity: 0.1, //节点受到的向中心的引力因子。该值越大节点越往中心点靠拢
+							repulsion:
+								nodes.length <= 2
+									? 1200
+									: nodes.length < 5 && nodes.length > 2
+									? 900
+									: nodes.length >= 5 && nodes.length < 10
+									? 800
+									: nodes.length > 15 && nodes.length <= 20
+									? 700
+									: 500, // 节点之间的斥力因子,值越大斥力越大
+							edgeLength:
+								nodes.length <= 2
+									? 200
+									: nodes.length < 5 && nodes.length > 2
+									? 150
+									: nodes.length >= 5 && nodes.length < 7
+									? 100
+									: nodes.length >= 7 && nodes.length < 10
+									? 70
+									: nodes.length >= 10 && nodes.length < 13
+									? 70
+									: nodes.length >= 10 && nodes.length < 13
+									? 60
+									: nodes.length >= 13 && nodes.length <= 15
+									? 60
+									: nodes.length > 15 && nodes.length <= 18
+									? 30
+									: 20 //边的两个节点之间的距离，这个距离也会受 repulsion影响，支持设置成数组表达边长的范围，此时不同大小的值会线性映射到不同的长度。值越小则长度越长
 						},
 						data: nodes,
 						links: links
@@ -308,12 +353,43 @@ export default {
 				this.nodeDetail = null;
 			}
 		},
+		toPath(e) {
+			if (e.no && e.name && this.currentNodes !== e.name) {
+				this.currentNodeNo = e.no;
+				this.currentNodes = e.name;
+				this.getNodeDetail(e.no);
+				this.geteChartsData();
+				this.changeLinkPath(e);
+			}
+		},
+		changeLinkPath(e) {
+			let arr = this.linkPath;
+			if (arr.length > 0) {
+				let hasNode = false;
+				let nodeIndex = -1;
+				arr.forEach((item, index) => {
+					if (e.no === item.no) {
+						hasNode = true;
+						nodeIndex = index;
+					}
+				});
+				if (!hasNode) {
+					this.linkPath.push({
+						name: e.name,
+						no: e.no
+					});
+				} else if (hasNode && nodeIndex >= 0) {
+					this.linkPath = this.linkPath.splice(0, nodeIndex + 1);
+				}
+			}
+		},
 		clickCharts(e) {
 			if (e.name !== this.currentNodes) {
 				this.currentNodes = e.name;
 				if (e.data.nodeNo) {
 					this.getNodeDetail(e.data.nodeNo);
 				}
+				this.changeLinkPath({ name: e.name, no: e.data && e.data.nodeNo ? e.data.nodeNo : null });
 				this.geteChartsData();
 			}
 		},
@@ -325,6 +401,15 @@ export default {
 			this.currentNodes = options.currentNode;
 			this.currentNodeNo = options.currentNodeNo;
 		}
+		this.linkPath.push({
+			no: this.currentNodeNo,
+			name: this.currentNodes
+		});
+		this.geteChartsData();
+		this.getNodeDetail(this.currentNodeNo);
+		uni.setNavigationBarTitle({
+			title: this.currentNodes
+		});
 	},
 	onReady() {
 		// #ifdef MP-WEIXIN
@@ -340,14 +425,65 @@ export default {
 <style lang="scss">
 .test {
 	width: 100%;
+	min-height: 100vh;
+	background-color: #fff;
+	padding: 20rpx;
+	.data-empty {
+		width: 100%;
+		margin-top: 30vh;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 	.charts {
 		width: calc(100% - 40rpx);
 		height: 700rpx;
-		margin: 0 20rpx;
+		margin-bottom: 20rpx;
 	}
 	.detail-desc {
 		padding: 20rpx;
 		text-indent: 40rpx;
+		.rich-text {
+			width: 100%;
+			overflow: hidden;
+		}
+	}
+	.node-path {
+		padding: 20rpx;
+		display: flex;
+		flex-wrap: wrap;
+		.path-item {
+			display: flex;
+			line-height: 40rpx;
+			margin-bottom: 20rpx;
+			.name {
+				background-color: #0081FF;
+				border-radius: 50rpx;
+				padding: 5rpx 20rpx;
+				font-size: 24rpx;
+				color: #fff;
+			}
+			.separator{
+				display: inline-flex;
+				align-items: center;
+				position: relative;
+				margin-right: 10rpx;
+				.line{
+					display: inline-block;
+					height: 5rpx;
+					width: 40rpx;
+					background-color: #0081FF;
+					&::after{
+						content: '';
+						border: 10rpx solid transparent;
+						border-left-color: #0081FF;
+						position: absolute;
+						right: -20rpx;
+						top: calc(50% - 10rpx);
+					}
+				}
+			}
+		}
 	}
 }
 </style>

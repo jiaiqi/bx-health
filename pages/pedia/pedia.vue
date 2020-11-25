@@ -68,10 +68,19 @@ export default {
 		};
 	},
 	methods: {
+		isDoctor(){
+			// 查询当前用户是否是医生
+			let url = this.getServiceUrl('daq', 'srvdaq_website_page_item_select', 'select');
+			let req = {
+				serviceName: 'srvdaq_website_page_item_select',
+				colNames: ['*'],
+				condition: [{ colName: 'page_no', ruleType: 'eq', value: 'BX202004280847490008' }],
+				page: null
+			};
+		},
 		skip(item) {
 			let dest_page = '';
 			let self = this;
-			debugger
 			if (item.dest_page && item.dest_page.indexOf('/pages/specific/health') !== -1) {
 				let index = item.dest_page.indexOf('/pages/specific/health');
 				dest_page = '/otherPages' + item.dest_page.slice(22);

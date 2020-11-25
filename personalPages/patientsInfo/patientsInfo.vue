@@ -68,7 +68,8 @@ export default {
 	// padding: 20rpx 0;
 	height: 80rpx;
 	justify-content: space-around;
-	border-top: 1px solid rgba(0, 0, 0, 0.33);
+	// border-top: 1px solid rgba(0, 0, 0, 0.33);
+	box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 	.info-bottom-tab{
 		display: flex;
 		flex-direction: column;

@@ -8,14 +8,57 @@
 						<view class="person-chat-item-left">
 							<image :src="userInfo.img_url?userInfo.img_url:'/personalPages/static/doctor_default.jpg'" mode=""></image>
 						</view>
-						<view @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
+							<image :src="item.img_url" mode=""></image>
+						</view>
+						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+							<text>{{item.msg_content}}</text>
+						</view>
+						<!-- <view v-else @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
 							<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
+						</view> -->
+						<view v-else-if="item.msg_link" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+							<view class="link-left">
+								<image src="../../static/links.png" mode=""></image>
+							</view>
+							<view class="link-right">
+								<view v-if="item.quertion_name" class="link-right-item">
+									<text>问卷记录</text>
+									<text>{{item.quertion_name}}</text>
+								</view>
+								<view v-else-if="item.recode_num" class="link-right-item">
+									<text>饮食记录</text>
+									<text>时间：{{item.recode_num}}</text>
+								</view>
+							</view>
+							<!-- <text>{{item.quertion_name?item.quertion_name:item.recode_num}}</text> -->
+							<!-- <text>{{item.msg_link}}</text> -->
 						</view>
 					</view>
 					<view v-else-if="item.sender_account === currentUserInfo.user_no" class="person-chat-item-send">
 						<text class="unread" v-if="item.msg_state === '未读'">{{item.msg_state}}</text>
-						<view @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
-							<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
+						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
+							<image :src="item.img_url" mode=""></image>
+						</view>
+						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+							<text>{{item.msg_content}}</text>
+						</view>
+						<view v-else-if="item.msg_link" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+							<view class="link-left">
+								<image src="../../static/links.png" mode=""></image>
+							</view>
+							<view class="link-right">
+								<view v-if="item.quertion_name" class="link-right-item">
+									<text>问卷记录</text>
+									<text>{{item.quertion_name}}</text>
+								</view>
+								<view v-else-if="item.recode_num" class="link-right-item">
+									<text>饮食记录</text>
+									<text>时间：{{item.recode_num}}</text>
+								</view>
+							</view>
+							<!-- <text>{{item.quertion_name?item.quertion_name:item.recode_num}}</text> -->
+							<!-- <text>{{item.msg_link}}</text> -->
 						</view>
 						<view class="person-chat-item-left">
 							<image :src="currentUserInfo.headimgurl?currentUserInfo.headimgurl:'/personalPages/static/doctor_default.jpg'" mode=""></image>
@@ -28,8 +71,19 @@
 		<view class="person-chat-bot" :class="doctor_no?'person-doctor-chat-bot':''">
 			<view class="person-chat-bot-top">
 				<view class="person-chat-left">
-					<input v-if="!isSendLink" @input="changeTest" v-model="chatText" type="text" value="" />
+					<image @click="changeVoice('keyword')" v-if="currentVoiceType === 'voice'" src="../../static/voice.png" mode=""></image>
+					<image @click="changeVoice('voice')" v-if="currentVoiceType === 'keyword'" src="../../static/keyboard.png" mode=""></image>
+					<text 
+					v-if="currentVoiceType === 'keyword'"
+					@touchstart.stop.prevent="startVoice"
+					@touchmove.stop.prevent="moveVoice"
+					@touchend.stop="endVoice"
+					@touchcancel.stop="cancelVoice"
+					
+					>按住发送</text>
 					<input v-else @input="changeTest" v-model="chatText" type="text" value="" />
+					<!-- <input v-if="!isSendLink" @input="changeTest" v-model="chatText" type="text" value="" /> -->
+					<!-- <input v-else @input="changeTest" v-model="chatText" type="text" value="" /> -->
 				</view>
 				<view class="person-chat-rig">
 					<view class="person-chat-rig-add-wrap">
@@ -59,6 +113,14 @@
 						</view>
 						<view  class="person-chat-bot-bot-item-b">
 							<text>饮食记录</text>
+						</view>
+					</view>
+					<view @click="openMenuPoup('photo')" class="person-chat-bot-bot-item">
+						<view class="person-chat-bot-bot-item-top">
+							图
+						</view>
+						<view  class="person-chat-bot-bot-item-b">
+							<text>图片</text>
 						</view>
 					</view>
 				</view>
@@ -97,9 +159,11 @@
 <script>
 	import bxRadio from '@/components/bx-radio/bx-radio.vue';
 	import bxRadioGroup from '@/components/bx-radio-group/bx-radio-group.vue';
+	import robbyImageUpload from '@/components/robby-image-upload/robby-image-upload.vue';
 	export default {
 		name:'personchat',
 		components:{
+			robbyImageUpload
 		},
 		props:{
 			customer_no: {
@@ -146,10 +210,120 @@
 				recordList:[],
 				chatTextBottom:'',
 				currentUserInfo:uni.getStorageSync('login_user_info'),
-				recodeList:[]
+				recodeList:[],
+				recodeOnloadList:[],
+				chooseRecod:'', //链接
+				currentVoiceType:'voice',
+				Recorder: uni.getRecorderManager(),
+				Audio: uni.createInnerAudioContext(),
+				recording: false, //标识是否正在录音
+				isStopVoice: false, //加锁 防止点击过快引起的当录音正在准备(还没有开始录音)的时候,却调用了stop方法但并不能阻止录音的问题
+				voiceInterval:null,
+				voiceTime:0, //总共录音时长
+				canSend:true, //是否可以发送
+				PointY:0, //坐标位置
+				voiceIconText:"正在录音...",
+				showFunBtn:false, //是否展示功能型按钮
+				AudioExam:null, //正在播放音频的实例
 			}
 		},
 		methods:{
+			stopAudio(item) {
+				item.anmitionPlay = false;
+				this.Audio.src = '';
+				this.Audio.stop();
+			},
+			//准备开始录音
+			startVoice(e) {
+				console.log("-==----------------")
+				if(!this.Audio.paused){
+					//如果音频正在播放 先暂停。
+					this.stopAudio(this.AudioExam)
+				}
+				this.recording = true;
+				this.isStopVoice = false;
+				this.canSend = true;
+				this.voiceIconText = "正在录音..."
+				this.PointY = e.touches[0].clientY;
+				this.Recorder.start({
+					format: 'mp3'
+				});
+			},
+			//录音已经开始
+			beginVoice(){
+				if (this.isStopVoice) {
+					this.Recorder.stop();
+					return;
+				}
+				this.voiceTitle = '松开 结束'
+				this.voiceInterval =  setInterval(()=>{
+					this.voiceTime ++;
+				},1000)
+			},
+			//move 正在录音中
+			moveVoice(e){
+				const PointY = e.touches[0].clientY
+				const slideY = this.PointY - PointY;
+				if(slideY > uni.upx2px(120)){
+					this.canSend = false;
+					this.voiceIconText = '松开手指 取消发送 '
+				}else if(slideY > uni.upx2px(60)){
+					this.canSend = true;
+					this.voiceIconText = '手指上滑 取消发送 '
+				}else{
+					this.voiceIconText = '正在录音... '
+				}
+			},
+			//结束录音
+			endVoice() {
+				this.isStopVoice = true; //加锁 确保已经结束录音并不会录制
+				this.Recorder.stop();
+				this.voiceTitle = '按住 说话'
+			},
+			handleRecorder({ tempFilePath,duration }) {
+				console.log("0000000000录音结束")
+				let contentDuration;
+				// #ifdef MP-WEIXIN
+				this.voiceTime = 0;
+				if (duration < 600) {
+					this.voiceIconText="说话时间过短";
+					setTimeout(()=>{
+						this.recording = false;
+					},200)
+					return;
+				} 
+				contentDuration = duration/1000;
+				// #endif
+				
+				// #ifdef APP-PLUS
+				contentDuration = this.voiceTime +1;
+				this.voiceTime = 0;
+				if(contentDuration <= 0) {
+					this.voiceIconText="说话时间过短";
+					setTimeout(()=>{
+						this.recording = false;
+					},200)
+					return;
+				};
+				// #endif
+				
+				this.recording = false;
+				const params = {
+					contentType: 2,
+					content: tempFilePath,
+					contentDuration: Math.ceil(contentDuration)
+				};
+				console.log("-----语音----",params)
+				// this.canSend && this.sendMsg(params);
+			},
+		/*点击图片预览**/
+		previewImages(url){
+			console.log("---------预览")
+			let arr = [url]
+			uni.previewImage({
+				urls:arr
+			})
+		},
 		 uniqueArray(array, key){
 			  var result = [array[0]];
 			  for(var i = 1; i < array.length; i++){
@@ -197,11 +371,51 @@
 			checkboxGroupChange(){
 			},
 			openMenuPoup(type){
-				this.showBottom = true
-				this.currentSendType = type
-				// if(this.currentSendType === 'question'){
+				let self = this
+				if(type == 'question' || type === 'bite'){								
+					this.showBottom = true
+					this.currentSendType = type
 					this.seleceMenuConent()
-				// }
+				}else if(type === 'photo'){
+					uni.chooseImage({
+					    count: 6, //默认9
+					    sourceType: ['album'], //从相册选择
+					    success: function (res) {
+							let reqHeader = {
+								bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+							}
+							let formData = {
+								serviceName: "srv_bxfile_service",
+								interfaceName: "add",
+								app_no: "health",
+								table_name: "",
+								thumbnailType:'fwsu_100',
+								columns: "image"
+							}
+							let url = ''
+							for(let i=0;i<res.tempFilePaths.length;i++){
+								uni.uploadFile({
+									url:self.$api.upload,
+									header: reqHeader,
+									formData:formData,
+									filePath: res.tempFilePaths[i],
+									name: 'file',
+									success: (e) => {
+										if(e.statusCode === 200){
+											let photoDataNo = JSON.parse(e.data).file_no
+											self.sendMessageLanguageInfo('图片',photoDataNo)
+										}else{
+											
+										}
+										// console.log(uploadFileRes.data);
+									}
+								})
+							}
+							
+					    }
+					});
+				}
+				
 			},
 			confirmPoup(){
 				this.showBottom = false
@@ -213,16 +427,52 @@
 					// url = `/archivesPages/archives-history/archives-history?pageType=${e}`;
 					url = `/archivesPages/archives-history/archives-history?pageType=diet&chatChoseTime=` + this.checkRadioValue
 				}
-				this.chatText = url
+				this.chooseRecod = url
+				// this.chatText = url
 				// let linkData = {
 				// 	name:,
 				// 	url:url
 				// }
+				this.sendMessageInfo()
 				console.log("------url",url)
 				
 			},
 			hideModal(){
 				this.showBottom = false
+			},
+			/*查询问卷列表**/
+			async getRecorderManagerList(){
+				let serviceName = 'srvdaq_activity_cfg_select'
+				let req = {
+					serviceName: serviceName,
+					colNames: ['*'],
+					condition:[
+					// {
+					// 	colName:'user_no',
+					// 	ruleType:'eq',
+					// 	value:uni.getStorageSync('login_user_info').user_no
+					// },
+					{
+						colName:'status',
+						ruleType:"eq",
+						value:'进行中'
+					},
+					{
+						colName:'info_collect_type',
+						ruleType:"eq",
+						value:'自测'
+					}
+					],
+					order:[{
+						colName:'create_time',
+						orderType:'asc'
+					}]
+				}
+				let app = 'daq'
+				let url = this.getServiceUrl(app, serviceName, 'select');
+				let res = await this.$http.post(url,req)
+				this.recodeOnloadList = res.data.data
+				this.getUserInfo(this.customer_no);
 			},
 			async seleceMenuConent(){
 				let serviceName = null
@@ -312,7 +562,13 @@
 				}
 				// this.heightStyle = 'calc(100vh - 100px)'
 			},
-			
+			changeVoice(type){
+				// if(type = ){
+					
+				// }
+				console.log("----------",type)
+				this.currentVoiceType = type
+			},
 			/*input框内有没有内容**/
 			changeTest(){
 				if(this.chatText){
@@ -323,6 +579,32 @@
 					}else{
 						this.heightStyle = 'calc(100vh - 100px)'
 					}
+					
+				}
+			},
+			/*点击发送后添加图片或语音数据**/
+			async sendMessageLanguageInfo(type,value){
+				let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
+				let req = [{
+					serviceName: 'srvhealth_consultation_chat_record_add',
+					colNames: ['*'],
+					data:[{
+						sender_account:this.currentUserInfo.user_no,
+						receiver_account:this.doctor_no?this.doctor_no:this.userInfo.userno,
+						msg_content_type:type
+					}]
+				}];
+				if(type === '图片'){
+					req[0].data[0].image = value
+				}else{
+					req[0].data[0].msg_link = value
+				}
+				console.log("res========>",req)
+				let res = await this.$http.post(url, req);
+				if(res.data.state === 'SUCCESS'){
+					
+					console.log("发送成功")
+					this.getMessageInfo()
 					
 				}
 			},
@@ -341,7 +623,7 @@
 				if(!this.isSendLink){
 					req[0].data[0].msg_content=this.chatText
 				}else{
-					req[0].data[0].msg_link=this.chatText
+					req[0].data[0].msg_link = this.chooseRecod
 				}
 				console.log("res========>",req)
 				let res = await this.$http.post(url, req);
@@ -420,7 +702,29 @@
 				req.relation_condition.data = conditionData
 				let res = await this.$http.post(url, req);
 				if(res.data.data.length > 0){
+					res.data.data.forEach((item,i)=>{
+						if(item.image){
+							let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
+							this.$set(res.data.data[i],'img_url',url)
+						}
+					})
 					this.recordList = res.data.data
+					res.data.data.forEach(links=>{
+						if(links.msg_content_type === '链接'){
+							/*饮食记录**/
+							if(links.msg_link.indexOf('chatChoseTime') > -1){
+								links['recode_num'] = links.msg_link.split("&")[1].split("=")[1]
+							}else if(links.msg_link.indexOf('activity_no') > -1){
+								//问卷记录
+								let active_num = links.msg_link.split("&")[1].split("=")[1]
+								this.recodeOnloadList.forEach(t=>{
+									if(t.activity_no === active_num){
+										links['quertion_name'] = t.title
+									}
+								})
+							}
+						}
+					})
 					this.chatTextBottom ='person-chat-item' + (res.data.data.length - 1)
 					// this.getUserInfoList()
 					if(type && type === 'onLoad'){
@@ -482,8 +786,30 @@
 			
 		},	
 		mounted() {
+			
+			this.Recorder = uni.getRecorderManager()
+			this.Recorder.onStart(e => {
+				
+				this.beginVoice();
+			});
+			//录音结束事件
+			this.Recorder.onStop(res => {
+				clearInterval(this.voiceInterval);
+				this.handleRecorder(res);
+			});
+			
+			//音频停止事件
+			this.Audio.onStop(e => {
+				this.closeAnmition();
+			});
+			
+			//音频播放结束事件
+			this.Audio.onEnded(e => {
+				this.closeAnmition();
+			});
 			if(this.customer_no){
-				this.getUserInfo(this.customer_no);
+				this.getRecorderManagerList()
+				
 			}
 			const query = uni.createSelectorQuery().in(this);
 			query.select('.person-chat-top').boundingClientRect(data => {
@@ -511,8 +837,28 @@
 			// }, 50);
 		},
 		onLoad(option) {
+			//录音开始事件
+			this.Recorder.onStart(e => {
+				
+				this.beginVoice();
+			});
+			//录音结束事件
+			this.Recorder.onStop(res => {
+				clearInterval(this.voiceInterval);
+				this.handleRecorder(res);
+			});
+			
+			//音频停止事件
+			this.Audio.onStop(e => {
+				this.closeAnmition();
+			});
+			
+			//音频播放结束事件
+			this.Audio.onEnded(e => {
+				this.closeAnmition();
+			});
 			if(option.no){
-				this.getUserInfo(option.no);
+				// this.getUserInfo(option.no);
 			}
 		}
 	}
@@ -554,6 +900,38 @@
 						font-weight: 700;
 						font-size: 12px;
 						position: relative;
+						display: flex;
+						align-items: center;
+						box-shadow: 2px 1px 2px rgba(26, 26, 26, 0.2);
+						.link-left{
+							margin-right: 16rpx;
+							image{
+								width: 30rpx;
+								height: 30rpx;
+							}
+						}
+						.link-right{
+							.link-right-item{
+								display: flex;
+								flex-direction: column;
+								text{
+									&:first-child{
+										color: #000;
+										font-weight: 700;
+										font-style: normal;
+										text-decoration: none;
+										font-size: 14px
+									}
+									&:last-child{
+										color: #ccc;
+										font-weight: 700;
+										font-style: normal;
+										text-decoration: none;
+										font-size: 14px;
+									}
+								}
+							}
+						}
 						&::after{
 							content: '';
 							display: block;
@@ -569,6 +947,52 @@
 						}
 					}
 					.person-chat-item-right-link{
+						&::after{
+							content: '';
+							display: block;
+							width: 0;
+							height: 0;
+							border-top: 0px solid transparent;
+							border-bottom: 0px solid transparent;
+							border-right: 0px solid #fff;
+							position: absolute;
+							border-radius: 1px;
+							left: -8px;
+							top: 15px;
+						}
+					}
+					.person-chat-item-right-image{
+						background: #eeeeee;
+						box-shadow: none;
+						&::after{
+							content: '';
+							display: block;
+							width: 0;
+							height: 0;
+							border-top: 0px solid transparent;
+							border-bottom: 0px solid transparent;
+							border-left: 0px solid transparent;
+							position: absolute;
+							right: -8px;
+							top: 15px;						
+						}
+						image{
+							width: 130rpx;
+							height: 130rpx;
+							border-radius: 5px;
+						}
+						// image{
+						// 	width: 100rpx;
+						// 	height: 100rpx;
+						// }
+					}
+					.person-chat-item-right-link{
+						.link-left{
+							image{
+								width: 30rpx;
+								height: 30rpx;
+							}
+						}
 						text{
 							color: blue;
 							font-weight: 200;
@@ -605,6 +1029,35 @@
 						font-weight: 700;
 						font-size: 12px;
 						position: relative;
+						.link-left{
+							margin-right: 16rpx;
+							image{
+								width: 30rpx;
+								height: 30rpx;
+							}
+						}
+						.link-right{
+							.link-right-item{
+								display: flex;
+								flex-direction: column;
+								text{
+									&:first-child{
+										color: #000;
+										font-weight: 700;
+										font-style: normal;
+										text-decoration: none;
+										font-size: 14px
+									}
+									&:last-child{
+										color: #ccc;
+										font-weight: 700;
+										font-style: normal;
+										text-decoration: none;
+										font-size: 14px;
+									}
+								}
+							}
+						}
 						&::after{
 							content: '';
 							display: block;
@@ -618,12 +1071,79 @@
 							top: 15px;
 						}
 					}
+					.person-chat-item-right-image{
+						background: #eeeeee;
+						&::after{
+							content: '';
+							display: block;
+							width: 0;
+							height: 0;
+							border-top: 5px solid transparent;
+							border-bottom: 5px solid transparent;
+							border-left: 0px solid transparent;
+							position: absolute;
+							right: -8px;
+							top: 15px;						
+						}
+						image{
+							width: 130rpx;
+							height: 130rpx;
+							border-radius: 5px;
+						}
+						
+					}
 					.person-chat-item-right-link{
+						display: flex;
+						background-color: #eeeeee;
+						background-color: #fff;
+						box-shadow: 2px 1px 2px rgba(26, 26, 26, 0.2);
+						align-items: center;
+						.link-left{
+							margin-right: 16rpx;
+							image{
+								width: 30rpx;
+								height: 30rpx;
+							}
+						}
+						.link-right{
+							.link-right-item{
+								display: flex;
+								flex-direction: column;
+								text{
+									&:first-child{
+										color: #000;
+										font-weight: 700;
+										font-style: normal;
+										text-decoration: none;
+										font-size: 14px
+									}
+									&:last-child{
+										color: #ccc;
+										font-weight: 700;
+										font-style: normal;
+										text-decoration: none;
+										font-size: 14px;
+									}
+								}
+							}
+						}
 						text{
 							color: blue;
 							font-weight: 200;
 							font-style:italic;
 							text-decoration: underline;
+						}
+						&::after{
+							content: '';
+							display: block;
+							width: 0;
+							height: 0;
+							border-top: 5px solid transparent;
+							border-bottom: 5px solid transparent;
+							border-left: 8px solid transparent;
+							position: absolute;
+							right: -8px;
+							top: 15px;
 						}
 					}
 				}
@@ -657,14 +1177,32 @@
 				align-items: center;
 			.person-chat-left{
 				width: 85%;
+				display: flex;
+				align-items: center;
 				// margin-right: 30rpx;
-				
+				image{
+					width: 50rpx;
+					height: 50rpx;
+					margin-right: 10rpx;
+				}
 				input{
+					width: 90%;
 					padding: 2px 10rpx;
 					background: #fff;
 					height: 70rpx;
 					border-radius: 10rpx;
 					font-size: 24rpx;
+				}
+				text{
+					width: 90%;
+					padding: 2px 10rpx;
+					background: #fff;
+					height: 70rpx;
+					border-radius: 10rpx;
+					font-size: 24rpx;
+					text-align: center;
+					line-height: 80rpx;
+					font-size: 28rpx;
 				}
 			}
 			.person-chat-rig{

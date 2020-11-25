@@ -194,7 +194,7 @@
 				<view
 					class="content padding-0"
 					style="padding:0;width: 100%!important;flex-direction: column;position: relative;"
-					v-else-if="fieldData.type === 'date' || fieldData.type === 'dateTime' || fieldData.type === 'time' || fieldData.type === 'Date'"
+					v-else-if="fieldData.type === 'date' || fieldData.type === 'dateTime' || fieldData.type === 'time'||fieldData.type === 'Time' || fieldData.type === 'Date'"
 				>
 					<input
 						@blur="onInputBlur"
@@ -1053,6 +1053,7 @@ export default {
 		},
 		toggleTab(str) {
 			console.log('点击', str);
+			// str = 
 			this.$refs[str].show();
 			console.log(this.$refs[str].show());
 		},

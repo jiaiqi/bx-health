@@ -264,6 +264,27 @@
 				</view>
 			</view>
 		</view>
+		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="bottom">
+			<view class="health-item">
+				<!-- 	<view class="tips">
+					<text class="cuIcon-info"></text>
+					最多只能勾选五项
+				</view> -->
+				<bx-checkbox-group max="1" checkboxMode="button">
+					<bx-checkbox v-for="item in cookData" v-model="item.checked" :key="item.value" :disabled="item.disable" :name="item.label" @change="checkboxGroupChange">{{ item.label }}</bx-checkbox>
+				</bx-checkbox-group>
+<!-- 						<checkbox-group @change="checkboxGroupChange" class="check-box-group">
+					<label v-for="(item, index) in checkboxList" :key="index" class="check-box-item">
+						<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" :disabled="disabledTag && !checkedList.includes(item.value)" />
+						{{ item.label }}
+					</label>
+				</checkbox-group> -->
+				<view class="button-box">
+					<button class="cu-btn" @click="showUserHealtManagePopup = false">取消</button>
+					<button class="cu-btn " @click="confirmCookData">确定</button>
+				</view>
+			</view>
+		</u-popup>
 	</view>
 </template>
 
@@ -312,6 +333,7 @@ export default {
 			list: [],
 			foodChild:[],
 			isShowInfo:false,
+			showUserHealtManagePopup:false,
 			categoryTop:[{
 				name:'NRV%占比',
 				type:'NRV'
@@ -533,7 +555,8 @@ export default {
 			isShowCookType:false,
 			pageType:'',
 			currFoodNo:null,
-			isCookDataChoose:false
+			isCookDataChoose:false,
+			currentChooseCookData:''
 		};
 	},
 	onShow() {
@@ -580,7 +603,51 @@ export default {
 		}
 	},
 	methods: {
-		
+		checkboxGroupChange(e){
+			console.log("---------e-",e)
+			let isHasTrue = false
+			this.cookData.forEach(item=>{
+				if(item.value === e.name  && e.value){
+					isHasTrue = true
+				}
+			})
+			if(isHasTrue){
+				this.cookData.forEach(item=>{
+					item.disable = true
+					if(item.value === e.name && e.value){
+						item.disable = false
+					}
+				})
+			}else{
+				this.cookData.forEach(item=>{
+					item.disable = false
+					// if(item.value === e.name && e.value){
+					// 	item.disable = false
+					// }
+				})
+			}
+			
+			if(!e.value){
+				this.currentChooseCookData = this.cookData[0].value
+				this.isCookDataChoose = false
+			}else{
+				this.currentChooseCookData = e
+				
+			}
+			
+			
+		},
+		confirmCookData(){
+			if(!this.currentChooseCookData.value){
+				this.currentCookData = this.cookData[0].value
+				this.isCookDataChoose = false
+			}else{
+				this.currentCookData = this.currentChooseCookData.name
+				this.isCookDataChoose = true
+			}
+			
+			this.showUserHealtManagePopup = false
+		},
 		async getCurrentFood(item){
 			let self = this;
 			let serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
@@ -805,13 +872,15 @@ export default {
 		},
 		chooseCook(){
 			console.log("点击烹调方式")
-			this.isShowCookType = true
+			// this.isShowCookType = true
+			this.showUserHealtManagePopup = true
 		},
 		clickCook(){
 			this.isCookDataChoose = !this.isCookDataChoose
 		},
 		chooseCookFood(item){
 			this.currentCookData = item.value
+			
 			this.isCookDataChoose = true
 			this.isShowCookType = false
 			
@@ -1453,15 +1522,15 @@ export default {
 				}
 			}
 		}
-		.button-box {
-			display: flex;
-			justify-content: center;
-			align-items: flex-end;
-			padding: 15rpx 0;
-			button {
-				width: 80%;
-			}
-		}
+		// .button-box {
+		// 	display: flex;
+		// 	justify-content: center;
+		// 	align-items: flex-end;
+		// 	padding: 15rpx 0;
+		// 	button {
+		// 		width: 80%;
+		// 	}
+		// }
 	}
 }
 
@@ -1772,6 +1841,41 @@ export default {
 	.active-cook-item{
 		color: red;
 		border-color: red;
+	}
+}
+.health-item {
+	min-height: 150rpx;
+	display: flex;
+	padding: 50rpx 30rpx;
+	display: flex;
+	flex-direction: column;
+	.tips {
+		color: #999;
+		padding: 20rpx 0;
+	}
+	.check-box-group {
+		display: flex;
+		flex-wrap: wrap;
+		.check-box-item {
+			margin-right: 20rpx;
+			min-width: 30%;
+		}
+	}
+}
+.button-box {
+	width: 100%;
+	padding: 30rpx;
+	font-weight: bold;
+	text-align: center;
+	display: flex;
+	.cu-btn {
+		background-color: #11c5bd;
+		color: #fff;
+		margin-right: 50rpx;
+		flex: 1;
+		&:last-child {
+			margin-right: 0;
+		}
 	}
 }
 </style>

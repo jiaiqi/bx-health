@@ -49,6 +49,21 @@
 			<view class="title">健康建议</view>
 			<view class="content">一切正常请继续保持</view>
 		</view>
+		<view class="health-archive-item health-todos">
+			<view class="subtitle">
+				<text class="title-text">用药计划</text>
+				<view class="title-action" @click="navPages('drug')">
+					<text class="cuIcon-add "></text>
+					<text class="see-histroy">添加</text>
+				</view>
+			</view>
+			<view class="content todo-list">
+				<view class="todo-item" v-for="(item, index) in todoList" :key="index" @click="clickTodoItem(item, index)">
+					<view class="check-box" :class="{ checked: item.checked }"><view class="checked cuIcon-check" v-if="item.checked"></view></view>
+					<view class="todo-item-content" :class="{ checked: item.checked }">{{ item.ds_name }}</view>
+				</view>
+			</view>
+		</view>
 		<view class="health-archive-item health-score">
 			<view class="subtitle">
 				<text class="title-text">近日健康指数</text>
@@ -176,7 +191,7 @@
 				</view>
 			</view>
 		</view>
-		
+		<view class="cu-modal bottom-modal"></view>
 		<u-popup v-model="showUserListPopup" border-radius="40" mode="top">
 			<view class="user-list">
 				<view class="user-item" @click="userInfo = item" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
@@ -193,7 +208,7 @@
 					最多只能勾选五项
 				</view> -->
 				<bx-checkbox-group max="5" checkboxMode="button" v-model="checkedList">
-					<bx-checkbox v-model="item.checked" v-for="item in checkboxList" :key="item.value" :name="item.label" >{{ item.label }}</bx-checkbox>
+					<bx-checkbox v-model="item.checked" v-for="item in checkboxList" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
 				</bx-checkbox-group>
 				<!-- 						<checkbox-group @change="checkboxGroupChange" class="check-box-group">
 					<label v-for="(item, index) in checkboxList" :key="index" class="check-box-item">
@@ -248,7 +263,8 @@ export default {
 				option_list_v2: { refed_col: 'daq_survey_activity_no', srv_app: 'health', serviceName: 'srvhealth_see_doctor_lab_examination_select', key_disp_col: 'name' },
 				showExp: true,
 				value: ''
-			}
+			},
+			todoList: []
 		};
 	},
 	computed: {
@@ -347,6 +363,22 @@ export default {
 		}
 	},
 	methods: {
+		clickTodoItem(item, index) {
+			this.$set(item, 'checked', !item.checked);
+		},
+		async getToDoList() {
+			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_drug_schedule_select',
+				colNames: ['*'],
+				condition: [],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data)) {
+				this.todoList = res.data.data;
+			}
+		},
 		showAddRecordLayout() {
 			this.showAddRecord = true;
 			this.getTreeSelectorData();
@@ -766,11 +798,7 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni
-										? item.val_rni * self.userInfo.weight
-										: item.val_ear
-										? item.val_ear * self.userInfo.weight
-										: mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -859,9 +887,9 @@ export default {
 		},
 		changeSelectedTag() {
 			this.selectedTags = this.checkboxList.filter(item => item.checked);
-			if(this.selectedTags.length>5) return;
+			if (this.selectedTags.length > 5) return;
 			this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.label);
-			
+
 			this.updataUserTags().then(res => {
 				this.showUserHealtManagePopup = false;
 			});
@@ -907,11 +935,9 @@ export default {
 		},
 		checkboxchange(e) {
 			console.log(e);
-			debugger;
 		},
 		checkboxGroupChange(e) {
 			console.log(e);
-			debugger;
 			let items = this.checkboxList;
 			// let	values = e.detail.value;
 			let values = e;
@@ -935,6 +961,11 @@ export default {
 				uni.navigateTo({
 					url: '/archivesPages/archives-history/archives-history?isAll=true'
 					// url:'/otherPages/balancedDiet/balancedDiet'
+				});
+			} else if (type === 'drug') {
+				let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+				uni.navigateTo({
+					url: '/publicPages/form/form?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
 				});
 			}
 		},
@@ -1081,6 +1112,7 @@ export default {
 				this.sleepScore = await this.calcSleepScore();
 				this.BPScore = await this.calcBPScore();
 				this.selectInspectionReport();
+				this.getToDoList();
 			}
 		},
 		toAddPage() {}
@@ -1472,6 +1504,42 @@ export default {
 						font-size: 24rpx;
 						color: #999;
 						text-indent: 10rpx;
+					}
+				}
+			}
+			&.todo-list {
+				display: grid;
+				grid-template-columns: repeat(3, calc(33.33% - 20rpx));
+				grid-row-gap: 20rpx;
+				grid-column-gap: 20rpx;
+				font-weight: normal;
+				.todo-item {
+					height: 100rpx;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+					border-radius: 20rpx;
+					.check-box {
+						border: 2px solid #666;
+						border-radius: 30rpx;
+						width: 50rpx;
+						height: 50rpx;
+						margin-right: 10rpx;
+						display: flex;
+						justify-content: center;
+						align-items: center;
+						&.checked {
+							color: #fff;
+							background-color: #666;
+							font-size: 34rpx;
+						}
+					}
+					.todo-item-content {
+						&.checked {
+							text-decoration: line-through;
+							// text-underline: thr;
+						}
 					}
 				}
 			}

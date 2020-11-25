@@ -2,7 +2,7 @@
 	<view class="bx-checkbox-group">
 		<view class="onmax-tip" v-show="onMax">
 			<text class="cuIcon-info"></text>
-			<text class="tip">最多只能勾选五项</text>
+			<text class="tip">最多只能勾选{{tipNumber}}项</text>
 		</view>
 		<slot></slot>
 		</view>
@@ -96,6 +96,23 @@ export default {
 		return {
 			onMax: false //是否已经达到选项数量限制
 		};
+	},
+	computed:{
+		tipNumber(){
+			let max = this.max
+			let tipNum = null
+			if(max){
+				switch (max){
+					case '1':
+					 tipNum = '一';
+					break;
+					case '5':
+					 tipNum = '五';
+					break;
+				}
+			}
+			return tipNum
+		}
 	},
 	created() {
 		// 如果将children定义在data中，在微信小程序会造成循环引用而报错
