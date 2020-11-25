@@ -35,12 +35,12 @@ export default {
 			default: 999
 		},
 		// 所有选中项的 name
-		// value: {
-		// 	default: Array,
-		// 	default() {
-		// 		return []
-		// 	}
-		// },
+		value: {
+			default: Array,
+			default() {
+				return []
+			}
+		},
 		// 是否禁用所有复选框
 		disabled: {
 			type: Boolean,

@@ -176,9 +176,7 @@
 				</view>
 			</view>
 		</view>
-		<!-- 		<u-popup v-model="showAddRecord" mode="center">
-			
-		</u-popup> -->
+		
 		<u-popup v-model="showUserListPopup" border-radius="40" mode="top">
 			<view class="user-list">
 				<view class="user-item" @click="userInfo = item" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">

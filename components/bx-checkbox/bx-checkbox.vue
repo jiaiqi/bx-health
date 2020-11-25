@@ -1,10 +1,10 @@
 <template>
 	<view class="bx-checkbox" :style="[checkboxStyle]" :class="checkboxClass">
-		<view class="bx-checkbox-icon" @tap="toggle" :class="{ checked: value===true }">
+		<view class="bx-checkbox-icon" @tap="toggle" :class="{ checked: checked}">
 			<text v-if="serialChar">{{ serialChar }}</text>
-			<text class="cuIcon-check" v-if="value && !serialChar"></text>
+			<text class="cuIcon-check" v-if="checked && !serialChar"></text>
 		</view>
-		<view class="bx-checkbox__label" @tap="onClickLabel" :class="{ checked: value===true , disabled: disabled }"><slot /></view>
+		<view class="bx-checkbox__label" @tap="onClickLabel" :class="{ checked: checked, disabled: disabled }"><slot /></view>
 	</view>
 </template>
 
@@ -40,11 +40,11 @@ export default {
 			type: Boolean,
 			default: false
 		},
-		// 是否为选中状态
-		checked: {
-			type: Boolean,
-			default: false
-		},
+		// // 是否为选中状态
+		// checked: {
+		// 	type: Boolean,
+		// 	default: false
+		// },
 		// 是否禁用
 		disabled: {
 			type: [String, Boolean],
@@ -95,6 +95,9 @@ export default {
 		this.childIndex = this.parent.children.length
 	},
 	computed: {
+		checked(){
+			return this.value
+		},
 		// 是否禁用，如果父组件bx-checkbox-group禁用的话，将会忽略子组件的配置
 		isDisabled() {
 			return this.disabled !== '' ? this.disabled : this.parent ? this.parent.disabled : false;
@@ -176,11 +179,11 @@ export default {
 			}
 		},
 		emitEvent() {
-			// this.$emit('change', {
-			// 	index:this.childIndex,
-			// 	value: !this.value,
-			// 	name: this.name
-			// });
+			this.$emit('change', {
+				index:this.childIndex,
+				value: !this.value,
+				name: this.name
+			});
 			this.$emit('input', !this.value);
 			// 执行父组件bx-checkbox-group的事件方法
 			// 等待下一个周期再执行，因为this.$emit('input')作用于父组件，再反馈到子组件内部，需要时间

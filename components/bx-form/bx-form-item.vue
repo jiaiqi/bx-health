@@ -14,8 +14,8 @@
 			<!-- 图片描述 -->
 			<block class="img-explain" v-if="fieldData.option_img_explain">
 				<view class="option_img_explain" @click="showOption_img = !showOption_img">
-					<u-icon name="play-right-fill" color="#666" size="28" v-if="!showOption_img"></u-icon>
-					<u-icon name="arrow-down-fill" color="#666" size="28" v-if="showOption_img"></u-icon>
+					<!-- 					<u-icon name="play-right-fill" color="#666" size="28" v-if="!showOption_img"></u-icon>
+					<u-icon name="arrow-down-fill" color="#666" size="28" v-if="showOption_img"></u-icon> -->
 					<text class="margin-left-xs">图片描述</text>
 				</view>
 				<image width="100%" height="300rpx" :src="getOptionImgExplain(fieldData.option_img_explain)" v-if="showOption_img"></image>
@@ -300,6 +300,9 @@
 				<view v-else-if="fieldData.type === 'cascader'" @click="openCascader">
 					<input :placeholder="'点击选择' + placeholderValue" v-model="fieldData.value" disabled :class="!valid.valid ? 'valid_error' : ''" name="input" />
 				</view>
+				<view v-else-if="fieldData.type === 'Set'" @click="openSetBox">
+					<input :placeholder="'点击选择' + placeholderValue" v-model="fieldData.value" disabled :class="!valid.valid ? 'valid_error' : ''" name="input" />
+				</view>
 				<view class="item-group flex align-center" style="" v-else-if="fieldData.type === 'input'">
 					<input
 						@blur="onInputBlur"
@@ -330,6 +333,19 @@
 				</block>
 			</view>
 		</view>
+		<view class="cu-modal bottom-modal" :class="{ show: showSetBox }">
+			<view class="cu-dialog">
+				<view class="set-box" v-if="isArray(checkboxList)">
+					<bx-checkbox-group checkboxMode="button" v-model="checkedValue">
+						<bx-checkbox v-model="item.checked" v-for="(item,index) in checkboxList" :key="item.label" :name="item.value">{{ item.label }}</bx-checkbox>
+					</bx-checkbox-group>
+					<view class="button-box">
+						<button class="cu-btn button" @tap="cancelSaveSetValue">取消</button>
+						<button class="cu-btn button" @click="saveSetValue">确定</button>
+					</view>
+				</view>
+			</view>
+		</view>
 		<view class="cu-modal" :class="modalName == 'Image' ? 'show' : ''" @tap="hideModal">
 			<view class="cu-dialog" style="height: 100vh;width:100vw;z-index: 999999;">
 				<view class="bg-img" :style="'background-image: url(' + imagesUrl[imageIndex] + ');height:100%;background-size:100%;'">
@@ -343,27 +359,29 @@
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }">
-			<view class="cu-dialog tree-selector">
-				<u-search
-					:show-action="false"
-					action-text="搜索"
-					:animation="true"
-					:shape="'square'"
-					v-model="treeSearchVal"
-					@change="getTreeSelectorDataWithKey"
-					style="margin: 20rpx;"
-				></u-search>
-				<bxTreeSelector
-					:srvInfo="isArray(fieldData.option_list_v2) ? null : fieldData.option_list_v2"
-					:treeData="treeSelectorData"
-					:childNodeCol="'_childNode'"
-					:disColName="fieldData && fieldData.option_list_v2 && fieldData.option_list_v2['key_disp_col'] ? fieldData.option_list_v2['key_disp_col'] : ''"
-					:nodeKey="fieldData.option_list_v2 && fieldData.option_list_v2['refed_col'] ? fieldData.option_list_v2['refed_col'] : 'no'"
-					@clickParentNode="onTreeGridChange"
-					@clickLastNode="onMenu"
-				></bxTreeSelector>
-				<u-loadmore @loadmore="loadMoreTreeData" :status="treeDataStatus" :load-text="loadText" />
-				<view class="dialog-button"><view class="cu-btn bg-blue shadow" @tap="showTreeSelector = false">取消</view></view>
+			<view class="cu-dialog">
+				<view class="tree-selector">
+					<u-search
+						:show-action="false"
+						action-text="搜索"
+						:animation="true"
+						:shape="'square'"
+						v-model="treeSearchVal"
+						@change="getTreeSelectorDataWithKey"
+						style="margin: 20rpx;"
+					></u-search>
+					<bxTreeSelector
+						:srvInfo="isArray(fieldData.option_list_v2) ? null : fieldData.option_list_v2"
+						:treeData="treeSelectorData"
+						:childNodeCol="'_childNode'"
+						:disColName="fieldData && fieldData.option_list_v2 && fieldData.option_list_v2['key_disp_col'] ? fieldData.option_list_v2['key_disp_col'] : ''"
+						:nodeKey="fieldData.option_list_v2 && fieldData.option_list_v2['refed_col'] ? fieldData.option_list_v2['refed_col'] : 'no'"
+						@clickParentNode="onTreeGridChange"
+						@clickLastNode="onMenu"
+					></bxTreeSelector>
+					<u-loadmore @loadmore="loadMoreTreeData" :status="treeDataStatus" :load-text="loadText" />
+					<view class="dialog-button"><view class="cu-btn bg-blue shadow" @tap="showTreeSelector = false">取消</view></view>
+				</view>
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showRichText }">
@@ -504,7 +522,10 @@ export default {
 				total: 0,
 				rownumber: 20,
 				pageNo: 1
-			}
+			},
+			checkedValue: [],
+			checkboxList:[],
+			showSetBox:false,
 		};
 	},
 	updated() {},
@@ -512,18 +533,18 @@ export default {
 		placeholderValue: function() {
 			let item = this.deepClone(this.fieldData);
 			// item.label.slice(0, 2) == (index + 1).toString()
-			let label = ''
-			if (item.label && item.itemIndex&&item.label.slice(0, 1) == item.itemIndex.toString()) {
-				label =  item.label.slice(1);
-			} else if (item.label && item.itemIndex&&item.label.slice(0, 2) == item.itemIndex.toString()) {
-				label =  item.label.slice(2);
+			let label = '';
+			if (item.label && item.itemIndex && item.label.slice(0, 1) == item.itemIndex.toString()) {
+				label = item.label.slice(1);
+			} else if (item.label && item.itemIndex && item.label.slice(0, 2) == item.itemIndex.toString()) {
+				label = item.label.slice(2);
 			} else if (item.label) {
-				label =  item.label;
+				label = item.label;
 			}
-			if(label.indexOf('.')!==-1&&label.indexOf('.')<2){
-				label = label.replace('.','')
+			if (label.indexOf('.') !== -1 && label.indexOf('.') < 2) {
+				label = label.replace('.', '');
 			}
-			return label
+			return label;
 		},
 		dictShowValue() {
 			let option_list_v2 = this.fieldData.option_list_v2;
@@ -583,10 +604,11 @@ export default {
 		}
 	},
 	mounted() {
-		console.log('procDataprocDataprocData', this.procData);
+		let self = this;
 		if (this.fieldData.type === 'poupchange') {
 			this.getpoupInfo(this.fieldData.option_list_v2);
 		}
+
 		if (this.field.condition && Array.isArray(this.field.condition)) {
 			// this.field.condition.forEach()
 		}
@@ -850,6 +872,35 @@ export default {
 		hideModal(e) {
 			this.modalName = null;
 		},
+		cancelSaveSetValue(){
+			this.checkboxList = this.checkboxList.map(item=>{
+				if(this.fieldData.value&&this.fieldData.value.indexOf(item.value)!==-1){
+					item.checked = true
+				}else{
+					item.checked = false
+				}
+				return item
+			})
+			this.checkedValue = this.deepClone(this.checkboxList).filter(item=>item.checked).map(item=>item.value);
+			this.showSetBox = false
+		},
+		saveSetValue() {
+			setTimeout(()=>{
+				let values = this.deepClone(this.checkboxList).filter(item=>item.checked).map(item=>item.value);
+				this.checkedValue = values
+				let str=''
+				if(Array.isArray(values)&&values.length>0){
+					str = values.toString()
+				}
+				if(str!==this.fieldData.value){
+					this.fieldData.value = str
+				}
+				this.onInputBlur();
+				this.$emit('on-value-change', this.fieldData);
+				this.getValid();
+				this.showSetBox = false
+			},60)
+		},
 		deleteImage(e) {
 			console.log(e);
 			this.fieldData.value = '';
@@ -1024,6 +1075,23 @@ export default {
 		openCascader() {
 			this.defaultLineVal = this.fieldData.value;
 			this.$refs.popup.open();
+		},
+		openSetBox(){
+			let self  =this
+			if (self.fieldData.type === 'Set') {
+				if (Array.isArray(self.fieldData.option_list_v2) && self.fieldData.option_list_v2.length > 0) {
+					self.checkboxList = self.fieldData.option_list_v2.map(item => {
+						if (item&&(!item.hasOwnProperty('checked')||!item.checked)) {
+							item.checked = false;
+						}
+						if (self.fieldData.value && self.fieldData.value.indexOf(item.value) !== -1) {
+							item.checked = true;
+						}
+						return item
+					});
+				}
+			}
+			this.showSetBox = true
 		},
 		async getUserRoomPerson(no) {
 			const url = this.getServiceUrl('zhxq', 'srvzhxq_syrk_select', 'select');
@@ -1504,8 +1572,8 @@ uni-text.input-icon {
 .cu-card.article > .cu-item .title {
 	line-height: normal;
 }
-.cu-dialog.tree-selector,
-.cu-dialog.rich-text {
+.tree-selector,
+.rich-text {
 	height: auto;
 	padding-top: 50rpx;
 	background-color: #fff;
@@ -1518,6 +1586,24 @@ uni-text.input-icon {
 		// padding-right: 50upx;
 		padding: 20rpx 0;
 		margin-top: 50rpx;
+	}
+}
+.set-box {
+	padding: 20rpx 0;
+}
+.button-box {
+	padding: 40rpx 20rpx;
+	display: flex;
+	justify-content: center;
+	.button {
+		max-width: 40%;
+		flex: 1;
+		margin-right: 40rpx;
+		background-color: #11c5bd;
+		color: #fff;
+		&:nth-child(2n) {
+			margin-right: 0;
+		}
 	}
 }
 .pickers {

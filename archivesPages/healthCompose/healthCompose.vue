@@ -12,7 +12,7 @@
 			</view>
 			<view class="more-couple-cen-wrap">
 				<view class="couple-cen more-couple-cen">
-					<view @click="toQuestionnaire(item.no)" v-for="(item, index) in coupleData" :key="index" class="couple-cen-item">
+					<view @click="toQuestionnaire(item)" v-for="(item, index) in coupleData" :key="index" class="couple-cen-item">
 						<!-- <view
 						@click="clickItem(item)"
 						v-for="(item, index) in coupleData"
@@ -66,7 +66,7 @@
 								<text class="unit">分</text>
 							</text>
 							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
-							<view class="unfilled" v-if="!item.finished" @click="toQuestionnaire(item.no)">
+							<view class="unfilled" v-if="!item.finished" @click="toQuestionnaire(item)">
 								<text class="text-icon cuIcon-edit"></text>
 								<text class="text">点击填写</text>
 							</view>
@@ -234,16 +234,35 @@ export default {
 	},
 
 	methods: {
-		toQuestionnaire(no) {
-			if (no) {
+		toQuestionnaire(item) {
+			if (item && item.no) {
 				uni.navigateTo({
-					url: `/questionnaire/index/index?formType=form&activity_no=${no}&status=进行中`
+					url: `/questionnaire/index/index?formType=form&activity_no=${item.no}&status=进行中`
 				});
 			} else {
-				uni.showToast({
-					title: '未知编号，请刷新重试',
-					icon: 'none'
-				});
+				if (item && (item.name !== '体重' || item.name !== '年龄')) {
+					let row = this.userInfo;
+					let params = {
+						type: 'update',
+						condition: [
+							{
+								colName: 'id',
+								ruleType: 'in',
+								value: row.id
+							}
+						],
+						serviceName: 'srvhealth_person_info_update',
+						defaultVal: row
+					};
+					uni.navigateTo({
+						url: '/publicPages/form/form?params=' + JSON.stringify(params)
+					});
+				} else {
+					uni.showToast({
+						title: '未知编号，请刷新重试',
+						icon: 'none'
+					});
+				}
 			}
 		},
 		async getScoreFromQuestionRecord(no) {

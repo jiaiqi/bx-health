@@ -9,8 +9,8 @@
 			:fields="fields"
 			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
 		></bxform>
-		<view class="button-box">
-			<view v-for="(item, index) in buttons" :key="index">
+		<view class="button-box" v-if="colsV2Data&&isArray(fields)&&fields.length>0">
+			<view v-for="(item, index) in buttons" :key="index" class="button">
 				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue">{{ item.button_name }}</button>
 			</view>
 		</view>
@@ -41,17 +41,15 @@ export default {
 			let buttons = [];
 			if (this.colsV2Data && this.colsV2Data._buttonInfo) {
 				buttons = this.colsV2Data._buttonInfo;
-				console.log('aaaaa', buttons);
 			} else if (this.colsV2Data && this.colsV2Data._formButtons) {
 				buttons = this.colsV2Data._formButtons;
-				console.log('bbbbb', buttons);
 			}
+			buttons = buttons.filter(item=>item.button_name!=='重置')
 			let data = {};
 			this.fields.forEach(item => {
 				data[item['column']] = item['value'];
 			});
 			let fieldModel = data;
-			console.log(data, 'getDetailfieldModel');
 			buttons.forEach(btn => {
 				if (btn.disp_exps) {
 					btn['display'] = eval(btn.disp_exps);
@@ -195,9 +193,6 @@ export default {
 								this.type = 'detail';
 								await this.getFieldsV2();
 							}
-							// this.onRequest('update', e.service_name, req).then(res => {
-
-							// });
 						}
 					}
 					break;
@@ -225,6 +220,7 @@ export default {
 					break;
 				case 'reset':
 					this.$refs.bxForm.onReset().then(res => {
+						debugger
 						if (res) {
 							uni.showToast({
 								title: '已重置'
@@ -279,14 +275,19 @@ export default {
 </script>
 
 <style lang="scss">
-	.button-box {
-		display: flex;
-		justify-content: space-around;
-		align-items: center;
-		min-height: 200upx;
-		background-color: #fff;
+.button-box {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	min-height: 200upx;
+	background-color: #fff;
+	flex-wrap: wrap;
+	.button {
+		width: 40%;
 		.cu-btn{
-			flex: 1;
-			}
+			background-color: #14c4bd;
+			width: 100%;
+		}
 	}
+}
 </style>
