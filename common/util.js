@@ -83,7 +83,7 @@ export default {
 						}
 						// 第一次拿到，缓存
 						let pageconfig = Vue.prototype.getPageConfig(response.data.data, pageType)
-						self.$store.commit('setSrvCol', pageconfig)
+						// self.$store.commit('setSrvCol', pageconfig)
 						return pageconfig
 					}
 				} else {

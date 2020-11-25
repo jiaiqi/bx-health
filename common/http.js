@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import api from '@/common/api.js'
-import flyio from '@/common/wx.js' // 引入flyio
-let fly = new flyio
+// import flyio from '@/common/wx.js' // 引入flyio
+// let fly = new flyio
+import request from '@/common/utils/request.js'
+const fly = request({})
 let FormateDate = function(date) {
 	let o = {
 		'yy': date.getFullYear(),
@@ -44,7 +46,6 @@ let ignoreServiceName = (url) => {
 fly.interceptors.request.use((request) => {
 	//给所有请求添加自定义header
 	console.log("request: ", request)
-	// if (!ignoreUrlList.includes(request.url)) {
 	if (ignoreServiceName(request.url)) {
 		uni.showLoading({
 			// mask: true
@@ -88,8 +89,8 @@ fly.interceptors.response.use(
 	(res) => {
 		uni.hideLoading()
 		//只将请求结果的data字段返回
-		if (res.data.resultCode === "0011" || (res.request.headers.USERlOGIN && res.request.headers.USERlOGIN ===
-				"noneLogin")) { //未登录
+		if (res.data.resultCode === "0011" ) { //未登录
+		// || (res.request.headers.USERlOGIN && res.request.headers.USERlOGIN ==="noneLogin")
 			uni.setStorageSync('isLogin', false)
 			uni.setStorageSync('stophttp', true)
 			// uni.setStorageSync('backUrl',window.location.pathname + window.location.search)
@@ -154,6 +155,7 @@ fly.interceptors.response.use(
 		} else {
 			uni.setStorageSync('stophttp', false)
 		}
+		return res
 	},
 	(err) => {
 		//发生网络错误后会走到这里

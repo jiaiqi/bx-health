@@ -115,10 +115,10 @@ export default {
       } else {
         headbut.showMenus = false
       }
-      self.$store.dispatch({
-        type: 'setHeadrBar',
-        data: headbut
-      })
+      // self.$store.dispatch({
+      //   type: 'setHeadrBar',
+      //   data: headbut
+      // })
       console.log(headbut, newData, butType)
     }
   }
