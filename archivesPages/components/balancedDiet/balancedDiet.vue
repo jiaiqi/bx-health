@@ -501,12 +501,15 @@
 		<view class="cu-modal bottom-modal" :class="isShowCookType ? 'show' : ''">
 			<view class="cu-dialog">
 				<view class="cu-bar bg-white cook-top">
-					<view class="action text-blue" @tap="isShowCookType = false">取消</view>
+					<!-- <view class="action text-blue" @tap="isShowCookType = false">取消</view> -->
 					<text>常见烹调方式</text>
-					<view class="action text-green" @tap="isShowCookType = false"></view>
+					<!-- <view class="action text-green" @tap="isShowCookType = false"></view> -->
 				</view>
 				<view class="cooktype-wrap" v-if="currentRecord">
-					<view
+					<bx-radio-group v-model="cook_method" mode="button">
+						<bx-radio v-for="item in cookTypes" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
+					</bx-radio-group>
+					<!-- <view
 						@click="chooseCookType(cook)"
 						v-for="(cook, c) in cookTypes"
 						:key="c"
@@ -516,6 +519,18 @@
 						}"
 					>
 						<text>{{ cook.value }}</text>
+					</view> -->
+					<view class="button-box">
+						<button class="cu-btn button" @tap="isShowCookType = false">取消</button>
+						<button
+							class="cu-btn button"
+							@tap="
+								isShowCookType = false;
+								currentRecord.cook_method = cook_method;
+							"
+						>
+							确定
+						</button>
 					</view>
 				</view>
 			</view>
@@ -550,6 +565,7 @@ export default {
 		return {
 			showChart: true,
 			isShowCookType: false,
+			cook_method: '',
 			cookTypes: [], //烹调方式集合
 			unitList: [],
 			dietLayout: 'grid',
@@ -2802,8 +2818,8 @@ export default {
 		if (!this.pageType) {
 			return;
 		}
-		if(this.chatChoseTime){
-			this.selectDate = this.chatChoseTime
+		if (this.chatChoseTime) {
+			this.selectDate = this.chatChoseTime;
 		}
 		self = this;
 		this.procEleData();
@@ -3803,6 +3819,25 @@ uni-checkbox::before {
 .cu-modal.show {
 	z-index: 999;
 }
+.button-box {
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin: 30rpx 0;
+	.button {
+		background-color: #11c5bd;
+		color: #fff;
+		margin-right: 30rpx;
+		flex: 1;
+		&:nth-child(2n) {
+			margin-right: 0;
+		}
+	}
+}
+.cook-top{
+	justify-content: center;
+}
 .cooktype-wrap {
 	display: flex;
 	flex-wrap: wrap;
@@ -4073,8 +4108,9 @@ uni-checkbox::before {
 			letter-spacing: 2px;
 			border-radius: 10rpx;
 			font-size: 28rpx;
-			width: 300rpx;
-			margin-right: 20rpx;
+			// width: 300rpx;
+			flex: 1;
+			margin-right: 40rpx;
 			text-align: center;
 			&:last-child {
 				margin-right: 0rpx;

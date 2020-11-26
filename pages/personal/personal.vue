@@ -13,9 +13,9 @@
 					<!-- <image src="/otherPages/static/img/yd.png" mode=""></image> -->
 					<text>我的医生</text>
 				</view>
-				<view class="container-cen-top-list">
+				<view class="container-cen-top-list" @click="toPages('userList')">
 					<text class="cuIcon-comment text-green" style="font-size: 70rpx;"></text>
-					<text>健康咨询</text>
+					<text>我的用户</text>
 				</view>
 				<view class="container-cen-top-list" @click="toPages('pinggu')">
 					<text class="cuIcon-addressbook text-orange" style="font-size: 70rpx;"></text>
@@ -85,8 +85,14 @@ export default {
 					break;
 				case 'beDoctor':
 					uni.navigateTo({
-						url: '/publicPages/form/form?serviceName=srvhealth_doctor_add&type=add&cond='
+						url: '/publicPages/form/form?serviceName=srvhealth_doctor_add&type=add'
 					});
+					break;
+				case 'userList':
+					uni.navigateTo({
+						url: '/personalPages/userList/userList'
+					});
+					break;
 			}
 		},
 		toPersonDetail(type) {

@@ -1,16 +1,9 @@
 <template>
 	<view class="test">
-<!-- 		<bx-radio-group v-model="radioValue" mode="normal" wrap>
-			<bx-radio  v-for="item in options" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-radio>
-		</bx-radio-group>
-			<bx-checkbox-group  mode="normal" wrap>
-			<bx-checkbox v-for="item in options" v-model="item.checked" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-checkbox>
-		</bx-checkbox-group> -->
 		<view class="node-path">
 			<view class="path-item" v-for="(item, index) in linkPath" :key="item.no" @click="toPath(item)">
 				<view class="name">{{ item.name }}</view>
 				<view class="separator" v-if="index + 1 < linkPath.length"><view class="line"></view></view>
-				<!-- <text class="separator cuIcon-right" v-if="index + 1 < linkPath.length"></text> -->
 			</view>
 		</view>
 		<view class="charts" v-if="nodeDetail && nutrientsChartOption.option && nutrientsChartOption.option.title">
@@ -136,21 +129,21 @@ export default {
 				if (!nameArr.includes(item.target_name)) {
 					if (item.target_name === this.currentNodes) {
 						nodes.push({
-							symbol:
-								data.length === 4
-									? 'path://M512 0.310115l511.689885 511.689885-511.689885 511.689885-511.689885-511.689885z'
-									: data.length === 5
-									? 'path://M512 51.146296 1023.462964 422.744598 828.099456 1024.005115 195.900544 1024.005115 0.537036 422.744598Z'
-									: data.length === 6
-									? 'path://M512.024475 0l445.413275 255.984641V768.015359l-445.413275 255.984641L66.508806 768.015359V256.046077z'
-									: data.length == 7
-									? 'path://M522.666667 0l416.981333 200.810667 102.976 451.2-288.554667 361.834666H291.264L2.709333 652.010667l102.976-451.2z'
-									: data.length === 8
-									? 'path://M1024 512l-149.9648 362.0352L512 1024 149.9648 874.0352 0 512 149.9648 149.9648 512 0l362.0352 149.9648z'
-									: data.length > 8
-									? 'circle'
-									: 'diamond',
-							// symbol: 'diamond', //中间的节点
+							// symbol:
+							// 	data.length === 4
+							// 		? 'path://M512 0.310115l511.689885 511.689885-511.689885 511.689885-511.689885-511.689885z'
+							// 		: data.length === 5
+							// 		? 'path://M512 51.146296 1023.462964 422.744598 828.099456 1024.005115 195.900544 1024.005115 0.537036 422.744598Z'
+							// 		: data.length === 6
+							// 		? 'path://M512.024475 0l445.413275 255.984641V768.015359l-445.413275 255.984641L66.508806 768.015359V256.046077z'
+							// 		: data.length == 7
+							// 		? 'path://M522.666667 0l416.981333 200.810667 102.976 451.2-288.554667 361.834666H291.264L2.709333 652.010667l102.976-451.2z'
+							// 		: data.length === 8
+							// 		? 'path://M1024 512l-149.9648 362.0352L512 1024 149.9648 874.0352 0 512 149.9648 149.9648 512 0l362.0352 149.9648z'
+							// 		: data.length > 8
+							// 		? 'circle'
+							// 		: 'diamond',
+							symbol: 'diamond', //中间的节点
 							name: item.target_name,
 							nodeNo: item.target_node_no,
 							category: 1
@@ -270,7 +263,7 @@ export default {
 						symbolSize: 58,
 						// zoom: 0.5, //当前视角的缩放比例
 						draggable: false, //可拖拽
-						roam: 'true', //是否开启鼠标缩放和平移漫游 默认false,可配置scale -缩放 move -移动 true
+						roam: true, //是否开启鼠标缩放和平移漫游 默认false,可配置scale -缩放 move -移动 true
 						// focusNodeAdjacency: true, // 是否在鼠标移到节点上的时候突出显示节点以及节点的边和邻接节点。
 						categories: categories,
 						edgeSymbol: ['circle', 'arrow'],
@@ -300,19 +293,19 @@ export default {
 							// gravity: 0.1, //节点受到的向中心的引力因子。该值越大节点越往中心点靠拢
 							repulsion:
 								nodes.length <= 2
-									? 1200
-									: nodes.length < 5 && nodes.length > 2
 									? 900
-									: nodes.length >= 5 && nodes.length < 10
+									: nodes.length < 5 && nodes.length > 2
 									? 800
-									: nodes.length > 15 && nodes.length <= 20
+									: nodes.length >= 5 && nodes.length < 10
 									? 700
+									: nodes.length > 15 && nodes.length <= 20
+									? 600
 									: 500, // 节点之间的斥力因子,值越大斥力越大
 							edgeLength:
 								nodes.length <= 2
-									? 200
-									: nodes.length < 5 && nodes.length > 2
 									? 150
+									: nodes.length < 5 && nodes.length > 2
+									? 120
 									: nodes.length >= 5 && nodes.length < 7
 									? 100
 									: nodes.length >= 7 && nodes.length < 10
@@ -363,7 +356,7 @@ export default {
 		toPath(e) {
 			if (e.no && e.name && this.currentNodeNo !== e.no) {
 				this.currentNodeNo = e.no;
-				// this.currentNodes = e.name;
+				this.currentNodes = e.name;
 				// this.getNodeDetail(e.no);
 				this.geteChartsData();
 				this.changeLinkPath(e);
@@ -397,7 +390,7 @@ export default {
 		},
 		clickCharts(e) {
 			if (e.data && e.data.nodeNo && e.data.nodeNo !== this.currentNodeNo) {
-				// this.currentNodes = e.name;
+				this.currentNodes = e.name;
 				this.currentNodeNo = e.data.nodeNo;
 				this.geteChartsData();
 				// this.getNodeDetail(e.data.nodeNo);

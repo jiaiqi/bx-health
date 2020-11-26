@@ -17,7 +17,7 @@
 						<!-- <view v-else @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
 							<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
 						</view> -->
-						<view v-else-if="item.msg_link" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
 							<view class="link-left">
 								<image src="../../static/links.png" mode=""></image>
 							</view>
@@ -34,6 +34,26 @@
 							<!-- <text>{{item.quertion_name?item.quertion_name:item.recode_num}}</text> -->
 							<!-- <text>{{item.msg_link}}</text> -->
 						</view>
+						
+						<view
+							@tap="handleAudio(item)"
+							v-else-if = "item.msg_link && item.msg_content_type === '语音'" 
+							hover-class="contentType2-hover-class"
+							class="content contentType2">
+							<view class="voice_icon_left-wrap">
+								<view class="">
+									{{item.voice_time?item.voice_time:''}}
+								</view>
+								<view class="voice_icon voice_icon_left" :class="item.anmitionPlay?'voice_icon_left_an':''"></view>								
+							</view>
+							
+						</view>
+						
+						<!-- <view 
+						@tap="handleAudio(item)" 
+						v-else-if = "item.msg_link && item.msg_content_type === '语音'" class="person-chat-item-right">
+							<text>语音</text>
+						</view> -->
 					</view>
 					<view v-else-if="item.sender_account === currentUserInfo.user_no" class="person-chat-item-send">
 						<text class="unread" v-if="item.msg_state === '未读'">{{item.msg_state}}</text>
@@ -43,7 +63,7 @@
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
 							<text>{{item.msg_content}}</text>
 						</view>
-						<view v-else-if="item.msg_link" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
+						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
 							<view class="link-left">
 								<image src="../../static/links.png" mode=""></image>
 							</view>
@@ -60,13 +80,36 @@
 							<!-- <text>{{item.quertion_name?item.quertion_name:item.recode_num}}</text> -->
 							<!-- <text>{{item.msg_link}}</text> -->
 						</view>
+						
+						<view 
+							@tap="handleAudio(item)"
+							v-else-if = "item.msg_link && item.msg_content_type === '语音'" 
+							hover-class="contentType2-hover-class"
+							class="content contentType2 content-type-right">
+							<view class="voice_icon_right-wrap">
+								<view class="voice_icon voice_icon_right" :class="item.anmitionPlay?'voice_icon_right_an':''"></view>
+								<view class="">{{item.voice_time?item.voice_time:''}}</view>
+							</view>
+							
+						</view>
 						<view class="person-chat-item-left">
 							<image :src="currentUserInfo.headimgurl?currentUserInfo.headimgurl:'/personalPages/static/doctor_default.jpg'" mode=""></image>
 						</view>
 					</view>
 				</view>
 			</scroll-view>
-			
+			<view class="voice_an"  v-if="recording">
+				<view class="voice_an_icon">
+					<view id="one" class="wave"></view>
+					<view id="two" class="wave"></view>
+					<view id="three" class="wave"></view>
+					<view id="four" class="wave"></view>
+					<view id="five" class="wave"></view>
+					<view id="six" class="wave"></view>
+					<view id="seven" class="wave"></view>
+				</view>
+				<view class="text">{{voiceIconText}}</view>
+			</view>
 		</view>
 		<view class="person-chat-bot" :class="doctor_no?'person-doctor-chat-bot':''">
 			<view class="person-chat-bot-top">
@@ -75,12 +118,14 @@
 					<image @click="changeVoice('voice')" v-if="currentVoiceType === 'keyword'" src="../../static/keyboard.png" mode=""></image>
 					<text 
 					v-if="currentVoiceType === 'keyword'"
+					class="voice_title"
+					:style="{ background: recording ? '#c7c6c6' : '#FFFFFF' }"
 					@touchstart.stop.prevent="startVoice"
 					@touchmove.stop.prevent="moveVoice"
 					@touchend.stop="endVoice"
 					@touchcancel.stop="cancelVoice"
 					
-					>按住发送</text>
+					>{{ voiceTitle }}</text>
 					<input v-else @input="changeTest" v-model="chatText" type="text" value="" />
 					<!-- <input v-if="!isSendLink" @input="changeTest" v-model="chatText" type="text" value="" /> -->
 					<!-- <input v-else @input="changeTest" v-model="chatText" type="text" value="" /> -->
@@ -133,7 +178,7 @@
 					<view class="action text-blue" @tap="hideModal">取消</view>
 				</view>
 				<view class="padding-xl recode-poup">
-					<bx-radio-group @change="radioChange">
+					<!-- <bx-radio-group @change="radioChange">
 						<bx-radio
 							class="radio"
 							color="#2979ff"
@@ -143,22 +188,16 @@
 						>
 							{{ item.title?item.title:item.hdate }}
 						</bx-radio>
-					</bx-radio-group>
-					<!-- <checkbox-group @change="checkboxGroupChange" class="check-box-group recode-poup-list">
-						<label v-for="(item, index) in 5" :key="index" class="check-box-item">
-							<checkbox :value="index" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" />
-							{{ index }}
-						</label>
-					</checkbox-group> -->
+					</bx-radio-group> -->
 				</view>
 			</view>
-		</view>
+		</view>		
 	</view>
 </template>
 
 <script>
-	import bxRadio from '@/components/bx-radio/bx-radio.vue';
-	import bxRadioGroup from '@/components/bx-radio-group/bx-radio-group.vue';
+	// import bxRadio from '@/components/bx-radio/bx-radio.vue';
+	// import bxRadioGroup from '@/components/bx-radio-group/bx-radio-group.vue';
 	import robbyImageUpload from '@/components/robby-image-upload/robby-image-upload.vue';
 	export default {
 		name:'personchat',
@@ -206,6 +245,7 @@
 				currentSendType:'',
 				// isFeed:false,
 				current_type:'world',
+				voiceTitle:'按住 说话',
 				userInfo:'',
 				recordList:[],
 				chatTextBottom:'',
@@ -228,8 +268,24 @@
 			}
 		},
 		methods:{
+			//控制播放还是暂停音频文件
+			handleAudio(item) {				
+				console.log("点击语音=========>",this.Audio.paused)				
+				this.AudioExam = item;
+				this.Audio.paused ? this.playAudio(item) : this.stopAudio(item);
+				
+				// this.playAudio(item)
+			},
+			//播放音频
+			playAudio(item) {
+				this.Audio.src = item.msg_link;
+				this.Audio.id = item.id;
+				this.Audio.play();
+				item.anmitionPlay = true;
+			},
 			stopAudio(item) {
 				item.anmitionPlay = false;
+				// this.Audio.id = item.id;
 				this.Audio.src = '';
 				this.Audio.stop();
 			},
@@ -296,8 +352,9 @@
 				// #endif
 				
 				// #ifdef APP-PLUS
-				contentDuration = this.voiceTime +1;
+				contentDuration = Number(this.voiceTime) +1;
 				this.voiceTime = 0;
+				console.log("=----------录音--")
 				if(contentDuration <= 0) {
 					this.voiceIconText="说话时间过短";
 					setTimeout(()=>{
@@ -314,7 +371,23 @@
 					contentDuration: Math.ceil(contentDuration)
 				};
 				console.log("-----语音----",params)
+				this.canSend && this.sendMessageLanguageInfo('语音',params)
 				// this.canSend && this.sendMsg(params);
+			},
+			/*发送语音**/
+			sendVoiceMesage(params){
+				
+			},
+			closeAnmition() {				
+				const hasBeenSentId = this.Audio.id;
+				// this.recodeList.forEach(it=>{
+				// 	if(it.id === hasBeenSentId){
+				// 		it.anmitionPlay = false;
+				// 	}
+				// })
+				const item = this.recordList.find(it => it.id == hasBeenSentId);
+				console.log("-----------动画",item)
+				item.anmitionPlay = false;
 			},
 		/*点击图片预览**/
 		previewImages(url){
@@ -596,17 +669,18 @@
 				}];
 				if(type === '图片'){
 					req[0].data[0].image = value
-				}else{
-					req[0].data[0].msg_link = value
+				}else if(type === '语音'){
+					req[0].data[0].msg_link = value.content
+					req[0].data[0].voice_time = value.contentDuration
 				}
 				console.log("res========>",req)
 				let res = await this.$http.post(url, req);
-				if(res.data.state === 'SUCCESS'){
+				// if(res.data.state === 'SUCCESS'){
 					
-					console.log("发送成功")
+					console.log("发送成功",res)
 					this.getMessageInfo()
 					
-				}
+				// }
 			},
 			/*点击发送后添加数据**/
 			async sendMessageInfo(){
@@ -703,6 +777,9 @@
 				let res = await this.$http.post(url, req);
 				if(res.data.data.length > 0){
 					res.data.data.forEach((item,i)=>{
+						if(item.msg_content_type === '语音'){
+							this.$set(res.data.data[i],'anmitionPlay',false)
+						}
 						if(item.image){
 							let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
 							this.$set(res.data.data[i],'img_url',url)
@@ -835,7 +912,7 @@
 			// setTimeout(() => {
 			//    uni.pageScrollTo({scrollTop: 99999999, duration: 0});
 			// }, 50);
-		},
+		},		
 		onLoad(option) {
 			//录音开始事件
 			this.Recorder.onStart(e => {
@@ -868,11 +945,83 @@
 	.person-chat-wrap{
 		height: 100vh;
 		background-color: #eeeeee;
+		.voice_an{
+			width: 300rpx;
+			height: 300rpx;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%,-55%);
+			background-color: rgba(41,41,41,0.7);
+			color: white;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			border-radius: 10rpx;
+			.text{
+				padding-top: 30rpx;
+			}
+			@keyframes runVoice{
+				0%{
+					height: 10%;
+				}
+				20%{
+					height: 50%;
+				}
+				50%{
+					height: 100%;
+				}
+				80%{
+					height: 50%;
+				}
+				100%{
+					height: 0%;
+				}
+			}	
+			.wave{
+				width:6rpx;
+				height: 100%;
+				margin-left: 10rpx;
+				border-radius: 50rpx;
+				background-color: #999;
+				vertical-align: middle;
+				display: inline-block;
+			}
+			.voice_an_icon{
+				width: 200rpx;
+				height: 100rpx;
+				line-height: 50rpx;
+				margin: 50rpx 0;
+			}
+			.voice_an_icon #one{
+				animation:runVoice 0.6s infinite 0.1s;
+			}
+			.voice_an_icon #two{
+				animation:runVoice 0.6s infinite 0.3s;
+			}
+			.voice_an_icon #three{
+				animation:runVoice 0.6s infinite 0.6s;
+			}
+			.voice_an_icon #four{
+				animation:runVoice 0.6s infinite 0.1s;
+			}
+			.voice_an_icon #five{
+				animation:runVoice 0.6s infinite 0.3s;
+			}
+			.voice_an_icon #six{
+				animation:runVoice 0.6s infinite 0.6s;
+			}
+			.voice_an_icon #seven{
+				animation:runVoice 0.6s infinite 0.1s;
+			}
+		}
 		.nav-chat-top{
 			background-color: rgb(11, 201, 157)!important;
 			color: white;
 			font-weight: 700;
 		}
+		
 		.person-chat-top{
 			display: flex;
 			flex-direction: column;
@@ -1029,6 +1178,8 @@
 						font-weight: 700;
 						font-size: 12px;
 						position: relative;
+						display: flex;
+						align-items: center;
 						.link-left{
 							margin-right: 16rpx;
 							image{
@@ -1151,6 +1302,16 @@
 			.person-chat-item-my{
 				display: flex;
 				justify-content: flex-end;
+				// .person-chat-item-send{
+				// 	.person-chat-item-right{
+				// 		background-color: #eeeeee;
+				// 		text{
+				// 			width: 100%;
+				// 			background-color: #07c062;
+				// 		}
+				// 	}
+				// }
+				
 			}
 		}
 		.person-chat-top-w{
@@ -1272,4 +1433,99 @@
 			
 		}
 	}
+	.contentType2 {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		.voice_icon_right-wrap{
+			background-color: #07c062;
+			padding: 16rpx 16rpx 16rpx 80rpx;
+			border-radius: 8rpx;
+			position: relative;
+			display: flex;
+			&::after{
+					content: '';
+					display: block;
+					width: 0;
+					height: 0;
+					border-top: 5px solid transparent;
+					border-bottom: 5px solid transparent;
+					border-left: 8px solid #07c062;
+					position: absolute;
+					border-radius: 1px;
+					right: -7px;
+					top: 16rpx;
+				}
+		}
+		.voice_icon_left-wrap{
+			background-color: #fff;
+			padding: 16rpx 80rpx 16rpx 16rpx;
+			border-radius: 8rpx;
+			position: relative;
+			display: flex;
+			box-shadow: 2px 1px 2px rgba(26, 26, 26, 0.2);
+			&::after{
+					content: '';
+					display: block;
+					width: 0;
+					height: 0;
+					border-top: 5px solid transparent;
+					border-bottom: 5px solid transparent;
+					border-right: 8px solid #fff;
+					position: absolute;
+					border-radius: 1px;
+					left: -7px;
+					top: 16rpx;
+				}
+		}
+		.voice_icon {
+			height: 34rpx;
+			width: 34rpx; 
+			background-repeat: no-repeat;
+			background-size: 100%;
+		}
+		.voice_icon_right {
+			background-image: url(../../static/voice-left-3.png);
+			margin-left: 10rpx;
+		}
+		.voice_icon_left {
+			background-image: url(../../static/voice-right-3.png);
+			margin-right: 10rpx;
+		}
+		.voice_icon_right_an {
+			animation: voiceAn_right 1s linear alternate infinite;
+		}
+		.voice_icon_left_an {
+			animation: voiceAn_left 1s linear alternate infinite;
+		}
+		@keyframes voiceAn_right {
+			0% {
+				background-image: url(../../static/voice-left-1.png);
+			}
+			50% {
+				background-image: url(../../static/voice-left-2.png);
+			}
+			100% {
+				background-image: url(../../static/voice-left-3.png);
+			}
+		}
+		@keyframes voiceAn_left {
+			0% {
+				background-image: url(../../static/voice-right-1.png);
+			}
+			50% {
+				background-image: url(../../static/voice-right-2.png);
+			}
+			100% {
+				background-image: url(../../static/voice-right-3.png);
+			}
+		}
+	}
+	.voice_title {
+		text-align: center;
+		background-color: #ffffff;
+		height: 80rpx;
+		line-height: 80rpx;
+		border-radius: 12rpx;
+	}	
 </style>

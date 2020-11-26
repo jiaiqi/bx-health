@@ -49,6 +49,7 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				// this.doctorList = res.data.data;
+				debugger
 				let noList = res.data.data.map(item => item.manager_no);
 				let noStr = noList.toString();
 				let doctorList = await this.getDoctorInfo(noStr, true);
@@ -226,7 +227,7 @@ export default {
 		}
 	},
 	onShow() {
-		this.getBindDoctor();
+		// this.getBindDoctor();
 	},
 	onReachBottom() {
 		// 下拉到底部

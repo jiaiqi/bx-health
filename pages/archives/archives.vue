@@ -59,7 +59,7 @@
 			</view>
 			<view class="content todo-list">
 				<view class="todo-item" v-for="(item, index) in todoList" :key="index" @click="clickTodoItem(item, index)">
-					<view class="check-box" :class="{ checked: item.checked }"><view class="checked cuIcon-check" v-if="item.checked"></view></view>
+					<!-- <view class="check-box" :class="{ checked: item.checked }"><view class="checked cuIcon-check" v-if="item.checked"></view></view> -->
 					<view class="todo-item-content" :class="{ checked: item.checked }">{{ item.ds_name }}</view>
 				</view>
 			</view>
@@ -365,10 +365,10 @@ export default {
 	methods: {
 		clickTodoItem(item, index) {
 			// this.$set(item, 'checked', !item.checked);
-			if(item.ds_no){
+			if (item.ds_no) {
 				uni.navigateTo({
-					url:`/archivesPages/DrugPlan/DrugPlan?ds_no=${item.ds_no}`
-				})
+					url: `/archivesPages/DrugPlan/DrugPlan?ds_no=${item.ds_no}`
+				});
 			}
 		},
 		async getToDoList() {
@@ -970,7 +970,7 @@ export default {
 			} else if (type === 'drug') {
 				let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
 				uni.navigateTo({
-					url: '/publicPages/form/form?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
+					url: '/publicPages/form/form?serviceName=srvhealth_drug_schedule_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
 				});
 			}
 		},
@@ -1523,8 +1523,12 @@ export default {
 					display: flex;
 					justify-content: center;
 					align-items: center;
-					box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+					// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 					border-radius: 20rpx;
+					color: #e6a23c;
+					background: #fdf6ec;
+					border-color: #f5dab1;
+					box-shadow: 0px 0px 4px #f5dab1, 0 0 6px #fdf6ec;
 					.check-box {
 						border: 2px solid #666;
 						border-radius: 30rpx;
@@ -1541,6 +1545,8 @@ export default {
 						}
 					}
 					.todo-item-content {
+						font-weight: 700;
+
 						&.checked {
 							text-decoration: line-through;
 							// text-underline: thr;
@@ -1606,7 +1612,7 @@ export default {
 		color: #fff;
 		margin-right: 50rpx;
 		flex: 1;
-		&:last-child {
+		&:nth-child(2n) {
 			margin-right: 0;
 		}
 	}

@@ -27,24 +27,25 @@
 				"navigationBarTitleText": "个人中心",
 				"enablePullDownRefresh": false
 			}
-		},
-		{
-			"path": "pages/management/management",
-			"style": {
-				"navigationBarTitleText": "用户",
-				"enablePullDownRefresh": false
-			}
-		},
-		{
-			"path": "pages/testPage/testPage",
-			"style": {
-				"navigationBarTitleText": "健康图谱",
-				"enablePullDownRefresh": false,
-				"usingComponents": {
-					
-				}
-			}
 		}
+		// ,
+		// {
+		// 	"path": "pages/management/management",
+		// 	"style": {
+		// 		"navigationBarTitleText": "用户",
+		// 		"enablePullDownRefresh": false
+		// 	}
+		// },
+		// {
+		// 	"path": "pages/testPage/testPage",
+		// 	"style": {
+		// 		"navigationBarTitleText": "健康图谱",
+		// 		"enablePullDownRefresh": false,
+		// 		"usingComponents": {
+
+		// 		}
+		// 	}
+		// }
 	],
 	"subPackages": [{
 			// 问卷
@@ -106,17 +107,21 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
+				}, {
+					"path": "DrugPlan/DrugPlan",
+					"style": {
+						"navigationBarTitleText": "用药计划详情",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "RelationGraph/RelationGraph",
+					"style": {
+						"navigationBarTitleText": "健康图谱",
+						"enablePullDownRefresh": false
+					}
 				}
-			    ,{
-                    "path" : "DrugPlan/DrugPlan",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "用药计划详情",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "pregnancy",
@@ -190,6 +195,13 @@
 						"enablePullDownRefresh": true
 						// "navigationBarBackgroundColor":"#0bc99d"
 					}
+				}, {
+					"path": "userList/userList",
+					"style": {
+						"navigationBarTitleText": "用户管理",
+						"enablePullDownRefresh": false
+					}
+
 				}
 			]
 		},
@@ -479,12 +491,12 @@
 				"selectedIconPath": "static/icon/geren_selected.png",
 				"text": "个人"
 			},
-			{
-				"pagePath": "pages/management/management",
-				"iconPath": "/static/icon/yonghu.png",
-				"selectedIconPath": "static/icon/yonghu_selected.png",
-				"text": "用户"
-			},
+			// {
+			// 	"pagePath": "pages/management/management",
+			// 	"iconPath": "/static/icon/yonghu.png",
+			// 	"selectedIconPath": "static/icon/yonghu_selected.png",
+			// 	"text": "用户"
+			// },
 			{
 				"pagePath": "pages/store/store",
 				"iconPath": "/static/icon/shenghuo.png",

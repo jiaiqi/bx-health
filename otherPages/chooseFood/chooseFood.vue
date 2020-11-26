@@ -270,9 +270,9 @@
 					<text class="cuIcon-info"></text>
 					最多只能勾选五项
 				</view> -->
-				<bx-checkbox-group max="1" checkboxMode="button">
-					<bx-checkbox v-for="item in cookData" v-model="item.checked" :key="item.value" :disabled="item.disable" :name="item.label" @change="checkboxGroupChange">{{ item.label }}</bx-checkbox>
-				</bx-checkbox-group>
+				<bx-radio-group v-model="RadioChoose" max="1" mode="button">
+					<bx-radio v-for="item in cookData" v-model="item.checked" :key="item.value" :disabled="item.disable" :name="item.value" @change="checkboxGroupChange">{{ item.label }}</bx-radio>
+				</bx-radio-group>
 <!-- 						<checkbox-group @change="checkboxGroupChange" class="check-box-group">
 					<label v-for="(item, index) in checkboxList" :key="index" class="check-box-item">
 						<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" :disabled="disabledTag && !checkedList.includes(item.value)" />
@@ -310,6 +310,7 @@ export default {
 	data() {
 		return {
 			unitList: [],
+			RadioChoose:'',
 			currFoodTime:'',
 			dinnerTime:[{
 				value:'早餐',
@@ -606,45 +607,47 @@ export default {
 		checkboxGroupChange(e){
 			console.log("---------e-",e)
 			let isHasTrue = false
-			this.cookData.forEach(item=>{
-				if(item.value === e.name  && e.value){
-					isHasTrue = true
-				}
-			})
-			if(isHasTrue){
-				this.cookData.forEach(item=>{
-					item.disable = true
-					if(item.value === e.name && e.value){
-						item.disable = false
-					}
-				})
-			}else{
-				this.cookData.forEach(item=>{
-					item.disable = false
-					// if(item.value === e.name && e.value){
-					// 	item.disable = false
-					// }
-				})
-			}
+			// this.cookData.forEach(item=>{
+			// 	if(item.value === e.name  && e.value){
+			// 		isHasTrue = true
+			// 	}
+			// })
+			// if(isHasTrue){
+			// 	this.cookData.forEach(item=>{
+			// 		item.disable = true
+			// 		if(item.value === e.name && e.value){
+			// 			item.disable = false
+			// 		}
+			// 	})
+			// }else{
+			// 	this.cookData.forEach(item=>{
+			// 		item.disable = false
+			// 		// if(item.value === e.name && e.value){
+			// 		// 	item.disable = false
+			// 		// }
+			// 	})
+			// }
 			
-			if(!e.value){
-				this.currentChooseCookData = this.cookData[0].value
-				this.isCookDataChoose = false
-			}else{
+			// if(!e.value){
 				this.currentChooseCookData = e
+			// 	this.isCookDataChoose = false
+			// }else{
+			// 	this.currentChooseCookData = e
 				
-			}
+			// }
 			
 			
 		},
 		confirmCookData(){
-			if(!this.currentChooseCookData.value){
-				this.currentCookData = this.cookData[0].value
-				this.isCookDataChoose = false
-			}else{
-				this.currentCookData = this.currentChooseCookData.name
-				this.isCookDataChoose = true
-			}
+			this.currentCookData = this.currentChooseCookData
+			this.isCookDataChoose = true
+			// if(!this.currentChooseCookData.value){
+			// 	this.currentCookData = this.cookData[0].value
+			// 	this.isCookDataChoose = false
+			// }else{
+			// 	this.currentCookData = this.currentChooseCookData.name
+			// 	this.isCookDataChoose = true
+			// }
 			
 			this.showUserHealtManagePopup = false
 		},
