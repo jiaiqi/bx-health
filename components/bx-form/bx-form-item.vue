@@ -219,6 +219,7 @@
 					<w-picker mode="yearMonth" startYear="1900" endYear="2030" :current="false" @confirm="onConfirm" :disabledAfter="false" ref="yearMonth" themeColor="#f00"></w-picker>
 					<w-picker mode="dateTime" startYear="1900" endYear="2030" step="1" :current="false" @confirm="onConfirm" ref="dateTime" themeColor="#f00"></w-picker>
 					<w-picker mode="time" :current="false" @confirm="onConfirm" ref="time" step="1"></w-picker>
+					<w-picker mode="time" :current="true" :second="false" @confirm="onConfirm" ref="Time" step="1"></w-picker>
 				</view>
 				<!-- fieldData.type === 'list' 选项列表 -->
 				<view v-else-if="fieldData.type === 'list'">
@@ -978,11 +979,6 @@ export default {
 				this.$emit('on-value-change', this.fieldData);
 			} else {
 				if (this.fieldData.type === 'checkboxFk') {
-					// let bool = this.fieldData.options[index];
-					// bool.checked = !bool.checked;
-					// this.$set(this.fieldData.options, index, bool);
-					// let arr = this.fieldData.options.filter(item => item.checked).map(item => item.value);
-					// arr = arr.filter(item => item && item);
 					let arr = this.fieldData.value;
 					if (Array.isArray(arr) && arr.indexOf(e.value) === -1) {
 						arr.push(e.value);
@@ -1053,7 +1049,7 @@ export default {
 		},
 		toggleTab(str) {
 			console.log('点击', str);
-			// str = 
+			// str = str.toLowerCase()
 			this.$refs[str].show();
 			console.log(this.$refs[str].show());
 		},

@@ -224,7 +224,7 @@ export default {
 		border-radius: 60rpx;
 		border: 2rpx solid #888;
 		color: #888;
-		margin-right: 20rpx;
+		margin-right: 10rpx;
 		display: flex;
 		justify-content: center;
 		align-items: center;
