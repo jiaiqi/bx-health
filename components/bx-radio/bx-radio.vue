@@ -140,8 +140,8 @@ export default {
 			return style;
 		},
 		radioButtonClass() {
-			if (this.parent && this.parent.radioMode) {
-				if (this.parent.radioMode === 'button') {
+			if (this.parent && (this.parent.radioMode||this.parent.mode)) {
+				if (this.parent.radioMode === 'button'||this.parent.mode === 'button') {
 					return 'button-mode';
 				}
 			}

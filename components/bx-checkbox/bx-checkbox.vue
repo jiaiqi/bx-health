@@ -123,8 +123,8 @@ export default {
 			return this.shape ? this.shape : this.parent ? this.parent.shape : 'square';
 		},
 		checkboxClass() {
-			if (this.parent && this.parent.checkboxMode) {
-				if (this.parent.checkboxMode === 'button') {
+			if (this.parent && (this.parent.checkboxMode||this.parent.mode)) {
+				if (this.parent.checkboxMode === 'button'||this.parent.mode === 'button') {
 					return 'button-mode';
 				}
 			}

@@ -56,6 +56,11 @@ export default {
 			default: 'circle'
 		},
 		// 样式风格 normal-经典多选框风格，button-按钮风格
+		mode: {
+			type: String,
+			default: 'normal'
+		},
+		// 同上，后续将删除此属性
 		radioMode: {
 			type: String,
 			default: 'normal'
