@@ -1,16 +1,10 @@
 <template>
 	<view class="bx-radio" :style="[radioStyle]" :class="[radioButtonClass]">
-		<view class="bx-radio-icon" :class="{checked:name===parentData.value,'has-char':serialChar,'no-char':!serialChar}" @tap="toggle">
-			<text v-if="serialChar">{{serialChar}}</text>
-			<text v-if="!serialChar&&name===parentData.value" class="bx-radio-checked"></text>
+		<view class="bx-radio-icon" :class="{ checked: name === parentData.value, 'has-char': serialChar, 'no-char': !serialChar }" @tap="toggle">
+			<text v-if="serialChar">{{ serialChar }}</text>
+			<text v-if="!serialChar && name === parentData.value" class="bx-radio-checked"></text>
 		</view>
-		<view
-			class="bx-radio__label"
-			@tap="onClickLabel"
-			:class="{ checked: checked, disabled: disabled }"
-		>
-			<slot />
-		</view>
+		<view class="bx-radio__label" @tap="onClickLabel" :class="{ checked: checked, disabled: disabled }"><slot /></view>
 	</view>
 </template>
 
@@ -67,11 +61,11 @@ export default {
 			default: ''
 		},
 		// 序号
-		serialChar:{
+		serialChar: {
 			type: [String, Number],
 			default: ''
 		},
-		wrap:{
+		wrap: {
 			type: [String, Boolean],
 			default: ''
 		}
@@ -95,9 +89,9 @@ export default {
 		};
 	},
 	computed: {
-		checked(){
+		checked() {
 			// 是否选中
-			return this.parent.value===this.name
+			return this.parent.value === this.name;
 		},
 		// 是否禁用，如果父组件bx-raios-group禁用的话，将会忽略子组件的配置
 		elDisabled() {
@@ -145,25 +139,24 @@ export default {
 			}
 			return style;
 		},
-		radioButtonClass(){
+		radioButtonClass() {
 			if (this.parent && this.parent.radioMode) {
 				if (this.parent.radioMode === 'button') {
 					return 'button-mode';
 				}
 			}
-		},
+		}
 	},
 	created() {
 		this.parent = false;
 		// 支付宝小程序不支持provide/inject，所以使用这个方法获取整个父组件，在created定义，避免循环引用
 		this.getParentData('bx-radio-group');
-		if(this.parent){
+		if (this.parent) {
 			this.parent.children.push(this);
 		}
 	},
 	methods: {
-		updateParentData() {
-		},
+		updateParentData() {},
 		getParentData(parentName = '') {
 			// 避免在created中去定义parent变量
 			if (!this.parent) this.parent = false;
@@ -241,10 +234,10 @@ export default {
 			background-color: #007aff;
 			color: #fff;
 		}
-		&.checked.no-char{
+		&.checked.no-char {
 			border-color: #007aff;
 			border-width: 4rpx;
-			.bx-radio-checked{
+			.bx-radio-checked {
 				display: inline-block;
 				width: 12rpx;
 				height: 12rpx;
@@ -253,29 +246,38 @@ export default {
 			}
 		}
 	}
-	&.button-mode{
-		.bx-radio-icon{
+	&.button-mode {
+		.bx-radio-icon {
 			display: none;
 		}
-		.bx-radio__label{
-				color: #323233;
-				background-color: #fff;
-				border: 1px solid #ebedf0;
-				padding: 8rpx 20rpx;
-				border-radius: 50rpx;
-				letter-spacing: 1px;
-				transition: all 0.5s;
+		.bx-radio__label {
+			color: #323233;
+			background-color: #fff;
+			border: 1px solid #ebedf0;
+			padding: 8rpx 20rpx;
+			border-radius: 50rpx;
+			letter-spacing: 1px;
+			transition: all 0.5s;
+			&:active {
+				color: #409eff;
+				background: #ecf5ff;
+				border-color: #b3d8ff;
+				transform: scale(1.2);
+			}
+			&.checked {
+				color: #fff;
+				border-color: #0081ff;
+				background-color: #0081ff;
+			}
+			&.disabled {
+				color: #fff;
+				background-color: #a0cfff;
+				border-color: #a0cfff;
 				&:active {
-					color: #409eff;
-					background: #ecf5ff;
-					border-color: #b3d8ff;
-					transform: scale(1.2);
+					pointer-events: none;
+					transform: scale(1);
 				}
-				&.checked {
-					color: #fff;
-					border-color: #0081ff;
-					background-color: #0081ff;
-				}
+			}
 		}
 	}
 }

@@ -1,6 +1,6 @@
 <template>
 	<view class="bx-checkbox" :style="[checkboxStyle]" :class="checkboxClass">
-		<view class="bx-checkbox-icon" @tap="toggle" :class="{ checked: checked}">
+		<view class="bx-checkbox-icon" @tap="toggle" :class="{ checked: checked }">
 			<text v-if="serialChar">{{ serialChar }}</text>
 			<text class="cuIcon-check" v-if="checked && !serialChar"></text>
 		</view>
@@ -85,18 +85,18 @@ export default {
 		return {
 			parentDisabled: false,
 			newParams: {},
-			childIndex:null,
+			childIndex: null
 		};
 	},
 	created() {
 		this.parent = this.theParent.call(this, 'bx-checkbox-group');
 		// 如果存在bx-checkbox-group，将本组件的this塞进父组件的children中
 		this.parent && this.parent.children.push(this);
-		this.childIndex = this.parent.children.length
+		this.childIndex = this.parent.children.length;
 	},
 	computed: {
-		checked(){
-			return this.value
+		checked() {
+			return this.value;
 		},
 		// 是否禁用，如果父组件bx-checkbox-group禁用的话，将会忽略子组件的配置
 		isDisabled() {
@@ -180,7 +180,7 @@ export default {
 		},
 		emitEvent() {
 			this.$emit('change', {
-				index:this.childIndex,
+				index: this.childIndex,
 				value: !this.value,
 				name: this.name
 			});
@@ -207,7 +207,7 @@ export default {
 			} else {
 				this.emitEvent();
 				if (this.parent && checkedNum >= this.parent.max) {
-				// 如果原来为未选中状态，需要选中的数量少于父组件中设置的max值，才可以选中
+					// 如果原来为未选中状态，需要选中的数量少于父组件中设置的max值，才可以选中
 					uni.showToast({
 						title: `最多可选${this.parent.max}项`,
 						icon: 'none'
@@ -269,6 +269,10 @@ export default {
 				color: #fff;
 				background-color: #a0cfff;
 				border-color: #a0cfff;
+				&:active {
+					pointer-events: none;
+					transform: scale(1);
+				}
 			}
 		}
 	}

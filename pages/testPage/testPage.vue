@@ -1,7 +1,7 @@
 <template>
 	<view class="test">
 		<bx-radio-group v-model="radioValue" radioMode="button">
-			<bx-radio v-for="item in options" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-radio>
+			<bx-radio disabled v-for="item in options" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-radio>
 		</bx-radio-group>
 		<!-- 	<bx-checkbox-group  checkboxMode="button">
 			<bx-checkbox v-for="item in options" v-model="item.checked" :key="item.id" :name="item.value">{{ item.label }}</bx-checkbox>
