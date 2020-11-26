@@ -1,5 +1,5 @@
 <template>
-	<view class="bx-radio" :style="[radioStyle]">
+	<view class="bx-radio" :style="[radioStyle]" :class="[radioButtonClass]">
 		<view class="bx-radio-icon" :class="{checked:name===parentData.value,'has-char':serialChar,'no-char':!serialChar}" @tap="toggle">
 			<text v-if="serialChar">{{serialChar}}</text>
 			<text v-if="!serialChar&&name===parentData.value" class="bx-radio-checked"></text>
@@ -7,6 +7,7 @@
 		<view
 			class="bx-radio__label"
 			@tap="onClickLabel"
+			:class="{ checked: checked, disabled: disabled }"
 		>
 			<slot />
 		</view>
@@ -94,6 +95,10 @@ export default {
 		};
 	},
 	computed: {
+		checked(){
+			// 是否选中
+			return this.parent.value===this.name
+		},
 		// 是否禁用，如果父组件bx-raios-group禁用的话，将会忽略子组件的配置
 		elDisabled() {
 			return this.disabled !== '' ? this.disabled : this.parentData.disabled !== null ? this.parentData.disabled : false;
@@ -139,7 +144,14 @@ export default {
 				// #endif
 			}
 			return style;
-		}
+		},
+		radioButtonClass(){
+			if (this.parent && this.parent.radioMode) {
+				if (this.parent.radioMode === 'button') {
+					return 'button-mode';
+				}
+			}
+		},
 	},
 	created() {
 		this.parent = false;
@@ -213,35 +225,58 @@ export default {
 	display: flex;
 	align-items: center;
 	padding: 10rpx;
-	min-width: 50%;
-}
-.bx-radio-icon {
-	width: 40rpx;
-	height: 40rpx;
-	border-radius: 60rpx;
-	border: 2rpx solid #888;
-	color: #888;
-	margin-right: 20rpx;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	font-size: 24rpx;
-	&.checked.has-char {
-		border: none;
-		background-color: #007aff;
-		color: #fff;
-	}
-	&.checked.no-char{
-		border-color: #007aff;
-		border-width: 4rpx;
-		.bx-radio-checked{
-			display: inline-block;
-			width: 12rpx;
-			height: 12rpx;
-			border-radius: 12rpx;
+	.bx-radio-icon {
+		width: 40rpx;
+		height: 40rpx;
+		border-radius: 60rpx;
+		border: 2rpx solid #888;
+		color: #888;
+		margin-right: 20rpx;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 24rpx;
+		&.checked.has-char {
+			border: none;
 			background-color: #007aff;
+			color: #fff;
+		}
+		&.checked.no-char{
+			border-color: #007aff;
+			border-width: 4rpx;
+			.bx-radio-checked{
+				display: inline-block;
+				width: 12rpx;
+				height: 12rpx;
+				border-radius: 12rpx;
+				background-color: #007aff;
+			}
 		}
 	}
-	
+	&.button-mode{
+		.bx-radio-icon{
+			display: none;
+		}
+		.bx-radio__label{
+				color: #323233;
+				background-color: #fff;
+				border: 1px solid #ebedf0;
+				padding: 8rpx 20rpx;
+				border-radius: 50rpx;
+				letter-spacing: 1px;
+				transition: all 0.5s;
+				&:active {
+					color: #409eff;
+					background: #ecf5ff;
+					border-color: #b3d8ff;
+					transform: scale(1.2);
+				}
+				&.checked {
+					color: #fff;
+					border-color: #0081ff;
+					background-color: #0081ff;
+				}
+		}
+	}
 }
 </style>

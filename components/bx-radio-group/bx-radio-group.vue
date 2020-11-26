@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import Emitter from '@/common/emitter.js';
+import Emitter from '@/common/mixins/emitter.js';
 /**
  * radioRroup 单选框父组件
  * @description 单选框用于有一个选择，用户只能选择其中一个的场景。搭配bx--radio使用
@@ -54,6 +54,11 @@ export default {
 		shape: {
 			type: String,
 			default: 'circle'
+		},
+		// 样式风格 normal-经典多选框风格，button-按钮风格
+		radioMode: {
+			type: String,
+			default: 'normal'
 		},
 		// 图标的大小，单位rpx
 		iconSize: {

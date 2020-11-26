@@ -1,34 +1,53 @@
-function broadcast(componentName, eventName, params) {
-    this.$children.forEach(child => {
-        const name = child.$options.name;
+/**
+ * 递归使用 call 方式this指向
+ * @param componentName // 需要找的组件的名称
+ * @param eventName // 事件名称
+ * @param params // 需要传递的参数
+ */
 
-        if (name === componentName) {
-            child.$emit.apply(child, [eventName].concat(params));
-        } else {
-            // todo 如果 params 是空数组，接收到的会是 undefined
-            broadcast.apply(child, [componentName, eventName].concat([params]));
-        }
-    });
+function broadcast(componentName, eventName, params) {
+	this.$children.forEach(child => {
+		const name = child.$options.name;
+		if (name === componentName) {
+			child.$emit.apply(child, [eventName].concat(params));
+		} else {
+			// todo 如果 params 是空数组，接收到的会是 undefined
+			broadcast.apply(child, [componentName, eventName].concat([params]));
+		}
+	});
 }
 export default {
-    methods: {
-        dispatch(componentName, eventName, params) {
-            let parent = this.$parent || this.$root;
-            let name = parent.$options.name;
-
-            while (parent && (!name || name !== componentName)) {
-                parent = parent.$parent;
-
-                if (parent) {
-                    name = parent.$options.name;
-                }
-            }
-            if (parent) {
-                parent.$emit.apply(parent, [eventName].concat(params));
-            }
-        },
-        broadcast(componentName, eventName, params) {
-            broadcast.call(this, componentName, eventName, params);
-        }
-    }
+	methods: {
+		/**
+		 * 派发 (向上查找) (一个)
+		 * @param componentName // 需要找的组件的名称
+		 * @param eventName // 事件名称
+		 * @param params // 需要传递的参数
+		 */
+		dispatch(componentName, eventName, params) {
+			let parent = this.$parent || this.$root; //$parent 找到最近的父节点 $root 根节点
+			let name = parent.$options.name; // 获取当前组件实例的name
+			// 如果当前有节点 && 当前没名称 且 当前名称等于需要传进来的名称的时候就去查找当前的节点
+			// 循环出当前名称的一样的组件实例
+			while (parent && (!name || name !== componentName)) {
+				parent = parent.$parent;
+				if (parent) {
+					name = parent.$options.name;
+				}
+			}
+			// 有节点表示当前找到了name一样的实例
+			if (parent) {
+				parent.$emit.apply(parent, [eventName].concat(params));
+			}
+		},
+		/**
+		 * 广播 (向下查找) (广播多个)
+		 * @param componentName // 需要找的组件的名称
+		 * @param eventName // 事件名称
+		 * @param params // 需要传递的参数
+		 */
+		broadcast(componentName, eventName, params) {
+			broadcast.call(this, componentName, eventName, params);
+		}
+	}
 };

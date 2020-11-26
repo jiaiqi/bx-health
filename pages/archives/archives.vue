@@ -364,7 +364,12 @@ export default {
 	},
 	methods: {
 		clickTodoItem(item, index) {
-			this.$set(item, 'checked', !item.checked);
+			// this.$set(item, 'checked', !item.checked);
+			if(item.ds_no){
+				uni.navigateTo({
+					url:`/archivesPages/DrugPlan/DrugPlan?ds_no=${item.ds_no}`
+				})
+			}
 		},
 		async getToDoList() {
 			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_select', 'select');

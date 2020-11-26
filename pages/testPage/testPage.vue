@@ -1,26 +1,23 @@
 <template>
 	<view class="test">
-		<!-- <bx-radio-group v-model="radioValue">
+		<bx-radio-group v-model="radioValue" radioMode="button">
 			<bx-radio v-for="item in options" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-radio>
-		</bx-radio-group> -->
+		</bx-radio-group>
 		<!-- 	<bx-checkbox-group  checkboxMode="button">
 			<bx-checkbox v-for="item in options" v-model="item.checked" :key="item.id" :name="item.value">{{ item.label }}</bx-checkbox>
 		</bx-checkbox-group> -->
 		<view class="node-path">
 			<view class="path-item" v-for="(item, index) in linkPath" :key="item.no" @click="toPath(item)">
 				<view class="name">{{ item.name }}</view>
-				<view class="separator" v-if="index + 1 < linkPath.length">
-					<view class="line"></view>
-				</view>
+				<view class="separator" v-if="index + 1 < linkPath.length"><view class="line"></view></view>
 				<!-- <text class="separator cuIcon-right" v-if="index + 1 < linkPath.length"></text> -->
 			</view>
 		</view>
 		<view class="charts" v-if="nodeDetail && nutrientsChartOption.option && nutrientsChartOption.option.title">
 			<bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart>
 		</view>
-
 		<view class="detail-desc" v-if="nodeDetail && nodeDetail.node_desc"><view v-html="nodeDetail.node_desc" class="rich-text"></view></view>
-		<view class="data-empty" v-else><u-empty text="数据为空"></u-empty></view>
+		<view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view>
 	</view>
 </template>
 
@@ -35,6 +32,7 @@ export default {
 			nutrientsChartOption: {
 				option: {}
 			},
+			emptyText: '数据加载中...',
 			radioValue: '',
 			vaL: '',
 			currentNodes: '健康',
@@ -121,16 +119,17 @@ export default {
 				colNames: ['*'],
 				relation_condition: {
 					relation: 'OR',
-					data: [{ colName: 'source_name', ruleType: 'eq', value: this.currentNodes }, { colName: 'target_name', ruleType: 'eq', value: this.currentNodes }]
+					data: [{ colName: 'source_node_no', ruleType: 'eq', value: this.currentNodeNo }, { colName: 'target_node_no', ruleType: 'eq', value: this.currentNodeNo }]
 				},
 				page: { pageNo: 1, rownumber: 999 }
 			};
 			let res = await this.$http.post(url, req);
-
 			let data = res.data.data;
 			if (!res.data.data || !Array.isArray(res.data.data) || res.data.data.length == 0) {
+				this.emptyText = '数据为空';
 				return;
 			}
+			this.getNodeDetail(this.currentNodeNo);
 			let nameArr = [];
 			let nodes = [];
 			data.forEach((item, index) => {
@@ -349,15 +348,23 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.nodeDetail = res.data.data[0];
+				// this.linkPath.push({
+				// 	no: this.nodeDetail.kn_no,
+				// 	name: this.nodeDetail.node_name
+				// });
+				this.changeLinkPath({
+					no: this.nodeDetail.kn_no,
+					name: this.nodeDetail.node_name
+				});
 			} else {
 				this.nodeDetail = null;
 			}
 		},
 		toPath(e) {
-			if (e.no && e.name && this.currentNodes !== e.name) {
+			if (e.no && e.name && this.currentNodeNo !== e.no) {
 				this.currentNodeNo = e.no;
-				this.currentNodes = e.name;
-				this.getNodeDetail(e.no);
+				// this.currentNodes = e.name;
+				// this.getNodeDetail(e.no);
 				this.geteChartsData();
 				this.changeLinkPath(e);
 			}
@@ -381,32 +388,30 @@ export default {
 				} else if (hasNode && nodeIndex >= 0) {
 					this.linkPath = this.linkPath.splice(0, nodeIndex + 1);
 				}
+			} else {
+				this.linkPath.push({
+					name: e.name,
+					no: e.no
+				});
 			}
 		},
 		clickCharts(e) {
-			if (e.name !== this.currentNodes) {
-				this.currentNodes = e.name;
-				if (e.data.nodeNo) {
-					this.getNodeDetail(e.data.nodeNo);
-				}
-				this.changeLinkPath({ name: e.name, no: e.data && e.data.nodeNo ? e.data.nodeNo : null });
+			if (e.data && e.data.nodeNo && e.data.nodeNo !== this.currentNodeNo) {
+				// this.currentNodes = e.name;
+				this.currentNodeNo = e.data.nodeNo;
 				this.geteChartsData();
+				// this.getNodeDetail(e.data.nodeNo);
+				this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
 			}
 		},
 		checkboxChange(e) {}
 	},
 
 	onLoad(options) {
-		if (options.currentNode && options.currentNodeNo) {
-			this.currentNodes = options.currentNode;
+		if (options.currentNodeNo) {
 			this.currentNodeNo = options.currentNodeNo;
 		}
-		this.linkPath.push({
-			no: this.currentNodeNo,
-			name: this.currentNodes
-		});
 		this.geteChartsData();
-		this.getNodeDetail(this.currentNodeNo);
 		uni.setNavigationBarTitle({
 			title: this.currentNodes
 		});
@@ -457,28 +462,28 @@ export default {
 			line-height: 40rpx;
 			margin-bottom: 20rpx;
 			.name {
-				background-color: #0081FF;
+				background-color: #0081ff;
 				border-radius: 50rpx;
 				padding: 5rpx 20rpx;
 				font-size: 24rpx;
 				color: #fff;
 			}
-			.separator{
+			.separator {
 				display: inline-flex;
 				align-items: center;
 				position: relative;
-				margin-right: 10rpx;
-				.line{
+				margin-right: 5rpx;
+				.line {
 					display: inline-block;
 					height: 5rpx;
 					width: 40rpx;
-					background-color: #0081FF;
-					&::after{
+					background-color: #0081ff;
+					&::after {
 						content: '';
 						border: 10rpx solid transparent;
-						border-left-color: #0081FF;
+						border-left-color: #0081ff;
 						position: absolute;
-						right: -20rpx;
+						right: -15rpx;
 						top: calc(50% - 10rpx);
 					}
 				}

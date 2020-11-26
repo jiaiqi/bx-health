@@ -231,8 +231,9 @@ import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
 // import uniEcharts from '@/archivesPages/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
 var _self;
-import dayjs from '../static/dayjs/esm/index.js'
+// import dayjs from '../static/dayjs/esm/index.js'
 // var dayjs = require('../static/dayjs/esm/index.js');
+import dayjs from '../static/dayjs/dayjs.min.js';
 export default {
 	components: {
 		// #ifdef MP-WEIXIN

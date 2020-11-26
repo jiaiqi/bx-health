@@ -107,7 +107,16 @@
 						"enablePullDownRefresh": false
 					}
 				}
-			]
+			    ,{
+                    "path" : "DrugPlan/DrugPlan",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "用药计划详情",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "pregnancy",

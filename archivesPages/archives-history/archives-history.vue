@@ -65,7 +65,7 @@
 							<text class="unit">kg</text>
 						</view>
 						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'sleep'">
-							<text class="digital">{{ historyRecord[0].sleep_time.slice(0, 5) }}</text>
+							<text class="digital" v-if="historyRecord[0].sleep_time">{{ historyRecord[0].sleep_time.slice(0, 5) }}</text>
 							<text class="unit">(时长)</text>
 						</view>
 						<view class="date" v-if="historyRecord && historyRecord.length > 0">
@@ -176,8 +176,8 @@ import uniEcCharts from '@/components/uni-ec-canvas/uni-echart.vue';
 // import uniEcCharts from '@/archivesPages/components/uni-ec-canvas/uni-echart.vue';
 import energyListWrap from './totalEnergyList.js';
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet';
-import dayjs from '../static/dayjs/esm/index.js';
-// import dayjs from '../static/dayjs';
+import dayjs from '../static/dayjs/dayjs.min.js';
+// import dayjs from '../static/dayjs/esm/index.js';
 export default {
 	components: {
 		uniEcCharts,
@@ -549,7 +549,7 @@ export default {
 				if (unit === '步') {
 					obj.label.show = false;
 				}
-			
+
 				if (item.data.length > 10) {
 					if (item.data.length > 10 && item.data.length <= 20) {
 						option.dataZoom = [
@@ -654,6 +654,7 @@ export default {
 			}
 		},
 		async getChartData(type) {
+			console.log(this.serviceLog);
 			let serviceObj = {
 				weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
 				bloodPressure: 'srvhealth_blood_pressure_record_select', // 血压
@@ -697,6 +698,15 @@ export default {
 					this.BPChartData.series = series;
 					this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
 					this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+				} else if (type === 'sleep') {
+					// series = this.sleepChartData.series;
+					// series[0].data = res.data.data.map(item => {
+					// 	return Number(item.sleep_time);
+					// });
+					// // series[1].data = res.data.data.map(item => Number(item.diastolic_pressure.toFixed(1)));
+					// this.BPChartData.series = series;
+					// this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
+					// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
 				}
 				this.historyRecord = this.deepClone(res.data.data).reverse();
 			} else {
@@ -1075,12 +1085,14 @@ export default {
 				// #endif
 				if (!userInfo || !uni.getStorageSync('isLogin')) {
 					// 未登录
+					// #ifdef MP-WEIXIN
 					const result = await wx.login();
 					if (result.code) {
 						this.code = result.code;
 						await this.wxLogin({ code: result.code });
 						await this.initPage();
 					}
+					// #endif
 				} else {
 					this.isLogin = true;
 				}
@@ -1092,27 +1104,6 @@ export default {
 					if (userInfo) {
 						this.userInfo = userInfo;
 					}
-					// if (uni.getStorageSync('current_user_info')) {
-					// 	this.userInfo = uni.getStorageSync('current_user_info');
-					// } else {
-					// 	let userList = uni.getStorageSync('user_info_list');
-					// 	if (Array.isArray(userList) && userList.length > 0) {
-					// 		let name = uni.getStorageSync('current_user');
-					// 		if (name) {
-					// 			userList.forEach(item => {
-					// 				if (item.name === name) {
-					// 					uni.setStorageSync('current_user', item.name);
-					// 					uni.setStorageSync('current_user_info', item);
-					// 					this.userInfo = item;
-					// 				}
-					// 			});
-					// 		} else {
-					// 			uni.setStorageSync('current_user_info', userList[0]);
-					// 			uni.setStorageSync('current_user', userList[0].name);
-					// 			this.userInfo = userList[0];
-					// 		}
-					// 	}
-					// }
 					if (!this.wxUserInfo) {
 						await this.getUserInfo(); //查找微信用户基本信息
 					}
