@@ -64,6 +64,16 @@
 			"minified": true
 		},
 		"plugins": {
+			// #ifdef MP-WEIXIN 
+			// "tencentvideo": {
+			// 	"version": "1.2.4",
+			// 	"provider": "wxa75efa648b60994b"
+			// }
+			// #endif
+			// "youku-plugin": {
+			// 	"version": "1.0.0",
+			// 	"provider": "wx5de0c309a1472da6"
+			// }
 			// "echarts": {
 			// 	"version": "1.0.5",
 			// 	"provider": "wx1db9e5ab1149ea03"

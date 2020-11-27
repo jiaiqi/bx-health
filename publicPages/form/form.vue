@@ -26,14 +26,14 @@ export default {
 	data() {
 		return {
 			fields: [],
-			loadedType: 'srvV2',
 			colsV2Data: null,
 			type: '',
 			serviceName: '',
 			condition: [],
 			defaultCondition: [],
 			params: {},
-			addType: ''
+			addType: '',
+			fieldsCond:[],//treeSelector类型字段的条件
 		};
 	},
 	computed: {
@@ -84,6 +84,9 @@ export default {
 		if (destApp) {
 			uni.setStorageSync('activeApp', destApp);
 		}
+		if(option.fieldsCond){
+			this.fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
+		}
 		if (option.params) {
 			this.params = JSON.parse(decodeURIComponent(option.params));
 		}
@@ -93,9 +96,7 @@ export default {
 		if (option.cond) {
 			this.defaultCondition = JSON.parse(option.cond);
 		}
-		if (option.hasOwnProperty('loadedType')) {
-			this.loadedType = option.loadedType;
-		} else if (option.hasOwnProperty('params')) {
+		if (option.hasOwnProperty('params')) {
 			this.serviceName = this.params.serviceName;
 			this.type = this.params.type;
 			this.condition = this.params.condition;
@@ -147,18 +148,26 @@ export default {
 					this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 					break;
 				case 'add':
-					if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs._fieldInfo && Array.isArray(colVs._fieldInfo)) {
-						let arr = [];
-						this.defaultCondition.forEach(cond => {
-							colVs._fieldInfo.forEach(field => {
-								if (cond.colName === field.column) {
-									field['value'] = cond['value'];
-									field['disabled'] = true;
-								}
+					this.fields = colVs._fieldInfo.map(field=>{
+						if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs._fieldInfo && Array.isArray(colVs._fieldInfo)){
+							this.defaultCondition.forEach(cond => {
+								colVs._fieldInfo.forEach(field => {
+									if (cond.colName === field.column) {
+										field['value'] = cond['value'];
+										field['disabled'] = true;
+									}
+								});
 							});
-						});
-					}
-					this.fields = colVs._fieldInfo;
+						}
+						if(Array.isArray(this.fieldsCond)&&this.fieldsCond.length>0){
+							this.fieldsCond.forEach(item=>{
+								if(item.column===field.column&&field.option_list_v2&&Array.isArray(field.option_list_v2.conditions)&&Array.isArray(item.condition)){
+									field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition)
+								}
+							})
+						}
+						return field
+					});
 					break;
 				case 'detail':
 					defaultVal = await this.getDefaultVal();

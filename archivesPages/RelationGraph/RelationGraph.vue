@@ -9,7 +9,20 @@
 		<view class="charts" v-if="nodeDetail && nutrientsChartOption.option && nutrientsChartOption.option.title">
 			<bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart>
 		</view>
-		<view class="detail-desc" v-if="nodeDetail && nodeDetail.node_desc"><view v-html="nodeDetail.node_desc" class="rich-text"></view></view>
+		<view class="detail-desc" v-if="nodeDetail">
+			<!-- 		<txv-video
+				:vid="nodeDetail.video_link"
+				:playerid="nodeDetail.video_link"
+				:autoplay="false"
+				:poster="nodeDetail.video_link"
+				:usePoster="true"
+				v-if="nodeDetail.video_link"
+			></txv-video> -->
+			<view class="video-box">
+				<video class="video-player" :src="txv_path" :usePoster="true" controls object-fit="contain"></video>
+			</view>
+			<view v-html="nodeDetail.node_desc" v-if="nodeDetail.node_desc" class="rich-text"></view>
+		</view>
 		<view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view>
 	</view>
 </template>
@@ -22,6 +35,7 @@ export default {
 	},
 	data() {
 		return {
+			txv_path: '',
 			nutrientsChartOption: {
 				option: {}
 			},
@@ -122,7 +136,7 @@ export default {
 				this.emptyText = '数据为空';
 				return;
 			}
-			this.getNodeDetail(this.currentNodeNo);
+			await this.getNodeDetail(this.currentNodeNo);
 			let nameArr = [];
 			let nodes = [];
 			data.forEach((item, index) => {
@@ -341,6 +355,10 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.nodeDetail = res.data.data[0];
+				if (this.nodeDetail && this.nodeDetail.video_link) {
+					this.getVideoInfo(this.nodeDetail.video_link);
+				}
+				this.currentNodes = this.nodeDetail.node_name;
 				// this.linkPath.push({
 				// 	no: this.nodeDetail.kn_no,
 				// 	name: this.nodeDetail.node_name
@@ -397,7 +415,56 @@ export default {
 				this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
 			}
 		},
-		checkboxChange(e) {}
+		getVideoInfo: function(vid) {
+			var that = this;
+			var urlString = 'https://vv.video.qq.com/getinfo?otype=json&appver=3.2.19.333&platform=11&defnpayver=1&vid=' + vid;
+			wx.request({
+				url: urlString,
+				success: function(res) {
+					var dataJson = res.data.replace(/QZOutputJson=/, '') + 'qwe';
+					var dataJson1 = dataJson.replace(/;qwe/, '');
+					var data = JSON.parse(dataJson1);
+					var fn_pre = data.vl.vi[0].lnk;
+					var host = data['vl']['vi'][0]['ul']['ui'][0]['url'];
+					var streams = data['fl']['fi'];
+					var seg_cnt = data['vl']['vi'][0]['cl']['fc'];
+					if (parseInt(seg_cnt) == 0) {
+						seg_cnt = 1;
+					}
+					var best_quality = streams[streams.length - 1]['name'];
+					var part_format_id = streams[streams.length - 1]['id'];
+					var pageArr = [];
+					for (var i = 1; i < seg_cnt + 1; i++) {
+						var filename = fn_pre + '.p' + (part_format_id % 10000) + '.' + i + '.mp4';
+						console.log(filename);
+						pageArr.push(i);
+						that.requestVideoUrls(part_format_id, vid, filename, 'index' + i, host);
+					}
+				}
+			});
+		},
+		requestVideoUrls: function(part_format_id, vid, fileName, index, host) {
+			var keyApi = 'https://vv.video.qq.com/getkey?otype=json&platform=11&format=' + part_format_id + '&vid=' + vid + '&filename=' + fileName + '&appver=3.2.19.333';
+			var that = this;
+			wx.request({
+				url: keyApi,
+				success: function(res) {
+					var dataJson = res.data.replace(/QZOutputJson=/, '') + 'qwe';
+					var dataJson1 = dataJson.replace(/;qwe/, '');
+					var data = JSON.parse(dataJson1);
+					var part_urls = new Array();
+					if (data.key != undefined) {
+						var vkey = data['key'];
+						var url = host + fileName + '?vkey=' + vkey;
+						part_urls[index] = String(url);
+						that.txv_path = part_urls.index1;
+						// that.setData({
+						// 	videoUrl: part_urls.index1
+						// });
+					}
+				}
+			});
+		}
 	},
 
 	onLoad(options) {
@@ -405,9 +472,9 @@ export default {
 			this.currentNodeNo = options.currentNodeNo;
 		}
 		this.geteChartsData();
-		uni.setNavigationBarTitle({
-			title: this.currentNodes
-		});
+		// uni.setNavigationBarTitle({
+		// 	title: this.currentNodes
+		// });
 	},
 	onReady() {
 		// #ifdef MP-WEIXIN
@@ -440,7 +507,14 @@ export default {
 	}
 	.detail-desc {
 		padding: 20rpx;
-		text-indent: 40rpx;
+		text-indent: 20rpx;
+		.video-box{
+			text-indent: 0;
+			width: 100%;
+			.video-player{
+				width: 100%;
+			}
+		}
 		.rich-text {
 			width: 100%;
 			overflow: hidden;

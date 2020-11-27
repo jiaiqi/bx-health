@@ -172,6 +172,8 @@ export default {
 					fieldInfo.defaultValue = item.init_expr
 				}
 				fieldInfo.option_list_v2 = item.option_list_v2
+				fieldInfo.bx_col_type = item.bx_col_type
+				fieldInfo.redundant = item.redundant
 				fieldInfo.col_type = item.col_type
 				fieldInfo.section = item.section
 				fieldInfo.validators = item.validators

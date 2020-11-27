@@ -87,8 +87,7 @@ export default {
 			default() {
 				return '';
 			}
-		},
-		
+		}
 	},
 	data() {
 		return {
@@ -98,9 +97,9 @@ export default {
 			oldField: [],
 			oldFieldModel: {},
 			specialCol: [],
-			amapPlugin:null,
-			key:'7ec9d87d88962a082a1e9faea774b4e9', //高德key
-			more_config: { 
+			amapPlugin: null,
+			key: '7ec9d87d88962a082a1e9faea774b4e9', //高德key
+			more_config: {
 				col_relation: [
 					{
 						watch_col: ['page_end', 'page_start'], //相关字段
@@ -190,46 +189,34 @@ export default {
 	},
 	mounted() {
 		// this.amapPlugin = new amap.AMapWX({
-		// 	key: this.key  
+		// 	key: this.key
 		// });
 	},
 	methods: {
-		getSeatInfo(e){
-			
-			
-			
-			
-			
-			
-			
-			let  self  = this
-			
+		getSeatInfo(e) {
+			let self = this;
+
 			uni.chooseLocation({
-			    success: function (res) {
-			        self.allField.forEach(item=>{
-						if(item.column === 'address'){
-							item.value = res.address
-						}else if(item.column === 'longitude'){
-							item.value = res.longitude
-						} else if(item.column === 'latitude'){
-							item.value = res.latitude
+				success: function(res) {
+					self.allField.forEach(item => {
+						if (item.column === 'address') {
+							item.value = res.address;
+						} else if (item.column === 'longitude') {
+							item.value = res.longitude;
+						} else if (item.column === 'latitude') {
+							item.value = res.latitude;
 						}
-					})
-			    }
+					});
+				}
 			});
-			
-			
-			   uni.$once('update',function(data){
-			        console.log(data);
-					let locationData = JSON.parse(data)
-				
-			    })
-			
-			
-			
-			
-			// 	this.amapPlugin.getRegeo({  
-			// 	success: (data) => {  
+
+			uni.$once('update', function(data) {
+				console.log(data);
+				let locationData = JSON.parse(data);
+			});
+
+			// 	this.amapPlugin.getRegeo({
+			// 	success: (data) => {
 			// 		console.log("---高德---",data)
 			// 		// if(e.column === 'address'){
 			// 			this.allField.forEach(item=>{
@@ -240,10 +227,10 @@ export default {
 			// 				} else if(item.column === 'latitude'){
 			// 					item.value = data[0].latitude
 			// 				}
-							
+
 			// 			})
 			// 		// }
-			// 		uni.hideLoading();  
+			// 		uni.hideLoading();
 			// 	},
 			// 	fail:(e)=>{
 			// 		uni.showToast({
@@ -421,7 +408,8 @@ export default {
 					this.fieldModel[itemData.column] = itemData.value;
 					let item = this.fieldModel;
 					if (itemData.hasOwnProperty('option_list_v2')) {
-						if (itemData.option_list_v2&&
+						if (
+							itemData.option_list_v2 &&
 							typeof itemData.option_list_v2.srv_app_exp === 'object' &&
 							itemData.option_list_v2.srv_app_exp.type === 'column' &&
 							itemData.option_list_v2.srv_app_exp.value &&
@@ -466,11 +454,11 @@ export default {
 						}
 					});
 					/*针对添加我的食物时对餐馆编号隐藏*/
-					if(this.addType && (itemData.column === 'restaurant_no' || itemData.column === 'price' || itemData.column === 'mark')){
-						itemData['display'] = false
+					if (this.addType && (itemData.column === 'restaurant_no' || itemData.column === 'price' || itemData.column === 'mark')) {
+						itemData['display'] = false;
 					}
-					if(this.service && (this.service.indexOf("srvhealth_mixed_food_nutrition_contents") >-1) && itemData.column==='owner'){
-						itemData['display'] = false
+					if (this.service && this.service.indexOf('srvhealth_mixed_food_nutrition_contents') > -1 && itemData.column === 'owner') {
+						itemData['display'] = false;
 					}
 					return itemData;
 				});
@@ -485,17 +473,17 @@ export default {
 				this.fieldModel[e.column] = e.value;
 			}
 			/*争对食材选择冗余做单独处理*/
-			if(e.column === 'food_no' && e.type === 'treeSelector' && typeof e.colData === 'object'){
-				this.allField.forEach(hea=>{
-					if(hea.column === 'unit'){
-						hea.value = e.colData.unit
-					}else if(hea.column === 'name'){
-						hea.value = e.colData.name
+			if (e.column === 'food_no' && e.type === 'treeSelector' && typeof e.colData === 'object') {
+				this.allField.forEach(hea => {
+					if (hea.column === 'unit') {
+						hea.value = e.colData.unit;
+					} else if (hea.column === 'name') {
+						hea.value = e.colData.name;
 					}
-				})
+				});
 			}
 			/*----------------*/
-			
+
 			e.value = this.fieldModel[e.column];
 			const fieldModel = this.deepClone(this.fieldModel);
 			this.allField = this.allField.map((item, index) => {

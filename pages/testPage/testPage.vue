@@ -6,18 +6,19 @@
 			<bx-checkbox-group  mode="normal" wrap>
 			<bx-checkbox v-for="item in options" v-model="item.checked" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-checkbox>
 		</bx-checkbox-group> -->
-		<view class="node-path">
+<!-- 		<view class="node-path">
 			<view class="path-item" v-for="(item, index) in linkPath" :key="item.no" @click="toPath(item)">
 				<view class="name">{{ item.name }}</view>
 				<view class="separator" v-if="index + 1 < linkPath.length"><view class="line"></view></view>
-				<!-- <text class="separator cuIcon-right" v-if="index + 1 < linkPath.length"></text> -->
 			</view>
 		</view>
 		<view class="charts" v-if="nodeDetail && nutrientsChartOption.option && nutrientsChartOption.option.title">
 			<bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart>
 		</view>
 		<view class="detail-desc" v-if="nodeDetail && nodeDetail.node_desc"><view v-html="nodeDetail.node_desc" class="rich-text"></view></view>
-		<view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view>
+		<view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view> -->
+	     
+		
 	</view>
 </template>
 
@@ -29,6 +30,7 @@ export default {
 	},
 	data() {
 		return {
+			vid:"y3163a92r88",
 			nutrientsChartOption: {
 				option: {}
 			},
@@ -408,13 +410,13 @@ export default {
 	},
 
 	onLoad(options) {
-		if (options.currentNodeNo) {
-			this.currentNodeNo = options.currentNodeNo;
-		}
-		this.geteChartsData();
-		uni.setNavigationBarTitle({
-			title: this.currentNodes
-		});
+		// if (options.currentNodeNo) {
+		// 	this.currentNodeNo = options.currentNodeNo;
+		// }
+		// this.geteChartsData();
+		// uni.setNavigationBarTitle({
+		// 	title: this.currentNodes
+		// });
 	},
 	onReady() {
 		// #ifdef MP-WEIXIN

@@ -35,15 +35,13 @@
 		// 		"navigationBarTitleText": "用户",
 		// 		"enablePullDownRefresh": false
 		// 	}
-		// },
+		// }
+		// ,
 		// {
 		// 	"path": "pages/testPage/testPage",
 		// 	"style": {
-		// 		"navigationBarTitleText": "健康图谱",
-		// 		"enablePullDownRefresh": false,
-		// 		"usingComponents": {
-
-		// 		}
+		// 		"navigationBarTitleText": "",
+		// 		"enablePullDownRefresh": false
 		// 	}
 		// }
 	],
@@ -80,13 +78,6 @@
 		{
 			"root": "archivesPages",
 			"pages": [
-				// 	{
-				// 	"path": "old-home/old-home",
-				// 	"style": {
-				// 		"navigationBarTitleText": "健康档案",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// }, 
 				{
 					"path": "archives-history/archives-history",
 					"style": {
@@ -111,6 +102,7 @@
 					"path": "DrugPlan/DrugPlan",
 					"style": {
 						"navigationBarTitleText": "用药计划详情",
+						"navigationBarBackgroundColor": "#409eff",
 						"enablePullDownRefresh": false
 					}
 
@@ -118,7 +110,12 @@
 					"path": "RelationGraph/RelationGraph",
 					"style": {
 						"navigationBarTitleText": "健康图谱",
-						"enablePullDownRefresh": false
+						"enablePullDownRefresh": false,
+						"usingComponents": {
+							// #ifdef MP-WEIXIN
+							// "txv-video": "plugin://tencentvideo/video"
+							// #endif
+						}
 					}
 				}
 			]
@@ -174,7 +171,6 @@
 				{
 					"path": "patientsInfo/patientsInfo",
 					"style": {
-						// "navigationStyle": "custom",
 						"navigationBarTitleText": "患者信息",
 						"enablePullDownRefresh": false
 					}
@@ -190,10 +186,8 @@
 				{
 					"path": "myDoctor/doctorChat",
 					"style": {
-						// "navigationStyle": "custom",
 						"navigationBarTitleText": "聊天列表",
 						"enablePullDownRefresh": true
-						// "navigationBarBackgroundColor":"#0bc99d"
 					}
 				}, {
 					"path": "userList/userList",
@@ -230,18 +224,6 @@
 						"navigationBarBackgroundColor": "#0bc99d"
 					}
 				},
-				// {
-				// 	"path": "balancedDiet/balancedDiet",
-				// 	"style": {
-				// 		"navigationStyle": "custom",
-				// 		"navigationBarTitleText": "今日概览",
-				// 		"navigationBarBackgroundColor": "#0bc99d"
-				// 	}
-				// },
-				// {
-				// 	"path": "mineSelf/mineSelf",
-				// 	"style": {}
-				// }, 
 				{
 					"path": "tool/toolOne/toolOne",
 					"style": {
@@ -431,7 +413,6 @@
 			"pages": [{
 				"path": "hospitalOverview/hospitalOverview",
 				"style": {
-					// "navigationStyle":"custom",
 					"navigationBarBackgroundColor": "#0094ff",
 					"navigationBarTitleText": "医院简介",
 					"transparentTitle": "auto"
@@ -491,12 +472,6 @@
 				"selectedIconPath": "static/icon/geren_selected.png",
 				"text": "个人"
 			},
-			// {
-			// 	"pagePath": "pages/management/management",
-			// 	"iconPath": "/static/icon/yonghu.png",
-			// 	"selectedIconPath": "static/icon/yonghu_selected.png",
-			// 	"text": "用户"
-			// },
 			{
 				"pagePath": "pages/store/store",
 				"iconPath": "/static/icon/shenghuo.png",

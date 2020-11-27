@@ -376,7 +376,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_drug_schedule_select',
 				colNames: ['*'],
-				condition: [],
+				condition: [{'colName':'person_no','ruleType':'eq',value:this.userInfo.no}],
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);
@@ -968,7 +968,7 @@ export default {
 					// url:'/otherPages/balancedDiet/balancedDiet'
 				});
 			} else if (type === 'drug') {
-				let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+				let condition = [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]; //默认值
 				uni.navigateTo({
 					url: '/publicPages/form/form?serviceName=srvhealth_drug_schedule_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
 				});
