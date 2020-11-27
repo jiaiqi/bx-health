@@ -53,7 +53,7 @@
 					</view>
 				</view>
 			</view>
-			<!-- 			<view class="child-service-title">
+		<!-- 	<view class="child-service-title">
 				<text class="title-text">用药记录明细</text>
 				<text class="title-action" @click="toAdd('record-detail')">
 					<text class="cuIcon-add "></text>
@@ -70,7 +70,7 @@
 				</view>
 				<view class="drug-record-timeline">
 					<view class="cu-timeline" v-for="item in drugRecord" :key="item.date">
-						<view class="cu-time" :class="{ 'text-blue': item.date === nowDate }">{{ item.date === nowDate ? `${item.date.slice(5) }(今天)`: item.date.slice(5) }}</view>
+						<view class="cu-time" :class="{ 'text-blue': item.date === nowDate }">{{ item.date === nowDate ? `${item.date.slice(5)}(今天)` : item.date.slice(5) }}</view>
 						<view
 							class="cu-item text-gray"
 							v-for="record in item.data"
@@ -168,7 +168,10 @@ export default {
 					url = '/publicPages/form/form?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
 					break;
 				case 'record':
-					url = `/publicPages/form/form?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
+					// url = `/publicPages/form/form?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
+					// 	JSON.stringify(condition)
+					// )}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
+					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
 						JSON.stringify(condition)
 					)}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
 					break;

@@ -102,7 +102,7 @@
 				<view 
 					@click.stop="tofeedback"
 					class="cu-item boxfood couple-boxfood"
-					v-if="isLoad"
+					v-if="isLoad && !pageDetType"
 				>
 					<view class="smallbox couple-smallbox">
 						<view class="smallbox-couple-top">
@@ -237,7 +237,7 @@
 		/>
 		<!-- <flyInCart ref="inCart" :cartBasketRect="cartBasketRect"></flyInCart> -->
 		<jumpBall :backgroundImage="currFood.imgurl" :start.sync="num" :element.sync="element" @msg="jbMsg" />
-		<view class="public-button-box add-button">
+		<view v-if="!pageDetType" class="public-button-box add-button">
 			<view @click="openCar" class="lg text-gray cuIcon-cart add-button-wrap">
 					<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>				
 			</view>
@@ -652,7 +652,8 @@ export default {
 			childChooseArrLength:0,
 			classifyCond:null,
 			copyData:[],
-			isShowMyList:false
+			isShowMyList:false,
+			pageDetType:''
 		};
 	},
 	onShow() {
@@ -662,8 +663,12 @@ export default {
 	},
 	onLoad(option) {
 		let query = JSON.parse(decodeURIComponent(option.condType));
+		console.log("query-----",query)
 		if(query.date){
 			this.selectDate = query.date
+		}
+		if(query.pagetType){
+			this.pageDetType = query.pagetType
 		}
 		console.log('optionoptionoption', query);
 		if (query.lackEle) {
@@ -2060,11 +2065,11 @@ export default {
 				let food = encodeURIComponent(JSON.stringify(this.currFood))
 				if(!this.isShowMyList){
 					uni.navigateTo({
-						url:'/otherPages/chooseFood/chooseFood?currFood=' + food
+						url:'/otherPages/chooseFood/chooseFood?currFood=' + food + '&pageType=' + this.pageDetType
 					})
 				}else{
 					uni.navigateTo({
-						url:'/otherPages/chooseFood/chooseFood?currFood=' + food + '&type=owner'
+						url:'/otherPages/chooseFood/chooseFood?currFood=' + food + '&type=owner' + this.pageDetType
 					})
 				}
 				
