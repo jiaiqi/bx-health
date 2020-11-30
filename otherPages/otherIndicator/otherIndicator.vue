@@ -533,7 +533,7 @@ export default {
 									service_no: this.serviceLog.no,
 									name: this.serviceLog.name,
 									weight: this.inputVal.weight,
-									body_fat_rate: this.inputVal.body_fat_rate,
+									body_fat_rate: this.inputVal.body_fat_rate?this.inputVal.body_fat_rate:0,
 									wearing: this.inputVal.wearing,
 									alimentary_canal: this.inputVal.alimentary_canal
 								}
@@ -652,6 +652,9 @@ export default {
 					this.selectBasicUserList()
 					uni.showToast({
 						title:'体重数据已更新',
+					})
+					uni.navigateBack({
+						delta:0
 					})
 				}
 			})

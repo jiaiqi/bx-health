@@ -1,22 +1,6 @@
 <template>
 	<view class="drug-plan">
-		<view class="total-title">
-			<view class="child-service-title">
-				<!-- <text class="title-text">用药计划</text> -->
-				<!-- <text class="title-action" @click="toAdd('plan')">
-					<text class="cuIcon-add "></text>
-					<text class="see-histroy">添加</text>
-				</text> -->
-			</view>
-		</view>
-		<!-- 		<bx-form
-			ref="bxForm"
-			:service="serviceName"
-			:pageType="type"
-			:BxformType="type"
-			:fields="fields"
-			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
-		></bx-form> -->
+		<view class="total-title"><view class="child-service-title"></view></view>
 		<view class="main-table">
 			<view class="table-item" v-for="item in fields" :key="item.column">
 				<view class="label">{{ item.label }}</view>
@@ -39,7 +23,6 @@
 							<view class="detail-label">用法：</view>
 							<view class="data-item">
 								<text class="label">
-									<!-- 用药 -->
 									<text class="value">{{ data.take_times }}</text>
 								</text>
 							</view>
@@ -53,13 +36,29 @@
 					</view>
 				</view>
 			</view>
-		<!-- 	<view class="child-service-title">
-				<text class="title-text">用药记录明细</text>
-				<text class="title-action" @click="toAdd('record-detail')">
-					<text class="cuIcon-add "></text>
-					<text class="see-histroy">添加</text>
-				</text>
-			</view> -->
+			<view class="child-service-item">
+				<view class="child-service-title"><text class="title-text">今日用药情况</text></view>
+				<view class="child-service-data-wrap">
+					<view class="child-service-data" v-for="(data, dataIndex) in drugList" :key="dataIndex">
+						<view class="title">{{ data.general_name }}</view>
+						<view class="detail">
+							<view class="detail-label">已用{{ data.times }}次</view>
+							<view class="detail-label">应用{{ data.take_times }}</view>
+				<!-- 			<view class="data-item">
+								<text class="label">
+									<text class="value">{{ data.times }}</text>
+								</text>
+							</view> -->
+						<!-- 	<view class="data-item">
+								<text class="label">
+									<text class="value">{{ data.dosage_each_time }}</text>
+									{{ data.dosage_unit }}/次
+								</text>
+							</view> -->
+						</view>
+					</view>
+				</view>
+			</view>
 			<view class="child-service-item">
 				<view class="child-service-title">
 					<text class="title-text">用药记录</text>
@@ -78,9 +77,12 @@
 							:key="record.take_time"
 						>
 							<view class="timeline-content " :class="{ 'bg-bluess': item.date === nowDate, 'bg-grayss': item.date !== nowDate }">
-								<view class="cu-capsule radius">
-									<view class="cu-tag " :class="{ 'bg-blue': item.date === nowDate, 'bg-grey': item.date !== nowDate }">{{ calcTime(record.take_time) }}</view>
-									<view class="cu-tag " :class="{ 'line-blue': item.date === nowDate, 'line-grey': item.date !== nowDate }">{{ record.take_time.slice(0, 5) }}</view>
+								<view class="top">
+									<view class="cu-capsule radius">
+										<view class="cu-tag " :class="{ 'bg-blue': item.date === nowDate, 'bg-grey': item.date !== nowDate }">{{ calcTime(record.take_time) }}</view>
+										<view class="cu-tag " :class="{ 'line-blue': item.date === nowDate, 'line-grey': item.date !== nowDate }">{{ record.take_time.slice(0, 5) }}</view>
+									</view>
+									<view class="delete-icon" @click="deleteRecord(record)"><text class="cuIcon-delete"></text></view>
 								</view>
 								<view class="drug-detail" v-if="isArray(record.detail)">
 									<view class="detail-item" v-for="detail in record.detail" :class="{ 'text-blue': item.date === nowDate }">
@@ -88,25 +90,10 @@
 										<text>{{ detail.general_name }}</text>
 									</view>
 								</view>
-								<!-- 			<text class="take-time" v-if="record.take_time">
-									<text class="label">
-										用药时间:
-									</text>
-									<text class="value">
-										
-									</text>
-								</text> -->
 							</view>
 						</view>
 					</view>
 				</view>
-				<!-- 	<view class="child-service-data-wrap">
-					<view class="child-service-data" v-for="item in drugRecord">
-						<view class="title">{{ item.take_date }} {{ item.take_time.slice(0, 5) }}</view>
-						<view class="detail">
-						</view>
-					</view>
-				</view> -->
 			</view>
 		</view>
 	</view>
@@ -119,9 +106,11 @@ export default {
 	data() {
 		return {
 			planNo: '',
+			drugList:[], //当前用药计划的药品列表
 			planDetail: {}, //用药计划
 			colsV2Data: {},
 			drugRecord: [], //用药记录
+			todayRecord: [],  
 			fields: [],
 			childServiceData: [],
 			type: 'detail',
@@ -136,6 +125,37 @@ export default {
 		}
 	},
 	methods: {
+		deleteRecord(e) {
+			uni.showModal({
+				title: '提示',
+				content: '删除此条记录?',
+				success(res) {
+					if (res.confirm) {
+						let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_record_delete', 'operate');
+						let req = [{ serviceName: 'srvhealth_drug_schedule_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+						this.$http.post(url, req).then(res => {
+							if (res.data.state === 'SUCCESS') {
+								this.deleteRecordDetail(e.dsr_no);
+							}
+						});
+					}
+				}
+			});
+		},
+		deleteRecordDetail(dsr_no) {
+			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_record_detail_list_delete', 'operate');
+			let req = [{ serviceName: 'srvhealth_drug_schedule_record_detail_list_delete', condition: [{ colName: 'dsr_no', ruleType: 'in', value: dsr_no }] }];
+			this.$http.post(url, req).then(res => {
+				if (res.data.state === 'SUCCESS') {
+					uni.showToast({
+						title: '删除成功'
+					});
+					if (this.planNo) {
+						this.getFieldsV2(this.serviceName);
+					}
+				}
+			});
+		},
 		calcTime(time) {
 			if (!time) {
 				return;
@@ -160,12 +180,14 @@ export default {
 			}
 		},
 		toAdd(type, item) {
-			let condition = [{ colName: 'person_no', ruleType: 'eq', value: this.planDetail.person_no }];
+			let condition = [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }];
 			let fieldsCond = [{ column: 'ds_no', condition: [{ colName: 'person_no', ruleType: 'eq', value: this.planDetail.person_no }] }];
 			let url = '';
 			switch (type) {
 				case 'detail':
-					url = '/publicPages/form/form?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
+					condition = [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }];
+					url = '/publicPages/form/form?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition));
+					// url = '/publicPages/form/form?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
 					break;
 				case 'record':
 					// url = `/publicPages/form/form?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
@@ -173,7 +195,7 @@ export default {
 					// )}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
 					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
 						JSON.stringify(condition)
-					)}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
+					)}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}&ds_no=${this.planNo}`;
 					break;
 				case 'record-detail':
 					// 用药记录明细 条件:用药计划编码（ds_no）；默认值:用药记录编码（dsr_no）
@@ -284,6 +306,7 @@ export default {
 				let dateArr = [];
 				let DrugRecordDetailList = await this.getDrugRecordDetail();
 				res.data.data.forEach(item => {
+					
 					if (!dateArr.includes(item.take_date)) {
 						dateArr.push(item.take_date);
 					}
@@ -299,6 +322,12 @@ export default {
 							DrugRecordDetailList.forEach(detail => {
 								if (detail.dsr_no === item.dsr_no) {
 									item.detail.push(detail);
+									if (item.take_date === this.nowDate) {
+										let hasExist = this.todayRecord.find((record)=>record.take_time===item.take_time)
+										if(!hasExist){
+											this.todayRecord.push(item);
+										}
+									}
 								}
 							});
 						}
@@ -309,8 +338,23 @@ export default {
 					return record;
 				});
 				this.drugRecord = recordList;
+				this.buildTodayCase()
 				return res.data.data;
 			}
+		},
+		buildTodayCase(){
+			let drugList  =this.deepClone(this.childServiceData[0].data)
+			let todayDrugDetail = this.todayRecord.reduce((a,b)=>a.concat(b.detail),[])
+			this.drugList = drugList.map(drug=>{
+				let times = 0
+				todayDrugDetail.forEach(item=>{
+					if(item.s_code===drug.s_code){
+						times ++
+					}
+				})
+				drug.times = times
+				return drug
+			})
 		},
 		async getPlanDetail(no) {
 			// 查找此用药计划的详细信息
@@ -392,6 +436,17 @@ export default {
 		min-height: 200rpx;
 		background-color: #fff;
 		box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		.top {
+			display: flex;
+			justify-content: space-between;
+			.delete-icon {
+				font-size: 40rpx;
+				transition: 0.5s all ease-out;
+				&:active {
+					transform: scale(1.3);
+				}
+			}
+		}
 		.drug-detail {
 			display: flex;
 			flex-wrap: wrap;
@@ -466,18 +521,12 @@ export default {
 			min-height: 220rpx;
 		}
 		.child-service-data-wrap {
-			// display: flex;
-			// flex-wrap: wrap;
-			width: 100%;
 			display: grid;
-			grid-template-columns: repeat(3, calc(33.33% - 20rpx));
+			grid-template-columns: repeat(3, calc(33.33% - 40rpx / 3));
 			grid-row-gap: 20rpx;
 			grid-column-gap: 20rpx;
 			.child-service-data {
 				padding: 10rpx 0;
-				// width: calc(50% - 10rpx);
-				// margin-right: 20rpx;
-				// margin-bottom: 20rpx;
 				display: flex;
 				flex-direction: column;
 				align-items: center;

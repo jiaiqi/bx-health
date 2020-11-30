@@ -1,5 +1,5 @@
 <template>
-	<view class="food_wrap">
+	<view v-if="currFood " class="food_wrap">
 		<view  class="cu-bar bg-white food_wrap_top" :class="pageType?'':'ingredient'">
 			<view @click="clickTop('edit')" v-if="pageType && !pageDetailType" class=" button" >编辑</view>
 			<view class="date-time">
@@ -199,31 +199,34 @@
 					<text v-if="currentCookData" @click.stop="clickCook" :class="isCookDataChoose?'active-cook-data':''">{{currentCookData}}</text>
 					<text @click="chooseCook">更多</text>					
 				</view>
-				<view v-if="currFood.dish_type && currFood.dish_type.indexOf('自选') > -1 && !pageDetailType" class="minced">
+				<view v-if="isShowZx && !pageDetailType" class="minced">
 					<view class="calculate-l">
 						自选臊子：
 					</view>
-					<view class="minced-item-all">
-						<view v-for="(item,index) in minceListChoose" :key="item.id" class="minced-item minced-item-active">
+						<!-- <view class="minced-item-all"> -->
+						<text v-for="(item,index) in minceListChoose" :key="item.id" class="minced-item minced-item-active">
 							{{item.name}}
-						</view>
-					</view>
-					<view @click="chooseCook('minkes')" class="minced-right-add">
-						<text class="lg text-gray cuIcon-add"></text>
-					</view>
+						</text>
+						<!-- </view> -->
+						<!-- <view @click="chooseCook('minkes')" class="minced-right-add"> -->
+							<text @click="chooseCook('minkes')" class="lg text-gray cuIcon-add minced-right-add"></text>
+						<!-- </view>			 -->
 				</view>
-				<view v-if="currFood.dish_type && currFood.dish_type.indexOf('自选') > -1 && !pageDetailType" class="minced">
+				<view v-if="isShowZx && !pageDetailType" class="minced">
 					<view class="calculate-l">
 						自选配料：
 					</view>
-					<view class="minced-item-all">
-						<view v-for="(item,index) in chooseBurdening" :key="item.id" class="minced-item minced-item-active">
-							{{item.name}}
-						</view>
-					</view>
-					<view @click="chooseCook('burdening')" class="minced-right-add">
-						<text class="lg text-gray cuIcon-add"></text>
-					</view>
+					<!-- <view class="minced-item-all"> -->
+						<!-- <view class="minced-item-all"> -->
+							<text v-for="(item,index) in chooseBurdening" :key="item.id" class="minced-item minced-item-active">
+								{{item.name}}
+							</text>
+						<!-- </view> -->
+						<!-- <view @click="chooseCook('burdening')" class="minced-right-add"> -->
+							<text @click="chooseCook('burdening')" class="lg text-gray cuIcon-add minced-right-add"></text>
+						<!-- </view> -->
+					<!-- </view> -->
+					
 				</view>
 				<view v-if="!pageDetailType" class="weight">
 					<view class="calculate-l">时间：</view>
@@ -292,12 +295,12 @@
 		</view>
 		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="bottom">
 			<view class="health-item">		
-				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType ==='minkes'" checkboxMode="button" v-model="checkedMinceValue">
-					<bx-checkbox v-model="item.checked" v-for="(item,index) in minceList" :key="item.name" :name="item.name">{{ item.name }}</bx-checkbox>
+				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType ==='minkes'" mode="button" v-model="checkedMinceValue">
+					<bx-checkbox v-model="item.checked" v-for="(item,index) in minceList" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
 				</bx-checkbox-group>
 				
-				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType ==='burdening'" checkboxMode="button" v-model="checkedburdeningValue">
-					<bx-checkbox v-model="item.checked" v-for="(item,index) in burdening" :key="item.name" :name="item.name">{{ item.name }}</bx-checkbox>
+				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType ==='burdening'" mode="button" v-model="checkedburdeningValue">
+					<bx-checkbox v-model="item.checked" v-for="(item,index) in burdening" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
 				</bx-checkbox-group>
 				
 				<bx-radio-group v-model="RadioChoose" max="1" mode="button">
@@ -305,7 +308,7 @@
 				</bx-radio-group>
 				
 				<view class="button-box">
-					<button class="cu-btn" @click="showUserHealtManagePopup = false">取消</button>
+					<button class="cu-btn" @click="closePoup">取消</button>
 					<button class="cu-btn " @click="confirmCookData">确定</button>
 				</view>
 			</view>
@@ -638,6 +641,12 @@ export default {
 				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
 				return age;
 			}
+		},
+		isShowZx(){
+			debugger
+			if(this.currFood && this.currFood.dish_type&&this.currFood.dish_type === '自选臊子面食'){
+				return true
+			}
 		}
 	},
 	methods: {
@@ -688,7 +697,11 @@ export default {
 			
 			
 		},
+		closePoup(){
+			this.showUserHealtManagePopup = false
+		},
 		confirmCookData(){
+			console.log("minceList---->",this.checkedMinceValue,"burdening---->",this.checkedburdeningValue)
 			if(this.currFood.dish_type && this.currFood.dish_type === '自选臊子面食' && this.poupType && this.poupType === 'minkes'){
 				this.minceListChoose = []
 				this.minceList.forEach(item=>{
@@ -735,18 +748,19 @@ export default {
 			let res = await this.$http.post(url, req);
 			let urls = self.$api.downloadFile + res.data.data[0].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +"&thumbnailType=fwsu_100";
 			this.$set(res.data.data[0], 'imgurl', urls);
-			this.currFood = res.data.data[0]
+			self.currFood = res.data.data[0]
 			
-			if(!this.currFood.meal_no){
-				this.getFoodsV2()
+			if(!self.currFood.meal_no){
+				self.getFoodsV2()
 			}
-			if(this.currFood.dish_type && this.currFood.dish_type.indexOf('自选') > -1){
+			
+			self.calculateCurrTime()
+			self.assembleData();
+			self.selectCurrFoodUnit(self.currFood);
+			if(self.currFood.dish_type && self.currFood.dish_type.indexOf('自选') > -1){
 				// this.getMincedAll()
-				this.getMixChildFood()
+				self.getMixChildFood()
 			}
-			this.calculateCurrTime()
-			this.assembleData();
-			this.selectCurrFoodUnit(this.currFood);
 		},
 		/*查询臊子**/
 		async getMincedAll(){
@@ -1085,6 +1099,7 @@ export default {
 			this.minceList = [] //可选臊子
 			this.burdening = [] //可选配料
 			data.forEach(item=>{
+				this.$set(item,'checked',false)
 				if(item.item_form_type === '混合食物' && item.choose_type === '可选'){
 					this.minceList.push(item)
 				}else if(item.item_form_type === '食材' && item.choose_type === '可选'){
@@ -1938,9 +1953,12 @@ export default {
 	align-items: center;
 	width: 100%;
 	margin-bottom: 10rpx;
-	.minced-item-all{
-		font-size: 24rpx;
-		display: flex;
+	flex-wrap: wrap;
+	white-space: normal;
+	font-size: 24rpx;
+	// .minced-item-all{
+	// 	font-size: 24rpx;
+	// 	display: flex;
 		.minced-item{
 			padding: 10rpx 16rpx;
 			background: #f8f8f8;
@@ -1948,6 +1966,9 @@ export default {
 			color: #999;
 			border-radius: 30rpx;
 			margin-right: 10rpx;
+			margin-bottom: 10rpx;
+			min-width: 40rpx;
+			text-align: center;
 		}
 		.minced-item-active{
 			padding: 10rpx 16rpx;
@@ -1956,9 +1977,9 @@ export default {
 			border-radius: 30rpx;
 			color: #fff;
 		}
-	}
+	// }
 	.minced-right-add{
-		padding: 0px 30rpx;
+		padding: 5px 30rpx;
 		border: 1px dashed #999;
 		border-radius: 30rpx;
 		display: flex;
@@ -2030,8 +2051,7 @@ export default {
 					width: 24%;
 					&:first-child{
 						width: 50%;
-					}
-					
+					}					
 					text-align: center;						
 				}
 				&:last-of-type{

@@ -1,9 +1,20 @@
 <template>
-	<view class="test">
+	<view class="relation-graph">
+		<view class="serach-bar">
+			<view class="cu-bar search bg-white">
+				<view class="search-form round" @click="toSearchPage">
+					<text class="cuIcon-search"></text>
+					<input disabled :adjust-position="false" type="text" :placeholder="currentNodes" confirm-type="search" />
+				</view>
+			</view>
+		</view>
 		<view class="node-path">
 			<view class="path-item" v-for="(item, index) in linkPath" :key="item.no" @click="toPath(item)">
 				<view class="name">{{ item.name }}</view>
-				<view class="separator" v-if="index + 1 < linkPath.length"><view class="line"></view></view>
+				<view class="separator" v-if="index + 1 < linkPath.length">
+					<text class="cuIcon-right"></text>
+				</view>
+				<!-- <view class="separator" v-if="index + 1 < linkPath.length"><view class="line"></view></view> -->
 			</view>
 		</view>
 		<view class="charts" v-if="nodeDetail && nutrientsChartOption.option && nutrientsChartOption.option.title">
@@ -18,9 +29,7 @@
 				:usePoster="true"
 				v-if="nodeDetail.video_link"
 			></txv-video> -->
-			<view class="video-box" v-if="txv_path">
-				<video class="video-player" :src="txv_path" :usePoster="true" controls object-fit="contain"></video>
-			</view>
+			<view class="video-box" v-if="txv_path"><video class="video-player" :src="txv_path" :usePoster="true" controls object-fit="contain"></video></view>
 			<view v-html="nodeDetail.node_desc" v-if="nodeDetail.node_desc" class="rich-text"></view>
 		</view>
 		<view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view>
@@ -107,6 +116,11 @@ export default {
 		};
 	},
 	methods: {
+		toSearchPage() {
+			uni.navigateTo({
+				url: '/archivesPages/GraphSearch/GraphSearch'
+			});
+		},
 		async getCurrentNodeInfo() {
 			let url = this.getServiceUrl('health', 'srvhealth_knowledge_graph_select', 'select');
 			let req = {
@@ -357,28 +371,52 @@ export default {
 				this.nodeDetail = res.data.data[0];
 				if (this.nodeDetail && this.nodeDetail.video_link) {
 					this.getVideoInfo(this.nodeDetail.video_link);
+				} else {
+					this.txv_path = '';
 				}
 				this.currentNodes = this.nodeDetail.node_name;
-				// this.linkPath.push({
-				// 	no: this.nodeDetail.kn_no,
-				// 	name: this.nodeDetail.node_name
-				// });
 				this.changeLinkPath({
 					no: this.nodeDetail.kn_no,
 					name: this.nodeDetail.node_name
 				});
+				return res.data.data[0];
 			} else {
 				this.nodeDetail = null;
 			}
 		},
-		toPath(e) {
-			if (e.no && e.name && this.currentNodeNo !== e.no) {
-				this.currentNodeNo = e.no;
-				this.currentNodes = e.name;
-				// this.getNodeDetail(e.no);
-				this.geteChartsData();
-				this.changeLinkPath(e);
+		async toPath(e) {
+			let nodetail = await this.getNodeDetail(e.no, false);
+			if ((nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
+				if (e.no !== this.currentNodeNo) {
+					this.currentNodes = e.name;
+					this.currentNodeNo = e.no;
+					this.geteChartsData();
+					this.changeLinkPath({ name: e.name, no: e.no });
+				}
+			} else if (nodetail.link_type) {
+				let url = '';
+				if (nodetail.link_type.indexOf('内部页面') !== -1) {
+					url = nodetail.page_link_url;
+				} else if (nodetail.link_type.indexOf('外部页面') !== -1) {
+					let resultUrl = await this.getResultUrl(nodetail.external_page_link_url);
+					url = '/publicPages/webviewPage/webviewPage?webUrl=' + resultUrl;
+					if (!resultUrl) {
+						return;
+					}
+				}
+				if (url) {
+					uni.navigateTo({
+						url: url
+					});
+				}
 			}
+			// if (e.no && e.name && this.currentNodeNo !== e.no) {
+				
+			// 	this.currentNodeNo = e.no;
+			// 	this.currentNodes = e.name;
+			// 	this.geteChartsData();
+			// 	this.changeLinkPath(e);
+			// }
 		},
 		changeLinkPath(e) {
 			let arr = this.linkPath;
@@ -406,13 +444,33 @@ export default {
 				});
 			}
 		},
-		clickCharts(e) {
-			if (e.data && e.data.nodeNo && e.data.nodeNo !== this.currentNodeNo) {
-				this.currentNodes = e.name;
-				this.currentNodeNo = e.data.nodeNo;
-				this.geteChartsData();
-				// this.getNodeDetail(e.data.nodeNo);
-				this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
+		async clickCharts(e) {
+			if (e.data && e.data.nodeNo) {
+				let nodetail = await this.getNodeDetail(e.data.nodeNo, false);
+				if ((nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
+					if (e.data.nodeNo !== this.currentNodeNo) {
+						this.currentNodes = e.name;
+						this.currentNodeNo = e.data.nodeNo;
+						this.geteChartsData();
+						this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
+					}
+				} else if (nodetail.link_type) {
+					let url = '';
+					if (nodetail.link_type.indexOf('内部页面') !== -1) {
+						url = nodetail.page_link_url;
+					} else if (nodetail.link_type.indexOf('外部页面') !== -1) {
+						let resultUrl = await this.getResultUrl(nodetail.external_page_link_url);
+						url = '/publicPages/webviewPage/webviewPage?webUrl=' + resultUrl;
+						if (!resultUrl) {
+							return;
+						}
+					}
+					if (url) {
+						uni.navigateTo({
+							url: url
+						});
+					}
+				}
 			}
 		},
 		getVideoInfo: function(vid) {
@@ -458,9 +516,6 @@ export default {
 						var url = host + fileName + '?vkey=' + vkey;
 						part_urls[index] = String(url);
 						that.txv_path = part_urls.index1;
-						// that.setData({
-						// 	videoUrl: part_urls.index1
-						// });
 					}
 				}
 			});
@@ -488,7 +543,7 @@ export default {
 </script>
 
 <style lang="scss">
-.test {
+.relation-graph {
 	width: 100%;
 	min-height: 100vh;
 	background-color: #fff;
@@ -501,17 +556,17 @@ export default {
 		align-items: center;
 	}
 	.charts {
-		width: calc(100% - 40rpx);
+		width: 100%;
 		height: 700rpx;
 		margin-bottom: 20rpx;
 	}
 	.detail-desc {
 		padding: 20rpx;
 		text-indent: 20rpx;
-		.video-box{
+		.video-box {
 			text-indent: 0;
 			width: 100%;
-			.video-player{
+			.video-player {
 				width: 100%;
 			}
 		}

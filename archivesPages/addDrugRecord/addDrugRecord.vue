@@ -9,23 +9,28 @@
 			:fields="fields"
 			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
 		></bxform>
-		<view class="drug-select-box">
+		<view class="drug-select-box" v-if="fields && fields.length > 0">
 			<!-- 药品选择 -->
-			<view class="cu-bar bg-white margin-top">
-				<!-- <view class="action"><button class="cu-btn">选择药物</button></view> -->
-			<!-- 	<bxform
+			<!-- <view class="action"><button class="cu-btn">选择药物</button></view> -->
+			<!-- 	<bxFormItem :field="item" v-for="(item, index) in detailField" :key="index + detailField[index].value" ref="drugForm" @on-selector-change="selectorChange($event, index)">
+				<view class="delete-button" @click="deleteDetailItem(index)" v-if="detailField[index].value"><text class="cuIcon-delete"></text></view>
+			</bxFormItem> -->
+			<view class="title">选择药物</view>
+			<bx-checkbox-group mode="normal" v-model="checkDrugNoList">
+				<bx-checkbox v-for="item in drugList" v-model="item.checked" :key="item.id" :name="item.value">{{ item.label }}</bx-checkbox>
+			</bx-checkbox-group>
+			<!-- 		<bxform
 					ref="bxForm2"
 					service="srvhealth_drug_schedule_record_detail_list_add"
-					:addType="add"
-					:pageType="add"
-					:BxformType="add"
+					addType="add"
+					pageType="add"
+					BxformType="add"
 					:fields="detailField"
 				></bxform> -->
-			</view>
 		</view>
 		<view class="button-box" v-if="colsV2Data && isArray(fields) && fields.length > 0">
 			<view v-for="(item, index) in buttons" :key="index" class="button">
-				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue">{{ item.button_name }}</button>
+				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue"><text class="cuIcon-check"></text> {{ item.button_name }}</button>
 			</view>
 		</view>
 	</view>
@@ -34,16 +39,19 @@
 <script>
 import bxform from '@/components/bx-form/bx-form.vue';
 // import bxButtons from '../components/bx-buttons/bx-buttons.vue';
+import bxFormItem from '@/components/bx-form/bx-form-item.vue';
 export default {
-	components: { bxform },
+	components: { bxform, bxFormItem },
 	props: {},
 	data() {
 		return {
 			fields: [],
+			ds_no: '',
 			detailField: [
 				{
 					column: 's_code',
-					label: '选择药物',
+					label: '添加药物',
+					placeholder: '点击选择药物',
 					defaultValue: null,
 					isRequire: false,
 					type: 'treeSelector',
@@ -66,10 +74,10 @@ export default {
 					disabled: false,
 					_validators: { max: 50, min: null, reg: '', required: false, msg: '', isType: { _custom: { type: 'function', display: '<span>ƒ</span> (e)' } } },
 					value: '',
-					valid: { column: 's_code', valid: true, msg: '不能为空!' },
-					
+					valid: { column: 's_code', valid: true, msg: '不能为空!' }
 				}
 			],
+			oldDetailField: [],
 			colsV2Data: null,
 			type: '',
 			serviceName: '',
@@ -77,7 +85,10 @@ export default {
 			defaultCondition: [],
 			params: {},
 			addType: '',
-			fieldsCond: [] //treeSelector类型字段的条件
+			fieldsCond: [], //treeSelector类型字段的条件
+			drugDetailItem: [],
+			drugList: [], //当前用药计划的药物列表
+			checkDrugNoList: [] //已选药物
 		};
 	},
 	computed: {
@@ -97,6 +108,9 @@ export default {
 			buttons.forEach(btn => {
 				if (btn.disp_exps) {
 					btn['display'] = eval(btn.disp_exps);
+				}
+				if (btn.button_name === '提交') {
+					btn.button_name = '服药';
 				}
 				if (btn.operate_params) {
 					let fieldData = btn.operate_params['data'];
@@ -125,15 +139,22 @@ export default {
 		if (option.fieldsCond) {
 			this.fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
 		}
+		if (option.cond) {
+			this.defaultCondition = JSON.parse(option.cond);
+			this.detailField[0].option_list_v2.conditions = JSON.parse(option.cond);
+		}
+		if (option.ds_no) {
+			this.ds_no = option.ds_no;
+			this.getDrugItemList();
+		}
+		this.oldDetailField = this.deepClone(this.detailField);
 		if (option.params) {
 			this.params = JSON.parse(decodeURIComponent(option.params));
 		}
 		if (option.addType) {
 			this.addType = option.addType;
 		}
-		if (option.cond) {
-			this.defaultCondition = JSON.parse(option.cond);
-		}
+
 		if (option.hasOwnProperty('params')) {
 			this.serviceName = this.params.serviceName;
 			this.type = this.params.type;
@@ -152,6 +173,51 @@ export default {
 		}
 	},
 	methods: {
+		getDrugItemList() {
+			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_detail_list_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_drug_schedule_detail_list_select',
+				colNames: ['*'],
+				page: { pageNo: 1, rownumber: 20 },
+				condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.ds_no }]
+			};
+			if (this.ds_no) {
+				this.$http.post(url, req).then(res => {
+					if (Array.isArray(res.data.data)) {
+						this.drugList = res.data.data.map(item => {
+							item.checked = false;
+							item.label = item.general_name;
+							item.value = item.s_code;
+							return item;
+						});
+					}
+				});
+			}
+		},
+		deleteDetailItem(index) {
+			if (this.detailField[index].value && this.detailField.length > 1) {
+				this.drugDetailItem.splice(index, 1);
+				this.detailField.splice(index, 1);
+			} else {
+				this.detailField[index].value = '';
+			}
+			this.oldDetailField = this.deepClone(this.detailField);
+		},
+		selectorChange(e, index) {
+			if (!e) {
+				return;
+			}
+			let selectorInfo = this.deepClone(e);
+			if (selectorInfo.colData && !this.oldDetailField[index].value) {
+				this.drugDetailItem.push(selectorInfo.colData);
+				let field = this.deepClone(this.oldDetailField[0]);
+				field.value = '';
+				// let field = this.deepClone(this.oldDetailField[this.oldDetailField.length - 1]);
+				this.detailField.push(field);
+				this.oldDetailField = this.deepClone(this.detailField);
+			} else {
+			}
+		},
 		async getDefaultVal() {
 			if (this.type === 'detail' || this.type === 'update') {
 				let app = uni.getStorageSync('activeApp');
@@ -221,6 +287,60 @@ export default {
 					break;
 			}
 		},
+		addDrugItem(e) {
+			let recordInfo = this.deepClone(e);
+			if (!recordInfo || !recordInfo.dsr_no) {
+				return;
+			}
+			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_record_detail_list_add', 'operate');
+			let req = [
+				{
+					serviceName: 'srvhealth_drug_schedule_record_detail_list_add',
+					condition: [],
+					data: [
+						{
+							dsr_no: 'DSR202011271043520006',
+							ds_no: 'DS202011270940210003',
+							s_code: '86900026000308',
+							drug_reg_name: '脂芪口服液',
+							general_code: 'Z-Z01AA-Z0160',
+							general_name: '脂芪口服液',
+							take_times: '2次',
+							dosage_each_time: 15,
+							dosage_unit: '毫升'
+						}
+					]
+				}
+			];
+			let checkDrugList = this.drugList.filter(item => this.checkDrugNoList.includes(item.s_code));
+			req[0].data = checkDrugList.map(item => {
+				return {
+					dsr_no: recordInfo.dsr_no,
+					ds_no: item.ds_no,
+					s_code: item.s_code,
+					drug_reg_name: item.drug_reg_name,
+					general_code: item.general_code,
+					general_name: item.general_name,
+					take_times: item.take_times,
+					dosage_each_time: item.dosage_each_time,
+					dosage_unit: item.dosage_unit
+				};
+			});
+			// req[0].data = this.drugDetailItem.map(item => {
+			// 	return {
+			// 		dsr_no: recordInfo.dsr_no,
+			// 		ds_no: item.ds_no,
+			// 		s_code: item.s_code,
+			// 		drug_reg_name: item.drug_reg_name,
+			// 		general_code: item.general_code,
+			// 		general_name: item.general_name,
+			// 		take_times: item.take_times,
+			// 		dosage_each_time: item.dosage_each_time,
+			// 		dosage_unit: item.dosage_unit
+			// 	};
+			// });
+			this.$http.post(url, req);
+		},
 		async onButton(e) {
 			let req = this.$refs.bxForm.getFieldModel();
 			for (let key in req) {
@@ -254,10 +374,9 @@ export default {
 						req = [{ serviceName: e.service_name, data: [req] }];
 						let app = uni.getStorageSync('activeApp');
 						let url = this.getServiceUrl(app, e.service_name, 'add');
-						console.log(url, e);
 						let res = await this.$http.post(url, req);
-						console.log(url, res.data);
 						if (res.data.state === 'SUCCESS') {
+							this.addDrugItem(res.data.response[0].response.effect_data[0]);
 							uni.showModal({
 								title: '提示',
 								content: '添加成功',
@@ -332,6 +451,20 @@ export default {
 	min-height: 100vh;
 	background-color: #fff;
 }
+.drug-select-box {
+	padding: 20rpx 30rpx;
+	.title {
+		line-height: 60rpx;
+		font-size: 28rpx;
+	}
+	.delete-button {
+		width: 100rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 40rpx;
+	}
+}
 .button-box {
 	display: flex;
 	justify-content: space-around;
@@ -339,6 +472,13 @@ export default {
 	min-height: 200upx;
 	background-color: #fff;
 	flex-wrap: wrap;
+	.cuIcon-check{
+		border-radius: 30px;
+		font-weight: bold;
+		border: 2rpx solid #fff;
+		margin-right: 10rpx;
+		padding: 5rpx;
+	}
 	.button {
 		width: 40%;
 		.cu-btn {

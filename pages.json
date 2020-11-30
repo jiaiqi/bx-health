@@ -77,8 +77,7 @@
 		},
 		{
 			"root": "archivesPages",
-			"pages": [
-				{
+			"pages": [{
 					"path": "archives-history/archives-history",
 					"style": {
 						"navigationBarTitleText": "健康记录",
@@ -117,17 +116,23 @@
 							// #endif
 						}
 					}
+				}, {
+					"path": "addDrugRecord/addDrugRecord",
+					"style": {
+						"navigationBarTitleText": "用药记录增加",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "GraphSearch/GraphSearch",
+					"style": {
+						// "navigationStyle": "custom",
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+
 				}
-			    ,{
-                    "path" : "addDrugRecord/addDrugRecord",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "用药记录增加",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "pregnancy",

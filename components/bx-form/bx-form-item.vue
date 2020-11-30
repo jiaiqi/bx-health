@@ -1,5 +1,5 @@
 <template>
-	<view>
+	<view class="bx-form-item">
 		<view class="cu-form-group itemwrap" v-if="fieldData.display" :class="{ 'form-detail': pageFormType === 'detail' }">
 			<view class="title" :class="!valid.valid ? 'valid_error' : ''">
 				<text class="text-red text-shadow" v-show="fieldData.isRequire">*</text>
@@ -194,7 +194,7 @@
 				<view
 					class="content padding-0"
 					style="padding:0;width: 100%!important;flex-direction: column;position: relative;"
-					v-else-if="fieldData.type === 'date' || fieldData.type === 'dateTime' || fieldData.type === 'time'||fieldData.type === 'Time' || fieldData.type === 'Date'"
+					v-else-if="fieldData.type === 'date' || fieldData.type === 'dateTime' || fieldData.type === 'time' || fieldData.type === 'Time' || fieldData.type === 'Date'"
 				>
 					<input
 						@blur="onInputBlur"
@@ -289,14 +289,17 @@
 					name="input"
 					v-else-if="fieldData.type === 'digit' || fieldData.type === 'Float'"
 				/>
-				<view v-else-if="fieldData.type === 'treeSelector'" @click="openTreeSelector">
+				<view v-else-if="fieldData.type === 'treeSelector'" class="input-view">
 					<input
-						:placeholder="'点击选择' + placeholderValue"
+						:placeholder="fieldData.placeholder ? fieldData.placeholder : '点击选择' + placeholderValue"
 						:value="treeSelectorShowValue ? treeSelectorShowValue : fieldData.value"
 						disabled
 						:class="!valid.valid ? 'valid_error' : ''"
 						name="input"
+						class="input"
+						@click="openTreeSelector"
 					/>
+					<slot></slot>
 				</view>
 				<view v-else-if="fieldData.type === 'cascader'" @click="openCascader">
 					<input :placeholder="'点击选择' + placeholderValue" v-model="fieldData.value" disabled :class="!valid.valid ? 'valid_error' : ''" name="input" />
@@ -338,7 +341,7 @@
 			<view class="cu-dialog">
 				<view class="set-box" v-if="isArray(checkboxList)">
 					<bx-checkbox-group checkboxMode="button" v-model="checkedValue">
-						<bx-checkbox v-model="item.checked" v-for="(item,index) in checkboxList" :key="item.label" :name="item.value">{{ item.label }}</bx-checkbox>
+						<bx-checkbox v-model="item.checked" v-for="(item, index) in checkboxList" :key="item.label" :name="item.value">{{ item.label }}</bx-checkbox>
 					</bx-checkbox-group>
 					<view class="button-box">
 						<button class="cu-btn button" @tap="cancelSaveSetValue">取消</button>
@@ -525,8 +528,8 @@ export default {
 				pageNo: 1
 			},
 			checkedValue: [],
-			checkboxList:[],
-			showSetBox:false,
+			checkboxList: [],
+			showSetBox: false
 		};
 	},
 	updated() {},
@@ -766,21 +769,6 @@ export default {
 			console.log('change----', e.detail.value);
 			this.index = e.detail.value;
 			let oriItem = null;
-			this.oriPicker.forEach((ori, index) => {
-				if (ori.name == this.picker[e.detail.value]) {
-					oriItem = ori;
-					if (itemFile.column == 'lybm') {
-						self.fieldData.value = ori.lybm;
-					}
-					if (itemFile.column == 'dybm') {
-						self.fieldData.value = ori.dybm;
-					}
-					if (itemFile.column == 'fwbm') {
-						self.fieldData.value = ori.fwbm;
-					}
-					// this.fieldData.value = this.picker[this.index]
-				}
-			});
 			this.$emit('picker-change', oriItem);
 		},
 		changeVal(newval, oldval, index) {
@@ -873,34 +861,38 @@ export default {
 		hideModal(e) {
 			this.modalName = null;
 		},
-		cancelSaveSetValue(){
-			this.checkboxList = this.checkboxList.map(item=>{
-				if(this.fieldData.value&&this.fieldData.value.indexOf(item.value)!==-1){
-					item.checked = true
-				}else{
-					item.checked = false
+		cancelSaveSetValue() {
+			this.checkboxList = this.checkboxList.map(item => {
+				if (this.fieldData.value && this.fieldData.value.indexOf(item.value) !== -1) {
+					item.checked = true;
+				} else {
+					item.checked = false;
 				}
-				return item
-			})
-			this.checkedValue = this.deepClone(this.checkboxList).filter(item=>item.checked).map(item=>item.value);
-			this.showSetBox = false
+				return item;
+			});
+			this.checkedValue = this.deepClone(this.checkboxList)
+				.filter(item => item.checked)
+				.map(item => item.value);
+			this.showSetBox = false;
 		},
 		saveSetValue() {
-			setTimeout(()=>{
-				let values = this.deepClone(this.checkboxList).filter(item=>item.checked).map(item=>item.value);
-				this.checkedValue = values
-				let str=''
-				if(Array.isArray(values)&&values.length>0){
-					str = values.toString()
+			setTimeout(() => {
+				let values = this.deepClone(this.checkboxList)
+					.filter(item => item.checked)
+					.map(item => item.value);
+				this.checkedValue = values;
+				let str = '';
+				if (Array.isArray(values) && values.length > 0) {
+					str = values.toString();
 				}
-				if(str!==this.fieldData.value){
-					this.fieldData.value = str
+				if (str !== this.fieldData.value) {
+					this.fieldData.value = str;
 				}
 				this.onInputBlur();
 				this.$emit('on-value-change', this.fieldData);
 				this.getValid();
-				this.showSetBox = false
-			},60)
+				this.showSetBox = false;
+			}, 60);
 		},
 		deleteImage(e) {
 			console.log(e);
@@ -1073,22 +1065,22 @@ export default {
 			this.defaultLineVal = this.fieldData.value;
 			this.$refs.popup.open();
 		},
-		openSetBox(){
-			let self  =this
+		openSetBox() {
+			let self = this;
 			if (self.fieldData.type === 'Set') {
 				if (Array.isArray(self.fieldData.option_list_v2) && self.fieldData.option_list_v2.length > 0) {
 					self.checkboxList = self.fieldData.option_list_v2.map(item => {
-						if (item&&(!item.hasOwnProperty('checked')||!item.checked)) {
+						if (item && (!item.hasOwnProperty('checked') || !item.checked)) {
 							item.checked = false;
 						}
 						if (self.fieldData.value && self.fieldData.value.indexOf(item.value) !== -1) {
 							item.checked = true;
 						}
-						return item
+						return item;
 					});
 				}
 			}
-			this.showSetBox = true
+			this.showSetBox = true;
 		},
 		async getUserRoomPerson(no) {
 			const url = this.getServiceUrl('zhxq', 'srvzhxq_syrk_select', 'select');
@@ -1155,6 +1147,7 @@ export default {
 			this.showTreeSelector = false;
 			this.onInputBlur();
 			this.$emit('on-value-change', this.fieldData);
+			this.$emit('on-selector-change', this.fieldData);
 			this.getValid();
 			let fieldData = this.fieldData;
 			if (fieldData.type === 'treeSelector') {
@@ -1382,6 +1375,9 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.bx-form-item {
+	width: 100%;
+}
 .input-sm {
 	height: 2.4em;
 	line-height: 2.4em;
@@ -1447,7 +1443,12 @@ export default {
 		background-color: red;
 	}
 }
-
+.input-view {
+	display: flex;
+	.input {
+		flex: 1;
+	}
+}
 /* #ifdef MP-WEIXIN */
 .form-content {
 	flex: 1;

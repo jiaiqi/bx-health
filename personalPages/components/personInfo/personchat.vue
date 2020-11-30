@@ -49,11 +49,12 @@
 							
 						</view>
 						
-						<!-- <view 
-						@tap="handleAudio(item)" 
-						v-else-if = "item.msg_link && item.msg_content_type === '语音'" class="person-chat-item-right">
-							<text>语音</text>
-						</view> -->
+						<view
+						@tap="openVideo(item)" 						
+						v-else-if = "item.video && item.msg_content_type === '视频'" class="video_right_play">
+							<!-- <text>视频</text> -->
+							<video style="width: 250px;height: 200px;" id="myVideo" :src="`${apiUrl + item.video + '&bx_auth_ticket='}${ticket}`" controls></video>
+						</view>
 					</view>
 					<view v-else-if="item.sender_account === currentUserInfo.user_no" class="person-chat-item-send">
 						<text class="unread" v-if="item.msg_state === '未读'">{{item.msg_state}}</text>
@@ -91,6 +92,12 @@
 								<view class="">{{item.voice_time?item.voice_time:''}}</view>
 							</view>
 							
+						</view>
+						<view
+						@tap="openVideo(item)" 
+						v-else-if = "item.video && item.msg_content_type === '视频'" class="video_right_play">
+							<!-- <text>视频</text> -->
+							<video style="width: 250px;height: 200px;" id="myVideo" :src="`${apiUrl + item.video + '&bx_auth_ticket='}${ticket}`" controls></video>
 						</view>
 						<view class="person-chat-item-left">
 							<image :src="currentUserInfo.headimgurl?currentUserInfo.headimgurl:'/personalPages/static/doctor_default.jpg'" mode=""></image>
@@ -168,6 +175,22 @@
 							<text>图片</text>
 						</view>
 					</view>
+					<!-- <view @click="openMenuPoup('word')" class="person-chat-bot-bot-item">
+						<view class="person-chat-bot-bot-item-top">
+							文
+						</view>
+						<view  class="person-chat-bot-bot-item-b">
+							<text>文档</text>
+						</view>
+					</view> -->
+					<view @click="openMenuPoup('video')" class="person-chat-bot-bot-item">
+						<view class="person-chat-bot-bot-item-top">
+							视
+						</view>
+						<view  class="person-chat-bot-bot-item-b">
+							<text>视频</text>
+						</view>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -235,14 +258,20 @@
 				return feed
 			}
 		},
+		onReady() {
+			 this.videoContext = uni.createVideoContext('myVideo')
+			console.log("eeeeeee-----Ready")
+		},
 		data(){
 			return {
 				heightStyle:'',
+				videoContext:'',
 				checkRadioValue:'',
 				chatText:'',
 				isSendLink:false,
 				showBottom:false,
 				currentSendType:'',
+				apiUrl:this.$api.downloadFile,
 				// isFeed:false,
 				current_type:'world',
 				voiceTitle:'按住 说话',
@@ -256,6 +285,7 @@
 				currentVoiceType:'voice',
 				Recorder: uni.getRecorderManager(),
 				Audio: uni.createInnerAudioContext(),
+				ticket:uni.getStorageSync('bx_auth_ticket'),
 				recording: false, //标识是否正在录音
 				isStopVoice: false, //加锁 防止点击过快引起的当录音正在准备(还没有开始录音)的时候,却调用了stop方法但并不能阻止录音的问题
 				voiceInterval:null,
@@ -268,13 +298,18 @@
 			}
 		},
 		methods:{
+			/*播放视频**/
+			openVideo(item){
+				// let self = this
+				// uni.openVideoEditor({
+				// 	filePath:self.$api.downloadFile + item.video + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
+				// })
+			},
 			//控制播放还是暂停音频文件
 			handleAudio(item) {				
 				console.log("点击语音=========>",this.Audio.paused)				
 				this.AudioExam = item;
 				this.Audio.paused ? this.playAudio(item) : this.stopAudio(item);
-				
-				// this.playAudio(item)
 			},
 			//播放音频
 			playAudio(item) {
@@ -454,6 +489,7 @@
 					    count: 6, //默认9
 					    sourceType: ['album'], //从相册选择
 					    success: function (res) {
+							console.log("上传图片----》",res)
 							let reqHeader = {
 								bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
 							}
@@ -486,6 +522,83 @@
 							}
 							
 					    }
+					});
+				}else if(type === 'word'){
+					wx.chooseMessageFile({
+					  count: 1,
+					  type: 'file',
+					  success (res) {
+					   console.log("上传图片----》",res)
+					   let reqHeader = {
+					   	bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+					   }
+					   let formData = {
+					   	serviceName: "srv_bxfile_service",
+					   	interfaceName: "add",
+					   	app_no: "health",
+					   	columns: "attachment"
+					   }
+					   console.log("name-----",formData)
+					   let url = ''
+					   for(let i=0;i<res.tempFiles.length;i++){
+					   	uni.uploadFile({
+					   		url:self.$api.upload,
+					   		header: reqHeader,
+					   		formData:formData,
+					   		filePath: res.tempFiles[i].path,
+					   		success: (e) => {
+					   			if(e.statusCode === 200){
+					   				let photoDataNo = JSON.parse(e.data).file_no
+									console.log("上传文件-----",e)
+					   				// self.sendMessageLanguageInfo('文件',photoDataNo)
+					   			}else{
+					   				
+					   			}
+					   			// console.log(uploadFileRes.data);
+					   		}
+					   	})
+					   }
+					  }
+					})
+					console.log("点击上传文档----")
+				}else if(type === 'video'){
+					let reqHeader = {
+						bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+					}
+					let formData = {
+						serviceName: "srv_bxfile_service",
+						interfaceName: "add",
+						app_no: "health",
+						columns: "video"
+					}
+					 uni.chooseVideo({
+						count: 1,
+						sourceType: ['camera', 'album'],
+						success: function (res) {
+							let src = res.tempFilePath;
+							console.log("-----------res----视频",src)
+							uni.uploadFile({
+								url:self.$api.upload,
+								header: reqHeader,
+								formData:formData,
+								filePath: src,
+								name:'file',
+								success: (e) => {
+									console.log("上传文件-----",e)
+									if(e.statusCode === 200){
+										let photoDataNo = JSON.parse(e.data).file_no
+										console.log("上传文件-----",e)
+										self.sendMessageLanguageInfo('视频',photoDataNo)
+									}else{										
+									}
+								},
+								fail:(e)=> {
+									console.log("失败---",e)
+								}
+							})
+							console.log("点击视频----",res)
+							
+						}
 					});
 				}
 				
@@ -672,6 +785,10 @@
 				}else if(type === '语音'){
 					req[0].data[0].msg_link = value.content
 					req[0].data[0].voice_time = value.contentDuration
+				}else if(type === '文件'){
+					req[0].data[0].attachment = value
+				}else if(type === '视频'){
+					req[0].data[0].video = value
 				}
 				console.log("res========>",req)
 				let res = await this.$http.post(url, req);
@@ -681,6 +798,11 @@
 					this.getMessageInfo()
 					
 				// }
+			},
+			/*查询文件**/
+			async getFileNo(no){
+				let fileNo = await this.getFilePath(no)
+				console.log("file——no",fileNo)
 			},
 			/*点击发送后添加数据**/
 			async sendMessageInfo(){
@@ -784,6 +906,9 @@
 							let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
 							this.$set(res.data.data[i],'img_url',url)
 						}
+						if(item.attachment){
+							this.getFileNo(item.attachment)
+						}
 					})
 					this.recordList = res.data.data
 					res.data.data.forEach(links=>{
@@ -865,8 +990,7 @@
 		mounted() {
 			
 			this.Recorder = uni.getRecorderManager()
-			this.Recorder.onStart(e => {
-				
+			this.Recorder.onStart(e => {				
 				this.beginVoice();
 			});
 			//录音结束事件
@@ -881,9 +1005,17 @@
 			});
 			
 			//音频播放结束事件
-			this.Audio.onEnded(e => {
-				this.closeAnmition();
-			});
+			this.$on('onEnded',data=>{
+				this.Audio.onEnded(e => {
+					console.log("e----------end--")
+				});
+			}
+				// this.Audio.onEnded(e => {
+				// 	console.log("e----------end--")
+				// });
+			)
+				
+			
 			if(this.customer_no){
 				this.getRecorderManagerList()
 				
@@ -932,6 +1064,7 @@
 			
 			//音频播放结束事件
 			this.Audio.onEnded(e => {
+				console.log("----------语音播放结束----")
 				this.closeAnmition();
 			});
 			if(option.no){
