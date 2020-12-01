@@ -53,7 +53,7 @@
 						@tap="openVideo(item)" 						
 						v-else-if = "item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
-							<video style="width: 250px;height: 200px;" id="myVideo" :src="`${apiUrl + item.video + '&bx_auth_ticket='}${ticket}`" controls></video>
+							<video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video>
 						</view>
 					</view>
 					<view v-else-if="item.sender_account === currentUserInfo.user_no" class="person-chat-item-send">
@@ -97,7 +97,19 @@
 						@tap="openVideo(item)" 
 						v-else-if = "item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
-							<video style="width: 250px;height: 200px;" id="myVideo" :src="`${apiUrl + item.video + '&bx_auth_ticket='}${ticket}`" controls></video>
+							<video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video>
+						</view>
+						<view @click="downloadfile(item)" v-else-if = "item.msg_content_type === '文件'" class="documents-wrap">
+							<view class="documents-item">
+								<view class="documents-item-left">
+									<text>1125.docx</text>
+								</view>
+								<view class="documents-item-right">
+									<image v-if="item.file_type && (item.file_type == 'docx' || item.file_type == 'doc')" src="/personalPages/static/word.png" mode=""></image>
+									<image v-else-if="item.file_type && item.file_type === 'xlsx'" src="/personalPages/static/excel.png" mode=""></image>
+									<image v-else-if="item.file_type && item.file_type === 'pdf'" src="/personalPages/static/pdf.png" mode=""></image>
+								</view>
+							</view>
 						</view>
 						<view class="person-chat-item-left">
 							<image :src="currentUserInfo.headimgurl?currentUserInfo.headimgurl:'/personalPages/static/doctor_default.jpg'" mode=""></image>
@@ -175,14 +187,22 @@
 							<text>图片</text>
 						</view>
 					</view>
-					<!-- <view @click="openMenuPoup('word')" class="person-chat-bot-bot-item">
+					<view @click="openMenuPoup('word')" class="person-chat-bot-bot-item">
 						<view class="person-chat-bot-bot-item-top">
 							文
 						</view>
 						<view  class="person-chat-bot-bot-item-b">
 							<text>文档</text>
 						</view>
-					</view> -->
+					</view>
+					<view @click="openMenuPoup('wx_word')" class="person-chat-bot-bot-item">
+						<view class="person-chat-bot-bot-item-top">
+							文
+						</view>
+						<view  class="person-chat-bot-bot-item-b">
+							<text>微信文档</text>
+						</view>
+					</view>
 					<view @click="openMenuPoup('video')" class="person-chat-bot-bot-item">
 						<view class="person-chat-bot-bot-item-top">
 							视
@@ -524,13 +544,64 @@
 					    }
 					});
 				}else if(type === 'word'){
+					let url = '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent("https://wx2.100xsys.cn/pages/fileInfo/fileInfo") + '?doctor_no=' + encodeURIComponent(this.doctor_no?this.doctor_no:'') + '&userno=' + encodeURIComponent(this.userInfo.userno)
+					console.log('url----->',url)
+					uni.navigateTo({
+						url:'/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent("https://wx2.100xsys.cn/pages/fileInfo/fileInfo") + '&doctor_no=' + encodeURIComponent(this.doctor_no?this.doctor_no:'') + '&userno=' + encodeURIComponent(this.userInfo.userno)
+					})
+					// return
+					// wx.chooseMessageFile({
+					//   count: 1,
+					//   type: 'file',
+					//   success (res) {
+					//    console.log("上传图片----》",res)
+					//    let reqHeader = {
+					// 		bx_auth_ticket: uni.getStorageSync('bx_auth_ticket'),
+					// 		"content-type":"multipart/form-data"
+					//    }
+					//    let formData = {
+					//    	serviceName: "srv_bxfile_service",
+					//    	interfaceName: "add",
+					//    	app_no: "health",
+					//    	columns: "attachment"
+					//    }
+					//    console.log("name-----",formData)
+					//    let url = ''
+					//    for(let i=0;i<res.tempFiles.length;i++){
+					// 	   console.log("res--上传文件--",res)
+					//    	wx.uploadFile({
+					//    		url:self.$api.upload,
+					//    		header: reqHeader,
+					//    		formData:formData,
+					//    		filePath: res.tempFiles[i],
+					// 		name:'file',
+					//    		success: (e) => {
+					// 			console.log("e----->",e)
+					//    			if(e.statusCode === 200){
+					//    				let photoDataNo = JSON.parse(e.data).file_no
+					// 				console.log("上传文件-----",e)
+					//    				self.sendMessageLanguageInfo('文件',photoDataNo)
+					//    			}else{
+					   				
+					//    			}
+					//    		},
+					// 		fail:(e)=>{
+					// 			console.log("fail-----",e)
+					// 		}
+					//    	})
+					//    }
+					//   }
+					// })
+					console.log("点击上传文档----")
+				}else if(type === 'wx_word'){
 					wx.chooseMessageFile({
 					  count: 1,
 					  type: 'file',
 					  success (res) {
 					   console.log("上传图片----》",res)
 					   let reqHeader = {
-					   	bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+							bx_auth_ticket: uni.getStorageSync('bx_auth_ticket'),
+							"content-type":"multipart/form-data"
 					   }
 					   let formData = {
 					   	serviceName: "srv_bxfile_service",
@@ -541,26 +612,30 @@
 					   console.log("name-----",formData)
 					   let url = ''
 					   for(let i=0;i<res.tempFiles.length;i++){
+						   console.log("res--上传文件--",res)
 					   	uni.uploadFile({
 					   		url:self.$api.upload,
 					   		header: reqHeader,
 					   		formData:formData,
-					   		filePath: res.tempFiles[i].path,
+					   		filePath: res.tempFiles[0].path,
+							name:'file',
 					   		success: (e) => {
+								console.log("e----->",e)
 					   			if(e.statusCode === 200){
 					   				let photoDataNo = JSON.parse(e.data).file_no
 									console.log("上传文件-----",e)
-					   				// self.sendMessageLanguageInfo('文件',photoDataNo)
+					   				self.sendMessageLanguageInfo('文件',photoDataNo)
 					   			}else{
 					   				
 					   			}
-					   			// console.log(uploadFileRes.data);
-					   		}
+					   		},
+							fail:(e)=>{
+								console.log("fail-----",e)
+							}
 					   	})
 					   }
 					  }
 					})
-					console.log("点击上传文档----")
 				}else if(type === 'video'){
 					let reqHeader = {
 						bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
@@ -721,7 +796,8 @@
 			},
 			/*打开发送链接弹窗**/
 			openLink(){
-				this.isSendLink = true
+				this.isSendLink = !this.isSendLink
+				
 				// setTimeout(() => {
 				//    uni.pageScrollTo({scrollTop: 99999999, duration: 0});
 				// }, 50);
@@ -729,6 +805,10 @@
 					this.heightStyle = 'calc(100vh - 140px)'
 				}else{
 					this.heightStyle = 'calc(100vh - 200px)'
+				}
+				
+				if(!this.isSendLink){
+					this.heightStyle = 'calc(100vh - 45px)'
 				}
 				
 			},
@@ -768,6 +848,43 @@
 					
 				}
 			},
+			downloadfile(item){				
+			    var url = this.$api.downloadFile + item.attachment + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+				uni.showToast({
+					title:'正在下载',
+					icon:'none'
+				})
+			    //下载文件，生成临时地址
+			    wx.downloadFile({
+			      url: url, 
+			      success(res) {
+			        // console.log(res)
+			        //保存到本地
+			        wx.saveFile({
+			          tempFilePath: res.tempFilePath,
+			          success: function (res) {
+						  uni.hideToast()
+			            const savedFilePath = res.savedFilePath;
+			            // 打开文件
+						uni.showToast({
+							title:'正在打开',
+							icon:'none'
+						})
+			            wx.openDocument({
+			              filePath: savedFilePath,
+			              success: function (res) {
+							  uni.hideToast()
+			                console.log('打开文档成功')
+			              },
+			            });
+			          },
+			          fail: function (err) {
+			            console.log('保存失败：', err)
+			          }
+			        });
+			      }
+			    })
+			  },
 			/*点击发送后添加图片或语音数据**/
 			async sendMessageLanguageInfo(type,value){
 				let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
@@ -802,6 +919,7 @@
 			/*查询文件**/
 			async getFileNo(no){
 				let fileNo = await this.getFilePath(no)
+				return fileNo[0]
 				console.log("file——no",fileNo)
 			},
 			/*点击发送后添加数据**/
@@ -907,7 +1025,17 @@
 							this.$set(res.data.data[i],'img_url',url)
 						}
 						if(item.attachment){
-							this.getFileNo(item.attachment)
+							 this.getFileNo(item.attachment).then(obj=>{
+								console.log("fileObj------>",obj)
+								this.$set(res.data.data[i],'documents_name',obj.src_name)
+								this.$set(res.data.data[i],'file_type',obj.file_type)
+								this.$set(res.data.data[i],'file_size',obj.file_size)
+							})
+							
+						}
+						if(item.msg_content_type === '视频' && item.video){
+							let video_url = this.$api.downloadFile + item.video + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
+							this.$set(res.data.data[i],'video_url',video_url)
 						}
 					})
 					this.recordList = res.data.data
@@ -976,9 +1104,11 @@
 					}					
 					this.userInfo = res.data.data[0];
 					
+					uni.setStorageSync('current_patient',this.userInfo)
 					this.getMessageInfo('onLoad')
 					return res.data.data[0];
 				}else{
+					uni.setStorageSync('current_patient',"")
 					uni.showToast({
 						title:'未找到患者信息',
 						icon:'none'
@@ -1033,8 +1163,10 @@
 			setTimeout(()=>{
 				this.$nextTick(()=>{
 					if(this.doctor_no){
+						uni.setStorageSync('doctor_no',this.doctor_no)
 						this.heightStyle = 'calc(100vh - 50px);'
 					}else{
+						uni.setStorageSync('doctor_no',"")
 						this.heightStyle = 'calc(100vh - 100px);'
 					}
 				})
@@ -1530,6 +1662,7 @@
 				display: flex;
 				border-top: 1px solid #ccc;
 				background-color: #f7f7f7;
+				flex-wrap: wrap;
 				.person-chat-bot-bot-item{
 					display: flex;
 					flex-direction: column;
@@ -1660,5 +1793,23 @@
 		height: 80rpx;
 		line-height: 80rpx;
 		border-radius: 12rpx;
-	}	
+	}
+	.documents-wrap{
+		.documents-item{
+			display: flex;
+			background-color: white;
+			padding: 10rpx 20rpx;
+			border-radius: 10rpx;
+			.documents-item-left{
+				margin-right: 30rpx;
+			}
+			.documents-item-right{
+				image{
+					width: 85rpx;
+					height: 85rpx;
+				}
+			}
+		}
+	}
+	
 </style>
