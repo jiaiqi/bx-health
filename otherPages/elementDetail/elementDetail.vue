@@ -111,7 +111,7 @@
 					<view class="column diet-name">{{ item.name }}</view>
 					<view class="column">{{ item.unit === 'g' ? item.amount * item.unit_weight_g + item.unit : item.amount + item.unit }}</view>
 					<view class="column">{{ (item.amount * item[elementData.key]).toFixed(1) + elementData.units }}</view>
-					<view class="column">{{ item.amount * item.unit_energy }}千卡</view>
+					<view class="column">{{ item.unit_energy?item.amount * item.unit_energy:item.amount * item.energy }}千卡</view>
 					<view class="move column"><view class="" @click="deleteItem(item)">删除</view></view>
 				</view>
 				<view class="diet-item total" v-if="dietRecord.length > 0">
