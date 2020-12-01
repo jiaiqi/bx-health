@@ -11,9 +11,7 @@
 		<view class="node-path">
 			<view class="path-item" v-for="(item, index) in linkPath" :key="item.no" @click="toPath(item)">
 				<view class="name">{{ item.name }}</view>
-				<view class="separator" v-if="index + 1 < linkPath.length">
-					<text class="cuIcon-right"></text>
-				</view>
+				<view class="separator" v-if="index + 1 < linkPath.length"><text class="cuIcon-right"></text></view>
 				<!-- <view class="separator" v-if="index + 1 < linkPath.length"><view class="line"></view></view> -->
 			</view>
 		</view>
@@ -411,7 +409,7 @@ export default {
 				}
 			}
 			// if (e.no && e.name && this.currentNodeNo !== e.no) {
-				
+
 			// 	this.currentNodeNo = e.no;
 			// 	this.currentNodes = e.name;
 			// 	this.geteChartsData();
@@ -459,8 +457,8 @@ export default {
 					if (nodetail.link_type.indexOf('内部页面') !== -1) {
 						url = nodetail.page_link_url;
 					} else if (nodetail.link_type.indexOf('外部页面') !== -1) {
-						let resultUrl = await this.getResultUrl(nodetail.external_page_link_url);
-						url = '/publicPages/webviewPage/webviewPage?webUrl=' + resultUrl;
+						let resultUrl = this.getResultUrl(nodetail.external_page_link_url);
+						url = '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(resultUrl);
 						if (!resultUrl) {
 							return;
 						}
@@ -471,6 +469,11 @@ export default {
 						});
 					}
 				}
+			}
+		},
+		getResultUrl(url) {
+			if (url) {
+				return this.$api.srvHost + '/health/remote/getPage?address=' + url;
 			}
 		},
 		getVideoInfo: function(vid) {

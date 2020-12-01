@@ -17,6 +17,7 @@ export default {
 	onLoad(option) {
 		if(option.webUrl){
 			this.webUrl = decodeURIComponent(option.webUrl)
+			// this.webUrl = 'http://srvms.100xsys.cn/health/remote/getPage?address=https://xw.qq.com/cmsid/20201201A0296600'
 		}
 	}
 	

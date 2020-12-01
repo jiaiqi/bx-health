@@ -498,7 +498,7 @@ export default {
 		height: 60rpx;
 		border-radius: 50rpx;
 		border: 1px solid #f1f1f1;
-		olor: #0081ff;
+		color: #0081ff;
 		transition: all 1s;
 		box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		&:active {

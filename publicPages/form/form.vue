@@ -1,15 +1,29 @@
 <template>
 	<view class="form-page">
-		<bxform
-			ref="bxForm"
-			:service="serviceName"
-			:addType="addType"
-			:pageType="type"
-			:BxformType="type"
-			:fields="fields"
-			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
-		></bxform>
+		<cu-custom bgColor="bg-blue" :isBack="true">
+			<!-- <block slot="backText">返回</block> -->
+			<block slot="content" v-if="colsV2Data && colsV2Data.service_view_name">{{ colsV2Data.service_view_name }}</block>
+		</cu-custom>
+		<view class="main-table">
+			<!-- <view class="normal-title">子表</view> -->
+			<bxform
+				ref="bxForm"
+				:service="serviceName"
+				:addType="addType"
+				:pageType="type"
+				:BxformType="type"
+				:fields="fields"
+				:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
+			></bxform>
+		</view>
+		<view class="child-service-box" v-if="type === 'detail' && childService && childService.length > 0">
+			<view class="normal-title">子表</view>
+			<view class="child-service-item" v-for="item in childService" @click="toChildServiceList(item)">
+				<view class="child-service-title">{{ item.foreign_key && item.foreign_key.section_name ? item.foreign_key.section_name : item.service_view_name }}</view>
+			</view>
+		</view>
 		<view class="button-box" v-if="colsV2Data && isArray(fields) && fields.length > 0">
+			<view class="button" v-if="type === 'detail'"><button class="cu-btn bg-blue" @click="toUpdatePages">编辑</button></view>
 			<view v-for="(item, index) in buttons" :key="index" class="button">
 				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue">{{ item.button_name }}</button>
 			</view>
@@ -19,7 +33,6 @@
 
 <script>
 import bxform from '@/components/bx-form/bx-form.vue';
-// import bxButtons from '../components/bx-buttons/bx-buttons.vue';
 export default {
 	components: { bxform },
 	props: {},
@@ -33,10 +46,15 @@ export default {
 			defaultCondition: [],
 			params: {},
 			addType: '',
-			fieldsCond:[],//treeSelector类型字段的条件
+			fieldsCond: [] //treeSelector类型字段的条件
 		};
 	},
 	computed: {
+		childService() {
+			if (this.colsV2Data && Array.isArray(this.colsV2Data.child_service)) {
+				return this.colsV2Data.child_service;
+			}
+		},
 		buttons: function() {
 			let buttons = [];
 			if (this.colsV2Data && this.colsV2Data._buttonInfo) {
@@ -84,7 +102,7 @@ export default {
 		if (destApp) {
 			uni.setStorageSync('activeApp', destApp);
 		}
-		if(option.fieldsCond){
+		if (option.fieldsCond) {
 			this.fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
 		}
 		if (option.params) {
@@ -114,6 +132,82 @@ export default {
 		}
 	},
 	methods: {
+		toChildServiceList(e) {
+			let data = this.deepClone(e);
+			let formData = this.params.defaultVal;
+			let condition = [{ colName: e.foreign_key.column_name, ruleType: 'eq', value: formData[e.foreign_key.referenced_column_name] }];
+			if (e.foreign_key && e.foreign_key.more_config && e.foreign_key.more_config.targetType && formData[e.foreign_key.referenced_column_name]) {
+				let targetType = e.foreign_key.more_config.targetType;
+				if (targetType === 'list') {
+					uni.navigateTo({
+						url: '/pages/public/list/list?serviceName=' + e.service_name + '&cond=' + JSON.stringify(condition)
+					});
+				} else if (targetType === 'detail') {
+					if (e.childData && e.childData.data && e.childData.data.length > 0) {
+						let params = {
+							type: 'update',
+							formDisabled: true,
+							condition: [
+								{
+									colName: 'id',
+									ruleType: 'in',
+									value: e.childData.data[0].id
+								}
+							],
+							serviceName: e.service_name
+							// "defaultVal": row
+						};
+						uni.navigateTo({
+							url: '/pages/public/formPage/formPage?params=' + JSON.stringify(params)
+						});
+					} else {
+						uni.showModal({
+							title: '提示',
+							content: '暂无数据，是否添加数据',
+							success(res) {
+								if (res.confirm) {
+									let params = {
+										type: 'add',
+										serviceName: e.service_name.replace('_select', '_add')
+										// defaultVal:formData
+									};
+									// referenced_column_name //被引用的字段
+									// column //子表字段
+									console.log(e);
+									if (e.foreign_key && e.foreign_key.referenced_column_name && e.foreign_key.column_name) {
+										params.defaultCondition = [
+											{
+												colName: e.foreign_key.referenced_column_name,
+												ruleType: 'eq',
+												value: formData[e.foreign_key.column_name]
+											}
+										];
+									}
+									uni.navigateTo({
+										url: '/pages/public/formPage/formPage?params=' + JSON.stringify(params)
+									});
+								}
+							}
+						});
+					}
+				}
+			} else {
+				uni.navigateTo({
+					url: '/pages/public/list/list?pageType=list&serviceName=' + e.service_name + '&cond=' + JSON.stringify(condition)
+				});
+			}
+		},
+		toUpdatePages() {
+			let params = {
+				type: 'update',
+				condition: this.params.condition,
+				serviceName: this.params.serviceName.replace('_select', '_update'),
+				defaultVal: this.params.defaultVal
+			};
+			uni.navigateTo({
+				url: '/pages/public/formPage/formPage?params=' + JSON.stringify(params)
+			});
+		},
 		async getDefaultVal() {
 			if (this.type === 'detail' || this.type === 'update') {
 				let app = uni.getStorageSync('activeApp');
@@ -148,8 +242,8 @@ export default {
 					this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 					break;
 				case 'add':
-					this.fields = colVs._fieldInfo.map(field=>{
-						if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs._fieldInfo && Array.isArray(colVs._fieldInfo)){
+					this.fields = colVs._fieldInfo.map(field => {
+						if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs._fieldInfo && Array.isArray(colVs._fieldInfo)) {
 							this.defaultCondition.forEach(cond => {
 								colVs._fieldInfo.forEach(field => {
 									if (cond.colName === field.column) {
@@ -159,14 +253,14 @@ export default {
 								});
 							});
 						}
-						if(Array.isArray(this.fieldsCond)&&this.fieldsCond.length>0){
-							this.fieldsCond.forEach(item=>{
-								if(item.column===field.column&&field.option_list_v2&&Array.isArray(field.option_list_v2.conditions)&&Array.isArray(item.condition)){
-									field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition)
+						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
+							this.fieldsCond.forEach(item => {
+								if (item.column === field.column && field.option_list_v2 && Array.isArray(field.option_list_v2.conditions) && Array.isArray(item.condition)) {
+									field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition);
 								}
-							})
+							});
 						}
-						return field
+						return field;
 					});
 					break;
 				case 'detail':
@@ -287,6 +381,67 @@ export default {
 .form-page {
 	min-height: 100vh;
 	background-color: #fff;
+	height: auto;
+	.normal-title {
+		margin-bottom: 20rpx;
+		margin-left: 10rpx;
+		padding: 0;
+		display: inline-block;
+		position: relative;
+		width: 100%;
+		text-indent: 30rpx;
+		font-weight: bold;
+		font-size: 32rpx;
+		&::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 10%;
+			height: 80%;
+			width: 5px;
+			background-color: #0081ff;
+			border-radius: 5rpx;
+		}
+	}
+	.main-table {
+		.normal-title {
+			margin-left: 20rpx;
+		}
+	}
+	.child-service-box {
+		margin: 20rpx;
+		padding: 20rpx;
+		display: flex;
+		flex-wrap: wrap;
+		box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		.child-service-item {
+			min-height: 100rpx;
+			width: calc(33% - 6rpx);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			transform: translate(2px, 2px);
+			background-color: #409eff;
+			color: #fff;
+			transition: 0.2s all ease-in-out;
+			border-radius: 10rpx;
+			margin-right: 10rpx;
+			&:nth-child(3n + 1) {
+				margin-right: 0;
+			}
+			&:active {
+				transform: translate(2px, 2px);
+				color: #409eff;
+				background: #ecf5ff;
+				box-shadow: 0px 0px 4px #ecf5ff, 0 0 6px #b3d8ff;
+			}
+			.child-service-title {
+				// color: #0081ff;
+				letter-spacing: 2px;
+				font-weight: bold;
+			}
+		}
+	}
 }
 .button-box {
 	display: flex;
