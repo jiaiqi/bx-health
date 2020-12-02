@@ -2,11 +2,12 @@
 	<view class="person-chat-wrap">
 		<!-- <cu-custom class="nav-chat-top" bgColor="#0bc99d" :isBack="true"><block slot="backText">返回</block><block slot="content">交流</block></cu-custom> -->
 		<view class="person-chat-top" :style="{height:heightStyle}" :class="!doctor_no?'person-chat-top-w':'person-chat-top-w-h'">
-			<scroll-view scroll-y="true" :style="{height:heightStyle}" :scroll-into-view="chatTextBottom">
-				<view :id="`person-chat-item${index}`" v-for="(item,index) in recordList" :key="index" class="person-chat-item" :class="item.sender_account === currentUserInfo.user_no?'person-chat-item-my':''">
-					<view v-if="doctor_no?item.sender_account === doctor_no : item.sender_account === userInfo.userno" class="person-chat-item-accept">
+			<scroll-view @scroll="chatScroll" scroll-y="true" :style="{height:heightStyle}" :scroll-into-view="chatTextBottom">
+				<view :id="`person-chat-item${item.id}`" v-for="(item,index) in recordList" :key="index" class="person-chat-item" :class="item.sender_account === currentUserInfo.user_no?'person-chat-item-my':''">
+					<view v-if="doctor_no?item.sender_account === doctor_no.owner_account : item.sender_account === userInfo.userno" class="person-chat-item-accept">
 						<view class="person-chat-item-left">
-							<image :src="userInfo.img_url?userInfo.img_url:'/personalPages/static/doctor_default.jpg'" mode=""></image>
+							<image v-if="!doctor_no" :src="userInfo.img_url?userInfo.img_url:'/personalPages/static/doctor_default.jpg'" mode=""></image>
+							<image v-else :src="doctor_no.dt_pic?`${apiUrl + doctor_no.dt_pic}&bx_auth_ticket=${ticket}`:'/personalPages/static/doctor_default.jpg'" mode=""></image>
 						</view>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
 							<image :src="item.img_url" mode=""></image>
@@ -54,6 +55,18 @@
 						v-else-if = "item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
 							<video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video>
+						</view>
+						<view @click="downloadfile(item)" v-else-if = "item.msg_content_type === '文件'" class="documents-wrap">
+							<view class="documents-item">
+								<view class="documents-item-left">
+									<text>1125.docx</text>
+								</view>
+								<view class="documents-item-right">
+									<image v-if="item.file_type && (item.file_type == 'docx' || item.file_type == 'doc')" src="/personalPages/static/word.png" mode=""></image>
+									<image v-else-if="item.file_type && item.file_type === 'xlsx'" src="/personalPages/static/excel.png" mode=""></image>
+									<image v-else-if="item.file_type && item.file_type === 'pdf'" src="/personalPages/static/pdf.png" mode=""></image>
+								</view>
+							</view>
 						</view>
 					</view>
 					<view v-else-if="item.sender_account === currentUserInfo.user_no" class="person-chat-item-send">
@@ -119,13 +132,13 @@
 			</scroll-view>
 			<view class="voice_an"  v-if="recording">
 				<view class="voice_an_icon">
-					<view id="one" class="wave"></view>
-					<view id="two" class="wave"></view>
-					<view id="three" class="wave"></view>
-					<view id="four" class="wave"></view>
-					<view id="five" class="wave"></view>
-					<view id="six" class="wave"></view>
-					<view id="seven" class="wave"></view>
+					<view id="one" class="wave one"></view>
+					<view id="two" class="wave two"></view>
+					<view id="three" class="wave three"></view>
+					<view id="four" class="wave four"></view>
+					<view id="five" class="wave five"></view>
+					<view id="six" class="wave six"></view>
+					<view id="seven" class="wave seven"></view>
 				</view>
 				<view class="text">{{voiceIconText}}</view>
 			</view>
@@ -165,7 +178,7 @@
 				<view class="person-chat-bot-bot-item-w">
 					<view @click="openMenuPoup('question')" class="person-chat-bot-bot-item">
 						<view class="person-chat-bot-bot-item-top">
-							问
+							<image src="/personalPages/static/question.png" mode=""></image>
 						</view>
 						<view  class="person-chat-bot-bot-item-b">
 							<text>问卷记录</text>
@@ -173,7 +186,7 @@
 					</view>
 					<view @click="openMenuPoup('bite')" class="person-chat-bot-bot-item">
 						<view class="person-chat-bot-bot-item-top">
-							饮
+							<image src="/personalPages/static/diet.png" mode=""></image>
 						</view>
 						<view  class="person-chat-bot-bot-item-b">
 							<text>饮食记录</text>
@@ -181,7 +194,7 @@
 					</view>
 					<view @click="openMenuPoup('photo')" class="person-chat-bot-bot-item">
 						<view class="person-chat-bot-bot-item-top">
-							图
+							<image src="/personalPages/static/photo.png" mode=""></image>
 						</view>
 						<view  class="person-chat-bot-bot-item-b">
 							<text>图片</text>
@@ -189,7 +202,7 @@
 					</view>
 					<view @click="openMenuPoup('word')" class="person-chat-bot-bot-item">
 						<view class="person-chat-bot-bot-item-top">
-							文
+							<image src="/personalPages/static/file.png" mode=""></image>
 						</view>
 						<view  class="person-chat-bot-bot-item-b">
 							<text>文档</text>
@@ -197,7 +210,7 @@
 					</view>
 					<view @click="openMenuPoup('wx_word')" class="person-chat-bot-bot-item">
 						<view class="person-chat-bot-bot-item-top">
-							文
+							<image src="/personalPages/static/paper.png" mode=""></image>
 						</view>
 						<view  class="person-chat-bot-bot-item-b">
 							<text>微信文档</text>
@@ -205,7 +218,7 @@
 					</view>
 					<view @click="openMenuPoup('video')" class="person-chat-bot-bot-item">
 						<view class="person-chat-bot-bot-item-top">
-							视
+							<image src="/personalPages/static/video.png" mode=""></image>
 						</view>
 						<view  class="person-chat-bot-bot-item-b">
 							<text>视频</text>
@@ -261,9 +274,9 @@
 				}
 			},
 			doctor_no:{
-				type: String,
+				type: Object,
 				default() {
-					return '';
+					return {};
 				}
 			},
 		},
@@ -279,8 +292,7 @@
 			}
 		},
 		onReady() {
-			 this.videoContext = uni.createVideoContext('myVideo')
-			console.log("eeeeeee-----Ready")
+			 this.videoContext = uni.createVideoContext('myVideo')			 
 		},
 		data(){
 			return {
@@ -295,6 +307,12 @@
 				// isFeed:false,
 				current_type:'world',
 				voiceTitle:'按住 说话',
+				pageInfo:{
+					rownumber:20,
+					total:0,
+					pageNo:1
+				},
+				scrollNum:0,
 				userInfo:'',
 				recordList:[],
 				chatTextBottom:'',
@@ -315,6 +333,8 @@
 				voiceIconText:"正在录音...",
 				showFunBtn:false, //是否展示功能型按钮
 				AudioExam:null, //正在播放音频的实例
+				isLoading:false,
+				isAll:false
 			}
 		},
 		methods:{
@@ -333,8 +353,26 @@
 			},
 			//播放音频
 			playAudio(item) {
+				// this.Audio.src = item.msg_link;
+				console.log("------",item)
 				this.Audio.src = item.msg_link;
 				this.Audio.id = item.id;
+				//音频播放结束事件
+				console.log("this.Audio------->",this.Audio)
+				this.Audio.onEnded(e => {
+					console.log("e----播放结束",e)
+					this.closeAnmition();
+				});
+				this.Recorder.onStart(e => {
+					console.log("录音开始")
+					this.beginVoice();
+				});				
+				//音频停止事件
+				this.Audio.onStop(e => {
+					console.log("音频停止事件")
+					this.closeAnmition();
+				});
+				
 				this.Audio.play();
 				item.anmitionPlay = true;
 			},
@@ -392,6 +430,7 @@
 				this.voiceTitle = '按住 说话'
 			},
 			handleRecorder({ tempFilePath,duration }) {
+				let self = this
 				console.log("0000000000录音结束")
 				let contentDuration;
 				// #ifdef MP-WEIXIN
@@ -426,12 +465,59 @@
 					contentDuration: Math.ceil(contentDuration)
 				};
 				console.log("-----语音----",params)
+				// if(this.canSend){
+				// 	let reqHeader = {
+				// 		bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+				// 	}
+				// 	let formData = {
+				// 		serviceName: "srv_bxfile_service",
+				// 		interfaceName: "add",
+				// 		app_no: "health",
+				// 		table_name: "",
+				// 	}
+				// 	uni.uploadFile({
+				// 		url:self.$api.upload,
+				// 		header: reqHeader,
+				// 		formData:formData,
+				// 		filePath: tempFilePath,
+				// 		name: 'file',
+				// 		success: (e) => {
+				// 			if(e.statusCode === 200){
+				// 				let photoDataNo = JSON.parse(e.data).file_no
+				// 				params.content = photoDataNo
+				// 				this.sendMessageLanguageInfo('语音',params)
+				// 				// self.sendMessageLanguageInfo('语音',photoDataNo)
+				// 			}else{
+								
+				// 			}
+				// 			// console.log(uploadFileRes.data);
+				// 		}
+				// 	})
+				// }
+				
+				
+				// this.canSend && this.sendMessageLanguageInfo('语音',params)
 				this.canSend && this.sendMessageLanguageInfo('语音',params)
 				// this.canSend && this.sendMsg(params);
 			},
 			/*发送语音**/
 			sendVoiceMesage(params){
 				
+			},
+			/*滚动**/
+			chatScroll(e) {
+				// if(!this.isLoading){
+					// console.log("滚动-------",e)
+				// 	return
+				// }
+				this.scrollNum = e.detail.scrollTop
+				if (e.detail.scrollTop < 50 && !this.isLoading && !this.isAll) {					
+					this.isLoading = true
+					this.pageInfo.pageNo += 1
+					this.getMessageInfo().then(_=>{
+						this.isLoading = false
+					})
+				}
 			},
 			closeAnmition() {				
 				const hasBeenSentId = this.Audio.id;
@@ -544,10 +630,10 @@
 					    }
 					});
 				}else if(type === 'word'){
-					let url = '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent("https://wx2.100xsys.cn/pages/fileInfo/fileInfo") + '?doctor_no=' + encodeURIComponent(this.doctor_no?this.doctor_no:'') + '&userno=' + encodeURIComponent(this.userInfo.userno)
+					let url = '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent("https://wx2.100xsys.cn/pages/fileInfo/fileInfo") + '?doctor_no=' + encodeURIComponent(this.doctor_no.owner_account) + '&userno=' + encodeURIComponent(this.userInfo.userno)
 					console.log('url----->',url)
 					uni.navigateTo({
-						url:'/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent("https://wx2.100xsys.cn/pages/fileInfo/fileInfo") + '&doctor_no=' + encodeURIComponent(this.doctor_no?this.doctor_no:'') + '&userno=' + encodeURIComponent(this.userInfo.userno)
+						url:'/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent("https://wx2.100xsys.cn/pages/fileInfo/fileInfo") + '&doctor_no=' + encodeURIComponent(this.doctor_no.owner_account) + '&userno=' + encodeURIComponent(this.userInfo.userno)
 					})
 					// return
 					// wx.chooseMessageFile({
@@ -893,7 +979,7 @@
 					colNames: ['*'],
 					data:[{
 						sender_account:this.currentUserInfo.user_no,
-						receiver_account:this.doctor_no?this.doctor_no:this.userInfo.userno,
+						receiver_account:this.doctor_no?this.doctor_no.owner_account:this.userInfo.userno,
 						msg_content_type:type
 					}]
 				}];
@@ -930,7 +1016,7 @@
 					colNames: ['*'],
 					data:[{
 						sender_account:this.currentUserInfo.user_no,
-						receiver_account:this.doctor_no?this.doctor_no:this.userInfo.userno,
+						receiver_account:this.doctor_no?this.doctor_no.owner_account:this.userInfo.userno,
 						msg_content_type:!this.isSendLink?'文本':'链接',
 					}]
 				}];
@@ -948,6 +1034,13 @@
 					
 				}
 			},
+			_SortJson(json) {
+				json.sort((a,b)=> {
+				// console.log('b,a',b,a,a.time - b.time)
+				return new Date(a.create_time).getTime() - new Date(b.create_time).getTime()  ;//时间反序
+				});
+			console.log('--------排序',json)
+			},
 			/*查询当前登陆人和其他人聊天记录**/
 			async getMessageInfo(type=null){
 				let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
@@ -960,8 +1053,9 @@
 					},
 					order:[{
 						colName:'create_time',
-						orderType:'asc'
-					}]
+						orderType:'desc'
+					}],
+					page:this.pageInfo
 				};
 				let conditionData = []
 				if(this.pageType){
@@ -970,7 +1064,7 @@
 							data:[{
 								colName:'sender_account',
 								ruleType:'eq',
-								value:this.doctor_no
+								value:this.doctor_no.owner_account
 							},{
 								colName:'receiver_account',
 								ruleType:'eq',
@@ -985,7 +1079,7 @@
 							},{
 								colName:'receiver_account',
 								ruleType:'eq',
-								value:this.doctor_no
+								value:this.doctor_no.owner_account
 							}]
 						}]
 				}else{
@@ -1015,10 +1109,21 @@
 				}
 				req.relation_condition.data = conditionData
 				let res = await this.$http.post(url, req);
+				this.pageInfo.total = res.data.page.total
+				
 				if(res.data.data.length > 0){
 					res.data.data.forEach((item,i)=>{
 						if(item.msg_content_type === '语音'){
 							this.$set(res.data.data[i],'anmitionPlay',false)
+							// this.getFilePath(item.msg_link).then(obj=>{
+							// 	if(obj){
+							// 		let video_url = this.$api.downloadFile + obj.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
+							// 		this.$set(res.data.data[i],'voice_url',video_url)
+							// 	}
+							// 	console.log("语音内容-----",obj)
+							// })
+							// let video_url = this.$api.downloadFile + item.msg_link + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
+							// this.$set(res.data.data[i],'voice_url',video_url)
 						}
 						if(item.image){
 							let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
@@ -1026,19 +1131,19 @@
 						}
 						if(item.attachment){
 							 this.getFileNo(item.attachment).then(obj=>{
-								console.log("fileObj------>",obj)
+								// console.log("fileObj------>",obj)
 								this.$set(res.data.data[i],'documents_name',obj.src_name)
 								this.$set(res.data.data[i],'file_type',obj.file_type)
 								this.$set(res.data.data[i],'file_size',obj.file_size)
-							})
-							
+							})							
 						}
 						if(item.msg_content_type === '视频' && item.video){
 							let video_url = this.$api.downloadFile + item.video + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
 							this.$set(res.data.data[i],'video_url',video_url)
 						}
 					})
-					this.recordList = res.data.data
+					// this.recordList = res.data.data
+					console.log("res00000",res.data.data)
 					res.data.data.forEach(links=>{
 						if(links.msg_content_type === '链接'){
 							/*饮食记录**/
@@ -1055,9 +1160,23 @@
 							}
 						}
 					})
-					this.chatTextBottom ='person-chat-item' + (res.data.data.length - 1)
+					this.recordList = []
+					if(!this.isAll){
+						this._SortJson(res.data.data)
+						this.recordList.unshift(...res.data.data)
+						// console.log("排序============",a)
+					}
+					
+					if(this.pageInfo.pageNo * this.pageInfo.rownumber >= res.data.page.total){
+						this.isAll = true
+					}					
+					// this.chatTextBottom ='person-chat-item' + (res.data.data.length - 1)
+					this.$nextTick(()=>{
+						this.chatTextBottom ='person-chat-item' + ((res.data.data[res.data.data.length - 1].id))
+					})
 					// this.getUserInfoList()
 					if(type && type === 'onLoad'){
+						this.chatTextBottom ='person-chat-item' + (this.recordList[this.recordList.length - 1].id)
 						this.updateMessageInfo()
 					}
 				}
@@ -1071,7 +1190,7 @@
 					condition:[{
 						colName:'sender_account',
 						ruleType:'eq',
-						value:this.doctor_no?this.doctor_no:this.userInfo.userno
+						value:this.doctor_no?this.doctor_no.owner_account:this.userInfo.userno
 					},{
 						colName:'msg_state',
 						ruleType:'eq',
@@ -1119,6 +1238,8 @@
 		},	
 		mounted() {
 			
+			
+			
 			this.Recorder = uni.getRecorderManager()
 			this.Recorder.onStart(e => {				
 				this.beginVoice();
@@ -1134,32 +1255,17 @@
 				this.closeAnmition();
 			});
 			
-			//音频播放结束事件
-			this.$on('onEnded',data=>{
-				this.Audio.onEnded(e => {
-					console.log("e----------end--")
-				});
-			}
-				// this.Audio.onEnded(e => {
-				// 	console.log("e----------end--")
-				// });
-			)
+			//音频播放结束事件			
+			// this.Audio.onEnded(e => {
+			// 	console.log("e----------end--")
+			// });
+			
 				
 			
 			if(this.customer_no){
 				this.getRecorderManagerList()
 				
-			}
-			const query = uni.createSelectorQuery().in(this);
-			query.select('.person-chat-top').boundingClientRect(data => {
-			  console.log("得到布局位置信息" + JSON.stringify(data));
-			  console.log("节点离页面顶部的距离为" + data.top);
-			  uni.pageScrollTo({
-			      scrollTop: data.top,
-			      duration: 300
-			  });
-			}).exec();
-			
+			}						
 			setTimeout(()=>{
 				this.$nextTick(()=>{
 					if(this.doctor_no){
@@ -1177,20 +1283,33 @@
 			//    uni.pageScrollTo({scrollTop: 99999999, duration: 0});
 			// }, 50);
 		},		
+		onPageScroll() {
+			const query = uni.createSelectorQuery().in(this);
+			query.select('.person-chat-top').boundingClientRect(data => {
+			  console.log("得到布局位置信息" + JSON.stringify(data));
+			  console.log("节点离页面顶部的距离为" + data.top);
+			  uni.pageScrollTo({
+			      scrollTop: data.top,
+			      duration: 300
+			  });
+			}).exec();
+		},
 		onLoad(option) {
 			//录音开始事件
 			this.Recorder.onStart(e => {
-				
+				console.log("录音开始")
 				this.beginVoice();
 			});
 			//录音结束事件
 			this.Recorder.onStop(res => {
+				console.log("录音结束事件")
 				clearInterval(this.voiceInterval);
 				this.handleRecorder(res);
 			});
 			
 			//音频停止事件
 			this.Audio.onStop(e => {
+				console.log("音频停止事件")
 				this.closeAnmition();
 			});
 			
@@ -1209,78 +1328,7 @@
 <style lang="scss" scoped>
 	.person-chat-wrap{
 		height: 100vh;
-		background-color: #eeeeee;
-		.voice_an{
-			width: 300rpx;
-			height: 300rpx;
-			position: fixed;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%,-55%);
-			background-color: rgba(41,41,41,0.7);
-			color: white;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			text-align: center;
-			border-radius: 10rpx;
-			.text{
-				padding-top: 30rpx;
-			}
-			@keyframes runVoice{
-				0%{
-					height: 10%;
-				}
-				20%{
-					height: 50%;
-				}
-				50%{
-					height: 100%;
-				}
-				80%{
-					height: 50%;
-				}
-				100%{
-					height: 0%;
-				}
-			}	
-			.wave{
-				width:6rpx;
-				height: 100%;
-				margin-left: 10rpx;
-				border-radius: 50rpx;
-				background-color: #999;
-				vertical-align: middle;
-				display: inline-block;
-			}
-			.voice_an_icon{
-				width: 200rpx;
-				height: 100rpx;
-				line-height: 50rpx;
-				margin: 50rpx 0;
-			}
-			.voice_an_icon #one{
-				animation:runVoice 0.6s infinite 0.1s;
-			}
-			.voice_an_icon #two{
-				animation:runVoice 0.6s infinite 0.3s;
-			}
-			.voice_an_icon #three{
-				animation:runVoice 0.6s infinite 0.6s;
-			}
-			.voice_an_icon #four{
-				animation:runVoice 0.6s infinite 0.1s;
-			}
-			.voice_an_icon #five{
-				animation:runVoice 0.6s infinite 0.3s;
-			}
-			.voice_an_icon #six{
-				animation:runVoice 0.6s infinite 0.6s;
-			}
-			.voice_an_icon #seven{
-				animation:runVoice 0.6s infinite 0.1s;
-			}
-		}
+		background-color: #eeeeee;		
 		.nav-chat-top{
 			background-color: rgb(11, 201, 157)!important;
 			color: white;
@@ -1291,7 +1339,7 @@
 			display: flex;
 			flex-direction: column;
 			max-height: calc(100vh - 100rpx);
-			overflow-y: scroll;
+			// overflow-y: scroll;
 			// margin: 10rpx;
 			.person-chat-item{	
 				// display: flex;
@@ -1680,6 +1728,10 @@
 						font-weight: 600;
 						border-radius: 10px;
 						margin-bottom: 5px;
+						image{
+							width: 50rpx;
+							height: 50rpx;
+						}
 					}
 				}
 			}
@@ -1800,6 +1852,7 @@
 			background-color: white;
 			padding: 10rpx 20rpx;
 			border-radius: 10rpx;
+			border: 1px solid #ccc;
 			.documents-item-left{
 				margin-right: 30rpx;
 			}
@@ -1811,5 +1864,76 @@
 			}
 		}
 	}
-	
+	.voice_an{
+		width: 300rpx;
+		height: 300rpx;
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%,-55%);
+		background-color: rgba(41,41,41,0.7);
+		color: white;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		border-radius: 10rpx;
+		.text{
+			padding-top: 30rpx;
+		}
+		@keyframes runVoice{
+			0%{
+				height: 10%;
+			}
+			20%{
+				height: 50%;
+			}
+			50%{
+				height: 100%;
+			}
+			80%{
+				height: 50%;
+			}
+			100%{
+				height: 0%;
+			}
+		}	
+		.wave{
+			width:6rpx;
+			height: 100%;
+			margin-left: 10rpx;
+			border-radius: 50rpx;
+			background-color: #999;
+			vertical-align: middle;
+			display: inline-block;
+		}
+		.voice_an_icon{
+			width: 200rpx;
+			height: 100rpx;
+			line-height: 50rpx;
+			margin: 50rpx 0;
+		}
+		
+	}
+	.one{
+		animation:runVoice 0.6s infinite 0.1s;
+	}
+	.two{
+		animation:runVoice 0.6s infinite 0.3s;
+	}
+	.three{
+		animation:runVoice 0.6s infinite 0.6s;
+	}
+	.four{
+		animation:runVoice 0.6s infinite 0.1s;
+	}
+	.five{
+		animation:runVoice 0.6s infinite 0.3s;
+	}
+	.six{
+		animation:runVoice 0.6s infinite 0.6s;
+	}
+	.seven{
+		animation:runVoice 0.6s infinite 0.1s;
+	}
 </style>

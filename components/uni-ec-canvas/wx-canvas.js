@@ -9,9 +9,6 @@ export default class WxCanvas {
     } else {
       this._initStyle(ctx);
     }
-
-    // this._initCanvas(zrender, ctx);
-
     this._initEvent();
   }
 

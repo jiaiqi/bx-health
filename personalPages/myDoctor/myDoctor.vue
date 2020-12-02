@@ -11,7 +11,7 @@
 					<view class="content-left">
 						<text class="doctor-name">{{ item.dt_name }}</text>
 					</view>
-					<view @click="toChatPage(item.owner_account)" class="content-right">
+					<view @click="toChatPage(item)" class="content-right">
 						<text v-if="item.count_num !==0" style="z-index: 1;">{{item.count_num}}</text>
 						<image src="../static/chat.png" mode=""></image>
 					</view>
@@ -49,7 +49,6 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				// this.doctorList = res.data.data;
-				debugger
 				let noList = res.data.data.map(item => item.manager_no);
 				let noStr = noList.toString();
 				let doctorList = await this.getDoctorInfo(noStr, true);
@@ -62,7 +61,7 @@ export default {
 		toChatPage(item){			
 			let no = this.userInfo.no
 			uni.navigateTo({
-				url:'/personalPages/myDoctor/doctorChat?no=' + no +'&doctor=' + item
+				url:'/personalPages/myDoctor/doctorChat?no=' + no +'&doctor=' + encodeURIComponent(JSON.stringify(item))
 			})
 		},
 		toScan() {

@@ -22,7 +22,7 @@
 				this.no = option.no
 			}
 			if(option.doctor){
-				this.doctor_no = option.doctor
+				this.doctor_no = JSON.parse(decodeURIComponent(option.doctor)) 
 			}
 		},
 		onPullDownRefresh() {

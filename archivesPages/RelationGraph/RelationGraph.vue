@@ -4,7 +4,7 @@
 			<view class="cu-bar search bg-white">
 				<view class="search-form round" @click="toSearchPage">
 					<text class="cuIcon-search"></text>
-					<input disabled :adjust-position="false" type="text" :placeholder="currentNodes" confirm-type="search" />
+					<!-- <input disabled :adjust-position="false" type="text" :placeholder="currentNodes" confirm-type="search" /> -->
 				</view>
 			</view>
 		</view>
@@ -47,70 +47,12 @@ export default {
 				option: {}
 			},
 			emptyText: '数据加载中...',
-			radioValue: '',
-			vaL: '',
 			currentNodes: '健康',
 			currentNodeNo: 'KN202011211458080001',
-			options: [
-				{
-					id: 1646,
-					option_no: '20201117095322001311',
-					option_seq: 1,
-					option_value: '没有或很少时间',
-					answer: '否',
-					option_img_explain: null,
-					option_video_explain: null,
-					option_view_no: 'A',
-					value: '没有或很少时间',
-					showimg: false,
-					label: '没有或很少时间',
-					checked: false
-				},
-				{
-					id: 1647,
-					option_no: '20201117095322001312',
-					option_seq: 2,
-					option_value: '小部分时间',
-					answer: '否',
-					option_img_explain: null,
-					option_video_explain: null,
-					option_view_no: 'B',
-					value: '小部分时间',
-					showimg: false,
-					label: '小部分时间',
-					checked: false
-				},
-				{
-					id: 1648,
-					option_no: '20201117095322001313',
-					option_seq: 3,
-					option_value: '相当多时间',
-					answer: '否',
-					option_img_explain: null,
-					option_video_explain: null,
-					option_view_no: 'C',
-					value: '相当多时间',
-					showimg: false,
-					label: '相当多时间',
-					checked: false
-				},
-				{
-					id: 1649,
-					option_no: '20201117095322001314',
-					option_seq: 4,
-					option_value: '绝大部分或全部时间',
-					answer: '否',
-					option_img_explain: null,
-					option_video_explain: null,
-					option_view_no: 'D',
-					value: '绝大部分或全部时间',
-					showimg: false,
-					label: '绝大部分或全部时间',
-					checked: false
-				}
-			],
-			nodeDetail: null,
-			linkPath: []
+			linkPath: [],
+			graphData: [],
+			nodeData: [],
+			nodeDetail:null,
 		};
 	},
 	methods: {
@@ -125,7 +67,7 @@ export default {
 				serviceName: 'srvhealth_knowledge_graph_select',
 				colNames: ['*'],
 				condition: [],
-				page: { pageNo: 1, rownumber: 10 },
+				page: { pageNo: 1, rownumber: 1000 },
 				order: [],
 				draft: false
 			};
@@ -144,57 +86,112 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			let data = res.data.data;
+			this.graphData = this.deepClone(data);
 			if (!res.data.data || !Array.isArray(res.data.data) || res.data.data.length == 0) {
 				this.emptyText = '数据为空';
 				return;
 			}
-			await this.getNodeDetail(this.currentNodeNo);
+			let nodeData = [];
+			if (Array.isArray(data)) {
+				let nodeNoArr = data.reduce((pre, cur) => {
+					if (!pre.includes(cur.source_node_no)) {
+						pre.push(cur.source_node_no);
+					}
+					if (!pre.includes(cur.target_node_no)) {
+						pre.push(cur.target_node_no);
+					}
+					if(!pre.includes(this.currentNodeNo)){
+						pre.push(this.currentNodeNo);
+					}
+					return pre;
+				}, []);
+				await this.getNodeDetail(nodeNoArr.toString(), 'total');
+				nodeData = this.nodeData
+			}
 			let nameArr = [];
 			let nodes = [];
-			data.forEach((item, index) => {
-				if (!nameArr.includes(item.target_name)) {
-					if (item.target_name === this.currentNodes) {
-						nodes.push({
-							// symbol:
-							// 	data.length === 4
-							// 		? 'path://M512 0.310115l511.689885 511.689885-511.689885 511.689885-511.689885-511.689885z'
-							// 		: data.length === 5
-							// 		? 'path://M512 51.146296 1023.462964 422.744598 828.099456 1024.005115 195.900544 1024.005115 0.537036 422.744598Z'
-							// 		: data.length === 6
-							// 		? 'path://M512.024475 0l445.413275 255.984641V768.015359l-445.413275 255.984641L66.508806 768.015359V256.046077z'
-							// 		: data.length == 7
-							// 		? 'path://M522.666667 0l416.981333 200.810667 102.976 451.2-288.554667 361.834666H291.264L2.709333 652.010667l102.976-451.2z'
-							// 		: data.length === 8
-							// 		? 'path://M1024 512l-149.9648 362.0352L512 1024 149.9648 874.0352 0 512 149.9648 149.9648 512 0l362.0352 149.9648z'
-							// 		: data.length > 8
-							// 		? 'circle'
-							// 		: 'diamond',
-							symbol: 'diamond', //中间的节点
-							name: item.target_name,
-							nodeNo: item.target_node_no,
-							category: 1
-						});
-					} else {
-						nodes.push({
-							name: item.target_name,
-							nodeNo: item.target_node_no,
-							category: 2
-						});
+			nodeData = nodeData.map(node=>{
+				data.forEach(item=>{
+					if(item.target_node_no===node.kn_no){
+						node.relation = 'target'
 					}
-					nameArr.push(item.target_name);
-				}
-			});
-			data.forEach((item, index) => {
-				if (!nameArr.includes(item.source_name)) {
+					if(item.source_node_no===node.kn_no){
+						node.relation = 'source'
+					}
+				})
+				return node
+			})
+			console.log(this.deepClone(nodeData))
+			nodeData.forEach(node=>{
 					nodes.push({
-						name: item.source_name,
-						nodeNo: item.source_node_no,
-						category: 0,
-						label: `${item.path_name ? item.path_name : ''} ${item.path_value ? `(${item.path_value})` : ''}`
+						// symbol:'image://http://xxx.xxx.xxx/a/b.png',
+						// #ifdef H5
+						symbol: node && node.node_icon ? `image://${node.node_icon}` :node.kn_no=== this.currentNodeNo? 'diamond':'circle', //中间的节点
+						// #endif
+						// #ifdef MP-WEIXIN
+						symbol:node.kn_no=== this.currentNodeNo? 'diamond':'circle', //中间的节点
+						// #endif
+						// symbol: 'diamond', //中间的节点
+						name: node.node_name,
+						nodeNo: node.kn_no,
+						category: this.currentNodeNo===node.kn_no?1:node.relation==="source"?0: 2,
+						label: {
+							// #ifdef H5
+							position: node && node.node_icon ? 'bottom' : 'inside'
+							// #endif
+						}
 					});
-					nameArr.push(item.source_name);
-				}
-			});
+				})
+				debugger
+			// data.forEach((item, index) => {
+			// 	let nodeDetail = this.nodeDetail;
+			// 	if (!nameArr.includes(item.target_name)) {
+			// 		if (item.target_name === this.currentNodes) {
+			// 			nodes.push({
+			// 				// symbol:'image://http://xxx.xxx.xxx/a/b.png',
+			// 				symbol: nodeDetail && nodeDetail.node_icon ? `image://${nodeDetail.node_icon}` : 'diamond', //中间的节点
+			// 				// symbol: 'diamond', //中间的节点
+			// 				name: item.target_name,
+			// 				nodeNo: item.target_node_no,
+			// 				category: 1,
+			// 				label: {
+			// 					position: nodeDetail && nodeDetail.node_icon ? 'bottom' : 'inside'
+			// 				}
+			// 			});
+			// 		} else {
+			// 			nodes.push({
+			// 				name: item.target_name,
+			// 				nodeNo: item.target_node_no,
+			// 				category: 2
+			// 			});
+			// 		}
+			// 		nameArr.push(item.target_name);
+			// 	}
+			// 	if (!nameArr.includes(item.source_name)) {
+			// 		if (item.source_name === this.currentNodes) {
+			// 			nodes.push({
+			// 				// symbol:'image://http://xxx.xxx.xxx/a/b.png',
+			// 				symbol: nodeDetail && nodeDetail.node_icon ? `image://${nodeDetail.node_icon}` : 'diamond', //中间的节点
+			// 				name: item.source_name,
+			// 				nodeNo: item.source_node_no,
+			// 				category: 1,
+			// 				label: {
+			// 					position: nodeDetail && nodeDetail.node_icon ? 'bottom' : 'inside'
+			// 				}
+			// 			});
+			// 		} else {
+			// 			nodes.push({
+			// 				name: item.source_name,
+			// 				nodeNo: item.source_node_no,
+			// 				category: 0
+			// 			});
+			// 		}
+			// 		nameArr.push(item.source_name);
+			// 	}
+			// });
+			// data.forEach((item, index) => {
+
+			// });
 			let links = data.map(item => {
 				return {
 					value: `  ${item.path_name ? item.path_name : ''} ${item.path_value ? `(${item.path_value})` : ''}`,
@@ -226,7 +223,6 @@ export default {
 					};
 				}
 			});
-
 			// links.forEach(link => {
 			// 	link.label = {
 			// 		align: 'center',
@@ -311,7 +307,9 @@ export default {
 							curveness: 0 //曲率
 						},
 						label: {
-							show: true
+							show: true,
+							position: 'inside',
+							distance: 0
 						},
 						force: {
 							// layoutAnimation: false,
@@ -353,44 +351,54 @@ export default {
 			};
 			this.nutrientsChartOption.option = option;
 		},
-		async getNodeDetail(no) {
+		async getNodeDetail(no, type) {
 			let url = this.getServiceUrl('health', 'srvhealth_knowledge_node_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_knowledge_node_select',
 				colNames: ['*'],
-				relation_condition: {
-					relation: 'OR',
-					data: [{ colName: 'kn_no', ruleType: 'eq', value: no }]
-				},
-				page: { pageNo: 1, rownumber: 10 }
+				// relation_condition: {
+				// 	relation: 'OR',
+				// 	// data: [{ colName: 'kn_no', ruleType: 'eq', value: no }]
+				// },
+				condition: [{ colName: 'kn_no', ruleType: 'in', value: no }],
+				page: { pageNo: 1}
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				this.nodeDetail = res.data.data[0];
+				let nodeDetail = res.data.data.find(item => item.kn_no === this.currentNodeNo);
+				this.nodeDetail = res.data.data.find(item => item.kn_no === this.currentNodeNo);
 				if (this.nodeDetail && this.nodeDetail.video_link) {
 					this.getVideoInfo(this.nodeDetail.video_link);
 				} else {
 					this.txv_path = '';
 				}
-				this.currentNodes = this.nodeDetail.node_name;
-				this.changeLinkPath({
-					no: this.nodeDetail.kn_no,
-					name: this.nodeDetail.node_name
-				});
-				return res.data.data[0];
+				if(nodeDetail){
+					this.currentNodes = this.nodeDetail.node_name;
+					this.changeLinkPath({
+						no: this.nodeDetail.kn_no,
+						name: this.nodeDetail.node_name
+					});
+				}
+				if (type === 'total') {
+					this.nodeData = res.data.data;
+				}
+				debugger
+				return nodeDetail;
 			} else {
 				this.nodeDetail = null;
 			}
 		},
 		async toPath(e) {
+			this.currentNodes = e.name;
+			this.currentNodeNo = e.no;
 			let nodetail = await this.getNodeDetail(e.no, false);
 			if ((nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
-				if (e.no !== this.currentNodeNo) {
+				// if (e.no !== this.currentNodeNo) {
 					this.currentNodes = e.name;
 					this.currentNodeNo = e.no;
 					this.geteChartsData();
 					this.changeLinkPath({ name: e.name, no: e.no });
-				}
+				// }
 			} else if (nodetail.link_type) {
 				let url = '';
 				if (nodetail.link_type.indexOf('内部页面') !== -1) {
@@ -444,14 +452,15 @@ export default {
 		},
 		async clickCharts(e) {
 			if (e.data && e.data.nodeNo) {
+				this.currentNodes = e.name;
+				this.currentNodeNo = e.data.nodeNo;
 				let nodetail = await this.getNodeDetail(e.data.nodeNo, false);
+				debugger
 				if ((nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
-					if (e.data.nodeNo !== this.currentNodeNo) {
-						this.currentNodes = e.name;
-						this.currentNodeNo = e.data.nodeNo;
+					// if (e.data.nodeNo !== this.currentNodeNo) {
 						this.geteChartsData();
 						this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
-					}
+					// }
 				} else if (nodetail.link_type) {
 					let url = '';
 					if (nodetail.link_type.indexOf('内部页面') !== -1) {
@@ -530,9 +539,6 @@ export default {
 			this.currentNodeNo = options.currentNodeNo;
 		}
 		this.geteChartsData();
-		// uni.setNavigationBarTitle({
-		// 	title: this.currentNodes
-		// });
 	},
 	onReady() {
 		// #ifdef MP-WEIXIN
@@ -551,6 +557,12 @@ export default {
 	min-height: 100vh;
 	background-color: #fff;
 	padding: 20rpx;
+	.serach-bar{
+		.input-box{
+			
+		}
+	}
+
 	.data-empty {
 		width: 100%;
 		margin-top: 30vh;
