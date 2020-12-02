@@ -229,8 +229,10 @@ export default {
 		getFieldsV2: async function() {
 			let app = uni.getStorageSync('activeApp');
 			let colVs = await this.getServiceV2(this.serviceName, this.type, this.type, app);
+			colVs = this.deepClone(colVs)
 			let defaultVal = null;
 			this.colsV2Data = colVs;
+			
 			if (colVs.service_view_name) {
 				uni.setNavigationBarTitle({
 					title: colVs.service_view_name
@@ -248,7 +250,7 @@ export default {
 								colVs._fieldInfo.forEach(field => {
 									if (cond.colName === field.column) {
 										field['value'] = cond['value'];
-										field['disabled'] = true;
+										// field['disabled'] = true;
 									}
 								});
 							});
