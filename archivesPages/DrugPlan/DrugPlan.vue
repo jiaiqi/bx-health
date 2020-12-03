@@ -126,16 +126,17 @@ export default {
 	},
 	methods: {
 		deleteRecord(e) {
+			const self = this
 			uni.showModal({
 				title: '提示',
 				content: '删除此条记录?',
 				success(res) {
 					if (res.confirm) {
-						let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_record_delete', 'operate');
+						let url = self.getServiceUrl('health', 'srvhealth_drug_schedule_record_delete', 'operate');
 						let req = [{ serviceName: 'srvhealth_drug_schedule_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
-						this.$http.post(url, req).then(res => {
+						self.$http.post(url, req).then(res => {
 							if (res.data.state === 'SUCCESS') {
-								this.deleteRecordDetail(e.dsr_no);
+								self.deleteRecordDetail(e.dsr_no);
 							}
 						});
 					}

@@ -59,7 +59,7 @@
 						<view @click="downloadfile(item)" v-else-if = "item.msg_content_type === '文件'" class="documents-wrap">
 							<view class="documents-item">
 								<view class="documents-item-left">
-									<text>1125.docx</text>
+									<text>{{item.documents_name}}</text>
 								</view>
 								<view class="documents-item-right">
 									<image v-if="item.file_type && (item.file_type == 'docx' || item.file_type == 'doc')" src="/personalPages/static/word.png" mode=""></image>
@@ -115,7 +115,7 @@
 						<view @click="downloadfile(item)" v-else-if = "item.msg_content_type === '文件'" class="documents-wrap">
 							<view class="documents-item">
 								<view class="documents-item-left">
-									<text>1125.docx</text>
+									<text>{{item.documents_name}}</text>
 								</view>
 								<view class="documents-item-right">
 									<image v-if="item.file_type && (item.file_type == 'docx' || item.file_type == 'doc')" src="/personalPages/static/word.png" mode=""></image>
@@ -356,6 +356,7 @@
 				// this.Audio.src = item.msg_link;
 				console.log("------",item)
 				this.Audio.src = item.msg_link;
+				// this.Audio.src = item.voice_url;
 				this.Audio.id = item.id;
 				//音频播放结束事件
 				console.log("this.Audio------->",this.Audio)
@@ -693,7 +694,8 @@
 					   	serviceName: "srv_bxfile_service",
 					   	interfaceName: "add",
 					   	app_no: "health",
-					   	columns: "attachment"
+					   	columns: "attachment",
+						src_name:res.tempFiles[0].name
 					   }
 					   console.log("name-----",formData)
 					   let url = ''
@@ -949,6 +951,7 @@
 			        wx.saveFile({
 			          tempFilePath: res.tempFilePath,
 			          success: function (res) {
+						  console.log("res------保存",res)
 						  uni.hideToast()
 			            const savedFilePath = res.savedFilePath;
 			            // 打开文件
@@ -998,6 +1001,8 @@
 				// if(res.data.state === 'SUCCESS'){
 					
 					console.log("发送成功",res)
+					this.isAll = false
+					this.pageInfo.pageNo = 1
 					this.getMessageInfo()
 					
 				// }
@@ -1030,6 +1035,8 @@
 				if(res.data.state === 'SUCCESS'){
 					
 					console.log("发送成功")
+					this.isAll = false
+					this.pageInfo.pageNo = 1
 					this.getMessageInfo()
 					
 				}
@@ -1109,42 +1116,47 @@
 				}
 				req.relation_condition.data = conditionData
 				let res = await this.$http.post(url, req);
+				let resData = res.data.data
 				this.pageInfo.total = res.data.page.total
 				
-				if(res.data.data.length > 0){
-					res.data.data.forEach((item,i)=>{
+				if(resData.length > 0){
+					resData.forEach((item,i)=>{
 						if(item.msg_content_type === '语音'){
-							this.$set(res.data.data[i],'anmitionPlay',false)
+							this.$set(resData[i],'anmitionPlay',false)
+							
 							// this.getFilePath(item.msg_link).then(obj=>{
-							// 	if(obj){
-							// 		let video_url = this.$api.downloadFile + obj.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
-							// 		this.$set(res.data.data[i],'voice_url',video_url)
-							// 	}
-							// 	console.log("语音内容-----",obj)
+							// 	console.log("语音内容-----",obj,item.msg_link)
+							// 	// if(obj){
+							// 		let video_url = this.$api.getFilePath + obj[0].fileurl
+							// 		this.$set(item,'voice_url',video_url)
+							// 	// }
 							// })
 							// let video_url = this.$api.downloadFile + item.msg_link + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
-							// this.$set(res.data.data[i],'voice_url',video_url)
+							// this.$set(resData[i],'voice_url',video_url)
 						}
 						if(item.image){
 							let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
-							this.$set(res.data.data[i],'img_url',url)
+							this.$set(item,'img_url',url)
 						}
 						if(item.attachment){
 							 this.getFileNo(item.attachment).then(obj=>{
 								// console.log("fileObj------>",obj)
-								this.$set(res.data.data[i],'documents_name',obj.src_name)
-								this.$set(res.data.data[i],'file_type',obj.file_type)
-								this.$set(res.data.data[i],'file_size',obj.file_size)
+								if(item.attachment === '20201203093456744100'){
+									console.log("fileObj------>",obj)
+								}
+								this.$set(item,'documents_name',obj.src_name)
+								this.$set(item,'file_type',obj.file_type)
+								this.$set(item,'file_size',obj.file_size)
 							})							
 						}
 						if(item.msg_content_type === '视频' && item.video){
 							let video_url = this.$api.downloadFile + item.video + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
-							this.$set(res.data.data[i],'video_url',video_url)
+							this.$set(resData[i],'video_url',video_url)
 						}
 					})
-					// this.recordList = res.data.data
-					console.log("res00000",res.data.data)
-					res.data.data.forEach(links=>{
+					// this.recordList = resData
+					console.log("res00000",resData)
+					resData.forEach(links=>{
 						if(links.msg_content_type === '链接'){
 							/*饮食记录**/
 							if(links.msg_link.indexOf('chatChoseTime') > -1){
@@ -1160,19 +1172,21 @@
 							}
 						}
 					})
-					this.recordList = []
+					if(this.pageInfo.pageNo == 1){
+						this.recordList = []
+					}
 					if(!this.isAll){
-						this._SortJson(res.data.data)
-						this.recordList.unshift(...res.data.data)
+						this._SortJson(resData)
+						this.recordList.unshift(...resData)
 						// console.log("排序============",a)
 					}
 					
 					if(this.pageInfo.pageNo * this.pageInfo.rownumber >= res.data.page.total){
 						this.isAll = true
 					}					
-					// this.chatTextBottom ='person-chat-item' + (res.data.data.length - 1)
+					// this.chatTextBottom ='person-chat-item' + (resData.length - 1)
 					this.$nextTick(()=>{
-						this.chatTextBottom ='person-chat-item' + ((res.data.data[res.data.data.length - 1].id))
+						this.chatTextBottom ='person-chat-item' + ((resData[resData.length - 1].id))
 					})
 					// this.getUserInfoList()
 					if(type && type === 'onLoad'){
@@ -1853,8 +1867,13 @@
 			padding: 10rpx 20rpx;
 			border-radius: 10rpx;
 			border: 1px solid #ccc;
+			max-width: 450rpx;
 			.documents-item-left{
 				margin-right: 30rpx;
+				max-width: 280rpx;
+				overflow: hidden;
+				white-space: normal;
+				text-overflow: ellipsis;
 			}
 			.documents-item-right{
 				image{

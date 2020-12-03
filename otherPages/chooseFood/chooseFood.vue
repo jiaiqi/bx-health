@@ -1,7 +1,7 @@
 <template>
-	<view v-if="currFood " class="food_wrap">
-		<view  class="cu-bar bg-white food_wrap_top" :class="pageType?'':'ingredient'">
-			<view @click="clickTop('edit')" v-if="pageType && !pageDetailType" class=" button" >编辑</view>
+	<view v-if="currFood" class="food_wrap">
+		<view class="cu-bar bg-white food_wrap_top" :class="pageType ? '' : 'ingredient'">
+			<view @click="clickTop('edit')" v-if="pageType && !pageDetailType" class=" button">编辑</view>
 			<view class="date-time">
 				<view class="date-time-rq">{{ nowDate }}</view>
 				/
@@ -26,8 +26,15 @@
 			</view>
 			<view class="ele-text-wrap">
 				<view class="ele-text-top-tit">
-					
-					<text @click="changeCate(item,index)" v-for="(item,index) in categoryTop" v-if="item.name === '食材组成'?currFood.meal_no:true" :key="index" :class="categoryTopIndex === index?'active-text-top-tit':''">{{item.name}}</text>					
+					<text
+						@click="changeCate(item, index)"
+						v-for="(item, index) in categoryTop"
+						v-if="item.name === '食材组成' ? currFood.meal_no : true"
+						:key="index"
+						:class="categoryTopIndex === index ? 'active-text-top-tit' : ''"
+					>
+						{{ item.name }}
+					</text>
 				</view>
 				<!-- <view class="ele-text-top">主要维生素含量如下：</view> -->
 				<view v-if="categoryTopIndex === 1" class="ele-text-cen">
@@ -65,7 +72,7 @@
 								<text style="color: red;">({{ currFood.vitamin_e >= 27.9 ? '高' : currFood.vitamin_e >= 13.9 && currFood.vitamin_e < 27.9 ? '中' : '低' }})</text>
 							</view>
 						</view>
-					</view>					
+					</view>
 					<view class="ele-text-cen-item">
 						<view class="ele-text-cen-item-title">水溶性维生素</view>
 						<view class="ele-text-cen-item-cen">
@@ -76,7 +83,7 @@
 							</view>
 							<view class="ele-text">
 								<text>VB2:</text>
-								<text>{{ currFood.vitamin_b2 ?Number(currFood.vitamin_b2).toFixed(1) : '' }}mg</text>
+								<text>{{ currFood.vitamin_b2 ? Number(currFood.vitamin_b2).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.vitamin_b2 >= 0.79 ? '高' : currFood.vitamin_b2 >= 0.4 && currFood.vitamin_b2 < 0.79 ? '中' : '低' }})</text>
 							</view>
 							<view class="ele-text">
@@ -145,30 +152,35 @@
 								<text>{{ currFood.element_mn ? Number(currFood.element_mn).toFixed(1) : '' }}mg</text>
 								<text style="color: red;">({{ currFood.element_mn >= 4.44 ? '高' : currFood.element_mn >= 2.22 && currFood.element_mn < 4.44 ? '中' : '低' }})</text>
 							</view>
-						</view> 
+						</view>
 					</view>
 				</view>
 				<view v-if="categoryTopIndex == 0" class="uni-ec-canvas-wrap">
 					<view class="uni-ec-canvas-top">
-						<view @click="changeApprove(item,index)" v-for="(item,index) in approveData" class="uni-ec-canvas-top-item" :key="index" :class="currentAppr.name === item.name?'active-approve':''" >
+						<view
+							@click="changeApprove(item, index)"
+							v-for="(item, index) in approveData"
+							class="uni-ec-canvas-top-item"
+							:key="index"
+							:class="currentAppr.name === item.name ? 'active-approve' : ''"
+						>
 							<view class="uni-ec-canvas-top-t">
-								<text>{{item.name}}</text>
+								<text>{{ item.name }}</text>
 							</view>
 							<view class="uni-ec-canvas-top-b">
 								<!-- <text>年龄:{{item.age?item.age:'??'}}</text> -->
-								<text>({{item.weight?item.weight:'??'}}kg)</text>
+								<text>({{ item.weight ? item.weight : '??' }}kg)</text>
 							</view>
 						</view>
 					</view>
 					<view class="uni-ec-canvas-bot">
 						<!-- #ifdef MP-WEIXIN -->
-							<uniEcCanvas v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+						<uniEcCanvas v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
 						<!-- #endif -->
 						<!-- #ifdef H5 -->
-							<uniEcharts v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
+						<uniEcharts v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
 						<!-- #endif -->
 					</view>
-					
 				</view>
 				<view v-if="categoryTopIndex == 2 && currFood.meal_no" class="material-list-wrap">
 					<view class="shop-detail-bot-tab">
@@ -178,10 +190,10 @@
 							<text>单位</text>
 						</view>
 						<view v-if="foodChild.length > 0" class="shop-detail-bot-tab-m">
-							<view v-for="(item,index) in foodChild" :key="index" class="shop-detail-bot-tab-m-item">
-								<text>{{item.name}}</text>
-								<text>{{item.unit_amount}}</text>
-								<text>{{item.unit}}</text>
+							<view v-for="(item, index) in foodChild" :key="index" class="shop-detail-bot-tab-m-item">
+								<text>{{ item.name }}</text>
+								<text>{{ item.unit_amount }}</text>
+								<text>{{ item.unit }}</text>
 							</view>
 						</view>
 						<view v-else class="detail-none">
@@ -191,60 +203,47 @@
 							</view>
 						</view>
 					</view>
-				</view>			
+				</view>
 			</view>
 			<view class="calculate">
 				<view v-if="!currFood.meal_no" class="cook weight">
 					<view class="calculate-l">烹调方式：</view>
-					<text v-if="currentCookData" @click.stop="clickCook" :class="isCookDataChoose?'active-cook-data':''">{{currentCookData}}</text>
-					<text @click="chooseCook">更多</text>					
+					<text v-if="currentCookData" @click.stop="clickCook" :class="isCookDataChoose ? 'active-cook-data' : ''">{{ currentCookData }}</text>
+					<text @click="chooseCook">更多</text>
 				</view>
 				<view v-if="isShowZx && !pageDetailType" class="minced">
-					<view class="calculate-l">
-						自选臊子：
-					</view>
-						<!-- <view class="minced-item-all"> -->
-						<text v-for="(item,index) in minceListChoose" :key="item.id" class="minced-item minced-item-active">
-							{{item.name}}
-						</text>
-						<!-- </view> -->
-						<!-- <view @click="chooseCook('minkes')" class="minced-right-add"> -->
-							<text @click="chooseCook('minkes')" class="lg text-gray cuIcon-add minced-right-add"></text>
-						<!-- </view>			 -->
-				</view>
-				<view v-if="isShowZx && !pageDetailType" class="minced">
-					<view class="calculate-l">
-						自选配料：
-					</view>
+					<view class="calculate-l">自选臊子：</view>
 					<!-- <view class="minced-item-all"> -->
-						<!-- <view class="minced-item-all"> -->
-							<text v-for="(item,index) in chooseBurdening" :key="item.id" class="minced-item minced-item-active">
-								{{item.name}}
-							</text>
-						<!-- </view> -->
-						<!-- <view @click="chooseCook('burdening')" class="minced-right-add"> -->
-							<text @click="chooseCook('burdening')" class="lg text-gray cuIcon-add minced-right-add"></text>
-						<!-- </view> -->
+					<text v-for="(item, index) in minceListChoose" :key="item.id" class="minced-item minced-item-active">{{ item.name }}</text>
 					<!-- </view> -->
-					
+					<!-- <view @click="chooseCook('minkes')" class="minced-right-add"> -->
+					<text @click="chooseCook('minkes')" class="lg text-gray cuIcon-add minced-right-add"></text>
+					<!-- </view>			 -->
+				</view>
+				<view v-if="isShowZx && !pageDetailType" class="minced">
+					<view class="calculate-l">自选配料：</view>
+					<!-- <view class="minced-item-all"> -->
+					<!-- <view class="minced-item-all"> -->
+					<text v-for="(item, index) in chooseBurdening" :key="item.id" class="minced-item minced-item-active">{{ item.name }}</text>
+					<!-- </view> -->
+					<!-- <view @click="chooseCook('burdening')" class="minced-right-add"> -->
+					<text @click="chooseCook('burdening')" class="lg text-gray cuIcon-add minced-right-add"></text>
+					<!-- </view> -->
+					<!-- </view> -->
 				</view>
 				<view v-if="!pageDetailType" class="weight">
 					<view class="calculate-l">时间：</view>
-					<view @click="chooseTime(u, ids)" v-for="(u, ids) in dinnerTime" :key="ids" :class="currFoodTime == u.value ? 'active-unit' : ''" class="unit">
-						{{ u.value }}						
-					</view>
+					<view @click="chooseTime(u, ids)" v-for="(u, ids) in dinnerTime" :key="ids" :class="currFoodTime == u.value ? 'active-unit' : ''" class="unit">{{ u.value }}</view>
 				</view>
 				<view v-if="!pageDetailType" class="weight">
 					<view class="calculate-l">单位：</view>
 					<view @click="chooseUnit(u, ids)" v-for="(u, ids) in unitList" :key="ids" :class="currIndex == ids ? 'active-unit' : ''" class="unit">
-						{{ u.unit_amount ? u.unit_amount + u.unit : u.unit }}						
+						{{ u.unit_amount ? u.unit_amount + u.unit : u.unit }}
 					</view>
 				</view>
 			</view>
 			<view v-if="!pageDetailType" class="amount">
-				<view class="amount-left">
-					<text>数量：</text>
-				</view>
+				<view class="amount-left"><text>数量：</text></view>
 				<view class="input-box">
 					<view class="key-left">
 						<text @click="countDietNum('-0.1')">-0.1</text>
@@ -276,8 +275,8 @@
 				</radio-group>
 			</view>
 		</view>
-		
-		<view v-if="!currFood.meal_no" class="cu-modal bottom-modal" :class="isShowCookType?'show':''">
+
+		<view v-if="!currFood.meal_no" class="cu-modal bottom-modal" :class="isShowCookType ? 'show' : ''">
 			<view class="cu-dialog">
 				<view class="cu-bar bg-white cook-top">
 					<view class="action text-blue" @tap="hideCookModel">取消</view>
@@ -286,27 +285,42 @@
 				</view>
 				<view class="padding-xl">
 					<view class="cook-wrap">
-						<view @click="chooseCookFood(cook)" v-for="(cook,c) in cookData" :key="c" class="cook-item" :class="currentCookData==cook.value&&isCookDataChoose?'active-cook-item':''">
-							<text>{{cook.value}}</text>
+						<view
+							@click="chooseCookFood(cook)"
+							v-for="(cook, c) in cookData"
+							:key="c"
+							class="cook-item"
+							:class="currentCookData == cook.value && isCookDataChoose ? 'active-cook-item' : ''"
+						>
+							<text>{{ cook.value }}</text>
 						</view>
 					</view>
 				</view>
 			</view>
 		</view>
 		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="bottom">
-			<view class="health-item">		
-				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType ==='minkes'" mode="button" v-model="checkedMinceValue">
-					<bx-checkbox v-model="item.checked" v-for="(item,index) in minceList" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
+			<view class="health-item">
+				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType === 'minkes'" mode="button" v-model="checkedMinceValue">
+					<bx-checkbox v-model="item.checked" v-for="(item, index) in minceList" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
 				</bx-checkbox-group>
-				
-				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType ==='burdening'" mode="button" v-model="checkedburdeningValue">
-					<bx-checkbox v-model="item.checked" v-for="(item,index) in burdening" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
+
+				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType === 'burdening'" mode="button" v-model="checkedburdeningValue">
+					<bx-checkbox v-model="item.checked" v-for="(item, index) in burdening" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
 				</bx-checkbox-group>
-				
+
 				<bx-radio-group v-model="RadioChoose" max="1" mode="button">
-					<bx-radio v-for="item in cookData" v-model="item.checked" :key="item.value" :disabled="pageDetailType?true:item.disable" :name="item.value" @change="checkboxGroupChange">{{ item.label }}</bx-radio>
+					<bx-radio
+						v-for="item in cookData"
+						v-model="item.checked"
+						:key="item.value"
+						:disabled="pageDetailType ? true : item.disable"
+						:name="item.value"
+						@change="checkboxGroupChange"
+					>
+						{{ item.label }}
+					</bx-radio>
 				</bx-radio-group>
-				
+
 				<view class="button-box">
 					<button class="cu-btn" @click="closePoup">取消</button>
 					<button class="cu-btn " @click="confirmCookData">确定</button>
@@ -338,65 +352,79 @@ export default {
 	data() {
 		return {
 			unitList: [],
-			minceList:[],
-			minceListChoose:[],
-			RadioChoose:'',
-			currFoodTime:'',
-			dinnerTime:[{
-				value:'早餐',
-				type:'cereal'
-			},{
-				value:'中餐',
-				type:'lunch'
-			},{
-				value:'晚餐',
-				type:'dinner'
-			},{
-				value:'夜宵',
-				type:'midnight'
-			},{
-				value:'加餐',
-				type:'extra'
-			},{
-				value:'其他',
-				type:'other'
-			}],
+			minceList: [],
+			minceListChoose: [],
+			RadioChoose: '',
+			currFoodTime: '',
+			dinnerTime: [
+				{
+					value: '早餐',
+					type: 'cereal'
+				},
+				{
+					value: '中餐',
+					type: 'lunch'
+				},
+				{
+					value: '晚餐',
+					type: 'dinner'
+				},
+				{
+					value: '夜宵',
+					type: 'midnight'
+				},
+				{
+					value: '加餐',
+					type: 'extra'
+				},
+				{
+					value: '其他',
+					type: 'other'
+				}
+			],
 			list: [],
-			foodChild:[],
-			isShowInfo:false,
-			showUserHealtManagePopup:false,
-			categoryTop:[{
-				name:'NRV%占比',
-				type:'NRV'
-			},{
-				name:'营养素含量',
-				type:'purity'
-			},{
-				name:'食材组成',
-				type:'material'
-			}],
-			approveData:[{
-				name:'男性',
-				type:'man',
-				sex:'男',
-				age:18,
-				weight:65
-				
-			},{
-				name:'女性',
-				type:'woman',
-				sex:'女',
-				age:18,
-				weight:55
-			},{
-				name:'我的',
-				type:'mine',
-				sex:null,
-				age:null,
-				weight:null
-			}],
-			categoryTopIndex:0,
-			currentAppr:'',
+			foodChild: [],
+			isShowInfo: false,
+			showUserHealtManagePopup: false,
+			categoryTop: [
+				{
+					name: 'NRV%占比',
+					type: 'NRV'
+				},
+				{
+					name: '营养素含量',
+					type: 'purity'
+				},
+				{
+					name: '食材组成',
+					type: 'material'
+				}
+			],
+			approveData: [
+				{
+					name: '男性',
+					type: 'man',
+					sex: '男',
+					age: 18,
+					weight: 65
+				},
+				{
+					name: '女性',
+					type: 'woman',
+					sex: '女',
+					age: 18,
+					weight: 55
+				},
+				{
+					name: '我的',
+					type: 'mine',
+					sex: null,
+					age: null,
+					weight: null
+				}
+			],
+			categoryTopIndex: 0,
+			currentAppr: '',
 			currFood: '',
 			heatNum: '',
 			nowDate: this.formateDate(new Date(), 'date').replace(/\s*/g, ''),
@@ -421,7 +449,7 @@ export default {
 					name: '碳水化合物',
 					key: 'carbohydrate'
 				},
-				
+
 				{
 					name: 'VA',
 					key: 'vitamin_a'
@@ -462,7 +490,7 @@ export default {
 					name: '镁',
 					key: 'element_mg'
 				},
-				
+
 				{
 					name: '钾',
 					key: 'element_k'
@@ -561,19 +589,19 @@ export default {
 							name: '食物含量',
 							type: 'bar',
 							stack: '总数',
-							data: [],
-						// 	itemStyle: {
-						// 	normal: {
-						// 		label: {
-						// 			show: true, //开启显示
-						// 			position: 'top', //在上方显示
-						// 			textStyle: { //数值样式
-						// 				color: 'black',
-						// 				fontSize: 16
-						// 			}
-						// 		}
-						// 	}
-						// },
+							data: []
+							// 	itemStyle: {
+							// 	normal: {
+							// 		label: {
+							// 			show: true, //开启显示
+							// 			position: 'top', //在上方显示
+							// 			textStyle: { //数值样式
+							// 				color: 'black',
+							// 				fontSize: 16
+							// 			}
+							// 		}
+							// 	}
+							// },
 						}
 					]
 				}
@@ -581,31 +609,31 @@ export default {
 			currIndex: '', //选择单位index
 			userInfo: '',
 			result: '',
-			cookData:[], //烹饪方式
-			currentCookData:null,
-			isShowCookType:false,
-			pageType:'',
-			pageDetailType:'',
-			currFoodNo:null,
-			isCookDataChoose:false,
-			currentChooseCookData:'',
-			currentMince:'',
-			burdening:[] ,//可选配料
-			chooseBurdening:[] ,//可选配料
-			checkedMinceValue:[],
-			checkedburdeningValue:[],
-			poupType:''
+			cookData: [], //烹饪方式
+			currentCookData: null,
+			isShowCookType: false,
+			pageType: '',
+			pageDetailType: '',
+			currFoodNo: null,
+			isCookDataChoose: false,
+			currentChooseCookData: '',
+			currentMince: '',
+			burdening: [], //可选配料
+			chooseBurdening: [], //可选配料
+			checkedMinceValue: [],
+			checkedburdeningValue: [],
+			poupType: ''
 		};
 	},
 	onShow() {
-		this.approveData[2].sex = this.userInfo.sex
-		this.approveData[2].age = this.age
-		this.approveData[2].weight = this.userInfo.weight
-		this.getCurrentFood(this.currFoodNo)
+		this.approveData[2].sex = this.userInfo.sex;
+		this.approveData[2].age = this.age;
+		this.approveData[2].weight = this.userInfo.weight;
+		this.getCurrentFood(this.currFoodNo);
 	},
 	onLoad(option) {
 		if (uni.getStorageSync('current_user_info')) {
-			this.userInfo = uni.getStorageSync('current_user_info');			
+			this.userInfo = uni.getStorageSync('current_user_info');
 			uni.setStorageSync('current_user', this.userInfo.name);
 		} else {
 			let userList = uni.getStorageSync('user_info_list');
@@ -615,24 +643,23 @@ export default {
 			}
 		}
 		console.log('option-----', option.currFood);
-		if(option.type){
-			this.pageType = option.type
+		if (option.type) {
+			this.pageType = option.type;
 		}
-		if(option.pageType){
-			this.pageDetailType = option.pageType
+		if (option.pageType) {
+			this.pageDetailType = option.pageType;
 		}
 		let query = JSON.parse(decodeURIComponent(option.currFood));
 		if (query.hdate) {
 			this.nowDate = query.hdate;
 		}
 		this.currFoodNo = query;
-		
-		
+
 		// if (this.currFood) {
-			this.currentAppr = this.approveData[0]
-			this.getCurrentFood(this.currFoodNo)
-			
-			// this.getNutrientRecommended()
+		this.currentAppr = this.approveData[0];
+		this.getCurrentFood(this.currFoodNo);
+
+		// this.getNutrientRecommended()
 		// }
 	},
 	computed: {
@@ -642,30 +669,29 @@ export default {
 				return age;
 			}
 		},
-		isShowZx(){
-			debugger
-			if(this.currFood && this.currFood.dish_type&&this.currFood.dish_type === '自选臊子面食'){
-				return true
+		isShowZx() {
+			if (this.currFood && this.currFood.dish_type && this.currFood.dish_type === '自选臊子面食') {
+				return true;
 			}
 		}
 	},
 	methods: {
 		/*点击放大食材照片**/
-		blowImage(url){
-			let lastIndex = url.lastIndexOf('&')
-			let imgurl = url.slice(0,lastIndex)
+		blowImage(url) {
+			let lastIndex = url.lastIndexOf('&');
+			let imgurl = url.slice(0, lastIndex);
 			uni.previewImage({
-				urls:[imgurl]
-			})
+				urls: [imgurl]
+			});
 		},
 		// /*点击选择臊子**/
 		// chooseMinced(item){
 		// 	this.currentMince = item
 		// 	console.log("点击选择臊子----")
 		// },
-		checkboxGroupChange(e){
-			console.log("---------e-",e)
-			let isHasTrue = false
+		checkboxGroupChange(e) {
+			console.log('---------e-', e);
+			let isHasTrue = false;
 			// this.cookData.forEach(item=>{
 			// 	if(item.value === e.name  && e.value){
 			// 		isHasTrue = true
@@ -686,132 +712,134 @@ export default {
 			// 		// }
 			// 	})
 			// }
-			
+
 			// if(!e.value){
-				this.currentChooseCookData = e
+			this.currentChooseCookData = e;
 			// 	this.isCookDataChoose = false
 			// }else{
 			// 	this.currentChooseCookData = e
-				
+
 			// }
-			
-			
 		},
-		closePoup(){
-			this.showUserHealtManagePopup = false
+		closePoup() {
+			this.showUserHealtManagePopup = false;
 		},
-		confirmCookData(){
-			console.log("minceList---->",this.checkedMinceValue,"burdening---->",this.checkedburdeningValue)
-			if(this.currFood.dish_type && this.currFood.dish_type === '自选臊子面食' && this.poupType && this.poupType === 'minkes'){
-				this.minceListChoose = []
-				this.minceList.forEach(item=>{
-					this.checkedMinceValue.forEach(v=>{
-						if(item.name === v){
-							this.minceListChoose.push(item)
+		confirmCookData() {
+			console.log('minceList---->', this.checkedMinceValue, 'burdening---->', this.checkedburdeningValue);
+			if (this.currFood.dish_type && this.currFood.dish_type === '自选臊子面食' && this.poupType && this.poupType === 'minkes') {
+				this.minceListChoose = [];
+				this.minceList.forEach(item => {
+					this.checkedMinceValue.forEach(v => {
+						if (item.name === v) {
+							this.minceListChoose.push(item);
 						}
-					})
-				})
-				
-			}else if(this.currFood.dish_type && this.currFood.dish_type === '自选臊子面食' && this.poupType && this.poupType === 'burdening'){
-				this.chooseBurdening = []
-				this.burdening.forEach(item=>{
-					this.checkedburdeningValue.forEach(v=>{
-						if(item.name === v){
-							this.chooseBurdening.push(item)
+					});
+				});
+			} else if (this.currFood.dish_type && this.currFood.dish_type === '自选臊子面食' && this.poupType && this.poupType === 'burdening') {
+				this.chooseBurdening = [];
+				this.burdening.forEach(item => {
+					this.checkedburdeningValue.forEach(v => {
+						if (item.name === v) {
+							this.chooseBurdening.push(item);
 						}
-					})
-				})
-				
-			}else {
-				this.currentCookData = this.currentChooseCookData
-				this.isCookDataChoose = true
-			}			
-			
-			this.showUserHealtManagePopup = false
+					});
+				});
+			} else {
+				this.currentCookData = this.currentChooseCookData;
+				this.isCookDataChoose = true;
+			}
+
+			this.showUserHealtManagePopup = false;
+		
 		},
-		async getCurrentFood(item){
+		async getCurrentFood(item) {
 			let self = this;
-			let serviceName = 'srvhealth_mixed_food_nutrition_contents_select'
-			if(!item.meal_no){
-				serviceName = 'srvhealth_diet_contents_select'
+			let serviceName = 'srvhealth_mixed_food_nutrition_contents_select';
+			if (!item.meal_no) {
+				serviceName = 'srvhealth_diet_contents_select';
 			}
 			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
 				serviceName: serviceName,
 				colNames: ['*'],
-				condition:[{
-					colName:"id",
-					ruleType:"eq",
-					value:item.id
-				}]
+				condition: [
+					{
+						colName: 'id',
+						ruleType: 'eq',
+						value: item.id
+					}
+				]
 			};
 			let res = await this.$http.post(url, req);
-			let urls = self.$api.downloadFile + res.data.data[0].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +"&thumbnailType=fwsu_100";
+			let urls = self.$api.downloadFile + res.data.data[0].image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 			this.$set(res.data.data[0], 'imgurl', urls);
-			self.currFood = res.data.data[0]
-			
-			if(!self.currFood.meal_no){
-				self.getFoodsV2()
+			self.currFood = res.data.data[0];
+
+			if (!self.currFood.meal_no) {
+				self.getFoodsV2();
 			}
-			
-			self.calculateCurrTime()
+
+			self.calculateCurrTime();
 			self.assembleData();
 			self.selectCurrFoodUnit(self.currFood);
-			if(self.currFood.dish_type && self.currFood.dish_type.indexOf('自选') > -1){
+			if (self.currFood.dish_type && self.currFood.dish_type.indexOf('自选') > -1) {
 				// this.getMincedAll()
-				self.getMixChildFood()
+				self.getMixChildFood();
 			}
 		},
 		/*查询臊子**/
-		async getMincedAll(){
-			let serviceName = 'srvhealth_mixed_food_nutrition_item_select'
+		async getMincedAll() {
+			let serviceName = 'srvhealth_mixed_food_nutrition_item_select';
 			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
 				serviceName: serviceName,
 				colNames: ['*'],
-				condition:[{
-					colName:"meal_no",
-					ruleType:"eq",
-					value:"自选臊子"
-				}]
+				condition: [
+					{
+						colName: 'meal_no',
+						ruleType: 'eq',
+						value: '自选臊子'
+					}
+				]
 			};
 			// let res = await this.$http.post(url, req);
-			
 		},
-		hideCookModel(){
-			this.isShowCookType = false
+		hideCookModel() {
+			this.isShowCookType = false;
 		},
-		configCookFood(){
-			this.isShowCookType = false
+		configCookFood() {
+			this.isShowCookType = false;
 		},
-		async getFoodsV2(){
-			let self = this
+		async getFoodsV2() {
+			let self = this;
 			let colVs = await this.getServiceV2('srvhealth_diet_contents_select', 'list', 'list', 'health');
-			let colData = colVs.srv_cols
-			colData.forEach(item=>{
-				if(item.columns === 'cook_method'){
-					self.cookData = item.option_list_v2
-					this.currentCookData = self.currFood.cook_method.split(',')[0]
+			let colData = colVs.srv_cols;
+			colData.forEach(item => {
+				if (item.columns === 'cook_method') {
+					self.cookData = item.option_list_v2;
+					this.currentCookData = self.currFood.cook_method.split(',')[0];
 				}
-			})
+			});
 		},
-		clickTop(type){
-			if(type === 'edit'){
-				let cond = [{
-					colName:"id",
-					ruleType:"in",
-					value:this.currFood.id
-				}]
+		clickTop(type) {
+			if (type === 'edit') {
+				let cond = [
+					{
+						colName: 'id',
+						ruleType: 'in',
+						value: this.currFood.id
+					}
+				];
 				let params = {
-				  type: 'update',
-				  condition: cond,
-				  serviceName: 'srvhealth_mixed_food_nutrition_contents_update',
-				  defaultVal: this.currFood
+					type: 'update',
+					condition: cond,
+					serviceName: 'srvhealth_mixed_food_nutrition_contents_update',
+					defaultVal: this.currFood
 				};
 				uni.navigateTo({
-				  url: '/publicPages/form/form?type=update&params='+ encodeURIComponent(JSON.stringify(params)) 
+					url: '/publicPages/form/form?type=update&params=' + encodeURIComponent(JSON.stringify(params))
 				});
-			}else if(type === 'add'){
+			} else if (type === 'add') {
 				// let cond = [{
 				// 	colName:"unit",
 				// 	ruleType:"eq",
@@ -822,42 +850,41 @@ export default {
 				// 	value:this.currFood.meal_no
 				// }]
 				uni.navigateTo({
-					url:'/otherPages/shop/foodMaterial?itemFood=' + encodeURIComponent(JSON.stringify(this.currFood))
-				})
+					url: '/otherPages/shop/foodMaterial?itemFood=' + encodeURIComponent(JSON.stringify(this.currFood))
+				});
 				// uni.navigateTo({
 				//   url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
-				// });	
+				// });
 			}
 		},
 		/*点击切换图表顶部类型**/
-		changeApprove(item,index){
-			if(item.type === 'mine' && (!item.age || !item.sex)){
+		changeApprove(item, index) {
+			if (item.type === 'mine' && (!item.age || !item.sex)) {
 				uni.showModal({
-				    title: '提示',
-				    content: '当前没有进行登记年龄、性别和体重，是否去登记?',
-				    success: function (res) {
-				        if (res.confirm) {
+					title: '提示',
+					content: '当前没有进行登记年龄、性别和体重，是否去登记?',
+					success: function(res) {
+						if (res.confirm) {
 							uni.navigateTo({
-								url:'/otherPages/chooseFood/myFoodsInfo'
-							})
-				        } else if (res.cancel) {
-				            console.log('用户点击取消');
-				        }
-				    }
+								url: '/otherPages/chooseFood/myFoodsInfo'
+							});
+						} else if (res.cancel) {
+							console.log('用户点击取消');
+						}
+					}
 				});
-			}else{
-				this.currentAppr = item
-				this.assembleData()
+			} else {
+				this.currentAppr = item;
+				this.assembleData();
 			}
-			
 		},
 		/*点击切换营养素占比和NRV**/
-		changeCate(item,index){
-			this.categoryTopIndex = index
-			if(item.type === 'NRV'){
-				this.currentAppr = this.approveData[0]
-			}else if(item.type === 'material'){
-				this.getMixChildFood()
+		changeCate(item, index) {
+			this.categoryTopIndex = index;
+			if (item.type === 'NRV') {
+				this.currentAppr = this.approveData[0];
+			} else if (item.type === 'material') {
+				this.getMixChildFood();
 			}
 		},
 		async getNutrientRecommended() {
@@ -874,14 +901,14 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			let age = self.currentAppr.age
-			if(age < 18){
-				age = 18
+			let age = self.currentAppr.age;
+			if (age < 18) {
+				age = 18;
 			}
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-				let result = res.data.data.filter(item => {					
+				let result = res.data.data.filter(item => {
 					if ((item.sex && item.sex.indexOf(self.currentAppr.sex) !== -1) || !item.sex) {
-						if (item.age_start && item.age_end) {							
+						if (item.age_start && item.age_end) {
 							return age >= item.age_start && age < item.age_end;
 						} else if (item.age_start && !item.age_end) {
 							return age >= item.age_start;
@@ -902,14 +929,14 @@ export default {
 					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === '烟酸') {
 						endArr.push(currFood[nut.key]);
 					}
-					result.forEach(re => {			
+					result.forEach(re => {
 						if (nut.name === re.nutrient) {
-							num = ((Number(currFood[nut.key]) / Number(re.val_rni)) * 100).toFixed(1);			
-							if(nut.name === '蛋白质'){
-								num = Number(((Number(currFood[nut.key]) / Number(re.val_rni)) * 100 / self.currentAppr.weight)).toFixed(1)
+							num = ((Number(currFood[nut.key]) / Number(re.val_rni)) * 100).toFixed(1);
+							if (nut.name === '蛋白质') {
+								num = Number(((Number(currFood[nut.key]) / Number(re.val_rni)) * 100) / self.currentAppr.weight).toFixed(1);
 							}
-							endArr.push(Number(num));						
-						}												
+							endArr.push(Number(num));
+						}
 					});
 				});
 				return endArr;
@@ -949,13 +976,13 @@ export default {
 			// option.series[0].data = currData.map(ser => {
 			// 	return ser;
 			// });
-			if(!option.series[1] ){
+			if (!option.series[1]) {
 				option.series.push(obj);
 			}
-			if(this.value1 == 0){
+			if (this.value1 == 0) {
 				this.countDietNum('+1');
-			}else{
-				this.originalData()
+			} else {
+				this.originalData();
 			}
 		},
 		/* 点击取消*/
@@ -972,34 +999,32 @@ export default {
 		RadiohideModal() {
 			this.modalName = '';
 		},
-		chooseCook(type=null){
-			if(type){
-				this.poupType = type
+		chooseCook(type = null) {
+			if (type) {
+				this.poupType = type;
 			}
-			console.log("点击烹调方式")
+			console.log('点击烹调方式');
 			// this.isShowCookType = true
-			this.showUserHealtManagePopup = true
+			this.showUserHealtManagePopup = true;
 		},
-		clickCook(){
-			this.isCookDataChoose = !this.isCookDataChoose
+		clickCook() {
+			this.isCookDataChoose = !this.isCookDataChoose;
 		},
-		chooseCookFood(item){
-			this.currentCookData = item.value
-			
-			this.isCookDataChoose = true
-			this.isShowCookType = false
-			
+		chooseCookFood(item) {
+			this.currentCookData = item.value;
+
+			this.isCookDataChoose = true;
+			this.isShowCookType = false;
 		},
 		/*选择餐食类别(早中晚)**/
-		chooseTime(item,i){
-			
-			this.currFoodTime = item.value
+		chooseTime(item, i) {
+			this.currFoodTime = item.value;
 		},
 		/*计算当前时间--早餐/午餐...**/
-		calculateCurrTime(){
-			let time = this.formateDate(new Date(), 'dateTime').split(":")[0]
-			console.log("计算时间--->",time)
-			let type = ''
+		calculateCurrTime() {
+			let time = this.formateDate(new Date(), 'dateTime').split(':')[0];
+			console.log('计算时间--->', time);
+			let type = '';
 			/**
 			 * [{
 				value:'早餐',
@@ -1021,20 +1046,20 @@ export default {
 				type:'other'
 			}],
 			 * */
-			if(time >=6 && time <= 9){
-				type = '早餐'
-			}else if(time >= 10 && time <= 11){
-				type = '加餐'
-			}else if(time >= 12 && time <= 14){
-				type = '中餐'
-			}else if(time >= 18 && time <= 20){
-				type = '晚餐'
-			}else if(time >= 21 && time <= 24){
-				type = '夜宵'
-			}else{
-				type = '其他'
+			if (time >= 6 && time <= 9) {
+				type = '早餐';
+			} else if (time >= 10 && time <= 11) {
+				type = '加餐';
+			} else if (time >= 12 && time <= 14) {
+				type = '中餐';
+			} else if (time >= 18 && time <= 20) {
+				type = '晚餐';
+			} else if (time >= 21 && time <= 24) {
+				type = '夜宵';
+			} else {
+				type = '其他';
 			}
-			this.currFoodTime = type
+			this.currFoodTime = type;
 		},
 		/*选择单位*/
 		chooseUnit(item, i) {
@@ -1079,38 +1104,40 @@ export default {
 			this.goBalanceDiet();
 		},
 		/* 获取当前食物得食材含量**/
-		async getMixChildFood(){
-			let self = this
+		async getMixChildFood() {
+			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_mixed_food_nutrition_item_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_mixed_food_nutrition_item_select',
 				colNames: ['*'],
-				condition:[{
-					colName:"meal_no",
-					ruleType:"eq",
-					value:this.currFood.meal_no
-				}],
+				condition: [
+					{
+						colName: 'meal_no',
+						ruleType: 'eq',
+						value: this.currFood.meal_no
+					}
+				]
 			};
 			let res = await this.$http.post(url, req);
-			let data = res.data.data
-			if(data.length >= 0){	
-				this.foodChild = data
+			let data = res.data.data;
+			if (data.length >= 0) {
+				this.foodChild = data;
 			}
-			this.minceList = [] //可选臊子
-			this.burdening = [] //可选配料
-			data.forEach(item=>{
-				this.$set(item,'checked',false)
-				if(item.item_form_type === '混合食物' && item.choose_type === '可选'){
-					this.minceList.push(item)
-				}else if(item.item_form_type === '食材' && item.choose_type === '可选'){
-					this.burdening.push(item)
+			this.minceList = []; //可选臊子
+			this.burdening = []; //可选配料
+			data.forEach(item => {
+				this.$set(item, 'checked', false);
+				if (item.item_form_type === '混合食物' && item.choose_type === '可选') {
+					this.minceList.push(item);
+				} else if (item.item_form_type === '食材' && item.choose_type === '可选') {
+					this.burdening.push(item);
 				}
-			})
+			});
 		},
 		/* 点击食物选择数字加减**/
 		countDietNum(num) {
 			let self = this;
-			this.isCountDiet = true
+			this.isCountDiet = true;
 			let value = Number(this.value1);
 			if (value >= 0) {
 				if (num === '-0.1') {
@@ -1141,12 +1168,12 @@ export default {
 				}
 				if (value == 0) {
 					this.heatNum = 0;
-				}		
-				this.originalData()
+				}
+				this.originalData();
 			}
 		},
-		originalData(){
-			let self = this
+		originalData() {
+			let self = this;
 			let addObj = {
 				name: '超标部分',
 				type: 'bar',
@@ -1160,26 +1187,25 @@ export default {
 			let result = this.result;
 			nutrientData.forEach(nut => {
 				let num = 0;
-				let a = 0
+				let a = 0;
 				// if (nut.name === '碳水化合物' || nut.name === 'VB3') {
-					if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === '烟酸'){
+				if (nut.name === '脂肪' || nut.name === '碳水化合物' || nut.name === '烟酸') {
 					addData.push(currFood[nut.key] * Number(self.choiceNum));
 				}
 				result.forEach(re => {
-					
 					if (nut.name === re.nutrient) {
-						num =(((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100);
-						if(nut.name === '蛋白质'){
+						num = ((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100;
+						if (nut.name === '蛋白质') {
 							// num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
-							num = (((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100)								
+							num = ((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100;
 						}
-						num = parseInt(num*10) / 10												
-						if(re.nutrient === '叶酸'){							
-							if(a == 0){
-								addData.push(Number(num))
+						num = parseInt(num * 10) / 10;
+						if (re.nutrient === '叶酸') {
+							if (a == 0) {
+								addData.push(Number(num));
 							}
-							a++
-						}else{
+							a++;
+						} else {
 							addData.push(Number(num));
 						}
 						// if(num > 100){
@@ -1214,109 +1240,109 @@ export default {
 						htime: this.currTime ? this.currTime : this.nowDateTime,
 						name: item.name,
 						amount: item.amount,
-						unit: this.radioLabel.unit?this.radioLabel.unit:item.unit,
+						unit: this.radioLabel.unit ? this.radioLabel.unit : item.unit,
 						energy: item.heatNum,
 						user_name: uni.getStorageSync('current_user'),
 						image: item.image,
 						unit_weight_g: this.radioLabel ? this.radioLabel.amount : 100,
-						dining_type:this.currFoodTime,
-						protein:Number(this.currFood.protein) * item.amount,
-						axunge:Number(this.currFood.axunge) * item.amount,
-						carbohydrate:Number(this.currFood.carbohydrate) * item.amount,
-						cholesterol:Number(this.currFood.cholesterol) * item.amount,
-						vitamin_a:Number(this.currFood.vitamin_a) * item.amount,
-						vitamin_d:Number(this.currFood.vitamin_d) * item.amount,
-						vitamin_e:Number(this.currFood.vitamin_e) * item.amount,
-						vitamin_k:Number(this.currFood.vitamin_k) * item.amount,
-						vitamin_b1:Number(this.currFood.vitamin_b1) * item.amount,
-						vitamin_b2:Number(this.currFood.vitamin_b2) * item.amount,
-						vitamin_b3:Number(this.currFood.vitamin_b3) * item.amount,
-						vitamin_b6:Number(this.currFood.vitamin_b6) * item.amount,
-						vitamin_b12:Number(this.currFood.vitamin_b12) * item.amount,
-						folic_acid:Number(this.currFood.folic_acid) * item.amount,
-						vitamin_c:Number(this.currFood.vitamin_c) * item.amount,
-						element_ca:Number(this.currFood.element_ca) * item.amount,
-						element_p:Number(this.currFood.element_p) * item.amount,
-						element_mg:Number(this.currFood.element_mg) * item.amount,
-						element_k:Number(this.currFood.element_k) * item.amount,
-						element_na:Number(this.currFood.element_na) * item.amount,
-						element_fe:Number(this.currFood.element_fe) * item.amount,
-						element_zn:Number(this.currFood.element_zn) * item.amount,
-						element_se:Number(this.currFood.element_se) * item.amount,
-						element_cu:Number(this.currFood.element_cu) * item.amount,
-						element_mn:Number(this.currFood.element_mn) * item.amount,
+						dining_type: this.currFoodTime,
+						protein: Number(this.currFood.protein) * item.amount,
+						axunge: Number(this.currFood.axunge) * item.amount,
+						carbohydrate: Number(this.currFood.carbohydrate) * item.amount,
+						cholesterol: Number(this.currFood.cholesterol) * item.amount,
+						vitamin_a: Number(this.currFood.vitamin_a) * item.amount,
+						vitamin_d: Number(this.currFood.vitamin_d) * item.amount,
+						vitamin_e: Number(this.currFood.vitamin_e) * item.amount,
+						vitamin_k: Number(this.currFood.vitamin_k) * item.amount,
+						vitamin_b1: Number(this.currFood.vitamin_b1) * item.amount,
+						vitamin_b2: Number(this.currFood.vitamin_b2) * item.amount,
+						vitamin_b3: Number(this.currFood.vitamin_b3) * item.amount,
+						vitamin_b6: Number(this.currFood.vitamin_b6) * item.amount,
+						vitamin_b12: Number(this.currFood.vitamin_b12) * item.amount,
+						folic_acid: Number(this.currFood.folic_acid) * item.amount,
+						vitamin_c: Number(this.currFood.vitamin_c) * item.amount,
+						element_ca: Number(this.currFood.element_ca) * item.amount,
+						element_p: Number(this.currFood.element_p) * item.amount,
+						element_mg: Number(this.currFood.element_mg) * item.amount,
+						element_k: Number(this.currFood.element_k) * item.amount,
+						element_na: Number(this.currFood.element_na) * item.amount,
+						element_fe: Number(this.currFood.element_fe) * item.amount,
+						element_zn: Number(this.currFood.element_zn) * item.amount,
+						element_se: Number(this.currFood.element_se) * item.amount,
+						element_cu: Number(this.currFood.element_cu) * item.amount,
+						element_mn: Number(this.currFood.element_mn) * item.amount
 					};
 					// if (this.searchArg.type === 'food') {
 					if (item.meal_no) {
 						obj['mixed_food_no'] = item.meal_no;
-						obj['diret_type'] = "mixed_food";
-						if(this.currFood.dish_type && this.currFood.dish_type.indexOf('自选') > -1 ){
-							if(this.minceListChoose && this.minceListChoose.length > 0){
-								this.minceListChoose.forEach(m=>{
-									obj.energy = (Number(obj.energy) + (m.unit_energy * item.amount)).toFixed(1)
-									obj.protein=(Number(obj.protein) + (Number(m.protein) * item.amount)).toFixed(1),
-									obj.axunge=(Number(obj.axunge) + (Number(m.axunge) * item.amount)).toFixed(1),
-									obj.carbohydrate=(Number(obj.carbohydrate) + (Number(m.carbohydrate) * item.amount)).toFixed(1),
-									obj.cholesterol=(Number(obj.cholesterol) + (Number(m.cholesterol) * item.amount)).toFixed(1),
-									obj.vitamin_a=(Number(obj.vitamin_a) + (Number(m.vitamin_a) * item.amount)).toFixed(1),
-									obj.vitamin_d=(Number(obj.vitamin_d) + (Number(m.vitamin_d) * item.amount)).toFixed(1),
-									obj.vitamin_e=(Number(obj.vitamin_e) + (Number(m.vitamin_e) * item.amount)).toFixed(1),
-									obj.vitamin_k=(Number(obj.vitamin_k) + (Number(m.vitamin_k) * item.amount)).toFixed(1),
-									obj.vitamin_b1=(Number(obj.vitamin_b1) + (Number(m.vitamin_b1) * item.amount)).toFixed(1),
-									obj.vitamin_b2=(Number(obj.vitamin_b2) + (Number(m.vitamin_b2) * item.amount)).toFixed(1),
-									obj.vitamin_b3=(Number(obj.vitamin_b3) + (Number(m.vitamin_b3) * item.amount)).toFixed(1),
-									obj.vitamin_b6=(Number(obj.vitamin_b6) + (Number(m.vitamin_b6) * item.amount)).toFixed(1),
-									obj.vitamin_b12=(Number(obj.vitamin_b12) + (Number(m.vitamin_b12) * item.amount)).toFixed(1),
-									obj.folic_acid=(Number(obj.folic_acid) + (Number(m.folic_acid) * item.amount)).toFixed(1),
-									obj.vitamin_c=(Number(obj.vitamin_c) + (Number(m.vitamin_c) * item.amount)).toFixed(1),
-									obj.element_ca=(Number(obj.element_ca) + (Number(m.element_ca) * item.amount)).toFixed(1),
-									obj.element_p=(Number(obj.element_p) + (Number(m.element_p) * item.amount)).toFixed(1),
-									obj.element_mg=(Number(obj.element_mg) + (Number(m.element_mg) * item.amount)).toFixed(1),
-									obj.element_k=(Number(obj.element_k) + (Number(m.element_k) * item.amount)).toFixed(1),
-									obj.element_na=(Number(obj.element_na) + (Number(m.element_na) * item.amount)).toFixed(1),
-									obj.element_fe=(Number(obj.element_fe) + (Number(m.element_fe) * item.amount)).toFixed(1),
-									obj.element_zn=(Number(obj.element_zn) + (Number(m.element_zn) * item.amount)).toFixed(1),
-									obj.element_se=(Number(obj.element_se) + (Number(m.element_se) * item.amount)).toFixed(1),
-									obj.element_cu=(Number(obj.element_cu) + (Number(m.element_cu) * item.amount)).toFixed(1),
-									obj.element_mn=(Number(obj.element_mn) + (Number(m.element_mn) * item.amount)).toFixed(1)
-								})
+						obj['diret_type'] = 'mixed_food';
+						if (this.currFood.dish_type && this.currFood.dish_type.indexOf('自选') > -1) {
+							if (this.minceListChoose && this.minceListChoose.length > 0) {
+								this.minceListChoose.forEach(m => {
+									obj.energy = (Number(obj.energy) + m.unit_energy * item.amount).toFixed(1);
+									(obj.protein = (Number(obj.protein) + Number(m.protein) * item.amount).toFixed(1)),
+										(obj.axunge = (Number(obj.axunge) + Number(m.axunge) * item.amount).toFixed(1)),
+										(obj.carbohydrate = (Number(obj.carbohydrate) + Number(m.carbohydrate) * item.amount).toFixed(1)),
+										(obj.cholesterol = (Number(obj.cholesterol) + Number(m.cholesterol) * item.amount).toFixed(1)),
+										(obj.vitamin_a = (Number(obj.vitamin_a) + Number(m.vitamin_a) * item.amount).toFixed(1)),
+										(obj.vitamin_d = (Number(obj.vitamin_d) + Number(m.vitamin_d) * item.amount).toFixed(1)),
+										(obj.vitamin_e = (Number(obj.vitamin_e) + Number(m.vitamin_e) * item.amount).toFixed(1)),
+										(obj.vitamin_k = (Number(obj.vitamin_k) + Number(m.vitamin_k) * item.amount).toFixed(1)),
+										(obj.vitamin_b1 = (Number(obj.vitamin_b1) + Number(m.vitamin_b1) * item.amount).toFixed(1)),
+										(obj.vitamin_b2 = (Number(obj.vitamin_b2) + Number(m.vitamin_b2) * item.amount).toFixed(1)),
+										(obj.vitamin_b3 = (Number(obj.vitamin_b3) + Number(m.vitamin_b3) * item.amount).toFixed(1)),
+										(obj.vitamin_b6 = (Number(obj.vitamin_b6) + Number(m.vitamin_b6) * item.amount).toFixed(1)),
+										(obj.vitamin_b12 = (Number(obj.vitamin_b12) + Number(m.vitamin_b12) * item.amount).toFixed(1)),
+										(obj.folic_acid = (Number(obj.folic_acid) + Number(m.folic_acid) * item.amount).toFixed(1)),
+										(obj.vitamin_c = (Number(obj.vitamin_c) + Number(m.vitamin_c) * item.amount).toFixed(1)),
+										(obj.element_ca = (Number(obj.element_ca) + Number(m.element_ca) * item.amount).toFixed(1)),
+										(obj.element_p = (Number(obj.element_p) + Number(m.element_p) * item.amount).toFixed(1)),
+										(obj.element_mg = (Number(obj.element_mg) + Number(m.element_mg) * item.amount).toFixed(1)),
+										(obj.element_k = (Number(obj.element_k) + Number(m.element_k) * item.amount).toFixed(1)),
+										(obj.element_na = (Number(obj.element_na) + Number(m.element_na) * item.amount).toFixed(1)),
+										(obj.element_fe = (Number(obj.element_fe) + Number(m.element_fe) * item.amount).toFixed(1)),
+										(obj.element_zn = (Number(obj.element_zn) + Number(m.element_zn) * item.amount).toFixed(1)),
+										(obj.element_se = (Number(obj.element_se) + Number(m.element_se) * item.amount).toFixed(1)),
+										(obj.element_cu = (Number(obj.element_cu) + Number(m.element_cu) * item.amount).toFixed(1)),
+										(obj.element_mn = (Number(obj.element_mn) + Number(m.element_mn) * item.amount).toFixed(1));
+								});
 							}
-							if(this.chooseBurdening && this.chooseBurdening.length > 0){
-								this.chooseBurdening.forEach(n=>{
-									obj.energy = (Number(obj.energy) + (n.unit_energy * item.amount)).toFixed(1)
-									obj.protein=(Number(obj.protein) + (Number(n.protein) * item.amount)).toFixed(1),
-									obj.axunge=(Number(obj.axunge) + (Number(n.axunge) * item.amount)).toFixed(1),
-									obj.carbohydrate=(Number(obj.carbohydrate) + (Number(n.carbohydrate) * item.amount)).toFixed(1),
-									obj.cholesterol=(Number(obj.cholesterol) + (Number(n.cholesterol) * item.amount)).toFixed(1),
-									obj.vitamin_a=(Number(obj.vitamin_a) + (Number(n.vitamin_a) * item.amount)).toFixed(1),
-									obj.vitamin_d=(Number(obj.vitamin_d) + (Number(n.vitamin_d) * item.amount)).toFixed(1),
-									obj.vitamin_e=(Number(obj.vitamin_e) + (Number(n.vitamin_e) * item.amount)).toFixed(1),
-									obj.vitamin_k=(Number(obj.vitamin_k) + (Number(n.vitamin_k) * item.amount)).toFixed(1),
-									obj.vitamin_b1=(Number(obj.vitamin_b1) + (Number(n.vitamin_b1) * item.amount)).toFixed(1),
-									obj.vitamin_b2=(Number(obj.vitamin_b2) + (Number(n.vitamin_b2) * item.amount)).toFixed(1),
-									obj.vitamin_b3=(Number(obj.vitamin_b3) + (Number(n.vitamin_b3) * item.amount)).toFixed(1),
-									obj.vitamin_b6=(Number(obj.vitamin_b6) + (Number(n.vitamin_b6) * item.amount)).toFixed(1),
-									obj.vitamin_b12=(Number(obj.vitamin_b12) + (Number(n.vitamin_b12) * item.amount)).toFixed(1),
-									obj.folic_acid=(Number(obj.folic_acid) + (Number(n.folic_acid) * item.amount)).toFixed(1),
-									obj.vitamin_c=(Number(obj.vitamin_c) + (Number(n.vitamin_c) * item.amount)).toFixed(1),
-									obj.element_ca=(Number(obj.element_ca) + (Number(n.element_ca) * item.amount)).toFixed(1),
-									obj.element_p=(Number(obj.element_p) + (Number(n.element_p) * item.amount)).toFixed(1),
-									obj.element_mg=(Number(obj.element_mg) + (Number(n.element_mg) * item.amount)).toFixed(1),
-									obj.element_k=(Number(obj.element_k) + (Number(n.element_k) * item.amount)).toFixed(1),
-									obj.element_na=(Number(obj.element_na) + (Number(n.element_na) * item.amount)).toFixed(1),
-									obj.element_fe=(Number(obj.element_fe) + (Number(n.element_fe) * item.amount)).toFixed(1),
-									obj.element_zn=(Number(obj.element_zn) + (Number(n.element_zn) * item.amount)).toFixed(1),
-									obj.element_se=(Number(obj.element_se) + (Number(n.element_se) * item.amount)).toFixed(1),
-									obj.element_cu=(Number(obj.element_cu) + (Number(n.element_cu) * item.amount)).toFixed(1),
-									obj.element_mn=(Number(obj.element_mn) + (Number(n.element_mn) * item.amount)).toFixed(1)
-								})
+							if (this.chooseBurdening && this.chooseBurdening.length > 0) {
+								this.chooseBurdening.forEach(n => {
+									obj.energy = (Number(obj.energy) + n.unit_energy * item.amount).toFixed(1);
+									(obj.protein = (Number(obj.protein) + Number(n.protein) * item.amount).toFixed(1)),
+										(obj.axunge = (Number(obj.axunge) + Number(n.axunge) * item.amount).toFixed(1)),
+										(obj.carbohydrate = (Number(obj.carbohydrate) + Number(n.carbohydrate) * item.amount).toFixed(1)),
+										(obj.cholesterol = (Number(obj.cholesterol) + Number(n.cholesterol) * item.amount).toFixed(1)),
+										(obj.vitamin_a = (Number(obj.vitamin_a) + Number(n.vitamin_a) * item.amount).toFixed(1)),
+										(obj.vitamin_d = (Number(obj.vitamin_d) + Number(n.vitamin_d) * item.amount).toFixed(1)),
+										(obj.vitamin_e = (Number(obj.vitamin_e) + Number(n.vitamin_e) * item.amount).toFixed(1)),
+										(obj.vitamin_k = (Number(obj.vitamin_k) + Number(n.vitamin_k) * item.amount).toFixed(1)),
+										(obj.vitamin_b1 = (Number(obj.vitamin_b1) + Number(n.vitamin_b1) * item.amount).toFixed(1)),
+										(obj.vitamin_b2 = (Number(obj.vitamin_b2) + Number(n.vitamin_b2) * item.amount).toFixed(1)),
+										(obj.vitamin_b3 = (Number(obj.vitamin_b3) + Number(n.vitamin_b3) * item.amount).toFixed(1)),
+										(obj.vitamin_b6 = (Number(obj.vitamin_b6) + Number(n.vitamin_b6) * item.amount).toFixed(1)),
+										(obj.vitamin_b12 = (Number(obj.vitamin_b12) + Number(n.vitamin_b12) * item.amount).toFixed(1)),
+										(obj.folic_acid = (Number(obj.folic_acid) + Number(n.folic_acid) * item.amount).toFixed(1)),
+										(obj.vitamin_c = (Number(obj.vitamin_c) + Number(n.vitamin_c) * item.amount).toFixed(1)),
+										(obj.element_ca = (Number(obj.element_ca) + Number(n.element_ca) * item.amount).toFixed(1)),
+										(obj.element_p = (Number(obj.element_p) + Number(n.element_p) * item.amount).toFixed(1)),
+										(obj.element_mg = (Number(obj.element_mg) + Number(n.element_mg) * item.amount).toFixed(1)),
+										(obj.element_k = (Number(obj.element_k) + Number(n.element_k) * item.amount).toFixed(1)),
+										(obj.element_na = (Number(obj.element_na) + Number(n.element_na) * item.amount).toFixed(1)),
+										(obj.element_fe = (Number(obj.element_fe) + Number(n.element_fe) * item.amount).toFixed(1)),
+										(obj.element_zn = (Number(obj.element_zn) + Number(n.element_zn) * item.amount).toFixed(1)),
+										(obj.element_se = (Number(obj.element_se) + Number(n.element_se) * item.amount).toFixed(1)),
+										(obj.element_cu = (Number(obj.element_cu) + Number(n.element_cu) * item.amount).toFixed(1)),
+										(obj.element_mn = (Number(obj.element_mn) + Number(n.element_mn) * item.amount).toFixed(1));
+								});
 							}
 						}
 					} else {
 						obj['diet_contents_no'] = item.food_no;
 						obj['diret_type'] = 'diet_contents';
-						if(this.isCookDataChoose){
-							obj['cook_method'] = this.currentCookData
+						if (this.isCookDataChoose) {
+							obj['cook_method'] = this.currentCookData;
 						}
 					}
 					// }
@@ -1327,58 +1353,57 @@ export default {
 				let req = [{ serviceName: serviceName, colNames: ['*'], data: arr }];
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS') {
-					console.log("-------添加---",res)
-					this.addRecodChildData(res.data.response[0].response.effect_data[0].diet_record_no)
+					console.log('-------添加---', res);
+					this.addRecodChildData(res.data.response[0].response.effect_data[0].diet_record_no);
 					// if (this.searchArg.type === 'food') {
 					// this.getChooseFoodList();
 
 					// 通知健康追踪页面，饮食记录已改变，需要刷新数据
-					// uni.$emit('dietUpdate');
-					// uni.navigateBack({
-					// 	delta: 0
-					// });
+					uni.$emit('dietUpdate');
+					uni.navigateBack({
+						delta: 0
+					});
 					// }
 				}
 			}
 		},
-		async addRecodChildData(id){
-			let chooseBurdening = []
-			let minceListChoose = []
-			if(this.chooseBurdening.length > 0){
-				this.chooseBurdening.forEach(item=>{
-						let obj = {
-							item_form_type:item.item_form_type,
-							choose_type:item.choose_type,
-							food_no:item.food_no,
-							unit:item.unit,
-							name:item.name,
-							unit_amount:item.unit_amount,
-							diet_record_no:id
-						}
-						chooseBurdening.push(obj)
-				})
+		async addRecodChildData(id) {
+			let chooseBurdening = [];
+			let minceListChoose = [];
+			if (this.chooseBurdening.length > 0) {
+				this.chooseBurdening.forEach(item => {
+					let obj = {
+						item_form_type: item.item_form_type,
+						choose_type: item.choose_type,
+						food_no: item.food_no,
+						unit: item.unit,
+						name: item.name,
+						unit_amount: item.unit_amount,
+						diet_record_no: id
+					};
+					chooseBurdening.push(obj);
+				});
 			}
-			if(this.minceListChoose.length > 0){
-				this.minceListChoose.forEach(alone=>{
+			if (this.minceListChoose.length > 0) {
+				this.minceListChoose.forEach(alone => {
 					let obj1 = {
-						item_form_type:alone.item_form_type,
-						item_mixed_food_no:alone.item_mixed_food_no,
-						choose_type:alone.choose_type,
-						unit:alone.unit,
-						name:item.name,
-						unit_amount:alone.unit_amount,
-						diet_record_no:id
-					}
-					minceListChoose.push(obj1)
-				})
-				
+						item_form_type: alone.item_form_type,
+						item_mixed_food_no: alone.item_mixed_food_no,
+						choose_type: alone.choose_type,
+						unit: alone.unit,
+						name: item.name,
+						unit_amount: alone.unit_amount,
+						diet_record_no: id
+					};
+					minceListChoose.push(obj1);
+				});
 			}
-			let data = [...chooseBurdening,...minceListChoose]
+			let data = [...chooseBurdening, ...minceListChoose];
 			let serviceName = 'srvhealth_diet_record_item_add';
 			let url = this.getServiceUrl('health', serviceName, 'operate');
-			let req = [{ serviceName: serviceName, colNames: ['*'], condition:[{colName:'diet_record_no',ruleType:'eq',value:id}], data: data }];
+			let req = [{ serviceName: serviceName, colNames: ['*'], condition: [{ colName: 'diet_record_no', ruleType: 'eq', value: id }], data: data }];
 			let res = await this.$http.post(url, req);
-			if(res.data.state === 'SUCCESS'){
+			if (res.data.state === 'SUCCESS') {
 				// uni.$emit('dietUpdate');
 				// uni.navigateBack({
 				// 	delta: 0
@@ -1416,15 +1441,15 @@ export default {
 	background-color: #f8f8f8;
 	min-height: 100vh;
 }
-.food_wrap_top{
+.food_wrap_top {
 	display: flex;
-	justify-content: space-between!important;
+	justify-content: space-between !important;
 	font-weight: 700;
 	color: #000;
 	font-size: 30rpx;
 }
-.ingredient{
-	justify-content: center!important;
+.ingredient {
+	justify-content: center !important;
 }
 .contents {
 	// overflow: hidden;
@@ -1802,25 +1827,25 @@ export default {
 	margin-left: 10px;
 	margin-top: 10px;
 	// padding: 20upx 0;
-	.ele-text-top-tit{
+	.ele-text-top-tit {
 		display: flex;
 		margin-bottom: 30rpx;
-		text{
+		text {
 			font-size: 30rpx;
 			padding: 8rpx 20rpx;
 			border-bottom: 1px solid transparent;
 			margin-right: 20rpx;
-			
+
 			// border-radius: 30rpx;
 		}
-		.active-text-top-tit{
+		.active-text-top-tit {
 			// background-color: #fbbd08;
-			color: #FBBD08;
+			color: #fbbd08;
 			font-weight: 700;
-			border-color: #FBBD08;
+			border-color: #fbbd08;
 		}
 	}
-	
+
 	.ele-text-cen {
 		display: flex;
 		flex-wrap: wrap;
@@ -1916,24 +1941,24 @@ export default {
 			margin-left: 20upx;
 		}
 	}
-	.cook{
+	.cook {
 		margin-bottom: 16rpx;
-		.calculate-l{
+		.calculate-l {
 			margin-bottom: 0;
 		}
-		.unit{
+		.unit {
 			padding: 0rpx 30rpx;
 		}
-		text{
-			&:nth-child(2){
+		text {
+			&:nth-child(2) {
 				color: #999;
 				margin-right: 8rpx;
 				border: 1px solid #999;
 				padding: 4rpx 30rpx;
 				border-radius: 24rpx;
 			}
-			
-			&:last-child{
+
+			&:last-child {
 				// margin-bottom: -10rpx;
 				// font-weight: 700;
 				border: 1px solid #999;
@@ -1941,14 +1966,14 @@ export default {
 				border-radius: 24rpx;
 			}
 		}
-		.active-cook-data{
+		.active-cook-data {
 			background-color: coral;
-			color: white!important;
-			border-color: coral!important;
+			color: white !important;
+			border-color: coral !important;
 		}
 	}
 }
-.minced{
+.minced {
 	display: flex;
 	align-items: center;
 	width: 100%;
@@ -1959,26 +1984,26 @@ export default {
 	// .minced-item-all{
 	// 	font-size: 24rpx;
 	// 	display: flex;
-		.minced-item{
-			padding: 10rpx 16rpx;
-			background: #f8f8f8;
-			border:1px solid #999;
-			color: #999;
-			border-radius: 30rpx;
-			margin-right: 10rpx;
-			margin-bottom: 10rpx;
-			min-width: 40rpx;
-			text-align: center;
-		}
-		.minced-item-active{
-			padding: 10rpx 16rpx;
-			background: #f37b1d;
-			border:1px solid #f37b1d;
-			border-radius: 30rpx;
-			color: #fff;
-		}
+	.minced-item {
+		padding: 10rpx 16rpx;
+		background: #f8f8f8;
+		border: 1px solid #999;
+		color: #999;
+		border-radius: 30rpx;
+		margin-right: 10rpx;
+		margin-bottom: 10rpx;
+		min-width: 40rpx;
+		text-align: center;
+	}
+	.minced-item-active {
+		padding: 10rpx 16rpx;
+		background: #f37b1d;
+		border: 1px solid #f37b1d;
+		border-radius: 30rpx;
+		color: #fff;
+	}
 	// }
-	.minced-right-add{
+	.minced-right-add {
 		padding: 5px 30rpx;
 		border: 1px dashed #999;
 		border-radius: 30rpx;
@@ -1993,7 +2018,7 @@ export default {
 	display: flex;
 	align-items: center;
 	margin-left: 10rpx;
-	.amount-left{
+	.amount-left {
 		color: #000;
 	}
 	.number {
@@ -2023,72 +2048,71 @@ export default {
 		}
 	}
 }
-.material-list-wrap{
-	.shop-detail-bot-tab{
+.material-list-wrap {
+	.shop-detail-bot-tab {
 		min-height: 300upx;
-		.shop-detail-bot-tab-t{
+		.shop-detail-bot-tab-t {
 			display: flex;
 			justify-content: space-around;
-			background-color: rgb(240,240,240);
+			background-color: rgb(240, 240, 240);
 			padding: 5px 0;
 			width: 95%;
 			margin: 0 auto;
-			text{
+			text {
 				width: 33%;
 				text-align: center;
 			}
 		}
-		.shop-detail-bot-tab-m{
-			.shop-detail-bot-tab-m-item{
+		.shop-detail-bot-tab-m {
+			.shop-detail-bot-tab-m-item {
 				display: flex;
 				justify-content: space-around;
 				padding: 10rpx 0;
 				border-bottom: 1px solid #f2f3f3;
 				width: 95%;
 				margin: 0 auto;
-				
-				text{
+
+				text {
 					width: 24%;
-					&:first-child{
+					&:first-child {
 						width: 50%;
-					}					
-					text-align: center;						
+					}
+					text-align: center;
 				}
-				&:last-of-type{
+				&:last-of-type {
 					border-bottom: none;
 				}
 			}
-			.operation-food{
+			.operation-food {
 				width: 33%;
 				text-align: center;
-				text{
+				text {
 					color: red;
 				}
 			}
-			
 		}
-		.detail-none{
-			.detail-none-t{
-				min-height: calc(100vh - 160upx) ;
+		.detail-none {
+			.detail-none-t {
+				min-height: calc(100vh - 160upx);
 				display: flex;
 				flex-direction: column;
 				align-items: center;
 				justify-content: center;
-				image{
+				image {
 					width: 140upx;
 					height: 140upx;
 				}
-				text{
+				text {
 					color: #b0b0b0;
 				}
 			}
 		}
 	}
 }
-.uni-ec-canvas-wrap{
-	.uni-ec-canvas-top{
+.uni-ec-canvas-wrap {
+	.uni-ec-canvas-top {
 		display: flex;
-		.uni-ec-canvas-top-item{
+		.uni-ec-canvas-top-item {
 			display: flex;
 			align-items: center;
 			padding: 5px 10px;
@@ -2098,13 +2122,13 @@ export default {
 			border: 1px solid #ccc;
 			margin-right: 14rpx;
 		}
-		.active-approve{
+		.active-approve {
 			background-color: #8dc63f;
 			color: #fff;
 			border-color: #8dc63f;
 		}
 	}
-	.uni-ec-canvas-bot{
+	.uni-ec-canvas-bot {
 		width: 710rpx;
 		height: 540rpx;
 		margin-top: 20rpx;
@@ -2114,23 +2138,22 @@ export default {
 	width: 710rpx;
 	height: 540rpx;
 }
-.cook-top{
+.cook-top {
 	padding: 0 15rpx;
 	justify-content: space-between;
 }
-.cook-wrap{
+.cook-wrap {
 	display: flex;
 	flex-wrap: wrap;
-	.cook-item{
+	.cook-item {
 		padding: 4rpx 30rpx;
 		border: 1px solid #ccc;
 		margin-right: 20rpx;
 		margin-bottom: 10rpx;
-		text{
-			
+		text {
 		}
 	}
-	.active-cook-item{
+	.active-cook-item {
 		color: red;
 		border-color: red;
 	}
@@ -2170,5 +2193,4 @@ export default {
 		}
 	}
 }
-
 </style>
