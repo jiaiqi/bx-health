@@ -72,6 +72,7 @@ export default {
 	},
 	methods: {
 		toPages(e) {
+			let self = this
 			switch (e) {
 				case 'doctor':
 					uni.navigateTo({
@@ -89,10 +90,41 @@ export default {
 					});
 					break;
 				case 'userList':
-					uni.navigateTo({
-						url: '/personalPages/userList/userList'
-					});
+					this.getDoctorInfo().then(res=>{
+						if(res){
+							uni.navigateTo({
+								url: '/personalPages/userList/userList'
+							});
+						}else{
+							uni.showModal({
+								title:'提示',
+								content:'您还不是医生，是否申请成为医生',
+								success(res) {
+									if(res.confirm){
+										self.toPages('beDoctor')
+									}
+								}
+							})
+						}
+					})
 					break;
+			}
+		},
+		async getDoctorInfo() {
+			// 查找医生信息
+			let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_doctor_select',
+				colNames: ['*'],
+				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.wxUserInfo.user_no ? this.wxUserInfo.user_no  : this.userInfo.userno }]
+			};
+			if (req.condition[0].value) {
+				let res = await this.$http.post(url, req);
+				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+					return res.data.data[0];
+				} else {
+					return false;
+				}
 			}
 		},
 		toPersonDetail(type) {

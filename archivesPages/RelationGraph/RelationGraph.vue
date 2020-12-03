@@ -30,7 +30,7 @@
 			<view class="video-box" v-if="txv_path"><video class="video-player" :src="txv_path" :usePoster="true" controls object-fit="contain"></video></view>
 			<view v-html="nodeDetail.node_desc" v-if="nodeDetail.node_desc" class="rich-text"></view>
 		</view>
-		<view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view>
+		<!-- <view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view> -->
 	</view>
 </template>
 

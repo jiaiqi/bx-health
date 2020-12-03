@@ -1,9 +1,8 @@
 <template>
 	<view class="form-page">
-		<cu-custom bgColor="bg-blue" :isBack="true">
-			<!-- <block slot="backText">返回</block> -->
+<!-- 		<cu-custom bgColor="bg-blue" :isBack="true">
 			<block slot="content" v-if="colsV2Data && colsV2Data.service_view_name">{{ colsV2Data.service_view_name }}</block>
-		</cu-custom>
+		</cu-custom> -->
 		<view class="main-table">
 			<!-- <view class="normal-title">子表</view> -->
 			<bxform

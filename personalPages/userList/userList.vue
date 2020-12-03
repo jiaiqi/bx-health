@@ -36,7 +36,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_doctor_select',
 				colNames: ['*'],
-				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.userInfo.user_no ? this.userInfo.user_no : this.currentUser.userno }],
+				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.userInfo.user_no ? this.userInfo.user_no : this.currentUser.userno }]
 			};
 			if (req.condition[0].value) {
 				let res = await this.$http.post(url, req);
@@ -73,16 +73,14 @@ export default {
 			this.menuAgList = [obj];
 		},
 		buildSearchArg(doctorInfo) {
-			if (doctorInfo.dt_no) {
-				this.searchArg = {
-					serviceName: 'srvhealth_patient_doctor_select',
-					imgCol: 'customer_profile_url',
-					condition: [{ colName: 'manager_no', ruleType: 'like', value: doctorInfo.dt_no }],
-					wordKey: {
-						title: 'customer_name'
-					}
-				};
-			}
+			this.searchArg = {
+				serviceName: 'srvhealth_patient_doctor_select',
+				imgCol: 'customer_profile_url',
+				condition: [{ colName: 'manager_no', ruleType: 'like', value: doctorInfo && doctorInfo.dt_no ? doctorInfo.dt_no : '**' }],
+				wordKey: {
+					title: 'customer_name'
+				}
+			};
 		}
 	},
 	onShow() {
@@ -95,12 +93,12 @@ export default {
 			this.getDoctorInfo().then(res => {
 				if (res && res.dt_no) {
 					this.doctorInfo = res;
-					this.buildSearchArg(res);
-					this.buildMenuAgList();
 				}
+				this.buildSearchArg(res);
+				this.buildMenuAgList();
 			});
 		}
-	},
+	}
 };
 </script>
 
