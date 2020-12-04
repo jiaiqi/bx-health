@@ -558,7 +558,8 @@ export default {
 				if (result > 200) {
 					result = 200;
 				}
-				return (result * 20) / 200;
+				result = (result * 20) / 200;
+				return Number(result.toFixed(1));
 			} else {
 				return 0;
 			}
