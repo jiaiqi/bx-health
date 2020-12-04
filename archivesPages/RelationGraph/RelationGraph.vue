@@ -29,6 +29,36 @@
 			></txv-video> -->
 			<view class="video-box" v-if="txv_path"><video class="video-player" :src="txv_path" :usePoster="true" controls object-fit="contain"></video></view>
 			<view v-html="nodeDetail.node_desc" v-if="nodeDetail.node_desc" class="rich-text"></view>
+
+			<view class="link-box">
+				<view class="node-link">
+					<!-- <view class="link-title">内部页面</view> -->
+					<view class="link-item-box" v-for="item in nodesLinkList['inPage']" @click="toLink(item)">
+						<view class="title">{{ item.link_name }}</view>
+						<view class="origin">来源：{{ item.external_link_src }}</view>
+					</view>
+				</view>
+				<view class="node-link">
+					<!-- <view class="link-title">外部页面</view> -->
+					<view class="link-item-box" v-for="item in nodesLinkList['outPage']" @click="toLink(item)">
+						<view class="title">
+							<text class="cuIcon-text margin-right-xs"></text>
+							{{ item.link_name }}
+						</view>
+						<view class="origin">来源：{{ item.external_link_src }}</view>
+					</view>
+				</view>
+				<view class="node-link">
+					<!-- <view class="link-title">外部视频</view> -->
+					<view class="link-item-box" v-for="item in nodesLinkList['outVideo']" @click="toLink(item)">
+						<view class="title">
+							<text class="cuIcon-video margin-right-xs"></text>
+							{{ item.link_name }}
+						</view>
+						<view class="origin">来源：{{ item.external_link_src }}</view>
+					</view>
+				</view>
+			</view>
 		</view>
 		<!-- <view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view> -->
 	</view>
@@ -52,10 +82,36 @@ export default {
 			linkPath: [],
 			graphData: [],
 			nodeData: [],
-			nodeDetail:null,
+			nodeDetail: null,
+			nodesLinkList: {
+				outPage: [],
+				inPage: [],
+				outVideo: []
+			} //节点链接列表
 		};
 	},
 	methods: {
+		toLink(item) {
+			let url = '';
+			switch (item.link_type) {
+				case '外部页面':
+					if (item.external_page_link_url) {
+						url = '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(this.getResultUrl(item.external_page_link_url));
+					}
+					break;
+				case '外部视频':
+					url = '/archivesPages/VideoPlayer/VideoPlayer?src='+encodeURIComponent(item.video_url);
+					break;
+				case '内部页面':
+					url = item.page_link_url;
+					break;
+			}
+			if (url) {
+				uni.navigateTo({
+					url: url
+				});
+			}
+		},
 		toSearchPage() {
 			uni.navigateTo({
 				url: '/archivesPages/GraphSearch/GraphSearch'
@@ -100,98 +156,47 @@ export default {
 					if (!pre.includes(cur.target_node_no)) {
 						pre.push(cur.target_node_no);
 					}
-					if(!pre.includes(this.currentNodeNo)){
+					if (!pre.includes(this.currentNodeNo)) {
 						pre.push(this.currentNodeNo);
 					}
 					return pre;
 				}, []);
 				await this.getNodeDetail(nodeNoArr.toString(), 'total');
-				nodeData = this.nodeData
+				nodeData = this.nodeData;
 			}
 			let nameArr = [];
 			let nodes = [];
-			nodeData = nodeData.map(node=>{
-				data.forEach(item=>{
-					if(item.target_node_no===node.kn_no){
-						node.relation = 'target'
+			nodeData = nodeData.map(node => {
+				data.forEach(item => {
+					if (item.target_node_no === node.kn_no) {
+						node.relation = 'target';
 					}
-					if(item.source_node_no===node.kn_no){
-						node.relation = 'source'
+					if (item.source_node_no === node.kn_no) {
+						node.relation = 'source';
 					}
-				})
-				return node
-			})
-			console.log(this.deepClone(nodeData))
-			nodeData.forEach(node=>{
-					nodes.push({
-						// symbol:'image://http://xxx.xxx.xxx/a/b.png',
+				});
+				return node;
+			});
+			console.log(this.deepClone(nodeData));
+			nodeData.forEach(node => {
+				nodes.push({
+					// #ifdef H5
+					symbol: node && node.node_icon ? `image://${node.node_icon}` : node.kn_no === this.currentNodeNo ? 'diamond' : 'circle', //中间的节点
+					// #endif
+					// #ifdef MP-WEIXIN
+					symbol: node.kn_no === this.currentNodeNo ? 'diamond' : 'circle', //中间的节点
+					// #endif
+					// symbol: 'diamond', //中间的节点
+					name: node.node_name,
+					nodeNo: node.kn_no,
+					category: this.currentNodeNo === node.kn_no ? 1 : node.relation === 'source' ? 0 : 2,
+					label: {
 						// #ifdef H5
-						symbol: node && node.node_icon ? `image://${node.node_icon}` :node.kn_no=== this.currentNodeNo? 'diamond':'circle', //中间的节点
+						position: node && node.node_icon ? 'bottom' : 'inside'
 						// #endif
-						// #ifdef MP-WEIXIN
-						symbol:node.kn_no=== this.currentNodeNo? 'diamond':'circle', //中间的节点
-						// #endif
-						// symbol: 'diamond', //中间的节点
-						name: node.node_name,
-						nodeNo: node.kn_no,
-						category: this.currentNodeNo===node.kn_no?1:node.relation==="source"?0: 2,
-						label: {
-							// #ifdef H5
-							position: node && node.node_icon ? 'bottom' : 'inside'
-							// #endif
-						}
-					});
-				})
-				debugger
-			// data.forEach((item, index) => {
-			// 	let nodeDetail = this.nodeDetail;
-			// 	if (!nameArr.includes(item.target_name)) {
-			// 		if (item.target_name === this.currentNodes) {
-			// 			nodes.push({
-			// 				// symbol:'image://http://xxx.xxx.xxx/a/b.png',
-			// 				symbol: nodeDetail && nodeDetail.node_icon ? `image://${nodeDetail.node_icon}` : 'diamond', //中间的节点
-			// 				// symbol: 'diamond', //中间的节点
-			// 				name: item.target_name,
-			// 				nodeNo: item.target_node_no,
-			// 				category: 1,
-			// 				label: {
-			// 					position: nodeDetail && nodeDetail.node_icon ? 'bottom' : 'inside'
-			// 				}
-			// 			});
-			// 		} else {
-			// 			nodes.push({
-			// 				name: item.target_name,
-			// 				nodeNo: item.target_node_no,
-			// 				category: 2
-			// 			});
-			// 		}
-			// 		nameArr.push(item.target_name);
-			// 	}
-			// 	if (!nameArr.includes(item.source_name)) {
-			// 		if (item.source_name === this.currentNodes) {
-			// 			nodes.push({
-			// 				// symbol:'image://http://xxx.xxx.xxx/a/b.png',
-			// 				symbol: nodeDetail && nodeDetail.node_icon ? `image://${nodeDetail.node_icon}` : 'diamond', //中间的节点
-			// 				name: item.source_name,
-			// 				nodeNo: item.source_node_no,
-			// 				category: 1,
-			// 				label: {
-			// 					position: nodeDetail && nodeDetail.node_icon ? 'bottom' : 'inside'
-			// 				}
-			// 			});
-			// 		} else {
-			// 			nodes.push({
-			// 				name: item.source_name,
-			// 				nodeNo: item.source_node_no,
-			// 				category: 0
-			// 			});
-			// 		}
-			// 		nameArr.push(item.source_name);
-			// 	}
-			// });
-			// data.forEach((item, index) => {
-
-			// });
+					}
+				});
+			});
 			let links = data.map(item => {
 				return {
 					value: `  ${item.path_name ? item.path_name : ''} ${item.path_value ? `(${item.path_value})` : ''}`,
@@ -223,25 +228,6 @@ export default {
 					};
 				}
 			});
-			// links.forEach(link => {
-			// 	link.label = {
-			// 		align: 'center',
-			// 		fontSize: 12
-			// 	};
-			// 	if (link.name === '参股') {
-			// 		link.lineStyle = {
-			// 			color: color2
-			// 		};
-			// 	} else if (link.name === '董事') {
-			// 		link.lineStyle = {
-			// 			color: color1
-			// 		};
-			// 	} else if (link.name === '法人') {
-			// 		link.lineStyle = {
-			// 			color: color3
-			// 		};
-			// 	}
-			// });
 
 			let categories = [
 				{
@@ -351,6 +337,49 @@ export default {
 			};
 			this.nutrientsChartOption.option = option;
 		},
+		async getNodesLink() {
+			// 查找节点链接列表
+			let url = this.getServiceUrl('health', 'srvhealth_knowledge_node_link_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_knowledge_node_link_select',
+				colNames: ['*'],
+				condition: [{ colName: 'kn_no', ruleType: 'eq', value: this.currentNodeNo }]
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data)) {
+				
+				for(let item of res.data.data){
+					if (item.link_type === '外部视频' && item.external_link_src === '腾讯视频') {
+						item.video_url = await this.getVideoInfo(item.video_link);
+					}
+					// return item;
+				}
+				let list = res.data.data.reduce((pre, cur) => {
+					let key = '';
+					switch (cur.link_type) {
+						case '外部页面':
+							key = 'outPage';
+							break;
+						case '内部页面':
+							key = 'inPage';
+							break;
+						case '外部视频':
+							key = 'outVideo';
+							break;
+					}
+					if (pre[key] && Array.isArray(pre[key]) === true) {
+						pre[key].push(cur);
+					} else {
+						pre[key] = [cur];
+					}
+					return pre;
+				}, {});
+				this.nodesLinkList = list;
+				// res.data.data.map(item => {
+					
+				// });
+			}
+		},
 		async getNodeDetail(no, type) {
 			let url = this.getServiceUrl('health', 'srvhealth_knowledge_node_select', 'select');
 			let req = {
@@ -361,19 +390,21 @@ export default {
 				// 	// data: [{ colName: 'kn_no', ruleType: 'eq', value: no }]
 				// },
 				condition: [{ colName: 'kn_no', ruleType: 'in', value: no }],
-				page: { pageNo: 1}
+				page: { pageNo: 1 }
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				let nodeDetail = res.data.data.find(item => item.kn_no === this.currentNodeNo);
 				this.nodeDetail = res.data.data.find(item => item.kn_no === this.currentNodeNo);
+
 				if (this.nodeDetail && this.nodeDetail.video_link) {
-					this.getVideoInfo(this.nodeDetail.video_link);
+					// this.getVideoInfo(this.nodeDetail.video_link);
 				} else {
 					this.txv_path = '';
 				}
-				if(nodeDetail){
+				if (nodeDetail) {
 					this.currentNodes = this.nodeDetail.node_name;
+					this.getNodesLink();
 					this.changeLinkPath({
 						no: this.nodeDetail.kn_no,
 						name: this.nodeDetail.node_name
@@ -382,7 +413,6 @@ export default {
 				if (type === 'total') {
 					this.nodeData = res.data.data;
 				}
-				debugger
 				return nodeDetail;
 			} else {
 				this.nodeDetail = null;
@@ -394,17 +424,17 @@ export default {
 			let nodetail = await this.getNodeDetail(e.no, false);
 			if ((nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
 				// if (e.no !== this.currentNodeNo) {
-					this.currentNodes = e.name;
-					this.currentNodeNo = e.no;
-					this.geteChartsData();
-					this.changeLinkPath({ name: e.name, no: e.no });
+				this.currentNodes = e.name;
+				this.currentNodeNo = e.no;
+				this.geteChartsData();
+				this.changeLinkPath({ name: e.name, no: e.no });
 				// }
 			} else if (nodetail.link_type) {
 				let url = '';
 				if (nodetail.link_type.indexOf('内部页面') !== -1) {
 					url = nodetail.page_link_url;
 				} else if (nodetail.link_type.indexOf('外部页面') !== -1) {
-					let resultUrl = await this.getResultUrl(nodetail.external_page_link_url);
+					let resultUrl = this.getResultUrl(nodetail.external_page_link_url);
 					url = '/publicPages/webviewPage/webviewPage?webUrl=' + resultUrl;
 					if (!resultUrl) {
 						return;
@@ -455,11 +485,10 @@ export default {
 				this.currentNodes = e.name;
 				this.currentNodeNo = e.data.nodeNo;
 				let nodetail = await this.getNodeDetail(e.data.nodeNo, false);
-				debugger
 				if ((nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
 					// if (e.data.nodeNo !== this.currentNodeNo) {
-						this.geteChartsData();
-						this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
+					this.geteChartsData();
+					this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
 					// }
 				} else if (nodetail.link_type) {
 					let url = '';
@@ -485,12 +514,39 @@ export default {
 				return this.$api.srvHost + '/health/remote/getPage?address=' + url;
 			}
 		},
-		getVideoInfo: function(vid) {
+		async getVideoInfo(vid) {
 			var that = this;
 			var urlString = 'https://vv.video.qq.com/getinfo?otype=json&appver=3.2.19.333&platform=11&defnpayver=1&vid=' + vid;
-			wx.request({
-				url: urlString,
-				success: function(res) {
+			// wx.request({
+			// 	url: urlString,
+			// 	success: function(res) {
+			// 		var dataJson = res.data.replace(/QZOutputJson=/, '') + 'qwe';
+			// 		var dataJson1 = dataJson.replace(/;qwe/, '');
+			// 		var data = JSON.parse(dataJson1);
+			// 		var fn_pre = data.vl.vi[0].lnk;
+			// 		var host = data['vl']['vi'][0]['ul']['ui'][0]['url'];
+			// 		var streams = data['fl']['fi'];
+			// 		var seg_cnt = data['vl']['vi'][0]['cl']['fc'];
+			// 		if (parseInt(seg_cnt) == 0) {
+			// 			seg_cnt = 1;
+			// 		}
+			// 		var best_quality = streams[streams.length - 1]['name'];
+			// 		var part_format_id = streams[streams.length - 1]['id'];
+			// 		var pageArr = [];
+			// 		for (var i = 1; i < seg_cnt + 1; i++) {
+			// 			var filename = fn_pre + '.p' + (part_format_id % 10000) + '.' + i + '.mp4';
+			// 			console.log(filename);
+			// 			pageArr.push(i);
+			// 			that.requestVideoUrls(part_format_id, vid, filename, 'index' + i, host);
+			// 		}
+			// 	}
+			// });
+			let res = await uni.request({
+				url: urlString
+			});
+			if (Array.isArray(res) && res.length > 1 && res[1].data) {
+				res = res[1];
+				if (res) {
 					var dataJson = res.data.replace(/QZOutputJson=/, '') + 'qwe';
 					var dataJson1 = dataJson.replace(/;qwe/, '');
 					var data = JSON.parse(dataJson1);
@@ -504,21 +560,42 @@ export default {
 					var best_quality = streams[streams.length - 1]['name'];
 					var part_format_id = streams[streams.length - 1]['id'];
 					var pageArr = [];
+					let url = ''
 					for (var i = 1; i < seg_cnt + 1; i++) {
 						var filename = fn_pre + '.p' + (part_format_id % 10000) + '.' + i + '.mp4';
 						console.log(filename);
 						pageArr.push(i);
-						that.requestVideoUrls(part_format_id, vid, filename, 'index' + i, host);
+						 url = await that.requestVideoUrls(part_format_id, vid, filename, 'index' + i, host);
 					}
+					return url
 				}
-			});
+			}
 		},
-		requestVideoUrls: function(part_format_id, vid, fileName, index, host) {
+		async requestVideoUrls(part_format_id, vid, fileName, index, host) {
 			var keyApi = 'https://vv.video.qq.com/getkey?otype=json&platform=11&format=' + part_format_id + '&vid=' + vid + '&filename=' + fileName + '&appver=3.2.19.333';
 			var that = this;
-			wx.request({
-				url: keyApi,
-				success: function(res) {
+			// wx.request({
+			// 	url: keyApi,
+			// 	success: function(res) {
+			// 		var dataJson = res.data.replace(/QZOutputJson=/, '') + 'qwe';
+			// 		var dataJson1 = dataJson.replace(/;qwe/, '');
+			// 		var data = JSON.parse(dataJson1);
+			// 		var part_urls = new Array();
+			// 		if (data.key != undefined) {
+			// 			var vkey = data['key'];
+			// 			var url = host + fileName + '?vkey=' + vkey;
+			// 			part_urls[index] = String(url);
+			// 			debugger
+			// 			that.txv_path = part_urls.index1;
+			// 		}
+			// 	}
+			// });
+			let res = await uni.request({
+				url: keyApi
+			});
+			if (Array.isArray(res) && res.length > 1 && res[1].data) {
+				res = res[1];
+				if (res) {
 					var dataJson = res.data.replace(/QZOutputJson=/, '') + 'qwe';
 					var dataJson1 = dataJson.replace(/;qwe/, '');
 					var data = JSON.parse(dataJson1);
@@ -527,10 +604,12 @@ export default {
 						var vkey = data['key'];
 						var url = host + fileName + '?vkey=' + vkey;
 						part_urls[index] = String(url);
-						that.txv_path = part_urls.index1;
+						// that.txv_path = part_urls.index1;
+						return part_urls.index1;
 					}
 				}
-			});
+			}
+			
 		}
 	},
 
@@ -557,9 +636,8 @@ export default {
 	min-height: 100vh;
 	background-color: #fff;
 	padding: 20rpx;
-	.serach-bar{
-		.input-box{
-			
+	.serach-bar {
+		.input-box {
 		}
 	}
 
@@ -588,6 +666,49 @@ export default {
 		.rich-text {
 			width: 100%;
 			overflow: hidden;
+		}
+		.link-box {
+			margin-top: 20rpx;
+			.node-link {
+				width: 100%;
+				display: flex;
+				flex-direction: column;
+				.link-title {
+					font-weight: bold;
+					width: 100%;
+				}
+				.link-item-box {
+					display: flex;
+					overflow: hidden;
+					padding: 20rpx;
+					margin-bottom: 10rpx;
+					border-radius: 4px;
+					border: 1px solid #ebeef5;
+					background-color: #fff;
+					box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+					color: #303133;
+					flex-direction: column;
+					transition: 0.1s all;
+					&:active {
+						background-color: #f8f8f8;
+					}
+					.title {
+						font-size: 32rpx;
+						word-break: break-all;
+						display: -webkit-box;
+						-webkit-line-clamp: 2; /**指定行数*/
+						-webkit-box-orient: vertical;
+						overflow: hidden;
+						// color: #007AFF;
+					}
+					.origin {
+						color: #999;
+						font-size: 24rpx;
+						padding: 10rpx 0;
+						text-align: right;
+					}
+				}
+			}
 		}
 	}
 	.node-path {

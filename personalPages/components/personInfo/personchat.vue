@@ -1,12 +1,12 @@
 <template>
 	<view class="person-chat-wrap">
 		<!-- <cu-custom class="nav-chat-top" bgColor="#0bc99d" :isBack="true"><block slot="backText">返回</block><block slot="content">交流</block></cu-custom> -->
-		<view class="person-chat-top" :style="{height:heightStyle}" :class="!doctor_no?'person-chat-top-w':'person-chat-top-w-h'">
+		<view class="person-chat-top" :style="{height:heightStyle}" :class="!doctor_no.owner_account?'person-chat-top-w':'person-chat-top-w-h'">
 			<scroll-view @scroll="chatScroll" scroll-y="true" :style="{height:heightStyle}" :scroll-into-view="chatTextBottom">
 				<view :id="`person-chat-item${item.id}`" v-for="(item,index) in recordList" :key="index" class="person-chat-item" :class="item.sender_account === currentUserInfo.user_no?'person-chat-item-my':''">
-					<view v-if="doctor_no?item.sender_account === doctor_no.owner_account : item.sender_account === userInfo.userno" class="person-chat-item-accept">
+					<view v-if="doctor_no.owner_account?item.sender_account === doctor_no.owner_account : item.sender_account === userInfo.userno" class="person-chat-item-accept">
 						<view class="person-chat-item-left">
-							<image v-if="!doctor_no" :src="userInfo.img_url?userInfo.img_url:'/personalPages/static/doctor_default.jpg'" mode=""></image>
+							<image v-if="!doctor_no.owner_account" :src="userInfo.img_url?userInfo.img_url:'/personalPages/static/doctor_default.jpg'" mode=""></image>
 							<image v-else :src="doctor_no.dt_pic?`${apiUrl + doctor_no.dt_pic}&bx_auth_ticket=${ticket}`:'/personalPages/static/doctor_default.jpg'" mode=""></image>
 						</view>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
@@ -143,7 +143,7 @@
 				<view class="text">{{voiceIconText}}</view>
 			</view>
 		</view>
-		<view class="person-chat-bot" :class="doctor_no?'person-doctor-chat-bot':''">
+		<view class="person-chat-bot" :class="doctor_no.owner_account?'person-doctor-chat-bot':''">
 			<view class="person-chat-bot-top">
 				<view class="person-chat-left">
 					<image @click="changeVoice('keyword')" v-if="currentVoiceType === 'voice'" src="../../static/voice.png" mode=""></image>
@@ -1353,7 +1353,7 @@
 			display: flex;
 			flex-direction: column;
 			max-height: calc(100vh - 100rpx);
-			// overflow-y: scroll;
+			overflow-y: scroll;
 			// margin: 10rpx;
 			.person-chat-item{	
 				// display: flex;
@@ -1642,10 +1642,10 @@
 			}
 		}
 		.person-chat-top-w{
-			// max-height: calc(100vh - 260rpx);
+			max-height: calc(100vh - 260rpx);
 		}
 		.person-chat-top-w-h{
-			// max-height: calc(100vh - 180rpx);
+			max-height: calc(100vh - 180rpx);
 		}
 		.person-chat-bot{
 			// background-color: #f7f7f7;

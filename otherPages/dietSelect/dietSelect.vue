@@ -1119,8 +1119,11 @@ export default {
 		/* 顶部菜单点击**/
 		chooseMenu(parent,child){		
 			if(child.value === '饭馆'){
-				uni.switchTab({
-					url:'/pages/store/store'
+				// uni.switchTab({
+				// 	url:'/pages/store/store'
+				// })
+				uni.navigateTo({
+					url:'/otherPages/shopDietStore/shopDietStore'
 				})
 			}else{
 			console.log(parent,child,'parent,childparent,child')					

@@ -132,7 +132,16 @@
 					}
 
 				}
-			]
+			    ,{
+                    "path" : "VideoPlayer/VideoPlayer",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "pregnancy",
@@ -278,6 +287,12 @@
 					"path": "foodDetail/foodDetail",
 					"style": {
 						"navigationBarTitleText": "食物详情"
+					}
+				},
+				{
+					"path": "shopDietStore/shopDietStore",
+					"style": {
+						"navigationBarTitleText": "店铺列表"
 					}
 				},
 				// {

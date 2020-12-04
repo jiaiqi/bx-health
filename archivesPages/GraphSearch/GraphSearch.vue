@@ -79,7 +79,6 @@ export default {
 		},
 		toGraphPages(item) {
 			if (item.kn_no) {
-				debugger;
 				if (item.search_times) {
 					item.search_times = parseInt(item.search_times) + 1;
 					this.updateSearchTimes(item.kn_no, item.search_times);

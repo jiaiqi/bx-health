@@ -392,7 +392,6 @@ export default {
 					break;
 				case 'reset':
 					this.$refs.bxForm.onReset().then(res => {
-						debugger;
 						if (res) {
 							uni.showToast({
 								title: '已重置'

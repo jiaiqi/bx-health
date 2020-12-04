@@ -1,15 +1,138 @@
 <template>
 	<view class="store-wrap" v-if="isLogin">
-		<shop-store ref="store"></shop-store>
+		<view class="head-box">
+			<view class="navbar"></view>
+			<view class="container">
+				<view class="left"><!-- <view class="logo"><image src="/otherPages/static/img/logo96x96.png" mode="aspectFit"></image></view> --></view>
+				<view class="right" :style="'padding-right: ' + MPPR + 'px'">
+					<view class="address-box">
+						<i class="hxicon-locationfill"></i>
+						<i class="hxicon-right"></i>
+					</view>
+					<view class="notice"><i class="hxicon-notice"></i></view>
+				</view>
+			</view>
+		</view>
+		<view class="search-box" :class="{ QZBG: GDHEAD }" :style="GDHEAD ? 'padding-right: ' + MPPR + 'px' : ''">
+			<!-- <view class="navbar" ></view> -->
+			<view class="ctn">
+				<view class="hx-search-box">
+					<text class="cuIcon-search" style="color: #666;font-size: 22;"></text>
+					<!-- <uni-icons type="search" size="22" color="#666666" /> -->
+					<!-- <text>输入搜索关键词</text> -->
+					<input @input="goSearch" v-model="searchVal" type="text" placeholder="输入搜索关键词" value="" />
+				</view>
+			</view>
+		</view>
+		<view class="container margin-top sort-box">
+			<view class="item-box" v-for="(item, i) in sortList" :key="i">
+				<view @click="tapTitItem(item,i)" class="tit" :class="{ active: sortIndex == i }">
+					<text v-if="item.tit === '商户'">{{item.tit}}</text>
+					<text v-if="item.tit === '我的店铺'">{{ item.tit }}</text>
+				</view>
+			</view>
+		</view>
+		<view  class=" store-box" v-if="storeList && current_tit.type === 'shop'">
+			<sPullScroll
+				ref="pullScroll"
+				:heightStyle="heightStyle"
+				:pullDown="pullDown"
+				:pullUp="loadData"
+				:enablePullDown="true"
+				:enablePullUp="true"
+				:top="310"
+				:fixed="true"
+				:bottom="0"
+				finishText="我是有底线的..."
+			>
+				<view @click="toShopDetail(store)"  class=" item-box" v-for="(store, i) in storeList" :key="i">
+					<view class="container top-box">
+						<view class="left">
+							<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
+							<image v-else :src="store.imgurl" mode="aspectFill"></image>
+						</view>
+						<view class="right">
+							<text class="tit">{{ store.name }}</text>
+							<view class="column store-r-b">
+								<view class="store-r-b-t">
+									<text class="cuIcon-favorfill"></text>	
+									<!-- <u-icon name="star-fill"></u-icon>	 -->
+									<text>{{store.grade?store.grade:0}}</text>
+								</view>
+								<view class="store-r-b-b">
+									<text>月售{{store.sale_num?store.sale_num:0}}</text>
+								</view>
+							</view>
+							<view class="store-r-b-b">
+								<text>地址:</text>
+								<text>{{store.address?store.address:'暂无地址'}}</text>
+							</view>
+						</view>
+					</view>
+				</view>
+			</sPullScroll>
+		</view>
+		
+		<view  class=" store-box" v-else-if="current_tit.type === 'myShop'">
+			<sPullScroll
+				ref="pullScroll"
+				:heightStyle="heightStyle"
+				:pullDown="pullDown"
+				:pullUp="loadData"
+				:enablePullDown="true"
+				:enablePullUp="true"
+				:top="300"
+				:fixed="true"
+				:bottom="0"
+				finishText="我是有底线的..."
+			>
+			<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in myStoreList" :key="i">
+				<view class="container top-box">
+					<view class="left">
+						<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
+						<image v-else :src="store.imgurl" mode="aspectFill"></image>
+					</view>
+					<view class="right">
+						<text class="tit">{{ store.name }}</text>
+						<view class="column store-r-b store-r-b-my">
+							<view class="store-r-b-t">
+								<!-- <u-icon name="star-fill"></u-icon>	 -->
+								<text class="cuIcon-favorfill"></text>
+								<text>{{store.grade}}</text>
+							</view>
+							<view class="store-r-b-b">
+								<text>月售{{store.sale_num}}</text>
+							</view>
+						</view>
+						<view class="del-shop">
+							<text @click.stop="del(store)">删除</text>
+							<text @click.stop="amend(store)">修改</text>
+						</view>
+					</view>
+				</view>
+			</view>
+			</sPullScroll>
+		</view>
+		<!-- </mescroll-body> -->
+		<!-- <view class="foot" v-if="showFoot">
+			<text>更多商家加入中，敬请期待</text>
+		</view -->
+		<view class="footzw"></view>
+		<view class="public-button-box">
+			<view @click="addShop" class="add-button">
+				<!-- <u-icon name="plus"></u-icon> -->
+				<text class="cuIcon-add"></text>
+				<!-- <text class="add-button-num"></text> -->
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
 //引入测试数据
 import sPullScroll from '@/components/s-pull-scroll';
-import shopStore from '@/components/shopStore/shopStore.vue'
 export default {
-	components: {sPullScroll,shopStore},
+	components: {sPullScroll},
 	data() {
 		return {
 			isLogin: false, //是否已经登录
@@ -35,7 +158,7 @@ export default {
 			shopList: []
 		};
 	},
-	async mounted() {
+	async created() {
 		let self = this
 		uni.$on('loginStatusChange',(result)=>{
 			self.isLogin = result
@@ -65,10 +188,8 @@ export default {
 			}
 		} else {
 			self.isLogin = true;
-			// this.onRefresh()
-			// this.getShopList();
-			// self.$refs.store.getShopList();
-			// self.$refs.store.onRefresh()
+			this.onRefresh()
+			this.getShopList();
 		}
 	},
 	onLoad() {
@@ -76,10 +197,10 @@ export default {
 		// console.log('--------', this.shopList);
 	},
 	onShow() {
-		// console.log('onshow', this.isLogin);
+		console.log('onshow', this.isLogin);
 		if (this.isLogin) {
-			this.$refs.store.getShopList();
-			this.$refs.store.onRefresh()
+			this.getShopList();
+			this.onRefresh()
 			// this.getMyShopList()
 		}
 	},

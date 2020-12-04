@@ -22,15 +22,8 @@
 			</view>
 		</view>
 		<!-- 主体 -->
-		<view class="shop-main">
-			<view class="shop-main-top">
-				<scroll-view scroll-x class="bg-white nav" scroll-with-animation :scroll-left="scrollLeft">
-					<view class="cu-item" :class="index==TabCur?'text-green cur':''" v-for="(item,index) in list" :key="index" @tap="tabSelect" :data-id="index">
-						{{item.name}}
-					</view>
-				</scroll-view>
-			</view>
-			<view class="shop-main-sort">
+		<view class="shop-main">			
+			<view class="shop-main-sort" :class="fixation?'shop-main-sort-fixed':''">
 				<view class="shop-main-sort-left">
 					<text :class="index===currLabel?'pitch':''" v-for="(item,index) in labelList" @click="sortList(index,item.type)" class="shop-main-sort-item">
 						{{item.name}}
@@ -41,7 +34,7 @@
 					<image v-else="changeType === 'singleRow'" src="/otherPages/static/img/changelist1.png" mode=""></image>
 				</view>
 			</view>
-			<sPullScroll
+			<!-- <sPullScroll
 			
 				ref="pullScroll"
 				:heightStyle="heightStyle"
@@ -53,8 +46,8 @@
 				:fixed="true"
 				:bottom="0"
 				finishText="我是有底线的..."
-			>
-			<view v-if="shopList.length > 0" :class="changeType==='singleRow'?'':'doubleRow'" class="shop-main-list">				
+			> -->
+			<view v-if="shopList.length > 0" :class="changeType==='doubleRow'?'doubleRow':''" class="shop-main-list">				
 				<view  class="shop-main-list-wrap">
 					<view @click="toDetail(item)" v-for="(item,index) in shopList" class="shop-main-list-item">
 						<view class="item-left">
@@ -98,7 +91,7 @@
 					<text>暂无数据</text>
 				</view>
 			</view>
-			</sPullScroll>
+			<!-- </sPullScroll> -->
 			
 		</view>
 		<view v-if="queryType === 'myShop'" class="public-button-box">
@@ -120,9 +113,15 @@
 			return {
 				TabCur: 0,
 				scrollLeft: 0,
+				isShowFinish:false,
 				restAurn:null,
-				changeType:'singleRow',
+				fixation:false, //顶部是否固定
+				changeType:'doubleRow',
 				heightStyle: 'calc(100vh-620upx)',
+				order:[{
+					colName:'mark',
+					orderType:'desc'
+				}],
 				pageInfo: {
 					total: 0,
 					rownumber: 5,
@@ -146,7 +145,24 @@
 			}
 		},
 		onShow() {
-			this.onRefresh()
+			// this.onRefresh()
+			this.pageInfo.pageNo = 1
+			this.getFoodsList();
+		},
+		onReachBottom(){
+			this.pageInfo.pageNo++
+			if(!this.isShowFinish){
+				this.getFoodsList();
+			}
+			// console.log("触底")
+		},
+		onPageScroll(e){
+			if(e.scrollTop >= 160){
+				this.fixation = true
+			}else{
+				this.fixation = false
+			}
+			// console.log("滚动",e)
 		},
 		onLoad(option) {
 			let query = option.type
@@ -204,15 +220,18 @@
 				}
 			},
 			sortList(i,type){
+				this.pageInfo.pageNo = 1
 				let order = [{
 					colName:'',
 					orderType:'desc'
 				}]
+				
 				if(type === 'price'){
 					order[0].colName = 'price'
 				}else if(type === 'score'){
 					order[0].colName = 'mark'
 				}
+				this.order = order
 				this.currLabel = i
 				this.getFoodsList(order)
 			},
@@ -261,9 +280,20 @@
 						value:this.rest_no
 					}],
 					page:self.pageInfo,
-					order: orders?orders:initOrder
+					order: this.order
 				};
+				if(!this.isShowFinish){
+					// uni.showToast({
+					// 	title:'加载中',
+					// 	icon:'none'
+					// })
+					uni.showLoading({
+						title:'加载中',
+						duration: 2000
+					})
+				}
 				let res = await this.$http.post(url, req);
+				uni.hideLoading()
 				if(self.pageInfo.pageNo === 1){
 					self.shopList = []
 				}
@@ -272,9 +302,11 @@
 				let page = self.pageInfo;
 				if (page.rownumber * page.pageNo >= page.total) {
 					// finish(boolean:是否显示finishText,默认显示)
-					self.$refs.pullScroll.finish();
+					// self.$refs.pullScroll.finish();
+					this.isShowFinish = true
 				} else {
-					self.$refs.pullScroll.success();
+					this.isShowFinish = false
+					// self.$refs.pullScroll.success();
 				}
 				if(res.data.state === 'SUCCESS'){
 					// this.shopList = res.data.data
@@ -403,6 +435,7 @@
 			display: flex;
 			justify-content: space-between;
 			border-bottom: 1px solid #ccc;
+			border-top: 1px solid #ccc;
 			.shop-main-sort-left{
 				width: 80%;
 				font-size: 28upx;
@@ -412,7 +445,8 @@
 					color: red;
 				}
 				.shop-main-sort-item{
-					
+					width: 50%;
+					text-align: center;
 				}
 			}
 			.shop-main-sort-right{
@@ -422,6 +456,16 @@
 					height: 40upx;
 				}
 			}
+		}
+		.shop-main-sort-fixed{
+			position: fixed;
+			top: -1px;
+			z-index: 100;
+			background-color: white;
+			width: 100%;
+			box-shadow: 3px 3px 4px rgba(26, 26, 26, 0.2);
+			border-bottom: 0;
+			border-top: 0;
 		}
 		.shop-main-list{
 			// margin-top: 5px;
@@ -452,8 +496,12 @@
 						width: calc(100% - 180upx);
 						.item-right-top{	
 							display: flex;
-							flex-direction: column;
+							flex-direction: column;							
 							text{
+								width: 100%;
+								overflow: hidden;
+								white-space: nowrap;
+								text-overflow: ellipsis;
 								&:first-child{
 									font-size: 16px;
 									font-weight: 600;
@@ -544,6 +592,7 @@
 					}
 					.item-right{
 						width: 100%;
+						margin-left: 0;
 						.item-right-top{
 							width: 100%;
 							text{
@@ -567,6 +616,7 @@
 		position: relative;
 		// min-height: 230px;
 		height: 320rpx;
+		margin-bottom: 40rpx;
 		&-bg{
 			position: absolute;
 			left: 0;

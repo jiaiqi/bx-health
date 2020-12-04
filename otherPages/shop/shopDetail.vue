@@ -327,7 +327,7 @@
 						grid: {
 							left: '6%',
 							right: '6%',
-							top: '20%',
+							top: '25%',
 							bottom: '6%',
 							containLabel: true
 						},
@@ -958,6 +958,7 @@
 	.uni-ec-canvas-top{
 		display: flex;
 		margin-left: 20rpx;
+		margin-bottom: 20rpx;
 		text{
 			padding: 8rpx 20rpx;
 			// background-color: #8dc63f;

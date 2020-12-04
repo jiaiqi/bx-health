@@ -46,7 +46,7 @@ let ignoreServiceName = (url) => {
 fly.interceptors.request.use((request) => {
 	//给所有请求添加自定义header
 	console.log("request: ", request)
-	if (ignoreServiceName(request.url)) {
+	if (request.url&&ignoreServiceName(request.url)) {
 		uni.showLoading({
 			// mask: true
 			title: '加载中...'
