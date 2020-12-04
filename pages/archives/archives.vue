@@ -194,7 +194,7 @@
 		<view class="cu-modal bottom-modal"></view>
 		<u-popup v-model="showUserListPopup" border-radius="40" mode="top">
 			<view class="user-list">
-				<view class="user-item" @click="userInfo = item" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
+				<view class="user-item" @click="switchUser(item)" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
 					<image class="avatar" :src="getavatarUrl(item.profile_url)" size="60"></image>
 					{{ item.name }}
 				</view>
@@ -363,6 +363,12 @@ export default {
 		}
 	},
 	methods: {
+		switchUser(item) {
+			this.userInfo = item;
+			uni.setStorageSync('current_user_info', item);
+			uni.setStorageSync('current_user', item.name);
+			this.showUserListPopup = false;
+		},
 		clickTodoItem(item, index) {
 			// this.$set(item, 'checked', !item.checked);
 			if (item.ds_no) {
@@ -376,7 +382,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_drug_schedule_select',
 				colNames: ['*'],
-				condition: [{'colName':'person_no','ruleType':'eq',value:this.userInfo.no}],
+				condition: [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }],
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);
@@ -1120,7 +1126,13 @@ export default {
 				this.getToDoList();
 			}
 		},
-		toAddPage() {}
+		toAddPage() {
+			let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+			uni.setStorageSync('activeApp', 'health');
+			uni.navigateTo({
+				url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
+			});
+		}
 	},
 	created() {
 		uni.$on('healthTotalScoreChanged', result => {
