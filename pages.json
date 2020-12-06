@@ -1,14 +1,14 @@
 {
 	"pages": [
-		{
-			"path": "pages/login/login",
-			"style": {
-				"navigationBarTitleText": "登录",
-				"enablePullDownRefresh": false,
-				"navigationBarBackgroundColor": "#f1f1f1"
-			}
+		// {
+		// 	"path": "pages/login/login",
+		// 	"style": {
+		// 		"navigationBarTitleText": "登录",
+		// 		"enablePullDownRefresh": false,
+		// 		"navigationBarBackgroundColor": "#f1f1f1"
+		// 	}
 		
-		},
+		// },
 		{
 			"path": "pages/pedia/pedia",
 			"style": {
