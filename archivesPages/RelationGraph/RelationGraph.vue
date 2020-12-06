@@ -347,7 +347,7 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data)) {
-				
+				res.data.data= res.data.data.filter(item=>item.display==='是')
 				for(let item of res.data.data){
 					if (item.link_type === '外部视频' && item.external_link_src === '腾讯视频') {
 						item.video_url = await this.getVideoInfo(item.video_link);
