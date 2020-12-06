@@ -41,7 +41,12 @@
 			<view
 				class="form-content"
 				:class="{
-					alo_radio: fieldData.type === 'radio' || fieldData.type === 'radioFk' || fieldData.type === 'checkboxFk' || fieldData.type === 'checkbox' || fieldData.type === 'images',
+					alo_radio:
+						fieldData.type === 'radio' ||
+						fieldData.type === 'radioFk' ||
+						fieldData.type === 'checkboxFk' ||
+						fieldData.type === 'checkbox' ||
+						fieldData.type === 'images',
 					valid_error: !valid.valid
 				}"
 				v-if="pageFormType === 'form' || pageFormType === 'add' || pageFormType === 'update'"
@@ -183,7 +188,14 @@
 				/>
 				<picker class="pickers" @change="PickerChange($event, fieldData)" :value="index" :range="picker" v-if="fieldData.type === 'poupchange'">
 					<!-- <view class="picker">{{ index > -1 ? picker[index] : '请选择' }}</view> -->
-					<input type="text" :placeholder="'点击编辑' + placeholderValue" :value="picker[index]" :class="!valid.valid ? 'valid_error' : ''" name="input" :disabled="true" />
+					<input
+						type="text"
+						:placeholder="'点击编辑' + placeholderValue"
+						:value="picker[index]"
+						:class="!valid.valid ? 'valid_error' : ''"
+						name="input"
+						:disabled="true"
+					/>
 				</picker>
 				<!--  <bx-editor
           :field="fieldData"
@@ -216,7 +228,16 @@
 
 					<w-picker mode="date" startYear="1900" endYear="2030" :current="false" @confirm="onConfirm" :disabledAfter="false" ref="date" themeColor="#f00"></w-picker>
 					<w-picker mode="date" startYear="1900" endYear="2030" :current="false" @confirm="onConfirm" :disabledAfter="false" ref="Date" themeColor="#f00"></w-picker>
-					<w-picker mode="yearMonth" startYear="1900" endYear="2030" :current="false" @confirm="onConfirm" :disabledAfter="false" ref="yearMonth" themeColor="#f00"></w-picker>
+					<w-picker
+						mode="yearMonth"
+						startYear="1900"
+						endYear="2030"
+						:current="false"
+						@confirm="onConfirm"
+						:disabledAfter="false"
+						ref="yearMonth"
+						themeColor="#f00"
+					></w-picker>
 					<w-picker mode="dateTime" startYear="1900" endYear="2030" step="1" :current="false" @confirm="onConfirm" ref="dateTime" themeColor="#f00"></w-picker>
 					<w-picker mode="time" :current="false" @confirm="onConfirm" ref="time" step="1"></w-picker>
 					<w-picker mode="time" :current="true" :second="false" @confirm="onConfirm" ref="Time" step="1"></w-picker>
@@ -253,10 +274,20 @@
 								>
 									编辑
 								</view>
-								<view v-if="item.type === 'draft'" class="cu-btn  bg-blue light" style="height:2.4em;min-height: 1.6em;line-height: 1.6em;" @click="addListOptions(index, 'add')">
+								<view
+									v-if="item.type === 'draft'"
+									class="cu-btn  bg-blue light"
+									style="height:2.4em;min-height: 1.6em;line-height: 1.6em;"
+									@click="addListOptions(index, 'add')"
+								>
 									添加
 								</view>
-								<view v-if="item.type !== 'draft'" class="cu-btn  bg-orange light" style="height:2.4em;min-height: 1.6em;line-height: 1.6em;" @click="deleteListOptions(index)">
+								<view
+									v-if="item.type !== 'draft'"
+									class="cu-btn  bg-orange light"
+									style="height:2.4em;min-height: 1.6em;line-height: 1.6em;"
+									@click="deleteListOptions(index)"
+								>
 									删除
 								</view>
 							</view>
@@ -1021,7 +1052,11 @@ export default {
 		getValid: function() {
 			console.log('getValid', this.fieldData, this.field);
 			if (this.fieldData.isRequire && this.fieldData.value) {
-				if (this.fieldData.hasOwnProperty('_validators') && this.fieldData._validators.hasOwnProperty('isType') && typeof this.fieldData._validators.isType === 'function') {
+				if (
+					this.fieldData.hasOwnProperty('_validators') &&
+					this.fieldData._validators.hasOwnProperty('isType') &&
+					typeof this.fieldData._validators.isType === 'function'
+				) {
 					this.fieldData.valid = this.fieldData._validators.isType(this.fieldData.value);
 					this.valid.valid = true;
 				} else {
@@ -1269,7 +1304,11 @@ export default {
 				}
 			}
 			if (req.serviceName === 'srvsso_user_select') {
-				req.condition = [{ colName: 'dept_no', ruleType: 'like', value: 'bx100sys' }];
+				if (Array.isArray(req.condition)) {
+					req.condition.push();
+				} else {
+					req.condition = [{ colName: 'dept_no', ruleType: 'like', value: 'bx100sys' }];
+				}
 				appName = 'sso';
 			}
 			if (relation_condition && typeof relation_condition === 'object') {

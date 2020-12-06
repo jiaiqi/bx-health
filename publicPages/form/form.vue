@@ -1,6 +1,6 @@
 <template>
 	<view class="form-page">
-<!-- 		<cu-custom bgColor="bg-blue" :isBack="true">
+		<!-- 		<cu-custom bgColor="bg-blue" :isBack="true">
 			<block slot="content" v-if="colsV2Data && colsV2Data.service_view_name">{{ colsV2Data.service_view_name }}</block>
 		</cu-custom> -->
 		<view class="main-table">
@@ -249,10 +249,10 @@ export default {
 		getFieldsV2: async function() {
 			let app = uni.getStorageSync('activeApp');
 			let colVs = await this.getServiceV2(this.serviceName, this.type, this.type, app);
-			colVs = this.deepClone(colVs)
+			colVs = this.deepClone(colVs);
 			let defaultVal = null;
 			this.colsV2Data = colVs;
-			
+
 			if (colVs.service_view_name) {
 				uni.setNavigationBarTitle({
 					title: colVs.service_view_name
@@ -277,8 +277,15 @@ export default {
 						}
 						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
 							this.fieldsCond.forEach(item => {
-								if (item.column === field.column && field.option_list_v2 && Array.isArray(field.option_list_v2.conditions) && Array.isArray(item.condition)) {
-									field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition);
+								if (item.column === field.column) {
+									if (item.hasOwnProperty('display')) {
+										field.display = item.display;
+									}
+									if (field.option_list_v2 && Array.isArray(field.option_list_v2.conditions) && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition);
+									} else if (field.option_list_v2 && !field.option_list_v2.conditions && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = item.condition;
+									}
 								}
 							});
 						}
@@ -323,7 +330,13 @@ export default {
 					break;
 				case 'submit':
 					if (req) {
-						req = [{ serviceName: e.service_name, data: [req] }];
+						for (let key in req) {
+							if (!req[key]) {
+								delete req[key];
+							}
+						}
+						let data = this.deepClone(req);
+						req = [{ serviceName: e.service_name, data: [data] }];
 						let app = uni.getStorageSync('activeApp');
 						let url = this.getServiceUrl(app, e.service_name, 'add');
 						console.log(url, e);
@@ -345,7 +358,6 @@ export default {
 					break;
 				case 'reset':
 					this.$refs.bxForm.onReset().then(res => {
-						debugger;
 						if (res) {
 							uni.showToast({
 								title: '已重置'

@@ -91,7 +91,9 @@
 									<view class="bar">偏瘦</view>
 								</view>
 								<view class="bar2 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24"><text class="cuIcon-triangledownfill"></text></view>
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24">
+										<text class="cuIcon-triangledownfill"></text>
+									</view>
 									<view class="bar">正常</view>
 								</view>
 								<view class="bar3 bar-box">
@@ -891,7 +893,11 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni
+										? item.val_rni * self.userInfo.weight
+										: item.val_ear
+										? item.val_ear * self.userInfo.weight
+										: mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -1198,15 +1204,28 @@ export default {
 					success(res) {
 						if (res.confirm) {
 							let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+							let fieldsCond = [{ column: 'userno', condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }] }];
 							uni.setStorageSync('activeApp', 'health');
 							uni.navigateTo({
-								url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
+								url:
+									'/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' +
+									decodeURIComponent(JSON.stringify(condition)) +
+									'&fieldsCond=' +
+									decodeURIComponent(JSON.stringify(fieldsCond))
 							});
 						}
 					}
 				});
 			}
 		}
+		// toAddPage() {
+		// 	let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+		// 	let fieldsCond = [{ column: 'userno', condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }] }];
+		// 	uni.setStorageSync('activeApp', 'health');
+		// 	uni.navigateTo({
+		// 		url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))+'&fieldsCond='+ decodeURIComponent(JSON.stringify(fieldsCond))
+		// 	});
+		// }
 	},
 	onShow() {
 		this.initPage();

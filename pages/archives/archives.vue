@@ -1129,9 +1129,10 @@ export default {
 		},
 		toAddPage() {
 			let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+			let fieldsCond = [{ column: 'userno', display:false, condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }] }];
 			uni.setStorageSync('activeApp', 'health');
 			uni.navigateTo({
-				url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
+				url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))+'&fieldsCond='+ decodeURIComponent(JSON.stringify(fieldsCond))
 			});
 		}
 	},
