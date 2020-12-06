@@ -1,4 +1,3 @@
-
 export default {
 	install(Vue, options) {
 		Vue.prototype.pageTitle = '加载中…' // 可以自定义变量
@@ -865,13 +864,20 @@ export default {
 			}
 		}
 		Vue.prototype.setWxUserInfo = async function(e) {
-			let userInfo = JSON.parse(e)
+			try {
+				if (typeof e === 'string') {
+					e = JSON.parse(e)
+				}
+			} catch (err) {
+				//TODO handle the exception
+			}
+			let userInfo = e
 			console.log("setWxUserInfo", userInfo)
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_basic_user_info_save', 'operate')
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
 				"data": [{
-						"app_no": "APPNO20200107181133",
+						"app_no": Vue.prototype?.$api?.appNo?.wxmp?Vue.prototype.$api.appNo.wxmp:"APPNO20200107181133",
 						"nickname": userInfo.nickname,
 						"sex": userInfo.sex,
 						"country": userInfo.country,
@@ -879,7 +885,6 @@ export default {
 						"city": userInfo.city,
 						"headimgurl": userInfo.headimgurl
 					}
-
 				],
 			}]
 			if (e) {
@@ -1353,17 +1358,22 @@ export default {
 		Vue.prototype.getImagePath = (no) => {
 			return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 		}
-		Vue.prototype.requestSuccess = (res)=>{
-			return res.data.state==='SUCCESS'&&Array.isArray(res.data.data)
-		}  
-		Vue.prototype.getImageInfo = (item)=>{
-			return new Promise((resolve,reject)=>{
+		Vue.prototype.requestSuccess = (res) => {
+			return res.data.state === 'SUCCESS' && Array.isArray(res.data.data)
+		}
+		Vue.prototype.getImageInfo = (item) => {
+			return new Promise((resolve, reject) => {
 				wx.getImageInfo({
-					src:item.url,
-					success:(res)=>{
-						resolve({name:item.name,src:res.path,height:res.height,width:res.width})
+					src: item.url,
+					success: (res) => {
+						resolve({
+							name: item.name,
+							src: res.path,
+							height: res.height,
+							width: res.width
+						})
 					},
-					fail:(err)=>{
+					fail: (err) => {
 						reject(err)
 					}
 				})

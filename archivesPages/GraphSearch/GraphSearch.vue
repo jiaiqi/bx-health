@@ -55,6 +55,7 @@ export default {
 			this.$http.post(url, req).then(res => {
 				if (Array.isArray(res.data.data)) {
 					this.hotNodes = res.data.data;
+					
 				}
 			});
 		},
@@ -74,6 +75,12 @@ export default {
 			this.$http.post(url, req).then(res => {
 				if (Array.isArray(res.data.data)) {
 					this.nodeList = res.data.data;
+					if(res.data.data.length===0){
+						uni.showToast({
+							title:'搜索结果为空...',
+							icon:'none'
+						})
+					}
 				}
 			});
 		},

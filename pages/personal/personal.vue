@@ -1,7 +1,14 @@
 <template>
 	<view class="container">
 		<view class="container-top">
-			<view class="top-left"><image v-if="userInfo" :src="getImagePath(userInfo.profile_url)" mode=""></image></view>
+			<view class="top-left">
+				<!-- #ifdef MP-WEIXIN -->
+				<open-data type="userAvatarUrl" class="image"></open-data>
+				<!-- #endif -->
+				<!-- #ifndef MP-WEIXIN -->
+				<image v-if="userInfo"  class="image" :src="getImagePath(userInfo.profile_url)" mode=""></image>
+				<!-- #endif -->
+				</view>
 			<view class="top-right">
 				<view v-if="userInfo" class="top-right-name">{{ userInfo.name }}</view>
 			</view>
@@ -199,10 +206,11 @@ export default {
 		justify-content: center;
 		margin-left: 50upx;
 		/* padding: 10px; */
-		image {
+		.image {
 			width: 120upx;
 			height: 120upx;
 			border-radius: 50%;
+			overflow: hidden;
 		}
 	}
 	.top-right {
