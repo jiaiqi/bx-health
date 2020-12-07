@@ -52,7 +52,7 @@
 							<image v-else :src="store.imgurl" mode="aspectFill"></image>
 						</view>
 						<view class="right">
-							<text class="tit">{{ store.name }}</text>
+							<text class="tit">{{ store.name?store.name:'' }}</text>
 							<view class="column store-r-b">
 								<view class="store-r-b-t">
 									<text class="cuIcon-favorfill"></text>	

@@ -331,7 +331,7 @@ export default {
 			// 静默登录(验证登录)
 			const self = this;
 			const isWeixinClient = this.isWeixinClient();
-			self.getUserInfo()
+			self.getUserInfo();
 			if (isWeixinClient) {
 				const url = this.getServiceUrl('wx', 'srvwx_app_login_verify', 'operate');
 				// #ifdef MP-WEIXIN
@@ -339,7 +339,8 @@ export default {
 				const result = await this.wxLogin({ code: this.code, user: user });
 				if (result.status === 'success') {
 					// 登录成功，返回上一页面
-					uni.$emit('loginStatusChange',true)
+					uni.$emit('loginStatusChange', true);
+					self.$store.commit('SET_LOGIN_STATE', true);
 					let num = getCurrentPages();
 					if (Array.isArray(num) && num.length === 1) {
 						if (self.$api.homePath.indexOf('/pages/') !== -1) {
@@ -480,6 +481,7 @@ export default {
 								headimgurl: res.userInfo.avatarUrl
 							};
 							uni.setStorageSync('wxUserInfo', rawData);
+							self.$store.commit('SET_WX_USERINFO', rawData);
 							rawData = JSON.stringify(rawData);
 							self.setWxUserInfo(rawData);
 							console.log(res);
@@ -611,12 +613,13 @@ export default {
 					if (res.login_user_info.user_no) {
 						uni.setStorageSync('login_user_info', res.login_user_info);
 						console.log('res.login_user_info', res.login_user_info);
+						that.$store.commit('SET_LOGIN_USER', res.login_user_info);
 					}
 					if (res.login_user_info.data) {
 						uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 					}
 					uni.setStorageSync('isLogin', true);
-
+					that.$store.commit('SET_LOGIN_STATE', true);
 					console.log('that.backUrl', that.backUrl);
 
 					console.log('userLogined', response.data);
@@ -632,7 +635,12 @@ export default {
 							});
 						} else {
 							uni.redirectTo({
-								url: backUrl
+								url: backUrl,
+								fail() {
+									uni.navigateBack({
+										animationType:'zoom-fade-in'
+									})
+								}
 							});
 						}
 					} else {

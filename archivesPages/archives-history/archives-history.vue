@@ -1052,6 +1052,7 @@ export default {
 				const userInfo = res.data.data[0];
 				this.wxUserInfo = userInfo;
 				uni.setStorageSync('wxUserInfo', userInfo);
+				this.$store.commit('SET_WX_USERINFO',userInfo)
 				if (userInfo.headimgurl) {
 					this.src = userInfo.headimgurl;
 				}
@@ -1159,7 +1160,7 @@ export default {
 		},
 		/*查询当前登录人创建得用户信息**/
 		async getCurrUserInfo() {
-			self = this;
+			let self = this;
 			const url = self.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
@@ -1183,12 +1184,15 @@ export default {
 					});
 				} else {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
+					this.$store.commit("SET_USERINFO",res.data.data[0])
 				}
+				this.$store.commit('SET_USERLIST',res.data.data)
 				uni.setStorageSync('user_info_list', res.data.data);
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {
 				// 登录失效 进行静默登录
 				this.isLogin = false;
+				this.$store.commit('SET_LOGIN_STATE',false)
 				const result = await wx.login();
 				if (result.code) {
 					this.code = result.code;
@@ -1203,16 +1207,17 @@ export default {
 					showCancel: false,
 					success(res) {
 						if (res.confirm) {
-							let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
-							let fieldsCond = [{ column: 'userno', condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }] }];
-							uni.setStorageSync('activeApp', 'health');
-							uni.navigateTo({
-								url:
-									'/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' +
-									decodeURIComponent(JSON.stringify(condition)) +
-									'&fieldsCond=' +
-									decodeURIComponent(JSON.stringify(fieldsCond))
-							});
+							self.toAddPage()
+							// let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+							// let fieldsCond = [{ column: 'userno', condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }] }];
+							// uni.setStorageSync('activeApp', 'health');
+							// uni.navigateTo({
+							// 	url:
+							// 		'/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' +
+							// 		decodeURIComponent(JSON.stringify(condition)) +
+							// 		'&fieldsCond=' +
+							// 		decodeURIComponent(JSON.stringify(fieldsCond))
+							// });
 						}
 					}
 				});

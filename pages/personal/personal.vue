@@ -6,9 +6,9 @@
 				<open-data type="userAvatarUrl" class="image"></open-data>
 				<!-- #endif -->
 				<!-- #ifndef MP-WEIXIN -->
-				<image v-if="userInfo"  class="image" :src="getImagePath(userInfo.profile_url)" mode=""></image>
+				<image v-if="userInfo" class="image" :src="getImagePath(userInfo.user_image)?getImagePath(userInfo.user_image):getImagePath(userInfo.profile_url)" mode=""></image>
 				<!-- #endif -->
-				</view>
+			</view>
 			<view class="top-right">
 				<view v-if="userInfo" class="top-right-name">{{ userInfo.name }}</view>
 			</view>
@@ -73,13 +73,12 @@ export default {
 	data() {
 		return {
 			wxUserInfo: '',
-			userInfo: '',
-			currentUser: null
+			userInfo: ''
 		};
 	},
 	methods: {
 		toPages(e) {
-			let self = this
+			let self = this;
 			switch (e) {
 				case 'doctor':
 					uni.navigateTo({
@@ -92,28 +91,38 @@ export default {
 					});
 					break;
 				case 'beDoctor':
+					let fieldsCond = [{ column: 'dt_profile_url', display: false }, { column: 'owner_account', display: false, value: uni.getStorageSync('login_user_info').user_no }];
+					let userInfo = uni.getStorageSync('wxUserInfo');
+					if (userInfo && userInfo.headimgurl) {
+						fieldsCond = fieldsCond.map(item => {
+							if (item.column === 'dt_profile_url') {
+								item.value = userInfo.headimgurl;
+							}
+							return item;
+						});
+					}
 					uni.navigateTo({
-						url: '/publicPages/form/form?serviceName=srvhealth_doctor_add&type=add'
+						url: '/publicPages/form/form?serviceName=srvhealth_doctor_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 					});
 					break;
 				case 'userList':
-					this.getDoctorInfo().then(res=>{
-						if(res){
+					this.getDoctorInfo().then(res => {
+						if (res) {
 							uni.navigateTo({
 								url: '/personalPages/userList/userList'
 							});
-						}else{
+						} else {
 							uni.showModal({
-								title:'提示',
-								content:'您还不是医生，是否申请成为医生',
+								title: '提示',
+								content: '您还不是医生，是否申请成为医生',
 								success(res) {
-									if(res.confirm){
-										self.toPages('beDoctor')
+									if (res.confirm) {
+										self.toPages('beDoctor');
 									}
 								}
-							})
+							});
 						}
-					})
+					});
 					break;
 			}
 		},
@@ -123,7 +132,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_doctor_select',
 				colNames: ['*'],
-				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.wxUserInfo.user_no ? this.wxUserInfo.user_no  : this.userInfo.userno }]
+				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.wxUserInfo.user_no ? this.wxUserInfo.user_no : this.userInfo.userno }]
 			};
 			if (req.condition[0].value) {
 				let res = await this.$http.post(url, req);
@@ -140,6 +149,19 @@ export default {
 			});
 		},
 		async initPage() {
+			let wxUserInfo = uni.getStorageSync('wxUserInfo');
+			this.wxUserInfo = wxUserInfo;
+			this.$store.commit('SET_WX_USERINFO', wxUserInfo);
+			let userList = uni.getStorageSync('user_info_list');
+			let current_user_info = uni.getStorageSync('current_user_info');
+			let currentUserInfo = await this.selectBasicUserList();
+			if (currentUserInfo) {
+				this.$store.commit('SET_USERINFO', currentUserInfo);
+				current_user_info = currentUserInfo;
+			}
+			if (current_user_info) {
+				this.userInfo = current_user_info;
+			}
 			if (!this.userInfo || !uni.getStorageSync('isLogin')) {
 				// 未登录 h5跳转到登录页,小程序端进行静默登录
 				// #ifdef MP-WEIXIN
@@ -164,24 +186,14 @@ export default {
 			menus: ['shareAppMessage', 'shareTimeline']
 		});
 		// #endif
-		let userInfo = uni.getStorageSync('wxUserInfo');
-		this.wxUserInfo = userInfo;
-		let userList = uni.getStorageSync('user_info_list');
-		let current_user_info = uni.getStorageSync('current_user_info');
-		let currentUserInfo = await this.selectBasicUserList();
-		if (currentUserInfo) {
-			current_user_info = currentUserInfo;
-		}
-		if (current_user_info) {
-			this.userInfo = current_user_info;
-		}
+
 		// if (userList && current_user) {
 		// 	let currentUser = userList.filter(item => {
 		// 		return item.name === current_user;
 		// 	});
 		// 	if (Array.isArray(currentUser) && currentUser.length > 0) this.currentUser = currentUser[0];
 		// }
-		// this.initPage();
+		this.initPage();
 	}
 };
 </script>

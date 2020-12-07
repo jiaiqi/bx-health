@@ -43,10 +43,31 @@ let ignoreServiceName = (url) => {
 	return result
 }
 //添加请求拦截器
-fly.interceptors.request.use((request) => {
+fly.interceptors.request.use(async (request) => {
 	//给所有请求添加自定义header
 	console.log("request: ", request)
-	if (request.url&&ignoreServiceName(request.url)) {
+	if (request.url && request.url.indexOf('srvwx_app_login_verify') == -1 && request.url.indexOf('rvuser_login') == -1) {
+		if (Vue.prototype.$store && Vue.prototype.$store.getters && Vue.prototype.$store.getters.isLogin === false) {
+			debugger
+			// request.cancel = true
+			// #ifdef H5
+			uni.navigateTo({
+				url: '/publicPages/accountExec/accountExec'
+			});
+			request.cancel = true
+			// #endif
+			// #ifdef MP-WEIXIN
+			const result = await wx.login();
+			if (result.code) {
+				let res = await Vue.prototype.wxLogin({
+					code: result.code
+				});
+				debugger
+			}
+			// #endif
+		}
+	}
+	if (request.url && ignoreServiceName(request.url)) {
 		uni.showLoading({
 			// mask: true
 			title: '加载中...'
@@ -89,10 +110,11 @@ fly.interceptors.response.use(
 	(res) => {
 		uni.hideLoading()
 		//只将请求结果的data字段返回
-		if (res.data.resultCode === "0011" ) { //未登录
-		// || (res.request.headers.USERlOGIN && res.request.headers.USERlOGIN ==="noneLogin")
+		if (res.data.resultCode === "0011") { //未登录
+			// || (res.request.headers.USERlOGIN && res.request.headers.USERlOGIN ==="noneLogin")
 			uni.setStorageSync('isLogin', false)
 			uni.setStorageSync('stophttp', true)
+			Vue.prototype.$store.commit('SET_LOGIN_STATE', false)
 			// uni.setStorageSync('backUrl',window.location.pathname + window.location.search)
 			// 后端返回 无效登录时，需要进行的跳转处理
 			if (uni.getStorageSync("isLogin")) {

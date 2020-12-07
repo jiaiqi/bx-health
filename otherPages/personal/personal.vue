@@ -79,6 +79,9 @@ export default {
 	},
 	created() {
 		let userInfo = uni.getStorageSync('wxUserInfo');
+		if (userInfo) {
+			this.$store.commit('SET_WX_USERINFO', userInfo);
+		}
 		this.userInfo = userInfo;
 		let userList = uni.getStorageSync('user_info_list');
 		let current_user = uni.getStorageSync('current_user');
@@ -86,7 +89,10 @@ export default {
 			let currentUser = userList.filter(item => {
 				return item.name === current_user;
 			});
-			if (Array.isArray(currentUser) && currentUser.length > 0) this.currentUser = currentUser[0];
+			if (Array.isArray(currentUser) && currentUser.length > 0) {
+				this.currentUser = currentUser[0];
+				this.$store.commit('SET_USERINFO', currentUser[0]);
+			}
 		}
 	}
 };

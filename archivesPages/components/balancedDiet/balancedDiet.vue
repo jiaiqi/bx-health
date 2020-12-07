@@ -2641,6 +2641,7 @@ export default {
 				});
 			} else {
 				uni.setStorageSync('current_user_info', e);
+				this.$store.commit("SET_USERINFO",e)
 				this.userInfo = e;
 				uni.setStorageSync('current_user', e.name);
 				this.getDietAllRecord();
@@ -2773,6 +2774,7 @@ export default {
 			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
 				const userInfo = res.data.data[0];
 				this.wxUserInfo = userInfo;
+				this.$store.commit('SET_WX_USERINFO',userInfo)
 				uni.setStorageSync('wxUserInfo', userInfo);
 				if (userInfo.headimgurl) {
 					this.src = userInfo.headimgurl;

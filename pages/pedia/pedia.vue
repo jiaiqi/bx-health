@@ -68,7 +68,7 @@ export default {
 		};
 	},
 	methods: {
-		isDoctor(){
+		isDoctor() {
 			// 查询当前用户是否是医生
 			let url = this.getServiceUrl('daq', 'srvdaq_website_page_item_select', 'select');
 			let req = {
@@ -131,7 +131,7 @@ export default {
 					switch (res.data.data[index].div_type) {
 						case 'buttons':
 							let swiperList = [];
-							result = result.filter(item=>item.display!=='隐藏')
+							result = result.filter(item => item.display !== '隐藏');
 							let length = Math.ceil(result.length / 8); //向上取整
 							if (length > 0) {
 								for (var i = 0; i < length; i++) {
@@ -147,7 +147,7 @@ export default {
 							res.data.data[index]['carousel'] = result;
 							break;
 					}
-					if(res.data.data[index].disp_flag!=='否'){
+					if (res.data.data[index].disp_flag !== '否') {
 						this.pageItemList.push(res.data.data[index]);
 					}
 				}
@@ -232,11 +232,13 @@ export default {
 			}
 			if (userInfo && userInfo.user_no) {
 				this.loginUserInfo = userInfo;
+				this.$store.commit('SET_LOGIN_USER', userInfo);
 				await this.selectUserList(userInfo);
 			}
 		},
 		// 查找当前帐号建立的用户列表
 		async selectUserList(userInfo) {
+			let self = this;
 			const url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
@@ -256,16 +258,19 @@ export default {
 					res.data.data.forEach(item => {
 						if (item.name === uni.getStorageSync('current_user')) {
 							uni.setStorageSync('current_user', item.name);
+							this.$store.commit('SET_USERINFO', item);
 						}
 					});
 				} else {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					uni.setStorageSync('current_user', res.data.data[0].name);
 				}
+				this.$store.commit('SET_USERLIST', res.data.data);
 				uni.setStorageSync('user_info_list', res.data.data);
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {
 				// 登录失效 进行静默登录
+				this.$store.commit('SET_LOGIN_STATE', false);
 				uni.setStorageSync('isLogin', false);
 				// #ifdef MP-WEIXIN
 				const result = await wx.login();
@@ -281,12 +286,15 @@ export default {
 					title: '提示',
 					content: '当前账号未登记个人信息，是否跳转到信息登记页面',
 					success(res) {
-						if (res.confirm) {
-							let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
-							uni.navigateTo({
-								url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
-							});
+						if(res.confirm){
+								self.toAddPage();
 						}
+						// if (res.confirm) {
+						// 	let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+						// 	uni.navigateTo({
+						// 		url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
+						// 	});
+						// 	}
 					}
 				});
 			}
@@ -296,7 +304,7 @@ export default {
 		this.getPageItem();
 	},
 	onShow() {
-		this.initPage()
+		this.initPage();
 	},
 	onLoad() {
 		// #ifdef MP-WEIXIN
@@ -353,7 +361,7 @@ export default {
 				display: flex;
 				flex-wrap: wrap;
 				padding: 0 calc((100% - 680rpx) / 2);
-				.image{
+				.image {
 					width: 60rpx;
 					height: 60rpx;
 				}

@@ -51,7 +51,9 @@ export default {
 				} else {
 					serviceName += srvType
 				}
-				let cols = self.$store.getters.getSrvCol ? self.$store.getters.getSrvCol : []
+				let cols = self.$store.getters.srvCol ? self.$store.getters.srvCol : []
+				// let cols = self.$store.getters.getSrvCol ? self.$store.getters.getSrvCol : []
+
 				let nCols = cols.filter(item => item.service_name === serviceName && item.use_type === pageType)
 				console.log('=====1', nCols)
 				if (nCols.length === 0) {
@@ -82,7 +84,8 @@ export default {
 						}
 						// 第一次拿到，缓存
 						let pageconfig = Vue.prototype.getPageConfig(response.data.data, pageType)
-						// self.$store.commit('setSrvCol', pageconfig)
+						self.$store.dispatch('setSrvCol', pageconfig)
+						// self.$store.dispatch('app/setSrvCol', pageconfig)
 						return pageconfig
 					}
 				} else {
@@ -486,7 +489,9 @@ export default {
 				return (typeof o === 'object' || typeof o === 'function') && o !== null
 			}
 			if (!isObject(obj)) {
-				throw new Error('非对象')
+				// throw new Error('非对象')
+				console.log("非对象")
+				return
 			}
 			let isArray = Array.isArray(obj)
 			let newObj = isArray ? [...obj] : { ...obj
@@ -582,9 +587,11 @@ export default {
 			if (res.data.resultCode === 'SUCCESS') {
 				// 登录成功
 				uni.setStorageSync('isLogin', true);
+				Vue.prototype.$store.commit('SET_LOGIN_STATE', true)
 				let resData = res.data.response[0].response;
 				if (resData.login_user_info.user_no) {
 					uni.setStorageSync('login_user_info', resData.login_user_info);
+					Vue.prototype.$store.commit('SET_LOGIN_USER', resData.login_user_info)
 				}
 				uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
 				if (resData.login_user_info.data) {
@@ -599,6 +606,7 @@ export default {
 				uni.showToast({
 					title: res.data.resultMessage
 				});
+				Vue.prototype.$store.commit('SET_LOGIN_STATE', false)
 				return false;
 			}
 		}
@@ -872,22 +880,23 @@ export default {
 				//TODO handle the exception
 			}
 			let userInfo = e
+
 			console.log("setWxUserInfo", userInfo)
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_basic_user_info_save', 'operate')
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
 				"data": [{
-						"app_no": Vue.prototype?.$api?.appNo?.wxmp?Vue.prototype.$api.appNo.wxmp:"APPNO20200107181133",
-						"nickname": userInfo.nickname,
-						"sex": userInfo.sex,
-						"country": userInfo.country,
-						"province": userInfo.province,
-						"city": userInfo.city,
-						"headimgurl": userInfo.headimgurl
-					}
-				],
+					"app_no": Vue.prototype ?.$api ?.appNo ?.wxmp ? Vue.prototype.$api.appNo.wxmp : "APPNO20200107181133",
+					"nickname": userInfo.nickname,
+					"sex": userInfo.sex,
+					"country": userInfo.country,
+					"province": userInfo.province,
+					"city": userInfo.city,
+					"headimgurl": userInfo.headimgurl
+				}],
 			}]
 			if (e) {
+				Vue.prototype.$store.commit('SET_WX_USERINFO', userInfo)
 				let response = await this.$http.post(url, req);
 				console.log('srvfile_attachment_select', response);
 				if (response.data.state === 'SUCCESS' && response.data.data.length > 0) {
@@ -1254,17 +1263,26 @@ export default {
 							if (item.name === uni.getStorageSync('current_user')) {
 								uni.setStorageSync('current_user_info', item);
 								current_user_info = item
+								try {
+									Vue.prototype.$store.commit("SET_USERINFO", item)
+								} catch (e) {
+									//TODO handle the exception
+								}
 							}
 						});
 					} else {
 						uni.setStorageSync('current_user_info', res.data.data[0]);
 						uni.setStorageSync('current_user', res.data.data[0].name);
 						current_user_info = res.data.data[0]
+						Vue.prototype.$store.commit("SET_USERINFO", current_user_info)
+						Vue.prototype.$store.commit("SET_USERLIST", res.data.data)
+
 					}
 					return current_user_info
 				} else if (res.data.resultCode === '0011') {
 					// 登录失效 进行静默登录
 					// #ifdef MP-WEIXIN
+					Vue.prototype.$store.commit("SET_LOGIN_STATE", false)
 					const result = await wx.login();
 					if (result.code) {
 						await Vue.prototype.wxLogin({
@@ -1280,16 +1298,17 @@ export default {
 						showCancel: false,
 						success(res) {
 							if (res.confirm) {
-								let condition = [{
-									colName: 'userno',
-									ruleType: 'eq',
-									value: uni.getStorageSync('login_user_info').user_no
-								}];
-								uni.setStorageSync('activeApp', 'health');
-								uni.navigateTo({
-									url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(
-										JSON.stringify(condition))
-								});
+								Vue.prototype.toAddPage()
+								// let condition = [{
+								// 	colName: 'userno',
+								// 	ruleType: 'eq',
+								// 	value: uni.getStorageSync('login_user_info').user_no
+								// }];
+								// uni.setStorageSync('activeApp', 'health');
+								// uni.navigateTo({
+								// 	url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(
+								// 		JSON.stringify(condition))
+								// });
 							}
 						}
 					});
@@ -1311,6 +1330,37 @@ export default {
 				// #endif
 
 			}
+		}
+		Vue.prototype.toAddPage = () => {
+			let fieldsCond = [{
+					column: 'profile_url',
+					display: false
+				},
+				{
+					column: 'userno',
+					display: false,
+					value: uni.getStorageSync('login_user_info').user_no,
+					condition: [{
+						colName: 'user_no',
+						ruleType: 'eq',
+						value: uni.getStorageSync('login_user_info').user_no
+					}]
+				}
+			];
+			let userInfo = uni.getStorageSync('wxUserInfo');
+			if (userInfo && userInfo.headimgurl) {
+				fieldsCond = fieldsCond.map(item => {
+					if (item.column === 'profile_url') {
+						item.value = userInfo.headimgurl;
+					}
+					return item;
+				});
+			}
+			uni.setStorageSync('activeApp', 'health');
+			uni.navigateTo({
+				url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(
+					JSON.stringify(fieldsCond))
+			});
 		}
 		Vue.prototype.getFoodsDetail = async (dietRecord) => {
 			// 根据饮食记录得到食物编号查找食物详细数据

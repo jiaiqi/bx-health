@@ -5,6 +5,13 @@ import Vue from 'vue';
 // }
 export default {
 	onLaunch: function() {
+		uni.onMemoryWarning(function () {
+		  console.log('onMemoryWarningReceive')
+			uni.showModal({
+				title:'警告',
+				content:"onMemoryWarningReceive,内存不足"
+			})
+		})
 		this.judgeClientEnviroment();
 		uni.setStorageSync('isThirdParty', this.$api.isThirdParty);
 		uni.getSystemInfo({

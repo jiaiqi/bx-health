@@ -170,6 +170,7 @@ export default {
 					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 				}
 				uni.setStorageSync('isLogin', true);
+				this.$store.commit('SET_LOGIN_STATE',true)
 				return {
 					status: 'success',
 					response: resData

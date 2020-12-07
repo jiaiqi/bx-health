@@ -254,8 +254,18 @@ export default {
 						serviceName: 'srvhealth_person_info_update',
 						defaultVal: row
 					};
+					let fieldsCond = [{
+							column: 'profile_url',
+							display: false
+						},
+						{
+							column: 'userno',
+							display: false,
+							value: uni.getStorageSync('login_user_info').user_no
+						}
+					];
 					uni.navigateTo({
-						url: '/publicPages/form/form?params=' + JSON.stringify(params)
+						url: '/publicPages/form/form?fieldsCond='+encodeURIComponent(JSON.stringify(fieldsCond))+'&params=' + JSON.stringify(params)
 					});
 				} else {
 					uni.showToast({

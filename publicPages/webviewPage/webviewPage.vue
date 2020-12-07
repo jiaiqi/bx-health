@@ -7,6 +7,8 @@ export default {
 	data() {
 		return {
 			webUrl: '',
+			userno:'',
+			doctor_no:'',
 			webviewStyles: {
 				progress: {
 					color: '#FF3333'
@@ -19,6 +21,12 @@ export default {
 			this.webUrl = decodeURIComponent(option.webUrl)
 			// this.webUrl = 'http://srvms.100xsys.cn/health/remote/getPage?address=https://xw.qq.com/cmsid/20201201A0296600'
 		}
+		// if(option.doctor_no){
+		// 	this.doctor_no = decodeURIComponent(option.doctor_no)
+		// }
+		// if(option.userno){
+		// 	this.userno = decodeURIComponent(option.userno)
+		// }
 	}
 	
 };

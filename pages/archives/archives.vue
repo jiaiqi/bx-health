@@ -1014,13 +1014,16 @@ export default {
 							uni.setStorageSync('current_user', item.name);
 							console.log(this.checkboxList);
 							this.userInfo = item;
+							this.$store.commit('SET_USERINFO',item)
 						}
 					});
 				} else {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					uni.setStorageSync('current_user', res.data.data[0].name);
 					this.userInfo = res.data.data[0];
+					this.$store.commit('SET_USERINFO',res.data.data[0])
 				}
+				this.$store.commit('SET_USERLIST',res.data.data)
 				if (this.userInfo && this.userInfo.requirement) {
 					let tags = this.userInfo.requirement.split(',');
 					if (Array.isArray(this.checkboxList) && this.checkboxList.length > 0) {
@@ -1044,6 +1047,7 @@ export default {
 			} else if (res.data.resultCode === '0011') {
 				// 登录失效 进行静默登录
 				this.isLogin = false;
+				this.$store.commit('SET_LOGIN_STATE',false)
 				// #ifdef MP-WEIXIN
 				const result = await wx.login();
 				if (result.code) {
@@ -1060,10 +1064,29 @@ export default {
 					// showCancel: false,
 					success(res) {
 						if (res.confirm) {
-							let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
-							uni.navigateTo({
-								url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
-							});
+							this.toAddPage();
+							// let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+							// let fieldsCond = [
+							// 	{ column: 'profile_url', display: false },
+							// 	{
+							// 		column: 'userno',
+							// 		display: false,
+							// 		value: uni.getStorageSync('login_user_info').user_no,
+							// 		condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }]
+							// 	}
+							// ];
+							// let userInfo = uni.getStorageSync('wxUserInfo');
+							// if (userInfo && userInfo.headimgurl) {
+							// 	fieldsCond = fieldsCond.map(item => {
+							// 		if (item.column === 'profile_url') {
+							// 			item.value = userInfo.headimgurl;
+							// 		}
+							// 		return item;
+							// 	});
+							// }
+							// uni.navigateTo({
+							// 	url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+							// });
 						}
 					}
 				});
@@ -1128,11 +1151,28 @@ export default {
 			}
 		},
 		toAddPage() {
-			let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
-			let fieldsCond = [{ column: 'userno', display:false, condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }] }];
+			// let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
+			let fieldsCond = [
+				{ column: 'profile_url', display: false },
+				{
+					column: 'userno',
+					display: false,
+					value: uni.getStorageSync('login_user_info').user_no,
+					condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }]
+				}
+			];
+			let userInfo = uni.getStorageSync('wxUserInfo');
+			if (userInfo && userInfo.headimgurl) {
+				fieldsCond = fieldsCond.map(item => {
+					if (item.column === 'profile_url') {
+						item.value = userInfo.headimgurl;
+					}
+					return item;
+				});
+			}
 			uni.setStorageSync('activeApp', 'health');
 			uni.navigateTo({
-				url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))+'&fieldsCond='+ decodeURIComponent(JSON.stringify(fieldsCond))
+				url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 			});
 		}
 	},

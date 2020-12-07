@@ -93,14 +93,14 @@ export default {
 	methods: {
 		toLink(item) {
 			let url = '';
-			switch (item.link_type) {
+			switch (item && item.link_type) {
 				case '外部页面':
 					if (item.external_page_link_url) {
 						url = '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(this.getResultUrl(item.external_page_link_url));
 					}
 					break;
 				case '外部视频':
-					url = '/archivesPages/VideoPlayer/VideoPlayer?src='+encodeURIComponent(item.video_url);
+					url = '/archivesPages/VideoPlayer/VideoPlayer?src=' + encodeURIComponent(item.video_url);
 					break;
 				case '内部页面':
 					url = item.page_link_url;
@@ -347,8 +347,8 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data)) {
-				res.data.data= res.data.data.filter(item=>item.display==='是')
-				for(let item of res.data.data){
+				res.data.data = res.data.data.filter(item => item.display === '是');
+				for (let item of res.data.data) {
 					if (item.link_type === '外部视频' && item.external_link_src === '腾讯视频') {
 						item.video_url = await this.getVideoInfo(item.video_link);
 					}
@@ -356,17 +356,20 @@ export default {
 				}
 				let list = res.data.data.reduce((pre, cur) => {
 					let key = '';
-					switch (cur.link_type) {
-						case '外部页面':
-							key = 'outPage';
-							break;
-						case '内部页面':
-							key = 'inPage';
-							break;
-						case '外部视频':
-							key = 'outVideo';
-							break;
+					if (cur && cur.link_type) {
+						switch (cur.link_type) {
+							case '外部页面':
+								key = 'outPage';
+								break;
+							case '内部页面':
+								key = 'inPage';
+								break;
+							case '外部视频':
+								key = 'outVideo';
+								break;
+						}
 					}
+
 					if (pre[key] && Array.isArray(pre[key]) === true) {
 						pre[key].push(cur);
 					} else {
@@ -376,7 +379,7 @@ export default {
 				}, {});
 				this.nodesLinkList = list;
 				// res.data.data.map(item => {
-					
+
 				// });
 			}
 		},
@@ -485,7 +488,7 @@ export default {
 				this.currentNodes = e.name;
 				this.currentNodeNo = e.data.nodeNo;
 				let nodetail = await this.getNodeDetail(e.data.nodeNo, false);
-				if ((nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
+				if ((nodetail&&nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
 					// if (e.data.nodeNo !== this.currentNodeNo) {
 					this.geteChartsData();
 					this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
@@ -560,14 +563,14 @@ export default {
 					var best_quality = streams[streams.length - 1]['name'];
 					var part_format_id = streams[streams.length - 1]['id'];
 					var pageArr = [];
-					let url = ''
+					let url = '';
 					for (var i = 1; i < seg_cnt + 1; i++) {
 						var filename = fn_pre + '.p' + (part_format_id % 10000) + '.' + i + '.mp4';
 						console.log(filename);
 						pageArr.push(i);
-						 url = await that.requestVideoUrls(part_format_id, vid, filename, 'index' + i, host);
+						url = await that.requestVideoUrls(part_format_id, vid, filename, 'index' + i, host);
 					}
-					return url
+					return url;
 				}
 			}
 		},
@@ -609,7 +612,6 @@ export default {
 					}
 				}
 			}
-			
 		}
 	},
 

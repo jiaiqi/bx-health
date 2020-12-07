@@ -261,7 +261,27 @@ export default {
 			switch (this.type) {
 				case 'update':
 					defaultVal = await this.getDefaultVal();
-					this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
+					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
+					this.fields = fields.map(field=>{
+						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
+							this.fieldsCond.forEach(item => {
+								if (item.column === field.column) {
+									if (item.hasOwnProperty('display')) {
+										field.display = item.display;
+									}
+									if (item.hasOwnProperty('value')) {
+										field.value = item.value;
+									}
+									if (field.option_list_v2 && Array.isArray(field.option_list_v2.conditions) && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition);
+									} else if (field.option_list_v2 && !field.option_list_v2.conditions && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = item.condition;
+									}
+								}
+							});
+						}
+						return field
+					})
 					break;
 				case 'add':
 					this.fields = colVs._fieldInfo.map(field => {
@@ -280,6 +300,9 @@ export default {
 								if (item.column === field.column) {
 									if (item.hasOwnProperty('display')) {
 										field.display = item.display;
+									}
+									if (item.hasOwnProperty('value')) {
+										field.value = item.value;
 									}
 									if (field.option_list_v2 && Array.isArray(field.option_list_v2.conditions) && Array.isArray(item.condition)) {
 										field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition);
@@ -302,6 +325,7 @@ export default {
 		},
 		async onButton(e) {
 			let req = this.$refs.bxForm.getFieldModel();
+			debugger
 			for (let key in req) {
 				if (!req[key]) {
 					delete req[key];

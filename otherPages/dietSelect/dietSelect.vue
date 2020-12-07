@@ -1649,7 +1649,11 @@ export default {
 			let page = this.pageInfo;
 			this.pageInfo.pageNo = pullScroll.page;
 			console.log(pullScroll.page);
-			this.getFoodsList(this.order, this.condObj);
+			if(this.searchValue){
+				this.getSearchValue(this.searchValue)
+			}else{
+				this.getFoodsList(this.order, this.condObj);
+			}
 			// this.getDrawCoupon(this.req.serviceName, this.req.cond);
 			// if (page.rownumber * page.pageNo >= page.total) {
 			// 	// finish(boolean:是否显示finishText,默认显示)
@@ -1978,8 +1982,10 @@ export default {
 			if (this.pageInfo.pageNo === 1) {
 				self.foodList = [];
 			}
-			self.pageInfo.total = res.data.page.total;
-			self.pageInfo.pageNo = res.data.page.pageNo;
+			if(res.data&&res.data.page){
+				self.pageInfo.total = res.data.page.total?res.data.page.total:self.pageInfo.total;
+				self.pageInfo.pageNo = res.data.page.pageNo?res.data.page.pageNo:self.pageInfo.pageNo;
+			}
 			let page = self.pageInfo;
 			if (page.rownumber * page.pageNo >= page.total) {
 				// finish(boolean:是否显示finishText,默认显示)

@@ -6,7 +6,7 @@
 		<view class="shop-detail-cen">
 			<view class="shop-detail-cen-left">
 				<view class="cen-title">
-					{{foodObj.name}}
+					{{foodObj.name?foodObj.name:''}}
 				</view>
 				<view class="cen-referral">
 					脆糯营养，口感好，健康绿色
@@ -16,19 +16,19 @@
 				</view>
 				<view class="cen-money">
 					<text>￥</text>
-					<text>{{foodObj.price}}</text>
+					<text>{{foodObj.price?foodObj.price:0}}</text>
 				</view>
 			</view>		
 			<view class="shop-detail-cen-rig">
 				<view @click="toMyTodayFood" class="shop-detail-hod">
 					添加至今日饮食
 				</view>
-				<view v-if="!isJoin" @click="joinCar" class="shop-detail-btn">
+			<!-- 	<view v-if="!isJoin" @click="joinCar" class="shop-detail-btn">
 					加入购物车
 				</view>
 				<view v-else class="counter">
 					<u-number-box @minus="subtract" @plus="adds" :min="1" v-model="value" @change="valChange"></u-number-box>
-				</view>
+				</view> -->
 			</view>
 		</view>
 		<view class="shop-detail-bot">
@@ -69,8 +69,7 @@
 						<view class="detail-none-t">
 							<image src="/otherPages/static/img/noneData.png" mode=""></image>
 							<text>暂无数据</text>
-						</view>
-						
+						</view>						
 					</view>
 				</view>
 			</view>
@@ -187,11 +186,11 @@
 			</view>	 -->		
 		</view>		
 		<jumpBall :backgroundColor="'red'" :start.sync="num" :element.sync="element" @msg="jbMsg" />
-		<view class="public-button-box">
+	<!-- 	<view class="public-button-box">
 			<view @click="goCar" class="lg text-gray cuIcon-cart add-button">
 				<text class="add-button-num">{{carNum}}</text>
 			</view>
-		</view>
+		</view> -->
 	</view>
 </template>
 
@@ -880,6 +879,13 @@
 				padding: 5px 0;
 				width: 95%;
 				margin: 0 auto;
+				text{
+					width: 24%;
+					text-align: center;
+					&:first-child{
+						width: 50%;
+					}
+				}
 			}
 			.shop-detail-bot-tab-m{
 				.shop-detail-bot-tab-m-item{
@@ -890,8 +896,12 @@
 					width: 95%;
 					margin: 0 auto;
 					text{
-						min-width: 33%;
+						
+						width: 24%;
 						text-align: center;
+						&:first-child{
+							width: 50%;
+						}
 						
 					}
 					&:last-of-type{

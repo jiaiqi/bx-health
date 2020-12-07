@@ -17,8 +17,10 @@
 			</view>
 		</view>
 		<view class="result-box">
-			<view class="node-item" v-for="item in nodeList" :key="item.id" @click="toGraphPages(item)">
+			<view class="node-item" :class="{ 'no-data': item.type === 'noData' }" v-for="item in nodeList" :key="item.id" @click="toGraphPages(item)">
+				<text class="tip margin-right-xs" v-if="item.type === 'noData'">未找到与</text>
 				<text>{{ item.node_name }}</text>
+				<text class="tip margin-left-xs" v-if="item.type === 'noData'">相关的内容</text>
 			</view>
 		</view>
 	</view>
@@ -55,7 +57,6 @@ export default {
 			this.$http.post(url, req).then(res => {
 				if (Array.isArray(res.data.data)) {
 					this.hotNodes = res.data.data;
-					
 				}
 			});
 		},
@@ -64,7 +65,7 @@ export default {
 			let req = [{ serviceName: 'srvhealth_knowledge_node_update', condition: [{ colName: 'kn_no', ruleType: 'eq', value: no }], data: [{ search_times: times }] }];
 			this.$http.post(url, req);
 		},
-		searchNode(name) {
+		async searchNode(name) {
 			let url = this.getServiceUrl('health', 'srvhealth_knowledge_node_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_knowledge_node_select',
@@ -72,17 +73,19 @@ export default {
 				condition: [{ colName: 'node_name', ruleType: 'like', value: name }],
 				page: { pageNo: 1, rownumber: 30 }
 			};
-			this.$http.post(url, req).then(res => {
-				if (Array.isArray(res.data.data)) {
+			let res = await this.$http.post(url, req);
+			if (this.requestSuccess(res)) {
+				if (res.data.data.length === 0) {
+					this.nodeList = [
+						{
+							node_name: `${name}`,
+							type: 'noData'
+						}
+					];
+				} else {
 					this.nodeList = res.data.data;
-					if(res.data.data.length===0){
-						uni.showToast({
-							title:'搜索结果为空...',
-							icon:'none'
-						})
-					}
 				}
-			});
+			}
 		},
 		toGraphPages(item) {
 			if (item.kn_no) {
@@ -109,6 +112,13 @@ export default {
 		.node-item {
 			border-bottom: 1rpx solid #f1f1f1;
 			padding: 20rpx;
+			&.no-data {
+				font-weight: bold;
+				text-align: center;
+				.tip {
+					font-weight: normal;
+				}
+			}
 			&:active {
 				background-color: #f8f8f8;
 			}
@@ -132,8 +142,8 @@ export default {
 					.xu-hao {
 						color: #f43f3b;
 					}
-					.text{
-						&::after{
+					.text {
+						&::after {
 							content: 'HOT';
 							position: absolute;
 							right: -100rpx;
@@ -147,8 +157,8 @@ export default {
 					.xu-hao {
 						color: #f44444;
 					}
-					.text{
-						&::after{
+					.text {
+						&::after {
 							content: 'HOT';
 							position: absolute;
 							right: -100rpx;
@@ -162,8 +172,8 @@ export default {
 					.xu-hao {
 						color: #f46046;
 					}
-					.text{
-						&::after{
+					.text {
+						&::after {
 							content: 'HOT';
 							position: absolute;
 							right: -100rpx;
@@ -176,7 +186,7 @@ export default {
 				.xu-hao {
 					margin-right: 20rpx;
 					display: inline-block;
-					min-width:50rpx;
+					min-width: 50rpx;
 					text-align: right;
 				}
 				.text {
