@@ -3,18 +3,10 @@ const getters = {
 	srvCol: state => state.app.srvCol,
 	userInfo: state => state.user.userInfo,
 	userList: state => state.user.userList,
-	wxUserInfo: state => state.user.wxUserInfo
-	// sidebar: state => state.app.sidebar,
-	// size: state => state.app.size,
-	// device: state => state.app.device,
-	// visitedViews: state => state.tagsView.visitedViews,
-	// cachedViews: state => state.tagsView.cachedViews,
-	// token: state => state.user.token,
-	// avatar: state => state.user.avatar,
-	// name: state => state.user.name,
-	// introduction: state => state.user.introduction,
-	// roles: state => state.user.roles,
-	// permission_routes: state => state.permission.routes,
-	// errorLogs: state => state.errorLog.logs
+	wxUserInfo: state => state.user.wxUserInfo,
+	loginUserInfo: state => state.user.loginUserInfo,
+	authSetting:state=>state.app.authSetting,
+	env:state=>state.app.env,
+	authBoxDisplay:state=>state.app.authBoxDisplay
 }
 export default getters

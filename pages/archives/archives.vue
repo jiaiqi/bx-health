@@ -1,5 +1,5 @@
 <template>
-	<view class="health-archive-wrap">
+	<view class="health-archive-wrap" v-if="(is_login && authSetting && authSetting.userInfo) || (is_login && client_env === 'h5')">
 		<view class="top text-bold">
 			<view class="left">
 				<view class="avatar" @click="showUserListPopup = true"><image class="avatar" :src="avatarUrl"></image></view>
@@ -195,11 +195,11 @@
 		<u-popup v-model="showUserListPopup" border-radius="40" mode="top">
 			<view class="user-list">
 				<view class="user-item" @click="switchUser(item)" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
-					<image class="avatar" :src="getavatarUrl(item.profile_url)" size="60"></image>
+					<image class="avatar" :src="getImagePath(item.profile_url)" size="60"></image>
 					{{ item.name }}
 				</view>
 			</view>
-			<view class="button-box"><button class="cu-btn bg-white text-blue" @click="toAddPage">添加新用户</button></view>
+			<view class="button-box"><button class="cu-btn bg-white text-blue" @click="toAddPages">添加新用户</button></view>
 		</u-popup>
 		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="bottom">
 			<view class="health-item">
@@ -223,10 +223,12 @@
 			</view>
 		</u-popup>
 	</view>
+	<bx-auth v-else-if="authBoxDisplay" @getuserinfo="getuserinfo"></bx-auth>
 </template>
 
 <script>
 import energyListWrap from '@/static/js/element_info.js';
+import { mapGetters } from 'vuex';
 export default {
 	data() {
 		return {
@@ -268,6 +270,14 @@ export default {
 		};
 	},
 	computed: {
+		...mapGetters({
+			authSetting: 'authSetting',
+			is_login: 'isLogin',
+			wxUserInfo: 'wxUserInfo',
+			login_user_info: 'loginUserInfo',
+			client_env: 'env',
+			authBoxDisplay:"authBoxDisplay"
+		}),
 		totalScore() {
 			if (this.healthTotalScore && typeof this.healthTotalScore === 'number') {
 				let score = this.healthTotalScore;
@@ -319,9 +329,11 @@ export default {
 		},
 		avatarUrl() {
 			if (this.userInfo.profile_url) {
-				return this.$api.downloadFile + this.userInfo.profile_url + '&thumbnailType=fwsu_100' + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+				return this.getImagePath(this.userInfo.profile_url)
+				// return this.$api.downloadFile + this.userInfo.profile_url + '&thumbnailType=fwsu_100' + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			} else if (this.loginUserInfo.headimgurl) {
-				return this.loginUserInfo.headimgurl;
+				return this.getImagePath(this.userInfo.headimgurl)
+				// return this.loginUserInfo.headimgurl;
 			}
 		},
 		bmi() {
@@ -986,11 +998,11 @@ export default {
 				url: '/questionnaire/couple/couple'
 			});
 		},
-		getavatarUrl(fileNo) {
-			if (fileNo) {
-				return this.$api.downloadFile + fileNo + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
-			}
-		},
+		// getavatarUrl(fileNo) {
+		// 	if (fileNo) {
+		// 		return this.$api.downloadFile + fileNo + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
+		// 	}
+		// },
 		// 查找当前帐号建立的用户列表
 		async selectUserList() {
 			const url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
@@ -1014,16 +1026,16 @@ export default {
 							uni.setStorageSync('current_user', item.name);
 							console.log(this.checkboxList);
 							this.userInfo = item;
-							this.$store.commit('SET_USERINFO',item)
+							this.$store.commit('SET_USERINFO', item);
 						}
 					});
 				} else {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					uni.setStorageSync('current_user', res.data.data[0].name);
 					this.userInfo = res.data.data[0];
-					this.$store.commit('SET_USERINFO',res.data.data[0])
+					this.$store.commit('SET_USERINFO', res.data.data[0]);
 				}
-				this.$store.commit('SET_USERLIST',res.data.data)
+				this.$store.commit('SET_USERLIST', res.data.data);
 				if (this.userInfo && this.userInfo.requirement) {
 					let tags = this.userInfo.requirement.split(',');
 					if (Array.isArray(this.checkboxList) && this.checkboxList.length > 0) {
@@ -1047,7 +1059,7 @@ export default {
 			} else if (res.data.resultCode === '0011') {
 				// 登录失效 进行静默登录
 				this.isLogin = false;
-				this.$store.commit('SET_LOGIN_STATE',false)
+				this.$store.commit('SET_LOGIN_STATE', false);
 				// #ifdef MP-WEIXIN
 				const result = await wx.login();
 				if (result.code) {
@@ -1058,38 +1070,7 @@ export default {
 				// #endif
 			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 				// 没有角色 提示跳转到创建角色页面
-				uni.showModal({
-					title: '提示',
-					content: '当前账号未登记个人信息，是否跳转到信息登记页面',
-					// showCancel: false,
-					success(res) {
-						if (res.confirm) {
-							this.toAddPage();
-							// let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
-							// let fieldsCond = [
-							// 	{ column: 'profile_url', display: false },
-							// 	{
-							// 		column: 'userno',
-							// 		display: false,
-							// 		value: uni.getStorageSync('login_user_info').user_no,
-							// 		condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }]
-							// 	}
-							// ];
-							// let userInfo = uni.getStorageSync('wxUserInfo');
-							// if (userInfo && userInfo.headimgurl) {
-							// 	fieldsCond = fieldsCond.map(item => {
-							// 		if (item.column === 'profile_url') {
-							// 			item.value = userInfo.headimgurl;
-							// 		}
-							// 		return item;
-							// 	});
-							// }
-							// uni.navigateTo({
-							// 	url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
-							// });
-						}
-					}
-				});
+				this.toAddPage(this.wxUserInfo);
 			}
 		},
 		async initPage() {
@@ -1097,27 +1078,31 @@ export default {
 			// #ifdef MP-WEIXIN
 			let res = await wx.getSetting();
 			if (!res.authSetting['scope.userInfo']) {
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
 				// 没有获取用户信息授权
-				uni.showModal({
-					title: '提示',
-					content: '请登录并授权获取用户信息后再进行查看',
-					confirmText: '去登录',
-					confirmColor: '#02D199',
-					success(res) {
-						if (res.confirm) {
-							// 确认 跳转到登录页
-							uni.navigateTo({
-								url: '/publicPages/accountExec/accountExec'
-							});
-						} else if (res.cancel) {
-							// 取消 返回首页
-							uni.switchTab({
-								url: '/pages/pedia/pedia'
-							});
-						}
-					}
-				});
+				// uni.showModal({
+				// 	title: '提示',
+				// 	content: '您还没有登录,请登录后查看',
+				// 	confirmText: '去登录',
+				// 	confirmColor: '#02D199',
+				// 	success(res) {
+				// 		if (res.confirm) {
+				// 			// 	// 确认 跳转到登录页
+				// 			uni.navigateTo({
+				// 				url: '/publicPages/accountExec/accountExec'
+				// 			});
+				// 		} else if (res.cancel) {
+				// 			// 取消 返回首页
+				// 			uni.switchTab({
+				// 				url: '/pages/pedia/pedia'
+				// 			});
+				// 		}
+				// 	}
+				// });
 				return;
+			} else {
+				this.isAuthUserInfo = true;
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
 			}
 			// #endif
 			if (!userInfo || !uni.getStorageSync('isLogin')) {
@@ -1136,6 +1121,7 @@ export default {
 				});
 				// #endif
 			} else {
+				this.$store.commit('SET_LOGIN_STATE', true);
 				this.isLogin = true;
 			}
 			if (userInfo) {
@@ -1150,7 +1136,7 @@ export default {
 				this.getToDoList();
 			}
 		},
-		toAddPage() {
+		toAddPages() {
 			// let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
 			let fieldsCond = [
 				{ column: 'profile_url', display: false },
@@ -1174,6 +1160,31 @@ export default {
 			uni.navigateTo({
 				url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 			});
+		},
+		async getuserinfo(e) {
+			// #ifdef MP-WEIXIN
+			const user = e.mp.detail;
+			if (user&&user.userInfo) {
+				let rawData = {
+					nickname: user.userInfo.nickName,
+					sex: user.userInfo.gender,
+					country: user.userInfo.country,
+					province: user.userInfo.province,
+					city: user.userInfo.city,
+					headimgurl: user.userInfo.avatarUrl
+				};
+				this.setWxUserInfo(rawData);
+				this.$store.commit('SET_WX_USERINFO', rawData)
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				const result = await wx.login();
+				if (result.code) {
+					this.wxLogin({
+						code: result.code
+					});
+					this.initPage();
+				}
+			}
+			// #endif
 		}
 	},
 	created() {
@@ -1199,8 +1210,18 @@ export default {
 		});
 		// #endif
 	},
+	onTabItemTap(e) {
+		this.initPage()
+	},
+	onPullDownRefresh() {
+		this.initPage().then(_=>{
+			uni.stopPullDownRefresh()
+		})
+	},
 	onShow() {
-		this.initPage();
+		// if(this.is_login&&this.authSetting['userInfo']){
+		// 	this.initPage();
+		// }
 	}
 };
 </script>

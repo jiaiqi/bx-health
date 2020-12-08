@@ -197,20 +197,20 @@ export default {
 			let res = await wx.getSetting();
 			if (!res.authSetting['scope.userInfo']) {
 				// 没有获取用户信息授权
-				uni.showModal({
-					title: '提示',
-					content: '请登录并授权获取用户信息后再进行查看',
-					confirmText: '去登录',
-					confirmColor: '#02D199',
-					success(res) {
-						if (res.confirm) {
-							// 确认 跳转到登录页
-							uni.navigateTo({
-								url: '/publicPages/accountExec/accountExec'
-							});
-						}
-					}
-				});
+				// uni.showModal({
+				// 	title: '提示',
+				// 	content: '请登录并授权获取用户信息后再进行查看',
+				// 	confirmText: '去登录',
+				// 	confirmColor: '#02D199',
+				// 	success(res) {
+				// 		if (res.confirm) {
+				// 			// 确认 跳转到登录页
+				// 			uni.navigateTo({
+				// 				url: '/publicPages/accountExec/accountExec'
+				// 			});
+				// 		}
+				// 	}
+				// });
 				return;
 			}
 			// #endif
@@ -282,21 +282,7 @@ export default {
 				// #endif
 			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 				// 没有角色 提示跳转到创建角色页面
-				uni.showModal({
-					title: '提示',
-					content: '当前账号未登记个人信息，是否跳转到信息登记页面',
-					success(res) {
-						if(res.confirm){
-								self.toAddPage();
-						}
-						// if (res.confirm) {
-						// 	let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
-						// 	uni.navigateTo({
-						// 		url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
-						// 	});
-						// 	}
-					}
-				});
+				// self.toAddPage();
 			}
 		}
 	},

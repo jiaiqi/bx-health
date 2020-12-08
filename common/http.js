@@ -48,7 +48,6 @@ fly.interceptors.request.use(async (request) => {
 	console.log("request: ", request)
 	if (request.url && request.url.indexOf('srvwx_app_login_verify') == -1 && request.url.indexOf('rvuser_login') == -1) {
 		if (Vue.prototype.$store && Vue.prototype.$store.getters && Vue.prototype.$store.getters.isLogin === false) {
-			debugger
 			// request.cancel = true
 			// #ifdef H5
 			uni.navigateTo({
@@ -62,7 +61,6 @@ fly.interceptors.request.use(async (request) => {
 				let res = await Vue.prototype.wxLogin({
 					code: result.code
 				});
-				debugger
 			}
 			// #endif
 		}
@@ -114,7 +112,9 @@ fly.interceptors.response.use(
 			// || (res.request.headers.USERlOGIN && res.request.headers.USERlOGIN ==="noneLogin")
 			uni.setStorageSync('isLogin', false)
 			uni.setStorageSync('stophttp', true)
-			Vue.prototype.$store.commit('SET_LOGIN_STATE', false)
+			if(Vue.prototype.$store&&Vue.prototype.$store.commit){
+				Vue.prototype.$store.commit('SET_LOGIN_STATE', false)
+			}
 			// uni.setStorageSync('backUrl',window.location.pathname + window.location.search)
 			// 后端返回 无效登录时，需要进行的跳转处理
 			if (uni.getStorageSync("isLogin")) {

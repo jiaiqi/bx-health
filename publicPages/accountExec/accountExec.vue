@@ -42,17 +42,13 @@
 				<button v-if="(client_env === 'web' || client_env === 'app' || client_env === 'wxh5') && isShowUserLogin" class="confirm-btn bg-gradual-orange text-green" @click="toBack">
 					暂不，继续使用
 				</button>
-				<button
-					v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin"
-					class="confirm-btn text-green"
-					lang="zh_CN"
-					open-type="getUserInfo"
-					@getuserinfo="saveWxUser"
-					:withCredentials="false"
-					:disabled="disabled"
-				>
-					微信登录
-				</button>
+				<view class="wx-login" v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin">
+					<view class="tips">请完成微信授权以继续使用</view>
+					<button class="confirm-btn" type="primary" lang="zh_CN" open-type="getUserInfo" @getuserinfo="saveWxUser" :withCredentials="false" :disabled="disabled">
+						微信授权用户信息
+					</button>
+					<button class="confirm-btn bg-grey text-black" type="default" @tap="navBack" :disabled="false">暂不授权</button>
+				</view>
 				<!-- 			<button v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin" class="confirm-btn bg-grey text-black" type="default" @tap="navBack" :disabled="false">
 					暂不授权
 				</button> -->
@@ -96,6 +92,7 @@ export default {
 		// #endif
 		if (uni.getStorageSync('isLogin')) {
 			console.log('已登录，不进行初始化授权', uni.getStorageSync('isLogin'));
+			// #ifdef H5
 			if (uni.getStorageSync('backUrl') && uni.getStorageSync('backUrl') !== '/') {
 				if (uni.getStorageSync('backUrl').indexOf('/pages/') !== -1) {
 					uni.switchTab({
@@ -130,6 +127,7 @@ export default {
 					}
 				}
 			}
+			// #endif
 		} else {
 			console.log('未登录，进行初始化授权', uni.getStorageSync('isLogin'));
 			// #ifdef H5
@@ -638,8 +636,8 @@ export default {
 								url: backUrl,
 								fail() {
 									uni.navigateBack({
-										animationType:'zoom-fade-in'
-									})
+										animationType: 'zoom-fade-in'
+									});
 								}
 							});
 						}
@@ -805,7 +803,16 @@ page {
 		width: 100%;
 	}
 }
-
+.wx-login {
+	margin-top: 70upx;
+	.tips {
+		text-align: center;
+		color: #999;
+	}
+	.confirm-btn {
+		margin-top: 30rpx;
+	}
+}
 .confirm-btn {
 	width: 630upx;
 	height: 76upx;

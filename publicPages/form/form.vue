@@ -15,14 +15,14 @@
 				:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
 			></bxform>
 		</view>
-		<view class="child-service-box" v-if="type === 'detail' && childService && childService.length > 0">
+		<view class="child-service-box" v-if="type === 'detail' && fields && isArray(fields) && fields.length > 0 && childService && childService.length > 0">
 			<view class="normal-title">子表</view>
 			<view class="child-service-item" v-for="item in childService" @click="toChildServiceList(item)">
 				<view class="child-service-title">{{ item.foreign_key && item.foreign_key.section_name ? item.foreign_key.section_name : item.service_view_name }}</view>
 			</view>
 		</view>
 		<view class="button-box" v-if="colsV2Data && isArray(fields) && fields.length > 0">
-			<view class="button" v-if="type === 'detail'"><button class="cu-btn bg-blue" @click="toUpdatePages">编辑</button></view>
+			<!-- <view class="button" v-if="type === 'detail'"><button class="cu-btn bg-blue" @click="toUpdatePages">编辑</button></view> -->
 			<view v-for="(item, index) in buttons" :key="index" class="button">
 				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue">{{ item.button_name }}</button>
 			</view>
@@ -225,15 +225,16 @@ export default {
 				defaultVal: this.params.defaultVal
 			};
 			uni.navigateTo({
-				url: '/pages/public/formPage/formPage?params=' + JSON.stringify(params)
+				url: '/publicPages/form/form?params=' + JSON.stringify(params)
 			});
 		},
 		async getDefaultVal() {
 			if (this.type === 'detail' || this.type === 'update') {
+				let serviceName = this.params.serviceName.replace('_update', '_select').replace('_add', '_select')
 				let app = uni.getStorageSync('activeApp');
-				let url = this.getServiceUrl(app, this.params.serviceName, 'select');
+				let url = this.getServiceUrl(app, serviceName, 'select');
 				let req = {
-					serviceName: this.params.serviceName,
+					serviceName: serviceName,
 					colNames: ['*'],
 					condition: this.params.condition ? this.params.condition : [],
 					page: { pageNo: 1, rownumber: 10 }
@@ -241,6 +242,7 @@ export default {
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS') {
 					if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+						this.params.defaultVal = res.data.data[0];
 						return res.data.data[0];
 					}
 				}
@@ -262,7 +264,7 @@ export default {
 				case 'update':
 					defaultVal = await this.getDefaultVal();
 					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
-					this.fields = fields.map(field=>{
+					this.fields = fields.map(field => {
 						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
 							this.fieldsCond.forEach(item => {
 								if (item.column === field.column) {
@@ -280,8 +282,8 @@ export default {
 								}
 							});
 						}
-						return field
-					})
+						return field;
+					});
 					break;
 				case 'add':
 					this.fields = colVs._fieldInfo.map(field => {
@@ -325,7 +327,6 @@ export default {
 		},
 		async onButton(e) {
 			let req = this.$refs.bxForm.getFieldModel();
-			debugger
 			for (let key in req) {
 				if (!req[key]) {
 					delete req[key];
@@ -334,8 +335,9 @@ export default {
 			switch (e.button_type) {
 				case 'edit':
 					if (e.page_type === '详情' && this.type === 'detail') {
-						this.type = 'update';
-						await this.getFieldsV2();
+						// this.type = 'update';
+						// await this.getFieldsV2();
+						this.toUpdatePages();
 					} else {
 						if (req) {
 							req = [{ serviceName: e.service_name, data: [req], condition: this.condition }];
@@ -359,6 +361,7 @@ export default {
 								delete req[key];
 							}
 						}
+						this.params.defaultVal = req;
 						let data = this.deepClone(req);
 						req = [{ serviceName: e.service_name, data: [data] }];
 						let app = uni.getStorageSync('activeApp');
@@ -484,6 +487,7 @@ export default {
 			transition: 0.2s all ease-in-out;
 			border-radius: 10rpx;
 			margin-right: 10rpx;
+			margin-bottom: 20rpx;
 			&:nth-child(3n + 1) {
 				margin-right: 0;
 			}

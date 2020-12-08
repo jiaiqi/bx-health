@@ -91,9 +91,7 @@
 									<view class="bar">偏瘦</view>
 								</view>
 								<view class="bar2 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24">
-										<text class="cuIcon-triangledownfill"></text>
-									</view>
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24"><text class="cuIcon-triangledownfill"></text></view>
 									<view class="bar">正常</view>
 								</view>
 								<view class="bar3 bar-box">
@@ -893,11 +891,7 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni
-										? item.val_rni * self.userInfo.weight
-										: item.val_ear
-										? item.val_ear * self.userInfo.weight
-										: mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -1052,7 +1046,7 @@ export default {
 				const userInfo = res.data.data[0];
 				this.wxUserInfo = userInfo;
 				uni.setStorageSync('wxUserInfo', userInfo);
-				this.$store.commit('SET_WX_USERINFO',userInfo)
+				this.$store.commit('SET_WX_USERINFO', userInfo);
 				if (userInfo.headimgurl) {
 					this.src = userInfo.headimgurl;
 				}
@@ -1184,15 +1178,15 @@ export default {
 					});
 				} else {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
-					this.$store.commit("SET_USERINFO",res.data.data[0])
+					this.$store.commit('SET_USERINFO', res.data.data[0]);
 				}
-				this.$store.commit('SET_USERLIST',res.data.data)
+				this.$store.commit('SET_USERLIST', res.data.data);
 				uni.setStorageSync('user_info_list', res.data.data);
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {
 				// 登录失效 进行静默登录
 				this.isLogin = false;
-				this.$store.commit('SET_LOGIN_STATE',false)
+				this.$store.commit('SET_LOGIN_STATE', false);
 				const result = await wx.login();
 				if (result.code) {
 					this.code = result.code;
@@ -1201,36 +1195,9 @@ export default {
 				}
 			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 				// 没有角色 提示跳转到创建角色页面
-				uni.showModal({
-					title: '提示',
-					content: '当前账号未登记个人信息，即将跳转到信息登记页面',
-					showCancel: false,
-					success(res) {
-						if (res.confirm) {
-							self.toAddPage()
-							// let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
-							// let fieldsCond = [{ column: 'userno', condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }] }];
-							// uni.setStorageSync('activeApp', 'health');
-							// uni.navigateTo({
-							// 	url:
-							// 		'/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' +
-							// 		decodeURIComponent(JSON.stringify(condition)) +
-							// 		'&fieldsCond=' +
-							// 		decodeURIComponent(JSON.stringify(fieldsCond))
-							// });
-						}
-					}
-				});
+				self.toAddPage();
 			}
 		}
-		// toAddPage() {
-		// 	let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
-		// 	let fieldsCond = [{ column: 'userno', condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }] }];
-		// 	uni.setStorageSync('activeApp', 'health');
-		// 	uni.navigateTo({
-		// 		url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))+'&fieldsCond='+ decodeURIComponent(JSON.stringify(fieldsCond))
-		// 	});
-		// }
 	},
 	onShow() {
 		this.initPage();

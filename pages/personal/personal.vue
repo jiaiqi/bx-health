@@ -1,23 +1,28 @@
 <template>
 	<view class="container">
-		<view class="container-top">
+		<view class="container-top" @click="toPages('updateInfo')">
 			<view class="top-left">
-				<!-- #ifdef MP-WEIXIN -->
-				<open-data type="userAvatarUrl" class="image"></open-data>
-				<!-- #endif -->
-				<!-- #ifndef MP-WEIXIN -->
-				<image v-if="userInfo" class="image" :src="getImagePath(userInfo.user_image)?getImagePath(userInfo.user_image):getImagePath(userInfo.profile_url)" mode=""></image>
-				<!-- #endif -->
+				<image
+					v-if="((authSetting && authSetting.userInfo) || client_env === 'h5') && (vuex_userInfo.user_image || vuex_userInfo.profile_url)"
+					class="image"
+					:src="getImagePath(vuex_userInfo.user_image) ? getImagePath(vuex_userInfo.user_image) : getImagePath(vuex_userInfo.profile_url)"
+				></image>
+				<text class="cuIcon-people image" v-else></text>
 			</view>
-			<view class="top-right">
-				<view v-if="userInfo" class="top-right-name">{{ userInfo.name }}</view>
+			<view class="top-right" v-if="vuex_userInfo && vuex_userInfo.name && ((authSetting && authSetting.userInfo) || client_env === 'h5')">
+				<view class="top-right-name">{{ vuex_userInfo.name }}</view>
+			</view>
+			<view class="top-right" v-if="(!authSetting || !authSetting.userInfo) && client_env === 'wxmp'">
+				<view class="top-right-name">游客</view>
+				<view class="top-right-name">
+					<button class="cu-btn bg-green margin-top-xs auth-button" type="primary" open-type="getUserInfo" @getuserinfo="getuserinfo">授权微信登录</button>
+				</view>
 			</view>
 		</view>
 		<view class="container-cen">
 			<view class="container-cen-top">
 				<view class="container-cen-top-list" @click="toPages('doctor')">
 					<text class="cuIcon-service text-blue" style="font-size: 70rpx;"></text>
-					<!-- <image src="/otherPages/static/img/yd.png" mode=""></image> -->
 					<text>我的医生</text>
 				</view>
 				<view class="container-cen-top-list" @click="toPages('userList')">
@@ -55,12 +60,6 @@
 							<text class="text-grey">医生名片</text>
 						</view>
 					</view>
-					<!-- 	<view class="cu-item arrow">
-						<view class="content">
-							<text class="cuIcon-text"></text>
-							<text class="text-grey">我的评估</text>
-						</view>
-					</view> -->
 				</view>
 			</view>
 		</view>
@@ -68,6 +67,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 export default {
 	name: 'mine-info',
 	data() {
@@ -76,8 +76,29 @@ export default {
 			userInfo: ''
 		};
 	},
+	computed: {
+		...mapGetters({
+			vuex_userInfo: 'userInfo',
+			authSetting: 'authSetting',
+			is_login: 'isLogin',
+			wxuserinfo: 'wxUserInfo',
+			login_user_info: 'loginUserInfo',
+			client_env: 'env',
+			authBoxDisplay: 'authBoxDisplay'
+		})
+	},
 	methods: {
 		toPages(e) {
+			// #ifdef MP-WEIXIN
+			if (!this.authSetting || !this.authSetting.userInfo) {
+				uni.showToast({
+					title: '请先授权微信登录后再进行操作',
+					icon: 'none'
+				});
+				return;
+			}
+			// #endif
+
 			let self = this;
 			switch (e) {
 				case 'doctor':
@@ -107,6 +128,7 @@ export default {
 					break;
 				case 'userList':
 					this.getDoctorInfo().then(res => {
+						debugger;
 						if (res) {
 							uni.navigateTo({
 								url: '/personalPages/userList/userList'
@@ -124,6 +146,25 @@ export default {
 						}
 					});
 					break;
+				case 'updateInfo':
+					let cond = [
+						{
+							colName: 'no',
+							ruleType: 'in',
+							value: this.vuex_userInfo.no
+						}
+					];
+					let params = {
+						type: 'detail',
+						condition: cond,
+						serviceName: 'srvhealth_person_info_select'
+					};
+					if (this.vuex_userInfo.no) {
+						uni.navigateTo({
+							url: '/publicPages/form/form?type=detail&params=' + encodeURIComponent(JSON.stringify(params))
+						});
+					}
+					break;
 			}
 		},
 		async getDoctorInfo() {
@@ -132,8 +173,9 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_doctor_select',
 				colNames: ['*'],
-				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.wxUserInfo.user_no ? this.wxUserInfo.user_no : this.userInfo.userno }]
+				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.wxuserinfo.user_no ? this.wxuserinfo.user_no : this.vuex_userInfo.userno }]
 			};
+			debugger;
 			if (req.condition[0].value) {
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
@@ -144,30 +186,78 @@ export default {
 			}
 		},
 		toPersonDetail(type) {
+			// #ifdef MP-WEIXIN
+			if (!this.authSetting || !this.authSetting.userInfo) {
+				uni.showToast({
+					title: '请先授权微信登录后再进行操作',
+					icon: 'none'
+				});
+				return;
+			}
+			// #endif
 			uni.navigateTo({
 				url: '/otherPages/personalDetail/personalDetail?type=' + type
 			});
 		},
 		async initPage() {
-			let wxUserInfo = uni.getStorageSync('wxUserInfo');
-			this.wxUserInfo = wxUserInfo;
-			this.$store.commit('SET_WX_USERINFO', wxUserInfo);
-			let userList = uni.getStorageSync('user_info_list');
-			let current_user_info = uni.getStorageSync('current_user_info');
-			let currentUserInfo = await this.selectBasicUserList();
-			if (currentUserInfo) {
-				this.$store.commit('SET_USERINFO', currentUserInfo);
-				current_user_info = currentUserInfo;
+			let self = this;
+			// #ifdef MP-WEIXIN
+			let res = await wx.getSetting();
+			if (!res.authSetting['scope.userInfo']) {
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
+				// 没有获取用户信息授权
+			} else {
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				uni.getUserInfo({
+					provider: 'weixin',
+					success: function(user) {
+						let rawData = {
+							nickname: user.userInfo.nickName,
+							sex: user.userInfo.gender,
+							country: user.userInfo.country,
+							province: user.userInfo.province,
+							city: user.userInfo.city,
+							headimgurl: user.userInfo.avatarUrl
+						};
+						self.$store.commit('SET_WX_USERINFO', rawData);
+						self.wxUserInfo = rawData;
+					}
+				});
+				let currentUserInfo = await this.selectBasicUserList();
+				if (currentUserInfo) {
+					this.$store.commit('SET_USERINFO', currentUserInfo);
+					this.userInfo = currentUserInfo;
+				} else if (currentUserInfo === 0) {
+					// 没有创建用户
+					uni.getUserInfo({
+						provider: 'weixin',
+						success: function(user) {
+							debugger;
+							let rawData = {
+								nickname: user.userInfo.nickName,
+								sex: user.userInfo.gender,
+								country: user.userInfo.country,
+								province: user.userInfo.province,
+								city: user.userInfo.city,
+								headimgurl: user.userInfo.avatarUrl
+							};
+							self.$store.commit('SET_WX_USERINFO', rawData);
+							self.wxUserInfo = rawData;
+							self.toAddPage(rawData).then(_ => {
+								self.initPage();
+							});
+						}
+					});
+				}
 			}
-			if (current_user_info) {
-				this.userInfo = current_user_info;
-			}
-			if (!this.userInfo || !uni.getStorageSync('isLogin')) {
+			// #endif
+			if (!this.is_login) {
 				// 未登录 h5跳转到登录页,小程序端进行静默登录
 				// #ifdef MP-WEIXIN
 				const result = await wx.login();
 				if (result.code) {
 					await this.wxLogin({ code: result.code });
+					debugger;
 					await this.initPage();
 				}
 				// #endif
@@ -177,7 +267,41 @@ export default {
 				});
 				// #endif
 			}
+			// let wxUserInfo = uni.getStorageSync('wxUserInfo');
+			// this.wxUserInfo = wxUserInfo;
+		},
+		async getuserinfo(e) {
+			// #ifdef MP-WEIXIN
+			const user = e.mp.detail;
+			if (user && user.userInfo) {
+				let rawData = {
+					nickname: user.userInfo.nickName,
+					sex: user.userInfo.gender,
+					country: user.userInfo.country,
+					province: user.userInfo.province,
+					city: user.userInfo.city,
+					headimgurl: user.userInfo.avatarUrl
+				};
+				this.setWxUserInfo(rawData);
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				const result = await wx.login();
+				if (result.code) {
+					this.wxLogin({
+						code: result.code
+					});
+					this.initPage();
+				}
+			}
+			// #endif
 		}
+	},
+	onPullDownRefresh() {
+		this.initPage().then(_ => {
+			uni.stopPullDownRefresh();
+		});
+	},
+	onTabItemTap() {
+		this.initPage();
 	},
 	async created() {
 		// #ifdef MP-WEIXIN
@@ -186,28 +310,34 @@ export default {
 			menus: ['shareAppMessage', 'shareTimeline']
 		});
 		// #endif
-
-		// if (userList && current_user) {
-		// 	let currentUser = userList.filter(item => {
-		// 		return item.name === current_user;
-		// 	});
-		// 	if (Array.isArray(currentUser) && currentUser.length > 0) this.currentUser = currentUser[0];
-		// }
-		this.initPage();
 	}
 };
 </script>
 <style lang="scss" scoped>
 .container {
-	height: calc(100vh - 188rpx);
+	height: calc(100vh - var(--window-top) - var(--window-bottom));
 	overflow: hidden;
+	background-color: #fff;
 }
 .container-top {
 	width: 100%;
-	height: 200rpx;
+	height: 300rpx;
 	padding-top: 10rpx;
-	background-color: #0bc99d;
+	// background-color: #0bc99d;
 	display: flex;
+	position: relative;
+	align-items: center;
+	.bg-view {
+		width: 100%;
+		height: 300rpx;
+		background-size: 100% 300rpx;
+		background-repeat: no-repeat;
+		filter: blur(20rpx);
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 0;
+	}
 	.top-left {
 		height: 120upx;
 		/* border-radius: 50%; */
@@ -218,17 +348,38 @@ export default {
 		justify-content: center;
 		margin-left: 50upx;
 		/* padding: 10px; */
+		z-index: 2;
+		.cuIcon-people {
+			border: 2rpx solid #333;
+		}
 		.image {
-			width: 120upx;
-			height: 120upx;
+			width: 120rpx;
+			height: 120rpx;
 			border-radius: 50%;
 			overflow: hidden;
+			font-size: 50rpx;
+			color: #333;
+			border-radius: 50%;
+			text-align: center;
+			line-height: 120rpx;
+			// border: 2rpx solid #333;
 		}
 	}
 	.top-right {
 		color: white;
 		font-size: 16px;
 		margin-left: 20upx;
+		z-index: 2;
+		color: #333;
+		.top-right-name {
+			min-height: 40rpx;
+		}
+		.auth-button {
+			border: 1rpx solid #fff;
+			border-radius: 30rpx;
+			color: #fff;
+			min-width: 500rpx;
+		}
 	}
 }
 .container-cen {

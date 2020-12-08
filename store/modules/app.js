@@ -1,18 +1,42 @@
+let env = ''
+// #ifdef MP-WEIXIN
+env = 'wxmp'
+// #endif
+// #ifdef H5
+env = 'h5'
+// #endif
+
 const state = {
-	env: 'mpwx',
+	env: env,
 	srvCol: [], // 组件共享的srv_col
 	isLogin: false, //登录状态
 	bx_auth_ticket: "", //登录token
 	backUrl: "", //当前页面的上一级页面
+	authSetting: {}, //微信授权信息
+	authBoxDisplay:''
 }
+let persistData = {}; //持久化数据
+
 
 const mutations = {
 	setSrvCol: (state, data) => {
 		state.srvCol.push(data)
+		persistData['srvCol'] = state.srvCol
+		uni.setStorageSync('persistData', persistData)
 	},
 	delSrvCol: (state, data) => {
 		let fils = state.srvCol.filter(item => item.service_name !== data)
 		state.srvCol = fils
+	},
+	SET_AUTH_SETTING: (state, data) => {
+		if (data.type) {
+			state.authSetting[data.type] = data.value
+			if(data.value===true){
+				state.authBoxDisplay = false
+			}else if(data.value===false){
+				state.authBoxDisplay = true
+			}
+		}
 	},
 	SET_LOGIN_STATE: (state, loginState) => {
 		state.isLogin = loginState

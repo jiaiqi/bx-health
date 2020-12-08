@@ -398,13 +398,17 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				let nodeDetail = res.data.data.find(item => item.kn_no === this.currentNodeNo);
-				this.nodeDetail = res.data.data.find(item => item.kn_no === this.currentNodeNo);
-
-				if (this.nodeDetail && this.nodeDetail.video_link) {
-					// this.getVideoInfo(this.nodeDetail.video_link);
-				} else {
-					this.txv_path = '';
+				if (nodeDetail.node_desc) {
+					if (nodeDetail.node_desc.indexOf('<img') !== -1) {
+						nodeDetail.node_desc = nodeDetail.node_desc.replace(/<img/, '<img style="width:90%;height:90%;margin:0;padding:0;text-indent:0;"');
+					}
 				}
+				this.nodeDetail = nodeDetail;
+				// if (this.nodeDetail && this.nodeDetail.video_link) {
+				// 	// this.getVideoInfo(this.nodeDetail.video_link);
+				// } else {
+				// 	this.txv_path = '';
+				// }
 				if (nodeDetail) {
 					this.currentNodes = this.nodeDetail.node_name;
 					this.getNodesLink();
@@ -488,7 +492,7 @@ export default {
 				this.currentNodes = e.name;
 				this.currentNodeNo = e.data.nodeNo;
 				let nodetail = await this.getNodeDetail(e.data.nodeNo, false);
-				if ((nodetail&&nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
+				if ((nodetail && nodetail.link_type && nodetail.link_type.indexOf('本节点') !== -1) || !nodetail.link_type) {
 					// if (e.data.nodeNo !== this.currentNodeNo) {
 					this.geteChartsData();
 					this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
@@ -657,7 +661,7 @@ export default {
 	}
 	.detail-desc {
 		padding: 20rpx;
-		text-indent: 20rpx;
+		// text-indent: 20rpx;
 		.video-box {
 			text-indent: 0;
 			width: 100%;

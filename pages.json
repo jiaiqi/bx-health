@@ -7,7 +7,7 @@
 		// 		"enablePullDownRefresh": false,
 		// 		"navigationBarBackgroundColor": "#f1f1f1"
 		// 	}
-		
+
 		// },
 		{
 			"path": "pages/pedia/pedia",
@@ -28,14 +28,16 @@
 			"path": "pages/archives/archives",
 			"style": {
 				"navigationBarTitleText": "健康档案",
-				"enablePullDownRefresh": false
+				"enablePullDownRefresh": true
+
 			}
 		},
 		{
 			"path": "pages/personal/personal",
 			"style": {
 				"navigationBarTitleText": "个人中心",
-				"enablePullDownRefresh": false
+				"enablePullDownRefresh": true
+				// "navigationStyle":"custom"
 			}
 		}
 		// ,
@@ -133,15 +135,15 @@
 						"navigationBarTitleText": "用药记录增加",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "GraphSearch/GraphSearch",
 					"style": {
 						// "navigationStyle": "custom",
-						"navigationBarTitleText": "",
+						"navigationBarTitleText": "节点搜索",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "VideoPlayer/VideoPlayer",
 					"style": {

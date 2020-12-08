@@ -886,7 +886,8 @@ export default {
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
 				"data": [{
-					"app_no": Vue.prototype ?.$api ?.appNo ?.wxmp ? Vue.prototype.$api.appNo.wxmp : "APPNO20200107181133",
+					"app_no": Vue.prototype.$api && Vue.prototype.$api.appNo && Vue.prototype.$api.appNo.wxmp ? Vue.prototype.$api
+						.appNo.wxmp : "APPNO20200107181133",
 					"nickname": userInfo.nickname,
 					"sex": userInfo.sex,
 					"country": userInfo.country,
@@ -897,9 +898,10 @@ export default {
 			}]
 			if (e) {
 				Vue.prototype.$store.commit('SET_WX_USERINFO', userInfo)
+				uni.setStorageSync('wxUserInfo', userInfo)
 				let response = await this.$http.post(url, req);
 				console.log('srvfile_attachment_select', response);
-				if (response.data.state === 'SUCCESS' && response.data.data.length > 0) {
+				if (response.data.state === 'SUCCESS' && Array.isArray(response.data.data) && response.data.data.length > 0) {
 					return response.data.data
 				}
 			}
@@ -960,6 +962,10 @@ export default {
 			}
 			uni.setStorageSync('client_env', client_env);
 			uni.setStorageSync('client_type', client_type);
+			return {
+				client_env,
+				client_type
+			}
 		}
 		Vue.prototype.getDecodeUrl = function(e) {
 			if (Vue.prototype.isInvalid(e)) {
@@ -1258,9 +1264,9 @@ export default {
 				const res = await Vue.prototype.$http.post(url, req);
 				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 					let current_user_info = null
-					if (uni.getStorageSync('current_user')) {
+					if (uni.getStorageSync('current_user_info')) {
 						res.data.data.forEach(item => {
-							if (item.name === uni.getStorageSync('current_user')) {
+							if (item.no === uni.getStorageSync('current_user_info').no) {
 								uni.setStorageSync('current_user_info', item);
 								current_user_info = item
 								try {
@@ -1276,7 +1282,6 @@ export default {
 						current_user_info = res.data.data[0]
 						Vue.prototype.$store.commit("SET_USERINFO", current_user_info)
 						Vue.prototype.$store.commit("SET_USERLIST", res.data.data)
-
 					}
 					return current_user_info
 				} else if (res.data.resultCode === '0011') {
@@ -1291,27 +1296,28 @@ export default {
 					}
 					// #endif
 				} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
+					return 0
 					// 没有角色 提示跳转到创建角色页面
-					uni.showModal({
-						title: '提示',
-						content: '当前账号未登记个人信息，即将跳转到信息登记页面',
-						showCancel: false,
-						success(res) {
-							if (res.confirm) {
-								Vue.prototype.toAddPage()
-								// let condition = [{
-								// 	colName: 'userno',
-								// 	ruleType: 'eq',
-								// 	value: uni.getStorageSync('login_user_info').user_no
-								// }];
-								// uni.setStorageSync('activeApp', 'health');
-								// uni.navigateTo({
-								// 	url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(
-								// 		JSON.stringify(condition))
-								// });
-							}
-						}
-					});
+					// uni.showModal({
+					// 	title: '提示',
+					// 	content: '当前账号未登记个人信息，即将跳转到信息登记页面',
+					// 	showCancel: false,
+					// 	success(res) {
+					// 		if (res.confirm) {
+					// Vue.prototype.toAddPage()
+					// let condition = [{
+					// 	colName: 'userno',
+					// 	ruleType: 'eq',
+					// 	value: uni.getStorageSync('login_user_info').user_no
+					// }];
+					// uni.setStorageSync('activeApp', 'health');
+					// uni.navigateTo({
+					// 	url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(
+					// 		JSON.stringify(condition))
+					// });
+					// 		}
+					// 	}
+					// });
 				}
 			} else {
 				// 没有user_no 跳转到登录页面
@@ -1331,36 +1337,65 @@ export default {
 
 			}
 		}
-		Vue.prototype.toAddPage = () => {
-			let fieldsCond = [{
-					column: 'profile_url',
-					display: false
-				},
-				{
-					column: 'userno',
-					display: false,
-					value: uni.getStorageSync('login_user_info').user_no,
-					condition: [{
-						colName: 'user_no',
-						ruleType: 'eq',
-						value: uni.getStorageSync('login_user_info').user_no
-					}]
-				}
-			];
-			let userInfo = uni.getStorageSync('wxUserInfo');
-			if (userInfo && userInfo.headimgurl) {
-				fieldsCond = fieldsCond.map(item => {
-					if (item.column === 'profile_url') {
-						item.value = userInfo.headimgurl;
+		Vue.prototype.toAddPage = async () => {
+			let wxUserInfo = Vue.prototype ?.$store ?.state ?.user ?.wxUserInfo
+			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_add', 'add')
+			let req = [{
+				"serviceName": "srvhealth_person_info_add",
+				"data": [{
+					"userno": uni.getStorageSync('login_user_info').user_no,
+					"name": wxUserInfo ? wxUserInfo.nickname : "",
+					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
+					"user_image": wxUserInfo ? wxUserInfo.headimgurl : "",
+					"sex": wxUserInfo ? (wxUserInfo.sex === 0 ? "男" : wxUserInfo.sex === 1 ? "女" : "") : "",
+					"is_main": "是"
+				}]
+			}]
+			let res = await Vue.prototype.$http.post(url, req)
+			if (res.data && res.data.resultCode === "SUCCESS") {} else {
+				uni.showModal({
+					title: '提示',
+					content: '当前账号未登记个人信息，是否跳转到信息登记页面',
+					success(res) {
+						if (res.confirm) {
+							let fieldsCond = [{
+									column: 'profile_url',
+									display: false
+								},
+								{
+									column: 'userno',
+									display: false,
+									value: uni.getStorageSync('login_user_info').user_no,
+									condition: [{
+										colName: 'user_no',
+										ruleType: 'eq',
+										value: uni.getStorageSync('login_user_info').user_no
+									}]
+								}
+							];
+							let userInfo = uni.getStorageSync('wxUserInfo');
+							if (userInfo && userInfo.headimgurl) {
+								fieldsCond = fieldsCond.map(item => {
+									if (item.column === 'profile_url') {
+										item.value = userInfo.headimgurl;
+									}
+									return item;
+								});
+							}
+							uni.setStorageSync('activeApp', 'health');
+							uni.navigateTo({
+								url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' +
+									decodeURIComponent(
+										JSON.stringify(fieldsCond))
+							});
+						} else {
+							uni.switchTab({
+								url: '/pages/pedia/pedia'
+							})
+						}
 					}
-					return item;
 				});
 			}
-			uni.setStorageSync('activeApp', 'health');
-			uni.navigateTo({
-				url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(
-					JSON.stringify(fieldsCond))
-			});
 		}
 		Vue.prototype.getFoodsDetail = async (dietRecord) => {
 			// 根据饮食记录得到食物编号查找食物详细数据
@@ -1406,7 +1441,11 @@ export default {
 			return res.data.data ? res.data.data : [];
 		}
 		Vue.prototype.getImagePath = (no) => {
-			return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+			if (no&&(no.indexOf('http://') !== -1 ||no.indexOf('https://') !== -1)) {
+				return no
+			} else if(no) {
+				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+			}
 		}
 		Vue.prototype.requestSuccess = (res) => {
 			return res.data.state === 'SUCCESS' && Array.isArray(res.data.data)

@@ -4,6 +4,15 @@ import getters from './getters'
 
 Vue.use(Vuex)
 
+let persistData = {}; //持久化数据
+
+try{
+	// 尝试获取本地是否存在persistData变量，第一次启动APP时是不存在的
+	persistData = uni.getStorageSync('persistData');
+}catch(e){
+	
+}
+
 // https://webpack.js.org/guides/dependency-management/#requirecontext
 const modulesFiles = require.context('./modules', true, /\.js$/)
 
