@@ -1,422 +1,154 @@
 <template>
 	<view class="test">
-<!-- 		<bx-radio-group v-model="radioValue" mode="normal" wrap>
-			<bx-radio  v-for="item in options" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-radio>
-		</bx-radio-group>
-			<bx-checkbox-group  mode="normal" wrap>
-			<bx-checkbox v-for="item in options" v-model="item.checked" :key="item.id" :name="item.value" :serial-char="item.option_view_no">{{ item.label }}</bx-checkbox>
-		</bx-checkbox-group> -->
-<!-- 		<view class="node-path">
-			<view class="path-item" v-for="(item, index) in linkPath" :key="item.no" @click="toPath(item)">
-				<view class="name">{{ item.name }}</view>
-				<view class="separator" v-if="index + 1 < linkPath.length"><view class="line"></view></view>
-			</view>
-		</view>
-		<view class="charts" v-if="nodeDetail && nutrientsChartOption.option && nutrientsChartOption.option.title">
-			<bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart>
-		</view>
-		<view class="detail-desc" v-if="nodeDetail && nodeDetail.node_desc"><view v-html="nodeDetail.node_desc" class="rich-text"></view></view>
-		<view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view> -->
-	     
-		
+		<a-form v-if="colsV2Data && colsV2Data._fieldInfo" :fields="colsV2Data._fieldInfo" :pageType="srvType" :formType="use_type">
+			<!-- 	<a-form-item v-for="field in colsV2Data._fieldInfo" :key="field.id" :field="field" :pageType="srvType">
+				<view class="form-item-detail" v-if="srvType === 'detail'">
+					<view class="form-item_image" v-if="pageFormType === 'detail' && fieldData.type === 'images'">
+						<image
+							v-if="fieldData.type === 'images'"
+							v-for="(item, index) in imagesUrl"
+							:key="index"
+							style="padding: 5upx;"
+							class="cu-avatar radius lg"
+							@tap="showModal(index, 'Image')"
+							data-target="Image"
+							:src="item"
+						></image>
+					</view>
+					<view class="form-item_rich-text" v-html="field.value" v-else-if="srvType === 'detail' && (field.type === 'snote' || field.type === 'Note')"></view>
+					<view class="form-item_normal-text" v-else>{{ field.value }}</view>
+				</view>
+			</a-form-item> -->
+		</a-form>
 	</view>
 </template>
 
 <script>
-import bxEchart from '@/components/uni-ec-canvas/uni-echart.vue';
+/**
+ *
+ */
 export default {
-	components: {
-		bxEchart
-	},
 	data() {
 		return {
-			vid:"y3163a92r88",
-			nutrientsChartOption: {
-				option: {}
+			serviceName: 'srvhealth_person_info_add',
+			srvType: 'add', // 表单信息 add | update  | select |list | detail
+			use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
+			colsV2Data: {
+				_fieldInfo:[]
 			},
-			emptyText: '数据加载中...',
-			radioValue: '',
-			vaL: '',
-			currentNodes: '健康',
-			currentNodeNo: 'KN202011211458080001',
-			options: [
-				{
-					id: 1646,
-					option_no: '20201117095322001311',
-					option_seq: 1,
-					option_value: '没有或很少时间',
-					answer: '否',
-					option_img_explain: null,
-					option_video_explain: null,
-					option_view_no: 'A',
-					value: '没有或很少时间',
-					showimg: false,
-					label: '没有或很少时间',
-					checked: false
-				},
-				{
-					id: 1647,
-					option_no: '20201117095322001312',
-					option_seq: 2,
-					option_value: '小部分时间',
-					answer: '否',
-					option_img_explain: null,
-					option_video_explain: null,
-					option_view_no: 'B',
-					value: '小部分时间',
-					showimg: false,
-					label: '小部分时间',
-					checked: false
-				},
-				{
-					id: 1648,
-					option_no: '20201117095322001313',
-					option_seq: 3,
-					option_value: '相当多时间',
-					answer: '否',
-					option_img_explain: null,
-					option_video_explain: null,
-					option_view_no: 'C',
-					value: '相当多时间',
-					showimg: false,
-					label: '相当多时间',
-					checked: false
-				},
-				{
-					id: 1649,
-					option_no: '20201117095322001314',
-					option_seq: 4,
-					option_value: '绝大部分或全部时间',
-					answer: '否',
-					option_img_explain: null,
-					option_video_explain: null,
-					option_view_no: 'D',
-					value: '绝大部分或全部时间',
-					showimg: false,
-					label: '绝大部分或全部时间',
-					checked: false
-				}
-			],
-			nodeDetail: null,
-			linkPath: []
+			condition: []
 		};
 	},
 	methods: {
-		async getCurrentNodeInfo() {
-			let url = this.getServiceUrl('health', 'srvhealth_knowledge_graph_select', 'select');
+		async getFieldsModel(srv) {
+			let app = uni.getStorageSync('activeApp');
+			let serviceName = this.getServiceName(srv);
+			let url = this.getServiceUrl(app, serviceName, 'select');
 			let req = {
-				serviceName: 'srvhealth_knowledge_graph_select',
+				serviceName: serviceName,
 				colNames: ['*'],
-				condition: [],
-				page: { pageNo: 1, rownumber: 10 },
-				order: [],
-				draft: false
-			};
-		},
-		async geteChartsData() {
-			let self = this;
-			let url = this.getServiceUrl('health', 'srvhealth_knowledge_graph_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_knowledge_graph_select',
-				colNames: ['*'],
-				relation_condition: {
-					relation: 'OR',
-					data: [{ colName: 'source_node_no', ruleType: 'eq', value: this.currentNodeNo }, { colName: 'target_node_no', ruleType: 'eq', value: this.currentNodeNo }]
-				},
-				page: { pageNo: 1, rownumber: 999 }
-			};
-			let res = await this.$http.post(url, req);
-			let data = res.data.data;
-			if (!res.data.data || !Array.isArray(res.data.data) || res.data.data.length == 0) {
-				this.emptyText = '数据为空';
-				return;
-			}
-			this.getNodeDetail(this.currentNodeNo);
-			let nameArr = [];
-			let nodes = [];
-			data.forEach((item, index) => {
-				if (!nameArr.includes(item.target_name)) {
-					if (item.target_name === this.currentNodes) {
-						nodes.push({
-							symbol:
-								data.length === 4
-									? 'path://M512 0.310115l511.689885 511.689885-511.689885 511.689885-511.689885-511.689885z'
-									: data.length === 5
-									? 'path://M512 51.146296 1023.462964 422.744598 828.099456 1024.005115 195.900544 1024.005115 0.537036 422.744598Z'
-									: data.length === 6
-									? 'path://M512.024475 0l445.413275 255.984641V768.015359l-445.413275 255.984641L66.508806 768.015359V256.046077z'
-									: data.length == 7
-									? 'path://M522.666667 0l416.981333 200.810667 102.976 451.2-288.554667 361.834666H291.264L2.709333 652.010667l102.976-451.2z'
-									: data.length === 8
-									? 'path://M1024 512l-149.9648 362.0352L512 1024 149.9648 874.0352 0 512 149.9648 149.9648 512 0l362.0352 149.9648z'
-									: data.length > 8
-									? 'circle'
-									: 'diamond',
-							// symbol: 'diamond', //中间的节点
-							name: item.target_name,
-							nodeNo: item.target_node_no,
-							category: 1
-						});
-					} else {
-						nodes.push({
-							name: item.target_name,
-							nodeNo: item.target_node_no,
-							category: 2
-						});
-					}
-					nameArr.push(item.target_name);
-				}
-			});
-			data.forEach((item, index) => {
-				if (!nameArr.includes(item.source_name)) {
-					nodes.push({
-						name: item.source_name,
-						nodeNo: item.source_node_no,
-						category: 0,
-						label: `${item.path_name ? item.path_name : ''} ${item.path_value ? `(${item.path_value})` : ''}`
-					});
-					nameArr.push(item.source_name);
-				}
-			});
-			let links = data.map(item => {
-				return {
-					value: `  ${item.path_name ? item.path_name : ''} ${item.path_value ? `(${item.path_value})` : ''}`,
-					label: { show: true },
-					source: item.source_name,
-					target: item.target_name,
-					lineStyle: {
-						color: item.source_name === self.currentNodes ? '#10a050' : '#006acc'
-					}
-				};
-			});
-			const color1 = '#006acc';
-			const color2 = '#ff7d18';
-			const color3 = '#10a050';
-
-			nodes.forEach(node => {
-				if (node.category === 0) {
-					node.itemStyle = {
-						color: color1
-					};
-				} else if (node.category === 1) {
-					(node.x = 10), (node.y = 10);
-					node.itemStyle = {
-						color: color2
-					};
-				} else if (node.category === 2) {
-					node.itemStyle = {
-						color: color3
-					};
-				}
-			});
-
-			// links.forEach(link => {
-			// 	link.label = {
-			// 		align: 'center',
-			// 		fontSize: 12
-			// 	};
-			// 	if (link.name === '参股') {
-			// 		link.lineStyle = {
-			// 			color: color2
-			// 		};
-			// 	} else if (link.name === '董事') {
-			// 		link.lineStyle = {
-			// 			color: color1
-			// 		};
-			// 	} else if (link.name === '法人') {
-			// 		link.lineStyle = {
-			// 			color: color3
-			// 		};
-			// 	}
-			// });
-
-			let categories = [
-				{
-					name: '源',
-					itemStyle: {
-						color: color1
-					}
-				},
-				{
-					name: '当前',
-					itemStyle: {
-						color: color2
-					}
-				},
-				{
-					name: '目标',
-					itemStyle: {
-						color: color3
-					}
-				}
-			];
-			let option = {
-				title: {
-					show: false
-					// text: this.currentNodes
-				},
-				legend: [
-					{
-						show: false,
-						// selectedMode: 'single',
-						data: categories.map(x => {
-							return x.name;
-						}),
-						icon: 'circle'
-					}
-				],
-				series: [
-					{
-						type: 'graph',
-						layout: 'force', // circular -环形布局 force -力引导布局 none -使用节点的x,y坐标作为节点的位置
-						symbolSize: 58,
-						// zoom: 0.5, //当前视角的缩放比例
-						draggable: false, //可拖拽
-						roam: 'true', //是否开启鼠标缩放和平移漫游 默认false,可配置scale -缩放 move -移动 true
-						// focusNodeAdjacency: true, // 是否在鼠标移到节点上的时候突出显示节点以及节点的边和邻接节点。
-						categories: categories,
-						edgeSymbol: ['circle', 'arrow'],
-						edgeSymbolSize: [4, 10],
-						// animationDurationUpdate: 5000,
-						edgeLabel: {
-							normal: {
-								show: true,
-								textStyle: {
-									fontSize: 10
-								},
-								formatter: '{c}'
-							}
-						},
-						lineStyle: {
-							// color: 'source', //target
-							width: 2,
-							type: 'solid', //'solid','dashed','dotted'
-							curveness: 0 //曲率
-						},
-						label: {
-							show: true
-						},
-						force: {
-							// layoutAnimation: false,
-							initLayout: 'circular',
-							// gravity: 0.1, //节点受到的向中心的引力因子。该值越大节点越往中心点靠拢
-							repulsion:
-								nodes.length <= 2
-									? 1200
-									: nodes.length < 5 && nodes.length > 2
-									? 900
-									: nodes.length >= 5 && nodes.length < 10
-									? 800
-									: nodes.length > 15 && nodes.length <= 20
-									? 700
-									: 500, // 节点之间的斥力因子,值越大斥力越大
-							edgeLength:
-								nodes.length <= 2
-									? 200
-									: nodes.length < 5 && nodes.length > 2
-									? 150
-									: nodes.length >= 5 && nodes.length < 7
-									? 100
-									: nodes.length >= 7 && nodes.length < 10
-									? 70
-									: nodes.length >= 10 && nodes.length < 13
-									? 70
-									: nodes.length >= 10 && nodes.length < 13
-									? 60
-									: nodes.length >= 13 && nodes.length <= 15
-									? 60
-									: nodes.length > 15 && nodes.length <= 18
-									? 30
-									: 20 //边的两个节点之间的距离，这个距离也会受 repulsion影响，支持设置成数组表达边长的范围，此时不同大小的值会线性映射到不同的长度。值越小则长度越长
-						},
-						data: nodes,
-						links: links
-					}
-				]
-			};
-			this.nutrientsChartOption.option = option;
-		},
-		async getNodeDetail(no) {
-			let url = this.getServiceUrl('health', 'srvhealth_knowledge_node_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_knowledge_node_select',
-				colNames: ['*'],
-				relation_condition: {
-					relation: 'OR',
-					data: [{ colName: 'kn_no', ruleType: 'eq', value: no }]
-				},
+				condition: this.condition ? this.condition : [],
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				this.nodeDetail = res.data.data[0];
-				// this.linkPath.push({
-				// 	no: this.nodeDetail.kn_no,
-				// 	name: this.nodeDetail.node_name
-				// });
-				this.changeLinkPath({
-					no: this.nodeDetail.kn_no,
-					name: this.nodeDetail.node_name
-				});
+			if (res.data.state === 'SUCCESS') {
+			}
+		},
+		getServiceName(srv) {
+			let len = srv.lastIndexOf('_');
+			let serviceName = srv.slice(0, len) + '_';
+			if (this.srvType === 'list' || this.srvType === 'detail') {
+				serviceName += 'select';
 			} else {
-				this.nodeDetail = null;
+				serviceName += srvType;
 			}
+			return serviceName;
 		},
-		toPath(e) {
-			if (e.no && e.name && this.currentNodeNo !== e.no) {
-				this.currentNodeNo = e.no;
-				// this.currentNodes = e.name;
-				// this.getNodeDetail(e.no);
-				this.geteChartsData();
-				this.changeLinkPath(e);
-			}
-		},
-		changeLinkPath(e) {
-			let arr = this.linkPath;
-			if (arr.length > 0) {
-				let hasNode = false;
-				let nodeIndex = -1;
-				arr.forEach((item, index) => {
-					if (e.no === item.no) {
-						hasNode = true;
-						nodeIndex = index;
-					}
+		async getFieldsV2() {
+			let app = uni.getStorageSync('activeApp');
+			let colVs = await this.getServiceV2(this.serviceName, this.srvType, this.use_type, app);
+			let defaultVal = null;
+			this.colsV2Data = colVs;
+			colVs = this.deepClone(colVs);
+			// debugger;
+			if (colVs.service_view_name) {
+				uni.setNavigationBarTitle({
+					title: colVs.service_view_name
 				});
-				if (!hasNode) {
-					this.linkPath.push({
-						name: e.name,
-						no: e.no
+			}
+			switch (colVs.use_type) {
+				case 'update':
+					defaultVal = await this.getDefaultVal();
+					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
+					this.fields = fields.map(field => {
+						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
+							this.fieldsCond.forEach(item => {
+								if (item.column === field.column) {
+									if (item.hasOwnProperty('display')) {
+										field.display = item.display;
+									}
+									if (item.hasOwnProperty('value')) {
+										field.value = item.value;
+									}
+									if (field.option_list_v2 && Array.isArray(field.option_list_v2.conditions) && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition);
+									} else if (field.option_list_v2 && !field.option_list_v2.conditions && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = item.condition;
+									}
+								}
+							});
+						}
+						return field;
 					});
-				} else if (hasNode && nodeIndex >= 0) {
-					this.linkPath = this.linkPath.splice(0, nodeIndex + 1);
-				}
-			} else {
-				this.linkPath.push({
-					name: e.name,
-					no: e.no
-				});
+					break;
+				case 'add':
+					this.fields = colVs._fieldInfo.map(field => {
+						if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs._fieldInfo && Array.isArray(colVs._fieldInfo)) {
+							this.defaultCondition.forEach(cond => {
+								colVs._fieldInfo.forEach(field => {
+									if (cond.colName === field.column) {
+										field['value'] = cond['value'];
+										// field['disabled'] = true;
+									}
+								});
+							});
+						}
+						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
+							this.fieldsCond.forEach(item => {
+								if (item.column === field.column) {
+									if (item.hasOwnProperty('display')) {
+										field.display = item.display;
+									}
+									if (item.hasOwnProperty('value')) {
+										field.value = item.value;
+									}
+									if (field.option_list_v2 && Array.isArray(field.option_list_v2.conditions) && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition);
+									} else if (field.option_list_v2 && !field.option_list_v2.conditions && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = item.condition;
+									}
+								}
+							});
+						}
+						return field;
+					});
+					break;
+				case 'detail':
+					defaultVal = await this.getDefaultVal();
+					this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
+					break;
+				default:
+					break;
 			}
-		},
-		clickCharts(e) {
-			if (e.data && e.data.nodeNo && e.data.nodeNo !== this.currentNodeNo) {
-				// this.currentNodes = e.name;
-				this.currentNodeNo = e.data.nodeNo;
-				this.geteChartsData();
-				// this.getNodeDetail(e.data.nodeNo);
-				this.changeLinkPath({ name: e.name, no: e.data.nodeNo });
-			}
-		},
-		checkboxChange(e) {}
+		}
 	},
 
-	onLoad(options) {
-		// if (options.currentNodeNo) {
-		// 	this.currentNodeNo = options.currentNodeNo;
-		// }
-		// this.geteChartsData();
-		// uni.setNavigationBarTitle({
-		// 	title: this.currentNodes
-		// });
+	onLoad(option) {
+		const destApp = option.destApp;
+		if (destApp) {
+			uni.setStorageSync('activeApp', destApp);
+		}
+		this.getFieldsV2();
 	},
 	onReady() {
 		// #ifdef MP-WEIXIN
@@ -433,8 +165,8 @@ export default {
 .test {
 	width: 100%;
 	min-height: 100vh;
-	background-color: #fff;
-	padding: 20rpx;
+	background-color: #f8f8f8;
+	// padding: 20rpx;
 	.data-empty {
 		width: 100%;
 		margin-top: 30vh;

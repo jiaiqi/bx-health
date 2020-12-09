@@ -76,6 +76,9 @@ export default {
 			this.searchArg = {
 				serviceName: 'srvhealth_patient_doctor_select',
 				imgCol: 'customer_profile_url',
+				isShowCouple:true,
+				pageRowNumber:20,
+				topNum:140,
 				condition: [{ colName: 'manager_no', ruleType: 'like', value: doctorInfo && doctorInfo.dt_no ? doctorInfo.dt_no : '**' }],
 				wordKey: {
 					title: 'customer_name'

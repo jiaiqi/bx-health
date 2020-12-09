@@ -48,14 +48,14 @@
 		// 		"enablePullDownRefresh": false
 		// 	}
 		// }
-		// ,
-		// {
-		// 	"path": "pages/testPage/testPage",
-		// 	"style": {
-		// 		"navigationBarTitleText": "",
-		// 		"enablePullDownRefresh": false
-		// 	}
-		// }
+		,
+		{
+			"path": "pages/testPage/testPage",
+			"style": {
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false
+			}
+		}
 		// ,
 	],
 	"subPackages": [{
@@ -183,6 +183,21 @@
 				{
 					"path": "pregnant/symptomDetail",
 					"style": {}
+				},
+				{
+					"path": "sickness/sickness",
+					"style": {
+						"navigationBarTitleText": "疾病列表",
+						"navigationBarBackgroundColor": "#409eff",
+						"enablePullDownRefresh": false
+					}
+				},{
+					"path": "sickness/sicknessDetail",
+					"style": {
+						"navigationBarTitleText": "疾病详情",
+						"navigationBarBackgroundColor": "#409eff",
+						"enablePullDownRefresh": false
+					}
 				}
 			]
 		},

@@ -39,7 +39,8 @@ export default {
 		 * @param {String} pageType  // use_type 取值
 		 * @param {String} app 
 		 */
-		Vue.prototype.getServiceV2 = async function(srv, srvType, pageType, app) { // 表单信息 srvType : add | update | list | detail | select
+		Vue.prototype.getServiceV2 = async function(srv, srvType, pageType, app) { 
+			// 表单信息 srvType : add | update | list | detail | select
 			// use_type: detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
 			let self = this
 			let appName = app || uni.getStorageSync("activeApp")
@@ -167,6 +168,7 @@ export default {
 					type: null,
 				}
 				fieldInfo.column = item.columns
+				fieldInfo.id = item.id
 				fieldInfo.label = item.label
 				fieldInfo.seq = item.seq
 				if (item.init_expr) {

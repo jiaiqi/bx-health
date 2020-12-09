@@ -140,8 +140,8 @@ export default {
 			return style;
 		},
 		radioButtonClass() {
-			if (this.parent && (this.parent.radioMode||this.parent.mode)) {
-				if (this.parent.radioMode === 'button'||this.parent.mode === 'button') {
+			if (this.parent && (this.parent.radioMode || this.parent.mode)) {
+				if (this.parent.radioMode === 'button' || this.parent.mode === 'button') {
 					return 'button-mode';
 				}
 			}
@@ -217,7 +217,7 @@ export default {
 .bx-radio {
 	display: flex;
 	align-items: center;
-	padding: 10rpx;
+	padding: 0 10rpx;
 	.bx-radio-icon {
 		width: 40rpx;
 		height: 40rpx;
@@ -247,6 +247,7 @@ export default {
 		}
 	}
 	&.button-mode {
+		margin: 5rpx 0;
 		.bx-radio-icon {
 			display: none;
 		}

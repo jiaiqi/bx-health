@@ -1,11 +1,11 @@
 <template>
 	<view class="content">
-		<view class="listBox" v-for="(item,index) in list" :key="index">
+		<view v-if="symptomSkillList.length > 0" class="listBox" v-for="(item,index) in symptomSkillList" :key="index">
 			<view class="topbox">
-				<image class="bgImg" :src="item.img"  mode=""></image>
+				<!-- <image class="bgImg" :src="item.img"  mode=""></image> -->
 				<view class="rightText">
-					<view class="title">{{item.title}}
-						<text style="color: #ff9900;font-size: 13px;margin-left: 15rpx;">[{{item.office}}]</text>
+					<view class="title">{{item._disease_no_disp}}
+						<text style="color: #ff9900;font-size: 13px;margin-left: 15rpx;">[{{item.division_office}}]</text>
 						<text style="">
 							
 						</text>
@@ -13,11 +13,11 @@
 					<view class="detail">{{item.detail}}</view>
 				</view>
 			</view>
-			<view class="correlation">
-				相关症状：{{item.symptom}}
-			</view>
+			<!-- <view class="correlation">
+				科室说明：{{item.symptom}}
+			</view> -->
 			
-			<view class="bottomSty">
+			<!-- <view class="bottomSty">
 				<view class="">患病几率：</view>
 				<view class="flex  pressline" style="display: flex;align-items: center;">
 					<view class="cu-progress round">
@@ -28,8 +28,12 @@
 					</view>
 					<text class="margin-left">{{item.possibility+'%'}}</text>
 				</view>
-			</view>
+			</view> -->
 			
+		</view>
+		<view v-if="symptomSkillList.length == 0" class="none-data">
+			<image src="/archivesPages/static/icon/noneData.png" mode=""></image>
+			<text>暂无数据</text>
 		</view>
 	
 	</view>
@@ -39,6 +43,13 @@
 	export default{
 		data(){
 			return{
+				symArr:[],
+				symptomSkillList:[],
+				pageInfo:{
+					pageNo: 1, 
+					rownumber: 20,
+					total:0
+				},
 				list:[
 					{
 						img:'http://xs3.op.xywy.com/api.iu1.xywy.com/jib/20160509/36574546bfd678b3c40141e9cbf610b363543.jpg',
@@ -83,7 +94,56 @@
 				]
 			}
 		},
+		mounted() {
+			this.symArr = this.$store.state.app.symptomArr
+			this.getSymptomsDisease()
+		},
+		onReachBottom(e) {
+			this.pageInfo.pageNo += 1;
+			this.getSymptomsDisease()
+			console.log("e---",e)
+		},
 		methods:{
+			/*获取症状和疾病对照数据**/
+			async getSymptomsDisease(){
+				let strArr = this.symArr.map(item=>{
+					return item.no
+				})
+				let symStr = strArr.join(",")
+				let url = this.getServiceUrl('health', 'srvhealth_symptoms_disease_select', 'select');
+				let req = {
+					serviceName: 'srvhealth_symptoms_disease_select',
+					colNames: ['*'],
+					condition: [{ colName: 'symptoms_no', ruleType: 'in', value: symStr }],
+					page: this.pageInfo
+				};
+				let res = await this.$http.post(url, req);
+				let data = res.data.data
+				data.forEach(item=>{
+					this.sickSection(item.disease_no).then(skil=>{
+						this.$set(item,'division_office',skil._dept_no_disp)
+						console.log("疾病科室---->",skil)
+					})
+				})
+				this.symptomSkillList = [...this.symptomSkillList,...res.data.data]
+				console.log("res----",res.data.data)
+			},
+			/*查询疾病科室**/
+			async sickSection(disease_no){
+				let url = this.getServiceUrl('health', 'srvhealth_disease_dept_select', 'select');
+				let req = {
+					serviceName: 'srvhealth_disease_dept_select',
+					colNames: ['*'],
+					condition: [{ colName: 'disease_no', ruleType: 'eq', value: disease_no }],
+					page: { pageNo: 1, rownumber: 10 }
+				};
+				let res = await this.$http.post(url, req);
+				let skilData = []
+				if(res.data.data.length > 0){
+					skilData = res.data.data[0]
+				}
+				return skilData
+			},
 			estimate(val){
 				let valNum = Number(val.id)
 				let className = '';
@@ -108,6 +168,19 @@
 </script>
 
 <style lang="scss" scoped>
+	.none-data{
+		height: 100vh;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		color: #999;
+		image{
+			width: 100rpx;
+			height: 100rpx;
+		}
+	}
 	.content{
 		background: #fff;
 		.listBox{

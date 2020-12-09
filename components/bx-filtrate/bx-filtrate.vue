@@ -8,7 +8,7 @@
 		</view>
 		<view class="filtrate-item-wrap">
 			<view v-for="(item, index) in copyData" :key="index" class="filtrate-item">
-				<view class="filtrate-item-left" style="display: flex;flex-shrink: 0;width: 152rpx;">{{ item.classify_name }}</view>
+				<view class="filtrate-item-left" style="display: flex;flex-shrink: 0;max-width: 152rpx;">{{ item.classify_name }}</view>
 				<view class="" style="display: flex;  flex-flow: wrap;">
 					<view @click="chooseMenu(item, cate)" v-for="(cate, i) in item.children" :class="cate.choose ? 'cate-active' : ''" class="filtrate-item-right">
 						<text>{{ cate.title }}</text>
@@ -31,7 +31,7 @@
 			:pullUp="loadData"
 			:enablePullDown="true"
 			:enablePullUp="true"
-			:top="topNum"
+			:top="searchArg.topNum"
 			:fixed="true"
 			:bottom="0"
 			finishText="我是有底线的..."
@@ -46,7 +46,7 @@
 					:key="idx"
 				>
 					<view class="smallbox">
-						<view class="smallbox-img">
+						<view v-if="searchArg.imgCol" class="smallbox-img">
 							<image width="100%" height="100%" v-if="!getImageUrl(food)" src="/static/none.png"></image>
 							<image width="100%" height="100%" v-else :src="getImageUrl(food)"></image>
 						</view>
@@ -55,7 +55,7 @@
 						</view>
 					</view>
 				</view>
-				<view @click.stop="tofeedback" class="cu-item boxfood couple-boxfood">
+				<view v-if="searchArg.isShowCouple" @click.stop="tofeedback" class="cu-item boxfood couple-boxfood">
 					<view class="add-btn"><text class="cuIcon-add"></text></view>
 					<view class="textbox"><view class="title-food">添加用户</view></view>
 				</view>
@@ -104,7 +104,7 @@ export default {
 			modalName: '',
 			pageInfo: {
 				total: 0,
-				rownumber: 20,
+				rownumber: this.searchArg.pageRowNumber,
 				pageNo: 1
 			},
 			condObj: null,
@@ -555,6 +555,7 @@ export default {
 			display: flex;
 			min-height: 100rpx;
 			align-items: center;
+			padding: 30rpx 0;
 			.filtrate-item-left {
 				padding: 10upx 20upx;
 			}
@@ -566,7 +567,7 @@ export default {
 				background-color: #f1f1f1;
 				border-radius: 50rpx;
 				display: flex;
-				margin: 0 10upx;
+				margin: 0 10upx 10upx;
 				justify-content: center;
 				border: 2rpx solid #f1f1f1;
 				transition: all 0.5s;
@@ -654,7 +655,7 @@ export default {
 	}
 }
 .boxfood {
-	height: 220rpx;
+	// height: 220rpx;
 	background: #ffffff;
 	width: 23%;
 	margin: 20upx 10upx 0 0;

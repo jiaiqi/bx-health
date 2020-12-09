@@ -13,7 +13,9 @@ const state = {
 	bx_auth_ticket: "", //登录token
 	backUrl: "", //当前页面的上一级页面
 	authSetting: {}, //微信授权信息
-	authBoxDisplay:''
+	authBoxDisplay:'',
+	sickItem:"",
+	symptomArr:[]
 }
 let persistData = {}; //持久化数据
 
@@ -43,7 +45,14 @@ const mutations = {
 	},
 	SET_BACK_URL: (state, url) => {
 		state.backUrl = url
-	}
+	},
+	SET_SICK_ITEM:(state,sick)=>{
+		state.sickItem = sick
+	},
+	SET_SYMPTOM_ARR:(state,symptom)=>{
+		state.symptomArr = symptom
+	},
+	
 }
 
 const actions = {

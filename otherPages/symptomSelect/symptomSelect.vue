@@ -249,7 +249,6 @@ export default {
 		/** 复选框事件*/
 		checkedItemChange(e, item) {
 			console.log(e, item);
-			debugger
 			let self = this;
 			let checkedData = this.checkedData;
 			let data = this.fromTypeData;
@@ -323,9 +322,13 @@ export default {
 							uni.$emit('symptomSelect', this.chooseArr);
 						}
 						// uni.navigateBack();
-						uni.navigateTo({
-							url: '/archivesPages/illnessDetaiList/illnessDetaiList'
-						});
+						if(this.chooseArr.length > 0){
+							this.$store.commit('SET_SYMPTOM_ARR',this.chooseArr)
+							uni.navigateTo({
+								url: '/archivesPages/illnessDetaiList/illnessDetaiList'
+							});
+						}
+						
 						
 					}
 				}
@@ -429,7 +432,6 @@ export default {
 		 * 对扁平化数组进行重新组装
 		 * */
 		assemblyData(arr) {
-			debugger
 			let flattArr = arr;
 			let parentNode = flattArr.filter(item => !item.parent_no);
 			parentNode.forEach(parent => {
