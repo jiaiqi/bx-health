@@ -55,7 +55,7 @@
 			</bx-checkbox-group>
 			<view class="form-item-content_value picker" v-else-if="popupFieldTypeList.includes(fieldData.type)" @click="openPopup(fieldData.type)">
 				<text class="place-holder" v-if="!fieldData.value">{{ '请选择' }}</text>
-				<text class="place-holder" v-else>{{ fkFieldLabel }}</text>
+				<text class="value" v-else>{{ fkFieldLabel }}</text>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="pickerFieldList.includes(fieldData.type)">
 				<picker :mode="pickerMode" :value="fieldData.value" start="09:01" end="21:01" @change="bindTimeChange">
@@ -131,16 +131,6 @@
 							<bx-radio class="radio" color="#2979ff" v-for="item in treeSelectorData" :key="item.id" :name="item.value" :serial-char="item.serialChar">{{ item.label }}</bx-radio>
 						</bx-radio-group>
 					</view>
-					<!-- 			<tree-selector
-						:srvInfo="isArray(fieldData.option_list_v2) ? null : fieldData.option_list_v2"
-						:treeData="treeSelectorData"
-						:childNodeCol="'_childNode'"
-						:disColName="fieldData && fieldData.option_list_v2 && fieldData.option_list_v2['key_disp_col'] ? fieldData.option_list_v2['key_disp_col'] : ''"
-						:nodeKey="fieldData.option_list_v2 && fieldData.option_list_v2['refed_col'] ? fieldData.option_list_v2['refed_col'] : 'no'"
-						@clickParentNode="onTreeGridChange"
-						@clickLastNode="onMenu"
-					></tree-selector> -->
-					<!-- <u-loadmore @loadmore="loadMoreTreeData" :status="treeDataStatus" :load-text="loadText" /> -->
 					<view class="dialog-button"><view class="cu-btn bg-grey shadow flex" @tap="showTreeSelector = false">取消</view></view>
 				</view>
 			</view>
@@ -487,11 +477,11 @@ export default {
 			}
 		}
 	}
-	.tree-selector{
-		height:calc( 80vh - var(--window-top) - var(--window-bottom));
+	.tree-selector {
+		height: calc(80vh - var(--window-top) - var(--window-bottom));
 		display: flex;
 		flex-direction: column;
-		.content{
+		.content {
 			flex: 1;
 			background-color: #fff;
 			.bx-radio-group {
