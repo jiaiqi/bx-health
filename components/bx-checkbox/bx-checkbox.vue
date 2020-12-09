@@ -1,10 +1,10 @@
 <template>
-	<view class="bx-checkbox" :style="[checkboxStyle]" :class="checkboxClass">
-		<view class="bx-checkbox-icon" @tap="toggle" :class="{ checked: checked }">
+	<view class="bx-checkbox" :style="[checkboxStyle]" :class="checkboxClass"  @tap="toggle">
+		<view class="bx-checkbox-icon" :class="{ checked: checked }">
 			<text v-if="serialChar">{{ serialChar }}</text>
 			<text class="cuIcon-check" v-if="checked && !serialChar"></text>
 		</view>
-		<view class="bx-checkbox__label" @tap="onClickLabel" :class="{ checked: checked, disabled: disabled }"><slot /></view>
+		<view class="bx-checkbox__label" :class="{ checked: checked, disabled: disabled }"><slot /></view>
 	</view>
 </template>
 

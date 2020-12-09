@@ -211,7 +211,7 @@ export default {
 				} else if (item.bx_col_type === "fk" && item.col_type !== "User") {
 					fieldInfo.type = "treeSelector"
 				} else if (item.col_type === "User") {
-					fieldInfo.type = "treeSelector"
+					fieldInfo.type = "Selector"
 					fieldInfo.option_list_v2 = {
 						"refed_col": "user_no",
 						"srv_app": "sso",
@@ -223,14 +223,14 @@ export default {
 						// }],
 						"key_disp_col": "user_disp"
 					}
-					fieldInfo.srvInfo = {
-						"key_disp_col": "user_disp",
-						serviceName: 'srvsso_user_select',
-						appNo: 'sso',
-						isTree: false,
-						column: 'user_no',
-						showCol: 'real_name', //要展示的字段
-					}
+					// fieldInfo.srvInfo = {
+					// 	"key_disp_col": "user_disp",
+					// 	serviceName: 'srvsso_user_select',
+					// 	appNo: 'sso',
+					// 	isTree: false,
+					// 	column: 'user_no',
+					// 	showCol: 'real_name', //要展示的字段
+					// }
 				} else if (fieldInfo.type === 'id_card') {
 					fieldInfo.type = 'idCardPicture'
 					fieldInfo.buttons = [{
