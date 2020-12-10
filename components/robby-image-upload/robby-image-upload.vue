@@ -345,8 +345,8 @@
 
 <style>
 	.imageUploadContainer{
-		padding: 10upx 5upx;
-		margin: 10upx 5upx;
+/* 		padding: 10upx 5upx;
+		margin: 10upx 5upx; */
 	}
 	
 	.dragging{
@@ -361,7 +361,7 @@
 	.imageItem, .imageUpload{
 		width: 160upx;
 		height: 160upx;
-		margin: 10upx;
+		margin: 0 10rpx 10rpx 0;
 	}
 	
 	.imageDel{

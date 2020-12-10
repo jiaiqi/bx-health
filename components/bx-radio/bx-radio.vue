@@ -1,10 +1,10 @@
 <template>
-	<view class="bx-radio" :style="[radioStyle]" :class="[radioButtonClass]">
-		<view class="bx-radio-icon" :class="{ checked: name === parentData.value, 'has-char': serialChar, 'no-char': !serialChar }" @tap="toggle">
+	<view class="bx-radio" :style="[radioStyle]" :class="[radioButtonClass]" @tap="toggle">
+		<view class="bx-radio-icon" :class="{ checked: name === parentData.value, 'has-char': serialChar, 'no-char': !serialChar }" >
 			<text v-if="serialChar">{{ serialChar }}</text>
 			<text v-if="!serialChar && name === parentData.value" class="bx-radio-checked"></text>
 		</view>
-		<view class="bx-radio__label" @tap="onClickLabel" :class="{ checked: checked, disabled: disabled }"><slot /></view>
+		<view class="bx-radio__label" :class="{ checked: checked, disabled: disabled }"><slot /></view>
 	</view>
 </template>
 
@@ -244,6 +244,16 @@ export default {
 				border-radius: 12rpx;
 				background-color: #007aff;
 			}
+		}
+	}
+	.bx-radio__label{
+		padding-right: 50rpx;
+		position: relative;
+		&::before{
+			position: absolute;
+			content: "";
+			width: 120%;
+			height: 120%;
 		}
 	}
 	&.button-mode {

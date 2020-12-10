@@ -1,6 +1,9 @@
 <template>
 	<view class="form-item">
-		<label class="form-item-label" :style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? 'white' : '' }">
+		<label
+			class="form-item-label"
+			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? 'white' : '' }"
+		>
 			{{ fieldData.label }}
 		</label>
 		<view class="form-item-content">
@@ -117,7 +120,7 @@
 				:limit="fieldData.fileNum"
 			></robby-image-upload>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }">
+		<view class="cu-modal bottom-modal" :class="{ show: showSelectorPopup }">
 			<view class="cu-dialog">
 				<view class="tree-selector">
 					<view class="content">
@@ -128,10 +131,12 @@
 							</view>
 						</view>
 						<bx-radio-group class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
-							<bx-radio class="radio" color="#2979ff" v-for="item in treeSelectorData" :key="item.id" :name="item.value" :serial-char="item.serialChar">{{ item.label }}</bx-radio>
+							<bx-radio class="radio" color="#2979ff" v-for="item in selectorData" :key="item.id" :name="item.value" :serial-char="item.serialChar">
+								{{ item.label }}
+							</bx-radio>
 						</bx-radio-group>
 					</view>
-					<view class="dialog-button"><view class="cu-btn bg-grey shadow flex" @tap="showTreeSelector = false">取消</view></view>
+					<view class="dialog-button"><view class="cu-btn bg-grey shadow flex" @tap="showSelectorPopup = false">取消</view></view>
 				</view>
 			</view>
 		</view>
@@ -197,7 +202,7 @@ export default {
 		return {
 			fieldData: this.field,
 			imagesUrl: [],
-			popupFieldTypeList: ['treeSelector', 'Set'], //点击会弹出popup的字段类型
+			popupFieldTypeList: ['treeSelector', 'Selector', 'Set'], //点击会弹出popup的字段类型
 			pickerFieldList: ['date', 'dateTime', 'time', 'Time', 'Date'],
 			reqHeader: null,
 			fileFormData: {
@@ -207,9 +212,9 @@ export default {
 				table_name: '',
 				columns: ''
 			},
-			showTreeSelector: false,
+			showSelectorPopup: false,
 			treePageInfo: { total: 0, rownumber: 20, pageNo: 1 },
-			treeSelectorData: [],
+			selectorData: [],
 			fkFieldLabel: ''
 		};
 	},
@@ -252,8 +257,8 @@ export default {
 			}
 		},
 		pickerChange(e) {
-			this.fkFieldLabel = this.treeSelectorData.find(item => item.value === e).label;
-			this.showTreeSelector = false;
+			this.fkFieldLabel = this.selectorData.find(item => item.value === e).label;
+			this.showSelectorPopup = false;
 		},
 		async getTreeSelectorData(cond, serv, relation_condition) {
 			let self = this;
@@ -327,12 +332,12 @@ export default {
 				}
 				let hasParentNo = res.data.data.filter(item => item.parent_no).length;
 				if (hasParentNo) {
-					self.treeSelectorData = self.treeReform(res.data.data, 'parent_no', 'no', self.fieldData.option_list_v2);
+					self.selectorData = self.treeReform(res.data.data, 'parent_no', 'no', self.fieldData.option_list_v2);
 					if (res.data.page && res.data.page.pageNo > 1) {
 						let data = self.treeReform(res.data.data, 'parent_no', 'no', self.fieldData.option_list_v2);
-						self.treeSelectorData = [...self.treeSelectorData, ...data];
+						self.selectorData = [...self.selectorData, ...data];
 					}
-					self.treeSelectorData = self.treeSelectorData.map((item, index) => {
+					self.selectorData = self.selectorData.map((item, index) => {
 						let a = {
 							title: '',
 							name: '',
@@ -353,11 +358,11 @@ export default {
 				} else {
 					if (res.data.page && res.data.page.pageNo > 1) {
 						let data = res.data.data;
-						self.treeSelectorData = [...self.treeSelectorData, ...data];
+						self.selectorData = [...self.selectorData, ...data];
 					} else {
-						self.treeSelectorData = res.data.data;
+						self.selectorData = res.data.data;
 					}
-					self.treeSelectorData = self.treeSelectorData.map(item => {
+					self.selectorData = self.selectorData.map(item => {
 						console.log(this.deepClone(this.fieldData.option_list_v2));
 						const config = this.deepClone(this.fieldData.option_list_v2);
 						item.label = config.key_disp_col ? item[config.key_disp_col] : '';
@@ -365,13 +370,13 @@ export default {
 						return item;
 					});
 				}
-				self.treeSelectorData.forEach(item => {
+				self.selectorData.forEach(item => {
 					if (self.fieldData.option_list_v2 && item[self.fieldData.option_list_v2.refed_col] === self.fieldData.value) {
 						self.fieldData['colData'] = item;
 					}
 				});
 			} else if (req.serviceName === 'srvsys_service_columnex_v2_select' && res.data && res.data.data && Array.isArray(res.data.data.srv_cols)) {
-				self.treeSelectorData = res.data.data.srv_cols;
+				self.selectorData = res.data.data.srv_cols;
 			}
 		},
 		bindTimeChange(e) {
@@ -380,9 +385,9 @@ export default {
 		openPopup(type) {
 			// 打开弹出层
 			switch (type) {
-				case 'treeSelector':
+				case 'Selector':
 					// this.getTreeSelectorData().then(_ => {
-					this.showTreeSelector = true;
+					this.showSelectorPopup = true;
 					// });
 					break;
 				case 'Set':
@@ -399,11 +404,11 @@ export default {
 		}
 	},
 	created() {
-		if (this.fieldData && this.fieldData.type === 'treeSelector') {
+		if (this.fieldData && this.fieldData.type === 'Selector') {
 			this.getTreeSelectorData().then(_ => {
 				if (this.fieldData.value) {
-					this.fkFieldLabel = this.treeSelectorData.find(item => item.value === this.fieldData.value)
-						? this.treeSelectorData.find(item => item.value === this.fieldData.value).label
+					this.fkFieldLabel = this.selectorData.find(item => item.value === this.fieldData.value)
+						? this.selectorData.find(item => item.value === this.fieldData.value).label
 						: '请选择';
 				}
 			});
@@ -479,6 +484,9 @@ export default {
 			background-color: #fff;
 			.bx-radio-group {
 				margin: 0 20rpx;
+			}
+			.button-mode{
+				margin-bottom: 10rpx;
 			}
 		}
 	}
