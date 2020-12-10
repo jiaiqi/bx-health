@@ -225,12 +225,13 @@ export default {
 				defaultVal: this.params.defaultVal
 			};
 			uni.navigateTo({
-				url: '/publicPages/form/form?params=' + JSON.stringify(params)
+				url: `/publicPages/newForm/newForm?serviceName=${params.serviceName}&type=update&fieldsCond=${encodeURIComponent(JSON.stringify(this.params.condition))}`
+				// url: '/publicPages/form/form?params=' + JSON.stringify(params)
 			});
 		},
 		async getDefaultVal() {
 			if (this.type === 'detail' || this.type === 'update') {
-				let serviceName = this.params.serviceName.replace('_update', '_select').replace('_add', '_select')
+				let serviceName = this.params.serviceName.replace('_update', '_select').replace('_add', '_select');
 				let app = uni.getStorageSync('activeApp');
 				let url = this.getServiceUrl(app, serviceName, 'select');
 				let req = {

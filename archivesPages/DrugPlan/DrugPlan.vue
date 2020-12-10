@@ -207,7 +207,7 @@ export default {
 							condition: [{ colName: 'person_no', ruleType: 'eq', value: this.planDetail.person_no }, { colName: 'person_no', ruleType: 'eq', value: this.planDetail.person_no }]
 						}
 					];
-					url = `/publicPages/form/form?serviceName=srvhealth_drug_schedule_record_detail_list_add&type=add&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
+					// url = `/publicPages/form/form?serviceName=srvhealth_drug_schedule_record_detail_list_add&type=add&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
 					break;
 			}
 			uni.navigateTo({

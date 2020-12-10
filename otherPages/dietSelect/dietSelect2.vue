@@ -999,7 +999,8 @@ export default {
 					value:""
 				}]
 				uni.navigateTo({
-				  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&cond='+decodeURIComponent(JSON.stringify(cond))
+				  url: '/publicPages/newForm/newForm?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add'
+				  // url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&cond='+decodeURIComponent(JSON.stringify(cond))
 				});
 			}
 			

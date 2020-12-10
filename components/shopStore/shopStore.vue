@@ -232,21 +232,28 @@ export default {
 			}
 		},
 		amend(item) {
-			let cond = [
+			// let cond = [
+			// 	{
+			// 		colName: 'id',
+			// 		ruleType: 'in',
+			// 		value: item.id
+			// 	}
+			// ];
+			// let params = {
+			// 	type: 'update',
+			// 	condition: cond,
+			// 	serviceName: 'srvhealth_restaurant_mgmt_select',
+			// 	defaultVal: item
+			// };
+			let fieldsCond = [
 				{
-					colName: 'id',
-					ruleType: 'in',
+					column: 'id',
 					value: item.id
 				}
 			];
-			let params = {
-				type: 'update',
-				condition: cond,
-				serviceName: 'srvhealth_restaurant_mgmt_select',
-				defaultVal: item
-			};
 			uni.navigateTo({
-				url: '/publicPages/form/form?type=update&params=' + encodeURIComponent(JSON.stringify(params))
+				url: `/publicPages/newForm/newForm?type=update&serviceName=srvhealth_restaurant_mgmt_select&fieldsCond=${JSON.stringify(fieldsCond)}`
+				// url: '/publicPages/form/form?type=update&params=' + encodeURIComponent(JSON.stringify(params))
 			});
 		},
 		/*删除**/

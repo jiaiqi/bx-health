@@ -21,15 +21,15 @@
 		</view>
 		<view class="container-cen">
 			<view class="container-cen-top">
-				<view  class="container-cen-top-list" @click="toPages('doctor')">
+				<view class="container-cen-top-list" @click="toPages('doctor')">
 					<text class="cuIcon-service text-blue" style="font-size: 70rpx;"></text>
 					<text>我的医生</text>
-					<view class="message-tag">{{doctor_message}}</view>
+					<view class="message-tag">{{ doctor_message }}</view>
 				</view>
 				<view class="container-cen-top-list" @click="toPages('userList')">
 					<text class="cuIcon-comment text-green" style="font-size: 70rpx;"></text>
 					<text>我的用户</text>
-					<view class="message-tag">{{hzMessage}}</view>
+					<view class="message-tag">{{ hzMessage }}</view>
 				</view>
 				<view class="container-cen-top-list" @click="toPages('pinggu')">
 					<text class="cuIcon-addressbook text-orange" style="font-size: 70rpx;"></text>
@@ -76,8 +76,8 @@ export default {
 		return {
 			wxUserInfo: '',
 			userInfo: '',
-			doctor_message:0,
-			hzMessage:0
+			doctor_message: 0,
+			hzMessage: 0
 		};
 	},
 	computed: {
@@ -100,9 +100,9 @@ export default {
 				relation_condition: {
 					relation: 'OR',
 					data: [
-					{
-						relation: 'AND',
-						data: [
+						{
+							relation: 'AND',
+							data: [
 								{
 									colName: 'receiver_account',
 									ruleType: 'eq',
@@ -113,8 +113,9 @@ export default {
 									ruleType: 'eq',
 									value: '未读'
 								}
-						]
-					}]
+							]
+						}
+					]
 				},
 				order: [
 					{
@@ -140,7 +141,7 @@ export default {
 				// this.doctorList = res.data.data;
 				let noList = res.data.data.map(item => item.manager_no);
 				let noStr = noList.toString();
-				let doctorList = await this.getDoctorInfoMessage(noStr, true);				
+				let doctorList = await this.getDoctorInfoMessage(noStr, true);
 			}
 		},
 		async getBindhzDoctor(no) {
@@ -158,8 +159,8 @@ export default {
 				let noList = res.data.data.map(item => item.customer_name);
 				let noStr = noList.toString();
 				let doctorList = await this.getDoctorRecod(noStr);
-				this.hzMessage = doctorList
-				console.log("查询----",doctorList,res.data.data)
+				this.hzMessage = doctorList;
+				console.log('查询----', doctorList, res.data.data);
 			}
 		},
 		toPages(e) {
@@ -186,9 +187,9 @@ export default {
 					});
 					break;
 				case 'beDoctor':
-				let userInfo = uni.getStorageSync('wxUserInfo');
+					let userInfo = uni.getStorageSync('wxUserInfo');
 					let fieldsCond = [
-						{ column: 'dt_profile_url', display: false, value: this.vuex_userInfo?this.vuex_userInfo.profile_url:'' },
+						{ column: 'dt_profile_url', display: false, value: this.vuex_userInfo ? this.vuex_userInfo.profile_url : '' },
 						{ column: 'owner_account', display: false, value: uni.getStorageSync('login_user_info').user_no }
 					];
 					uni.navigateTo({
@@ -231,7 +232,8 @@ export default {
 					};
 					if (this.vuex_userInfo.no) {
 						uni.navigateTo({
-							url: '/publicPages/form/form?type=detail&params=' + encodeURIComponent(JSON.stringify(params))
+							url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_person_info_select&type=detail&fieldsCond' + encodeURIComponent(JSON.stringify(cond))
+							// url: '/publicPages/form/form?type=detail&params=' + encodeURIComponent(JSON.stringify(params))
 						});
 					}
 					break;
@@ -281,17 +283,17 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				if (isSelf === true) {
-					this.doctorList = res.data.data;	
-					let arr = res.data.data.map(item=>{
-						return item.owner_account
-					})
-					let str = arr.join(',')
-					let count_num = 0
-						this.getDoctorRecod(str).then(length => {
-							count_num += length
-							this.doctor_message = count_num
-							console.log("-----------------length---",count_num)
-						});
+					this.doctorList = res.data.data;
+					let arr = res.data.data.map(item => {
+						return item.owner_account;
+					});
+					let str = arr.join(',');
+					let count_num = 0;
+					this.getDoctorRecod(str).then(length => {
+						count_num += length;
+						this.doctor_message = count_num;
+						console.log('-----------------length---', count_num);
+					});
 				}
 				return res.data.data[0];
 			} else {
@@ -426,26 +428,26 @@ export default {
 		}
 	},
 	onShow() {
-		this.userInfo = uni.getStorageSync('current_user_info')
-		this.getDoctorAllRecod(this.userInfo.userno).then(r=>{
+		this.userInfo = uni.getStorageSync('current_user_info');
+		this.getDoctorAllRecod(this.userInfo.userno).then(r => {
 			uni.setTabBarBadge({
-				index:3,
-				text:r.toString(),
-				success:(e)=>{
-					console.log("success---",e)
+				index: 3,
+				text: r.toString(),
+				success: e => {
+					console.log('success---', e);
 				},
-				fail:(fails)=> {
-					console.log("fails----",fails)
+				fail: fails => {
+					console.log('fails----', fails);
 				}
-			})
-		})
-		this.getBindDoctor()
-		this.getDoctorInfo().then(res=>{
-			if(res){
-				this.getBindhzDoctor(res.dt_no)
+			});
+		});
+		this.getBindDoctor();
+		this.getDoctorInfo().then(res => {
+			if (res) {
+				this.getBindhzDoctor(res.dt_no);
 			}
-			console.log("res-onshow---",res)
-		})
+			console.log('res-onshow---', res);
+		});
 	},
 	onPullDownRefresh() {
 		this.initPage().then(_ => {
@@ -555,7 +557,7 @@ export default {
 				width: 80upx;
 				height: 80upx;
 			}
-			.message-tag{
+			.message-tag {
 				position: absolute;
 				right: 0;
 				background: red;

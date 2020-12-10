@@ -265,7 +265,8 @@ export default {
 						}
 					];
 					uni.navigateTo({
-						url: '/publicPages/form/form?fieldsCond='+encodeURIComponent(JSON.stringify(fieldsCond))+'&params=' + JSON.stringify(params)
+						url: '/publicPages/newForm/newForm?fieldsCond='+encodeURIComponent(JSON.stringify(fieldsCond))+'&params=' + JSON.stringify(params)
+						// url: '/publicPages/form/form?fieldsCond='+encodeURIComponent(JSON.stringify(fieldsCond))+'&params=' + JSON.stringify(params)
 					});
 				} else {
 					uni.showToast({

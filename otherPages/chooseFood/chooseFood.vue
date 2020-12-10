@@ -836,8 +836,15 @@ export default {
 					serviceName: 'srvhealth_mixed_food_nutrition_contents_update',
 					defaultVal: this.currFood
 				};
+				let fieldsCond = [
+					{
+						column: 'id',
+						value:  this.currFood.id
+					}
+				];
 				uni.navigateTo({
-					url: '/publicPages/form/form?type=update&params=' + encodeURIComponent(JSON.stringify(params))
+					url: '/publicPages/newForm/newForm?type=update&fieldsCond='+encodeURIComponent(JSON.stringify(fieldsCond))
+					// url: '/publicPages/form/form?type=update&params=' + encodeURIComponent(JSON.stringify(params))
 				});
 			} else if (type === 'add') {
 				// let cond = [{

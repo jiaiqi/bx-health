@@ -1197,9 +1197,9 @@ export default {
 									"defaultVal": row
 								}
 								console.log("点击了【有效】的公共编辑按钮", row)
-								uni.navigateTo({
-									url: "/publicPages/form/form?params=" + JSON.stringify(params)
-								})
+								// uni.navigateTo({
+								// 	url: "/publicPages/form/form?params=" + JSON.stringify(params)
+								// })
 							} else {
 								console.log("点击了【无效】的公共编辑按钮")
 							}
@@ -1386,9 +1386,12 @@ export default {
 							}
 							uni.setStorageSync('activeApp', 'health');
 							uni.navigateTo({
-								url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' +
+								url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' +
 									decodeURIComponent(
 										JSON.stringify(fieldsCond))
+								// url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' +
+								// 	decodeURIComponent(
+								// 		JSON.stringify(fieldsCond))
 							});
 						} else {
 							uni.switchTab({

@@ -105,7 +105,8 @@
 					value:''
 				}]
 				uni.navigateTo({
-				  url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
+				  url: '/publicPages/newForm/newForm?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&fieldsCond='+decodeURIComponent(JSON.stringify(cond))
+				  // url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
 				});	
 			}
 		},
