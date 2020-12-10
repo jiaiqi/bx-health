@@ -497,12 +497,12 @@
 						"navigationBarTitleText": "列表"
 					}
 				},
-				{
-					"path": "form/form",
-					"style": {
-						"navigationBarTitleText": "表单"
-					}
-				},
+				// {
+				// 	"path": "form/form",
+				// 	"style": {
+				// 		"navigationBarTitleText": "表单"
+				// 	}
+				// },
 				{
 					"path": "webviewPage/webviewPage",
 					"style": {

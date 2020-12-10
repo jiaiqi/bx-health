@@ -103,9 +103,7 @@
 				:limit="fieldData.fileNum"
 			></robby-image-upload>
 		</view>
-		<view class="icon-area" >
-			<text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType==='location'"></text>
-		</view>
+		<view class="icon-area"><text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType === 'location'"></text></view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }">
 			<view class="cu-dialog">
@@ -149,8 +147,8 @@
 						</bx-radio-group>
 					</view>
 					<view class="dialog-button">
-						<view class="cu-btn bg-blue shadow flex" @tap="hidePopup" v-if="showMultiSelectorPopup">确定</view>
-						<view class="cu-btn bg-grey shadow flex" @tap="hidePopup" v-if="showSelectorPopup">取消</view>
+						<view class="cu-btn bg-blue shadow" @tap="hidePopup" v-if="showMultiSelectorPopup">确定</view>
+						<view class="cu-btn bg-grey shadow" @tap="hidePopup" v-if="showSelectorPopup">取消</view>
 					</view>
 				</view>
 			</view>
@@ -258,8 +256,8 @@ export default {
 		};
 	},
 	methods: {
-		getLocation(){
-			this.$emit('getLocation')
+		getLocation() {
+			this.$emit('getLocation');
 		},
 		hidePopup() {
 			this.showSelectorPopup = false;
@@ -272,7 +270,7 @@ export default {
 				self.imagesUrl = [];
 				if (fileDatas) {
 					for (let i = 0; i < fileDatas.length; i++) {
-						debugger
+						debugger;
 						self.imagesUrl.push(self.$api.getFilePath + fileDatas[i].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket'));
 					}
 				}
@@ -352,7 +350,7 @@ export default {
 			this.onInput();
 		},
 		pickerChange(e) {
-			if(this.fieldData.type==='Selector'){
+			if (this.fieldData.type === 'Selector') {
 				let optionData = this.selectorData.find(item => item.value === e);
 				this.fkFieldLabel = optionData.label;
 				this.fieldData['colData'] = optionData;
@@ -360,7 +358,6 @@ export default {
 				this.onInput();
 			}
 			// this.fkFieldLabel = this.selectorData.find(item => item.value === e).label;
-			
 		},
 		async getTreeSelectorData(cond, serv, relation_condition) {
 			let self = this;
@@ -568,9 +565,18 @@ export default {
 
 <style lang="scss" scoped>
 .cu-dialog {
+	padding: 0 20rpx 50rpx;
+	background-color: #fff;
 	.form-item-content_value {
 		width: 100%;
 		padding: 20rpx;
+	}
+	.dialog-button {
+		display: flex;
+		justify-content: space-around;
+		.cu-btn {
+			min-width: 45%;
+		}
 	}
 }
 .form-item {
@@ -676,7 +682,7 @@ export default {
 			}
 		}
 	}
-	.icon-area{
+	.icon-area {
 		display: inline-block;
 		text-align: left;
 		margin-right: 20rpx;

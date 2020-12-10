@@ -1,11 +1,15 @@
 <template>
 	<view class="form-page">
-		<a-form 
-		ref="bxForm"
-		v-if="colsV2Data && isArray(fields)" :fields="fields" :pageType="type" :service="serviceName" :formType="type"
-		:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
+		<a-form
+			ref="bxForm"
+			v-if="colsV2Data && isArray(fields)"
+			:fields="fields"
+			:pageType="type"
+			:service="serviceName"
+			:formType="type"
+			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
 		></a-form>
-<!-- 		<bxform
+		<!-- 		<bxform
 			ref="bxForm"
 			:service="serviceName"
 			:addType="addType"
@@ -35,18 +39,21 @@
 		</view>
 		<view class="button-box" v-if="colsV2Data && isArray(fields) && fields.length > 0">
 			<view v-for="(item, index) in buttons" :key="index" class="button">
-				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue"><text class="cuIcon-check"></text> {{ item.button_name }}</button>
+				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue">
+					<text class="cuIcon-check"></text>
+					{{ item.button_name }}
+				</button>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-import bxform from '@/components/bx-form/bx-form.vue';
+// import bxform from '@/components/bx-form/bx-form.vue';
 // import bxButtons from '../components/bx-buttons/bx-buttons.vue';
-import bxFormItem from '@/components/bx-form/bx-form-item.vue';
+// import bxFormItem from '@/components/bx-form/bx-form-item.vue';
 export default {
-	components: { bxform, bxFormItem },
+	// components: { bxform, bxFormItem },
 	props: {},
 	data() {
 		return {
@@ -476,7 +483,7 @@ export default {
 	min-height: 200upx;
 	background-color: #fff;
 	flex-wrap: wrap;
-	.cuIcon-check{
+	.cuIcon-check {
 		border-radius: 30px;
 		font-weight: bold;
 		border: 2rpx solid #fff;
