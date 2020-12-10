@@ -23,7 +23,7 @@
 				></image>
 			</view>
 			<view class="form-item-content_detail rich-text" v-html="field.value" v-else-if="pageType === 'detail' && (field.type === 'snote' || field.type === 'Note')"></view>
-			<view class="form-item-content_detail text" v-else-if="pageType === 'detail'">{{ field.value }}</view>
+			<view class="form-item-content_detail text" v-else-if="pageType === 'detail'">{{ field.value ? isArray(fieldData.value)?field.value.toString():field.value : '' }}</view>
 			<!-- detail-详情-end -->
 			<!-- form-item-start -->
 			<bx-radio-group class="form-item-content_value radio-group" v-model="fieldData.value" v-else-if="fieldData.type === 'radio'" @change="radioChange">
@@ -133,17 +133,24 @@
 								<input @input="searchFKDataWithKey" :adjust-position="false" type="text" placeholder="搜索" confirm-type="search" />
 							</view>
 						</view>
-						<bx-checkbox-group v-if="showMultiSelectorPopup" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button" @change="pickerChange">
-							<bx-checkbox class="radio" color="#2979ff" v-for="item in selectorData" :key="item.id" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
+						<bx-checkbox-group
+							v-if="showMultiSelectorPopup"
+							class="form-item-content_value checkbox-group"
+							v-model="fieldData.value"
+							mode="button"
+						>
+							<bx-checkbox v-for="item in setOptionList" :key="item.label" :name="item.value" v-model="item.checked">
+								{{ item.label }}
+							</bx-checkbox>
 						</bx-checkbox-group>
 						<bx-radio-group
 							v-if="showSelectorPopup"
 							class="form-item-content_value radio-group"
 							v-model="fieldData.value"
 							mode="button"
-							@change="pickerChange($event, selectorData)"
+							@change="pickerChange"
 						>
-							<bx-radio class="radio" color="#2979ff" v-for="item in selectorData" :key="item.id" :name="item.value">{{ item.label }}</bx-radio>
+							<bx-radio  v-for="item in selectorData" :key="item.id" :name="item.value">{{ item.label }}</bx-radio>
 						</bx-radio-group>
 					</view>
 					<view class="dialog-button">
@@ -226,7 +233,8 @@ export default {
 	},
 	data() {
 		return {
-			fieldData: this.field,
+			checkedList:[],
+			fieldData: {},
 			imagesUrl: [],
 			popupFieldTypeList: ['treeSelector', 'Selector', 'Set'], //点击会弹出popup的字段类型
 			pickerFieldList: ['date', 'dateTime', 'time', 'Time', 'Date'],
@@ -247,6 +255,7 @@ export default {
 			textareaValue: this.fieldData && this.fieldData.value ? this.fieldData.value : '',
 			treePageInfo: { total: 0, rownumber: 20, pageNo: 1 },
 			selectorData: [],
+			setOptionList:[],
 			fkFieldLabel: '',
 			valid: {
 				column: this.field.column,
@@ -254,6 +263,15 @@ export default {
 				msg: '不能为空!'
 			}
 		};
+	},
+	watch: {
+		field: {
+			deep: true,
+			immediate: true,
+			handler(newValue, oldValue) {
+				this.fieldData = newValue;
+			}
+		}
 	},
 	methods: {
 		getLocation() {
@@ -266,13 +284,16 @@ export default {
 		async getDefVal() {
 			let self = this;
 			if (this.fieldData.type === 'images' && this.fieldData.value !== '') {
-				let fileDatas = await self.getFilePath(this.fieldData.value);
-				self.imagesUrl = [];
-				if (fileDatas) {
-					for (let i = 0; i < fileDatas.length; i++) {
-						debugger;
-						self.imagesUrl.push(self.$api.getFilePath + fileDatas[i].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket'));
+				if (this.fieldData.value.indexOf('http') === -1) {
+					let fileDatas = await self.getFilePath(this.fieldData.value);
+					self.imagesUrl = [];
+					if (fileDatas) {
+						for (let i = 0; i < fileDatas.length; i++) {
+							self.imagesUrl.push(self.$api.getFilePath + fileDatas[i].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket'));
+						}
 					}
+				} else {
+					self.imagesUrl.push(this.fieldData.value);
 				}
 			} else if (this.fieldData.type === 'list' && this.fieldData.value !== '') {
 				// 选项列表
@@ -282,6 +303,9 @@ export default {
 					this.$set(this.listModel, colKey[i].colName, this.fieldModelsData[colKey[i].value]);
 					this.listModel[colKey[i].colName] = this.fieldModelsData[colKey[i].value];
 				}
+			}else if (this.fieldData.type === 'Set' && this.fieldData.value !== '') {
+				// 多选
+				this.fieldData.value = this.fieldData.value.split(',')
 			} else {
 				Object.keys(this.fieldsModel).forEach(key => {
 					if (this.fieldData.column === key && !this.fieldData.value && this.fieldsModel[key]) {
@@ -474,7 +498,10 @@ export default {
 					}
 				});
 			} else if (req.serviceName === 'srvsys_service_columnex_v2_select' && res.data && res.data.data && Array.isArray(res.data.data.srv_cols)) {
-				self.selectorData = res.data.data.srv_cols;
+				self.selectorData = res.data.data.srv_cols.map(item => {
+					item.checked = false;
+					return item;
+				});
 			}
 		},
 		bindTimeChange(e) {
@@ -485,7 +512,12 @@ export default {
 			switch (type) {
 				case 'Set':
 					if (Array.isArray(this.fieldData.option_list_v2)) {
-						this.selectorData = this.fieldData.option_list_v2;
+						this.setOptionList = this.fieldData.option_list_v2.map(item=>{
+							if(this.fieldData.value.includes(item.value)){
+								item.checked = true
+							}
+							return item
+						});
 						this.showMultiSelectorPopup = true;
 					}
 					break;
@@ -508,7 +540,11 @@ export default {
 		},
 		getValid() {
 			if (this.fieldData.isRequire && this.fieldData.value) {
-				if (this.fieldData.hasOwnProperty('_validators') && this.fieldData._validators.hasOwnProperty('isType') && typeof this.fieldData._validators.isType === 'function') {
+				if (
+					this.fieldData.hasOwnProperty('_validators') &&
+					this.fieldData._validators.hasOwnProperty('isType') &&
+					typeof this.fieldData._validators.isType === 'function'
+				) {
 					this.fieldData.valid = this.fieldData._validators.isType(this.fieldData.value);
 					this.valid.valid = true;
 				} else {

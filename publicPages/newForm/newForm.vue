@@ -30,7 +30,9 @@ export default {
 		toPages(type) {
 			this.srvType = type;
 			uni.redirectTo({
-				url: `/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(JSON.stringify(this.fieldsCond))}`
+				url: `/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(
+					JSON.stringify(this.fieldsCond)
+				)}`
 			});
 		},
 		async onButton(e) {
@@ -74,10 +76,6 @@ export default {
 										self.toPages('detail');
 									}
 								});
-								// let resData = this.getResData(res.data.response);
-								// console.log('resData', resData);
-								// this.use_type = 'detail';
-								// await this.getFieldsV2();
 							}
 						}
 					}
@@ -225,6 +223,12 @@ export default {
 					defaultVal = await this.getDefaultVal();
 					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 					this.fields = fields.map(field => {
+						if(field.type==='Set'&&Array.isArray(field.option_list_v2)){
+							field.option_list_v2 = field.option_list_v2.map(item=>{
+								item.checked=false;
+								return item
+							})
+						}
 						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
 							this.fieldsCond.forEach(item => {
 								if (item.column === field.column) {
@@ -247,6 +251,12 @@ export default {
 					break;
 				case 'add':
 					this.fields = colVs._fieldInfo.map(field => {
+						if(field.type==='Set'&&Array.isArray(field.option_list_v2)){
+							field.option_list_v2 = field.option_list_v2.map(item=>{
+								item.checked=false;
+								return item
+							})
+						}
 						if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs._fieldInfo && Array.isArray(colVs._fieldInfo)) {
 							this.defaultCondition.forEach(cond => {
 								colVs._fieldInfo.forEach(field => {
@@ -299,6 +309,9 @@ export default {
 		// use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
 
 		if (option.type) {
+			if (option.type.indexOf(',') !== -1) {
+				option.type = option.type.split(',')[0];
+			}
 			if (option.type === 'form') {
 				option.type = 'add';
 			}

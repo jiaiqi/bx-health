@@ -1279,7 +1279,6 @@ export default {
 				}
 				
 			}
-			debugger
 			if(parent.type === 'capacity' || parent.type === 'vitamin' || parent.type === 'mineral' ||parent.type === 'mingle'){
 				console.log(333,'par.type === parent.type')
 				let isHas = false

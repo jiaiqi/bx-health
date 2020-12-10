@@ -123,6 +123,9 @@ export default {
 				item.display = item.isShowExp && item.isShowExp.length > 0 ? this.colItemShowExps(item, this.fieldModel) : item.display === false ? false : true;
 				if (item.column === e.column) {
 					item.value = e.value;
+					if(item.type==='Set'){
+						item.option_list_v2 = e.option_list_v2
+					}
 				}
 				if (item.formulaShow) {
 					let isIfShow = evaluatorTo(fieldModel, item.formulaShow);
@@ -193,7 +196,7 @@ export default {
 					if (this.allField.length === 0) {
 						this.oldField = this.deepClone(newValue);
 					}
-					this.allField = this.deepClone(newValue);
+					this.allField = newValue;
 				}
 			}
 		},

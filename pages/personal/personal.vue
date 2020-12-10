@@ -199,7 +199,6 @@ export default {
 					break;
 				case 'userList':
 					this.getDoctorInfo().then(res => {
-						debugger;
 						if (res) {
 							uni.navigateTo({
 								url: '/personalPages/userList/userList'
@@ -232,7 +231,7 @@ export default {
 					};
 					if (this.vuex_userInfo.no) {
 						uni.navigateTo({
-							url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_person_info_select&type=detail&fieldsCond' + encodeURIComponent(JSON.stringify(cond))
+							url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_select&type=detail&fieldsCond' + encodeURIComponent(JSON.stringify(cond))
 							// url: '/publicPages/form/form?type=detail&params=' + encodeURIComponent(JSON.stringify(params))
 						});
 					}
@@ -364,7 +363,6 @@ export default {
 					uni.getUserInfo({
 						provider: 'weixin',
 						success: function(user) {
-							debugger;
 							let rawData = {
 								nickname: user.userInfo.nickName,
 								sex: user.userInfo.gender,
@@ -389,7 +387,6 @@ export default {
 				const result = await wx.login();
 				if (result.code) {
 					await this.wxLogin({ code: result.code });
-					debugger;
 					await this.initPage();
 				}
 				// #endif
