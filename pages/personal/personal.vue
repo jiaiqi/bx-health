@@ -21,13 +21,15 @@
 		</view>
 		<view class="container-cen">
 			<view class="container-cen-top">
-				<view class="container-cen-top-list" @click="toPages('doctor')">
+				<view  class="container-cen-top-list" @click="toPages('doctor')">
 					<text class="cuIcon-service text-blue" style="font-size: 70rpx;"></text>
 					<text>我的医生</text>
+					<view class="message-tag">{{doctor_message}}</view>
 				</view>
 				<view class="container-cen-top-list" @click="toPages('userList')">
 					<text class="cuIcon-comment text-green" style="font-size: 70rpx;"></text>
 					<text>我的用户</text>
+					<view class="message-tag">{{hzMessage}}</view>
 				</view>
 				<view class="container-cen-top-list" @click="toPages('pinggu')">
 					<text class="cuIcon-addressbook text-orange" style="font-size: 70rpx;"></text>
@@ -73,7 +75,9 @@ export default {
 	data() {
 		return {
 			wxUserInfo: '',
-			userInfo: ''
+			userInfo: '',
+			doctor_message:0,
+			hzMessage:0
 		};
 	},
 	computed: {
@@ -88,6 +92,76 @@ export default {
 		})
 	},
 	methods: {
+		async getDoctorAllRecod(userNo) {
+			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_consultation_chat_record_select',
+				colNames: ['*'],
+				relation_condition: {
+					relation: 'OR',
+					data: [
+					{
+						relation: 'AND',
+						data: [
+								{
+									colName: 'receiver_account',
+									ruleType: 'eq',
+									value: userNo
+								},
+								{
+									colName: 'msg_state',
+									ruleType: 'eq',
+									value: '未读'
+								}
+						]
+					}]
+				},
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'asc'
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			return res.data.data.length;
+		},
+		async getBindDoctor() {
+			// 查找医生信息
+			let url = this.getServiceUrl('health', 'srvhealth_patient_doctor_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_patient_doctor_select',
+				colNames: ['*'],
+				condition: [{ colName: 'customer_no', ruleType: 'like', value: this.userInfo.no }],
+				order: []
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
+				// this.doctorList = res.data.data;
+				let noList = res.data.data.map(item => item.manager_no);
+				let noStr = noList.toString();
+				let doctorList = await this.getDoctorInfoMessage(noStr, true);				
+			}
+		},
+		async getBindhzDoctor(no) {
+			// 查询患者信息
+			let url = this.getServiceUrl('health', 'srvhealth_patient_doctor_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_patient_doctor_select',
+				colNames: ['*'],
+				condition: [{ colName: 'manager_no', ruleType: 'like', value: no }],
+				order: []
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
+				// this.doctorList = res.data.data;
+				let noList = res.data.data.map(item => item.customer_name);
+				let noStr = noList.toString();
+				let doctorList = await this.getDoctorRecod(noStr);
+				this.hzMessage = doctorList
+				console.log("查询----",doctorList,res.data.data)
+			}
+		},
 		toPages(e) {
 			// #ifdef MP-WEIXIN
 			if (!this.authSetting || !this.authSetting.userInfo) {
@@ -112,18 +186,14 @@ export default {
 					});
 					break;
 				case 'beDoctor':
-					let fieldsCond = [{ column: 'dt_profile_url', display: false }, { column: 'owner_account', display: false, value: uni.getStorageSync('login_user_info').user_no }];
-					let userInfo = uni.getStorageSync('wxUserInfo');
-					if (userInfo && userInfo.headimgurl) {
-						fieldsCond = fieldsCond.map(item => {
-							if (item.column === 'dt_profile_url') {
-								item.value = userInfo.headimgurl;
-							}
-							return item;
-						});
-					}
+				let userInfo = uni.getStorageSync('wxUserInfo');
+					let fieldsCond = [
+						{ column: 'dt_profile_url', display: false, value: this.vuex_userInfo?this.vuex_userInfo.profile_url:'' },
+						{ column: 'owner_account', display: false, value: uni.getStorageSync('login_user_info').user_no }
+					];
 					uni.navigateTo({
-						url: '/publicPages/form/form?serviceName=srvhealth_doctor_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+						url: '/publicPages/newForm/newForm?serviceName=srvhealth_doctor_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+						// url: '/pages/form/form?serviceName=srvhealth_doctor_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 					});
 					break;
 				case 'userList':
@@ -167,6 +237,67 @@ export default {
 					break;
 			}
 		},
+		async getDoctorRecod(userNo) {
+			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_consultation_chat_record_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'sender_account',
+						ruleType: 'in',
+						value: userNo
+					},
+					{
+						colName: 'msg_state',
+						ruleType: 'eq',
+						value: '未读'
+					},
+					{
+						colName: 'receiver_account',
+						ruleType: 'eq',
+						value: this.userInfo.userno
+					}
+				],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'asc'
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			return res.data.data.length;
+		},
+		async getDoctorInfoMessage(no, isSelf) {
+			// 查找医生信息
+			let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_doctor_select',
+				colNames: ['*'],
+				condition: [{ colName: 'dt_no', ruleType: 'in', value: no }],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				if (isSelf === true) {
+					this.doctorList = res.data.data;	
+					let arr = res.data.data.map(item=>{
+						return item.owner_account
+					})
+					let str = arr.join(',')
+					let count_num = 0
+						this.getDoctorRecod(str).then(length => {
+							count_num += length
+							this.doctor_message = count_num
+							console.log("-----------------length---",count_num)
+						});
+				}
+				return res.data.data[0];
+			} else {
+				return false;
+			}
+		},
 		async getDoctorInfo() {
 			// 查找医生信息
 			let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
@@ -175,7 +306,6 @@ export default {
 				colNames: ['*'],
 				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.wxuserinfo.user_no ? this.wxuserinfo.user_no : this.vuex_userInfo.userno }]
 			};
-			debugger;
 			if (req.condition[0].value) {
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
@@ -295,6 +425,28 @@ export default {
 			// #endif
 		}
 	},
+	onShow() {
+		this.userInfo = uni.getStorageSync('current_user_info')
+		this.getDoctorAllRecod(this.userInfo.userno).then(r=>{
+			uni.setTabBarBadge({
+				index:3,
+				text:r.toString(),
+				success:(e)=>{
+					console.log("success---",e)
+				},
+				fail:(fails)=> {
+					console.log("fails----",fails)
+				}
+			})
+		})
+		this.getBindDoctor()
+		this.getDoctorInfo().then(res=>{
+			if(res){
+				this.getBindhzDoctor(res.dt_no)
+			}
+			console.log("res-onshow---",res)
+		})
+	},
 	onPullDownRefresh() {
 		this.initPage().then(_ => {
 			uni.stopPullDownRefresh();
@@ -398,9 +550,22 @@ export default {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+			position: relative;
 			image {
 				width: 80upx;
 				height: 80upx;
+			}
+			.message-tag{
+				position: absolute;
+				right: 0;
+				background: red;
+				color: white;
+				border-radius: 18rpx;
+				padding: 1px 2px;
+				top: -2px;
+				min-width: 44rpx;
+				height: 32rpx;
+				text-align: center;
 			}
 		}
 	}

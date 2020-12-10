@@ -57,6 +57,15 @@
 			}
 		}
 		// ,
+		// ,{
+		//        "path" : "pages/form/form",
+		//        "style" :                                                                                    
+		//        {
+		//            "navigationBarTitleText": "",
+		//            "enablePullDownRefresh": false
+		//        }
+
+		//    }
 	],
 	"subPackages": [{
 			// 问卷
@@ -191,7 +200,7 @@
 						"navigationBarBackgroundColor": "#409eff",
 						"enablePullDownRefresh": false
 					}
-				},{
+				}, {
 					"path": "sickness/sicknessDetail",
 					"style": {
 						"navigationBarTitleText": "疾病详情",
@@ -506,6 +515,13 @@
 						"enablePullDownRefresh": false,
 						"navigationBarTitleText": "位置选择"
 					}
+				}, {
+					"path": "newForm/newForm",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+
 				}
 			]
 		}

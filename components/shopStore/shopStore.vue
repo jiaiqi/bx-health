@@ -26,13 +26,13 @@
 		</view>
 		<view class="container margin-top sort-box">
 			<view class="item-box" v-for="(item, i) in sortList" :key="i">
-				<view @click="tapTitItem(item,i)" class="tit" :class="{ active: sortIndex == i }">
-					<text v-if="item.tit === '商户'">{{item.tit}}</text>
+				<view @click="tapTitItem(item, i)" class="tit" :class="{ active: sortIndex == i }">
+					<text v-if="item.tit === '商户'">{{ item.tit }}</text>
 					<text v-if="item.tit === '我的店铺'">{{ item.tit }}</text>
 				</view>
 			</view>
 		</view>
-		<view  class=" store-box" v-if="storeList && current_tit.type === 'shop'">
+		<view class=" store-box" v-if="storeList && current_tit.type === 'shop'">
 			<sPullScroll
 				ref="pullScroll"
 				:heightStyle="heightStyle"
@@ -45,35 +45,35 @@
 				:bottom="0"
 				finishText="我是有底线的..."
 			>
-				<view @click="toShopDetail(store)"  class=" item-box" v-for="(store, i) in storeList" :key="i">
+				<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in storeList" :key="i">
 					<view class="container top-box">
 						<view class="left">
 							<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
 							<image v-else :src="store.imgurl" mode="aspectFill"></image>
 						</view>
 						<view class="right">
-							<text class="tit">{{ store.name?store.name:'' }}</text>
+							<text class="tit">{{ store.name ? store.name : '' }}</text>
 							<view class="column store-r-b">
 								<view class="store-r-b-t">
-									<text class="cuIcon-favorfill"></text>	
+									<text class="cuIcon-favorfill"></text>
 									<!-- <u-icon name="star-fill"></u-icon>	 -->
-									<text>{{store.grade?store.grade:0}}</text>
+									<text>{{ store.grade ? store.grade : 0 }}</text>
 								</view>
 								<view class="store-r-b-b">
-									<text>月售{{store.sale_num?store.sale_num:0}}</text>
+									<text>月售{{ store.sale_num ? store.sale_num : 0 }}</text>
 								</view>
 							</view>
 							<view class="store-r-b-b">
 								<text>地址:</text>
-								<text>{{store.address?store.address:'暂无地址'}}</text>
+								<text>{{ store.address ? store.address : '暂无地址' }}</text>
 							</view>
 						</view>
 					</view>
 				</view>
 			</sPullScroll>
 		</view>
-		
-		<view  class=" store-box" v-else-if="current_tit.type === 'myShop'">
+
+		<view class=" store-box" v-else-if="current_tit.type === 'myShop'">
 			<sPullScroll
 				ref="pullScroll"
 				:heightStyle="heightStyle"
@@ -86,31 +86,31 @@
 				:bottom="0"
 				finishText="我是有底线的..."
 			>
-			<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in myStoreList" :key="i">
-				<view class="container top-box">
-					<view class="left">
-						<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
-						<image v-else :src="store.imgurl" mode="aspectFill"></image>
-					</view>
-					<view class="right">
-						<text class="tit">{{ store.name }}</text>
-						<view class="column store-r-b store-r-b-my">
-							<view class="store-r-b-t">
-								<!-- <u-icon name="star-fill"></u-icon>	 -->
-								<text class="cuIcon-favorfill"></text>
-								<text>{{store.grade}}</text>
-							</view>
-							<view class="store-r-b-b">
-								<text>月售{{store.sale_num}}</text>
-							</view>
+				<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in myStoreList" :key="i">
+					<view class="container top-box">
+						<view class="left">
+							<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
+							<image v-else :src="store.imgurl" mode="aspectFill"></image>
 						</view>
-						<view class="del-shop">
-							<text @click.stop="del(store)">删除</text>
-							<text @click.stop="amend(store)">修改</text>
+						<view class="right">
+							<text class="tit">{{ store.name }}</text>
+							<view class="column store-r-b store-r-b-my">
+								<view class="store-r-b-t">
+									<!-- <u-icon name="star-fill"></u-icon>	 -->
+									<text class="cuIcon-favorfill"></text>
+									<text>{{ store.grade }}</text>
+								</view>
+								<view class="store-r-b-b">
+									<text>月售{{ store.sale_num }}</text>
+								</view>
+							</view>
+							<view class="del-shop">
+								<text @click.stop="del(store)">删除</text>
+								<text @click.stop="amend(store)">修改</text>
+							</view>
 						</view>
 					</view>
 				</view>
-			</view>
 			</sPullScroll>
 		</view>
 		<!-- </mescroll-body> -->
@@ -132,12 +132,12 @@
 //引入测试数据
 import sPullScroll from '@/components/s-pull-scroll';
 export default {
-	components: {sPullScroll},
+	components: { sPullScroll },
 	data() {
 		return {
 			isLogin: false, //是否已经登录
 			MPPR: 0,
-			searchVal:'', //搜索内容
+			searchVal: '', //搜索内容
 			heightStyle: 'calc(100vh-620upx)',
 			GDHEAD: 0,
 			pageInfo: {
@@ -151,18 +151,18 @@ export default {
 				auto: false //是否在初始化后,自动执行downCallback; 默认true
 			},
 			sortIndex: 0,
-			sortList: [{ tit: '商户',type:'shop' }, { tit: '我的店铺',type:'myShop' }],
-			myStoreList:[], //当前登录人得商铺列表
-			current_tit:{ tit: '商户',type:'shop' }, //当前点击顶部分类
+			sortList: [{ tit: '商户', type: 'shop' }, { tit: '我的店铺', type: 'myShop' }],
+			myStoreList: [], //当前登录人得商铺列表
+			current_tit: { tit: '商户', type: 'shop' }, //当前点击顶部分类
 			storeList: [],
 			shopList: []
 		};
 	},
 	async created() {
-		let self = this
-		uni.$on('loginStatusChange',(result)=>{
-			self.isLogin = result
-		})
+		let self = this;
+		uni.$on('loginStatusChange', result => {
+			self.isLogin = result;
+		});
 		let userInfo = uni.getStorageSync('login_user_info');
 		if (!userInfo) {
 			// 未登录， 提示跳转
@@ -188,7 +188,7 @@ export default {
 			}
 		} else {
 			self.isLogin = true;
-			this.onRefresh()
+			this.onRefresh();
 			this.getShopList();
 		}
 	},
@@ -200,7 +200,7 @@ export default {
 		console.log('onshow', this.isLogin);
 		if (this.isLogin) {
 			this.getShopList();
-			this.onRefresh()
+			this.onRefresh();
 			// this.getMyShopList()
 		}
 	},
@@ -225,120 +225,127 @@ export default {
 			let page = this.pageInfo;
 			this.pageInfo.pageNo = pullScroll.page;
 			console.log(pullScroll.page);
-			if(this.current_tit.type === 'shop'){
-				this.getShopList()
-			}else if(this.current_tit.type === 'myShop'){
-				this.getMyShopList()
+			if (this.current_tit.type === 'shop') {
+				this.getShopList();
+			} else if (this.current_tit.type === 'myShop') {
+				this.getMyShopList();
 			}
 		},
-		amend(item){
-			let cond = [{
-				colName:"id",
-				ruleType:"in",
-				value:item.id
-			}]
+		amend(item) {
+			let cond = [
+				{
+					colName: 'id',
+					ruleType: 'in',
+					value: item.id
+				}
+			];
 			let params = {
-			  type: 'update',
-			  condition: cond,
-			  serviceName: 'srvhealth_restaurant_mgmt_select',
-			  defaultVal: item
+				type: 'update',
+				condition: cond,
+				serviceName: 'srvhealth_restaurant_mgmt_select',
+				defaultVal: item
 			};
 			uni.navigateTo({
-			  url: '/publicPages/form/form?type=update&params='+ encodeURIComponent(JSON.stringify(params)) 
+				url: '/publicPages/form/form?type=update&params=' + encodeURIComponent(JSON.stringify(params))
 			});
 		},
 		/*删除**/
-		 del(item){			
-			 let self = this
+		del(item) {
+			let self = this;
 			uni.showModal({
-			    title: '提示',
-			    content: '是否确认删除?',
-			    success:(res)=> {
-			        if (res.confirm) {
-						self.delFoods(item)
-			        } else if (res.cancel) {
-			            console.log('用户点击取消');
-			        }
-			    }
-			})
-			
+				title: '提示',
+				content: '是否确认删除?',
+				success: res => {
+					if (res.confirm) {
+						self.delFoods(item);
+					} else if (res.cancel) {
+						console.log('用户点击取消');
+					}
+				}
+			});
 		},
-		async delFoods(item){
-			let self = this
+		async delFoods(item) {
+			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_delete', 'operate');
-			let req = [{
-				serviceName: 'srvhealth_restaurant_mgmt_delete',
-				colNames: ['*'],
-				condition:[{
-					colName:'id',
-					ruleType:'in',
-					value:item.id
-				}]
-			}]
+			let req = [
+				{
+					serviceName: 'srvhealth_restaurant_mgmt_delete',
+					colNames: ['*'],
+					condition: [
+						{
+							colName: 'id',
+							ruleType: 'in',
+							value: item.id
+						}
+					]
+				}
+			];
 			let rea = await self.$http.post(url, req);
-			if(rea.data.resultCode === 'SUCCESS'){
+			if (rea.data.resultCode === 'SUCCESS') {
 				// self.getFoodsList()
-				self.getMyShopList()
-			}else{
+				self.getMyShopList();
+			} else {
 				uni.showToast({
-					title:rea.data.resultMessage,
-					icon:'none'
-				})
+					title: rea.data.resultMessage,
+					icon: 'none'
+				});
 			}
 		},
-		goSearch(){
-			if(this.current_tit.type === 'shop'){
-				this.getShopList("search",this.searchVal)
-			}else if(this.current_tit.type === 'myShop'){
-				this.getMyShopList("search",this.searchVal)
+		goSearch() {
+			if (this.current_tit.type === 'shop') {
+				this.getShopList('search', this.searchVal);
+			} else if (this.current_tit.type === 'myShop') {
+				this.getMyShopList('search', this.searchVal);
 			}
-			console.log("-=========>")
+			console.log('-=========>');
 		},
 		/* 点击顶部切换商铺和我得商铺列表**/
-		tapTitItem(item,i){
-			this.current_tit = item
-			this.sortIndex = i
-			this.onRefresh()
-			console.log("点击顶部切换===》",item)
+		tapTitItem(item, i) {
+			this.current_tit = item;
+			this.sortIndex = i;
+			this.onRefresh();
+			console.log('点击顶部切换===》', item);
 		},
 		/*跳转至商铺详情*/
 		toShopDetail(item) {
 			console.log('---------');
 			uni.navigateTo({
-				url: '/otherPages/shop/shopHome?type='+ this.current_tit.type +'&restaurantNo=' + item.restaurant_no
+				url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.restaurant_no
 			});
 		},
 		/* 获取商户列表**/
-		async getShopList(type=null,search_val) {
-			let self = this
+		async getShopList(type = null, search_val) {
+			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_restaurant_mgmt_select',
 				colNames: ['*'],
 				condition: [],
 				order: [],
-				page:self.pageInfo
+				page: self.pageInfo
 			};
-			if(type && type === 'search'){
-				req.condition = [{
-					colName:'name',
-					ruleType:'like',
-					value:search_val
-				}]
+			if (type && type === 'search') {
+				req.condition = [
+					{
+						colName: 'name',
+						ruleType: 'like',
+						value: search_val
+					}
+				];
 			}
 			let res = await this.$http.post(url, req);
-			if(res.data.resultCode === '0011'){
+			if (res.data.resultCode === '0011') {
 				this.isLogin = false;
 				const result = await wx.login();
 				if (result.code) {
 					this.code = result.code;
 					await this.wxLogin({ code: result.code });
-					this.isLogin = true
+					this.isLogin = true;
 					// await this.initPage();
 				}
-			}else{
-				if(self.pageInfo.pageNo === 1){
-					self.storeList = []
+			} else {
+				if (self.pageInfo.pageNo === 1) {
+					self.storeList = [];
 				}
 				self.pageInfo.total = res.data.page.total;
 				self.pageInfo.pageNo = res.data.page.pageNo;
@@ -351,44 +358,44 @@ export default {
 				}
 				if (res.data.state === 'SUCCESS') {
 					console.log('商户列表-----', res.data.data);
-					res.data.data.forEach(item=>{
-						if(item.image){
-							let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+					res.data.data.forEach(item => {
+						if (item.image) {
+							let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 							this.$set(item, 'imgurl', urls);
 						}
-						
-					})
-					this.storeList = [...this.storeList,...res.data.data]
+					});
+					this.storeList = [...this.storeList, ...res.data.data];
 				}
 			}
-			
 		},
 		/* 获取当前登录人得商铺**/
-		async getMyShopList(type=null,search_val) {
-			let self = this
+		async getMyShopList(type = null, search_val) {
+			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_restaurant_mgmt_select',
 				colNames: ['*'],
-				condition: [{
-					colName:'create_user',
-					ruleType:'eq',
-					value:uni.getStorageSync('login_user_info').user_no
-				}],
+				condition: [
+					{
+						colName: 'create_user',
+						ruleType: 'eq',
+						value: uni.getStorageSync('login_user_info').user_no
+					}
+				],
 				order: [],
-				page:self.pageInfo
+				page: self.pageInfo
 			};
-			if(type && type === 'search'){
+			if (type && type === 'search') {
 				let obj = {
-					colName:'name',
-					ruleType:'like',
-					value:search_val
-				}
-				req.condition.push(obj)
+					colName: 'name',
+					ruleType: 'like',
+					value: search_val
+				};
+				req.condition.push(obj);
 			}
 			let res = await this.$http.post(url, req);
-			if(self.pageInfo.pageNo === 1){
-				self.myStoreList = []
+			if (self.pageInfo.pageNo === 1) {
+				self.myStoreList = [];
 			}
 			self.pageInfo.total = res.data.page.total;
 			self.pageInfo.pageNo = res.data.page.pageNo;
@@ -399,27 +406,29 @@ export default {
 			} else {
 				self.$refs.pullScroll.success();
 			}
-			
+
 			if (res.data.state === 'SUCCESS') {
 				console.log('我的商户列表-----', res.data.data);
-				res.data.data.forEach(item=>{
-					if(item.image){
-						let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+				res.data.data.forEach(item => {
+					if (item.image) {
+						let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 						this.$set(item, 'imgurl', urls);
 					}
-					
-				})
-				this.myStoreList = [...this.myStoreList,...res.data.data]
-				if(this.myStoreList.length == 0){
-					this.current_tit={ tit: '商户',type:'shop' }
+				});
+				this.myStoreList = [...this.myStoreList, ...res.data.data];
+				if (this.myStoreList.length == 0) {
+					this.current_tit = { tit: '商户', type: 'shop' };
 					this.getShopList();
 				}
 			}
 		},
 		/*新增商铺**/
-		addShop(){
+		addShop() {
+			let fieldsCond = [{ column: 'address', fieldType: 'location' }];
 			uni.navigateTo({
-			  url: '/publicPages/form/form?serviceName=srvhealth_restaurant_mgmt_add&type=add'
+				url: `/publicPages/newForm/newForm?serviceName=srvhealth_restaurant_mgmt_add&type=add&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`
+				// url: `/pages/form/form?serviceName=srvhealth_restaurant_mgmt_add&type=add&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`
+				// url: '/publicPages/form/form?serviceName=srvhealth_restaurant_mgmt_add&type=add'
 			});
 		}
 	}
@@ -427,9 +436,9 @@ export default {
 </script>
 
 <style lang="scss">
-	.store-wrap{
-		height: 100%;
-	}
+.store-wrap {
+	height: 100%;
+}
 page {
 	background-color: #f8f8f8;
 }
@@ -519,23 +528,23 @@ page {
 		}
 	}
 }
-.store-r-b{
+.store-r-b {
 	display: flex;
 	align-items: center;
-	.store-r-b-t{
+	.store-r-b-t {
 		color: #f98c00;
 		font-weight: 700;
 		display: flex;
-		text{
+		text {
 			margin-right: 10upx;
 		}
 	}
-	.store-r-b-b{
+	.store-r-b-b {
 		color: #848484;
 		// margin-top: 10upx;
 	}
 }
-.store-r-b-my{
+.store-r-b-my {
 	margin-top: 30upx;
 }
 .search-box {
@@ -562,7 +571,7 @@ page {
 			flex: 1;
 			color: #888888;
 			font-size: 14px;
-			input{
+			input {
 				padding: 0 10rpx;
 				font-size: 28rpx;
 				height: 68rpx;
@@ -664,7 +673,7 @@ page {
 .sort-box {
 	display: flex;
 	flex-direction: row;
-	margin-top:12px;
+	margin-top: 12px;
 	.item-box {
 		margin-right: 16px;
 		.tit {
@@ -810,11 +819,11 @@ page {
 				}
 			}
 		}
-		.del-shop{
+		.del-shop {
 			display: flex;
 			justify-content: flex-end;
 			margin-right: 20upx;
-			text{
+			text {
 				color: #0081ff;
 				margin-right: 10px;
 				border: 1px solid #0081ff;

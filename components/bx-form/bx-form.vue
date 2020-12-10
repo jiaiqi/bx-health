@@ -313,7 +313,6 @@ export default {
 				}
 			});
 		},
-		setShowExp() {},
 		async setCallbackColumnValue(serviceCall, condition) {
 			let url = this.getServiceUrl(serviceCall.app, serviceCall.service, 'select');
 			let req = {
@@ -462,7 +461,6 @@ export default {
 					}
 					return itemData;
 				});
-				console.log('0000000000000000', this.allField);
 			}
 		},
 		onValChange(e) {

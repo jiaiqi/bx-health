@@ -217,12 +217,12 @@ export default {
 .bx-radio {
 	display: flex;
 	align-items: center;
-	padding: 0 10rpx;
+	padding: 10rpx;
 	.bx-radio-icon {
 		width: 40rpx;
 		height: 40rpx;
 		border-radius: 60rpx;
-		border: 2rpx solid #888;
+		border: 2rpx solid #c8c9cc;
 		color: #888;
 		margin-right: 10rpx;
 		display: flex;

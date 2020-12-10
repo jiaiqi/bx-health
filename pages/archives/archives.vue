@@ -51,7 +51,7 @@
 		</view>
 		<view class="health-archive-item health-todos">
 			<view class="subtitle">
-				<text class="title-text">用药计划</text>
+				<text class="title-text">待办事项</text>
 				<view class="title-action" @click="navPages('drug')">
 					<text class="cuIcon-add "></text>
 					<text class="see-histroy">添加</text>
@@ -276,7 +276,7 @@ export default {
 			wxUserInfo: 'wxUserInfo',
 			login_user_info: 'loginUserInfo',
 			client_env: 'env',
-			authBoxDisplay:"authBoxDisplay"
+			authBoxDisplay: 'authBoxDisplay'
 		}),
 		totalScore() {
 			if (this.healthTotalScore && typeof this.healthTotalScore === 'number') {
@@ -329,10 +329,10 @@ export default {
 		},
 		avatarUrl() {
 			if (this.userInfo.profile_url) {
-				return this.getImagePath(this.userInfo.profile_url)
+				return this.getImagePath(this.userInfo.profile_url);
 				// return this.$api.downloadFile + this.userInfo.profile_url + '&thumbnailType=fwsu_100' + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			} else if (this.loginUserInfo.headimgurl) {
-				return this.getImagePath(this.userInfo.headimgurl)
+				return this.getImagePath(this.userInfo.headimgurl);
 				// return this.loginUserInfo.headimgurl;
 			}
 		},
@@ -987,10 +987,15 @@ export default {
 					// url:'/otherPages/balancedDiet/balancedDiet'
 				});
 			} else if (type === 'drug') {
-				let condition = [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]; //默认值
+				// let condition = [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]; //默认值
+				let fieldsCond = [{ column: 'person_no', display: false, value: this.userInfo.no }];
 				uni.navigateTo({
-					url: '/publicPages/form/form?serviceName=srvhealth_drug_schedule_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
+					url: '/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+					// url: '/pages/form/form?serviceName=srvhealth_drug_schedule_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 				});
+				// uni.navigateTo({
+				// 	url: '/publicPages/form/form?serviceName=srvhealth_drug_schedule_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
+				// });
 			}
 		},
 		toCouple() {
@@ -1158,13 +1163,17 @@ export default {
 			}
 			uni.setStorageSync('activeApp', 'health');
 			uni.navigateTo({
-				url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+				url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+				// url: '/pages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 			});
+			// uni.navigateTo({
+			// 	url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+			// });
 		},
 		async getuserinfo(e) {
 			// #ifdef MP-WEIXIN
 			const user = e.mp.detail;
-			if (user&&user.userInfo) {
+			if (user && user.userInfo) {
 				let rawData = {
 					nickname: user.userInfo.nickName,
 					sex: user.userInfo.gender,
@@ -1174,7 +1183,7 @@ export default {
 					headimgurl: user.userInfo.avatarUrl
 				};
 				this.setWxUserInfo(rawData);
-				this.$store.commit('SET_WX_USERINFO', rawData)
+				this.$store.commit('SET_WX_USERINFO', rawData);
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
 				const result = await wx.login();
 				if (result.code) {
@@ -1211,12 +1220,12 @@ export default {
 		// #endif
 	},
 	onTabItemTap(e) {
-		this.initPage()
+		this.initPage();
 	},
 	onPullDownRefresh() {
-		this.initPage().then(_=>{
-			uni.stopPullDownRefresh()
-		})
+		this.initPage().then(_ => {
+			uni.stopPullDownRefresh();
+		});
 	},
 	onShow() {
 		// if(this.is_login&&this.authSetting['userInfo']){

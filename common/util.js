@@ -183,7 +183,7 @@ export default {
 				fieldInfo.validators = item.validators
 				// col_type 转换 表单组件 type 
 				if (item.col_type === "String" || item.col_type === "TelNo") {
-					fieldInfo.type = "input"
+					fieldInfo.type = "text"
 				} else if (item.col_type === "DateTime") {
 					fieldInfo.type = "date"
 				} else if (item.col_type === "FileList") {
@@ -209,7 +209,7 @@ export default {
 				} else if (item.col_type === "Integer" || item.col_type === "int") {
 					fieldInfo.type = "number"
 				} else if (item.bx_col_type === "fk" && item.col_type !== "User") {
-					fieldInfo.type = "treeSelector"
+					fieldInfo.type = "Selector"
 				} else if (item.col_type === "User") {
 					fieldInfo.type = "Selector"
 					fieldInfo.option_list_v2 = {

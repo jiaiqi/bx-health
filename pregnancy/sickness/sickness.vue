@@ -1,6 +1,7 @@
 <template>
 	<view class="">
-		<bx-filtrate :menuAgList='menuAgList' :searchArg="searchArg" :childChooseArr='childChooseArr' @clickItem="chooseFood" @clickMenu="chooseMenu" @clickTag="tagClick"></bx-filtrate>
+		
+		<bx-filtrate :menuAgList='menuAgList' :showSearch="true" :searchArg="searchArg" :childChooseArr='childChooseArr' @clickItem="chooseFood" @clickMenu="chooseMenu" @clickTag="tagClick"></bx-filtrate>
 	</view>
 </template>
 
@@ -51,9 +52,11 @@
 				searchArg: {
 					serviceName:'srvhealth_disease_select',
 					imgCol:'',
-					topNum:160,
-					isShowCouple:false,
-					pageRowNumber:45,
+					topNum:230,
+					serColname:'disease_name',
+					searchPlaceHolder:'请输入疾病名称搜索',
+					isShowCouple:false,					
+					pageRowNumber:65,
 					wordKey:{
 						title:"disease_name",
 						unit:"",

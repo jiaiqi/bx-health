@@ -305,7 +305,7 @@
 							<text class="unit">{{ currentRecord.unit }}</text>
 						</view>
 					</view>
-					<view class="view-tabs">
+					<view v-if="currentRecord && currentRecordType === 'food'" class="view-tabs">
 						<view class="view-tab" :class="{ 'active-tab': showChart }" @click="showChartView(true)">NRV%占比</view>
 						<view class="view-tab" :class="{ 'active-tab': !showChart }" @click="showChartView(false)">营养素含量</view>
 					</view>
@@ -3999,6 +3999,7 @@ uni-checkbox::before {
 		.amount {
 			display: flex;
 			align-items: center;
+			margin-top: 30rpx;
 			.number-box {
 				display: flex;
 				justify-content: center;

@@ -186,14 +186,13 @@ export default {
 			let url = '';
 			switch (type) {
 				case 'detail':
-					condition = [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }];
-					url = '/publicPages/form/form?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition));
+					// condition = [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }];
+					 fieldsCond = [{ column: 'ds_no',value: this.planNo,display:false }]
+					 url = `/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`
+					// url = '/publicPages/form/form?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition));
 					// url = '/publicPages/form/form?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
 					break;
 				case 'record':
-					// url = `/publicPages/form/form?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
-					// 	JSON.stringify(condition)
-					// )}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
 					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
 						JSON.stringify(condition)
 					)}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}&ds_no=${this.planNo}`;

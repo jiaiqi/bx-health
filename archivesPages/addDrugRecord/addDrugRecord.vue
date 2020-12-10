@@ -1,6 +1,11 @@
 <template>
 	<view class="form-page">
-		<bxform
+		<a-form 
+		ref="bxForm"
+		v-if="colsV2Data && isArray(fields)" :fields="fields" :pageType="type" :service="serviceName" :formType="type"
+		:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
+		></a-form>
+<!-- 		<bxform
 			ref="bxForm"
 			:service="serviceName"
 			:addType="addType"
@@ -8,7 +13,7 @@
 			:BxformType="type"
 			:fields="fields"
 			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
-		></bxform>
+		></bxform> -->
 		<view class="drug-select-box" v-if="fields && fields.length > 0">
 			<!-- 药品选择 -->
 			<!-- <view class="action"><button class="cu-btn">选择药物</button></view> -->

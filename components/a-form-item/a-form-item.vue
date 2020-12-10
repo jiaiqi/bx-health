@@ -1,12 +1,14 @@
 <template>
-	<view class="form-item">
+	<view class="form-item" v-if="fieldData.display" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid }">
 		<label
 			class="form-item-label"
-			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? 'white' : '' }"
+			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid }"
+			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
 		>
-			{{ fieldData.label }}
+			<text class="text-red is-required">{{ fieldData.isRequire ? '*' : '' }}</text>
+			<text class="label">{{ fieldData.label }}</text>
 		</label>
-		<view class="form-item-content">
+		<view class="form-item-content" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid }">
 			<!-- detail-详情-start -->
 			<view class="form-item_image" v-if="pageType === 'detail' && fieldData.type === 'images'">
 				<image
@@ -20,16 +22,16 @@
 					:src="item"
 				></image>
 			</view>
-			<view class="form-item-content_detail text" v-html="field.value" v-else-if="pageType === 'detail' && (field.type === 'snote' || field.type === 'Note')"></view>
-			<view class="form-item-content_detail rich-text" v-else-if="pageType === 'detail'">{{ field.value }}</view>
+			<view class="form-item-content_detail rich-text" v-html="field.value" v-else-if="pageType === 'detail' && (field.type === 'snote' || field.type === 'Note')"></view>
+			<view class="form-item-content_detail text" v-else-if="pageType === 'detail'">{{ field.value }}</view>
 			<!-- detail-详情-end -->
 			<!-- form-item-start -->
-			<bx-radio-group class="form-item-content_value radio-group" v-model="fieldData.value" v-else-if="fieldData.type === 'radio'">
+			<bx-radio-group class="form-item-content_value radio-group" v-model="fieldData.value" v-else-if="fieldData.type === 'radio'" @change="radioChange">
 				<bx-radio class="radio" color="#2979ff" v-for="item in fieldData.options" :disabled="fieldData.disabled ? fieldData.disabled : false" :key="item" :name="item">
 					{{ item }}
 				</bx-radio>
 			</bx-radio-group>
-			<bx-radio-group class="form-item-content_value radio-group" v-model="fieldData.value" v-else-if="fieldData.type === 'radioFk'">
+			<bx-radio-group class="form-item-content_value radio-group" v-model="fieldData.value" v-else-if="fieldData.type === 'radioFk'" @change="radioChange">
 				<bx-radio
 					class="radio"
 					color="#2979ff"
@@ -43,7 +45,7 @@
 				</bx-radio>
 			</bx-radio-group>
 			<checkbox-group name="checkbox-group" class="form-item-content_value checkbox-group" v-else-if="fieldData.type === 'checkbox'">
-				<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox" @click="radioChange(item)">
+				<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox">
 					<checkbox color="#2979ff" :value="item" :disabled="fieldData.disabled ? fieldData.disabled : false" :checked="fieldData.value.indexOf(item) !== -1" />
 					<text style="flex: 1;" class="text">{{ item }}</text>
 				</label>
@@ -58,7 +60,8 @@
 			</bx-checkbox-group>
 			<view class="form-item-content_value picker" v-else-if="popupFieldTypeList.includes(fieldData.type)" @click="openPopup(fieldData.type)">
 				<text class="place-holder" v-if="!fieldData.value">{{ '请选择' }}</text>
-				<text class="value" v-else>{{ fkFieldLabel }}</text>
+				<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">{{ fieldData.value.toString() }}</view>
+				<text class="value hidden" v-else>{{ fkFieldLabel }}</text>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="pickerFieldList.includes(fieldData.type)">
 				<picker :mode="pickerMode" :value="fieldData.value" start="09:01" end="21:01" @change="bindTimeChange">
@@ -66,43 +69,23 @@
 					<view class="value" v-else>{{ fieldData.value }}</view>
 				</picker>
 			</view>
+			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'" @click="showTextArea = true">
+				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
+				<view class="value" v-else>{{ fieldData.value | html2text }}</view>
+			</view>
 			<input
 				class="form-item-content_value"
 				@blur="onBlur"
-				type="number"
+				:type="fieldData.type"
 				:placeholder="'请输入'"
 				@input="onInput"
+				:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
 				:max="fieldData.item_type_attr && fieldData.item_type_attr.max ? fieldData.item_type_attr.max : 999"
 				:min="fieldData.item_type_attr && fieldData.item_type_attr.min ? fieldData.item_type_attr.min : 0"
 				v-model.number="fieldData.value"
 				name="input"
 				:disabled="fieldData.disabled ? fieldData.disabled : false"
-				v-else-if="fieldData.type === 'number'"
-			/>
-			<input
-				class="form-item-content_value"
-				@blur="onBlur"
-				type="digit"
-				:placeholder="'请输入'"
-				@input="onInput"
-				:disabled="fieldData.disabled ? fieldData.disabled : false"
-				:max="fieldData.item_type_attr && fieldData.item_type_attr.max ? fieldData.item_type_attr.max : 999"
-				:min="fieldData.item_type_attr && fieldData.item_type_attr.min ? fieldData.item_type_attr.min : 0"
-				v-model.number="fieldData.value"
-				name="input"
-				v-else-if="fieldData.type === 'digit' || fieldData.type === 'Float'"
-			/>
-			<input
-				class="form-item-content_value text uni-input"
-				v-else-if="fieldData.type === 'input'"
-				@blur="onBlur"
-				:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 100"
-				:disabled="fieldData.disabled ? fieldData.disabled : false"
-				:placeholder="'输入' + fieldData.label"
-				v-model="fieldData.value"
-				@input="onInput"
-				name="input"
-				type="text"
+				v-else-if="fieldData.type === 'number' || fieldData.type === 'digit' || fieldData.type === 'text'"
 			/>
 			<robby-image-upload
 				class="form-item-content_value image"
@@ -112,31 +95,63 @@
 				:enable-add="fieldData.disabled ? !fieldData.disabled : true"
 				:server-url="$api.upload"
 				@delete="deleteImage"
-				@add="getImageInfo"
-				:form-data="fileFormData"
+				@add="getImagesInfo"
+				:form-data="uploadFormData"
 				:header="reqHeader"
 				:showUploadProgress="true"
 				:server-url-delete-image="$api.deleteFile"
 				:limit="fieldData.fileNum"
 			></robby-image-upload>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showSelectorPopup }">
+		<view class="icon-area" >
+			<text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType==='location'"></text>
+		</view>
+		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
+		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }">
+			<view class="cu-dialog">
+				<textarea class="form-item-content_value textarea" v-model="textareaValue" placeholder="请输入" />
+				<view class="button-box">
+					<button class="cu-btn button bg-grey" @tap="showTextArea = false">取消</button>
+					<button
+						type="primary"
+						class="cu-btn button bg-blue"
+						@tap="
+							showTextArea = false;
+							fieldData.value = textareaValue;
+						"
+					>
+						确定
+					</button>
+				</view>
+			</view>
+		</view>
+		<view class="cu-modal bottom-modal" :class="{ show: showSelectorPopup || showMultiSelectorPopup }">
 			<view class="cu-dialog">
 				<view class="tree-selector">
 					<view class="content">
-						<view class="cu-bar search bg-white">
+						<view class="cu-bar search bg-white" v-if="showSelectorPopup">
 							<view class="search-form round">
 								<text class="cuIcon-search"></text>
 								<input @input="searchFKDataWithKey" :adjust-position="false" type="text" placeholder="搜索" confirm-type="search" />
 							</view>
 						</view>
-						<bx-radio-group class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
-							<bx-radio class="radio" color="#2979ff" v-for="item in selectorData" :key="item.id" :name="item.value" :serial-char="item.serialChar">
-								{{ item.label }}
-							</bx-radio>
+						<bx-checkbox-group v-if="showMultiSelectorPopup" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button" @change="pickerChange">
+							<bx-checkbox class="radio" color="#2979ff" v-for="item in selectorData" :key="item.id" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
+						</bx-checkbox-group>
+						<bx-radio-group
+							v-if="showSelectorPopup"
+							class="form-item-content_value radio-group"
+							v-model="fieldData.value"
+							mode="button"
+							@change="pickerChange($event, selectorData)"
+						>
+							<bx-radio class="radio" color="#2979ff" v-for="item in selectorData" :key="item.id" :name="item.value">{{ item.label }}</bx-radio>
 						</bx-radio-group>
 					</view>
-					<view class="dialog-button"><view class="cu-btn bg-grey shadow flex" @tap="showSelectorPopup = false">取消</view></view>
+					<view class="dialog-button">
+						<view class="cu-btn bg-blue shadow flex" @tap="hidePopup" v-if="showMultiSelectorPopup">确定</view>
+						<view class="cu-btn bg-grey shadow flex" @tap="hidePopup" v-if="showSelectorPopup">取消</view>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -146,6 +161,16 @@
 <script>
 export default {
 	name: 'aFormItem',
+	filters: {
+		html2text: function(value) {
+			return value
+				.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi, '')
+				.replace(/<[^>]+?>/g, '')
+				.replace(/\s+/g, ' ')
+				.replace(/ /g, ' ')
+				.replace(/>/g, ' ');
+		}
+	},
 	props: {
 		field: {
 			type: Object,
@@ -193,6 +218,9 @@ export default {
 					case 'Date':
 						type = 'date';
 						break;
+					case 'Time':
+						type = 'time';
+						break;
 				}
 				return type;
 			}
@@ -204,21 +232,85 @@ export default {
 			imagesUrl: [],
 			popupFieldTypeList: ['treeSelector', 'Selector', 'Set'], //点击会弹出popup的字段类型
 			pickerFieldList: ['date', 'dateTime', 'time', 'Time', 'Date'],
-			reqHeader: null,
-			fileFormData: {
+			reqHeader: {
+				bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+			},
+			uploadFormData: {
 				serviceName: 'srv_bxfile_service',
 				interfaceName: 'add',
 				app_no: '',
 				table_name: '',
 				columns: ''
 			},
+			listModel: {},
 			showSelectorPopup: false,
+			showMultiSelectorPopup: false,
+			showTextArea: false,
+			textareaValue: this.fieldData && this.fieldData.value ? this.fieldData.value : '',
 			treePageInfo: { total: 0, rownumber: 20, pageNo: 1 },
 			selectorData: [],
-			fkFieldLabel: ''
+			fkFieldLabel: '',
+			valid: {
+				column: this.field.column,
+				valid: true,
+				msg: '不能为空!'
+			}
 		};
 	},
 	methods: {
+		getLocation(){
+			this.$emit('getLocation')
+		},
+		hidePopup() {
+			this.showSelectorPopup = false;
+			this.showMultiSelectorPopup = false;
+		},
+		async getDefVal() {
+			let self = this;
+			if (this.fieldData.type === 'images' && this.fieldData.value !== '') {
+				let fileDatas = await self.getFilePath(this.fieldData.value);
+				self.imagesUrl = [];
+				if (fileDatas) {
+					for (let i = 0; i < fileDatas.length; i++) {
+						debugger
+						self.imagesUrl.push(self.$api.getFilePath + fileDatas[i].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket'));
+					}
+				}
+			} else if (this.fieldData.type === 'list' && this.fieldData.value !== '') {
+				// 选项列表
+				let listItemModel = this.fieldData.optionsConfig.model;
+				let colKey = this.fieldData.optionsConfig.conditions;
+				for (let i = 0; i < colKey.length; i++) {
+					this.$set(this.listModel, colKey[i].colName, this.fieldModelsData[colKey[i].value]);
+					this.listModel[colKey[i].colName] = this.fieldModelsData[colKey[i].value];
+				}
+			} else {
+				Object.keys(this.fieldsModel).forEach(key => {
+					if (this.fieldData.column === key && !this.fieldData.value && this.fieldsModel[key]) {
+						this.fieldData.value = this.fieldsModel[key];
+					}
+				});
+			}
+		},
+		getFileInfo(e) {
+			if (e.response.file_no) {
+				this.fieldData.value = e.response.file_no;
+			}
+		},
+		getImagesInfo(e) {
+			let res = JSON.parse(e.allImages[0]);
+			this.fieldData.value = res.file_no;
+			console.log('图片返回：', e, e.allImages[0], res, this.fieldData.value);
+			if (this.fieldData.value !== '' && this.fieldData.value !== null && this.fieldData.value !== undefined) {
+				this.uploadFormData['file_no'] = this.fieldData.value;
+			}
+			this.onInput();
+			this.getDefVal();
+		},
+		deleteImage(e) {
+			console.log(e);
+			this.fieldData.value = '';
+		},
 		searchFKDataWithKey(e) {
 			if (e.detail.value) {
 				let option = this.fieldData.option_list_v2;
@@ -256,9 +348,19 @@ export default {
 				this.getTreeSelectorData(null, null, relation_condition);
 			}
 		},
+		radioChange(e) {
+			this.onInput();
+		},
 		pickerChange(e) {
-			this.fkFieldLabel = this.selectorData.find(item => item.value === e).label;
-			this.showSelectorPopup = false;
+			if(this.fieldData.type==='Selector'){
+				let optionData = this.selectorData.find(item => item.value === e);
+				this.fkFieldLabel = optionData.label;
+				this.fieldData['colData'] = optionData;
+				this.showSelectorPopup = false;
+				this.onInput();
+			}
+			// this.fkFieldLabel = this.selectorData.find(item => item.value === e).label;
+			
 		},
 		async getTreeSelectorData(cond, serv, relation_condition) {
 			let self = this;
@@ -363,7 +465,6 @@ export default {
 						self.selectorData = res.data.data;
 					}
 					self.selectorData = self.selectorData.map(item => {
-						console.log(this.deepClone(this.fieldData.option_list_v2));
 						const config = this.deepClone(this.fieldData.option_list_v2);
 						item.label = config.key_disp_col ? item[config.key_disp_col] : '';
 						item.value = config.refed_col ? item[config.refed_col] : '';
@@ -385,27 +486,75 @@ export default {
 		openPopup(type) {
 			// 打开弹出层
 			switch (type) {
+				case 'Set':
+					if (Array.isArray(this.fieldData.option_list_v2)) {
+						this.selectorData = this.fieldData.option_list_v2;
+						this.showMultiSelectorPopup = true;
+					}
+					break;
 				case 'Selector':
 					// this.getTreeSelectorData().then(_ => {
 					this.showSelectorPopup = true;
 					// });
 					break;
-				case 'Set':
-					break;
 			}
 		},
 		onBlur() {
-			// 输入框失去焦点
+			// 输入框失去焦点 进行校验
 			console.log('on-blur');
 		},
 		onInput() {
 			// input事件
 			console.log('on-input');
+			this.getValid();
+			this.$emit('on-value-change', this.fieldData);
+		},
+		getValid() {
+			if (this.fieldData.isRequire && this.fieldData.value) {
+				if (this.fieldData.hasOwnProperty('_validators') && this.fieldData._validators.hasOwnProperty('isType') && typeof this.fieldData._validators.isType === 'function') {
+					this.fieldData.valid = this.fieldData._validators.isType(this.fieldData.value);
+					this.valid.valid = true;
+				} else {
+					this.fieldData.valid = { valid: true, msg: '有效' };
+					this.valid.valid = true;
+				}
+				// this.valid.valid = this.fieldData.valid.valid;
+			} else if (this.fieldData.isRequire && (this.fieldData.value === '' || this.fieldData.value === null || this.fieldData.value === undefined)) {
+				this.fieldData.valid = { valid: false, msg: this.fieldData.label + '不能为空' };
+				this.valid.valid = false;
+			} else {
+				this.fieldData.valid = { valid: true, msg: '有效' };
+				this.valid.valid = true;
+			}
+			this.$emit('on-value-change', this.fieldData);
+			return this.valid;
 		}
 	},
 	created() {
+		if (this.fieldData.type === 'images') {
+			this.uploadFormData = {
+				serviceName: 'srv_bxfile_service',
+				interfaceName: 'add',
+				app_no: '',
+				table_name: '',
+				columns: ''
+			};
+			this.uploadFormData['app_no'] = this.fieldData.srvInfo.appNo;
+			// this.uploadFormData['table_name'] = this.fieldData.srvInfo.tableName;
+			this.uploadFormData['columns'] = this.fieldData.column;
+			if (this.fieldData.value !== '' && this.fieldData.value !== null && this.fieldData.value !== undefined) {
+				this.uploadFormData['file_no'] = this.fieldData.value;
+			}
+		}
+		if (this.pageType === 'detail' || this.pageType === 'update') {
+			this.getDefVal();
+		}
 		if (this.fieldData && this.fieldData.type === 'Selector') {
-			this.getTreeSelectorData().then(_ => {
+			let cond = null;
+			// if(this.fieldData.value&&this.fieldData.option_list_v2&&this.fieldData.option_list_v2.refed_col){
+			// 	cond = [{colName:this.fieldData.option_list_v2.refed_col,ruleType:'in',value:this.fieldData.value}]
+			// }
+			this.getTreeSelectorData(cond).then(_ => {
 				if (this.fieldData.value) {
 					this.fkFieldLabel = this.selectorData.find(item => item.value === this.fieldData.value)
 						? this.selectorData.find(item => item.value === this.fieldData.value).label
@@ -418,14 +567,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.cu-dialog {
+	.form-item-content_value {
+		width: 100%;
+		padding: 20rpx;
+	}
+}
 .form-item {
 	display: flex;
 	flex-wrap: wrap;
 	min-height: 100rpx;
 	align-items: flex-start;
-	background-color: #fff;
+	// background-color: #fff;
 	padding: 10rpx;
 	position: relative;
+	&.form-detail {
+		min-height: 80rpx;
+		align-items: center;
+	}
+	.valid_msg {
+		width: 100%;
+		color: #f76260;
+		text-indent: 220rpx;
+		font-size: 24rpx;
+	}
 	&::after {
 		position: absolute;
 		box-sizing: border-box;
@@ -435,19 +600,48 @@ export default {
 		bottom: 0;
 		left: 16px;
 		border-bottom: 1px solid #ebedf0;
-		-webkit-transform: scaleY(0.5);
 		transform: scaleY(0.5);
 	}
 	.form-item-label {
 		display: flex;
 		min-width: 200rpx;
 		padding: 20rpx 10rpx;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+		color: #666;
+		&.form-detail {
+			padding: 0;
+		}
+		.is-required {
+			display: inline-flex;
+			align-items: center;
+			width: 20rpx;
+		}
+	}
+	.form-item-content_value.checkbox-group {
+		margin-top: 50rpx;
 	}
 	.form-item-content {
 		flex: 1;
 		display: flex;
+		flex-wrap: nowrap;
 		padding: 20rpx 0;
 		padding-left: 20rpx;
+		color: #000;
+		&.form-detail {
+			padding: 0;
+		}
+		&.valid_error {
+			border: 1rpx dashed #f37b1d;
+			margin-bottom: 10rpx;
+		}
+		.form-item-content_detail {
+			&.image {
+				width: 100rpx;
+				height: 100rpx;
+			}
+		}
 		.form-item-content_value {
 			line-height: 1.4em;
 			min-height: 1.4em;
@@ -456,7 +650,14 @@ export default {
 			font: inherit;
 			display: flex;
 			flex: 1;
+
 			&.picker {
+				.value {
+					width: 400rpx;
+					text-overflow: ellipsis;
+					overflow: hidden;
+					white-space: nowrap;
+				}
 				&:active {
 					background-color: #f1f1f1;
 					transition: all 0.5s ease-out;
@@ -475,6 +676,13 @@ export default {
 			}
 		}
 	}
+	.icon-area{
+		display: inline-block;
+		text-align: left;
+		margin-right: 20rpx;
+		font-size: 40rpx;
+		line-height: 80rpx;
+	}
 	.tree-selector {
 		height: calc(80vh - var(--window-top) - var(--window-bottom));
 		display: flex;
@@ -485,10 +693,19 @@ export default {
 			.bx-radio-group {
 				margin: 0 20rpx;
 			}
-			.button-mode{
+			.button-mode {
 				margin-bottom: 10rpx;
 			}
 		}
+	}
+}
+.button-box {
+	display: flex;
+	justify-content: space-around;
+	flex-wrap: wrap;
+	margin: 40rpx 0;
+	.button {
+		min-width: 45%;
 	}
 }
 </style>

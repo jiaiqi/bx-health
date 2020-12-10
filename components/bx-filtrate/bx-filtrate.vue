@@ -1,5 +1,28 @@
 <template>
 	<view class="filtrate-wrap">
+		<view v-if="showSearch" class="">
+			<view class="flexSelece">
+				<view class="box">
+					<view class="cu-bar search bg-white">
+						<view class="search-form round">
+							<text class="cuIcon-search"></text>
+							<input
+								@input="inputChange"
+								:adjust-position="false"
+								v-model="searchValue"
+								@keyup.enter="searchStart"
+								:placeholder="searchArg.searchPlaceHolder"
+								type="text"
+								confirm-type="search"
+							/>
+						</view>
+						<view class="action">
+							<text style="margin-right: 20rpx;" @click="search">搜索</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
 		<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 			<text>已选择：</text>
 			<view v-for="(item, index) in childChooseArr" class="filtrate-choose-item">
@@ -7,7 +30,7 @@
 			</view>
 		</view>
 		<view class="filtrate-item-wrap">
-			<view v-for="(item, index) in copyData" :key="index" class="filtrate-item">
+			<view v-for="(item, index) in copyData" :key="index" class="filtrate-item" :class="showSearch?'':'padding-filtrate-item'">
 				<view class="filtrate-item-left" style="display: flex;flex-shrink: 0;max-width: 152rpx;">{{ item.classify_name }}</view>
 				<view class="" style="display: flex;  flex-flow: wrap;">
 					<view @click="chooseMenu(item, cate)" v-for="(cate, i) in item.children" :class="cate.choose ? 'cate-active' : ''" class="filtrate-item-right">
@@ -52,6 +75,10 @@
 						</view>
 						<view class="textbox">
 							<view class="title-food">{{ food[searchArg.wordKey.title] }}</view>
+							<view v-if="searchArg.serviceName === 'srvhealth_patient_doctor_select'" class="content-right">
+								<text style="z-index: 1;">{{food.message_num}}</text>
+								<image src="/static/chat.png" mode=""></image>
+							</view>
 						</view>
 					</view>
 				</view>
@@ -78,6 +105,10 @@ export default {
 				return [];
 			}
 		},
+		showSearch:{
+			type:Boolean,
+			efault: false
+		},
 		menuAgList: {
 			type: Array,
 			default: () => {
@@ -94,6 +125,7 @@ export default {
 	data() {
 		return {
 			childChooseArrLength: 0,
+			searchValue:"",
 			heightStyle: 'calc(100vh-200upx)',
 			isShowMyList: false,
 			topNum: 100,
@@ -126,6 +158,67 @@ export default {
 		this.onRefresh();
 	},
 	methods: {
+		searchStart() {
+			let serValue = this.searchValue;
+			console.log('searchStart', serValue);
+			if (serValue) {
+				this.serBtn = true;
+			} else {
+				uni.showToast({
+					title: '请输入搜索内容',
+					icon: 'none'
+				});
+			}
+		},
+		/* 点击搜索**/
+		search() {
+			if (this.searchValue) {
+				this.getSearchValue(this.searchValue);
+			} else {
+				this.getFoodsList();
+			}
+		},
+		/* 输入框输入时触发**/
+		inputChange(e) {
+			console.log('输入框发生变化--', e.detail.value);
+			let serValue = e.detail.value;
+			if (serValue) {
+				this.getSearchValue(serValue);
+			} else {
+				this.isSeekValue = true
+				this.pageInfo.pageNo = 1
+				this.getFoodsList(null,this.classifyCond);
+			}
+		},
+		/*触发搜索框**/
+		async getSearchValue(value) {
+			let self = this;
+			let url = this.getServiceUrl('health', this.searchArg.serviceName, 'select');
+			let req = { serviceName: this.searchArg.serviceName, colNames: ['*'], condition: [{ colName: this.searchArg.serColname, ruleType: 'like', value: value }] };
+			let res = await this.$http.post(url, req);
+			let resData = res.data.data;
+			if(resData.length === 0){
+				this.isSeekValue = false
+			}else{
+				let isHas = false
+				resData.forEach(seek=>{
+					if(seek.name === value){
+						isHas=true
+					}
+				})
+				if(!isHas){
+					this.isSeekValue = false
+				}
+			}
+			this.foodList = resData;
+			for (let i = 0; i < resData.length; i++) {
+				if (resData[i][self.searchArg.imgCol]) {
+					let fileDatas = await self.getFilePath(resData[i][self.searchArg.imgCol]);
+					url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+					self.$set(resData[i], 'imgurl', url);
+				}
+			}
+		},
 		/* 顶部菜单点击**/
 		chooseMenu(parent, child) {
 			this.$emit('clickMenu', parent, child);
@@ -442,6 +535,33 @@ export default {
 				return this.$api.downloadFile + item[this.searchArg.imgCol] + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 			}
 		},
+		async getMessageInfo(no){
+			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_consultation_chat_record_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'sender_account',
+						ruleType: 'eq',
+						value: no
+					},
+					{
+						colName: 'msg_state',
+						ruleType: 'eq',
+						value: '未读'
+					}
+				],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'asc'
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			return res.data.data.length;
+		},
 		async getFoodsList(order = null, cond = null, type = null, serviceName = null) {
 			let self = this;
 			let url = this.getServiceUrl('health', serviceName ? serviceName : this.searchArg.serviceName, 'select');
@@ -515,10 +635,8 @@ export default {
 			let data = res.data.data;
 			if (data.length > 0) {
 				if (type) {
-					console.log('00000------', res.data.data);
 					let a = res.data.data.sort(this.sorta);
 					let b = a.sort(this.sortb);
-					console.log('sorta-------', b);
 					this.foodList = [...this.foodList, ...res.data.data];
 				} else {
 					this.foodList = [...this.foodList, ...res.data.data];
@@ -532,6 +650,14 @@ export default {
 						self.$set(data[i], 'imgurl', url);
 					}
 				}
+				if(this.searchArg.serviceName === 'srvhealth_patient_doctor_select'){
+					this.foodList.forEach(mes=>{
+						this.getMessageInfo(mes.customer_name).then(a=>{
+							this.$set(mes,'message_num',a)
+						})
+					})
+				}
+				
 			}
 			console.log('res---', res.data.data, this.colData);
 		}
@@ -555,7 +681,6 @@ export default {
 			display: flex;
 			min-height: 100rpx;
 			align-items: center;
-			padding: 30rpx 0;
 			.filtrate-item-left {
 				padding: 10upx 20upx;
 			}
@@ -580,6 +705,9 @@ export default {
 				color: #0bc99d;
 				background-color: rgba($color: #0bc99d, $alpha: 0.1);
 			}
+		}
+		.padding-filtrate-item{
+			padding: 30rpx 0;
 		}
 	}
 }
@@ -713,6 +841,8 @@ export default {
 		.textbox {
 			width: 100%;
 			padding: 10upx 4upx;
+			display: flex;
+			justify-content: center;
 			.title-food {
 				font-weight: bold;
 				font-size: 30upx;
@@ -1088,4 +1218,30 @@ export default {
 .change-tab /deep/ .u-tab-item {
 	padding: 0 10rpx;
 }
+.content-right {
+			display: flex;
+			position: relative;
+			margin-top: 10rpx;
+			text {
+				background: red;
+				min-width: 30rpx;
+				height: 30rpx;
+				color: #fff;
+				font-weight: 600;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 20rpx;
+				font-size: 24rpx;
+				padding: 0 4rpx;
+				position: absolute;
+				left: 50%;
+				top: -10rpx;
+				z-index: 1px !important;
+			}
+			image {
+				width: 50rpx;
+				height: 50rpx;
+			}
+		}
 </style>

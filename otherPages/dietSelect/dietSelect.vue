@@ -144,7 +144,7 @@
 									千卡/{{ currFood.unit_amount + currFood.unit }}
 								</text>
 							</view>
-							<view class="calorie">{{ heatNum ? heatNum.toFixed(1) :''}}千卡</view>
+							<view class="calorie">{{ heatNum && heatNum > 0.1 ? heatNum.toFixed(1) :heatNum?heatNum.toFixed(3):''}}千卡</view>
 						</view>
 					</view>					
 					<view class="calculate">						
@@ -159,6 +159,7 @@
 						
 					</view>
 					<view class="amount">
+						<text class="count-amount">数量：</text>
 						<view class="input-box">
 							<view class="key-left">
 								<text @click="countDietNum('-0.1')">-0.1</text>
@@ -286,7 +287,7 @@ export default {
 			heightStyle: 'calc(100vh-200upx)',
 			isSeekValue:true, // 是否搜索到内容
 			chooseFoods: [],
-			value1:0,
+			value1:1.0,
 			list: [],
 			current: 0,
 			isLoad:false,
@@ -310,7 +311,7 @@ export default {
 			chooseFoodArr: [],
 			showCarModal: false,
 			filterResult: '',
-			choiceNum: '',
+			choiceNum: 1,
 			currTime: '',
 			unitList:[],
 			nowDate: this.formateDate(new Date(), 'date').replace(/\s*/g, ''),
@@ -1863,16 +1864,20 @@ export default {
 						user_name: uni.getStorageSync('current_user'),
 						image: item.image,
 					};
-					if (this.searchArg.type === 'food') {
-						if(item.classify && item.classify === 'mixed_food'){
-							obj['mixed_food_no'] = item.meal_no
-							obj['diret_type'] = item.classify
-							obj['unit_weight_g'] = this.radioLabel?this.radioLabel.amount:100
-						}else {
-							obj['diet_contents_no'] = item.food_no
-							obj['diret_type'] = 'diet_contents'
-						}
+					if(item.self_weight_unit != '否'){
+						let weight = uni.getStorageSync('current_user_info').weight
+						obj.energy = obj.energy * weight
 					}
+					// if (this.searchArg.type === 'food') {
+					// 	if(item.classify && item.classify === 'mixed_food'){
+					// 		obj['mixed_food_no'] = item.meal_no
+					// 		obj['diret_type'] = item.classify
+					// 		obj['unit_weight_g'] = this.radioLabel?this.radioLabel.amount:100
+					// 	}else {
+					// 		obj['diet_contents_no'] = item.food_no
+					// 		obj['diret_type'] = 'diet_contents'
+					// 	}
+					// }
 					arr.push(obj);
 				});
 				let serviceName = '';
@@ -2054,9 +2059,8 @@ export default {
 		/* 点击选择食物**/
 		chooseFood(e) {
 			this.dotEndStr = '';
-			this.choiceNum = 0;
-			this.heatNum = 0;
-			this.value1 = 0
+			this.choiceNum = 1;
+			this.value1 = 1.0
 			this.showBottomModal = true;
 			let label_obj = {};
 			let colData = this.colData;
@@ -2070,6 +2074,7 @@ export default {
 			this.currFoodLabel = label_obj;
 			this.currFood = e;
 			this.currFood.hdate = this.selectDate
+			this.heatNum = this.currFood.unit_energy;
 			if(this.pageType === 'food'){
 				let food = encodeURIComponent(JSON.stringify(this.currFood))
 				if(!this.isShowMyList){
@@ -2441,7 +2446,8 @@ export default {
 			display: flex;
 			justify-content: flex-start;
 			// flex-wrap: wrap;
-			padding: 20upx 20upx;
+			padding: 20upx 10upx;
+			font-weight: 600;
 			min-height: 100upx;
 			align-items: center;
 			font-size: 36upx;
@@ -2511,6 +2517,12 @@ export default {
 		.amount {
 			color: #009688;
 			font-weight: 800;
+			display: flex;
+			align-items: center;
+			margin-left: 10rpx;
+			.count-amount{
+				color: #999;	
+			}
 			.number {
 				padding: 0 20upx;
 				font-size: 34upx;
@@ -2542,7 +2554,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-right: 20upx;	
+			margin-right: 10upx;	
 			border-radius: 5px;
 		}
 	}
@@ -2554,7 +2566,7 @@ export default {
 			min-width: 100upx;
 			text-align: center;
 			display: inline-block;
-			margin-left: 20upx;		
+			margin-left: 10upx;		
 			border-radius: 5px;
 		}
 	}

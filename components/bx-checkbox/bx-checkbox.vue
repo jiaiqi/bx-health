@@ -225,7 +225,7 @@ export default {
 	margin: 10rpx;
 	align-items: center;
 	.bx-checkbox-icon {
-		border: 1rpx solid #888;
+		border: 1rpx solid #c8c9cc;
 		width: 40rpx;
 		height: 40rpx;
 		justify-content: center;

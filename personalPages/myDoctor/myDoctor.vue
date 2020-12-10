@@ -29,7 +29,7 @@ export default {
 			userInfo: {},
 			docInfo: {},
 			qrcodeParams: '',
-			doctorList: []
+			doctorList: [],
 		};
 	},
 	methods: {
@@ -98,6 +98,11 @@ export default {
 						colName: 'sender_account',
 						ruleType: 'eq',
 						value: userNo
+					},
+					{
+						colName: 'receiver_account',
+						ruleType: 'eq',
+						value: this.userInfo.userno
 					},
 					{
 						colName: 'msg_state',
@@ -193,10 +198,14 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				if (isSelf === true) {
 					this.doctorList = res.data.data;
+					let count_num = 0
 					this.doctorList.forEach(item => {
 						this.getDoctorRecod(item.owner_account).then(length => {
+							count_num += length
+							this.count_num = count_num
 							this.$set(item, 'count_num', length);
-							// console.log("-----------------length---",length)
+							
+							console.log("-----------------length---",length)
 						});
 					});
 				}
