@@ -151,13 +151,6 @@ export default {
 			type: String,
 			default: 'left'
 		},
-		// lable的样式，对象形式
-		labelStyle: {
-			type: Object,
-			default() {
-				return {};
-			}
-		},
 		// lable字体的对齐方式
 		labelAlign: {
 			type: String,
