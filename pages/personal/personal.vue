@@ -217,21 +217,27 @@ export default {
 					});
 					break;
 				case 'updateInfo':
-					let cond = [
-						{
-							colName: 'no',
-							ruleType: 'in',
-							value: this.vuex_userInfo.no
-						}
-					];
-					let params = {
-						type: 'detail',
-						condition: cond,
-						serviceName: 'srvhealth_person_info_select'
-					};
+					// let cond = [
+					// 	{
+					// 		colName: 'no',
+					// 		ruleType: 'in',
+					// 		value: this.vuex_userInfo.no
+					// 	}
+					// ];
+					// let params = {
+					// 	type: 'detail',
+					// 	condition: cond,
+					// 	serviceName: 'srvhealth_person_info_select'
+					// };
 					if (this.vuex_userInfo.no) {
+						let fieldsCond = [
+							{
+								column: 'no',
+								value: this.vuex_userInfo.no
+							}
+						];
 						uni.navigateTo({
-							url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_select&type=detail&fieldsCond' + encodeURIComponent(JSON.stringify(cond))
+							url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_select&type=detail&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
 							// url: '/publicPages/form/form?type=detail&params=' + encodeURIComponent(JSON.stringify(params))
 						});
 					}
@@ -474,7 +480,7 @@ export default {
 	width: 100%;
 	height: 300rpx;
 	padding-top: 10rpx;
-	// background-color: #0bc99d;
+	background-color: #0bc99d;
 	display: flex;
 	position: relative;
 	align-items: center;
@@ -521,7 +527,7 @@ export default {
 		font-size: 16px;
 		margin-left: 20upx;
 		z-index: 2;
-		color: #333;
+		// color: #333;
 		.top-right-name {
 			min-height: 40rpx;
 		}

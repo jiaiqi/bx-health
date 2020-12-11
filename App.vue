@@ -1,3 +1,4 @@
+
 <script>
 import Vue from 'vue';
 // if (window.innerWidth > 750) {
@@ -63,42 +64,6 @@ export default {
 				// }
 			}
 		},
-		// async getDoctorInfo(no, isSelf) {
-		// 	// 查找医生信息
-		// 	let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
-		// 	let req = {
-		// 		serviceName: 'srvhealth_doctor_select',
-		// 		colNames: ['*'],
-		// 		condition: [{ colName: 'dt_no', ruleType: 'in', value: no }],
-		// 		page: { pageNo: 1, rownumber: 10 }
-		// 	};
-		// 	let res = await this.$http.post(url, req);
-		// 	if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-		// 		if (isSelf === true) {
-		// 			this.doctorList = res.data.data;
-		// 			let count_num = 0
-		// 			this.doctorList.forEach(item => {
-		// 				this.getDoctorRecod(item.owner_account).then(length => {
-		// 					count_num += length
-		// 					uni.setTabBarBadge({
-		// 						index:3,
-		// 						text:count_num.toString(),
-		// 						success:(e)=>{
-		// 							console.log("success---",e)
-		// 						},
-		// 						fail:(fails)=> {
-		// 							console.log("fails----",fails)
-		// 						}
-		// 					})
-		// 					console.log("-----------------length---",length)
-		// 				});
-		// 			});
-		// 		}
-		// 		return res.data.data[0];
-		// 	} else {
-		// 		return false;
-		// 	}
-		// },
 		async getDoctorRecod(userNo) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
@@ -137,7 +102,6 @@ export default {
 	onShow: function() {
 		console.log("APP Show-------",uni.getStorageSync('current_user_info'))
 		let userNo = uni.getStorageSync('current_user_info')
-		
 		if(userNo.userno){
 			this.getDoctorRecod(userNo.userno).then(length=>{
 				uni.setTabBarBadge({

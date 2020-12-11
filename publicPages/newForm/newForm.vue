@@ -30,9 +30,7 @@ export default {
 		toPages(type) {
 			this.srvType = type;
 			uni.redirectTo({
-				url: `/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(
-					JSON.stringify(this.fieldsCond)
-				)}`
+				url: `/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(JSON.stringify(this.fieldsCond))}`
 			});
 		},
 		async onButton(e) {
@@ -190,12 +188,19 @@ export default {
 		async getDefaultVal() {
 			if (this.use_type === 'detail' || this.use_type === 'update') {
 				let serviceName = this.serviceName.replace('_update', '_select').replace('_add', '_select');
+				let condition = this.fieldsCond.map(item => {
+					return {
+						colName: item.column,
+						ruleType: 'in',
+						value: item.value
+					};
+				});
 				let app = uni.getStorageSync('activeApp');
 				let url = this.getServiceUrl(app, serviceName, 'select');
 				let req = {
 					serviceName: serviceName,
 					colNames: ['*'],
-					condition: this.params.condition ? this.params.condition : [],
+					condition: condition,
 					page: { pageNo: 1, rownumber: 10 }
 				};
 				let res = await this.$http.post(url, req);
@@ -223,11 +228,11 @@ export default {
 					defaultVal = await this.getDefaultVal();
 					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 					this.fields = fields.map(field => {
-						if(field.type==='Set'&&Array.isArray(field.option_list_v2)){
-							field.option_list_v2 = field.option_list_v2.map(item=>{
-								item.checked=false;
-								return item
-							})
+						if (field.type === 'Set' && Array.isArray(field.option_list_v2)) {
+							field.option_list_v2 = field.option_list_v2.map(item => {
+								item.checked = false;
+								return item;
+							});
 						}
 						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
 							this.fieldsCond.forEach(item => {
@@ -251,11 +256,11 @@ export default {
 					break;
 				case 'add':
 					this.fields = colVs._fieldInfo.map(field => {
-						if(field.type==='Set'&&Array.isArray(field.option_list_v2)){
-							field.option_list_v2 = field.option_list_v2.map(item=>{
-								item.checked=false;
-								return item
-							})
+						if (field.type === 'Set' && Array.isArray(field.option_list_v2)) {
+							field.option_list_v2 = field.option_list_v2.map(item => {
+								item.checked = false;
+								return item;
+							});
 						}
 						if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs._fieldInfo && Array.isArray(colVs._fieldInfo)) {
 							this.defaultCondition.forEach(cond => {
