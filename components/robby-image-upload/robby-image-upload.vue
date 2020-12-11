@@ -5,8 +5,8 @@
 				<image :src="path" :class="{'dragging':isDragging(index)}" draggable="true" @tap="previewImage" :data-index="index" @touchstart="start" @touchmove.stop.prevent="move" @touchend="stop"></image>
 				<view v-if="isShowDel" class="imageDel" @tap="deleteImage" :data-index="index">x</view>
 			</view>
-			<view v-if="isShowAdd&&eventType!=='navTo'" class="imageUpload" @tap="selectImage">+</view>
-			<view v-if="isShowAdd&&eventType==='navTo'" class="imageUpload" @tap="toPage">+</view>
+			<view v-if="isShowAdd&&eventType!=='navTo'" class="imageUpload" @tap="selectImage"><text class="cuIcon-camera"></text></view>
+			<view v-if="isShowAdd&&eventType==='navTo'" class="imageUpload" @tap="toPage"><text class="cuIcon-camera"></text></view>
 		</view>
 		<image v-if="showMoveImage" class="moveImage" :style="{left:posMoveImageLeft, top:posMoveImageTop}" :src="moveImagePath"></image>
 	</view>
@@ -386,10 +386,11 @@
 	.imageUpload{
 		line-height: 150upx;
 		text-align: center;
-		font-size: 150upx;
+		font-size: 50upx;
 		color: #D9D9D9;
 		border: 1px solid #D9D9D9;
-		border-radius: 8upx;
+		border-radius: 4upx;
+		background-color: #f7f8fa;
 	}
 	
 	.moveImage{

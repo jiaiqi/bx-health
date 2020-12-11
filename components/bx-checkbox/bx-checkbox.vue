@@ -1,10 +1,10 @@
 <template>
-	<view class="bx-checkbox" :style="[checkboxStyle]" :class="checkboxClass"  @tap="toggle">
+	<view class="bx-checkbox" :style="[checkboxStyle]" :class="checkboxClass" @tap="toggle">
 		<view class="bx-checkbox-icon" :class="{ checked: checked }">
 			<text v-if="serialChar">{{ serialChar }}</text>
 			<text class="cuIcon-check" v-if="checked && !serialChar"></text>
 		</view>
-		<view class="bx-checkbox__label" :class="{ checked: checked, disabled: disabled }"><slot /></view>
+		<view class="bx-checkbox__label" hover-class="active" :class="{ checked: checked, disabled: disabled }"><slot /></view>
 	</view>
 </template>
 
@@ -123,8 +123,8 @@ export default {
 			return this.shape ? this.shape : this.parent ? this.parent.shape : 'square';
 		},
 		checkboxClass() {
-			if (this.parent && (this.parent.checkboxMode||this.parent.mode)) {
-				if (this.parent.checkboxMode === 'button'||this.parent.mode === 'button') {
+			if (this.parent && (this.parent.checkboxMode || this.parent.mode)) {
+				if (this.parent.checkboxMode === 'button' || this.parent.mode === 'button') {
 					return 'button-mode';
 				}
 			}
@@ -205,13 +205,14 @@ export default {
 			if (this.value == true) {
 				this.emitEvent();
 			} else {
-				this.emitEvent();
 				if (this.parent && checkedNum >= this.parent.max) {
 					// 如果原来为未选中状态，需要选中的数量少于父组件中设置的max值，才可以选中
 					uni.showToast({
 						title: `最多可选${this.parent.max}项`,
 						icon: 'none'
 					});
+				}else{
+					this.emitEvent();
 				}
 			}
 		}
@@ -241,29 +242,36 @@ export default {
 			// color: #0081FF;
 			border: none;
 		}
+		.bx-checkbox__label {
+			&::before {
+				position: absolute;
+				content: '';
+				width: 120%;
+				top: -10%;
+				left: -10%;
+				height: 120%;
+			}
+		}
 	}
 	&.button-mode {
 		.bx-checkbox-icon {
 			display: none;
 		}
 		.bx-checkbox__label {
-			color: #323233;
-			background-color: #fff;
-			border: 1px solid #ebedf0;
-			padding: 8rpx 20rpx;
+			color: #333;
+			background-color: #f1f1f1;
+			border: 1px solid #f1f1f1;
+			padding: 5rpx 30rpx;
 			border-radius: 50rpx;
 			letter-spacing: 1px;
 			transition: all 0.5s;
-			&:active {
-				color: #409eff;
-				background: #ecf5ff;
-				border-color: #b3d8ff;
-				transform: scale(1.2);
+			&.active {
+				transform: scale(1.1);
 			}
 			&.checked {
-				color: #fff;
-				border-color: #0081ff;
-				background-color: #0081ff;
+				border-color: #0bc99d;
+				color: #0bc99d;
+				background-color: rgba(11, 201, 157, 0.1);
 			}
 			&.disabled {
 				color: #fff;

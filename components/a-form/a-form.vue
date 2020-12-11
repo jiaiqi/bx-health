@@ -2,6 +2,8 @@
 	<view>
 		<a-form-item
 			:procData="procData"
+			:labelPosition="labelPosition"
+			:optionMode="optionMode"
 			@on-value-change="onValChange"
 			@on-value-blur="onValBlur"
 			v-for="field in allField"
@@ -29,13 +31,21 @@ export default {
 		},
 		pageType: {
 			type: String,
-			default: 'form' //form||detail
+			default: 'form'
 		},
 		procData: {
 			type: Object,
 			default() {
 				return {};
 			}
+		},
+		labelPosition: {
+			type: String,
+			default: 'left' //left|top
+		},
+		optionMode: {
+			type: String,
+			default: 'button' //选项的样式 normal | button
 		},
 		moreConfig: {
 			type: Object,
@@ -123,8 +133,8 @@ export default {
 				item.display = item.isShowExp && item.isShowExp.length > 0 ? this.colItemShowExps(item, this.fieldModel) : item.display === false ? false : true;
 				if (item.column === e.column) {
 					item.value = e.value;
-					if(item.type==='Set'){
-						item.option_list_v2 = e.option_list_v2
+					if (item.type === 'Set') {
+						item.option_list_v2 = e.option_list_v2;
 					}
 				}
 				if (item.formulaShow) {
@@ -135,21 +145,20 @@ export default {
 			});
 			if (e.bx_col_type === 'fk' && e.colData && typeof e.colData === 'object' && Array.isArray(e.colData) !== true && Object.keys(e.colData).length > 0) {
 				//冗余
-				this.allField = this.allField.map(item=>{
-					
-						if (item.redundant && typeof item.redundant === 'object' && item.redundant.dependField === e.column) {
-							if (item.redundant.trigger === 'always') {
+				this.allField = this.allField.map(item => {
+					if (item.redundant && typeof item.redundant === 'object' && item.redundant.dependField === e.column) {
+						if (item.redundant.trigger === 'always') {
+							item.value = e.colData[item.redundant.refedCol];
+						} else if (item.redundant.trigger === 'isnull') {
+							if (!item.value) {
 								item.value = e.colData[item.redundant.refedCol];
-							} else if (item.redundant.trigger === 'isnull') {
-								if (!item.value) {
-									item.value = e.colData[item.redundant.refedCol];
-								}
 							}
-							this.fieldModel[item.column] = item.value;
-							this.$emit('value-blur', this.fieldModel[item.column], this.fieldModel);
 						}
-					return item
-				})
+						this.fieldModel[item.column] = item.value;
+						this.$emit('value-blur', this.fieldModel[item.column], this.fieldModel);
+					}
+					return item;
+				});
 				// this.allField.forEach(item => {
 				// });
 			}

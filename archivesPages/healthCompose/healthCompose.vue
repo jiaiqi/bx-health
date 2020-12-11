@@ -241,20 +241,8 @@ export default {
 				});
 			} else {
 				if (item && (item.name !== '体重' || item.name !== '年龄')) {
-					let row = this.userInfo;
-					let params = {
-						type: 'update',
-						condition: [
-							{
-								colName: 'id',
-								ruleType: 'in',
-								value: row.id
-							}
-						],
-						serviceName: 'srvhealth_person_info_update',
-						defaultVal: row
-					};
-					let fieldsCond = [{
+					let fieldsCond = [
+						{
 							column: 'profile_url',
 							display: false
 						},
@@ -262,11 +250,14 @@ export default {
 							column: 'userno',
 							display: false,
 							value: uni.getStorageSync('login_user_info').user_no
+						},
+						{
+							column: 'no',
+							value: this.userInfo.no
 						}
 					];
 					uni.navigateTo({
-						url: '/publicPages/newForm/newForm?fieldsCond='+encodeURIComponent(JSON.stringify(fieldsCond))+'&params=' + JSON.stringify(params)
-						// url: '/publicPages/form/form?fieldsCond='+encodeURIComponent(JSON.stringify(fieldsCond))+'&params=' + JSON.stringify(params)
+						url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_update&type=update&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
 					});
 				} else {
 					uni.showToast({

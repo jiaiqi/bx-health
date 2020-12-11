@@ -39,7 +39,7 @@ export default {
 		 * @param {String} pageType  // use_type 取值
 		 * @param {String} app 
 		 */
-		Vue.prototype.getServiceV2 = async function(srv, srvType, pageType, app) { 
+		Vue.prototype.getServiceV2 = async function(srv, srvType, pageType, app) {
 			// 表单信息 srvType : add | update | list | detail | select
 			// use_type: detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
 			let self = this
@@ -166,6 +166,20 @@ export default {
 					defaultValue: null,
 					isRequire: null,
 					type: null,
+					moreConfig: {}
+				}
+				if (item.more_config && typeof item.more_config === 'string') {
+					try {
+						fieldInfo.moreConfig = JSON.parse(item.more_config)
+						if(fieldInfo.moreConfig.max&&typeof fieldInfo.moreConfig.max==='number'){
+							fieldInfo.max= fieldInfo.moreConfig.max
+						}
+						if(fieldInfo.moreConfig.min&&typeof fieldInfo.moreConfig.min==='number'){
+							fieldInfo.min= fieldInfo.moreConfig.min
+						}
+					} catch (e) {
+						//TODO handle the exception
+					}
 				}
 				fieldInfo.column = item.columns
 				fieldInfo.id = item.id
@@ -1446,9 +1460,9 @@ export default {
 			return res.data.data ? res.data.data : [];
 		}
 		Vue.prototype.getImagePath = (no) => {
-			if (no&&(no.indexOf('http://') !== -1 ||no.indexOf('https://') !== -1)) {
+			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
 				return no
-			} else if(no) {
+			} else if (no) {
 				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			}
 		}

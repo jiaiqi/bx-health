@@ -2,7 +2,7 @@
 	<view class="form-item" v-if="fieldData.display" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid }">
 		<label
 			class="form-item-label"
-			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid }"
+			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' }"
 			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
 		>
 			<text class="text-red is-required">{{ fieldData.isRequire ? '*' : '' }}</text>
@@ -28,12 +28,12 @@
 			</view>
 			<!-- detail-详情-end -->
 			<!-- form-item-start -->
-			<bx-radio-group class="form-item-content_value radio-group" v-model="fieldData.value" v-else-if="fieldData.type === 'radio'" @change="radioChange">
+			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value" v-else-if="fieldData.type === 'radio'" @change="radioChange">
 				<bx-radio class="radio" color="#2979ff" v-for="item in fieldData.options" :disabled="fieldData.disabled ? fieldData.disabled : false" :key="item" :name="item">
 					{{ item }}
 				</bx-radio>
 			</bx-radio-group>
-			<bx-radio-group class="form-item-content_value radio-group" v-model="fieldData.value" v-else-if="fieldData.type === 'radioFk'" @change="radioChange">
+			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value" v-else-if="fieldData.type === 'radioFk'" @change="radioChange">
 				<bx-radio
 					class="radio"
 					color="#2979ff"
@@ -53,6 +53,7 @@
 				</label>
 			</checkbox-group>
 			<bx-checkbox-group
+				:mode="optionMode"
 				v-model="fieldData.value"
 				class="form-item-content_value checkbox-group"
 				v-else-if="fieldData.type === 'checkboxFk'"
@@ -85,10 +86,23 @@
 				:max="fieldData.item_type_attr && fieldData.item_type_attr.max ? fieldData.item_type_attr.max : 999"
 				:min="fieldData.item_type_attr && fieldData.item_type_attr.min ? fieldData.item_type_attr.min : 0"
 				v-model.number="fieldData.value"
-				name="input"
 				:disabled="fieldData.disabled ? fieldData.disabled : false"
-				v-else-if="fieldData.type === 'number' || fieldData.type === 'digit' || fieldData.type === 'text'"
+				v-else-if="((fieldData.type === 'number' || fieldData.type === 'digit') && (!fieldData.max || !fieldData.min)) || fieldData.type === 'text'"
 			/>
+			<view class="form-item-content_value slider" v-else-if="(fieldData.type === 'number' || fieldData.type === 'digit') && fieldData.max && fieldData.min">
+				<view class="operate" hover-class="active" @click="numberChange('minus')" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">-</view>
+				<slider
+					class="uni-slider"
+					@change="changeSlider"
+					:step="fieldData.type === 'digit' ? 0.5 : 1"
+					:min="fieldData.value&&fieldData.value>=fieldData.min?fieldData.min:0"
+					:max="fieldData.max"
+					:value="fieldData.value < fieldData.min ? fieldData.min : fieldData.value"
+					v-model="fieldData.value"
+					show-value
+				/>
+				<view class="operate" hover-class="active" @click="numberChange('add')" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">+</view>
+			</view>
 			<robby-image-upload
 				class="form-item-content_value image"
 				v-else-if="fieldData.type === 'images'"
@@ -105,7 +119,10 @@
 				:limit="fieldData.fileNum"
 			></robby-image-upload>
 		</view>
-		<view class="icon-area"><text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType === 'location'"></text></view>
+		<view class="icon-area">
+			<!-- <text class="cuIcon-edit" v-if="(fieldData.type === 'number' || fieldData.type === 'digit') && fieldData.max && fieldData.min"></text> -->
+			<text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType === 'location'"></text>
+		</view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }">
 			<view class="cu-dialog">
@@ -199,6 +216,10 @@ export default {
 		pageType: {
 			type: String,
 			default: 'form' //form||detail
+		},
+		optionMode: {
+			type: String,
+			default: 'button' //选项的样式 normal | button
 		}
 	},
 	computed: {
@@ -250,7 +271,8 @@ export default {
 				column: this.field.column,
 				valid: true,
 				msg: '不能为空!'
-			}
+			},
+			longpressTimer:null
 		};
 	},
 	watch: {
@@ -263,6 +285,39 @@ export default {
 		}
 	},
 	methods: {
+		longpressNumEnd(){
+			clearInterval(this.longpressTimer)
+		},
+		longpressNumChange(type){
+			if(type){
+			  this.longpressTimer = setInterval(()=>{
+					this.numberChange(type)
+				},200)
+			}
+		},
+		numberChange(type) {
+			if (this.fieldData.type === 'number' || this.fieldData.type === 'digit') {
+				let step = this.fieldData.type === 'number' ? 1 : this.fieldData.type === 'digit' ? 0.5 : 0;
+				if(!this.fieldData.value){
+					this.fieldData.value = this.fieldData.min?this.fieldData.min:0
+				}
+				if (this.fieldData.max && this.fieldData.min) {
+					if (type === 'add') {
+						if (this.fieldData.value + step <= this.fieldData.max) {
+							this.fieldData.value = this.fieldData.value + step;
+						}
+					} else if (type === 'minus') {
+						if (this.fieldData.value - step >= this.fieldData.min) {
+							this.fieldData.value = this.fieldData.value - step;
+						}
+					}
+				}
+			}
+		},
+		changeSlider(e) {
+			console.log('value 发生变化：' + e.detail.value);
+			this.fieldData.value = e.detail.value
+		},
 		previewImage(urls) {
 			if (!urls) {
 				return;
@@ -273,7 +328,6 @@ export default {
 			urls = urls.map(url => {
 				//若图片地址携带压缩图参数则预览时去掉此参数
 				return url.replace(/&thumbnailType=fwsu_100/gi, '');
-				
 			});
 			uni.previewImage({
 				urls: urls,
@@ -281,9 +335,6 @@ export default {
 					itemList: ['发送给朋友', '保存图片', '收藏'],
 					success: function(data) {
 						console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
-					},
-					fail: function(err) {
-						console.log(err.errMsg);
 					}
 				}
 			});
@@ -299,6 +350,7 @@ export default {
 			let self = this;
 			if (this.fieldData.type === 'images' && this.fieldData.value) {
 				if (this.fieldData.value.indexOf('http') === -1) {
+					// 上传到系统的图片 只有图片编号 查到图片地址后再push
 					let fileDatas = await self.getFilePath(this.fieldData.value);
 					self.imagesUrl = [];
 					if (fileDatas) {
@@ -308,6 +360,7 @@ export default {
 						}
 					}
 				} else {
+					// 网络地址 直接push
 					self.imagesUrl.push(this.fieldData.value);
 				}
 			} else if (this.fieldData.type === 'list' && this.fieldData.value !== '') {
@@ -524,11 +577,12 @@ export default {
 		},
 		openPopup(type) {
 			// 打开弹出层
+			let fieldData = this.deepClone(this.fieldData);
 			switch (type) {
 				case 'Set':
 					if (Array.isArray(this.fieldData.option_list_v2)) {
 						this.setOptionList = this.fieldData.option_list_v2.map(item => {
-							if (this.fieldData.value.includes(item.value)) {
+							if (fieldData.value && fieldData.value.includes(item.value)) {
 								item.checked = true;
 							}
 							return item;
@@ -630,7 +684,7 @@ export default {
 	display: flex;
 	flex-wrap: wrap;
 	min-height: 100rpx;
-	align-items: flex-start;
+	align-items: center;
 	// background-color: #fff;
 	padding: 10rpx;
 	position: relative;
@@ -665,6 +719,9 @@ export default {
 		color: #666;
 		&.form-detail {
 			padding: 0;
+		}
+		&.label-top {
+			width: 100%;
 		}
 		.is-required {
 			display: inline-flex;
@@ -703,7 +760,33 @@ export default {
 			font: inherit;
 			display: flex;
 			flex: 1;
-
+			&.slider {
+				display: flex;
+				height: 80rpx;
+				align-items: center;
+				.operate {
+					display: inline-block;
+					padding: 5rpx 20rpx;
+					background-color: #f1f1f1;
+					position: relative;
+					font-size: 40rpx;
+					&.active {
+						transition: all 0.2s;
+						transform: scale(1.2);
+					}
+					&::before {
+						content: '';
+						width: 130%;
+						height: 130%;
+						top: -15%;
+						left: -15%;
+						position: absolute;
+					}
+				}
+				.uni-slider {
+					flex: 1;
+				}
+			}
 			&.picker {
 				.value {
 					width: 400rpx;
@@ -730,11 +813,12 @@ export default {
 		}
 	}
 	.icon-area {
-		display: inline-block;
+		display: inline-flex;
+		align-content: center;
 		text-align: left;
 		margin-right: 20rpx;
+		padding: 20rpx 0;
 		font-size: 40rpx;
-		line-height: 80rpx;
 	}
 	.tree-selector {
 		height: calc(80vh - var(--window-top) - var(--window-bottom));

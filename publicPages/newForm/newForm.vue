@@ -188,7 +188,7 @@ export default {
 		async getDefaultVal() {
 			if (this.use_type === 'detail' || this.use_type === 'update') {
 				let serviceName = this.serviceName.replace('_update', '_select').replace('_add', '_select');
-				let condition = this.fieldsCond.map(item => {
+				let condition = this.fieldsCond.filter(item=>item.value).map(item => {
 					return {
 						colName: item.column,
 						ruleType: 'in',
@@ -218,6 +218,14 @@ export default {
 			let defaultVal = null;
 			this.colsV2Data = colVs;
 			colVs = this.deepClone(colVs);
+			// if(Array.isArray(colVs._fieldInfo)){
+			// 	colVs._fieldInfo = colVs._fieldInfo.map(field=>{
+			// 		if(field.type==='digit'||field.type==='number'){
+			// 			debugger
+			// 		}
+			// 		return field
+			// 	})
+			// }
 			if (colVs.service_view_name) {
 				uni.setNavigationBarTitle({
 					title: colVs.service_view_name

@@ -1,10 +1,10 @@
 <template>
 	<view class="bx-radio" :style="[radioStyle]" :class="[radioButtonClass]" @tap="toggle">
-		<view class="bx-radio-icon" :class="{ checked: name === parentData.value, 'has-char': serialChar, 'no-char': !serialChar }" >
+		<view class="bx-radio-icon" :class="{ checked: name === parentData.value, 'has-char': serialChar, 'no-char': !serialChar }">
 			<text v-if="serialChar">{{ serialChar }}</text>
 			<text v-if="!serialChar && name === parentData.value" class="bx-radio-checked"></text>
 		</view>
-		<view class="bx-radio__label" :class="{ checked: checked, disabled: disabled }"><slot /></view>
+		<view class="bx-radio__label" hover-class="active" :class="{ checked: checked, disabled: disabled }"><slot /></view>
 	</view>
 </template>
 
@@ -246,13 +246,15 @@ export default {
 			}
 		}
 	}
-	.bx-radio__label{
+	.bx-radio__label {
 		padding-right: 50rpx;
 		position: relative;
-		&::before{
+		&::before {
 			position: absolute;
-			content: "";
+			content: '';
 			width: 120%;
+			top: -10%;
+			left: -10%;
 			height: 120%;
 		}
 	}
@@ -262,23 +264,20 @@ export default {
 			display: none;
 		}
 		.bx-radio__label {
-			color: #323233;
-			background-color: #fff;
-			border: 1px solid #ebedf0;
-			padding: 8rpx 20rpx;
+			color: #333;
+			background-color: #f1f1f1;
+			border: 1px solid #f1f1f1;
+			padding: 5rpx 30rpx;
 			border-radius: 50rpx;
 			letter-spacing: 1px;
 			transition: all 0.5s;
-			&:active {
-				color: #409eff;
-				background: #ecf5ff;
-				border-color: #b3d8ff;
-				transform: scale(1.2);
+			&.active {
+				transform: scale(1.1);
 			}
 			&.checked {
-				color: #fff;
-				border-color: #0081ff;
-				background-color: #0081ff;
+				border-color: #0bc99d;
+				color: #0bc99d;
+				background-color: rgba(11, 201, 157, 0.1);
 			}
 			&.disabled {
 				color: #fff;

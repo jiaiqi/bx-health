@@ -532,7 +532,6 @@ export default {
 			min-height: 40rpx;
 		}
 		.auth-button {
-			border: 1rpx solid #fff;
 			border-radius: 30rpx;
 			color: #fff;
 			min-width: 500rpx;

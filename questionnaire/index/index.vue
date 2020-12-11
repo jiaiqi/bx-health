@@ -11,7 +11,7 @@
 				</view>
 			</view>
 			<view class="content form-wrap" style="box-sizing: border-box;">
-				<bxform ref="bxform" :fields="configCols" :BxformType="'form'" pageType="add" @value-blur="saveValue"></bxform>
+				<bxform ref="bxform" :fields="configCols" label-position="top" option-mode="normal" pageType="add" @value-blur="saveValue"></bxform>
 			</view>
 			<view class="content" style="padding:30upx;" v-if="formData.end_remark">
 				<view class="desc">
