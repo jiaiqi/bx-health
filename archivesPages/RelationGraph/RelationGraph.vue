@@ -1,10 +1,12 @@
 <template>
-	<view class="relation-graph">
+	<view class="relation-graph" :style="{
+		'--global-text-font-size':globalTextFontSize+'px',
+		'--global-label-font-size':globalLabelFontSize+'px'
+	}">
 		<view class="serach-bar">
 			<view class="cu-bar search bg-white">
 				<view class="search-form round" @click="toSearchPage">
 					<text class="cuIcon-search"></text>
-					<!-- <input disabled :adjust-position="false" type="text" :placeholder="currentNodes" confirm-type="search" /> -->
 				</view>
 			</view>
 		</view>
@@ -66,9 +68,16 @@
 
 <script>
 import bxEchart from '@/components/uni-ec-canvas/uni-echart.vue';
+import { mapState } from 'vuex';
 export default {
 	components: {
 		bxEchart
+	},
+	computed: {
+		...mapState({
+			globalTextFontSize: state => state.app['globalTextFontSize'],
+			globalLabelFontSize: state => state.app.globalLabelFontSize
+		})
 	},
 	data() {
 		return {
@@ -672,6 +681,8 @@ export default {
 		.rich-text {
 			width: 100%;
 			overflow: hidden;
+			font-size: var(--global-text-font-size);
+			line-height: 1.5;
 		}
 		.link-box {
 			margin-top: 20rpx;

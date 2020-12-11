@@ -1,5 +1,8 @@
 <template>
-	<view class="container">
+	<view class="container" :style="{
+		'--global-text-font-size':globalTextFontSize+'px',
+		'--global-label-font-size':globalLabelFontSize+'px'
+	}">
 		<view class="container-top" @click="toPages('updateInfo')">
 			<view class="top-left">
 				<image
@@ -69,7 +72,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 export default {
 	name: 'mine-info',
 	data() {
@@ -81,6 +84,10 @@ export default {
 		};
 	},
 	computed: {
+		...mapState({
+			'globalTextFontSize':state=>state.app["globalTextFontSize"],
+			'globalLabelFontSize':state=>state.app.globalLabelFontSize
+		}),
 		...mapGetters({
 			vuex_userInfo: 'userInfo',
 			authSetting: 'authSetting',
@@ -473,6 +480,7 @@ export default {
 <style lang="scss" scoped>
 .container {
 	height: calc(100vh - var(--window-top) - var(--window-bottom));
+	font-size: var(--global-text-font-size);
 	overflow: hidden;
 	background-color: #fff;
 }
@@ -524,7 +532,8 @@ export default {
 	}
 	.top-right {
 		color: white;
-		font-size: 16px;
+		// font-size: 16px;
+		font-size: var(--global-text-font-size);
 		margin-left: 20upx;
 		z-index: 2;
 		// color: #333;
@@ -575,6 +584,9 @@ export default {
 	}
 	.container-bot {
 		margin-top: 40upx;
+		.content{
+			font-size: var(--global-text-font-size);
+		}
 	}
 }
 </style>

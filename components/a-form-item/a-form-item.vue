@@ -717,8 +717,9 @@ export default {
 		white-space: nowrap;
 		overflow: hidden;
 		color: #666;
+		font-size: var(--global-label-font-size);
 		&.form-detail {
-			padding: 0;
+			padding: 0 10rpx;
 		}
 		&.label-top {
 			width: 100%;
@@ -747,6 +748,7 @@ export default {
 			margin-bottom: 10rpx;
 		}
 		.form-item-content_detail {
+			font-size: var(--global-text-font-size);
 			&.image {
 				width: 100rpx;
 				height: 100rpx;

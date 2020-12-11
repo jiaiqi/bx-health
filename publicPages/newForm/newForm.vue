@@ -1,5 +1,8 @@
 <template>
-	<view class="form">
+	<view class="form" :style="{
+		'--global-text-font-size':globalTextFontSize+'px',
+		'--global-label-font-size':globalLabelFontSize+'px'
+	}">
 		<a-form v-if="colsV2Data && isArray(fields)" :fields="fields" :pageType="srvType" :formType="use_type" ref="bxForm" @value-blur="valueChange"></a-form>
 		<view class="button-box">
 			<button class="cu-btn bg-blue" type="primary" v-if="isArray(fields) && fields.length > 0" v-for="btn in colsV2Data._formButtons" :key="btn.id" @click="onButton(btn)">
@@ -13,6 +16,8 @@
 export default {
 	data() {
 		return {
+			globalTextFontSize:14,
+			globalLabelFontSize:12,
 			serviceName: '',
 			srvType: 'add', // 表单信息 add | update  | select |list | detail
 			use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
@@ -24,6 +29,7 @@ export default {
 			condition: [],
 			fieldsCond: [],
 			params: {}
+			
 		};
 	},
 	methods: {
@@ -309,7 +315,13 @@ export default {
 			}
 		}
 	},
+	mounted() {
 
+	},
+	onShow() {
+		this.globalTextFontSize =  getApp().globalData.globalTextFontSize?getApp().globalData.globalTextFontSize:14
+		this.globalLabelFontSize =  getApp().globalData.globalLabelFontSize?getApp().globalData.globalLabelFontSize:14
+	},
 	onLoad(option) {
 		const destApp = option.destApp;
 		if (destApp) {

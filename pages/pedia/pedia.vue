@@ -1,5 +1,8 @@
 <template>
-	<view class="page-wrap">
+	<view class="page-wrap" :style="{
+		'--global-text-font-size':globalTextFontSize+'px',
+		'--global-label-font-size':globalLabelFontSize+'px'
+	}">
 		<!-- <view class="status_bar"> -->
 		<!-- 这里是状态栏 -->
 		<!-- </view> -->
@@ -59,6 +62,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
 	// 通用站点首页
 	data() {
@@ -66,6 +70,12 @@ export default {
 			pageItemList: [], // 页面项
 			code: '' // 微信登录用
 		};
+	},
+	computed: {
+		...mapState({
+			globalTextFontSize: state => state.app['globalTextFontSize'],
+			globalLabelFontSize: state => state.app.globalLabelFontSize
+		})
 	},
 	methods: {
 		isDoctor() {
@@ -310,6 +320,7 @@ export default {
 	box-sizing: border-box;
 	background-color: #fff;
 	min-height: 100vh;
+	font-size: var(--global-label-font-size);
 	.status_bar {
 		height: var(--status-bar-height);
 		width: 100%;
@@ -340,19 +351,20 @@ export default {
 				}
 			}
 			.low-height {
-				height: 160rpx;
+				min-height: 160rpx;
 			}
 			.swiper-item {
 				width: 100%;
 				display: flex;
 				flex-wrap: wrap;
-				padding: 0 calc((100% - 680rpx) / 2);
+				// padding: 0 calc((100% - 680rpx) / 2);
 				.image {
 					width: 60rpx;
 					height: 60rpx;
 				}
 				.swiper-button {
-					width: 150rpx;
+					width:calc( 25% - 20rpx);
+					// width: 150rpx;
 					height: 150rpx;
 					display: inline-flex;
 					justify-content: center;
