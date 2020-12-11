@@ -104,26 +104,40 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
 				colNames: ['*'],
-				relation_condition: {
-					relation: 'OR',
-					data: [
-						{
-							relation: 'AND',
-							data: [
-								{
-									colName: 'receiver_account',
-									ruleType: 'eq',
-									value: userNo
-								},
-								{
-									colName: 'msg_state',
-									ruleType: 'eq',
-									value: '未读'
-								}
-							]
-						}
-					]
+				condition:[{
+					colName: 'receiver_account',
+					ruleType: 'eq',
+					value: userNo
 				},
+				{
+					colName: 'msg_state',
+					ruleType: 'eq',
+					value: '未读'
+				},
+				{
+					colName: 'identity',
+					ruleType: 'notnull'
+				}],
+				// relation_condition: {
+				// 	relation: 'OR',
+				// 	data: [
+				// 		{
+				// 			relation: 'AND',
+				// 			data: [
+				// 				{
+				// 					colName: 'receiver_account',
+				// 					ruleType: 'eq',
+				// 					value: userNo
+				// 				},
+				// 				{
+				// 					colName: 'msg_state',
+				// 					ruleType: 'eq',
+				// 					value: '未读'
+				// 				}
+				// 			]
+				// 		}
+				// 	]
+				// },
 				order: [
 					{
 						colName: 'create_time',
@@ -151,6 +165,20 @@ export default {
 				let doctorList = await this.getDoctorInfoMessage(noStr, true);
 			}
 		},
+		async getUserDoctorInfo(customer_no){
+			let url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_person_info_select',
+				colNames: ['*'],
+				condition: [{ colName: 'no', ruleType: 'eq', value: customer_no }],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			let res = await this.$http.post(url, req);
+			console.log("iserInfo-----",res)
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				return res.data.data[0]
+			}
+		},
 		async getBindhzDoctor(no) {
 			// 查询患者信息
 			let url = this.getServiceUrl('health', 'srvhealth_patient_doctor_select', 'select');
@@ -163,11 +191,22 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				// this.doctorList = res.data.data;
-				let noList = res.data.data.map(item => item.customer_name);
-				let noStr = noList.toString();
-				let doctorList = await this.getDoctorRecod(noStr);
-				this.hzMessage = doctorList;
-				console.log('查询----', doctorList, res.data.data);
+				let arr = []
+				res.data.data.forEach(items=>{
+					this.getUserDoctorInfo(items.customer_no).then(r=>{
+						arr.push(r.userno)
+					}).then(_=>{
+						let noStr = arr.toString()
+						// let doctorList = await this.getDoctorRecod(noStr)
+						this.getDoctorRecod(noStr,'患者').then(l=>{
+							console.log("l------------>",l)
+							this.hzMessage = l
+						})
+					})
+				})
+				// let noList = res.data.data.map(item => item.customer_name);
+				
+				// console.log('查询----', doctorList, res.data.data);
 			}
 		},
 		toPages(e) {
@@ -206,7 +245,8 @@ export default {
 					break;
 				case 'userList':
 					this.getDoctorInfo().then(res => {
-						if (res) {
+						if (res&&res.dt_no) {
+							this.$store.commit('SET_DOCTOR_INFO',res)
 							uni.navigateTo({
 								url: '/personalPages/userList/userList'
 							});
@@ -251,7 +291,7 @@ export default {
 					break;
 			}
 		},
-		async getDoctorRecod(userNo) {
+		async getDoctorRecod(userNo,type) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
@@ -266,6 +306,11 @@ export default {
 						colName: 'msg_state',
 						ruleType: 'eq',
 						value: '未读'
+					},
+					{
+						colName: 'identity',
+						ruleType: 'eq',
+						value: type
 					},
 					{
 						colName: 'receiver_account',
@@ -301,7 +346,7 @@ export default {
 					});
 					let str = arr.join(',');
 					let count_num = 0;
-					this.getDoctorRecod(str).then(length => {
+					this.getDoctorRecod(str,'医生').then(length => {
 						count_num += length;
 						this.doctor_message = count_num;
 						console.log('-----------------length---', count_num);

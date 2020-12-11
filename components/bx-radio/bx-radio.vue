@@ -1,6 +1,8 @@
 <template>
 	<view class="bx-radio" :style="[radioStyle]" :class="[radioButtonClass]" @tap="toggle">
-		<view class="bx-radio-icon" :class="{ checked: name === parentData.value, 'has-char': serialChar, 'no-char': !serialChar }">
+		<view class="bx-radio-icon" :style="{
+			'width':elIconSize+'px','height':elIconSize+'px'
+		}" :class="{ checked: name === parentData.value, 'has-char': serialChar, 'no-char': !serialChar }">
 			<text v-if="serialChar">{{ serialChar }}</text>
 			<text v-if="!serialChar && name === parentData.value" class="bx-radio-checked"></text>
 		</view>

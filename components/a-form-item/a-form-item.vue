@@ -23,9 +23,7 @@
 				></image>
 			</view>
 			<view class="form-item-content_detail rich-text" v-html="field.value" v-else-if="pageType === 'detail' && (field.type === 'snote' || field.type === 'Note')"></view>
-			<view class="form-item-content_detail text" v-else-if="pageType === 'detail'">
-				{{ field.value ? (isArray(fieldData.value) ? field.value.toString() : field.value) : '' }}
-			</view>
+			<view class="form-item-content_detail text" v-else-if="pageType === 'detail'">{{ fieldData.value || formalText }}</view>
 			<!-- detail-详情-end -->
 			<!-- form-item-start -->
 			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value" v-else-if="fieldData.type === 'radio'" @change="radioChange">
@@ -35,6 +33,7 @@
 			</bx-radio-group>
 			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value" v-else-if="fieldData.type === 'radioFk'" @change="radioChange">
 				<bx-radio
+				 :iconSize="fieldData.iconSize"
 					class="radio"
 					color="#2979ff"
 					v-for="item in fieldData.options"
@@ -87,15 +86,15 @@
 				:min="fieldData.item_type_attr && fieldData.item_type_attr.min ? fieldData.item_type_attr.min : 0"
 				v-model.number="fieldData.value"
 				:disabled="fieldData.disabled ? fieldData.disabled : false"
-				v-else-if="((fieldData.type === 'number' || fieldData.type === 'digit') && (!fieldData.max || !fieldData.min)) || fieldData.type === 'text'"
+				v-else-if="((fieldData.type === 'number' || fieldData.type === 'digit') && !fieldData.max) || fieldData.type === 'text'"
 			/>
-			<view class="form-item-content_value slider" v-else-if="(fieldData.type === 'number' || fieldData.type === 'digit') && fieldData.max && fieldData.min">
+			<view class="form-item-content_value slider" v-else-if="(fieldData.type === 'number' || fieldData.type === 'digit') && fieldData.max">
 				<view class="operate" hover-class="active" @click="numberChange('minus')" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">-</view>
 				<slider
 					class="uni-slider"
 					@change="changeSlider"
 					:step="fieldData.type === 'digit' ? 0.5 : 1"
-					:min="fieldData.value&&fieldData.value>=fieldData.min?fieldData.min:0"
+					:min="fieldData.value && fieldData.value >= fieldData.min ? fieldData.min : 0"
 					:max="fieldData.max"
 					:value="fieldData.value < fieldData.min ? fieldData.min : fieldData.value"
 					v-model="fieldData.value"
@@ -180,6 +179,18 @@ export default {
 				.replace(/\s+/g, ' ')
 				.replace(/ /g, ' ')
 				.replace(/>/g, ' ');
+		},
+		formalText(val) {
+			if (Array.isArray(val)) {
+				val = val.toString();
+			} else if (typeof val === 'string') {
+				val = val;
+			} else if (typeof val === 'object') {
+				val = JSON.stringify(val);
+			} else if (!val) {
+				val = '';
+			}
+			return val;
 		}
 	},
 	props: {
@@ -272,7 +283,7 @@ export default {
 				valid: true,
 				msg: '不能为空!'
 			},
-			longpressTimer:null
+			longpressTimer: null
 		};
 	},
 	watch: {
@@ -285,23 +296,23 @@ export default {
 		}
 	},
 	methods: {
-		longpressNumEnd(){
-			clearInterval(this.longpressTimer)
+		longpressNumEnd() {
+			clearInterval(this.longpressTimer);
 		},
-		longpressNumChange(type){
-			if(type){
-			  this.longpressTimer = setInterval(()=>{
-					this.numberChange(type)
-				},200)
+		longpressNumChange(type) {
+			if (type) {
+				this.longpressTimer = setInterval(() => {
+					this.numberChange(type);
+				}, 50);
 			}
 		},
 		numberChange(type) {
 			if (this.fieldData.type === 'number' || this.fieldData.type === 'digit') {
 				let step = this.fieldData.type === 'number' ? 1 : this.fieldData.type === 'digit' ? 0.5 : 0;
-				if(!this.fieldData.value){
-					this.fieldData.value = this.fieldData.min?this.fieldData.min:0
+				if (!this.fieldData.value) {
+					this.fieldData.value = this.fieldData.min ? this.fieldData.min : 0;
 				}
-				if (this.fieldData.max && this.fieldData.min) {
+				if (this.fieldData.max) {
 					if (type === 'add') {
 						if (this.fieldData.value + step <= this.fieldData.max) {
 							this.fieldData.value = this.fieldData.value + step;
@@ -316,7 +327,7 @@ export default {
 		},
 		changeSlider(e) {
 			console.log('value 发生变化：' + e.detail.value);
-			this.fieldData.value = e.detail.value
+			this.fieldData.value = e.detail.value;
 		},
 		previewImage(urls) {
 			if (!urls) {
@@ -723,6 +734,7 @@ export default {
 		}
 		&.label-top {
 			width: 100%;
+			padding:20rpx 10rpx 0;
 		}
 		.is-required {
 			display: inline-flex;
@@ -740,6 +752,7 @@ export default {
 		padding: 20rpx 0;
 		padding-left: 20rpx;
 		color: #000;
+		font-size: var(--global-text-font-size);
 		&.form-detail {
 			padding: 0;
 		}
@@ -748,7 +761,6 @@ export default {
 			margin-bottom: 10rpx;
 		}
 		.form-item-content_detail {
-			font-size: var(--global-text-font-size);
 			&.image {
 				width: 100rpx;
 				height: 100rpx;

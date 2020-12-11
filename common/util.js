@@ -166,16 +166,18 @@ export default {
 					defaultValue: null,
 					isRequire: null,
 					type: null,
-					moreConfig: {}
+					moreConfig: {},
+					max: null,
+					min: null
 				}
 				if (item.more_config && typeof item.more_config === 'string') {
 					try {
 						fieldInfo.moreConfig = JSON.parse(item.more_config)
-						if(fieldInfo.moreConfig.max&&typeof fieldInfo.moreConfig.max==='number'){
-							fieldInfo.max= fieldInfo.moreConfig.max
+						if (fieldInfo.moreConfig.max && typeof fieldInfo.moreConfig.max === 'number') {
+							fieldInfo.max = fieldInfo.moreConfig.max
 						}
-						if(fieldInfo.moreConfig.min&&typeof fieldInfo.moreConfig.min==='number'){
-							fieldInfo.min= fieldInfo.moreConfig.min
+						if (typeof fieldInfo.moreConfig.min === 'number') {
+							fieldInfo.min = fieldInfo.moreConfig.min
 						}
 					} catch (e) {
 						//TODO handle the exception

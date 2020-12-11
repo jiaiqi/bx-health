@@ -76,7 +76,7 @@
 						<view class="textbox">
 							<view class="title-food">{{ food[searchArg.wordKey.title] }}</view>
 							<view v-if="searchArg.serviceName === 'srvhealth_patient_doctor_select'" class="content-right">
-								<text style="z-index: 1;">{{food.message_num}}</text>
+								<text v-if="food.message_num" style="z-index: 1;">{{food.message_num>99?'99+':food.message_num}}</text>
 								<image src="/static/chat.png" mode=""></image>
 							</view>
 						</view>
@@ -265,7 +265,7 @@ export default {
 				} else {
 					let cond = {
 						colName: parent.colunn,
-						ruleType: 'eq',
+						ruleType: 'like',
 						value: child.value
 					};
 					this.condObj = cond;
@@ -537,6 +537,7 @@ export default {
 		},
 		async getMessageInfo(no){
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
+			let userno = this.$store.state.user.userInfo.userno
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
 				colNames: ['*'],
@@ -545,6 +546,16 @@ export default {
 						colName: 'sender_account',
 						ruleType: 'eq',
 						value: no
+					},
+					{
+						colName: 'receiver_account',
+						ruleType: 'eq',
+						value: userno
+					},
+					{
+						colName: 'identity',
+						ruleType: 'eq',
+						value: '患者'
 					},
 					{
 						colName: 'msg_state',
@@ -561,6 +572,20 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			return res.data.data.length;
+		},
+		async getUserInfo(customer_no){
+			let url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_person_info_select',
+				colNames: ['*'],
+				condition: [{ colName: 'no', ruleType: 'eq', value: customer_no }],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			let res = await this.$http.post(url, req);
+			console.log("iserInfo-----",res)
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				return res.data.data[0]
+			}
 		},
 		async getFoodsList(order = null, cond = null, type = null, serviceName = null) {
 			let self = this;
@@ -652,9 +677,15 @@ export default {
 				}
 				if(this.searchArg.serviceName === 'srvhealth_patient_doctor_select'){
 					this.foodList.forEach(mes=>{
-						this.getMessageInfo(mes.customer_name).then(a=>{
-							this.$set(mes,'message_num',a)
+						this.getUserInfo(mes.customer_no).then(no=>{
+							console.log('no-----',no)
+							if(no){
+								this.getMessageInfo(no.userno).then(a=>{
+									this.$set(mes,'message_num',a)
+								})
+							}
 						})
+						
 					})
 				}
 				

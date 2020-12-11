@@ -69,26 +69,20 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
 				colNames: ['*'],
-				relation_condition: {
-					relation: 'OR',
-					data: [
-						{
-							relation: 'AND',
-							data: [
-								{
-									colName: 'receiver_account',
-									ruleType: 'eq',
-									value: userNo
-								},
-								{
-									colName: 'msg_state',
-									ruleType: 'eq',
-									value: '未读'
-								}
-							]
-						}
-					]
-				},
+				condition:[{
+						colName: 'receiver_account',
+						ruleType: 'eq',
+						value: userNo
+					},
+					{
+						colName: 'msg_state',
+						ruleType: 'eq',
+						value: '未读'
+					},
+					{
+						colName: 'identity',
+						ruleType: 'notnull'
+					}],
 				order: [
 					{
 						colName: 'create_time',

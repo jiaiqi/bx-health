@@ -1,6 +1,8 @@
 <template>
 	<view class="bx-checkbox" :style="[checkboxStyle]" :class="checkboxClass" @tap="toggle">
-		<view class="bx-checkbox-icon" :class="{ checked: checked }">
+		<view class="bx-checkbox-icon" :class="{ checked: checked }" :style="{
+			'width':checkboxIconSize+'px','height':checkboxIconSize+'px'
+		}">
 			<text v-if="serialChar">{{ serialChar }}</text>
 			<text class="cuIcon-check" v-if="checked && !serialChar"></text>
 		</view>
@@ -150,6 +152,7 @@ export default {
 				style.flex = '0 0 100%';
 				// #endif
 			}
+			
 			return style;
 		}
 	},

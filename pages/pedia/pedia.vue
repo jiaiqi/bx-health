@@ -123,6 +123,33 @@ export default {
 		getMenuImagePath(btn) {
 			return this.$api.backEndAddress + '/main/images/appicon/' + btn.icon;
 		},
+		async getPageConfig(){
+			let url = this.getServiceUrl('daq', 'srvdaq_website_cfg_select', 'select');
+			let req = {
+				serviceName: 'srvdaq_website_cfg_select',
+				colNames: ['*'],
+				condition: [{ colName: 'website_no', ruleType: 'eq', value: 'WS2020042808470005' }],
+			};
+			let res = await this.$http.post(url,req)
+			if(this.requestSuccess(res)){
+				if(res.data.data.length>0){
+					let result = res.data.data[0]
+					if(result.more_config&&typeof result.more_config==='string'){
+						try{
+							result.more_config = JSON.parse(result.more_config)
+							if(result.more_config.globalLabelFontSize){
+								this.$store.commit('SET_GLOBAL_LABEL_SIZE',result.more_config.globalLabelFontSize)
+							}
+							if(result.more_config.globalTextFontSize){
+								this.$store.commit('SET_GLOBAL_TEXT_SIZE',result.more_config.globalTextFontSize)
+							}
+						}catch(e){
+							//TODO handle the exception
+						}
+					}
+				}
+			}
+		},
 		async getPageItem() {
 			// 查找页面项
 			let url = this.getServiceUrl('daq', 'srvdaq_website_page_item_select', 'select');
@@ -130,7 +157,6 @@ export default {
 				serviceName: 'srvdaq_website_page_item_select',
 				colNames: ['*'],
 				condition: [{ colName: 'page_no', ruleType: 'eq', value: 'BX202004280847490008' }],
-				page: null
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
@@ -298,6 +324,7 @@ export default {
 	},
 	created() {
 		this.getPageItem();
+		this.getPageConfig()
 	},
 	onShow() {
 		this.initPage();

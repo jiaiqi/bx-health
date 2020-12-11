@@ -1,6 +1,6 @@
 <template>
 	<view class="health-archive-page-wrap">
-		<patients-info :customer_no="customer_no" v-if="current_tab == 0"></patients-info>
+		<patients-info :customer_no="customer_no" :dp_no="dp_no" v-if="current_tab == 0"></patients-info>
 		<person-chat ref="chat" :customer_no="customer_no" v-if="current_tab == 1"></person-chat>
 		<view class="health-bottom">
 			<view @click="changeTab(index)" v-for="(item,index) in bottom_tab_data" :key="index" class="info-bottom-tab" :class="current_tab==index?'active-text':''">
@@ -31,7 +31,8 @@ export default {
 				name:'交流'
 			}],
 			current_tab:0,
-			customer_no:''
+			customer_no:'',
+			dp_no:''
 		}
 	},
 	methods:{
@@ -43,6 +44,9 @@ export default {
 	onLoad(option) {
 		if (option.customer_no) {
 			this.customer_no = option.customer_no;
+		}
+		if(option.dp_no){
+			this.dp_no = option.dp_no
 		}
 	},
 	onPullDownRefresh() {

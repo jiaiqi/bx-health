@@ -1,5 +1,8 @@
 <template>
-	<view class="cu-card">
+	<view class="cu-card" :style="{
+		'--global-text-font-size':globalTextFontSize+'px',
+		'--global-label-font-size':globalLabelFontSize+'px'
+	}">
 		<view class="page-wrap">
 			<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
 				<view class="desc" style="text-align: justify;">
@@ -51,6 +54,7 @@
 
 <script>
 import bxform from '@/components/a-form/a-form.vue';
+import { mapState } from 'vuex';
 // import bxform from '@/components/bx-form/bx-form.vue';
 
 export default {
@@ -88,6 +92,12 @@ export default {
 			type: String,
 			default: ''
 		}
+	},
+	computed: {
+		...mapState({
+			globalTextFontSize: state => state.app['globalTextFontSize'],
+			globalLabelFontSize: state => state.app.globalLabelFontSize
+		})
 	},
 	watch: {
 		activityNo(newValue, oldValue) {
@@ -408,6 +418,7 @@ export default {
 								this.formType = 'detail';
 							}
 							configCols.forEach((item, index) => {
+								item.iconSize = 28
 								item.itemIndex = index+1
 								if (item.label && item.label.slice(0, 1) != (index + 1).toString() && item.label.slice(0, 2) != (index + 1).toString()) {
 									item.label = (index + 1).toString() + '.' + item.label;

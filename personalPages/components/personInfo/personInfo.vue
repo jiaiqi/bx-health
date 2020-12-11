@@ -1,10 +1,13 @@
 <template>
 	<view class="health-archive-wrap">
 		<view class="avatar-box">
-			<view class="bg-view" :style="{ 'background-image': `url(${avatorPath})` }"></view>
+			<view
+				class="bg-view"
+				:style="{ 'background-image': `url(${avatorPath ? avatorPath : 'https://tse1-mm.cn.bing.net/th/id/OIP.pX_K8kY1FWrj9h_2YRlqBwHaEB?pid=Api&rs=1'})` }"
+			></view>
 			<view class="content-box">
 				<view class="avatar-bar">
-					<image :src="avatorPath" mode="aspectFit" class="avatar-iamge"></image>
+					<image :src="avatorPath ? avatorPath : '/static/icon/wode_selected.png'" mode="aspectFit" class="avatar-iamge"></image>
 					<view class="info">
 						<text class="username">{{ userInfo.name }}</text>
 						<view class="other-info">
@@ -25,13 +28,26 @@
 				</view>
 				<view class="profile-box">
 					<view class="title">
-						<view class="text">标签</view>
+						<view class="text">关注</view>
 						<!-- <view class="icon"><text class="cuIcon-right"></text></view> -->
 					</view>
 					<view class="requirement-box">
 						<view class="require-item" v-for="item in requirement" :key="item">{{ item }}</view>
 					</view>
 				</view>
+			</view>
+		</view>
+		<view class="profile-box tags">
+			<view class="title">
+				<view class="text">标签</view>
+				<view class="title-action" @click="navPages('addTag')">
+					<text class="cuIcon-time"></text>
+					<text class="see-histroy">添加标签</text>
+				</view>
+				<!-- <view class="icon"><text class="cuIcon-right"></text></view> -->
+			</view>
+			<view class="requirement-box">
+				<view class="require-item" v-for="item in tagList" :key="item.id">{{ item.label_name }}</view>
 			</view>
 		</view>
 		<view class="health-archive-item health-score">
@@ -138,32 +154,11 @@
 				</view>
 			</view>
 		</view>
-		<!-- 		<view class="health-archive-item ">
-			<view class="subtitle">
-				<text class="title-text">疾病风险提示</text>
-				<view class=""></view>
-			</view>
-			<view class="content disease-risk">
-				<view class="disease-item text-red">
-					<view class="disease-name">高血压</view>
-					<view class="number">
-						<text class="digit">90</text>
-						%
-					</view>
-				</view>
-				<view class="disease-item text-orange">
-					<view class="disease-name">肥胖</view>
-					<view class="number">
-						<text class="digit">75</text>
-						%
-					</view>
-				</view>
-			</view>
-		</view> -->
 	</view>
 </template>
 
 <script>
+import { mapGetters, mapState } from 'vuex';
 export default {
 	data() {
 		return {
@@ -171,18 +166,20 @@ export default {
 			userInfo: {},
 			isLoad: false,
 			inspectReportRecord: [],
-			totalInspectReportRecord: []
+			totalInspectReportRecord: [],
+			tagList: []
 		};
 	},
 	props: {
 		customer_no: {
 			type: String,
-			default() {
-				return '';
-			}
+			default: ''
+		},
+		dp_no: {
+			type: String,
+			default: ''
 		}
 	},
-
 	computed: {
 		age() {
 			if (this.userInfo.birthday) {
@@ -191,15 +188,47 @@ export default {
 			}
 		},
 		avatorPath() {
-			return this.$api.downloadFile + this.userInfo.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+			if (this.userInfo.profile_url) {
+				return this.$api.downloadFile + this.userInfo.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+			}
 		},
 		requirement() {
 			if (this.userInfo.requirement) {
 				return this.userInfo.requirement.split(',');
 			}
-		}
+		},
+		...mapState({
+			globalTextFontSize: state => state.app['globalTextFontSize'],
+			globalLabelFontSize: state => state.app.globalLabelFontSize,
+			doctorInfo: state => state.app.doctorInfo
+		}),
+		...mapGetters({
+			vuex_userInfo: 'userInfo',
+			authSetting: 'authSetting',
+			is_login: 'isLogin',
+			wxuserinfo: 'wxUserInfo',
+			login_user_info: 'loginUserInfo',
+			client_env: 'env',
+			authBoxDisplay: 'authBoxDisplay'
+		})
 	},
 	methods: {
+		getTagList() {
+			let url = this.getServiceUrl('health', 'srvhealth_user_label_set_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_user_label_set_select',
+				colNames: ['*'],
+				condition: [{ colName: 'dp_no', ruleType: 'eq', value: this.dp_no}]
+			};
+			this.$http.post(url, req).then(res => {
+				if (res.data.state === 'SUCCESS') {
+					this.tagList = res.data.data;
+				}
+			});
+		},
+		// getPatientInfo(){
+
+		// },
 		async selectInspectionReport() {
 			// 查询检查报告
 			let url = this.getServiceUrl('health', 'srvhealth_see_doctor_lab_examination_select', 'select');
@@ -277,6 +306,18 @@ export default {
 					url: '/archivesPages/archives-history/archives-history?isAll=true&customer_no=' + this.customer_no
 				});
 			}
+			if (type === 'addTag') {
+				let fieldsCond = [
+					{ column: 'manager_no', display: false, value: this.doctorInfo.dt_no },
+					{ column: 'customer_no', display: false, value: this.userInfo.no },
+					{ column: 'dp_no', display: false, value: this.dp_no }
+				];
+				if (fieldsCond.filter(item => item.value && item.value).length === 3) {
+					uni.navigateTo({
+						url: '/publicPages/newForm/newForm?serviceName=srvhealth_user_label_set_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+					});
+				}
+			}
 		},
 		async getUserInfo(customer_no) {
 			let url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
@@ -290,6 +331,7 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.userInfo = res.data.data[0];
 				this.selectInspectionReport();
+				this.getTagList();
 				return res.data.data[0];
 			} else {
 				uni.showToast({
@@ -390,57 +432,78 @@ export default {
 					}
 				}
 			}
-
-			.profile-box {
-				margin-top: 20rpx;
-				width: 100%;
-				height: 200rpx;
-				background-color: #ffff;
-				border-radius: 20rpx;
-				.title {
-					width: 100%;
-					padding: 10rpx 20rpx;
-					display: flex;
-					justify-content: space-between;
-					color: #333;
-					font-size: 34rpx;
-					font-weight: 600;
+		}
+	}
+	.profile-box {
+		margin-top: 20rpx;
+		width: 100%;
+		height: 200rpx;
+		background-color: #ffff;
+		border-radius: 20rpx;
+		&.tags {
+			width: calc(100% - 40rpx);
+			margin: 20rpx 20rpx 10rpx;
+		}
+		.title {
+			width: 100%;
+			padding: 10rpx 20rpx;
+			display: flex;
+			justify-content: space-between;
+			color: #333;
+			font-size: 34rpx;
+			font-weight: 600;
+			.title-action {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				padding: 0 20rpx;
+				height: 60rpx;
+				border-radius: 50rpx;
+				border: 1px solid #f1f1f1;
+				transition: all 1s;
+				&:active {
+					background-color: #999;
+					color: #fff;
 				}
-				.requirement-box {
-					display: flex;
-					align-items: flex-start;
-					flex: 1;
-					.require-item {
-						margin: 10rpx;
-						padding: 10rpx 20rpx;
-						@for $i from 1 through 20 {
-							&:nth-child(#{$i}) {
-								@if $i%2==1 {
-									color: #409eff;
-									background: #ecf5ff;
-									border-color: #b3d8ff;
-								}
-								@if $i%2==0 {
-									color: #67c23a;
-									background: #f0f9eb;
-									border-color: #c2e7b0;
-								}
-								@if $i%3==0 {
-									color: #909399;
-									background: #f4f4f5;
-									border-color: #d3d4d6;
-								}
-								@if $i%4==0 {
-									color: #e6a23c;
-									background: #fdf6ec;
-									border-color: #f5dab1;
-								}
-								@if $i%5==0 {
-									color: #f56c6c;
-									background: #fef0f0;
-									border-color: #fbc4c4;
-								}
-							}
+				.see-histroy {
+					font-size: 24rpx;
+					text-indent: 10rpx;
+				}
+			}
+		}
+		.requirement-box {
+			display: flex;
+			align-items: flex-start;
+			flex: 1;
+			.require-item {
+				margin: 10rpx;
+				padding: 10rpx 20rpx;
+				@for $i from 1 through 20 {
+					&:nth-child(#{$i}) {
+						@if $i%2==1 {
+							color: #409eff;
+							background: #ecf5ff;
+							border-color: #b3d8ff;
+						}
+						@if $i%2==0 {
+							color: #67c23a;
+							background: #f0f9eb;
+							border-color: #c2e7b0;
+						}
+						@if $i%3==0 {
+							color: #909399;
+							background: #f4f4f5;
+							border-color: #d3d4d6;
+						}
+						@if $i%4==0 {
+							color: #e6a23c;
+							background: #fdf6ec;
+							border-color: #f5dab1;
+						}
+						@if $i%5==0 {
+							color: #f56c6c;
+							background: #fef0f0;
+							border-color: #fbc4c4;
 						}
 					}
 				}
@@ -558,6 +621,7 @@ export default {
 				}
 				.see-histroy {
 					font-size: 24rpx;
+					text-indent: 10rpx;
 				}
 			}
 		}

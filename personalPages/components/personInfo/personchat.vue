@@ -8,9 +8,9 @@
 					v-for="(item, index) in recordList"
 					:key="index"
 					class="person-chat-item"
-					:class="item.sender_account === currentUserInfo.user_no ? 'person-chat-item-my' : ''"
+					:class="item.sender_account === currentUserInfo.userno ? 'person-chat-item-my' : ''"
 				>
-					<view v-if="doctor_no.owner_account ? item.sender_account === doctor_no.owner_account : item.sender_account === userInfo.userno" class="person-chat-item-accept">
+					<view v-if="doctor_no.owner_account ? item.sender_account === doctor_no.owner_account && item.receiver_account != item.sender_account : item.sender_account === userInfo.userno && item.receiver_account != item.sender_account" class="person-chat-item-accept">
 						<view class="person-chat-item-left">
 							<image v-if="!doctor_no.owner_account" :src="userInfo.img_url ? userInfo.img_url : '/personalPages/static/doctor_default.jpg'" mode=""></image>
 							<image v-else :src="doctor_no.dt_pic ? `${apiUrl + doctor_no.dt_pic}&bx_auth_ticket=${ticket}` : '/personalPages/static/doctor_default.jpg'" mode=""></image>
@@ -69,7 +69,7 @@
 							</view>
 						</view>
 					</view>
-					<view v-else-if="item.sender_account === currentUserInfo.user_no" class="person-chat-item-send">
+					<view v-else-if="item.sender_account === currentUserInfo.userno" class="person-chat-item-send">
 						<text class="unread" v-if="item.msg_state === '未读'">{{ item.msg_state }}</text>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
 							<image :src="item.img_url" mode=""></image>
@@ -160,7 +160,8 @@
 					>
 						{{ voiceTitle }}
 					</text>
-					<input v-else @input="changeTest" v-model="chatText" type="text" value="" />
+					<input v-else v-model="chatText" type="text" value="" />
+<!-- 					<input v-else @input="changeTest" v-model="chatText" type="text" value="" /> -->
 				</view>
 				<view class="person-chat-rig">
 					<view class="person-chat-rig-add-wrap">
@@ -281,7 +282,7 @@ export default {
 			userInfo: '',
 			recordList: [],
 			chatTextBottom: '',
-			currentUserInfo: uni.getStorageSync('login_user_info'),
+			currentUserInfo: uni.getStorageSync('current_user_info'),
 			recodeList: [],
 			recodeOnloadList: [],
 			chooseRecod: '', //链接
@@ -581,49 +582,6 @@ export default {
 						'&userno=' +
 						encodeURIComponent(this.userInfo.userno)
 				});
-				// return
-				// wx.chooseMessageFile({
-				//   count: 1,
-				//   type: 'file',
-				//   success (res) {
-				//    console.log("上传图片----》",res)
-				//    let reqHeader = {
-				// 		bx_auth_ticket: uni.getStorageSync('bx_auth_ticket'),
-				// 		"content-type":"multipart/form-data"
-				//    }
-				//    let formData = {
-				//    	serviceName: "srv_bxfile_service",
-				//    	interfaceName: "add",
-				//    	app_no: "health",
-				//    	columns: "attachment"
-				//    }
-				//    console.log("name-----",formData)
-				//    let url = ''
-				//    for(let i=0;i<res.tempFiles.length;i++){
-				// 	   console.log("res--上传文件--",res)
-				//    	wx.uploadFile({
-				//    		url:self.$api.upload,
-				//    		header: reqHeader,
-				//    		formData:formData,
-				//    		filePath: res.tempFiles[i],
-				// 		name:'file',
-				//    		success: (e) => {
-				// 			console.log("e----->",e)
-				//    			if(e.statusCode === 200){
-				//    				let photoDataNo = JSON.parse(e.data).file_no
-				// 				console.log("上传文件-----",e)
-				//    				self.sendMessageLanguageInfo('文件',photoDataNo)
-				//    			}else{
-
-				//    			}
-				//    		},
-				// 		fail:(e)=>{
-				// 			console.log("fail-----",e)
-				// 		}
-				//    	})
-				//    }
-				//   }
-				// })
 				console.log('点击上传文档----');
 			} else if (type === 'wx_word') {
 				wx.chooseMessageFile({
@@ -875,16 +833,16 @@ export default {
 			this.currentVoiceType = type;
 		},
 		/*input框内有没有内容**/
-		changeTest() {
-			if (this.chatText) {
-				this.isSendLink = false;
-				if (this.doctor_no.owner_account) {
-					this.heightStyle = 'calc(100vh - 50px)';
-				} else {
-					this.heightStyle = 'calc(100vh - 100px)';
-				}
-			}
-		},
+		// changeTest() {
+		// 	if (this.chatText) {
+		// 		this.isSendLink = false;
+		// 		if (this.doctor_no.owner_account) {
+		// 			this.heightStyle = 'calc(100vh - 50px)';
+		// 		} else {
+		// 			this.heightStyle = 'calc(100vh - 100px)';
+		// 		}
+		// 	}
+		// },
 		downloadfile(item) {
 			var url = this.$api.downloadFile + item.attachment + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			uni.showToast({
@@ -932,13 +890,15 @@ export default {
 					colNames: ['*'],
 					data: [
 						{
-							sender_account: this.currentUserInfo.user_no,
+							sender_account: this.currentUserInfo.userno,
 							receiver_account: this.doctor_no.owner_account ? this.doctor_no.owner_account : this.userInfo.userno,
-							msg_content_type: type
+							msg_content_type: type,
+							identity:this.pageType?'患者':'医生'
 						}
 					]
 				}
 			];
+			
 			if (type === '图片') {
 				req[0].data[0].image = value;
 			} else if (type === '语音') {
@@ -975,9 +935,10 @@ export default {
 					colNames: ['*'],
 					data: [
 						{
-							sender_account: this.currentUserInfo.user_no,
+							sender_account: this.currentUserInfo.userno,
 							receiver_account: this.doctor_no.owner_account ? this.doctor_no.owner_account : this.userInfo.userno,
-							msg_content_type: !this.isSendLink ? '文本' : '链接'
+							msg_content_type: !this.isSendLink ? '文本' : '链接',
+							identity:this.pageType?'患者':'医生'
 						}
 					]
 				}
@@ -1063,7 +1024,7 @@ export default {
 							{
 								colName: 'sender_account',
 								ruleType: 'eq',
-								value: this.currentUserInfo.user_no
+								value: this.currentUserInfo.userno
 							},
 							{
 								colName: 'receiver_account',
@@ -1083,7 +1044,7 @@ export default {
 							{
 								colName: 'receiver_account',
 								ruleType: 'eq',
-								value: this.currentUserInfo.user_no
+								value: this.currentUserInfo.userno
 							}
 						]
 					}
@@ -1093,7 +1054,9 @@ export default {
 			let res = await this.$http.post(url, req);
 			let resData = res.data.data;
 			this.pageInfo.total = res.data.page.total;
-
+			if (this.pageInfo.pageNo == 1) {
+				this.recordList = [];
+			}
 			if (resData.length > 0) {
 				resData.forEach((item, i) => {
 					if (item.msg_content_type === '语音') {
@@ -1131,6 +1094,7 @@ export default {
 					}
 				});
 				// this.recordList = resData
+				
 				console.log('res00000', resData);
 				resData.forEach(links => {
 					if (links.msg_content_type === '链接') {
@@ -1147,14 +1111,12 @@ export default {
 							});
 						}
 					}
-				});
-				if (this.pageInfo.pageNo == 1) {
-					this.recordList = [];
-				}
+				});				
 				if (!this.isAll) {
 					this._SortJson(resData);
 					this.recordList.unshift(...resData);
-					// console.log("排序============",a)
+					
+					console.log("排序============",this.recordList)
 				}
 
 				if (this.pageInfo.pageNo * this.pageInfo.rownumber >= res.data.page.total) {
