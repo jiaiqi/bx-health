@@ -194,7 +194,9 @@ export default {
 				let arr = []
 				res.data.data.forEach(items=>{
 					this.getUserDoctorInfo(items.customer_no).then(r=>{
-						arr.push(r.userno)
+						if(r && r.userno){
+							arr.push(r.userno)
+						}
 					}).then(_=>{
 						let noStr = arr.toString()
 						// let doctorList = await this.getDoctorRecod(noStr)
@@ -485,9 +487,14 @@ export default {
 	onShow() {
 		this.userInfo = uni.getStorageSync('current_user_info');
 		this.getDoctorAllRecod(this.userInfo.userno).then(r => {
+			if(r > 99){
+				r = '99+'
+			}else{
+				r = r.toString()
+			}
 			uni.setTabBarBadge({
 				index: 3,
-				text: r.toString(),
+				text: r,
 				success: e => {
 					console.log('success---', e);
 				},
@@ -624,6 +631,7 @@ export default {
 				min-width: 44rpx;
 				height: 32rpx;
 				text-align: center;
+				font-size: 24rpx;
 			}
 		}
 	}

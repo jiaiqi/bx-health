@@ -3,7 +3,7 @@
 		<label
 			class="form-item-label"
 			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' }"
-			:style="{ width: label_width,'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
+			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
 		>
 			<text class="text-red is-required">{{ fieldData.isRequire ? '*' : '' }}</text>
 			<text class="label">{{ fieldData.label }}</text>
@@ -23,7 +23,7 @@
 				></image>
 			</view>
 			<view class="form-item-content_detail rich-text" v-html="field.value" v-else-if="pageType === 'detail' && (field.type === 'snote' || field.type === 'Note')"></view>
-			<view class="form-item-content_detail text" v-else-if="pageType === 'detail'">{{ fieldData.value || formalText }}</view>
+			<view class="form-item-content_detail text" v-else-if="pageType === 'detail'">{{ fieldData.value | formalText }}</view>
 			<!-- detail-详情-end -->
 			<!-- form-item-start -->
 			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value" v-else-if="fieldData.type === 'radio'" @change="radioChange">
@@ -33,7 +33,7 @@
 			</bx-radio-group>
 			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value" v-else-if="fieldData.type === 'radioFk'" @change="radioChange">
 				<bx-radio
-				 :iconSize="fieldData.iconSize"
+					:iconSize="fieldData.iconSize"
 					class="radio"
 					color="#2979ff"
 					v-for="item in fieldData.options"
@@ -128,9 +128,12 @@
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }">
 			<view class="cu-dialog">
-				<textarea class="form-item-content_value textarea" v-model="textareaValue" placeholder="请输入" />
-				<view class="button-box">
-					<button class="cu-btn button bg-grey" @tap="showTextArea = false">取消</button>
+				<jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor"></jin-edit>
+				<!-- <rich-text-editor :html="textareaValue" ref="richEditor"></rich-text-editor> -->
+				<!-- <rich-text :nodes="textareaValue"></rich-text> -->
+				<!-- <textarea class="form-item-content_value textarea" v-model="textareaValue" placeholder="请输入" /> -->
+				<!-- <view class="button-box">
+					<button class="cu-btn button bg-grey" @tap="cancelSaveRichText">取消</button>
 					<button
 						type="primary"
 						class="cu-btn button bg-blue"
@@ -141,15 +144,15 @@
 					>
 						确定
 					</button>
-				</view>
+				</view> -->
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showSelectorPopup || showMultiSelectorPopup }">
 			<view class="cu-dialog">
 				<view class="tree-selector">
 					<view class="content">
-						<view class="cu-bar search bg-white" v-if="showSelectorPopup">
-							<view class="search-form round">
+						<view class="cu-bar search bg-white" v-if="showSelectorPopup && fieldData.showSearch !== false">
+							<view class="search-form round" v>
 								<text class="cuIcon-search"></text>
 								<input @input="searchFKDataWithKey" :adjust-position="false" type="text" placeholder="搜索" confirm-type="search" />
 							</view>
@@ -295,10 +298,25 @@ export default {
 			immediate: true,
 			handler(newValue, oldValue) {
 				this.fieldData = newValue;
+				if (newValue.type === 'textarea') {
+					this.textareaValue = newValue.value;
+				}
 			}
 		}
 	},
 	methods: {
+		saveRichText(e) {
+			if (e.isSave) {
+				if (e.html) {
+					this.fieldData.value = e.html;
+				}
+				this.fieldData.richData = e;
+			} else {
+				this.textareaValue = this.fieldData.value;
+				this.$refs.richEditor.resetContent(this.fieldData.value);
+			}
+			this.showTextArea = false;
+		},
 		longpressNumEnd() {
 			clearInterval(this.longpressTimer);
 		},
@@ -467,6 +485,12 @@ export default {
 		},
 		async getTreeSelectorData(cond, serv, relation_condition) {
 			let self = this;
+			if (this.fieldData.col_type === 'Enum') {
+				if (Array.isArray(this.fieldData.options)) {
+					this.selectorData = this.fieldData.options;
+				}
+				return;
+			}
 			let req = {
 				serviceName: serv ? serv : self.fieldData.option_list_v2 ? self.fieldData.option_list_v2.serviceName : '',
 				colNames: ['*'],
@@ -524,6 +548,9 @@ export default {
 			if (relation_condition && typeof relation_condition === 'object') {
 				req.relation_condition = relation_condition;
 				delete req.condition;
+			}
+			if (!req.serviceName) {
+				return;
 			}
 			let res = await self.onRequest('select', req.serviceName, req, appName);
 			// if (res.data.state === 'SUCCESS' && res.data.page && res.data.page.total > res.data.page.rownumber * res.data.page.pageNo) {
@@ -680,7 +707,7 @@ export default {
 
 <style lang="scss" scoped>
 .cu-dialog {
-	padding: 0 20rpx 50rpx;
+	padding: 0 0 50rpx;
 	background-color: #fff;
 	.form-item-content_value {
 		width: 100%;
@@ -737,7 +764,7 @@ export default {
 		}
 		&.label-top {
 			width: 100%;
-			padding:20rpx 10rpx 0;
+			padding: 20rpx 10rpx 0;
 		}
 		.is-required {
 			display: inline-flex;
@@ -805,9 +832,9 @@ export default {
 				}
 			}
 			&.picker {
-				.uni-picker{
+				.uni-picker {
 					width: 100%;
-					.picker-content{
+					.picker-content {
 						width: 100%;
 						display: flex;
 						justify-content: space-between;

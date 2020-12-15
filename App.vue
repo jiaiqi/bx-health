@@ -3,7 +3,7 @@ import Vue from 'vue';
 export default {
 	globalData: {
 		globalTextFontSize: 18,
-		globalLabelFontSize:16
+		globalLabelFontSize: 16
 	},
 	onLaunch() {
 		// #ifdef MP-WEIXIN
@@ -69,7 +69,8 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
 				colNames: ['*'],
-				condition:[{
+				condition: [
+					{
 						colName: 'receiver_account',
 						ruleType: 'eq',
 						value: userNo
@@ -82,7 +83,8 @@ export default {
 					{
 						colName: 'identity',
 						ruleType: 'notnull'
-					}],
+					}
+				],
 				order: [
 					{
 						colName: 'create_time',
@@ -126,6 +128,7 @@ export default {
 <style lang="scss">
 @import 'colorui/main.css';
 @import 'colorui/icon.css';
+@import '@/common/uni.css';
 
 /*每个页面公共css */
 // --page-height:calc(100vh - var(--window-top) - var(--window-bottom))

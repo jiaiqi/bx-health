@@ -219,9 +219,12 @@ export default {
 						appNo: item.table_name.substring(item.table_name.indexOf("bx") + 2, item.table_name.indexOf("_"))
 					}
 				} else if (item.col_type === "Enum" || item.col_type === "Dict") {
-					fieldInfo.type = "radioFk"
+					// fieldInfo.type = "radioFk"
+					fieldInfo.type = "Selector"
+					fieldInfo.showSearch = false
+					fieldInfo.option_list_v2 = item.option_list_v2
 					fieldInfo.options = item.option_list_v2
-				} else if (item.col_type === "MultilineText") {
+				} else if (item.col_type === "MultilineText"||item.col_type==='snote') {
 					fieldInfo.type = "textarea"
 				} else if (item.col_type === "Money" || item.col_type === "Float") {
 					fieldInfo.type = "digit"

@@ -102,7 +102,7 @@ export default {
 					{
 						colName: 'receiver_account',
 						ruleType: 'eq',
-						value: this.userInfo.userno
+						value: this.userInfo?this.userInfo.userno:''
 					},
 					{
 						colName: 'msg_state',
@@ -118,7 +118,11 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			return res.data.data.length;
+			let length = 0
+			if(res.data.data && res.data.data.length > 0){
+				length = res.data.data.length
+			}
+			return length;
 		},
 		async bindDoctor(docInfo) {
 			if (!docInfo) {
@@ -205,7 +209,7 @@ export default {
 							this.count_num = count_num
 							this.$set(item, 'count_num', length);
 							
-							console.log("-----------------length---",length)
+							// console.log("-----------------length---",length)
 						});
 					});
 				}
@@ -242,7 +246,7 @@ export default {
 		}
 	},
 	onShow() {
-		// this.getBindDoctor();
+		this.getBindDoctor();
 	},
 	onReachBottom() {
 		// 下拉到底部

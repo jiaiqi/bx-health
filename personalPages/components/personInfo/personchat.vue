@@ -1,7 +1,7 @@
 <template>
 	<view class="person-chat-wrap">
 		<!-- <cu-custom class="nav-chat-top" bgColor="#0bc99d" :isBack="true"><block slot="backText">返回</block><block slot="content">交流</block></cu-custom> -->
-		<view class="person-chat-top" :style="{ height: heightStyle }" :class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
+		<view class="person-chat-top" @click.stop="closeBottomPoup" :style="{ height: heightStyle }" :class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
 			<scroll-view @scroll="chatScroll" scroll-y="true" :style="{ height: heightStyle }" :scroll-into-view="chatTextBottom">
 				<view
 					:id="`person-chat-item${item.id}`"
@@ -304,6 +304,19 @@ export default {
 		};
 	},
 	methods: {
+		/*关闭底部选择按钮**/
+		closeBottomPoup(){
+			this.$nextTick(()=>{
+				if (this.doctor_no.owner_account) {
+					// uni.setStorageSync('doctor_no', this.doctor_no);
+					this.heightStyle = 'calc(100vh - 50px);';
+				} else {
+					// uni.setStorageSync('doctor_no', '');
+					this.heightStyle = 'calc(100vh - 90px);';
+				}
+			})
+			this.isSendLink = false
+		},
 		/*播放视频**/
 		openVideo(item) {
 			// let self = this
@@ -1054,10 +1067,12 @@ export default {
 			let res = await this.$http.post(url, req);
 			let resData = res.data.data;
 			this.pageInfo.total = res.data.page.total;
-			if (this.pageInfo.pageNo == 1) {
+			if (this.pageInfo.pageNo == 1 && type !== 'update') {
+				console.log("page为0")
 				this.recordList = [];
 			}
-			if (resData.length > 0) {
+			console.log("resData----->",resData)
+			if (resData.length > 0) {								
 				resData.forEach((item, i) => {
 					if (item.msg_content_type === '语音') {
 						this.$set(resData[i], 'anmitionPlay', false);
@@ -1111,24 +1126,32 @@ export default {
 							});
 						}
 					}
-				});				
-				if (!this.isAll) {
-					this._SortJson(resData);
-					this.recordList.unshift(...resData);
-					
-					console.log("排序============",this.recordList)
-				}
-
-				if (this.pageInfo.pageNo * this.pageInfo.rownumber >= res.data.page.total) {
-					this.isAll = true;
-				}
-				// this.chatTextBottom ='person-chat-item' + (resData.length - 1)
+				});	
+				this.$nextTick(()=>{
+					if (!this.isAll) {
+						this._SortJson(resData);
+						this.recordList.unshift(...resData);					
+						console.log("排序============",this.recordList)
+					}
+					if(type && type === 'update'){
+						this._SortJson(resData);
+						this.recordList = resData
+					}
+					if (this.pageInfo.pageNo * this.pageInfo.rownumber >= res.data.page.total) {
+						this.isAll = true;
+					}
+				})
+				
 				this.$nextTick(() => {
-					this.chatTextBottom = 'person-chat-item' + resData[resData.length - 1].id;
-				});
+					if(resData.length > 0){
+						this.chatTextBottom = 'person-chat-item' + resData[resData.length - 1].id;
+					}
+				})
 				// this.getUserInfoList()
 				if (type && type === 'onLoad') {
-					this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
+					if(this.recordList.length > 0){
+						this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
+					}
 					this.updateMessageInfo();
 				}
 			}
@@ -1161,7 +1184,7 @@ export default {
 			];
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				this.getMessageInfo();
+				this.getMessageInfo('update');
 				console.log('更新成功');
 			}
 		},
@@ -1222,21 +1245,7 @@ export default {
 				}
 			});
 		}, 500);
-	},
-	onPageScroll() {
-		const query = uni.createSelectorQuery().in(this);
-		query
-			.select('.person-chat-top')
-			.boundingClientRect(data => {
-				console.log('得到布局位置信息' + JSON.stringify(data));
-				console.log('节点离页面顶部的距离为' + data.top);
-				uni.pageScrollTo({
-					scrollTop: data.top,
-					duration: 300
-				});
-			})
-			.exec();
-	},
+	},	
 	onLoad(option) {
 		//录音开始事件
 		this.Recorder.onStart(e => {
