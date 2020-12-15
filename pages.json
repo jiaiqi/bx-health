@@ -80,8 +80,8 @@
 				{
 					"path": "history/history",
 					"style": {
-						"navigationBarTitleText": "",
-						"enablePullDownRefresh": false
+						"navigationBarBackgroundColor":"#5494ff",
+						"enablePullDownRefresh": true
 					}
 				},
 				{
@@ -161,7 +161,16 @@
 					}
 
 				}
-			]
+			    ,{
+                    "path" : "DietDetail/DietDetail",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "饮食记录详情",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "pregnancy",

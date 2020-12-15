@@ -3,7 +3,7 @@
 		<label
 			class="form-item-label"
 			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' }"
-			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
+			:style="{ width: label_width,'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
 		>
 			<text class="text-red is-required">{{ fieldData.isRequire ? '*' : '' }}</text>
 			<text class="label">{{ fieldData.label }}</text>
@@ -66,9 +66,12 @@
 				<text class="value hidden" v-else>{{ fkFieldLabel }}</text>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="pickerFieldList.includes(fieldData.type)">
-				<picker :mode="pickerMode" :value="fieldData.value" start="09:01" end="21:01" @change="bindTimeChange">
-					<view class="place-holder" v-if="!fieldData.value">请选择</view>
-					<view class="value" v-else>{{ fieldData.value }}</view>
+				<picker class="uni-picker" :mode="pickerMode" :value="fieldData.value" start="09:01" end="21:01" @change="bindTimeChange">
+					<view class="picker-content">
+						<view class="place-holder" v-if="!fieldData.value">请选择</view>
+						<view class="value" v-else>{{ fieldData.value }}</view>
+						<text class="cuIcon-calendar"></text>
+					</view>
 				</picker>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'" @click="showTextArea = true">
@@ -802,6 +805,14 @@ export default {
 				}
 			}
 			&.picker {
+				.uni-picker{
+					width: 100%;
+					.picker-content{
+						width: 100%;
+						display: flex;
+						justify-content: space-between;
+					}
+				}
 				.value {
 					width: 400rpx;
 					text-overflow: ellipsis;

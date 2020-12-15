@@ -204,6 +204,9 @@ export default {
 					fieldInfo.type = "date"
 				} else if (item.col_type === "FileList") {
 					fieldInfo.type = "file"
+					// #ifdef MP-WEIXIN
+					fieldInfo.type = "images"
+					// #endif
 					fieldInfo.srvInfo = {
 						tableName: item.table_name,
 						appNo: item.table_name.substring(item.table_name.indexOf("bx") + 2, item.table_name.indexOf("_"))
@@ -1348,6 +1351,7 @@ export default {
 				}
 				// #endif
 				// #ifdef H5
+				debugger
 				uni.navigateTo({
 					url: '/publicPages/accountExec/accountExec'
 				});

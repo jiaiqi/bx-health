@@ -1,8 +1,11 @@
 <template>
-	<view class="page-wrap" :style="{
-		'--global-text-font-size':globalTextFontSize+'px',
-		'--global-label-font-size':globalLabelFontSize+'px'
-	}">
+	<view
+		class="page-wrap"
+		:style="{
+			'--global-text-font-size': globalTextFontSize + 'px',
+			'--global-label-font-size': globalLabelFontSize + 'px'
+		}"
+	>
 		<!-- <view class="status_bar"> -->
 		<!-- 这里是状态栏 -->
 		<!-- </view> -->
@@ -123,27 +126,27 @@ export default {
 		getMenuImagePath(btn) {
 			return this.$api.backEndAddress + '/main/images/appicon/' + btn.icon;
 		},
-		async getPageConfig(){
+		async getPageConfig() {
 			let url = this.getServiceUrl('daq', 'srvdaq_website_cfg_select', 'select');
 			let req = {
 				serviceName: 'srvdaq_website_cfg_select',
 				colNames: ['*'],
-				condition: [{ colName: 'website_no', ruleType: 'eq', value: 'WS2020042808470005' }],
+				condition: [{ colName: 'website_no', ruleType: 'eq', value: 'WS2020042808470005' }]
 			};
-			let res = await this.$http.post(url,req)
-			if(this.requestSuccess(res)){
-				if(res.data.data.length>0){
-					let result = res.data.data[0]
-					if(result.more_config&&typeof result.more_config==='string'){
-						try{
-							result.more_config = JSON.parse(result.more_config)
-							if(result.more_config.globalLabelFontSize){
-								this.$store.commit('SET_GLOBAL_LABEL_SIZE',result.more_config.globalLabelFontSize)
+			let res = await this.$http.post(url, req);
+			if (this.requestSuccess(res)) {
+				if (res.data.data.length > 0) {
+					let result = res.data.data[0];
+					if (result.more_config && typeof result.more_config === 'string') {
+						try {
+							result.more_config = JSON.parse(result.more_config);
+							if (result.more_config.globalLabelFontSize) {
+								this.$store.commit('SET_GLOBAL_LABEL_SIZE', result.more_config.globalLabelFontSize);
 							}
-							if(result.more_config.globalTextFontSize){
-								this.$store.commit('SET_GLOBAL_TEXT_SIZE',result.more_config.globalTextFontSize)
+							if (result.more_config.globalTextFontSize) {
+								this.$store.commit('SET_GLOBAL_TEXT_SIZE', result.more_config.globalTextFontSize);
 							}
-						}catch(e){
+						} catch (e) {
 							//TODO handle the exception
 						}
 					}
@@ -156,7 +159,7 @@ export default {
 			let req = {
 				serviceName: 'srvdaq_website_page_item_select',
 				colNames: ['*'],
-				condition: [{ colName: 'page_no', ruleType: 'eq', value: 'BX202004280847490008' }],
+				condition: [{ colName: 'page_no', ruleType: 'eq', value: 'BX202004280847490008' }]
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
@@ -250,7 +253,8 @@ export default {
 				return;
 			}
 			// #endif
-			if (!userInfo || !uni.getStorageSync('isLogin')) {
+			if (!userInfo) {
+				debugger
 				// 未登录 h5跳转到登录页,小程序端进行静默登录
 				// #ifdef MP-WEIXIN
 				const result = await wx.login();
@@ -324,7 +328,7 @@ export default {
 	},
 	created() {
 		this.getPageItem();
-		this.getPageConfig()
+		this.getPageConfig();
 	},
 	onShow() {
 		this.initPage();
@@ -390,7 +394,7 @@ export default {
 					height: 60rpx;
 				}
 				.swiper-button {
-					width:calc( 25% - 20rpx);
+					width: calc(25% - 20rpx);
 					// width: 150rpx;
 					height: 150rpx;
 					display: inline-flex;

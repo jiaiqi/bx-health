@@ -333,10 +333,8 @@
 <script>
 // #ifdef MP-WEIXIN
 import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
-// import uniEcCanvas from '@/otherPages/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #endif
 // #ifdef H5
-// import uniEcharts from '@/otherPages/components/uni-ec-canvas/uni-echarts.vue';
 import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
 export default {
@@ -690,36 +688,8 @@ export default {
 		// 	console.log("点击选择臊子----")
 		// },
 		checkboxGroupChange(e) {
-			console.log('---------e-', e);
 			let isHasTrue = false;
-			// this.cookData.forEach(item=>{
-			// 	if(item.value === e.name  && e.value){
-			// 		isHasTrue = true
-			// 	}
-			// })
-			// if(isHasTrue){
-			// 	this.cookData.forEach(item=>{
-			// 		item.disable = true
-			// 		if(item.value === e.name && e.value){
-			// 			item.disable = false
-			// 		}
-			// 	})
-			// }else{
-			// 	this.cookData.forEach(item=>{
-			// 		item.disable = false
-			// 		// if(item.value === e.name && e.value){
-			// 		// 	item.disable = false
-			// 		// }
-			// 	})
-			// }
-
-			// if(!e.value){
 			this.currentChooseCookData = e;
-			// 	this.isCookDataChoose = false
-			// }else{
-			// 	this.currentChooseCookData = e
-
-			// }
 		},
 		closePoup() {
 			this.showUserHealtManagePopup = false;
@@ -750,7 +720,6 @@ export default {
 			}
 
 			this.showUserHealtManagePopup = false;
-		
 		},
 		async getCurrentFood(item) {
 			let self = this;
@@ -839,11 +808,11 @@ export default {
 				let fieldsCond = [
 					{
 						column: 'id',
-						value:  this.currFood.id
+						value: this.currFood.id
 					}
 				];
 				uni.navigateTo({
-					url: '/publicPages/newForm/newForm?type=update&fieldsCond='+encodeURIComponent(JSON.stringify(fieldsCond))
+					url: '/publicPages/newForm/newForm?type=update&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
 					// url: '/publicPages/form/form?type=update&params=' + encodeURIComponent(JSON.stringify(params))
 				});
 			} else if (type === 'add') {
@@ -972,7 +941,6 @@ export default {
 			let currFood = self.currFood;
 			nutrientData.forEach(ele => {
 				if (currFood[ele.key]) {
-					// currFood[ele.key] = currFood[ele.key] * Number(this.choiceNum)
 					self.$set(ele, 'value', currFood[ele.key]);
 				} else {
 					self.$set(ele, 'value', 0);
@@ -980,9 +948,6 @@ export default {
 			});
 			let currData = await this.getNutrientRecommended();
 			console.log('currData======>', currData);
-			// option.series[0].data = currData.map(ser => {
-			// 	return ser;
-			// });
 			if (!option.series[1]) {
 				option.series.push(obj);
 			}
@@ -1073,6 +1038,8 @@ export default {
 			console.log('单位选择----', item);
 			this.currIndex = i;
 			this.radioLabel = item;
+			this.currFood.unit_energy = ((item.unit_amount?item.unit_amount:item.amount) / this.currFood.unit_amount) * this.currFood.unit_energy;
+			this.currFood.unit_amount = item.unit_amount ? item.unit_amount : item.amount;
 			if (Number(this.choiceNum) && !this.radioLabel) {
 				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
 			} else if (Number(this.choiceNum) && this.radioLabel) {
@@ -1082,6 +1049,8 @@ export default {
 					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
 				}
 			}
+			// debugger
+			this.assembleData()
 		},
 		/*选择单位**/
 		RadioChange(e) {
@@ -1434,8 +1403,8 @@ export default {
 			unitList.push(item);
 			if (res.data.state === 'SUCCESS') {
 				unitList = [...unitList, ...res.data.data];
-				this.unitList = unitList;
-				this.list = unitList;
+				this.unitList = this.deepClone(unitList);
+				this.list = this.deepClone(unitList);
 			}
 			console.log('食物选择单位===>>>', this.unitList);
 		}

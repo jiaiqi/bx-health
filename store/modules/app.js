@@ -23,7 +23,8 @@ const state = {
 	authBoxDisplay: getItem('authBoxDisplay') ? getItem('authBoxDisplay') : '',
 	sickItem: "",
 	symptomArr: [],
-	doctorInfo: getItem('doctorInfo') ? getItem('doctorInfo') : {}
+	doctorInfo: getItem('doctorInfo') ? getItem('doctorInfo') : {},
+	dietRecord: getItem('dietRecord') ? getItem('dietRecord') : []
 }
 let persistData = {}; //持久化数据
 const mutations = {
@@ -70,6 +71,10 @@ const mutations = {
 	SET_DOCTOR_INFO: (state, info) => {
 		state.doctorInfo = info
 		setItem('doctorInfo', info)
+	},
+	SET_DIET_RECORD: (state, record) => {
+		state.dietRecord = record
+		setItem('dietRecord', record)
 	}
 }
 

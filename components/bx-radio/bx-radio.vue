@@ -139,6 +139,7 @@ export default {
 				style.flex = '0 0 100%';
 				// #endif
 			}
+			style['max-width']='100%'
 			return style;
 		},
 		radioButtonClass() {
@@ -251,6 +252,7 @@ export default {
 	.bx-radio__label {
 		padding-right: 50rpx;
 		position: relative;
+		flex: 1;
 		&::before {
 			position: absolute;
 			content: '';

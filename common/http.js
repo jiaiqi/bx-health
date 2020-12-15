@@ -49,6 +49,7 @@ fly.interceptors.request.use(async (request) => {
 	if (request.url && request.url.indexOf('srvwx_app_login_verify') == -1 && request.url.indexOf('rvuser_login') == -1) {
 		if (Vue.prototype.$store && Vue.prototype.$store.getters && Vue.prototype.$store.getters.isLogin === false) {
 			// request.cancel = true
+			debugger
 			// #ifdef H5
 			uni.navigateTo({
 				url: '/publicPages/accountExec/accountExec'
@@ -161,6 +162,7 @@ fly.interceptors.response.use(
 					}
 				} else {
 					// #ifdef H5
+					debugger
 					uni.navigateTo({
 						url: '/publicPages/accountExec/accountExec'
 					})

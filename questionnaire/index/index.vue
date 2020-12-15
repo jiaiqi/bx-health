@@ -1,9 +1,13 @@
 <template>
-	<view class="cu-card" :style="{
-		'--global-text-font-size':globalTextFontSize+'px',
-		'--global-label-font-size':globalLabelFontSize+'px'
-	}">
+	<view
+		class="quest"
+		:style="{
+			'--global-text-font-size': globalTextFontSize + 'px',
+			'--global-label-font-size': globalLabelFontSize + 'px'
+		}"
+	>
 		<view class="page-wrap">
+			<view class="to-history" v-if="configCols && configCols.length > 0" @click="toHistory">点击查看历史提交</view>
 			<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
 				<view class="desc" style="text-align: justify;">
 					<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
@@ -28,6 +32,7 @@
 			>
 				<button class="button" type="" @click="submitForm()">提交</button>
 			</view>
+			<!-- <view class="to-history"  v-if="configCols && configCols.length > 0 && formType === 'form'"  @click="toHistory">点击查看历史提交</view> -->
 			<view
 				class="button-box"
 				style="margin: 30upx;"
@@ -46,9 +51,9 @@
 					<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
 				</view>
 			</view>
-			<view class="to-history" v-if="configCols && configCols.length > 0 && formType === 'form'" @click="toHistory">点击查看历史提交</view>
+			<!-- <view class="to-history" v-if="configCols && configCols.length > 0 && formType === 'form'" @click="toHistory">点击查看历史提交</view> -->
 		</view>
-		<u-empty :text="emptyText" v-if="!configCols || configCols.length === 0"></u-empty>
+		<!-- <u-empty :text="emptyText" v-if="!configCols || configCols.length === 0"></u-empty> -->
 	</view>
 </template>
 
@@ -418,8 +423,8 @@ export default {
 								this.formType = 'detail';
 							}
 							configCols.forEach((item, index) => {
-								item.iconSize = 28
-								item.itemIndex = index+1
+								item.iconSize = 28;
+								item.itemIndex = index + 1;
 								if (item.label && item.label.slice(0, 1) != (index + 1).toString() && item.label.slice(0, 2) != (index + 1).toString()) {
 									item.label = (index + 1).toString() + '.' + item.label;
 								}
@@ -566,7 +571,8 @@ export default {
 			}
 			switch (e.item_type) {
 				case '文本':
-					config.type = e.item_type_attr['view_model'] === 'textarea' ? 'textarea' : 'input';
+					// config.type = e.item_type_attr['view_model'] === 'textarea' ? 'textarea' : 'input';
+					config.type = e.item_type_attr['view_model'] === 'textarea' ? 'textarea' : 'text';
 					break;
 				case '图片':
 					config.type = 'images';
@@ -575,6 +581,7 @@ export default {
 				case '选项':
 					config.type = e.item_type_attr.radioType && e.item_type_attr.radioType === 'multi' ? 'checkboxFk' : 'radioFk';
 					config.options = e.option_data.map((item, optIndex) => {
+						item.color = '#0bc99d';
 						item.value = item.option_value;
 						item.showimg = false;
 						item.label = item.option_value;
@@ -586,11 +593,11 @@ export default {
 							item.serialChar = optIndex;
 						}
 						return item;
-						// return item.option_value;
 					});
 					break;
 				case '时间日期':
-					config.type = e.item_type_attr.dateType ? e.item_type_attr.dateType : 'dateTime';
+					config.type = e.item_type_attr.dateType ? e.item_type_attr.dateType : 'date';
+					// config.type = e.item_type_attr.dateType ? e.item_type_attr.dateType : 'dateTime';
 					break;
 				case '数字':
 					config.type = e.item_type_attr.numberType ? e.item_type_attr.numberType : 'number';
@@ -606,7 +613,8 @@ export default {
 					};
 					break;
 				case '引用':
-					config.type = 'treeSelector';
+					config.type = 'Selector';
+					// config.type = 'treeSelector';
 					config.option_list_v2 = {
 						refed_col: e.item_type_attr.refed_col,
 						srv_app: e.item_type_attr.srv_app,
@@ -724,7 +732,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.cu-card {
+.quest {
 	background-color: #fff;
 	color: #fff;
 	height: 100vh;
@@ -754,7 +762,7 @@ export default {
 	text-align: center;
 	color: #0bc99d;
 	position: relative;
-	margin: 20rpx 0 50rpx;
+	margin: 20rpx 0 0;
 	&::before {
 		content: '';
 		position: absolute;

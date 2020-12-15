@@ -19,11 +19,11 @@
 		</view>
 		<view class="health-overall-score">
 			<view class="content">
-				<view class="score-item" @click="toPages('score-compose')">
+				<view class="score-item"  @click="toPages('score-compose')">
 					<text class="label">整体健康分</text>
 					<text class="value text-blue" v-if="healthTotalScore || healthTotalScore === 0">
 						<text class="int" v-if="totalScore && totalScore.number">{{ totalScore.number }}</text>
-						<text class="float" v-if="totalScore && totalScore.digit">.{{ totalScore.digit }}</text>
+						<text class="float" v-if="totalScore && totalScore.digit">.{{ totalScore.digit | fixed1 }}</text>
 					</text>
 					<text class="valuetip text-blue" v-else>
 						<text class="cuIcon-all"></text>
@@ -35,19 +35,33 @@
 						<text class="text">较上次评测增加两分</text>
 					</view>
 				</view>
-				<view class="score-item">
-					<text class="label">近日健康分</text>
+				<view class="score-item" @click="showAdvice = !showAdvice">
+					<text class="label" >近日健康分</text>
 					<text class="value  text-cyan">
 						<text class="int" v-if="todayScore && todayScore.number">{{ todayScore.number }}</text>
-						<text class="float" v-if="todayScore && todayScore.digit">.{{ todayScore.digit }}</text>
+						<text class="float" v-if="todayScore && todayScore.digit">.{{ todayScore.digit | fixed1 }}</text>
 						<!-- <text class="ratio"></text> -->
+						<text class="cuIcon-info text-cyan tips" ></text>
 					</text>
 				</view>
 			</view>
 		</view>
-		<view class="health-archive-item health-advice">
-			<view class="title">健康建议</view>
-			<view class="content">一切正常请继续保持</view>
+		<view class="health-advice">
+			<!-- <view class="title">健康建议</view> -->
+			<view class="content" :style="{ height: showAdvice ? 'auto' : 0 }">
+				<view class="health-advice-item bg-orange light" v-if="weightAdvice">
+					<text class="cuIcon-info">{{ weightAdvice }}</text>
+				</view>
+				<view class="health-advice-item bg-blue light" v-if="sportScoreAdvice">
+					<text class="cuIcon-info">{{ sportScoreAdvice }}</text>
+				</view>
+				<view class="health-advice-item bg-yellow light" v-if="sleepAdvice">
+					<text class="cuIcon-info">{{ sleepAdvice }}</text>
+				</view>
+				<view class="health-advice-item bg-green light" v-if="dietAdvice">
+					<text class="cuIcon-info">{{ dietAdvice }}</text>
+				</view>
+			</view>
 		</view>
 		<view class="health-archive-item health-todos">
 			<view class="subtitle">
@@ -266,8 +280,19 @@ export default {
 				showExp: true,
 				value: ''
 			},
-			todoList: []
+			todoList: [],
+			dietAdvice: '',
+			showAdvice: false
 		};
+	},
+	filters: {
+		fixed1: function(value) {
+			if (value) {
+				return value.toString().slice(0, 1);
+			} else {
+				return 0;
+			}
+		}
 	},
 	computed: {
 		...mapGetters({
@@ -288,7 +313,7 @@ export default {
 					if (arr.length == 2) {
 						return {
 							number: arr[0],
-							digit: arr[1]
+							digit: arr[1].toString()
 						};
 					}
 				} else {
@@ -309,7 +334,7 @@ export default {
 					if (arr.length == 2) {
 						return {
 							number: arr[0],
-							digit: arr[1]
+							digit: arr[1].toString()
 						};
 					}
 				} else {
@@ -330,10 +355,8 @@ export default {
 		avatarUrl() {
 			if (this.userInfo.profile_url) {
 				return this.getImagePath(this.userInfo.profile_url);
-				// return this.$api.downloadFile + this.userInfo.profile_url + '&thumbnailType=fwsu_100' + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			} else if (this.loginUserInfo.headimgurl) {
 				return this.getImagePath(this.userInfo.headimgurl);
-				// return this.loginUserInfo.headimgurl;
 			}
 		},
 		bmi() {
@@ -350,6 +373,48 @@ export default {
 		todayTotalScore() {
 			let result = this.dietScore + this.sportScore + this.weightScore + this.BPScore + this.sleepScore + 10;
 			return Number(result.toFixed(1));
+		},
+		sleepAdvice() {
+			let result = '';
+			let score = this.sleepScore;
+			if (score || score === 0) {
+				if (score < 7) {
+					result = '睡眠时间不足，若想提高您的睡眠分数，您需要尽量保持每日至少七小时睡眠时间，避免熬夜，最好每天在23:00之前入睡';
+				}
+			}
+			return result;
+		},
+		sportScoreAdvice() {
+			let result = '';
+			if (typeof this.sportScore === 'number') {
+				let score = this.sportScore;
+				if (score <= 10) {
+					result = '近期的运动量过少，若想提高运动分数，您需要增加运动量';
+				} else if (score > 10 && score <= 20) {
+					result = '近期运动情况良好，若想提高运动分数，可适当增加运动量';
+				}
+			}
+			return result;
+		},
+		weightAdvice() {
+			let bmi = this.bmi;
+			let result = '';
+			if (bmi) {
+				if (bmi <= 28 && bmi >= 24) {
+					//0-2.5
+					result = '您的体重过高，若想提高体重分数,您需要适当进行运动并减少热量摄入';
+				} else if (bmi >= 21 && bmi < 24) {
+					// 5-2.5
+					result = '您的体重略高于标准范围，若想提高体重分数,您需要适当进行运动，减少热量摄入';
+				} else if (bmi >= 18.5 && bmi < 21) {
+					//2.5-5
+					result = '您的体重在标准范围之内，若想提高体重分数,您可以适当进行运动，增加热量摄入';
+				} else if (bmi < 18.5 && bmi >= 10) {
+					//2.5-0
+					result = '您的体重过低，若想提高体重分数,您需要适当进行运动并从食物中补充足够的蛋白质。';
+				}
+			}
+			return result;
 		},
 		weightScore() {
 			// 计算体重分数
@@ -539,10 +604,10 @@ export default {
 				//5-10
 				result = 5 + (bmi - 18.5) * 2;
 			} else if (bmi < 18.5 && bmi >= 10) {
-				//5-0
 				result = (Math.abs(10 - bmi) * 5) / 8.5;
 			}
 			let energyInfo = await this.getDietRecord();
+			let advice = '您需要增加';
 			if (Array.isArray(energyInfo) && energyInfo.length > 0) {
 				energyInfo.forEach(ele => {
 					if (ele.key === 'protein') {
@@ -550,16 +615,29 @@ export default {
 							result += 10;
 						} else if (ele.EAR > ele.value) {
 							result += (ele.value * 10) / ele.EAR;
+							advice += '、蛋白质';
 						}
 					} else {
 						if (ele.EAR < ele.value && ele.value < ele.EAR * 2) {
-							result += 2;
 						} else if (ele.EAR > ele.value) {
 							result += (ele.value * 2) / ele.EAR;
+							advice += `、${ele.label}`;
 						}
 					}
 				});
 			}
+			if (advice.split('、').length > 1) {
+				if (advice.split('、').length > 4) {
+					advice =
+						advice
+							.split('、')
+							.slice(0, 4)
+							.reduce((pre, cur) => pre + cur + ',', '') + '等元素的摄入';
+				} else {
+					advice = advice + '的摄入';
+				}
+			}
+			this.dietAdvice = advice;
 			return Number(result.toFixed(1));
 		},
 		async calcSportScore() {
@@ -1386,8 +1464,15 @@ export default {
 				.value {
 					font-size: 150rpx;
 					display: flex;
+					position: relative;
 					.float {
 						font-size: 40rpx;
+					}
+					.tips {
+						font-size: 38rpx;
+						position: absolute;
+						top: 20rpx;
+						right: -10rpx;
 					}
 				}
 				.valuetip {
@@ -1639,9 +1724,27 @@ export default {
 				}
 			}
 		}
-		&.health-advice {
-			.content {
-				color: #0081ff;
+	}
+	.health-advice {
+		margin: 20rpx 20rpx 0;
+		background-color: #fff;
+		border-radius: 20rpx;
+		overflow: hidden;
+		.content {
+			color: #0081ff;
+			display: flex;
+			flex-direction: column;
+			transition: height .5s;
+			.health-advice-item {
+				padding: 20rpx;
+				// color: #67c23a;
+				// background: #f0f9eb;
+				// border-color: #c2e7b0;
+				margin-bottom: 10rpx;
+				width: 100%;
+				&:last-child {
+					margin-bottom: 0;
+				}
 			}
 		}
 	}

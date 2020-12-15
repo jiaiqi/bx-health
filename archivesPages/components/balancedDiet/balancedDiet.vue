@@ -152,7 +152,7 @@
 														over: alone.UL && alone.value > alone.UL
 													}"
 												>
-													{{ alone.value < alone.EAR ? '不足' : alone.UL && alone.value > alone.UL ? '过多' : '正常' }}
+													{{ getAloneLevel(alone) }}
 												</view>
 												<view class="after">{{ alone.right_width && alone.UL ? alone.UL : '' }}</view>
 											</view>
@@ -315,19 +315,33 @@
 							<view class="ele-item">
 								<text class="label">蛋白质</text>
 								<text class="value">{{ currentRecord.protein ? Number(currentRecord.protein).toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.protein >= 30.1 ? '高' : currentRecord.protein >= 15.5 && currentRecord.protein < 30.1 ? '中' : '低' }})</text>
+								<text
+									:class="{
+										'text-red': getElementLevel('protein', currentRecord.protein) === '低',
+										'text-orange': getElementLevel('protein', currentRecord.protein) === '中',
+										'text-green': getElementLevel('protein', currentRecord.protein) === '高'
+									}"
+								>
+									({{ getElementLevel('protein', currentRecord.protein) }})
+								</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">碳水化合物</text>
 								<text class="value">{{ currentRecord.carbohydrate ? currentRecord.carbohydrate.toFixed(1) : '' }}</text>
-								<text class="text-red">
-									({{ currentRecord.carbohydrate >= 51.9 ? '高' : currentRecord.carbohydrate >= 25.74 && currentRecord.carbohydrate < 51.9 ? '中' : '低' }})
+								<text
+									:class="{
+										'text-red': getElementLevel('carbohydrate', currentRecord.carbohydrate) === '低',
+										'text-orange': getElementLevel('carbohydrate', currentRecord.carbohydrate) === '中',
+										'text-green': getElementLevel('carbohydrate', currentRecord.carbohydrate) === '高'
+									}"
+								>
+									({{ getElementLevel('carbohydrate', currentRecord.carbohydrate) }})
 								</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">脂肪</text>
 								<text class="value">{{ currentRecord.axunge ? currentRecord.axunge.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.axunge >= 35.3 ? '高' : currentRecord.axunge >= 17.6 && currentRecord.axunge < 35.3 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('axunge', currentRecord.axunge) }})</text>
 							</view>
 						</view>
 						<view class="title">脂溶性维生素</view>
@@ -335,12 +349,12 @@
 							<view class="ele-item">
 								<text class="label">VA</text>
 								<text class="value">{{ currentRecord.vitamin_a ? currentRecord.vitamin_a.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.vitamin_a >= 915 ? '高' : currentRecord.vitamin_a >= 457 && currentRecord.vitamin_a < 915 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('vitamin_a', currentRecord.vitamin_a) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">VE</text>
 								<text class="value">{{ currentRecord.vitamin_e ? currentRecord.vitamin_e.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.vitamin_e >= 27.9 ? '高' : currentRecord.vitamin_e >= 13.9 && currentRecord.vitamin_e < 27.9 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('vitamin_e', currentRecord.vitamin_e) }})</text>
 							</view>
 						</view>
 						<view class="title">水溶性维生素</view>
@@ -348,22 +362,22 @@
 							<view class="ele-item">
 								<text class="label">VB1</text>
 								<text class="value">{{ currentRecord.vitamin_b1 ? currentRecord.vitamin_b1.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.vitamin_b1 >= 0.61 ? '高' : currentRecord.vitamin_b1 >= 0.32 && currentRecord.vitamin_b1 < 0.61 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('vitamin_b1', currentRecord.vitamin_b1) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">VB2</text>
 								<text class="value">{{ currentRecord.vitamin_b2 ? currentRecord.vitamin_b2.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.vitamin_b2 >= 0.79 ? '高' : currentRecord.vitamin_b2 >= 0.4 && currentRecord.vitamin_b2 < 0.79 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('vitamin_b2', currentRecord.vitamin_b2) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">VB3</text>
 								<text class="value">{{ currentRecord.vitamin_b3 ? currentRecord.vitamin_b3.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.vitamin_b3 >= 4.52 ? '高' : currentRecord.vitamin_b3 >= 2.26 && currentRecord.vitamin_b3 < 4.52 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('vitamin_b3', currentRecord.vitamin_b3) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">VC</text>
 								<text class="value">{{ currentRecord.vitamin_c ? currentRecord.vitamin_c.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.vitamin_c >= 61.2 ? '高' : currentRecord.vitamin_c >= 30.6 && currentRecord.vitamin_c < 61.2 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('vitamin_c', currentRecord.vitamin_c) }})</text>
 							</view>
 						</view>
 						<view class="title">常量矿物质</view>
@@ -371,22 +385,22 @@
 							<view class="ele-item">
 								<text class="label">钙</text>
 								<text class="value">{{ currentRecord.element_ca ? currentRecord.element_ca.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.element_ca >= 381 ? '高' : currentRecord.element_ca >= 190.5 && currentRecord.element_ca < 381 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('element_ca', currentRecord.element_ca) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">镁</text>
 								<text class="value">{{ currentRecord.element_mg ? currentRecord.element_mg.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.element_mg >= 111.6 ? '高' : currentRecord.element_mg >= 55.8 && currentRecord.element_mg < 111.6 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('element_mg', currentRecord.element_mg) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">磷</text>
 								<text class="value">{{ currentRecord.element_p ? currentRecord.element_p.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.element_p >= 296.4 ? '高' : currentRecord.element_p >= 148.2 && currentRecord.element_p < 296.4 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('element_p', currentRecord.element_p) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">钾</text>
 								<text class="value">{{ currentRecord.element_k ? currentRecord.element_k.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.element_k >= 526.2 ? '高' : currentRecord.element_k >= 263.1 && currentRecord.element_k < 526.2 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('element_k', currentRecord.element_k) }})</text>
 							</view>
 						</view>
 						<view class="title">微量元素</view>
@@ -394,37 +408,32 @@
 							<view class="ele-item">
 								<text class="label">铁</text>
 								<text class="value">{{ currentRecord.element_fe ? currentRecord.element_fe.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.element_fe >= 7.2 ? '高' : currentRecord.element_fe >= 3.6 && currentRecord.element_fe < 7.2 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('element_fe', currentRecord.element_fe) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">锌</text>
 								<text class="value">{{ currentRecord.element_zn ? currentRecord.element_zn.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.element_zn >= 6 ? '高' : currentRecord.element_zn >= 3 && currentRecord.element_zn < 6 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('element_zn', currentRecord.element_zn) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">硒</text>
 								<text class="value">{{ currentRecord.element_se ? currentRecord.element_se.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.element_se >= 23.82 ? '高' : currentRecord.element_se >= 11.91 && currentRecord.element_se < 23.82 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('element_se', currentRecord.element_se) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">铜</text>
 								<text class="value">{{ currentRecord.element_cu ? currentRecord.element_cu.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.element_cu >= 1.12 ? '高' : currentRecord.element_cu >= 0.56 && currentRecord.element_cu < 1.12 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('element_cu', currentRecord.element_cu) }})</text>
 							</view>
 							<view class="ele-item">
 								<text class="label">锰</text>
 								<text class="value">{{ currentRecord.element_mn ? currentRecord.element_mn.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ currentRecord.element_mn >= 4.44 ? '高' : currentRecord.element_mn >= 2.22 && currentRecord.element_mn < 4.44 ? '中' : '低' }})</text>
+								<text class="text-red">({{ getElementLevel('element_mn', currentRecord.element_mn) }})</text>
 							</view>
 						</view>
 					</view>
 					<view class="chart-box" v-if="currentRecord && currentRecordType === 'food' && showChart">
-						<!-- #ifdef MP-WEIXIN -->
-						<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-ec-canvas>
-						<!-- #endif -->
-						<!-- #ifdef H5 -->
 						<uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-echarts>
-						<!-- #endif -->
 					</view>
 					<view class="cook-type-box" v-if="currentRecord && currentRecordType === 'food'">
 						<view class="title">烹调方式:</view>
@@ -455,44 +464,6 @@
 				</view>
 			</view>
 		</view>
-		<!-- <view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view> -->
-		<!-- <u-popup v-model="showPopup" mode="bottom" border-radius="50">
-			<view class="popup-box">
-				<view class="icon-item" @click="toPages('food')">
-					<image src="@/archivesPages/static/icon/yinshi.png" mode="" class="icon"></image>
-					<text class="label">饮食</text>
-				</view>
-				<view class="icon-item" @click="toPages('sport')">
-					<image src="@/archivesPages/static/icon/yundong.png" mode="" class="icon"></image>
-					<text class="label">运动</text>
-				</view>
-				<view class="icon-item" @click="toPages('weight')">
-					<image src="@/archivesPages/static/icon/tizhong.png" mode="" class="icon"></image>
-					<text class="label">体重</text>
-				</view>
-				<view class="icon-item" @click="toPages('sleep')">
-					<image src="@/archivesPages/static/icon/sleep.png" mode="" class="icon"></image>
-					<text class="label">睡眠</text>
-				</view>
-				<view class="icon-item" @click="toPages('heartRate')">
-					<image src="@/archivesPages/static/icon/xinlv.png" mode="" class="icon"></image>
-					<text class="label">心率</text>
-				</view>
-				<view class="icon-item" @click="toPages('pressure')">
-					<image src="@/archivesPages/static/icon/xueya.png" mode="" class="icon"></image>
-					<text class="label">血压</text>
-				</view>
-				<view class="icon-item" @click="toPages('oxygen')">
-					<image src="@/archivesPages/static/icon/xueyang.png" mode="" class="icon"></image>
-					<text class="label">血氧</text>
-				</view>
-				<view class="icon-item" @click="toPages('glucose')">
-					<image src="@/archivesPages/static/icon/xuetang.png" mode="" class="icon"></image>
-					<text class="label">血糖</text>
-				</view>
-			</view>
-			<view class="close-icon"><text @click="showPopup = false" class="cuIcon-close"></text></view>
-		</u-popup> -->
 		<view @click.self="closeDay" class="cu-modal" style="display: flex; align-items: center" :class="modalName == 'Modal' ? 'show' : ''">
 			<view style="height: 43vh" class="cu-dialog">
 				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :markDays="markDays" :headerBar="true" @onDayClick="onDayClick"></bx-date-stamp>
@@ -500,26 +471,11 @@
 		</view>
 		<view class="cu-modal bottom-modal" :class="isShowCookType ? 'show' : ''">
 			<view class="cu-dialog">
-				<view class="cu-bar bg-white cook-top">
-					<!-- <view class="action text-blue" @tap="isShowCookType = false">取消</view> -->
-					<text>常见烹调方式</text>
-					<!-- <view class="action text-green" @tap="isShowCookType = false"></view> -->
-				</view>
+				<view class="cu-bar bg-white cook-top"><text>常见烹调方式</text></view>
 				<view class="cooktype-wrap" v-if="currentRecord">
 					<bx-radio-group v-model="cook_method" mode="button">
 						<bx-radio v-for="item in cookTypes" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
 					</bx-radio-group>
-					<!-- <view
-						@click="chooseCookType(cook)"
-						v-for="(cook, c) in cookTypes"
-						:key="c"
-						class="cook-item"
-						:class="{
-							'active-cook-item': currentRecord && currentRecord.cook_method && currentRecord.cook_method === cook.value
-						}"
-					>
-						<text>{{ cook.value }}</text>
-					</view> -->
 					<view class="button-box">
 						<button class="cu-btn button" @tap="isShowCookType = false">取消</button>
 						<button
@@ -541,25 +497,13 @@
 <script>
 import bxDateStamp from '@/archivesPages/components/bx-date-stamp/bx-date-stamp.vue';
 import xflSelect from '@/archivesPages/components/xfl-select/xfl-select.vue';
-// #ifdef MP-WEIXIN
-import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
-// import uniEcCanvas from '@/archivesPages/components/uni-ec-canvas/uni-ec-canvas.vue';
-// #endif
-// #ifdef H5
-import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
-// import uniEcharts from '@/archivesPages/components/uni-ec-canvas/uni-echarts.vue';
-// #endif
+import uniEcharts from '@/components/uni-ec-canvas/uni-echart.vue';
 let self;
 export default {
 	components: {
 		xflSelect,
 		bxDateStamp,
-		// #ifdef MP-WEIXIN
-		uniEcCanvas,
-		// #endif
-		// #ifdef H5
 		uniEcharts
-		// #endif
 	},
 	data() {
 		return {
@@ -1421,6 +1365,7 @@ export default {
 			//TODO 动态改变热量
 			this.currentRecord.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
 			this.currentRecord.unit = item.unit;
+			this.currentRecord.energy = (this.currentRecord.unit_weight_g * this.currentRecord.unit_energy) / this.currentRecord.unit_amount;
 			this.buildCurrenDietChartOption();
 		},
 		async getCookTypes() {
@@ -1701,6 +1646,94 @@ export default {
 			if (res.data.state === 'SUCCESS') {
 				this.getSportsAllRecord(res.data.data);
 			}
+		},
+		getAloneLevel(alone) {
+			if (alone && alone.value) {
+				return alone.value < alone.EAR ? '不足' : alone.UL && alone.value > alone.UL ? '过多' : '正常';
+			}
+		},
+		getElementLevel(ele, val) {
+			let result = '';
+			let level = {
+				protein: {
+					over: 30.1,
+					low: 15.5
+				},
+				carbohydrate: {
+					over: 51.9,
+					low: 25.74
+				},
+				axunge: {
+					over: 35.3,
+					low: 17.6
+				},
+				vitamin_a: {
+					over: 915,
+					low: 457
+				},
+				vitamin_e: {
+					over: 27.9,
+					low: 13.9
+				},
+				vitamin_b1: {
+					over: 0.61,
+					low: 0.32
+				},
+				vitamin_b2: {
+					over: 0.79,
+					low: 0.4
+				},
+				vitamin_b3: {
+					over: 4.52,
+					low: 2.26
+				},
+				vitamin_c: {
+					over: 61.2,
+					low: 30.6
+				},
+				element_ca: {
+					over: 381,
+					low: 190.5
+				},
+				element_mg: {
+					over: 111.6,
+					low: 55.8
+				},
+				element_p: {
+					over: 296.4,
+					low: 148.2
+				},
+				element_k: {
+					over: 526.2,
+					low: 263.1
+				},
+				element_fe: {
+					over: 7.2,
+					low: 3.6
+				},
+				element_zn: {
+					over: 6,
+					low: 3
+				},
+				element_se: {
+					over: 23.82,
+					low: 11.91
+				},
+				element_cu: {
+					over: 1.12,
+					low: 0.56
+				},
+				element_mn: {
+					over: 4.44,
+					low: 2.22
+				}
+			};
+			try {
+				result = val >= level[ele].over ? '高' : val < level[ele].over && val >= level[ele].low ? '中' : '低';
+			} catch (e) {
+				//TODO handle the exception
+			}
+			return result;
 		},
 		async getSportsAllRecord(data) {
 			// 运动记录
@@ -2501,6 +2534,7 @@ export default {
 					});
 				});
 			}
+			this.$store.commit('SET_DIET_RECORD', res.data.data);
 			this.energyListWrap = await this.buildDietData();
 			this.energyList = this.deepClone(energyList);
 			this.changeSub(4);
@@ -2641,7 +2675,7 @@ export default {
 				});
 			} else {
 				uni.setStorageSync('current_user_info', e);
-				this.$store.commit("SET_USERINFO",e)
+				this.$store.commit('SET_USERINFO', e);
 				this.userInfo = e;
 				uni.setStorageSync('current_user', e.name);
 				this.getDietAllRecord();
@@ -2774,7 +2808,7 @@ export default {
 			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
 				const userInfo = res.data.data[0];
 				this.wxUserInfo = userInfo;
-				this.$store.commit('SET_WX_USERINFO',userInfo)
+				this.$store.commit('SET_WX_USERINFO', userInfo);
 				uni.setStorageSync('wxUserInfo', userInfo);
 				if (userInfo.headimgurl) {
 					this.src = userInfo.headimgurl;
@@ -3837,7 +3871,7 @@ uni-checkbox::before {
 		}
 	}
 }
-.cook-top{
+.cook-top {
 	justify-content: center;
 }
 .cooktype-wrap {
@@ -4058,7 +4092,7 @@ uni-checkbox::before {
 				justify-content: center;
 				margin-bottom: 5px;
 				min-width: 100rpx;
-				font-size: 26rpx;
+				// font-size: 26rpx;
 				border: 1px solid #f37b1d;
 				background-color: #f37b1d;
 				color: #fff;
@@ -4073,7 +4107,7 @@ uni-checkbox::before {
 				margin-right: 20rpx;
 			}
 			.unit-item {
-				margin-right: 5px;
+				margin-right: 5rpx;
 				background-color: #f8f8f8;
 				color: #999;
 				border-radius: 20px;
@@ -4088,7 +4122,7 @@ uni-checkbox::before {
 				min-width: 100rpx;
 			}
 			.active-unit {
-				font-size: 26rpx;
+				// font-size: 26rpx;
 				border: 1px solid #f37b1d;
 				background-color: #f37b1d;
 				color: #fff;

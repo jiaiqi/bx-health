@@ -1,9 +1,5 @@
 <template>
 	<view class="main-history">
-		<!-- 		<view class="title" v-if="list && list.length > 0">
-			<text class="text">{{ title }}</text>
-			<text class="sub-title">填写记录</text>
-		</view> -->
 		<view class="list-wrap" v-if="list && list.length > 0">
 			<view
 				@click="toDetail(item)"
@@ -15,18 +11,23 @@
 					'has-completed': item.state === '完成'
 				}"
 			>
-				<view class="date">
-					<view class="label">填写时间:</view>
-					<view class="value">{{ item.start_time }}</view>
-				</view>
+	
 				<view class="status">
-					<view class="label">状态:</view>
-					<view class="value">{{ item.state }}</view>
+					<!-- <view class="label">状态:</view> -->
+					<text class="cuIcon-time margin-right-xs"></text>
+					<view class="value">{{ item.start_time.slice(10, 16) }}</view>
+					<view class="value">
+						<!-- {{ item.state }} -->
+					</view>
+				</view>
+				<view class="date">
+					<!-- <view class="label">填写时间:</view> -->
+					<view class="value">{{ item.start_time.slice(0, 10) }}</view>
 				</view>
 			</view>
 		</view>
 		<view class="loadmore-box"><u-loadmore :status="status" @loadmore="loadMore" :load-text="loadText" v-if="list && list.length > 0" /></view>
-		<u-empty text="没有找到填写记录" v-if="list.length === 0"></u-empty>
+		<u-empty text="没有找到填写记录" v-if="list.length === 0 && !initLoad"></u-empty>
 	</view>
 </template>
 
@@ -34,11 +35,12 @@
 export default {
 	data() {
 		return {
+			initLoad: false,
 			status: 'loadmore',
 			title: '',
 			page: {
 				pageNo: 1,
-				rownumber: 10,
+				rownumber: 20,
 				total: 0
 			},
 			activity_no: '',
@@ -70,6 +72,7 @@ export default {
 				page: { pageNo: this.page.pageNo, rownumber: this.page.rownumber }
 			};
 			this.$http.post(url, req).then(res => {
+				this.initLoad = false;
 				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 					this.page.total = res.data.page.total;
 					res.data.data.map(item => {
@@ -92,6 +95,15 @@ export default {
 	onReachBottom() {
 		this.loadMore();
 	},
+	onPullDownRefresh() {
+		this.page.pageNo = 1;
+		this.list = [];
+		this.initLoad = true;
+		this.getList();
+		setTimeout(() => {
+			uni.stopPullDownRefresh();
+		}, 500);
+	},
 	onLoad(option) {
 		if (option.activity_no) {
 			this.activity_no = option.activity_no;
@@ -104,7 +116,12 @@ export default {
 					});
 				}
 				this.user_no = user_info.user_no;
+				// #ifdef H5
 				this.getList();
+				// #endif
+				// #ifdef MP-WEIXIN
+				uni.startPullDownRefresh();
+				// #endif
 			}
 		}
 	}
@@ -113,7 +130,7 @@ export default {
 
 <style scoped lang="scss">
 .main-history {
-	height: 100vh;
+	height: calc(100vh - var(--window-top) - var(--window-bottom));
 	background-color: #fff;
 	.title {
 		padding: 20rpx 0;
@@ -152,40 +169,72 @@ export default {
 }
 .list-wrap {
 	display: flex;
-	flex-direction: column;
+	// flex-direction: column;
+	flex-wrap: wrap;
 	margin: 0;
 	padding: 0 20rpx;
 	background-color: #fff;
 	.list-item {
+		width: calc(33% - 40rpx / 3);
+		margin-right: 20rpx;
 		margin-top: 20rpx;
+		&:nth-child(3n) {
+			margin-right: 0;
+		}
 		display: flex;
-		justify-content: space-between;
-		color: #fff;
-		background-color: #9da1a7;
-		box-shadow: 4px 3px 4px rgba(157, 161, 167, 0.5);
-		padding: 20rpx;
+		flex-direction: column;
+		// justify-content: space-between;
+	  color: #409eff;
+	  background: #ecf5ff;
+	  border-color: #b3d8ff;
+		padding: 10rpx;
 		border-radius: 10rpx;
 		transition: all 0.5s;
-		// &.not-completed {
-		// 	background-color: #f84343;
-		// 	box-shadow: 4px 3px 4px rgba(248, 67, 67, 0.5);
-		// }
-		&.has-completed {
-			background-color: rgba(41, 121, 255, 0.8);
-			box-shadow: 4px 3px 4px rgba(41, 121, 255, 0.5);
+		position: relative;
+		overflow: hidden;
+		&::after{
+			position: absolute;
+			right:-90rpx;
+			top: 0;
+			width: 300rpx;
+			background-color: #fff;
+			color: #409eff;
+			transform: rotate(45deg) scale(0.8);
+			font-size: 24rpx;
+			text-indent: 80rpx;
+			text-align: center;
 		}
+		&.has-completed {
+			color: #FFF;
+			background-color: rgba(41, 121, 255, 0.8);
+			box-shadow: 4px 3px 4px rgba(124, 166, 255, 0.5);
+			&::after{
+				// text-indent: 90rpx;
+				content: '完成';
+			}
+		}
+		&.not-completed{
+			box-shadow: 4px 3px 4px #b3d8ff;
+			&::after{
+				content: '未完成';
+				background-color: #b3d8ff;     
+				color: #fff;
+			}
+		}
+		
 		&:active {
-			// opacity: 1;
 			transform: scale(1.05);
 		}
 		.date,
 		.status {
 			display: flex;
-			min-height: 50rpx;
-			align-items: center;
+			padding: 4rpx 10rpx;
 			.label {
 				margin-right: 10rpx;
 			}
+		}
+		.status {
+			// justify-content: flex-end;
 		}
 	}
 }

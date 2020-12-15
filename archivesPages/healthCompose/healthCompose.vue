@@ -1,10 +1,10 @@
 <template>
 	<view class="couple-wrap">
 		<view class="total-score text-blue">
-			{{ totalScore }}
+			{{ totalScore | fixed1 }}
 			<text class="unit">分</text>
 		</view>
-		<view class="tips"><text class="cuIcon-creative">提示：总分为100分，下方每一项右侧显示的百分数代表当前项占总分的比例</text></view>
+		<view class="tips" v-if="weightAdvice"><text class="cuIcon-creative">{{weightAdvice}}<!-- ，下方每一项右侧显示的百分数代表当前项占总分的比例 --></text></view>
 		<view class="couple-more-wrap">
 			<view class="couple-more-top">
 				<text></text>
@@ -26,7 +26,7 @@
 						</view>
 						<view v-if="item.name !== '其它'" class="couple-cen-item-t">
 							<text class="text-blue score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">
-								{{ item.grade }}
+								{{ item.grade | fixed1  }}
 								<text class="unit">分</text>
 							</text>
 							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
@@ -62,7 +62,7 @@
 						</view>
 						<view v-if="item.name !== '其它'" class="couple-cen-item-t" :class="item.grade === 0 ? '' : item.grade >= 0 && item.grade <= 5 ? 'risk' : 'normal'">
 							<text class="score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">
-								{{ item.grade }}
+								{{ item.grade | fixed1  }}
 								<text class="unit">分</text>
 							</text>
 							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
@@ -213,6 +213,15 @@ export default {
 			currIndex: 0
 		};
 	},
+	filters: {
+		fixed1: function(value) {
+			if (value) {
+				return value.toFixed(1);
+			} else {
+				return 0;
+			}
+		}
+	},
 	computed: {
 		bmi() {
 			if (this.userInfo.weight && this.userInfo.height) {
@@ -230,7 +239,31 @@ export default {
 			uni.$emit('healthTotalScoreChanged', result);
 			uni.setStorageSync('healthTotalScore', result);
 			return result;
-		}
+		},
+		weightAdvice(){
+			let score = this.getWeightScore()
+			let result = ''
+			let bmi = this.bmi;
+			if(typeof score === 'number'){
+				if (bmi >= 28 && bmi < 38) {
+					// 0-5
+					result = '您的体重过高，若想提高体重分数,您需要适当进行运动，减少热量摄入'
+				} else if (bmi < 28 && bmi >= 24) {
+					// 5-10
+					result = '您的体重略高于标准范围，若想提高体重分数,您需要适当进行运动，减少热量摄入'
+				} else if (bmi >= 18.5 && bmi < 21) {
+					// 10-20
+					result = '您的体重在标准范围之内，若想提高体重分数,您需要适当进行运动，增加热量摄入'
+				} else if (bmi >= 21 && bmi < 24) {
+					// 10-20
+					result = '您的体重在标准范围之内，若想提高体重分数,您需要适当进行运动并避免过多摄入高热量食物'
+				} else if (bmi < 18.5 && bmi >= 10) {
+					// 0-5
+					result = '您的体重过低，若想提高体重分数,您需要适当进行运动并从食物中补充足够的蛋白质。'
+				}
+			}
+			return result
+		},
 	},
 
 	methods: {
@@ -306,14 +339,19 @@ export default {
 				let bmi = this.bmi;
 				let result = 0;
 				if (bmi >= 28 && bmi < 38) {
+					// 0-5
 					result = (38 - bmi) / 2;
 				} else if (bmi < 28 && bmi >= 24) {
-					result = 5 + (4 * (28 - bmi)) / 5;
+					// 5-10
+					result = 5 + (5 * (28 - bmi)) / 4;
 				} else if (bmi >= 18.5 && bmi < 21) {
+					// 10-20
 					result = 10 + ((bmi - 18.5) * 10) / 2.5;
 				} else if (bmi >= 21 && bmi < 24) {
+					// 10-20
 					result = 20 - ((bmi - 21) * 10) / 3;
 				} else if (bmi < 18.5 && bmi >= 10) {
+					// 0-5
 					result = (Math.abs(10 - bmi) * 5) / 8.5;
 				}
 				return Number(result.toFixed(1));
