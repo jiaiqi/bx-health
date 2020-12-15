@@ -23,7 +23,7 @@
 						@click.stop="toggleData"
 					></text> -->
 					<!-- <w-picker mode="yearMonth" startYear="1900" endYear="2030" :current="false" @confirm="onConfirm" :disabledAfter="false" ref="yearMonth" themeColor="#f00"></w-picker> -->
-					<w-picker mode="date" startYear="1900" endYear="2030" :current="false" @confirm="onConfirm" :disabledAfter="false" ref="Date" themeColor="#f00"></w-picker>
+					<!-- <w-picker mode="date" startYear="1900" endYear="2030" :current="false" @confirm="onConfirm" :disabledAfter="false" ref="Date" themeColor="#f00"></w-picker> -->
 					<!-- <picker v-show="dateIsShow" mode="date" :value="info.bir" start="1900-09-01" end="2030-09-01" @change="DateChange">
 						<view class="picker">
 							{{info.bir}}
@@ -59,7 +59,7 @@
 </template>
 
 <script>
-	import wPicker from '@/components/w-picker/w-picker.vue';
+	// import wPicker from '@/components/w-picker/w-picker.vue';
 	export default {
 		name:'myFoodsInfo',
 		data(){
@@ -73,9 +73,9 @@
 				dateIsShow:false
 			}
 		},
-		components:{
-			wPicker
-		},
+		// components:{
+		// 	wPicker
+		// },
 		methods:{
 			DateChange(e) {
 				this.info.bir = e.detail.value
