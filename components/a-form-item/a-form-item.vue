@@ -126,7 +126,7 @@
 			<text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType === 'location'"></text>
 		</view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }">
+		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }" @click.self="showTextArea=false">
 			<view class="cu-dialog">
 				<jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor"></jin-edit>
 				<!-- <rich-text-editor :html="textareaValue" ref="richEditor"></rich-text-editor> -->
@@ -149,7 +149,7 @@
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }" @tap.self="showTreeSelector = false">
 			<view class="cu-dialog">
-				<view class="tree-selector"><cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="fieldData.srvInfo"></cascader-selector></view>
+				<view class="tree-selector cascader"><cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="fieldData.srvInfo"></cascader-selector></view>
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showSelectorPopup || showMultiSelectorPopup }">

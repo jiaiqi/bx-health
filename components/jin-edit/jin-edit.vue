@@ -274,7 +274,7 @@ export default {
 .ql-container {
 	line-height: 160%;
 	font-size: 34rpx;
-	height: 60vh;
+	height: 80vh;
 	padding: 20rpx 10rpx;
 	overflow: scroll;
 	/* height: auto; */

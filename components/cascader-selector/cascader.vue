@@ -127,10 +127,10 @@ export default {
 
 <style lang="scss">
 .cascader-content {
-	max-height: 900rpx;
 	overflow: scroll;
 	flex: 1;
 	display: flex;
+	height: calc(90vh - 270rpx);
 }
 .tag-line {
 	display: flex;

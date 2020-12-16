@@ -1399,7 +1399,7 @@ export default {
 	.symptom-page {
 		display: flex;
 		flex-direction: column;
-		height: calc(100vh - 100rpx);
+		height: calc(100vh - var(--window-top) - var(--window-bottom) - 200rpx);
 		.symptom-item-list {
 			flex: 1;
 			padding: 20rpx;

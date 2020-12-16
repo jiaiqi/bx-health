@@ -311,7 +311,9 @@ export default {
 .cascader-wrap {
 	width: 100%;
 	background-color: #fff;
-	min-height: 1100rpx;
+	// min-height: 1100rpx;
+	// height: 100%;
+	height: calc(90vh - 90rpx);
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
