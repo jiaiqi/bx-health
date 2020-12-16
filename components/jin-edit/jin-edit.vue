@@ -21,7 +21,9 @@
 				<jinIcon class="single" type="&#xe6eb;" font-size="44rpx" title="分割线" @click="insertDivider"></jinIcon>
 				<jinIcon class="single" type="&#xe6e8;" font-size="44rpx" title="撤销" @click="undo"></jinIcon>
 				<jinIcon class="single" type="&#xe705;" font-size="44rpx" title="重做" @click="redo"></jinIcon>
-				<jinIcon class="single" type="&#xeb8a;" font-size="44rpx" title="设置" @click="showSetting"></jinIcon>
+				<!-- <jinIcon class="single" type="&#xeb8a;" font-size="44rpx" title="设置" @click="showSetting"></jinIcon> -->
+				<jinIcon class="single" type="&#xeb8a;" font-size="44rpx" title="确定" @click="release(true)"></jinIcon>
+				<text class="cuIcon-close" style="font-size: 46rpx;font-weight: 900;" @click="release(false)"></text>
 			</view>
 			<!-- 文字相关操作 -->
 			<view class="font-more" :style="{ height: showMoreTool ? '100rpx' : 0 }">
@@ -250,7 +252,7 @@ export default {
 		async editFocus() {},
 		editBlur() {},
 		release(isSave) {
-			this.showSettingLayer = false;
+			// this.showSettingLayer = false;
 			this.editorCtx.getContents({
 				success: res => {
 					Object.assign(res, {

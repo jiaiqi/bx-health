@@ -272,13 +272,6 @@
 					<view class="symptom-item symptom-add" @click="addSymptom">+</view>
 				</view>
 			</view>
-			<!-- <view class="main-box symptom">
-				<view class="title">慢病风险</view>
-				<view class="symptom-box">
-					<view class="symptom-item" v-for="(item, index) in diseaseList" :key="index" v-show="item.disease_name">{{ item.disease_name }}</view>
-					<view class="symptom-item symptom-add">+</view>
-				</view>
-			</view> -->
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }">
 			<view class="cu-dialog current-diet-detail" v-if="currentRecord">
@@ -1080,7 +1073,7 @@ export default {
 						if (food.food_no === diet.diet_contents_no || food.meal_no === diet.mixed_food_no) {
 							let ratio = 1;
 							if (food['unit'] === 'g') {
-								ratio = (diet.unit_weight_g * diet.amount) / food.unit_amount;
+								ratio = (diet.unit_weight_g * diet.amount) / (food.unit_amount ? food.unit_amount : food.unit_weight_g);
 							}
 							ele.value = ele.value + food[ele['key']] * ratio;
 						}
@@ -2339,7 +2332,7 @@ export default {
 								}
 								let ratio = 1;
 								if (food['unit'] === 'g') {
-									ratio = re['unit_weight_g'] / food['unit_amount'];
+									ratio = re['unit_weight_g'] / (food['unit_amount'] ? food['unit_amount'] : food['unit_weight_g']);
 								}
 								food['amount'] = food['amount'] ? food['amount'] + re.amount : re.amount;
 								food['amount'] = ratio * food['amount'];
@@ -3899,7 +3892,7 @@ uni-checkbox::before {
 .current-diet-detail {
 	width: 100vw;
 	overflow: scroll;
-	height: 100%;
+	max-height: calc(100vh - 100rpx);
 	.title-bar {
 		display: flex;
 		justify-content: center;
@@ -3951,6 +3944,8 @@ uni-checkbox::before {
 		padding: 20rpx 0;
 		justify-content: space-around;
 		flex-wrap: wrap;
+		max-height: 1000rpx;
+		overflow: scroll;
 		.img {
 			width: 150rpx;
 			height: 150rpx;
@@ -4016,6 +4011,7 @@ uni-checkbox::before {
 				color: #000;
 				width: 100%;
 				font-weight: 700;
+				text-align: left;
 			}
 			.content {
 				width: 100%;

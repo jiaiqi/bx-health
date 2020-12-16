@@ -95,11 +95,13 @@
 				</view>
 			</u-popup> -->
 		</view>
-		<u-popup v-model="menuIsShow" :closeable="true" mode="bottom">
-			<view class="pregnant-main-top-item-poup">
-				<text @click="changeMenu(item,index)" v-if="item.name !== '导入数据'" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomTitList" :key="index">{{item.name}}</text>
+		<view class="cu-modal bottom-modal" :class="{show:menuIsShow}">
+			<view class="cu-dialog">
+				<view class="pregnant-main-top-item-poup">
+					<text @click="changeMenu(item,index)" v-if="item.name !== '导入数据'" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomTitList" :key="index">{{item.name}}</text>
+				</view>
 			</view>
-		</u-popup>
+		</view>
 	</view>
 </template>
 

@@ -19,7 +19,7 @@
 		</view>
 		<view class="health-overall-score">
 			<view class="content">
-				<view class="score-item"  @click="toPages('score-compose')">
+				<view class="score-item" @click="toPages('score-compose')">
 					<text class="label">整体健康分</text>
 					<text class="value text-blue" v-if="healthTotalScore || healthTotalScore === 0">
 						<text class="int" v-if="totalScore && totalScore.number">{{ totalScore.number }}</text>
@@ -36,12 +36,12 @@
 					</view>
 				</view>
 				<view class="score-item" @click="showAdvice = !showAdvice">
-					<text class="label" >近日健康分</text>
+					<text class="label">近日健康分</text>
 					<text class="value  text-cyan">
 						<text class="int" v-if="todayScore && todayScore.number">{{ todayScore.number }}</text>
 						<text class="float" v-if="todayScore && todayScore.digit">.{{ todayScore.digit | fixed1 }}</text>
 						<!-- <text class="ratio"></text> -->
-						<text class="cuIcon-info text-cyan tips" ></text>
+						<text class="cuIcon-info text-cyan tips"></text>
 					</text>
 				</view>
 			</view>
@@ -127,7 +127,7 @@
 					<view class="data text-blue">{{ sleepScore ? sleepScore : 0 }}</view>
 					<view class="action"></view>
 				</view>
-				<view class="grid-item">
+				<view class="grid-item"  @click="toPages('symptom')">
 					<view class="title">
 						症状
 						<text class="ratio">[10%]</text>
@@ -206,36 +206,30 @@
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal"></view>
-		<u-popup v-model="showUserListPopup" border-radius="40" mode="top">
-			<view class="user-list">
-				<view class="user-item" @click="switchUser(item)" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
-					<image class="avatar" :src="getImagePath(item.profile_url)" size="60"></image>
-					{{ item.name }}
+		<view class="cu-modal" :class="{ show: showUserListPopup }" @tap="showUserListPopup=false">
+		<!-- <u-popup v-model="showUserListPopup" border-radius="40" mode="top"> -->
+			<view class="cu-dialog">
+				<view class="user-list">
+					<view class="user-item" @click="switchUser(item)" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
+						<image class="avatar" :src="getImagePath(item.profile_url)" size="60"></image>
+						{{ item.name }}
+					</view>
 				</view>
+				<view class="button-box"><button class="cu-btn bg-white text-blue" @click="toAddPages">添加新用户</button></view>
 			</view>
-			<view class="button-box"><button class="cu-btn bg-white text-blue" @click="toAddPages">添加新用户</button></view>
-		</u-popup>
-		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="bottom">
-			<view class="health-item">
-				<!-- 	<view class="tips">
-					<text class="cuIcon-info"></text>
-					最多只能勾选五项
-				</view> -->
-				<bx-checkbox-group max="5" checkboxMode="button" v-model="checkedList">
-					<bx-checkbox v-model="item.checked" v-for="item in checkboxList" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
-				</bx-checkbox-group>
-				<!-- 						<checkbox-group @change="checkboxGroupChange" class="check-box-group">
-					<label v-for="(item, index) in checkboxList" :key="index" class="check-box-item">
-						<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" :disabled="disabledTag && !checkedList.includes(item.value)" />
-						{{ item.label }}
-					</label>
-				</checkbox-group> -->
-				<view class="button-box">
-					<button class="cu-btn" @click="cancelSelectTag">取消</button>
-					<button class="cu-btn " @click="changeSelectedTag">确定</button>
-				</view>
+		<!-- </u-popup> -->
+		</view>
+		<view class="cu-modal bottom-modal" :class="{ show: showUserHealtManagePopup }" @tap="showUserHealtManagePopup=false">
+			<view class="cu-dialog health-item">
+					<bx-checkbox-group max="5" checkboxMode="button" v-model="checkedList">
+						<bx-checkbox v-model="item.checked" v-for="item in checkboxList" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
+					</bx-checkbox-group>
+					<view class="button-box">
+						<button class="cu-btn" @click="cancelSelectTag">取消</button>
+						<button class="cu-btn " @click="changeSelectedTag">确定</button>
+					</view>
 			</view>
-		</u-popup>
+		</view>
 	</view>
 	<bx-auth v-else-if="authBoxDisplay" @getuserinfo="getuserinfo"></bx-auth>
 </template>
@@ -1274,7 +1268,25 @@ export default {
 			// #endif
 		}
 	},
-	created() {
+	
+	onTabItemTap(e) {
+		this.initPage();
+	},
+	onPullDownRefresh() {
+		this.initPage().then(_ => {
+			uni.stopPullDownRefresh();
+		});
+	},
+	onLoad() {
+		// #ifdef MP-WEIXIN
+		wx.showShareMenu({
+			withShareTicket: true,
+			menus: ['shareAppMessage', 'shareTimeline']
+		});
+		// #endif
+		if(this.is_login&&this.authSetting['userInfo']){
+			this.initPage();
+		}
 		uni.$on('healthTotalScoreChanged', result => {
 			if (result) {
 				if (parseInt(result !== parseFloat(result))) {
@@ -1284,31 +1296,20 @@ export default {
 				this.healthTotalScore = result;
 			}
 		});
+		uni.$on('data-update',()=>{
+			if(this.is_login){
+				this.initPage();
+			}
+		})
 		let score = uni.getStorageSync('healthTotalScore');
 		if (score) {
 			this.healthTotalScore = score;
 		}
 	},
-	onReady() {
-		// #ifdef MP-WEIXIN
-		wx.showShareMenu({
-			withShareTicket: true,
-			menus: ['shareAppMessage', 'shareTimeline']
-		});
-		// #endif
-	},
-	onTabItemTap(e) {
-		this.initPage();
-	},
-	onPullDownRefresh() {
-		this.initPage().then(_ => {
-			uni.stopPullDownRefresh();
-		});
-	},
 	onShow() {
-		// if(this.is_login&&this.authSetting['userInfo']){
-		// 	this.initPage();
-		// }
+		if(this.is_login){
+			this.initPage();
+		}
 	}
 };
 </script>
@@ -1734,7 +1735,7 @@ export default {
 			color: #0081ff;
 			display: flex;
 			flex-direction: column;
-			transition: height .5s;
+			transition: height 0.5s;
 			.health-advice-item {
 				padding: 20rpx;
 				// color: #67c23a;
@@ -1750,11 +1751,11 @@ export default {
 	}
 }
 .health-item {
-	min-height: 150rpx;
-	display: flex;
+	// min-height: 150rpx;
+	// display: flex;
 	padding: 50rpx 30rpx;
-	display: flex;
-	flex-direction: column;
+	// display: flex;
+	// flex-direction: column;
 	.tips {
 		color: #999;
 		padding: 20rpx 0;
@@ -1799,9 +1800,10 @@ export default {
 		color: #fff;
 		margin-right: 50rpx;
 		flex: 1;
-		&:nth-child(2n) {
+		&:nth-child(2n),&:last-child {
 			margin-right: 0;
 		}
+		
 	}
 }
 .inspect-record {

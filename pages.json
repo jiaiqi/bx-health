@@ -103,7 +103,8 @@
 					"path": "archives-history/archives-history",
 					"style": {
 						"navigationBarTitleText": "健康记录",
-						"enablePullDownRefresh": false
+						"enablePullDownRefresh": false,
+						"navigationStyle":"custom"
 					}
 				},
 				{

@@ -194,14 +194,15 @@ export default {
 		overflow: hidden;
 		&::after{
 			position: absolute;
-			right:-90rpx;
+			right:-120rpx;
+			padding: 10rpx 0;
 			top: 0;
 			width: 300rpx;
 			background-color: #fff;
 			color: #409eff;
 			transform: rotate(45deg) scale(0.8);
 			font-size: 24rpx;
-			text-indent: 80rpx;
+			// text-indent: 80rpx;
 			text-align: center;
 		}
 		&.has-completed {

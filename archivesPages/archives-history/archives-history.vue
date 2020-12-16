@@ -1,5 +1,9 @@
 <template>
 	<view class="history-wrap">
+		<cu-custom :isBack="true" @onBack="onBack">
+			<!-- <block slot="backText">返回</block> -->
+			<block slot="content">{{ pageName ? pageName : '健康记录' }}</block>
+		</cu-custom>
 		<view class="history-chart" v-if="isAllPages">
 			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'stepChart'" :ec="stepEcData"></uniEcCharts>
 			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasLineA'" :ec="weightEcData"></uniEcCharts>
@@ -12,8 +16,17 @@
 				{{ item.name }}
 			</button>
 		</view>
-
 		<view class="history-box" v-if="pageType">
+			<view class="symptom-page" v-if="pageType === 'symptom'">
+				<view class="symptom-item-list">
+					<view class="symptom-item" v-for="item in symptomRecord" :key="item.id">
+						<view class="name">{{ item.symptoms_name }}</view>
+						<view class="describe">{{ item.symptoms_remark }}</view>
+						<view class="date">{{ item.create_time.slice(5, 16) }}</view>
+					</view>
+				</view>
+				<button type="primary" class="cu-btn bg-blue button" v-if="pageType === 'symptom'" @click="toPages('symptom')">添加</button>
+			</view>
 			<view class="history-content">
 				<dietList
 					:chatChoseTime="chatChoseTime"
@@ -161,23 +174,24 @@
 				</view>
 			</view>
 		</view>
-		<u-popup v-model="showTypePopup" border-radius="40" mode="top" closeable>
-			<view class="switch-type-box">
-				<view class="type-item cu-btn round" :class="{ 'bg-blue': item.name === currentType }" v-for="item in typeList" :key="item.name" @click="currentType = item.name">
-					{{ item.name }}
+		<view class="cu-modal bottom-modal" :class="{ show: showTypePopup }">
+			<view class="cu-dialog">
+				<view class="switch-type-box">
+					<view class="type-item cu-btn round" :class="{ 'bg-blue': item.name === currentType }" v-for="item in typeList" :key="item.name" @click="currentType = item.name">
+						{{ item.name }}
+					</view>
 				</view>
 			</view>
-		</u-popup>
+		</view>
 	</view>
 </template>
 
 <script>
 import uniEcCharts from '@/components/uni-ec-canvas/uni-echart.vue';
-// import uniEcCharts from '@/archivesPages/components/uni-ec-canvas/uni-echart.vue';
 import energyListWrap from './totalEnergyList.js';
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet';
 import dayjs from '../static/dayjs/dayjs.min.js';
-// import dayjs from '../static/dayjs/esm/index.js';
+import { mapState } from 'vuex';
 export default {
 	components: {
 		uniEcCharts,
@@ -290,10 +304,16 @@ export default {
 			wxRunData: {},
 			stepInfoList: [],
 			pageType: '',
-			pageName: ''
+			pageName: '',
+			symptomRecord: []
 		};
 	},
 	computed: {
+		...mapState({
+			vuex_userInfo: state => state.user.userInfo,
+			vuex_isLogin: state => state.app.isLogin,
+			vuex_loginUserInfo: state => state.user.loginUserInfo
+		}),
 		echartsData() {
 			return this.deepClone(this.chartData);
 		},
@@ -387,15 +407,30 @@ export default {
 					};
 					url = '/otherPages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
 					break;
+				case 'symptom':
+					// let term = { serviceName: 'srvhealth_self_symptoms_select', srvApp: 'health', key: 'name', type: 'symptom' };
+					// url = '/otherPages/symptomSelect/symptomSelect?term=' + JSON.stringify(term);
+					let fieldsCond = [
+						{ column: 'info_no', value: this.vuex_userInfo.no, condition: [{ colName: 'no', ruleType: 'eq', value: this.vuex_userInfo.no }] },
+						{ column: 'user_account', value: this.vuex_userInfo.userno }
+					];
+					url = '/publicPages/newForm/newForm?serviceName=srvhealth_self_symptoms_record_add&type=add&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond));
+					break;
 			}
 			this.showPopup = false;
 			if (e !== 'food' && e !== 'sport') {
 				if (e === 'pressure') {
 					e = bp;
 				}
-				uni.navigateTo({
-					url: '/otherPages/otherIndicator/otherIndicator?type=' + e
-				});
+				if (url) {
+					uni.navigateTo({
+						url: url
+					});
+				} else {
+					uni.navigateTo({
+						url: '/otherPages/otherIndicator/otherIndicator?type=' + e
+					});
+				}
 			} else {
 				if (url) {
 					uni.navigateTo({
@@ -1054,6 +1089,48 @@ export default {
 				// 没有用户信息
 			}
 		},
+		async getSymptomRecord() {
+			// 症状记录
+			let userInfo = this.vuex_userInfo;
+			if (userInfo && userInfo.no) {
+				let timeRange = {
+					start: '',
+					end: ''
+				};
+				timeRange.end = dayjs()
+					.add(1, 'days')
+					.format('YYYY-MM-DD');
+				timeRange.start = dayjs()
+					.subtract(6, 'days')
+					.format('YYYY-MM-DD');
+				let url = this.getServiceUrl('health', 'srvhealth_self_symptoms_record_select', 'select');
+				let req = {
+					serviceName: 'srvhealth_self_symptoms_record_select',
+					colNames: ['*'],
+					condition: [
+						{
+							colName: 'create_time',
+							ruleType: 'lt',
+							value: timeRange.end
+						},
+						{
+							colName: 'create_time',
+							ruleType: 'gt',
+							value: timeRange.start
+						},
+						{
+							colName: 'info_no',
+							ruleType: 'eq',
+							value: this.vuex_userInfo.no
+						}
+					]
+				};
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data)) {
+					this.symptomRecord = res.data.data;
+				}
+			}
+		},
 		async initPage() {
 			let userInfo = uni.getStorageSync('login_user_info');
 			if (userInfo && userInfo.user_no) {
@@ -1141,6 +1218,11 @@ export default {
 					this.pageName = '睡眠记录';
 					this.showCanvas('sleep');
 					break;
+				case 'symptom':
+					this.pageName = '症状记录';
+					// this.showCanvas('sleep');
+					this.getSymptomRecord();
+					break;
 				case 'all':
 					this.pageName = '历史记录';
 					// #ifdef MP-WEIXIN
@@ -1197,6 +1279,9 @@ export default {
 				// 没有角色 提示跳转到创建角色页面
 				self.toAddPage();
 			}
+		},
+		onBack() {
+			uni.$emit('data-update');
 		}
 	},
 	onShow() {
@@ -1253,6 +1338,50 @@ export default {
 	font-size: 30rpx;
 	font-weight: 700;
 	width: 100%;
+	.symptom-page {
+		display: flex;
+		flex-direction: column;
+		height: calc(100vh - 100rpx);
+		.symptom-item-list {
+			// flex: 1;
+			// display: flex;
+			// flex-wrap: wrap;
+			// justify-content: flex-start;
+			// align-items: flex-start;
+			flex: 1;
+			padding: 20rpx;
+		}
+		.button {
+			width: calc(100% - 40rpx);
+			margin: 50rpx auto;
+		}
+		.symptom-item {
+			display: inline-flex;
+			width: calc(50% - 6rpx);
+			min-height: 180rpx;
+			margin-right: 10rpx;
+			flex-direction: column;
+			background-color: #fff;
+			margin-bottom: 10rpx;
+			padding: 20rpx;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+			font-weight: normal;
+			&:nth-child(2n) {
+				margin-right: 0;
+			}
+			.name {
+				font-weight: bold;
+			}
+			.describe {
+				flex: 1;
+				padding: 10rpx;
+				// background-color: #f8f8f8;
+			}
+			.date {
+				color: #999;
+			}
+		}
+	}
 	.history-content {
 		width: 100%;
 		.other-record {

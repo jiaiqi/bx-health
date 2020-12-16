@@ -33,6 +33,12 @@
 				if (this.bgImage) {
 					style = `${style}background-image:url(${bgImage});`;
 				}
+				if(this.bgColor.indexOf('#')!==-1){
+					style+=`background-color:${this.bgColor}`
+				}
+				if(!this.bgColor){
+					style+=`background-color:#0bc99d;color:#fff;`
+				}
 				return style
 			}
 		},
@@ -52,8 +58,9 @@
 		},
 		methods: {
 			BackPage() {
+				this.$emit('onBack')
 				uni.navigateBack({
-					delta: 1
+					delta: 1,
 				});
 			}
 		}

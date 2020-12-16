@@ -16,13 +16,7 @@
 						<text class="cuIcon-triangledownfill" color="#333" size="28" :class="{ active: showUserList }"></text>
 					</view>
 					<view class="user-list" :class="{ active: showUserList }">
-						<view
-							class="menu-item"
-							:class="{ 'current-user': userInfo.name === item.name }"
-							@click.stop="clickUserMenu(item)"
-							v-for="(item, index) in userMenuList"
-							:key="index"
-						>
+						<view class="menu-item" :class="{ 'current-user': userInfo.name === item.name }" @click.stop="clickUserMenu(item)" v-for="(item, index) in userMenuList" :key="index">
 							{{ item.name }}
 						</view>
 						<view class="menu-item" @click.stop="clickUserMenu('regulate')">人员管理</view>
@@ -71,13 +65,7 @@
 							style="display: flex; width: 90px; justify-content: space-between"
 						>
 							<text style="flex: 1">
-								{{
-									energyChange === 0
-										? '0.0'
-										: parseFloat(energyChange / 7.7) > 0
-										? `+${parseFloat(energyChange / 7.7).toFixed(1)}`
-										: parseFloat(energyChange / 7.7).toFixed(1)
-								}}
+								{{ energyChange === 0 ? '0.0' : parseFloat(energyChange / 7.7) > 0 ? `+${parseFloat(energyChange / 7.7).toFixed(1)}` : parseFloat(energyChange / 7.7).toFixed(1) }}
 							</text>
 							<text class="units">g脂肪</text>
 						</view>
@@ -97,9 +85,7 @@
 						<text class="cuIcon-rankfill"></text>
 					</view>
 				</view>
-				<view class="chart-box">
-					<uni-ec-canvas class="uni-ec-canvas" @click-chart="clickCharts" canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-ec-canvas>
-				</view>
+				<view class="chart-box"><uni-ec-canvas class="uni-ec-canvas" @click-chart="clickCharts" canvas-id="nutrients-canvas" :ec="nutrientsChartOption"></uni-ec-canvas></view>
 				<view class="indicator">
 					<view
 						class="btn"
@@ -145,13 +131,7 @@
 													}"
 												>
 													{{
-														alone.value === 0
-															? alone.shortName === 'E'
-																? 0 + 'mg/d'
-																: '0'
-															: alone.shortName === 'E'
-															? alone.value.toFixed(1) + 'mg/d'
-															: alone.value.toFixed(1)
+														alone.value === 0 ? (alone.shortName === 'E' ? 0 + 'mg/d' : '0') : alone.shortName === 'E' ? alone.value.toFixed(1) + 'mg/d' : alone.value.toFixed(1)
 													}}
 												</view>
 											</view>
@@ -373,46 +353,47 @@
 					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 				</view>
 			</view>
-			<!-- </u-popup> -->
 		</view>
 		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
-		<u-popup v-model="showPopup" mode="bottom" border-radius="50">
-			<view class="popup-box">
-				<view class="icon-item" @click="toPages('food')">
-					<image src="@/otherPages/static/icon/yinshi.png" mode="" class="icon"></image>
-					<text class="label">饮食</text>
+		<view class="cu-modal bottom-modal" :class="{ show: showPopup }">
+			<view class="cu-dialog">
+				<view class="popup-box">
+					<view class="icon-item" @click="toPages('food')">
+						<image src="@/otherPages/static/icon/yinshi.png" mode="" class="icon"></image>
+						<text class="label">饮食</text>
+					</view>
+					<view class="icon-item" @click="toPages('sport')">
+						<image src="@/otherPages/static/icon/yundong.png" mode="" class="icon"></image>
+						<text class="label">运动</text>
+					</view>
+					<view class="icon-item" @click="toPages('weight')">
+						<image src="@/otherPages/static/icon/tizhong.png" mode="" class="icon"></image>
+						<text class="label">体重</text>
+					</view>
+					<view class="icon-item" @click="toPages('sleep')">
+						<image src="@/otherPages/static/icon/sleep.png" mode="" class="icon"></image>
+						<text class="label">睡眠</text>
+					</view>
+					<view class="icon-item" @click="toPages('heartRate')">
+						<image src="@/otherPages/static/icon/xinlv.png" mode="" class="icon"></image>
+						<text class="label">心率</text>
+					</view>
+					<view class="icon-item" @click="toPages('pressure')">
+						<image src="@/otherPages/static/icon/xueya.png" mode="" class="icon"></image>
+						<text class="label">血压</text>
+					</view>
+					<view class="icon-item" @click="toPages('oxygen')">
+						<image src="@/otherPages/static/icon/xueyang.png" mode="" class="icon"></image>
+						<text class="label">血氧</text>
+					</view>
+					<view class="icon-item" @click="toPages('glucose')">
+						<image src="@/otherPages/static/icon/xuetang.png" mode="" class="icon"></image>
+						<text class="label">血糖</text>
+					</view>
 				</view>
-				<view class="icon-item" @click="toPages('sport')">
-					<image src="@/otherPages/static/icon/yundong.png" mode="" class="icon"></image>
-					<text class="label">运动</text>
-				</view>
-				<view class="icon-item" @click="toPages('weight')">
-					<image src="@/otherPages/static/icon/tizhong.png" mode="" class="icon"></image>
-					<text class="label">体重</text>
-				</view>
-				<view class="icon-item" @click="toPages('sleep')">
-					<image src="@/otherPages/static/icon/sleep.png" mode="" class="icon"></image>
-					<text class="label">睡眠</text>
-				</view>
-				<view class="icon-item" @click="toPages('heartRate')">
-					<image src="@/otherPages/static/icon/xinlv.png" mode="" class="icon"></image>
-					<text class="label">心率</text>
-				</view>
-				<view class="icon-item" @click="toPages('pressure')">
-					<image src="@/otherPages/static/icon/xueya.png" mode="" class="icon"></image>
-					<text class="label">血压</text>
-				</view>
-				<view class="icon-item" @click="toPages('oxygen')">
-					<image src="@/otherPages/static/icon/xueyang.png" mode="" class="icon"></image>
-					<text class="label">血氧</text>
-				</view>
-				<view class="icon-item" @click="toPages('glucose')">
-					<image src="@/otherPages/static/icon/xuetang.png" mode="" class="icon"></image>
-					<text class="label">血糖</text>
-				</view>
+				<view class="close-icon"><text @click="showPopup = false" class="cuIcon-close"></text></view>
 			</view>
-			<view class="close-icon"><text @click="showPopup = false" class="cuIcon-close"></text></view>
-		</u-popup>
+		</view>
 		<view @click.self="closeDay" class="cu-modal" style="display: flex; align-items: center" :class="modalName == 'Modal' ? 'show' : ''">
 			<view style="height: 43vh" class="cu-dialog">
 				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :markDays="markDays" :headerBar="true" @onDayClick="onDayClick"></bx-date-stamp>
@@ -1892,11 +1873,7 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni
-										? item.val_rni * self.userInfo.weight
-										: item.val_ear
-										? item.val_ear * self.userInfo.weight
-										: mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {

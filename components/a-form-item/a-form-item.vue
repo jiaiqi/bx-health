@@ -63,7 +63,7 @@
 			<view class="form-item-content_value picker" v-else-if="popupFieldTypeList.includes(fieldData.type)" @click="openPopup(fieldData.type)">
 				<text class="place-holder" v-if="!fieldData.value">{{ '请选择' }}</text>
 				<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">{{ fieldData.value.toString() }}</view>
-				<text class="value hidden" v-else>{{ fkFieldLabel }}</text>
+				<text class="value hidden" v-else>{{ fkFieldLabel ? fkFieldLabel : '' }}</text>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="pickerFieldList.includes(fieldData.type)">
 				<picker class="uni-picker" :mode="pickerMode" :value="fieldData.value" start="09:01" end="21:01" @change="bindTimeChange">
@@ -145,6 +145,11 @@
 						确定
 					</button>
 				</view> -->
+			</view>
+		</view>
+		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }" @tap.self="showTreeSelector = false">
+			<view class="cu-dialog">
+				<view class="tree-selector"><cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="fieldData.srvInfo"></cascader-selector></view>
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showSelectorPopup || showMultiSelectorPopup }">
@@ -263,7 +268,7 @@ export default {
 			checkedList: [],
 			fieldData: {},
 			imagesUrl: [],
-			popupFieldTypeList: ['treeSelector', 'Selector', 'Set'], //点击会弹出popup的字段类型
+			popupFieldTypeList: ['TreeSelector', 'treeSelector', 'Selector', 'Set'], //点击会弹出popup的字段类型
 			pickerFieldList: ['date', 'dateTime', 'time', 'Time', 'Date'],
 			reqHeader: {
 				bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
@@ -278,6 +283,7 @@ export default {
 			listModel: {},
 			showSelectorPopup: false,
 			showMultiSelectorPopup: false,
+			showTreeSelector: false,
 			showTextArea: false,
 			textareaValue: this.fieldData && this.fieldData.value ? this.fieldData.value : '',
 			treePageInfo: { total: 0, rownumber: 20, pageNo: 1 },
@@ -433,6 +439,15 @@ export default {
 			console.log(e);
 			this.fieldData.value = '';
 		},
+		getCascaderValue(e) {
+			let srvInfo = this.fieldData.srvInfo;
+			this.fkFieldLabel = `${e[srvInfo.key_disp_col]}/${e[srvInfo.refed_col]}`;
+			this.fieldData.value = e[srvInfo.refed_col];
+			this.fieldData['colData'] = e;
+			this.showTreeSelector = false;
+			this.onInput();
+			this.getDefVal();
+		},
 		searchFKDataWithKey(e) {
 			if (e.detail.value) {
 				let option = this.fieldData.option_list_v2;
@@ -467,7 +482,7 @@ export default {
 						]
 					});
 				}
-				this.getTreeSelectorData(null, null, relation_condition);
+				this.getSelectorData(null, null, relation_condition);
 			}
 		},
 		radioChange(e) {
@@ -483,7 +498,7 @@ export default {
 			}
 			// this.fkFieldLabel = this.selectorData.find(item => item.value === e).label;
 		},
-		async getTreeSelectorData(cond, serv, relation_condition) {
+		async getSelectorData(cond, serv, relation_condition) {
 			let self = this;
 			if (this.fieldData.col_type === 'Enum') {
 				if (Array.isArray(this.fieldData.options)) {
@@ -632,9 +647,10 @@ export default {
 					}
 					break;
 				case 'Selector':
-					// this.getTreeSelectorData().then(_ => {
 					this.showSelectorPopup = true;
-					// });
+					break;
+				case 'TreeSelector':
+					this.showTreeSelector = true;
 					break;
 			}
 		},
@@ -670,6 +686,7 @@ export default {
 		}
 	},
 	created() {
+		let self = this
 		if (this.fieldData.type === 'images') {
 			this.uploadFormData = {
 				serviceName: 'srv_bxfile_service',
@@ -688,16 +705,14 @@ export default {
 		if (this.pageType === 'detail' || this.pageType === 'update') {
 			this.getDefVal();
 		}
-		if (this.fieldData && this.fieldData.type === 'Selector') {
+		if (self.fieldData && self.fieldData.type === 'Selector') {
 			let cond = null;
-			// if(this.fieldData.value&&this.fieldData.option_list_v2&&this.fieldData.option_list_v2.refed_col){
-			// 	cond = [{colName:this.fieldData.option_list_v2.refed_col,ruleType:'in',value:this.fieldData.value}]
-			// }
-			this.getTreeSelectorData(cond).then(_ => {
-				if (this.fieldData.value) {
-					this.fkFieldLabel = this.selectorData.find(item => item.value === this.fieldData.value)
-						? this.selectorData.find(item => item.value === this.fieldData.value).label
+			self.getSelectorData(cond).then(_ => {
+				if (self.fieldData.value) {
+					self.fkFieldLabel = self.selectorData.find(item => item.value === self.fieldData.value)
+						? self.selectorData.find(item => item.value === self.fieldData.value).label
 						: '请选择';
+						
 				}
 			});
 		}
@@ -759,6 +774,8 @@ export default {
 		overflow: hidden;
 		color: #666;
 		font-size: var(--global-label-font-size);
+		white-space: normal;
+		line-height: 1.8;
 		&.form-detail {
 			padding: 0 10rpx;
 		}
@@ -873,7 +890,7 @@ export default {
 		font-size: 40rpx;
 	}
 	.tree-selector {
-		height: calc(80vh - var(--window-top) - var(--window-bottom));
+		height: calc(90vh - var(--window-top) - var(--window-bottom));
 		display: flex;
 		flex-direction: column;
 		.content {

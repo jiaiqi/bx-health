@@ -224,7 +224,7 @@ export default {
 					fieldInfo.showSearch = false
 					fieldInfo.option_list_v2 = item.option_list_v2
 					fieldInfo.options = item.option_list_v2
-				} else if (item.col_type === "MultilineText"||item.col_type==='snote') {
+				} else if (item.col_type === "MultilineText" || item.col_type === 'snote') {
 					fieldInfo.type = "textarea"
 				} else if (item.col_type === "Money" || item.col_type === "Float") {
 					fieldInfo.type = "digit"
@@ -232,6 +232,11 @@ export default {
 					fieldInfo.type = "number"
 				} else if (item.bx_col_type === "fk" && item.col_type !== "User") {
 					fieldInfo.type = "Selector"
+					if (item.option_list_v2 && item.option_list_v2.is_tree === true) {
+						fieldInfo.type = "TreeSelector"
+						fieldInfo.srvInfo = item.option_list_v2
+						fieldInfo.srvInfo.isTree = item.option_list_v2.is_tree
+					}
 				} else if (item.col_type === "User") {
 					fieldInfo.type = "Selector"
 					fieldInfo.option_list_v2 = {

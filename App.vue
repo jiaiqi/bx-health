@@ -6,6 +6,22 @@ export default {
 		globalLabelFontSize: 16
 	},
 	onLaunch() {
+		// #ifdef H5
+		// uni.navigateBack = (params)=>{
+		// 	let {delta,animationDuration,animationType} = params
+		// 	let pages = getCurrentPages()
+		// 	if(pages.length<=1){
+		// 		// H5端页面刷新之后页面栈会消失，此时navigateBack不能返回
+		// 		history.back()
+		// 	}else{
+		// 		uni.navigateBack({
+		// 			delta:delta,
+		// 			animationDuration:animationDuration,
+		// 			animationType:animationType
+		// 		})
+		// 	}
+		// }
+		// #endif
 		// #ifdef MP-WEIXIN
 		uni.onMemoryWarning(function() {
 			console.log('onMemoryWarningReceive');
@@ -145,7 +161,5 @@ body {
 uni-page-body > uni-view {
 	height: 100%;
 }
-.cu-modal {
-	text-align: left;
-}
+
 </style>

@@ -298,35 +298,40 @@
 				</view>
 			</view>
 		</view>
-		<u-popup v-model="showUserHealtManagePopup" border-radius="40" mode="bottom">
-			<view class="health-item">
-				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType === 'minkes'" mode="button" v-model="checkedMinceValue">
-					<bx-checkbox v-model="item.checked" v-for="(item, index) in minceList" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
-				</bx-checkbox-group>
+		<view class="cu-modal bottom-modal" :class="{ show: showUserHealtManagePopup }">
+			<view class="cu-dialog">
+				<view class="health-item">
+					<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType === 'minkes'" mode="button" v-model="checkedMinceValue">
+						<bx-checkbox v-model="item.checked" v-for="(item, index) in minceList" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
+					</bx-checkbox-group>
 
-				<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType === 'burdening'" mode="button" v-model="checkedburdeningValue">
-					<bx-checkbox v-model="item.checked" v-for="(item, index) in burdening" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
-				</bx-checkbox-group>
-
-				<bx-radio-group v-model="RadioChoose" max="1" mode="button">
-					<bx-radio
-						v-for="item in cookData"
-						v-model="item.checked"
-						:key="item.value"
-						:disabled="pageDetailType ? true : item.disable"
-						:name="item.value"
-						@change="checkboxGroupChange"
+					<bx-checkbox-group
+						v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType === 'burdening'"
+						mode="button"
+						v-model="checkedburdeningValue"
 					>
-						{{ item.label }}
-					</bx-radio>
-				</bx-radio-group>
+						<bx-checkbox v-model="item.checked" v-for="(item, index) in burdening" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
+					</bx-checkbox-group>
 
-				<view class="button-box">
-					<button class="cu-btn" @click="closePoup">取消</button>
-					<button class="cu-btn " @click="confirmCookData">确定</button>
+					<bx-radio-group v-model="RadioChoose" max="1" mode="button">
+						<bx-radio
+							v-for="item in cookData"
+							v-model="item.checked"
+							:key="item.value"
+							:disabled="pageDetailType ? true : item.disable"
+							:name="item.value"
+							@change="checkboxGroupChange"
+						>
+							{{ item.label }}
+						</bx-radio>
+					</bx-radio-group>
+					<view class="button-box">
+						<button class="cu-btn" @click="closePoup">取消</button>
+						<button class="cu-btn " @click="confirmCookData">确定</button>
+					</view>
 				</view>
 			</view>
-		</u-popup>
+		</view>
 	</view>
 </template>
 
@@ -1038,7 +1043,7 @@ export default {
 			console.log('单位选择----', item);
 			this.currIndex = i;
 			this.radioLabel = item;
-			this.currFood.unit_energy = ((item.unit_amount?item.unit_amount:item.amount) / this.currFood.unit_amount) * this.currFood.unit_energy;
+			this.currFood.unit_energy = ((item.unit_amount ? item.unit_amount : item.amount) / this.currFood.unit_amount) * this.currFood.unit_energy;
 			this.currFood.unit_amount = item.unit_amount ? item.unit_amount : item.amount;
 			if (Number(this.choiceNum) && !this.radioLabel) {
 				this.heatNum = Number(this.choiceNum) * this.currFood.unit_energy;
@@ -1050,7 +1055,7 @@ export default {
 				}
 			}
 			// debugger
-			this.assembleData()
+			this.assembleData();
 		},
 		/*选择单位**/
 		RadioChange(e) {
