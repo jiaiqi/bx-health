@@ -563,7 +563,7 @@ export default {
 				'ss': date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds()
 			};
 			if (type === 'date') {
-				return o.yy + '-' + o.MM + '-' + o.dd + ' '
+				return o.yy + '-' + o.MM + '-' + o.dd
 			} else if (type === 'YY-MM') {
 				return o.yy + '-' + o.MM
 			} else if (type === 'MM-DD') {

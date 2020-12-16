@@ -20,8 +20,8 @@
 			<view class="symptom-page" v-if="pageType === 'symptom'">
 				<view class="symptom-item-list">
 					<view class="symptom-item" v-for="item in symptomRecord" :key="item.id">
-						<view class="name">{{ item.symptoms_name }}</view>
-						<view class="describe">{{ item.symptoms_remark }}</view>
+						<view class="name">{{ item.symptoms_name?item.symptoms_name:'' }}</view>
+						<view class="describe">{{ item.symptoms_remark?item.symptoms_remark:'' }}</view>
 						<view class="date">{{ item.create_time.slice(5, 16) }}</view>
 					</view>
 				</view>
@@ -462,7 +462,9 @@ export default {
 				case 'step':
 					this.pageType = 'sport';
 					this.currentChart = 'stepChart';
-					this.getwxStepInfoList();
+					this.getwxStepInfoList().then(_ => {
+						this.selectDataFromSportRecord(this.stepInfoList);
+					});
 					this.currentType = '运动';
 					break;
 				case 'weight':
@@ -837,7 +839,8 @@ export default {
 			let result = await wx.getWeRunData();
 			if (result.errMsg === 'getWeRunData:ok') {
 				// this.wxRunData = result;
-				this.decryptData(result);
+				let data = await this.decryptData(result);
+				return data;
 			}
 			// #endif
 		},
@@ -861,7 +864,7 @@ export default {
 					let stepList = res.data.response[0].response.stepInfoList;
 					if (Array.isArray(stepList)) {
 						stepList = stepList.map(item => {
-							item.date = this.formateDate(item.timestamp * 1000);
+							item.date = this.formateDate(item.timestamp * 1000).trim();
 							return item;
 						});
 						this.stepInfoList = stepList;
@@ -885,6 +888,61 @@ export default {
 			} else {
 				return false;
 			}
+		},
+		async selectDataFromSportRecord(stepList) {
+			let url = this.getServiceUrl('health', 'srvhealth_body_activity_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_body_activity_record_select',
+				colNames: ['*'],
+				condition: [{ colName: 'userno', ruleType: 'like', value: this.vuex_userInfo.userno }, { colName: 'name', ruleType: 'like', value: '手机计步' }],
+				relation_condition: {},
+				page: { pageNo: 1, rownumber: 31 }
+			};
+			let timeRange = {
+				start: '',
+				end: ''
+			};
+			timeRange.end = dayjs().format('YYYY-MM-DD');
+			timeRange.start = dayjs()
+				.subtract(31, 'days')
+				.format('YYYY-MM-DD');
+			req.condition = req.condition.concat([{ colName: 'hdate', ruleType: 'lt', value: timeRange.end }, { colName: 'hdate', ruleType: 'gt', value: timeRange.start }]);
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data)) {
+				let dateArr = res.data.data.map(item => item.hdate.trim()).push(dayjs().format('YYYY-MM-DD'));
+				let pushData = [];
+				if (Array.isArray(stepList) && stepList.length > 0) {
+					stepList.forEach(item => {
+						if (!dateArr.includes(item.date)) {
+							pushData.push({
+								userno: this.vuex_userInfo.userno,
+								hdate: item.date,
+								htime: '00:00:00',
+								name: '手机计步',
+								unit: '步',
+								amount: item.step,
+								energy: (item.step * 150) / 1000,
+								user_name: this.vuex_userInfo.name
+							});
+						}
+					});
+				}
+				pushData = pushData.reverse();
+				if(pushData.length>0){
+					this.insertStepData(pushData);
+				}
+			}
+		},
+		async insertStepData(data) {
+			let url = this.getServiceUrl('health', 'srvhealth_body_activity_record_add', 'operate');
+			let req = [
+				{
+					serviceName: 'srvhealth_body_activity_record_add',
+					condition: [],
+					data: data
+				}
+			];
+			await this.$http.post(url, req);
 		},
 		async getNutrientRecommended() {
 			let url = this.getServiceUrl('health', 'srvhealth_nutrient_values_recommended_select', 'select');
@@ -1273,7 +1331,7 @@ export default {
 				if (result.code) {
 					this.code = result.code;
 					await this.wxLogin({ code: result.code });
-					await this.initPage();
+					// await this.initPage();
 				}
 			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 				// 没有角色 提示跳转到创建角色页面
@@ -1343,11 +1401,6 @@ export default {
 		flex-direction: column;
 		height: calc(100vh - 100rpx);
 		.symptom-item-list {
-			// flex: 1;
-			// display: flex;
-			// flex-wrap: wrap;
-			// justify-content: flex-start;
-			// align-items: flex-start;
 			flex: 1;
 			padding: 20rpx;
 		}
