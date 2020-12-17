@@ -548,7 +548,7 @@ export default {
 						// },
 						{
 							title: '镁',
-							value: 'element_m',
+							value: 'element_mg',
 							num: 50
 						},
 						// {
@@ -869,7 +869,7 @@ export default {
 						},
 						{
 							title: '镁',
-							value: 'element_m',
+							value: 'element_mg',
 							choose: false,
 							num: 186,
 							current_num: 0

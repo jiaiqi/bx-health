@@ -130,7 +130,7 @@ export default {
 	overflow: scroll;
 	flex: 1;
 	display: flex;
-	height: calc(90vh - 270rpx);
+	height: calc(90vh - 200rpx);
 }
 .tag-line {
 	display: flex;
@@ -220,9 +220,10 @@ export default {
 	.bx-tagbox {
 		margin: 20rpx;
 		padding: 20rpx;
-		height: 700rpx;
+		// height: 700rpx;
 		text-align: left;
 		flex: 1;
+		overflow: scroll;
 		// box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		.bx-item {
 			min-width: 100upx;
@@ -230,16 +231,31 @@ export default {
 			display: inline-block;
 			margin-right: 20upx;
 			margin-bottom: 10upx;
-			background-color: #f1f1f1;
+			// background-color: #f1f1f1;
+			border: 1rpx solid #F1F1F1;
 			border-radius: 50rpx;
-			padding: 8rpx 20rpx;
+			padding: 6rpx 25rpx;
 			text-align: center;
 			&:active {
 				transition: all 0.5s ease-in-out;
 				transform: scale(1.1);
 			}
 			&.more {
-				background-color: #f0ad4e;
+				// background-color: #f0ad4e;
+				// border-color:#f0ad4e ;
+				border: none;
+				color: #f0ad4e;
+				// text-decoration: underline;
+				position: relative;
+				&::after{
+					content: '';
+					width: 60rpx;
+					height: 4rpx;
+					position: absolute;
+					left:calc(50% - 30rpx);
+					bottom: 0;
+					background-color: #f0ad4e;
+				}
 			}
 		}
 	}

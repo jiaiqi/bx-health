@@ -27,12 +27,12 @@
 				<view class="container-cen-top-list" @click="toPages('doctor')">
 					<text class="cuIcon-service text-blue" style="font-size: 70rpx;"></text>
 					<text>我的医生</text>
-					<view class="message-tag">{{ doctor_message }}</view>
+					<view v-if="doctor_message != 0" class="message-tag">{{ doctor_message }}</view>
 				</view>
 				<view class="container-cen-top-list" @click="toPages('userList')">
 					<text class="cuIcon-comment text-green" style="font-size: 70rpx;"></text>
 					<text>我的用户</text>
-					<view class="message-tag">{{ hzMessage }}</view>
+					<view v-if="hzMessage != 0" class="message-tag">{{ hzMessage }}</view>
 				</view>
 				<view class="container-cen-top-list" @click="toPages('pinggu')">
 					<text class="cuIcon-addressbook text-orange" style="font-size: 70rpx;"></text>
@@ -492,16 +492,23 @@ export default {
 			}else{
 				r = r.toString()
 			}
-			uni.setTabBarBadge({
-				index: 3,
-				text: r,
-				success: e => {
-					console.log('success---', e);
-				},
-				fail: fails => {
-					console.log('fails----', fails);
-				}
-			});
+			if(r != 0){
+				uni.setTabBarBadge({
+					index: 3,
+					text: r,
+					success: e => {
+						console.log('success---', e);
+					},
+					fail: fails => {
+						console.log('fails----', fails);
+					}
+				});
+			}else{
+				uni.removeTabBarBadge({
+					index: 3,
+				})
+			}
+			
 		});
 		this.getBindDoctor();
 		this.getDoctorInfo().then(res => {

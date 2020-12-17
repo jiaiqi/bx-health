@@ -1587,7 +1587,7 @@ export default {
 		// background-color: #f7f7f7;
 		// box-shadow: 0px 1px 4px rgba(26, 26, 26, 0.2);
 		position: fixed;
-		bottom: 80rpx;
+		bottom: 100rpx;
 		width: 100%;
 		// display: flex;
 		// padding: 10rpx 20rpx;

@@ -42,13 +42,6 @@ let energyListWrap = [{
 				UL: 3000, // 可耐受最高摄入量
 				value: 0 // 当前值
 			},
-			// {
-			// 	name: 'D',
-			// 	key: 'vitamin_d',
-			// 	EAR: 8,
-			// 	UL: 50,
-			// 	value: 0
-			// },
 			{
 				label: '维生素E',
 				name: 'VE',
@@ -58,13 +51,6 @@ let energyListWrap = [{
 				UL: 700,
 				value: 0
 			}
-			// {
-			// 	name: 'K',
-			// 	EAR: 50,
-			// 	key: 'vitamin_k',
-			// 	UL: 80,
-			// 	value: 0
-			// }
 		]
 	},
 	{
@@ -209,5 +195,4 @@ let energyListWrap = [{
 		]
 	}
 ]
-
 export default energyListWrap

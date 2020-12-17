@@ -1,5 +1,11 @@
 <template>
-	<view><bx-filter :searchArg="searchArg" v-if="searchArg" :menuAgList="menuAgList" @clickItem="toPages('patients', $event)" @click-add-item="clickAddItem"></bx-filter></view>
+	<view>
+		<cu-custom :isBack="true" @onBack="onBack">
+			<!-- <block slot="backText">返回</block> -->
+			<block slot="content">用户管理</block>
+		</cu-custom>
+		<bx-filter ref="filter" :searchArg="searchArg" v-if="searchArg" :menuAgList="menuAgList" @clickItem="toPages('patients', $event)" @click-add-item="clickAddItem"></bx-filter>
+	</view>
 </template>
 
 <script>
@@ -18,6 +24,9 @@ export default {
 		};
 	},
 	methods: {
+		onBack(){
+			
+		},
 		toPages(type, item) {
 			if (type === 'patients' && item.customer_no) {
 				uni.navigateTo({
@@ -78,13 +87,16 @@ export default {
 				imgCol: 'customer_profile_url',
 				isShowCouple:true,
 				pageRowNumber:20,
-				topNum:140,
+				topNum:220,
 				condition: [{ colName: 'manager_no', ruleType: 'like', value: doctorInfo && doctorInfo.dt_no ? doctorInfo.dt_no : '**' }],
 				wordKey: {
 					title: 'customer_name'
 				}
 			};
 		}
+	},
+	onReady() {
+		console.log("app-onReady======>")
 	},
 	onShow() {
 		let userInfo = uni.getStorageSync('wxUserInfo');
@@ -100,7 +112,13 @@ export default {
 				this.buildSearchArg(res);
 				this.buildMenuAgList();
 			});
-		}
+		}		
+	},
+	mounted() {
+		uni.$on('backPage',()=>{
+			this.$refs.filter.onRefresh()
+		})
+		console.log("--mounted---")
 	}
 };
 </script>

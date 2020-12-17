@@ -29,7 +29,7 @@
 					<text
 						@click="changeCate(item, index)"
 						v-for="(item, index) in categoryTop"
-						v-if="item.name === '食材组成' ? currFood.meal_no : true"
+						v-if="item.name === '食材组成' ? (currFood.meal_no || (currFood.mix_type && currFood.mix_type === '混合')) : true"
 						:key="index"
 						:class="categoryTopIndex === index ? 'active-text-top-tit' : ''"
 					>
@@ -182,7 +182,7 @@
 						<!-- #endif -->
 					</view>
 				</view>
-				<view v-if="categoryTopIndex == 2 && currFood.meal_no" class="material-list-wrap">
+				<view v-if="categoryTopIndex == 2 && (currFood.meal_no || (currFood.mix_type && currFood.mix_type === '混合'))" class="material-list-wrap">
 					<view class="shop-detail-bot-tab">
 						<view class="shop-detail-bot-tab-t">
 							<text>食材名称</text>
@@ -865,7 +865,11 @@ export default {
 			if (item.type === 'NRV') {
 				this.currentAppr = this.approveData[0];
 			} else if (item.type === 'material') {
-				this.getMixChildFood();
+				if(this.currFood.mix_type && this.currFood.mix_type === '混合'){
+					this.getMaterialMixChildFood();
+				}else{
+					this.getMixChildFood();
+				}
 			}
 		},
 		async getNutrientRecommended() {
@@ -1083,6 +1087,25 @@ export default {
 				this.chooseFoods.push(this.currFood);
 			}
 			this.goBalanceDiet();
+		},
+		async getMaterialMixChildFood(){
+			
+			let self = this;
+			let url = this.getServiceUrl('health', 'srvhealth_diet_contents_item_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_diet_contents_item_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'food_no',
+						ruleType: 'eq',
+						value: this.currFood.food_no
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			this.foodChild = res.data.data
+			console.log("食材配料----->",res.data.data)
 		},
 		/* 获取当前食物得食材含量**/
 		async getMixChildFood() {
@@ -2038,10 +2061,13 @@ export default {
 			background-color: rgb(240, 240, 240);
 			padding: 5px 0;
 			width: 95%;
-			margin: 0 auto;
+			margin: 0 auto;			
 			text {
-				width: 33%;
+				width: 24%;
 				text-align: center;
+				&:first-child{
+					width: 50%;
+				}
 			}
 		}
 		.shop-detail-bot-tab-m {

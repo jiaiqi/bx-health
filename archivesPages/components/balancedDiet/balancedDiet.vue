@@ -2587,29 +2587,7 @@ export default {
 			}
 			return res.data.data;
 		},
-		// async getFoodType(cond, serv) {
-		// 	// 食物类型
-		// 	let serviceName = 'srvhealth_diet_contents_select';
-		// 	if (serv) {
-		// 		serviceName = serv;
-		// 	}
-		// 	let url = this.getServiceUrl('health', serviceName, 'select');
-		// 	let req = {
-		// 		serviceName: serviceName,
-		// 		colNames: ['*'],
-		// 		condition: [],
-		// 		order: []
-		// 	};
-		// 	if (cond) {
-		// 		req.condition = cond;
-		// 	}
-		// 	let res = await this.$http.post(url, req);
-		// 	if (res.data.state === 'SUCCESS' && res.data.data.length > 0 && !serv) {
-		// 		console.log(res.data.data);
-		// 		// this.foodType = res.data.data;
-		// 	}
-		// 	return res.data.data ? res.data.data : [];
-		// },
+
 		async getSportType(cond) {
 			// 运动类型
 			let url = this.getServiceUrl('health', 'srvhealth_body_activity_contents_select', 'select');
@@ -2683,17 +2661,20 @@ export default {
 			this.currentRecordType = 'sport';
 		},
 		async clickDietRecordItem(item) {
-			let unitList = await this.getFoodUnit(item);
-			unitList.forEach((unit, index) => {
-				console.log(item, unit);
-				if (item.unit === unit.unit) {
-					this.currentUnitIndex = index;
-				}
+			uni.redirectTo({
+				url: `/archivesPages/DietDetail/DietDetail?chooseDate=${this.selectDate}&no=${item.diet_record_no}&from=${decodeURIComponent('/archivesPages/archives-history/archives-history?pageType=diet')}`
 			});
-			this.showEditModal = true;
-			this.currentRecord = this.deepClone(item);
-			this.currentRecordType = 'food';
-			this.buildCurrenDietChartOption();
+			// let unitList = await this.getFoodUnit(item);
+			// unitList.forEach((unit, index) => {
+			// 	console.log(item, unit);
+			// 	if (item.unit === unit.unit) {
+			// 		this.currentUnitIndex = index;
+			// 	}
+			// });
+			// this.showEditModal = true;
+			// this.currentRecord = this.deepClone(item);
+			// this.currentRecordType = 'food';
+			// this.buildCurrenDietChartOption();
 		},
 		clickSportBox() {
 			this.sportListDisplay = !this.sportListDisplay;
@@ -4135,7 +4116,7 @@ uni-checkbox::before {
 		align-items: center;
 		font-size: 50rpx;
 		padding-top: 30rpx;
-		margin-bottom: 100rpx;
+		margin-bottom: 60rpx;
 		.btn {
 			padding: 15rpx 30rpx;
 			letter-spacing: 2px;

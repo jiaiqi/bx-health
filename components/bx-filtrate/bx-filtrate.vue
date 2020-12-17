@@ -155,6 +155,7 @@ export default {
 		if (this.menuAgList) {
 			this.copyData = this.deepClone(this.menuAgList);
 		}
+		console.log("----mounted----")
 		this.onRefresh();
 	},
 	methods: {
@@ -874,6 +875,7 @@ export default {
 			padding: 10upx 4upx;
 			display: flex;
 			justify-content: center;
+			align-items: center;
 			.title-food {
 				font-weight: bold;
 				font-size: 30upx;

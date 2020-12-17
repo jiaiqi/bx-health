@@ -25,6 +25,13 @@
 					</view>
 				</view>
 			</view>
+			<view @click="showTreeSelector = true" class="tree-select-box">
+				<text class="tree-select-box-l">症状选择：</text>
+				<text  v-if="chooseArr.length == 0">请选择</text>
+				<text class="tree-select-box-item" v-else>
+					<text v-for="it in chooseArr" :key="it.id">{{it.name}}</text>
+				</text>
+			</view>
 			<view class="symptom-bot-wrap-top">
 				<view class="symptom-bot-wrap-top-l">
 					<scroll-view :scroll-with-animation="true" style="height: 60upx;" scroll-x :scroll-left="scrollMenuLeft">
@@ -95,8 +102,18 @@
 				</view>
 			</u-popup> -->
 		</view>
+		
+		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }">
+			<view class="cu-dialog">
+				<view class="tree-selector"><cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="srvInfo"></cascader-selector></view>
+			</view>
+		</view>
+		
 		<view class="cu-modal bottom-modal" :class="{show:menuIsShow}">
 			<view class="cu-dialog">
+				<view class="action pregnant-main-top-item-poup-top" @tap="menuIsShow=false">
+					<text class="cuIcon-close text-red"></text>
+				</view>
 				<view class="pregnant-main-top-item-poup">
 					<text @click="changeMenu(item,index)" v-if="item.name !== '导入数据'" :class="activeIndex===index?'activeSympt':''" v-for="(item,index) in symptomTitList" :key="index">{{item.name}}</text>
 				</view>
@@ -108,10 +125,12 @@
 <script>
 import Thetable from '../components/Thetable/Thetable.vue';
 import symFrom from '../components/bx-sym-from/bx-sym-from.vue';
+import cascaderSelector from '@/components/cascader-selector/cascader-selector.vue'
 export default {
 	components: {
 		Thetable,
-		symFrom
+		symFrom,
+		cascaderSelector
 	},
 	data() {
 		return {
@@ -133,6 +152,14 @@ export default {
 			chooseArr: uni.getStorageSync('symptomList') ? uni.getStorageSync('symptomList') : [],
 			query: '',
 			show: false,
+			srvInfo:{
+				column:'no',
+				showCol:'name',
+				isTree:true,
+				serviceName:'srvhealth_self_symptoms_select',
+				appNo:'health'
+			},
+			showTreeSelector:false,
 			checkedData: [],
 			current_item: '',
 			menuIsShow:false,
@@ -184,6 +211,25 @@ export default {
 		}
 	},
 	methods: {
+		getCascaderValue(e){
+			console.log("e------",e)
+			this.showTreeSelector = false;
+			e.is_checked = true
+			let chooseArr = this.chooseArr
+			if(chooseArr.length == 0){
+				chooseArr.push(e)
+			}else {
+				let isHas = false
+				chooseArr.forEach(it=>{
+					if(it.id === e.id){
+						isHas = true
+					}
+				})
+				if(!isHas){
+					chooseArr.push(e)
+				}
+			}
+		},
 		/* 点击菜单展开或者收缩**/
 		showMore(){
 			this.menuIsShow = !this.menuIsShow
@@ -667,6 +713,28 @@ export default {
 		display: flex;
 		flex-wrap: wrap;
 	}	
+	
+}
+.tree-select-box{
+	display: flow-root;
+	background-color: white;
+	margin: 20rpx 0;
+	padding: 20rpx 0;
+	text{
+		&:last-child{
+			color: #fbbd08;
+		}
+	}
+	.tree-select-box-l{
+		margin-left: 40rpx;
+		min-width: 140rpx;
+	}
+	.tree-select-box-item{
+		text{			
+			margin-left: 0!important;
+			margin-right: 10rpx;
+		}
+	}
 }
 .wrapCont_row_item {
 	line-height: 34px;
@@ -866,10 +934,16 @@ export default {
 .navs-top {
 	margin-right: 20upx;
 }
+.pregnant-main-top-item-poup-top{
+	display: flex;
+	justify-content: flex-end;
+	margin: 20rpx;
+	font-size: 36rpx;
+}
 .pregnant-main-top-item-poup{
 	width: 95%;
 	margin: 0 auto;
-	padding: 60upx 0; 
+	padding: 0upx 0 30rpx; 
 	font-size: 30upx;
 	color: #000000;
 	text{

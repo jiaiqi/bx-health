@@ -117,16 +117,28 @@ export default {
 		let userNo = uni.getStorageSync('current_user_info');
 		if (userNo.userno) {
 			this.getDoctorRecod(userNo.userno).then(length => {
-				uni.setTabBarBadge({
+				if(length > 99){
+					length = '99+'
+				}else{
+					length = length.toString()
+				}
+				if(length != 0){
+					uni.setTabBarBadge({
+						index: 3,
+						text: length,
+						success: e => {
+							console.log('success---', e);
+						},
+						fail: fails => {
+							console.log('fails----', fails);
+						}
+					});
+				}else{
+				uni.removeTabBarBadge({
 					index: 3,
-					text: length.toString(),
-					success: e => {
-						console.log('success---', e);
-					},
-					fail: fails => {
-						console.log('fails----', fails);
-					}
-				});
+				})
+			}
+				
 			});
 		}
 

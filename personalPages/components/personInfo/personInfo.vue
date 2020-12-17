@@ -330,6 +330,7 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.userInfo = res.data.data[0];
+				 uni.$emit('userInfos',res.data.data[0])
 				this.selectInspectionReport();
 				this.getTagList();
 				return res.data.data[0];

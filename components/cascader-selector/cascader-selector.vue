@@ -48,10 +48,11 @@ export default {
 	methods: {
 		resetData() {
 			this.clickLine();
-			this.parent_no = ''
+			this.parent_no = '';
 		},
 		showMore() {
 			// 点击了‘更多’按钮
+			// uni.showLoading()
 			this.page.pageNo++;
 			let condition = [];
 			if (this.parent_no) {
@@ -73,7 +74,7 @@ export default {
 				];
 			}
 			this.getAreaData(condition, true);
-			this.showSelect = true
+			this.showSelect = true;
 		},
 		searchWithKey() {
 			let condition = [];
@@ -91,8 +92,10 @@ export default {
 					value: this.searchKey
 				});
 			}
-			this.getAreaData(condition);
-			this.showSelect = true
+			this.getAreaData(condition).then(_ => {
+				// uni.hideLoading()
+			});
+			this.showSelect = true;
 		},
 		async getAreaData(cond, ismore, defaultVal, index, lastListIndex) {
 			const srvInfo = this.srvInfo;
@@ -144,6 +147,7 @@ export default {
 					} else {
 						that.isShowMore = false;
 					}
+					return that.areaList;
 				} else {
 					const data = res.data.data;
 					// this.lineDataDefault[index] = data[0]
@@ -225,7 +229,13 @@ export default {
 			}
 		},
 		emitSelectVal() {
-			this.$emit('getCascaderValue', this.lineDataDefault[this.lineDataDefault.length - 1], 'sure');
+			if (this.lineDataDefault[this.lineDataDefault.length - 1]) {
+				// 确定
+				this.$emit('getCascaderValue', this.lineDataDefault[this.lineDataDefault.length - 1], 'sure');
+			} else {
+				// 取消
+				this.$emit('getCascaderValue',false);
+			}
 		},
 		setLineData() {
 			const value = this.defaultLineVal;
@@ -313,11 +323,11 @@ export default {
 	background-color: #fff;
 	// min-height: 1100rpx;
 	// height: 100%;
-	height: calc(90vh - 90rpx);
+	// height: calc(90vh - 90rpx);
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	z-index: 99999;
+	// z-index: 99999;
 	overflow: scroll;
 	.button-box {
 		width: 100%;

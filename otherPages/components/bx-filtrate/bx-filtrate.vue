@@ -48,7 +48,7 @@
 					:key="idx"
 				>
 					<view class="smallbox">
-						<view class="smallbox-img">
+						<view v-if="searchArg.imgCol" class="smallbox-img">
 							<image width="100%" height="100%" v-if="!food.imgurl" src="/otherPages/static/img/none.png"></image>
 							<image width="100%" height="100%" v-else :src="food.imgurl"></image>
 						</view>
