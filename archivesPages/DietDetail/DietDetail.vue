@@ -52,9 +52,10 @@ export default {
 	methods: {
 		cancel() {
 			//取消
-			uni.redirectTo({
-				url: this.backUrl
-			});
+			uni.navigateBack();
+			// uni.redirectTo({
+			// 	url: this.backUrl
+			// });
 		},
 		async UpdateDietInfo() {
 			let self = this;
@@ -80,7 +81,8 @@ export default {
 			];
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				debugger;
+				uni.$emit('dietUpdate');
+				uni.navigateBack();
 			}
 		},
 		async getDietRecordDetail() {
@@ -134,7 +136,10 @@ export default {
 			} else {
 				this.dietInfo.amount = Number((this.dietInfo.amount + step).toFixed(1));
 			}
-			this.$refs.elementDetail.buildChartOption();
+			this.dietInfo.energy = this.dietInfo.unit_energy * this.dietInfo.amount;
+			setTimeout(() => {
+				this.$refs.elementDetail.buildChartOption(this.dietInfo);
+			}, 200);
 		},
 		chooseCookType(e) {
 			// 选择食物烹调方式
@@ -152,7 +157,11 @@ export default {
 			// this.amount  =
 			this.dietInfo.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
 			this.dietInfo.unit = currentUnit.unit;
-			this.$refs.elementDetail.buildChartOption();
+			this.dietInfo.energy = this.dietInfo.unit_energy * this.dietInfo.amount;
+			setTimeout(() => {
+				this.$refs.elementDetail.buildChartOption(this.dietInfo);
+			}, 200);
+			this.$refs.elementDetail.buildChartOption(this.dietInfo);
 			// this.buildCurrenDietChartOption();
 		},
 		deleteItem(item) {

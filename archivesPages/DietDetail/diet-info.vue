@@ -26,6 +26,12 @@ export default {
 			eleData:eleData
 		};
 	},
+	watch: {
+		dietInfo: {
+			handler(newValue, oldValue) {
+			}
+		}
+	},
 	props: {
 		dietInfo: {
 			type: Object

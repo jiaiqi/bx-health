@@ -142,7 +142,7 @@ export default {
 						});
 					});
 				});
-				debugger
+				debugger;
 				return result;
 			}
 		},
@@ -186,8 +186,8 @@ export default {
 					let ratio = 1;
 					if (diet['unit'] === 'g') {
 						ratio = (diet.unit_weight_g * diet.amount) / (diet.unit_amount ? diet.unit_amount : diet.unit_weight_g);
-					}else{
-						debugger
+					} else {
+						debugger;
 						ratio = (diet.unit_weight_g * diet.amount) / 100;
 					}
 					ele.value = ele.value + diet[ele['key']] * ratio;
@@ -196,8 +196,11 @@ export default {
 			});
 			return eleArr;
 		},
-		async buildChartOption() {
+		async buildChartOption(dietInfo) {
 			let currentDiet = this.deepClone(this.dietInfo);
+			// if(dietInfo){
+			// 	 currentDiet = this.deepClone(dietInfo);
+			// }
 			let serviceName = '';
 			let eleArr = this.getEnergyListValue();
 			let category = eleArr.map(item => {
