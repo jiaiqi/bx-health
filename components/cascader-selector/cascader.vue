@@ -3,9 +3,10 @@
 		<view class="tag-line">
 			<view class="bx-tagbox">
 				<view v-if="showSelect">
-					<view class="bx-item" @click="selectArea(item)" v-for="(item, index) in areaList" :key="index">
+					<!-- <view class="bx-item" @click="selectArea(item)" v-for="(item, index) in areaList" :key="index">
 						{{ item.name ? item.name : showCol ? item[showCol] : '' }}
-					</view>
+					</view> -->
+					<cascaderItem :currentNo="currentNo" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem>
 					<view class="bx-item more" @click="showMore" v-if="isShowMore"><view class="content">更多</view></view>
 				</view>
 			</view>
@@ -28,6 +29,7 @@
 </template>
 
 <script>
+	import cascaderItem from './cascaderItem.vue'
 export default {
 	name: 'cascader', //层叠选择器内层，ui渲染
 	data() {
@@ -37,6 +39,7 @@ export default {
 			breadCrumbs: ''
 		};
 	},
+	components:{cascaderItem},
 	methods: {
 		showMore() {
 			this.$emit('show-more');
@@ -62,6 +65,10 @@ export default {
 		areaList: {
 			deep: true,
 			handler: function(newV, oldV) {
+				console.log("watch--cas",newV)
+				if(newV.child){
+					console.log("watch--cas",newV)
+				}
 				this.areaList = newV;
 				this.lineData = this.lineDataDefault;
 			}
@@ -71,6 +78,9 @@ export default {
 		this.lineData = this.lineDataDefault;
 	},
 	props: {
+		currentNo:{
+			type:String,			
+		},
 		// 是否显示‘请选择’提示
 		showSelect: {
 			type: Boolean,

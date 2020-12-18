@@ -9,7 +9,8 @@
 		</view>
 		<cascader
 			@tag-click="clickTag"
-			:areaList="areaList"
+			:areaList="oldAreaList"
+			:currentNo="current_no"
 			@line-click="clickLine"
 			@show-more="showMore"
 			:showSelect="showSelect"
@@ -41,8 +42,11 @@ export default {
 			showSelect: true,
 			isShowMore: false, //是否显示‘更多’按钮
 			outputData: {},
+			currentClick:null,
 			lineDataDefault: [], //线数据默认值
-			searchKey: '' // 搜索关键词
+			searchKey: '', // 搜索关键词
+			oldAreaList:[],
+			current_no:''
 		};
 	},
 	methods: {
@@ -157,11 +161,13 @@ export default {
 					}
 					// console.log('lineDataDefault',this.lineDataDefault)
 					return data;
-				}
+				}				
 			}
 		},
 		clickTag(e) {
 			console.log('click-tag', e);
+			this.currentClick = e
+			this.current_no = e.no
 			if (this.srvInfo.isTree === false) {
 				this.$emit('getCascaderValue', e, 'sure');
 				this.areaList = [];
@@ -194,7 +200,37 @@ export default {
 				} else {
 					this.showSelect = true;
 				}
-				this.getAreaData(condition);
+				this.getAreaData(condition).then(data=>{					
+					let oldAreaList = this.oldAreaList
+					this.valuationChild(oldAreaList,data,e)
+					// if(oldAreaList.length > 0){
+					// 	oldAreaList.forEach(item=>{
+					// 		if(item.no === e.no){
+					// 			this.$set(item,'child',data)
+					// 		}
+					// 	})
+					// }else{
+					// 	this.oldAreaList = data
+					// }
+					
+					// if(){
+						
+					// }
+				})
+			}
+		},
+		valuationChild(oldAreaList,child,e){
+			if(oldAreaList.length > 0){
+				oldAreaList.forEach(item=>{
+					if(item.no === e.no){
+						this.$set(item,'child',child)
+					}
+					if(item.child){
+						this.valuationChild(item.child,child,e)
+					}
+				})
+			}else{
+				// this.oldAreaList = data
 			}
 		},
 		clickLine(e, index) {
@@ -284,7 +320,9 @@ export default {
 	},
 	created() {
 		if (this.srvInfo && this.srvInfo.serviceName) {
-			this.getAreaData();
+			this.getAreaData().then(data=>{
+				this.oldAreaList = this.deepClone(data)
+			})
 		}
 		// if(this.defaultLineVal){
 		// 	this.setLineData()

@@ -1,0 +1,143 @@
+<template>
+	<view class="bx-tagbox-c">
+		<view class="bx-item" @click="selectArea(item)" :class="item.isChoose?'choose-item':''" v-for="(item, index) in areaList" :key="index">{{ item.name ? item.name : showCol ? item[showCol] : '' }}</view>
+		<cascaderItem v-if="currentItem.child && currentItem.child.length > 0" @selectAreaItem="selectArea2" :areaList="currentItem.child"></cascaderItem>
+	</view>
+</template>
+
+<script>
+export default {
+	name: 'cascaderItem',
+	data() {
+		return {
+			currentItem: '',
+			copyCurrentItem: {},
+			no: ''
+		};
+	},
+	methods: {
+		selectArea2(e) {
+			this.$emit('selectAreaItem', e);
+		},
+		selectArea(e) {
+			debugger;
+			// if(e.is_leaf != '是'){
+				if ( this.currentNo !== e.no) {
+					this.currentItem = e;
+					// this.currentItem.isChoose = true
+				}
+				this.$emit('selectAreaItem', e);
+			// }
+			
+		},
+		recursionArealist(oldAreaList) {
+			let self = this;
+			if (!Array.isArray(self.copyCurrentItem.child)) {
+				self.copyCurrentItem.child = [];
+			}
+			oldAreaList.forEach(item => {
+				if (Array.isArray(item.child)) {
+					item.isChoose = false
+					if (item.no === self.currentItem.no) {
+						item.isChoose = true
+						self.currentItem = self.deepClone(item);
+					} else {
+						self.recursionArealist(item.child);
+					}
+				}
+			});
+		},
+		valuationChild(oldAreaList, data) {
+			let self = this;
+			console.log('---', oldAreaList);
+			if (Array.isArray(data.child) && data.child.length > 0) {
+				data.child.forEach(item => {
+					if (item.no === self.copyCurrentItem.no) {
+						this.currentItem = oldAreaList;
+					}
+				});
+				console.log('data----', data);
+			}
+		}
+	},
+	watch: {
+		areaList: {
+			handler(newval, oldval) {
+				// this.valuationChild(newval);
+				if (newval.length > 0) {
+					this.recursionArealist(newval);
+					// newval.forEach(item => {
+					// 	if (item.no === this.currentItem.no) {
+					// 		this.currentItem.child = item.child;
+					// 		// this.valuationChild(newval, item.child, item);
+					// 	}
+					// });
+				}
+				console.log('watch----', newval);
+			},
+			deep: true
+		}
+	},
+	props: {
+		areaList: {
+			type: Array,
+			default: () => {
+				return [];
+			}
+		},
+		currentNo: {
+			type: String
+		}
+	}
+};
+</script>
+
+<style lang="scss" scoped>
+.bx-tagbox-c {
+	// margin: 20rpx;
+	// padding: 20rpx;
+	// height: 700rpx;
+	text-align: left;
+	flex: 1;
+	overflow: scroll;
+	margin-top: 20rpx;
+	// box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	.bx-item {
+		min-width: 100upx;
+		// height: 40upx;
+		display: inline-block;
+		margin-right: 20upx;
+		margin-bottom: 10upx;
+		// background-color: #f1f1f1;
+		border: 1rpx solid #f1f1f1;
+		border-radius: 50rpx;
+		padding: 6rpx 25rpx;
+		text-align: center;
+		&:active {
+			transition: all 0.5s ease-in-out;
+			transform: scale(1.1);
+		}
+		&.more {
+			// background-color: #f0ad4e;
+			// border-color:#f0ad4e ;
+			border: none;
+			color: #f0ad4e;
+			// text-decoration: underline;
+			position: relative;
+			&::after {
+				content: '';
+				width: 60rpx;
+				height: 4rpx;
+				position: absolute;
+				left: calc(50% - 30rpx);
+				bottom: 0;
+				background-color: #f0ad4e;
+			}
+		}
+	}
+	.choose-item{
+		background-color: #007aff;
+		color: white;
+	}
+}
+</style>

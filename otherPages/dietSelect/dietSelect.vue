@@ -224,28 +224,28 @@
 				<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal" @click.self="modalName = ''" :class="{ show: modalName === 'recent' }">
+		<view class="cu-modal bottom-modal" @click.self="hideModal" :class="{ show: modalName === 'recent' }">
 			<view class="cu-dialog" style="height: auto;max-height: 90vh;overflow: scroll;">
 				<view class="recent-diet">
 					<view class="title-bar ">
 						<text class="title">近期饮食记录</text>
 						<view class="action">
 							<!-- <text class="cu-btn sm text-blue" @click="changeRecentDietMode">{{ recentDietMode === 'edit' ? '完成' : '编辑' }}</text> -->
-							<text class="cu-btn sm text-blue" @click="selectAll">全选</text>
+							<text class="cu-btn sm text-blue margin-right-xs" @click="selectAll(true)">全选</text>
+							<text class="cu-btn sm text-blue" @click="selectAll(false)">反选</text>
 						</view>
 					</view>
 					<view class="content">
 						<view class="diet-item" v-for="item in recentDiet" :key="item.diet_record_no">
 							<image :src="getImagePath(item.image)" mode="aspectFill" class="image"></image>
 							<view class="info">
-								<view class="checkbox" @click="item.checked = !item.checked" v-if="recentDietMode === 'edit'">
-									<text class="cuIcon-check text-bold" v-if="item.checked"></text>
-								</view>
+								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'"><text class="cuIcon-check text-bold" v-if="item.checked"></text></view>
 								<view class="food-name">{{ item.name }}</view>
 								<view class="food-info">
 									<view class="amount">
 										<text class="separator" @click="calc(item, 'minus')">-</text>
-										<input type="number" class="input" v-model="item.amount" />
+										<text type="number" class="input">{{ item.amount }}</text>
+										<!-- <input type="number" class="input" v-model="item.amount" /> -->
 										<text class="separator" @click="calc(item, 'add')">+</text>
 										<!-- <text class="number"></text> -->
 									</view>
@@ -1027,6 +1027,10 @@ export default {
 		}
 	},
 	methods: {
+		changeChecked(item) {
+			item.checked = !item.checked;
+			this.$set(item, 'checked', item.checked);
+		},
 		calc(e, type, step = 1) {
 			if (type === 'minus') {
 				if (e.amount - step > 0) {
@@ -1065,10 +1069,16 @@ export default {
 				uni.$emit('dietUpdate');
 			}
 		},
-		selectAll() {
-			this.recentDiet.forEach(item => {
-				item.checked = true;
-			});
+		selectAll(e) {
+			if (e) {
+				this.recentDiet.forEach(item => {
+					item.checked = true;
+				});
+			} else {
+				this.recentDiet.forEach(item => {
+					item.checked = !item.checked;
+				});
+			}
 		},
 		changeRecentDietMode() {
 			if (this.recentDietMode === 'edit') {
@@ -2972,13 +2982,14 @@ export default {
 				.input {
 					margin: 0;
 					padding: 0;
+					height: 36rpx;
 					display: inline-block;
-					height: auto;
 					line-height: 1;
 					min-height: 0;
+					min-width: 40rpx;
 					max-width: 50rpx;
 					text-align: center;
-					border: 1rpx solid #dcdfe6;
+					border: 2rpx solid #dcdfe6;
 				}
 			}
 		}

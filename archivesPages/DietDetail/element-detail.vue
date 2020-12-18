@@ -70,12 +70,7 @@ export default {
 		dietInfo: {
 			handler(newValue, oldValue) {
 				if (newValue && newValue.diet_record_no) {
-					// this.buildChartOption();
-					if(!this.chartData.option){
-						this.getNutrientRecommended().then(_ => {
-							this.buildChartOption();
-						});
-					}
+						this.switchTab(true)
 				}
 			}
 		}
@@ -84,9 +79,9 @@ export default {
 		switchTab(show) {
 			this.showChart = show;
 			if (show) {
-				// this.getNutrientRecommended().then(_ => {
+				this.getNutrientRecommended().then(_ => {
 					this.buildChartOption();
-				// });
+				});
 			}
 		},
 		async getNutrientRecommended() {

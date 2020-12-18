@@ -1,5 +1,6 @@
 {
-	"pages": [{
+	"pages": [
+		{
 			"path": "pages/pedia/pedia",
 			"style": {
 				// "navigationStyle": "custom",
@@ -30,13 +31,6 @@
 				// "navigationStyle":"custom"
 			}
 		}
-		// {
-		// 	"path": "pages/testPage/testPage",
-		// 	"style": {
-		// 		"navigationBarTitleText": "",
-		// 		"enablePullDownRefresh": false
-		// 	}
-		// }
 	],
 	"subPackages": [{
 			// 问卷
@@ -139,13 +133,6 @@
 						"enablePullDownRefresh": false
 					}
 
-				}, {
-					"path": "newList/newList",
-					"style": {
-						"navigationBarTitleText": "",
-						"enablePullDownRefresh": true
-					}
-
 				}
 			]
 		},
@@ -216,7 +203,8 @@
 					"path": "patientsInfo/patientsInfo",
 					"style": {
 						"navigationBarTitleText": "患者信息",
-						"enablePullDownRefresh": false
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
 					}
 				},
 				{
@@ -231,14 +219,14 @@
 					"path": "myDoctor/doctorChat",
 					"style": {
 						"navigationBarTitleText": "聊天列表",
-						"enablePullDownRefresh": true
+						"enablePullDownRefresh": false
 					}
 				}, {
 					"path": "userList/userList",
 					"style": {
-						"navigationStyle": "custom",
 						"navigationBarTitleText": "用户管理",
-						"enablePullDownRefresh": false
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
 					}
 
 				}
@@ -398,10 +386,7 @@
 					"path": "shop/shopDetail",
 					"style": {}
 				},
-				// {
-				// 	"path": "shop/shopCarList",
-				// 	"style": {}
-				// },
+		
 				{
 					"path": "shop/foodMaterial",
 					"style": {}
@@ -444,6 +429,12 @@
 					"path": "list/list",
 					"style": {
 						"navigationBarTitleText": "列表"
+					}
+				},
+				{
+					"path": "form/form",
+					"style": {
+						"navigationBarTitleText": "表单"
 					}
 				},
 				{
