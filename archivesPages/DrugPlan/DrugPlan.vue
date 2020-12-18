@@ -11,10 +11,16 @@
 			<view class="child-service-item" v-for="(item, index) in childServiceData" :key="index">
 				<view class="child-service-title" v-if="item && item.colVs">
 					<text class="title-text">药品清单</text>
-					<text class="title-action" @click="toAdd('detail', item)">
-						<text class="cuIcon-add "></text>
-						<text class="see-histroy">添加</text>
-					</text>
+					<view class="" style="display: flex;">
+						<text class="title-action margin-right-xs" @click="toAdd('detail', item)">
+							<text class="cuIcon-add "></text>
+							<text class="see-histroy">添加</text>
+						</text>
+						<text class="title-action" @click="toAdd('scan', item)">
+							<text class="cuIcon-scan margin-right-xs"></text>
+							<text class="see-histroy">扫一扫</text>
+						</text>
+					</view>
 				</view>
 				<view class="child-service-data-wrap">
 					<view class="child-service-data" v-for="(data, dataIndex) in item.data" :key="dataIndex">
@@ -186,28 +192,23 @@ export default {
 			let url = '';
 			switch (type) {
 				case 'detail':
-					// condition = [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }];
 					 fieldsCond = [{ column: 'ds_no',value: this.planNo,display:false }]
 					 url = `/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`
-					// url = '/publicPages/form/form?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition));
-					// url = '/publicPages/form/form?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
+					break;
+					case 'scan':
+					uni.scanCode({
+					    scanType: ['barCode'],
+					    success: function (res) {
+								 debugger
+					        console.log('条码类型：' + res.scanType);
+					        console.log('条码内容：' + res.result);
+					    }
+					});
 					break;
 				case 'record':
 					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
 						JSON.stringify(condition)
 					)}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}&ds_no=${this.planNo}`;
-					break;
-				case 'record-detail':
-					// 用药记录明细 条件:用药计划编码（ds_no）；默认值:用药记录编码（dsr_no）
-					condition = [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }];
-					fieldsCond = [
-						{ column: 's_code', condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }] },
-						{
-							column: 'ds_no',
-							condition: [{ colName: 'person_no', ruleType: 'eq', value: this.planDetail.person_no }, { colName: 'person_no', ruleType: 'eq', value: this.planDetail.person_no }]
-						}
-					];
-					// url = `/publicPages/form/form?serviceName=srvhealth_drug_schedule_record_detail_list_add&type=add&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
 					break;
 			}
 			uni.navigateTo({
@@ -222,11 +223,6 @@ export default {
 				this.getPlanDetail(this.planNo);
 				return;
 			}
-			// if (colVs.service_view_name) {
-			// 	uni.setNavigationBarTitle({
-			// 		title: colVs.service_view_name
-			// 	});
-			// }
 			if (Array.isArray(colVs.child_service)) {
 				let childServiceData = [];
 				for (let item of colVs.child_service) {

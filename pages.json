@@ -1,15 +1,5 @@
 {
-	"pages": [
-		// {
-		// 	"path": "pages/login/login",
-		// 	"style": {
-		// 		"navigationBarTitleText": "登录",
-		// 		"enablePullDownRefresh": false,
-		// 		"navigationBarBackgroundColor": "#f1f1f1"
-		// 	}
-
-		// },
-		{
+	"pages": [{
 			"path": "pages/pedia/pedia",
 			"style": {
 				// "navigationStyle": "custom",
@@ -40,32 +30,13 @@
 				// "navigationStyle":"custom"
 			}
 		}
-		// ,
 		// {
-		// 	"path": "pages/management/management",
+		// 	"path": "pages/testPage/testPage",
 		// 	"style": {
-		// 		"navigationBarTitleText": "用户",
+		// 		"navigationBarTitleText": "",
 		// 		"enablePullDownRefresh": false
 		// 	}
 		// }
-		,
-		{
-			"path": "pages/testPage/testPage",
-			"style": {
-				"navigationBarTitleText": "",
-				"enablePullDownRefresh": false
-			}
-		}
-		// ,
-		// ,{
-		//        "path" : "pages/form/form",
-		//        "style" :                                                                                    
-		//        {
-		//            "navigationBarTitleText": "",
-		//            "enablePullDownRefresh": false
-		//        }
-
-		//    }
 	],
 	"subPackages": [{
 			// 问卷
@@ -80,7 +51,7 @@
 				{
 					"path": "history/history",
 					"style": {
-						"navigationBarBackgroundColor":"#5494ff",
+						"navigationBarBackgroundColor": "#5494ff",
 						"enablePullDownRefresh": true
 					}
 				},
@@ -104,7 +75,7 @@
 					"style": {
 						"navigationBarTitleText": "健康记录",
 						"enablePullDownRefresh": false,
-						"navigationStyle":"custom"
+						"navigationStyle": "custom"
 					}
 				},
 				{
@@ -161,17 +132,22 @@
 						"enablePullDownRefresh": false
 					}
 
+				}, {
+					"path": "DietDetail/DietDetail",
+					"style": {
+						"navigationBarTitleText": "饮食记录详情",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "newList/newList",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": true
+					}
+
 				}
-			    ,{
-                    "path" : "DietDetail/DietDetail",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "饮食记录详情",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "pregnancy",
@@ -260,6 +236,7 @@
 				}, {
 					"path": "userList/userList",
 					"style": {
+						"navigationStyle": "custom",
 						"navigationBarTitleText": "用户管理",
 						"enablePullDownRefresh": false
 					}
@@ -340,12 +317,6 @@
 						"navigationBarTitleText": "店铺列表"
 					}
 				},
-				// {
-				// 	"path": "sportsDetail/sportsDetail",
-				// 	"style": {
-				// 		"navigationBarTitleText": "运动详情"
-				// 	}
-				// }, 
 				{
 					"path": "otherIndicator/otherIndicator",
 					"style": {
@@ -449,38 +420,6 @@
 				}
 			]
 		},
-		// ,
-		// {
-		// 	"path": "pregnant/pregnant",
-		// 	"style": {}
-		// },
-		// {
-		// 	"path": "pregnant/pregnantHome",
-		// 	"style": {}
-		// },
-		// {
-		// 	"path": "pregnant/pregnantDetail",
-		// 	"style": {}
-		// },
-		// {
-		// 	"path": "pregnant/pregnantFoods",
-		// 	"style": {}
-		// },
-		// {
-		// 	"path": "pregnant/pregnantFoodsDetail",
-		// 	"style": {}
-		// },
-		// {
-		// 	"path": "pregnant/symptomDetail",
-		// 	"style": {}
-		// }
-		// ,
-		// {
-		// 	"path": "personal/personal",
-		// 	"style": {
-		// 		"navigationBarTitleText": "个人资料"
-		// 	}
-		// }
 		{
 			// 健康百科中的页面
 			"root": "pediaPages",
@@ -507,12 +446,6 @@
 						"navigationBarTitleText": "列表"
 					}
 				},
-				// {
-				// 	"path": "form/form",
-				// 	"style": {
-				// 		"navigationBarTitleText": "表单"
-				// 	}
-				// },
 				{
 					"path": "webviewPage/webviewPage",
 					"style": {

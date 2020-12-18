@@ -78,6 +78,10 @@
 				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
 				<view class="value" v-else>{{ fieldData.value | html2text }}</view>
 			</view>
+			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'RichText'" @click="showRichEditor = true">
+				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
+				<view class="value" v-else>{{ fieldData.value | html2text }}</view>
+			</view>
 			<input
 				class="form-item-content_value"
 				@blur="onBlur"
@@ -126,30 +130,30 @@
 			<text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType === 'location'"></text>
 		</view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }" @click.self="showTextArea = false">
+		<view class="cu-modal bottom-modal" :class="{ show: showRichEditor }" @click.self="showRichEditor = false">
 			<view class="cu-dialog">
 				<jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor"></jin-edit>
-				<!-- <rich-text-editor :html="textareaValue" ref="richEditor"></rich-text-editor> -->
-				<!-- <rich-text :nodes="textareaValue"></rich-text> -->
-				<!-- <textarea class="form-item-content_value textarea" v-model="textareaValue" placeholder="请输入" /> -->
-				<!-- <view class="button-box">
-					<button class="cu-btn button bg-grey" @tap="cancelSaveRichText">取消</button>
-					<button
-						type="primary"
-						class="cu-btn button bg-blue"
-						@tap="
-							showTextArea = false;
-							fieldData.value = textareaValue;
-						"
-					>
-						确定
-					</button>
-				</view> -->
+			</view>
+		</view>
+		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }" @click.self="showTextArea = false">
+			<view class="cu-dialog">
+				<textarea
+					style="min-height: 300px;width: 100%;text-align: left;text-indent: 40rpx;padding: 20rpx;"
+					:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 100"
+					@blur="onBlur"
+					auto-height
+					v-model="fieldData.value"
+					@input="onInput"
+					:placeholder="'请输入'"
+				></textarea>
+			</view>
+			<view class="button">
+				
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }" @tap.self="showTreeSelector = false">
 			<view class="cu-dialog">
-				<view class="tree-selector cascader"><cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="fieldData.srvInfo"></cascader-selector></view>
+				<view class="tree-selector cascader" v-if="showTreeSelector"><cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="fieldData.srvInfo"></cascader-selector></view>
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showSelectorPopup || showMultiSelectorPopup }">
@@ -200,6 +204,9 @@ export default {
 				val = JSON.stringify(val);
 			} else if (!val) {
 				val = '';
+			}
+			if(val==='null'){
+				val = '—'
 			}
 			return val;
 		}
@@ -285,6 +292,7 @@ export default {
 			showMultiSelectorPopup: false,
 			showTreeSelector: false,
 			showTextArea: false,
+			showRichEditor:false,
 			textareaValue: this.fieldData && this.fieldData.value ? this.fieldData.value : '',
 			treePageInfo: { total: 0, rownumber: 20, pageNo: 1 },
 			selectorData: [],
@@ -304,7 +312,7 @@ export default {
 			immediate: true,
 			handler(newValue, oldValue) {
 				this.fieldData = newValue;
-				if (newValue.type === 'textarea') {
+				if (newValue.type === 'textarea'||newValue.type === 'RichText') {
 					this.textareaValue = newValue.value;
 				}
 			}

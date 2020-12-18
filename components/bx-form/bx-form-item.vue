@@ -160,7 +160,7 @@
 					></attachment> -->
 				</view>
 				<textarea
-					style="min-height: 60px;width: 100%;"
+					style="min-height: 60px;width: 100%;text-align: left;"
 					:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 100"
 					@blur="onInputBlur"
 					auto-height

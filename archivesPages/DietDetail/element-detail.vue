@@ -45,11 +45,10 @@ export default {
 	},
 	data() {
 		return {
-			showChart: false,
+			showChart: true,
 			eleData: eleData,
 			nutrientList: [],
 			chartData: {
-				option: {}
 			}
 		};
 	},
@@ -72,6 +71,11 @@ export default {
 			handler(newValue, oldValue) {
 				if (newValue && newValue.diet_record_no) {
 					// this.buildChartOption();
+					if(!this.chartData.option){
+						this.getNutrientRecommended().then(_ => {
+							this.buildChartOption();
+						});
+					}
 				}
 			}
 		}
@@ -80,9 +84,9 @@ export default {
 		switchTab(show) {
 			this.showChart = show;
 			if (show) {
-				this.getNutrientRecommended().then(_ => {
+				// this.getNutrientRecommended().then(_ => {
 					this.buildChartOption();
-				});
+				// });
 			}
 		},
 		async getNutrientRecommended() {
@@ -142,7 +146,6 @@ export default {
 						});
 					});
 				});
-				debugger;
 				return result;
 			}
 		},
@@ -181,13 +184,11 @@ export default {
 				dietRecordList.forEach(diet => {
 					if (diet.diet_record_no === currentDiet.diet_record_no) {
 						diet = currentDiet;
-						debugger;
 					}
 					let ratio = 1;
 					if (diet['unit'] === 'g') {
 						ratio = (diet.unit_weight_g * diet.amount) / (diet.unit_amount ? diet.unit_amount : diet.unit_weight_g);
 					} else {
-						debugger;
 						ratio = (diet.unit_weight_g * diet.amount) / 100;
 					}
 					ele.value = ele.value + diet[ele['key']] * ratio;
@@ -223,7 +224,6 @@ export default {
 					case '其它食物':
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
-							debugger;
 							let ratio = currentDiet.unit_weight_g / 100;
 							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
 							let num = (val * 100) / Number(cur.EAR);
@@ -290,7 +290,10 @@ export default {
 						},
 						type: 'value',
 						axisLabel: {
-							formatter: `{value}%`
+							// formatter: `{value}%`
+							formatter(val){
+								return `${parseInt(val.toFixed(1))}%`
+							}
 						}
 					}
 				],

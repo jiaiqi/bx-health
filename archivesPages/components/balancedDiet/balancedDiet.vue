@@ -168,8 +168,8 @@
 				<view class="title">
 					<view class="label">饮食</view>
 					<view class="switch-layout">
-						<text class="cuIcon-list" :class="{ 'active-layout': dietLayout === 'list' }" @click="dietLayout = 'list'"></text>
-						<text class="cuIcon-apps" :class="{ 'active-layout': dietLayout === 'grid' }" @click="dietLayout = 'grid'"></text>
+						<text class="cuIcon-list active-layout" v-if="dietLayout === 'grid'" @click="dietLayout = 'list'"></text>
+						<text class="cuIcon-apps active-layout" v-if="dietLayout === 'list'" @click="dietLayout = 'grid'"></text>
 					</view>
 				</view>
 				<view class="record-box" @click.self="clickDietBox">
@@ -2661,8 +2661,8 @@ export default {
 			this.currentRecordType = 'sport';
 		},
 		async clickDietRecordItem(item) {
-			uni.redirectTo({
-				url: `/archivesPages/DietDetail/DietDetail?chooseDate=${this.selectDate}&no=${item.diet_record_no}&from=${decodeURIComponent('/archivesPages/archives-history/archives-history?pageType=diet')}`
+			uni.navigateTo({
+				url: `/archivesPages/DietDetail/DietDetail?chooseDate=${this.selectDate}&no=${item.diet_record_no}`
 			});
 			// let unitList = await this.getFoodUnit(item);
 			// unitList.forEach((unit, index) => {

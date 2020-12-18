@@ -18,7 +18,7 @@
 						</view>
 						<view class="action">
 							<text style="margin-right: 20rpx;" @click="search">搜索</text>
-							<text @click="showfilter">筛选</text>
+							<text @click="showRecent" v-if="!this.pageDetType">历史</text>
 						</view>
 					</view>
 				</view>
@@ -28,7 +28,7 @@
 		<view class="filtrate-wrap">
 			<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 				<text>已选择：</text>
-				<view @click="tagClick(item)" v-for="(item, index) in childChooseArr" class="filtrate-choose-item">
+				<view @click="tagClick(item)" v-for="(item, index) in childChooseArr" :key="index" class="filtrate-choose-item">
 					<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning" mode="light">{{ item.title }}</text>
 					<text class="lg text-gray cuIcon-close filtrate-close"></text>
 					<!-- <u-tag :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"/> -->
@@ -38,7 +38,7 @@
 				<view v-for="(item, index) in menuAgList" :key="index" class="filtrate-item">
 					<view class="filtrate-item-left" style="display: flex;flex-shrink: 0;width: 152rpx;">{{ item.classify_name }}</view>
 					<view class="" style="display: flex;  flex-flow: wrap;">
-						<view @click="chooseMenu(item, cate)" v-for="(cate, i) in item.children" :class="cate.choose ? 'cate-active' : ''" class="filtrate-item-right">
+						<view @click="chooseMenu(item, cate)" v-for="(cate, i) in item.children" :key="i" :class="cate.choose ? 'cate-active' : ''" class="filtrate-item-right">
 							<text>{{ cate.title }}</text>
 							<u-icon size="24" v-show="cate.current_num == 1 && item.type !== 'food' && childChooseArrLength == 1" name="arrow-downward"></u-icon>
 							<u-icon size="24" v-show="cate.current_num == 2 && item.type !== 'food' && childChooseArrLength == 1" name="arrow-upward"></u-icon>
@@ -224,6 +224,42 @@
 				<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>
 			</view>
 		</view>
+		<view class="cu-modal bottom-modal" @click.self="modalName = ''" :class="{ show: modalName === 'recent' }">
+			<view class="cu-dialog" style="height: auto;max-height: 90vh;overflow: scroll;">
+				<view class="recent-diet">
+					<view class="title-bar ">
+						<text class="title">近期饮食记录</text>
+						<view class="action">
+							<!-- <text class="cu-btn sm text-blue" @click="changeRecentDietMode">{{ recentDietMode === 'edit' ? '完成' : '编辑' }}</text> -->
+							<text class="cu-btn sm text-blue" @click="selectAll">全选</text>
+						</view>
+					</view>
+					<view class="content">
+						<view class="diet-item" v-for="item in recentDiet" :key="item.diet_record_no">
+							<image :src="getImagePath(item.image)" mode="aspectFill" class="image"></image>
+							<view class="info">
+								<view class="checkbox" @click="item.checked = !item.checked" v-if="recentDietMode === 'edit'">
+									<text class="cuIcon-check text-bold" v-if="item.checked"></text>
+								</view>
+								<view class="food-name">{{ item.name }}</view>
+								<view class="food-info">
+									<view class="amount">
+										<text class="separator" @click="calc(item, 'minus')">-</text>
+										<input type="number" class="input" v-model="item.amount" />
+										<text class="separator" @click="calc(item, 'add')">+</text>
+										<!-- <text class="number"></text> -->
+									</view>
+									<text class="text-left margin-left-xs">{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}</text>
+								</view>
+							</view>
+						</view>
+					</view>
+					<view class="footer" v-if="recentDietMode === 'edit' && checkedRecentDiet.length > 0">
+						<button class="cu-btn bg-cyan" @click="insertIntoDietRecord">添加到今日饮食记录</button>
+					</view>
+				</view>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -232,6 +268,7 @@ import bxFiltrate from '@/otherPages/components/bx-filtrate/bx-filtrate.vue';
 import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
 import jumpBall from '@/otherPages/components/hx-jump-ball/hx-jump-ball.vue';
 import sPullScroll from '@/components/s-pull-scroll';
+import { mapState } from 'vuex';
 export default {
 	components: {
 		sPullScroll,
@@ -240,6 +277,12 @@ export default {
 		bxFiltrate
 	},
 	computed: {
+		...mapState({
+			vuex_userInfo: state => state.user.userInfo
+		}),
+		checkedRecentDiet() {
+			return this.recentDiet.filter(item => item.checked);
+		},
 		carName() {
 			if (this.searchArg) {
 				let str = '';
@@ -265,6 +308,8 @@ export default {
 	},
 	data() {
 		return {
+			recentDiet: [],
+			recentDietMode: 'edit',
 			heightStyle: 'calc(100vh-200upx)',
 			isSeekValue: true, // 是否搜索到内容
 			chooseFoods: [],
@@ -291,7 +336,7 @@ export default {
 			showBottomModal: false, //是否显示底部选择
 			chooseFoodArr: [],
 			showCarModal: false,
-			filterResult: '',
+			// filterResult: '',
 			choiceNum: 1,
 			currTime: '',
 			unitList: [],
@@ -604,7 +649,7 @@ export default {
 					]
 				}
 			],
-			filterShow: false,
+			// filterShow: false,
 			listTouchDirection: null,
 			filterArr: [], //选择首页过滤时存储的过滤条件
 			filterParams: {
@@ -982,6 +1027,97 @@ export default {
 		}
 	},
 	methods: {
+		calc(e, type, step = 1) {
+			if (type === 'minus') {
+				if (e.amount - step > 0) {
+					e.amount = Number((e.amount - step).toFixed(1));
+				} else {
+					return;
+				}
+			} else {
+				e.amount = Number((e.amount + step).toFixed(1));
+			}
+			this.$set(e, 'amount', e.amount);
+		},
+		async insertIntoDietRecord() {
+			let url = this.getServiceUrl('health', 'srvhealth_diet_record_add', 'operate');
+			let list = this.deepClone(this.checkedRecentDiet);
+			let req = [
+				{
+					serviceName: 'srvhealth_diet_record_add',
+					colNames: ['*'],
+					data: list.map(item => {
+						delete item._userno_disp;
+						delete item.checked;
+						delete item.amountEditable;
+						return item;
+					})
+				}
+			];
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				uni.showToast({
+					title: '添加成功'
+				});
+				this.modalName = '';
+				this.getChooseFoodList();
+				// 通知健康追踪页面，饮食记录已改变，需要刷新数据
+				uni.$emit('dietUpdate');
+			}
+		},
+		selectAll() {
+			this.recentDiet.forEach(item => {
+				item.checked = true;
+			});
+		},
+		changeRecentDietMode() {
+			if (this.recentDietMode === 'edit') {
+				this.recentDietMode = 'view';
+			} else {
+				this.recentDietMode = 'edit';
+			}
+		},
+		showRecent() {
+			// 显示近期饮食弹窗。
+			this.getRecentDiet().then(data => {
+				if (Array.isArray(data) && data.length > 0) {
+					this.modalName = 'recent';
+				} else {
+					uni.showToast({
+						title: '未找到您的历史饮食记录',
+						icon: 'none'
+					});
+				}
+			});
+		},
+		async getRecentDiet() {
+			// 查找最近的饮食记录
+			let req = {
+				serviceName: 'srvhealth_diet_contents_newest_select',
+				colNames: ['*'],
+				page: {
+					pageNo: 1,
+					rownumber: 5
+				},
+				condition: [
+					{
+						colName: 'person_info_no',
+						ruleType: 'eq',
+						// value: 'PB2020121720080116'
+						value: this.vuex_userInfo.no
+					}
+				]
+			};
+			let res = await this.onRequest('select', 'srvhealth_diet_contents_newest_select', req, 'health');
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
+				this.recentDiet = res.data.data.map(item => {
+					item.checked = false;
+					item.amountEditable = false;
+					return item;
+				});
+				return res.data.data;
+			}
+		},
 		/*点击前往反馈页面**/
 		tofeedback() {
 			let no = null;
@@ -2139,20 +2275,20 @@ export default {
 			this.condObj = condObj;
 			this.getFoodsList(null, condObj);
 			console.log('condObj---', condObj);
-			this.onHideFilter();
+			// this.onHideFilter();
 		},
 
-		onResetFilter(e) {
-			//重置
-			console.log(e);
-		},
-		onHideFilter() {
-			this.filterShow = false;
-		},
-		showfilter() {
-			this.$refs.filter.hideclose();
-			this.filterShow = true;
-		},
+		// onResetFilter(e) {
+		// 	//重置
+		// 	console.log(e);
+		// },
+		// onHideFilter() {
+		// 	this.filterShow = false;
+		// },
+		// showfilter() {
+		// 	this.$refs.filter.hideclose();
+		// 	this.filterShow = true;
+		// },
 		searchStart() {
 			let serValue = this.searchValue;
 			console.log('searchStart', serValue);
@@ -2748,5 +2884,108 @@ export default {
 }
 .change-tab /deep/ .u-tab-item {
 	padding: 0 10rpx;
+}
+.recent-diet {
+	padding: 20rpx;
+	min-height: 600rpx;
+	text-align: left;
+	display: flex;
+	flex-direction: column;
+	.title-bar {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+		font-weight: bold;
+		padding: 0 0 20rpx;
+	}
+	.content {
+		flex: 1;
+	}
+	.diet-item {
+		display: inline-flex;
+		// flex-direction: column;
+		width: calc(50% - 10rpx);
+		// width: calc(33% - (40rpx/3));
+		margin-right: 20rpx;
+		// height:250rpx;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		text-align: center;
+		border-radius: 10rpx;
+		overflow: hidden;
+		margin-bottom: 10rpx;
+		// min-height: 150rpx;
+		.info {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			flex: 1;
+			position: relative;
+		}
+		.checkbox {
+			position: absolute;
+			// top:calc(50% - 20rpx);
+			bottom: 5rpx;
+			right: 5rpx;
+			background-color: #fff;
+			border: 2rpx solid #dcdfe6;
+			border-radius: 50%;
+			z-index: 10;
+			width: 40rpx;
+			height: 40rpx;
+		}
+		&:nth-child(2n) {
+			margin-right: 0;
+		}
+		// &:nth-child(3n+1){
+		// 	margin-right: 0;
+		// }
+		.image {
+			width: 160rpx;
+			height: 140rpx;
+		}
+		.food-name {
+			font-weight: bold;
+			text-align: left;
+			text-indent: 20rpx;
+		}
+		.food-info {
+			display: flex;
+			justify-content: space-between;
+			padding: 10rpx;
+			flex-direction: column;
+			.amount {
+				font-weight: normal;
+				border-radius: 4rpx;
+				height: 40rpx;
+				min-width: 40rpx;
+				line-height: 40rpx;
+				color: #333;
+				padding: 0 4rpx;
+				text-align: center;
+				// border: 1rpx solid #dcdfe6;
+				.separator {
+					display: inline-block;
+					width: 40rpx;
+					background-color: #dcdfe6;
+					text-align: center;
+				}
+				.input {
+					margin: 0;
+					padding: 0;
+					display: inline-block;
+					height: auto;
+					line-height: 1;
+					min-height: 0;
+					max-width: 50rpx;
+					text-align: center;
+					border: 1rpx solid #dcdfe6;
+				}
+			}
+		}
+	}
+	.footer {
+		text-align: center;
+		margin-bottom: 20rpx;
+	}
 }
 </style>

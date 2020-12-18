@@ -212,10 +212,9 @@ export default {
 		}
 	},
 	onLoad(option) {
-		if (option.chooseDate && option.no && option.from) {
+		if (option.chooseDate && option.no) {
 			this.chooseDate = option.chooseDate;
 			this.diet_record_no = option.no;
-			this.backUrl = option.from;
 			this.getDietRecordDetail(this.chooseDate);
 		}
 	}

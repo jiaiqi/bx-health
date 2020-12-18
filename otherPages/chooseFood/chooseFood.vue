@@ -342,6 +342,7 @@ import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #ifdef H5
 import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
+import { mapState } from 'vuex';
 export default {
 	name: 'chooseFood',
 	components: {
@@ -666,6 +667,11 @@ export default {
 		// }
 	},
 	computed: {
+		...mapState({
+			vuex_userInfo: state => state.user.userInfo,
+			vuex_isLogin: state => state.app.isLogin,
+			vuex_loginUserInfo: state => state.user.loginUserInfo
+		}),
 		age() {
 			if (this.userInfo.birthday) {
 				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
@@ -1243,6 +1249,8 @@ export default {
 						hdate: this.nowDate,
 						htime: this.currTime ? this.currTime : this.nowDateTime,
 						name: item.name,
+						person_info_no:this.vuex_userInfo.no,
+						person_name:this.vuex_userInfo.name,
 						amount: item.amount,
 						unit: this.radioLabel.unit ? this.radioLabel.unit : item.unit,
 						energy: item.heatNum,

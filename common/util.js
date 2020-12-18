@@ -224,8 +224,10 @@ export default {
 					fieldInfo.showSearch = false
 					fieldInfo.option_list_v2 = item.option_list_v2
 					fieldInfo.options = item.option_list_v2
-				} else if (item.col_type === "MultilineText" || item.col_type === 'snote') {
+				} else if (item.col_type === "MultilineText") {
 					fieldInfo.type = "textarea"
+				} else if (item.col_type === 'snote') {
+					fieldInfo.type = "RichText"
 				} else if (item.col_type === "Money" || item.col_type === "Float") {
 					fieldInfo.type = "digit"
 				} else if (item.col_type === "Integer" || item.col_type === "int") {
@@ -1477,7 +1479,7 @@ export default {
 			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
 				return no
 			} else if (no) {
-				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+ '&thumbnailType=fwsu_100';
 			}
 		}
 		Vue.prototype.requestSuccess = (res) => {
