@@ -321,9 +321,10 @@ export default {
 					this.fieldData.richData = e;
 				}
 			} else {
-				this.textareaValue = this.fieldData.value;
+				let val = this.fieldData.value ? this.fieldData.value : '';
+				this.textareaValue = val;
 				if (e.type === 'richtext') {
-					this.$refs.richEditor.resetContent(this.fieldData.value);
+					this.$refs.richEditor.resetContent(val);
 				}
 			}
 			this.modalName = '';
