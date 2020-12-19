@@ -74,11 +74,11 @@
 					</view>
 				</picker>
 			</view>
-			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'" @click="showTextArea = true">
+			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'" @click="showModal('TextArea')">
 				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
 				<view class="value" v-else>{{ fieldData.value | html2text }}</view>
 			</view>
-			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'RichText'" @click="showRichEditor = true">
+			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'RichText'" @click="showModal('RichEditor')">
 				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
 				<view class="value" v-else>{{ fieldData.value | html2text }}</view>
 			</view>
@@ -125,55 +125,52 @@
 				:limit="fieldData.fileNum"
 			></robby-image-upload>
 		</view>
-		<view class="icon-area">
-			<!-- <text class="cuIcon-edit" v-if="(fieldData.type === 'number' || fieldData.type === 'digit') && fieldData.max && fieldData.min"></text> -->
-			<text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType === 'location'"></text>
-		</view>
+		<view class="icon-area"><text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType === 'location'"></text></view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showRichEditor }" @click.self="showRichEditor = false">
-			<view class="cu-dialog" @tap.stop=""><jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor"></jin-edit></view>
+		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'RichEditor' }" @click="hideModal">
+			<view class="cu-dialog" @tap.stop=""><jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor" /></view>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }" @click.self="showTextArea = false">
+		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'TextArea' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop="">
 				<textarea
-					style="min-height: 300px;width: 100%;text-align: left;text-indent: 40rpx;padding: 20rpx;"
-					:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 100"
-					@blur="onBlur"
+					style="min-height: 300px;width: 100%;text-align: left;text-indent: 40rpx;padding: 20rpx;color: #000000;"
 					auto-height
-					v-model="fieldData.value"
-					@input="onInput"
+					v-model="textareaValue"
 					:placeholder="'请输入'"
 				></textarea>
+				<view class="button-box">
+					<view class="cu-btn button bg-gray" @click="saveRichText({ isSave: false, type: 'textarea' })">取消</view>
+					<view class="cu-btn button bg-cyan" @click="saveRichText({ isSave: true, type: 'textarea' })">确定</view>
+				</view>
 			</view>
-			<view class="button"></view>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }" @tap.self="showTreeSelector = false">
+		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'TreeSelector' }" @tap="hideModal">
 			<view class="cu-dialog" @tap.stop="">
-				<view class="tree-selector cascader" v-if="showTreeSelector">
+				<view class="tree-selector cascader" v-if="modalName === 'TreeSelector'">
 					<cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="fieldData.srvInfo"></cascader-selector>
 				</view>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showSelectorPopup || showMultiSelectorPopup }">
+		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'Selector' || modalName === 'MultiSelectorPopup' }">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="tree-selector">
 					<view class="content">
-						<view class="cu-bar search bg-white" v-if="showSelectorPopup && fieldData.showSearch !== false">
+						<view class="cu-bar search bg-white" v-if="modalName === 'Selector' && fieldData.showSearch !== false">
 							<view class="search-form round" v>
 								<text class="cuIcon-search"></text>
 								<input @input="searchFKDataWithKey" :adjust-position="false" type="text" placeholder="搜索" confirm-type="search" />
 							</view>
 						</view>
-						<bx-checkbox-group v-if="showMultiSelectorPopup" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
+						<bx-checkbox-group v-if="modalName === 'MultiSelectorPopup'" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
 							<bx-checkbox v-for="item in setOptionList" :key="item.label" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
 						</bx-checkbox-group>
-						<bx-radio-group v-if="showSelectorPopup" class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
+						<bx-radio-group v-if="modalName === 'Selector'" class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
 							<bx-radio v-for="item in selectorData" :key="item.id" :name="item.value">{{ item.label }}</bx-radio>
 						</bx-radio-group>
 					</view>
 					<view class="dialog-button">
-						<view class="cu-btn bg-blue shadow" @tap="hidePopup" v-if="showMultiSelectorPopup">确定</view>
-						<view class="cu-btn bg-grey shadow" @tap="hidePopup" v-if="showSelectorPopup">取消</view>
+						<view class="cu-btn bg-blue shadow" @tap="hideModal" v-if="modalName === 'MultiSelectorPopup'">确定</view>
+						<view class="cu-btn bg-grey shadow" @tap="hideModal" v-if="modalName === 'Selector'">取消</view>
 					</view>
 				</view>
 			</view>
@@ -286,11 +283,6 @@ export default {
 				columns: ''
 			},
 			listModel: {},
-			showSelectorPopup: false,
-			showMultiSelectorPopup: false,
-			showTreeSelector: false,
-			showTextArea: false,
-			showRichEditor: false,
 			textareaValue: this.fieldData && this.fieldData.value ? this.fieldData.value : '',
 			treePageInfo: { total: 0, rownumber: 20, pageNo: 1 },
 			selectorData: [],
@@ -301,7 +293,8 @@ export default {
 				valid: true,
 				msg: '不能为空!'
 			},
-			longpressTimer: null
+			longpressTimer: null,
+			modalName: '' //当前显示的modal
 		};
 	},
 	watch: {
@@ -319,15 +312,21 @@ export default {
 	methods: {
 		saveRichText(e) {
 			if (e.isSave) {
-				if (e.html) {
-					this.fieldData.value = e.html;
+				if (e.type === 'textarea') {
+					this.fieldData.value = this.textareaValue;
+				} else {
+					if (e.html) {
+						this.fieldData.value = e.html;
+					}
+					this.fieldData.richData = e;
 				}
-				this.fieldData.richData = e;
 			} else {
 				this.textareaValue = this.fieldData.value;
-				this.$refs.richEditor.resetContent(this.fieldData.value);
+				if (e.type === 'richtext') {
+					this.$refs.richEditor.resetContent(this.fieldData.value);
+				}
 			}
-			this.showTextArea = false;
+			this.modalName = '';
 		},
 		longpressNumEnd() {
 			clearInterval(this.longpressTimer);
@@ -386,9 +385,11 @@ export default {
 		getLocation() {
 			this.$emit('getLocation');
 		},
-		hidePopup() {
-			this.showSelectorPopup = false;
-			this.showMultiSelectorPopup = false;
+		showModal(name) {
+			this.modalName = name;
+		},
+		hideModal() {
+			this.modalName = '';
 		},
 		async getDefVal() {
 			let self = this;
@@ -452,7 +453,7 @@ export default {
 				this.fieldData.value = e[srvInfo.refed_col];
 				this.fieldData['colData'] = e;
 			}
-			this.showTreeSelector = false;
+			this.hideModal();
 			this.onInput();
 			this.getDefVal();
 		},
@@ -501,10 +502,9 @@ export default {
 				let optionData = this.selectorData.find(item => item.value === e);
 				this.fkFieldLabel = optionData.label;
 				this.fieldData['colData'] = optionData;
-				this.showSelectorPopup = false;
+				this.hideModal();
 				this.onInput();
 			}
-			// this.fkFieldLabel = this.selectorData.find(item => item.value === e).label;
 		},
 		async getSelectorData(cond, serv, relation_condition) {
 			let self = this;
@@ -562,7 +562,6 @@ export default {
 			}
 			if (req.serviceName === 'srvsso_user_select') {
 				if (Array.isArray(req.condition)) {
-					// req.condition.push();
 				} else {
 					req.condition = [{ colName: 'dept_no', ruleType: 'like', value: 'bx100sys' }];
 				}
@@ -651,14 +650,14 @@ export default {
 							}
 							return item;
 						});
-						this.showMultiSelectorPopup = true;
+						this.modalName = 'MultiSelector';
 					}
 					break;
 				case 'Selector':
-					this.showSelectorPopup = true;
+					this.modalName = 'Selector';
 					break;
 				case 'TreeSelector':
-					this.showTreeSelector = true;
+					this.modalName = 'TreeMultiSelector';
 					break;
 			}
 		},

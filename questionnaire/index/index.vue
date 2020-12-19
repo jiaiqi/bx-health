@@ -1,66 +1,60 @@
 <template>
 	<view
-		class="quest"
+		class="page-wrap"
 		:style="{
 			'--global-text-font-size': globalTextFontSize + 'px',
 			'--global-label-font-size': globalLabelFontSize + 'px'
 		}"
 	>
-		<view class="page-wrap">
-			<view class="to-history" v-if="configCols && configCols.length > 0" @click="toHistory">点击查看历史提交</view>
-			<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
-				<view class="desc" style="text-align: justify;">
-					<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
-					<view class="date-box">
-						<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
-						<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
-					</view>
+		<view class="to-history" v-if="configCols && configCols.length > 0" @click="toHistory">点击查看历史提交</view>
+		<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
+			<view class="desc" style="text-align: justify;">
+				<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
+				<view class="date-box">
+					<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
+					<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
 				</view>
 			</view>
-			<view class="content form-wrap" style="box-sizing: border-box;">
-				<bxform ref="bxform" :fields="configCols" label-position="top" option-mode="normal" pageType="add" @value-blur="saveValue"></bxform>
-			</view>
-			<view class="content" style="padding:30upx;" v-if="formData.end_remark">
-				<view class="desc">
-					<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
-				</view>
-			</view>
-			<view
-				class="button-box"
-				style="margin: 30upx;"
-				v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
-			>
-				<button class="button" type="" @click="submitForm()">提交</button>
-			</view>
-			<!-- <view class="to-history"  v-if="configCols && configCols.length > 0 && formType === 'form'"  @click="toHistory">点击查看历史提交</view> -->
-			<view
-				class="button-box"
-				style="margin: 30upx;"
-				v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
-			>
-				<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
-			</view>
-			<view
-				class="button-box"
-				style="margin: 30upx;"
-				v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
-			>
-				<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
-				<view class="score-box" v-if="scoreInfo.score || scoreInfo.score === 0">
-					得分：
-					<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
-				</view>
-			</view>
-			<!-- <view class="to-history" v-if="configCols && configCols.length > 0 && formType === 'form'" @click="toHistory">点击查看历史提交</view> -->
 		</view>
-		<!-- <u-empty :text="emptyText" v-if="!configCols || configCols.length === 0"></u-empty> -->
+		<view class="content form-wrap" style="box-sizing: border-box;">
+			<bxform ref="bxform" :fields="configCols" label-position="top" option-mode="normal" pageType="add" @value-blur="saveValue"></bxform>
+		</view>
+		<view class="content" style="padding:30upx;" v-if="formData.end_remark">
+			<view class="desc">
+				<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
+			</view>
+		</view>
+		<view
+			class="button-box"
+			style="margin: 30upx;"
+			v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
+		>
+			<button class="button" type="" @click="submitForm()">提交</button>
+		</view>
+		<view
+			class="button-box"
+			style="margin: 30upx;"
+			v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
+		>
+			<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
+		</view>
+		<view
+			class="button-box"
+			style="margin: 30upx;"
+			v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
+		>
+			<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
+			<view class="score-box" v-if="scoreInfo.score || scoreInfo.score === 0">
+				得分：
+				<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
 import bxform from '@/components/a-form/a-form.vue';
 import { mapState } from 'vuex';
-// import bxform from '@/components/bx-form/bx-form.vue';
 
 export default {
 	name: 'questionnaire', //问卷答题页面
@@ -288,14 +282,12 @@ export default {
 											}
 										}
 									} else {
-										// if (res.data.resultCode === 'FAILURE') {
 										uni.showToast({
 											title: res.data.resultMessage,
 											icon: 'none'
 										});
 									}
 									console.log(res);
-									// }
 								});
 							}
 						} else if (res.cancel) {
@@ -341,7 +333,6 @@ export default {
 					}
 				];
 			}
-			console.log(this.questionData);
 			if (questionData && questionData.fill_batch_no) {
 				req.condition = [
 					{
@@ -380,96 +371,89 @@ export default {
 					}
 				];
 			}
-			if (this)
-				this.$http
-					.post(url, req)
-					.then(res => {
-						if (res.data.state === 'SUCCESS') {
-							const data = res.data.data[0];
-							this.activity_no = data.activity_no;
-							let configCols = [];
-							data.item_data.forEach(item => {
-								configCols.push(this.getConfig(item));
-							});
-							if (data.logo) {
-								this.getPicture(data.logo).then(url => {
-									this.$set(this.formData, 'fileUrl', url);
-								});
-							}
-							if (data.user_data) {
-								console.log('data.answer_times', data.answer_times);
-								configCols.forEach(item => {
-									if (this.formType === 'detail') {
-										item.disabled = true;
-									}
-									data.user_data.forEach(items => {
-										if (item.column === items.item_no) {
-											if (item.item_type_attr && item.item_type_attr.radioType === 'multi') {
-												item.value = items.option_data;
-											} else {
-												item.value = items.option_data[0];
-											}
-										}
-									});
-								});
-							}
-							this.formData = data;
-							if (data.title) {
-								uni.setNavigationBarTitle({
-									title: data.title
-								});
-							}
-							if (data.user_state === '完成' && data.answer_times !== '多次') {
-								this.formType = 'detail';
-							}
-							configCols.forEach((item, index) => {
-								item.iconSize = 28;
-								item.itemIndex = index + 1;
-								if (item.label && item.label.slice(0, 1) != (index + 1).toString() && item.label.slice(0, 2) != (index + 1).toString()) {
-									item.label = (index + 1).toString() + '.' + item.label;
-								}
-								if (item.type === 'digit' && item.item_type_attr.decimal && item.value) {
-									item.value = Number(item.value).toFixed(item.item_type_attr.decimal);
-								} else if (item.type === 'digit' && !item.item_type_attr.decimal && item.value) {
-									item.value = Number(item.value).toFixed(1);
-								} else if (item.type === 'number' && item.value) {
-									item.value = parseInt(item.value).toString() !== 'NaN' ? parseInt(item.value) : 0;
-								}
-							});
-							this.configCols = configCols;
-							// alert("即将获取用户信息")
-							this.getUserInfo();
-						} else if (res.data.resultCode === '0011') {
-							uni.showToast({
-								title: '未登录',
-								icon: 'none'
-							});
-						} else if (res.data.resultCode === 'FAILURE') {
-							uni.showToast({
-								title: res.data.resultMessage,
-								icon: 'none'
-							});
-							if (res.data.resultMessage === '活动已结束') {
-								this.updateState().then(response => {
-									uni.showModal({
-										title: '提示',
-										content: res.data.resultMessage + ',即将跳转到列表页面',
-										showCancel: false,
-										success(res) {
-											if (res.confirm) {
-												uni.navigateBack({
-													animationDuration: 2000
-												});
-											}
-										}
-									});
-								});
-							}
-						}
-					})
-					.catch(err => {
-						console.log('err', err);
+			this.$http.post(url, req).then(res => {
+				if (res.data.state === 'SUCCESS') {
+					const data = res.data.data[0];
+					this.activity_no = data.activity_no;
+					let configCols = [];
+					data.item_data.forEach(item => {
+						configCols.push(this.getConfig(item));
 					});
+					if (data.logo) {
+						this.getPicture(data.logo).then(url => {
+							this.$set(this.formData, 'fileUrl', url);
+						});
+					}
+					if (data.user_data) {
+						console.log('data.answer_times', data.answer_times);
+						configCols.forEach(item => {
+							if (this.formType === 'detail') {
+								item.disabled = true;
+							}
+							data.user_data.forEach(items => {
+								if (item.column === items.item_no) {
+									if (item.item_type_attr && item.item_type_attr.radioType === 'multi') {
+										item.value = items.option_data;
+									} else {
+										item.value = items.option_data[0];
+									}
+								}
+							});
+						});
+					}
+					this.formData = data;
+					if (data.title) {
+						uni.setNavigationBarTitle({
+							title: data.title
+						});
+					}
+					if (data.user_state === '完成' && data.answer_times !== '多次') {
+						this.formType = 'detail';
+					}
+					configCols.forEach((item, index) => {
+						item.iconSize = 28;
+						item.itemIndex = index + 1;
+						if (item.label && item.label.slice(0, 1) != (index + 1).toString() && item.label.slice(0, 2) != (index + 1).toString()) {
+							item.label = (index + 1).toString() + '.' + item.label;
+						}
+						if (item.type === 'digit' && item.item_type_attr.decimal && item.value) {
+							item.value = Number(item.value).toFixed(item.item_type_attr.decimal);
+						} else if (item.type === 'digit' && !item.item_type_attr.decimal && item.value) {
+							item.value = Number(item.value).toFixed(1);
+						} else if (item.type === 'number' && item.value) {
+							item.value = parseInt(item.value).toString() !== 'NaN' ? parseInt(item.value) : 0;
+						}
+					});
+					this.configCols = configCols;
+					this.getUserInfo();
+				} else if (res.data.resultCode === '0011') {
+					uni.showToast({
+						title: '未登录',
+						icon: 'none'
+					});
+				} else if (res.data.resultCode === 'FAILURE') {
+					uni.showToast({
+						title: res.data.resultMessage,
+						icon: 'none'
+					});
+					if (res.data.resultMessage === '活动已结束') {
+						this.updateState().then(response => {
+							uni.showModal({
+								title: '提示',
+								content: res.data.resultMessage + ',即将跳转到列表页面',
+								showCancel: false,
+								success(res) {
+									if (res.confirm) {
+										uni.navigateBack({
+											animationDuration: 2000
+										});
+									}
+								}
+							});
+						});
+					}
+				}
+			});
 		},
 		async updateState(e) {
 			let reqData = [
@@ -492,11 +476,7 @@ export default {
 				}
 			];
 			let response = await this.$http.post(url, req);
-			if (response.data.resultCode === 'SUCCESS') {
-				// this.getList(this.currentTab)
-			}
 			return response;
-			console.log(response);
 		},
 		async getUserInfo() {
 			// 获取微信账号信息
@@ -513,12 +493,10 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			// alert("wxUserInfo:"+JSON.stringify(res))
 			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
 				const userInfo = res.data.data[0];
 				this.wxUserInfo = userInfo;
 				uni.setStorageSync('wxUserInfo', userInfo);
-				// alert(JSON.stringify(userInfo));
 			} else {
 				uni.showToast({
 					title: '未获取到当前微信用户信息',
@@ -732,21 +710,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.quest {
+.page-wrap {
 	background-color: #fff;
-	color: #fff;
-	height: 100vh;
-	.page-wrap {
-		height: 100%;
-		overflow-y: scroll;
-	}
 }
 .content {
 	width: 100%;
-	&.form-wrap {
-		// height: calc(100vh - 600rpx);
-		// overflow-y: scroll;
-	}
 	.desc {
 		width: 100%;
 	}

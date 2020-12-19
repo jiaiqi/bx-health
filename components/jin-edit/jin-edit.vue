@@ -256,7 +256,8 @@ export default {
 			this.editorCtx.getContents({
 				success: res => {
 					Object.assign(res, {
-						isSave: isSave
+						isSave: isSave,
+						type:'richtext'
 					});
 					this.$emit('editOk', res);
 				}
