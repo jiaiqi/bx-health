@@ -1,6 +1,5 @@
 {
-	"pages": [
-		{
+	"pages": [{
 			"path": "pages/pedia/pedia",
 			"style": {
 				// "navigationStyle": "custom",
@@ -386,7 +385,7 @@
 					"path": "shop/shopDetail",
 					"style": {}
 				},
-		
+
 				{
 					"path": "shop/foodMaterial",
 					"style": {}
@@ -432,12 +431,6 @@
 					}
 				},
 				{
-					"path": "form/form",
-					"style": {
-						"navigationBarTitleText": "表单"
-					}
-				},
-				{
 					"path": "webviewPage/webviewPage",
 					"style": {
 						"enablePullDownRefresh": false
@@ -455,7 +448,6 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}
 			]
 		}

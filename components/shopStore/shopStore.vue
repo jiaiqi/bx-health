@@ -253,7 +253,6 @@ export default {
 			];
 			uni.navigateTo({
 				url: `/publicPages/newForm/newForm?type=update&serviceName=srvhealth_restaurant_mgmt_select&fieldsCond=${JSON.stringify(fieldsCond)}`
-				// url: '/publicPages/form/form?type=update&params=' + encodeURIComponent(JSON.stringify(params))
 			});
 		},
 		/*删除**/
@@ -434,8 +433,6 @@ export default {
 			let fieldsCond = [{ column: 'address', fieldType: 'location' }];
 			uni.navigateTo({
 				url: `/publicPages/newForm/newForm?serviceName=srvhealth_restaurant_mgmt_add&type=add&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`
-				// url: `/pages/form/form?serviceName=srvhealth_restaurant_mgmt_add&type=add&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`
-				// url: '/publicPages/form/form?serviceName=srvhealth_restaurant_mgmt_add&type=add'
 			});
 		}
 	}

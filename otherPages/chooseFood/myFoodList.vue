@@ -66,7 +66,6 @@ export default {
 			];
 			uni.navigateTo({
 				url: '/publicPages/newForm/newForm?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add'
-				// url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&cond='+decodeURIComponent(JSON.stringify(cond))
 			});
 		},
 		async getFoodList() {

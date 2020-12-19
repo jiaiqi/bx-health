@@ -124,7 +124,6 @@ export default {
 			};
 			uni.navigateTo({
 				url: '/publicPages/newForm/newForm?serviceName=srvhealth_restaurant_mgmt_select&type=update&fieldsCond=' + encodeURIComponent(JSON.stringify(cond))
-				// url: '/publicPages/form/form?type=update&params='+ encodeURIComponent(JSON.stringify(params))
 			});
 		},
 		/*删除**/
@@ -304,7 +303,6 @@ export default {
 		addShop() {
 			uni.navigateTo({
 				url: '/publicPages/newForm/newForm?serviceName=srvhealth_restaurant_mgmt_add&type=add'
-				// url: '/publicPages/form/form?serviceName=srvhealth_restaurant_mgmt_add&type=add'
 			});
 		}
 	}

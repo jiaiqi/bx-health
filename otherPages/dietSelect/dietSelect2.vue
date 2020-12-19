@@ -119,7 +119,7 @@
 		</sPullScroll> -->
 		<!-- </scroll-view> -->
 		<view v-if="pageType === 'sport'" class="cu-modal bottom-modal" :class="{ show: showBottomModal }">
-			<view class="cu-dialog" :class="pageType === 'sport'?'sport-dialog':''">
+			<view class="cu-dialog" :class="pageType === 'sport'?'sport-dialog':''"  @tap.stop="">
 				<view class="cu-bar bg-white">
 					<view class=" text-cyan button" @tap="showBottomModal = false">取消</view>
 					<view class="date-time">
@@ -161,7 +161,8 @@
 								<text @click="countDietNum('-0.1')">-0.1</text>
 								<text @click="countDietNum('-1')">-1</text>
 							</view>
-							<u-input placeholder=" " :disabled="true" :clearable="false" :border="true" maxlength="20" v-model="choiceNum" type="number" />
+							<input placeholder=" " :disabled="true" :clearable="false" :border="true" maxlength="20" v-model="choiceNum" type="number" />
+							<!-- <u-input placeholder=" " :disabled="true" :clearable="false" :border="true" maxlength="20" v-model="choiceNum" type="number" /> -->
 							<view class="key-right">
 								<text @click="countDietNum('+1')">+1</text>
 								<text @click="countDietNum('+0.1')">+0.1</text>
@@ -1000,7 +1001,6 @@ export default {
 				}]
 				uni.navigateTo({
 				  url: '/publicPages/newForm/newForm?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add'
-				  // url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&cond='+decodeURIComponent(JSON.stringify(cond))
 				});
 			}
 			

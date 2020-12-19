@@ -1,8 +1,11 @@
 <template>
-	<view class="container" :style="{
-		'--global-text-font-size':globalTextFontSize+'px',
-		'--global-label-font-size':globalLabelFontSize+'px'
-	}">
+	<view
+		class="container"
+		:style="{
+			'--global-text-font-size': globalTextFontSize + 'px',
+			'--global-label-font-size': globalLabelFontSize + 'px'
+		}"
+	>
 		<view class="container-top" @click="toPages('updateInfo')">
 			<view class="top-left">
 				<image
@@ -85,8 +88,8 @@ export default {
 	},
 	computed: {
 		...mapState({
-			'globalTextFontSize':state=>state.app["globalTextFontSize"],
-			'globalLabelFontSize':state=>state.app.globalLabelFontSize
+			globalTextFontSize: state => state.app['globalTextFontSize'],
+			globalLabelFontSize: state => state.app.globalLabelFontSize
 		}),
 		...mapGetters({
 			vuex_userInfo: 'userInfo',
@@ -104,20 +107,22 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
 				colNames: ['*'],
-				condition:[{
-					colName: 'receiver_account',
-					ruleType: 'eq',
-					value: userNo
-				},
-				{
-					colName: 'msg_state',
-					ruleType: 'eq',
-					value: '未读'
-				},
-				{
-					colName: 'identity',
-					ruleType: 'notnull'
-				}],
+				condition: [
+					{
+						colName: 'receiver_account',
+						ruleType: 'eq',
+						value: userNo
+					},
+					{
+						colName: 'msg_state',
+						ruleType: 'eq',
+						value: '未读'
+					},
+					{
+						colName: 'identity',
+						ruleType: 'notnull'
+					}
+				],
 				// relation_condition: {
 				// 	relation: 'OR',
 				// 	data: [
@@ -165,7 +170,7 @@ export default {
 				let doctorList = await this.getDoctorInfoMessage(noStr, true);
 			}
 		},
-		async getUserDoctorInfo(customer_no){
+		async getUserDoctorInfo(customer_no) {
 			let url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
@@ -174,9 +179,9 @@ export default {
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);
-			console.log("iserInfo-----",res)
+			console.log('iserInfo-----', res);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				return res.data.data[0]
+				return res.data.data[0];
 			}
 		},
 		async getBindhzDoctor(no) {
@@ -191,23 +196,25 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				// this.doctorList = res.data.data;
-				let arr = []
-				res.data.data.forEach(items=>{
-					this.getUserDoctorInfo(items.customer_no).then(r=>{
-						if(r && r.userno){
-							arr.push(r.userno)
-						}
-					}).then(_=>{
-						let noStr = arr.toString()
-						// let doctorList = await this.getDoctorRecod(noStr)
-						this.getDoctorRecod(noStr,'患者').then(l=>{
-							console.log("l------------>",l)
-							this.hzMessage = l
+				let arr = [];
+				res.data.data.forEach(items => {
+					this.getUserDoctorInfo(items.customer_no)
+						.then(r => {
+							if (r && r.userno) {
+								arr.push(r.userno);
+							}
 						})
-					})
-				})
+						.then(_ => {
+							let noStr = arr.toString();
+							// let doctorList = await this.getDoctorRecod(noStr)
+							this.getDoctorRecod(noStr, '患者').then(l => {
+								console.log('l------------>', l);
+								this.hzMessage = l;
+							});
+						});
+				});
 				// let noList = res.data.data.map(item => item.customer_name);
-				
+
 				// console.log('查询----', doctorList, res.data.data);
 			}
 		},
@@ -242,13 +249,12 @@ export default {
 					];
 					uni.navigateTo({
 						url: '/publicPages/newForm/newForm?serviceName=srvhealth_doctor_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
-						// url: '/pages/form/form?serviceName=srvhealth_doctor_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 					});
 					break;
 				case 'userList':
 					this.getDoctorInfo().then(res => {
-						if (res&&res.dt_no) {
-							this.$store.commit('SET_DOCTOR_INFO',res)
+						if (res && res.dt_no) {
+							this.$store.commit('SET_DOCTOR_INFO', res);
 							uni.navigateTo({
 								url: '/personalPages/userList/userList'
 							});
@@ -266,18 +272,6 @@ export default {
 					});
 					break;
 				case 'updateInfo':
-					// let cond = [
-					// 	{
-					// 		colName: 'no',
-					// 		ruleType: 'in',
-					// 		value: this.vuex_userInfo.no
-					// 	}
-					// ];
-					// let params = {
-					// 	type: 'detail',
-					// 	condition: cond,
-					// 	serviceName: 'srvhealth_person_info_select'
-					// };
 					if (this.vuex_userInfo.no) {
 						let fieldsCond = [
 							{
@@ -287,13 +281,12 @@ export default {
 						];
 						uni.navigateTo({
 							url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_select&type=detail&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
-							// url: '/publicPages/form/form?type=detail&params=' + encodeURIComponent(JSON.stringify(params))
 						});
 					}
 					break;
 			}
 		},
-		async getDoctorRecod(userNo,type) {
+		async getDoctorRecod(userNo, type) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
@@ -348,7 +341,7 @@ export default {
 					});
 					let str = arr.join(',');
 					let count_num = 0;
-					this.getDoctorRecod(str,'医生').then(length => {
+					this.getDoctorRecod(str, '医生').then(length => {
 						count_num += length;
 						this.doctor_message = count_num;
 						console.log('-----------------length---', count_num);
@@ -487,12 +480,12 @@ export default {
 	onShow() {
 		this.userInfo = uni.getStorageSync('current_user_info');
 		this.getDoctorAllRecod(this.userInfo.userno).then(r => {
-			if(r > 99){
-				r = '99+'
-			}else{
-				r = r.toString()
+			if (r > 99) {
+				r = '99+';
+			} else {
+				r = r.toString();
 			}
-			if(r != 0){
+			if (r != 0) {
 				uni.setTabBarBadge({
 					index: 3,
 					text: r,
@@ -503,12 +496,11 @@ export default {
 						console.log('fails----', fails);
 					}
 				});
-			}else{
+			} else {
 				uni.removeTabBarBadge({
-					index: 3,
-				})
+					index: 3
+				});
 			}
-			
 		});
 		this.getBindDoctor();
 		this.getDoctorInfo().then(res => {
@@ -644,7 +636,7 @@ export default {
 	}
 	.container-bot {
 		margin-top: 40upx;
-		.content{
+		.content {
 			font-size: var(--global-text-font-size);
 		}
 	}

@@ -4,15 +4,11 @@
 			<view class="element-name">
 				<text class="text">{{ elementData.label }}({{ elementData.units }})</text>
 			</view>
-			<view class="desc-box" v-if="elementData&&elementData.UL&&elementData.value>elementData.UL&&eleDetail&&eleDetail.excess_title">
-				 <view class="desc-detail" v-html="eleDetail.excess_title">
-					 <text class="cuIcon-creative"></text>
-				</view>
+			<view class="desc-box" v-if="elementData && elementData.UL && elementData.value > elementData.UL && eleDetail && eleDetail.excess_title">
+				<view class="desc-detail" v-html="eleDetail.excess_title"><text class="cuIcon-creative"></text></view>
 			</view>
-			<view class="desc-box" v-if="elementData&&elementData.value<elementData.EAR&&eleDetail&&eleDetail.excess_title">
-				 <view class="desc-detail" v-html="eleDetail.excess_title">
-					 <text class="cuIcon-creative"></text>
-				</view>
+			<view class="desc-box" v-if="elementData && elementData.value < elementData.EAR && eleDetail && eleDetail.excess_title">
+				<view class="desc-detail" v-html="eleDetail.excess_title"><text class="cuIcon-creative"></text></view>
 			</view>
 			<view class="ele-item-wrap" v-if="elementData.label !== '钠'">
 				<text class="ele-item-name">{{ elementData.name }}</text>
@@ -71,10 +67,8 @@
 				<uni-echarts @click-chart="clickCharts" class="uni-ec-canvas" ref="canvasPie" canvas-id="canvasPie" :ec="ec"></uni-echarts>
 				<!-- #endif -->
 			</view>
-			<view class="desc-box" v-if="eleDetail&&eleDetail.desc">
-				 <view class="desc-detail" v-html="eleDetail.desc">
-					 <text class="cuIcon-creative"></text>
-				</view>
+			<view class="desc-box" v-if="eleDetail && eleDetail.desc">
+				<view class="desc-detail" v-html="eleDetail.desc"><text class="cuIcon-creative"></text></view>
 			</view>
 			<view class="tips" v-if="elementData.name === 'VA'">
 				<text class="cuIcon-creative">
@@ -110,18 +104,17 @@
 				>
 					<view class="column diet-name">{{ item.name }}</view>
 					<view class="column">{{ item.unit === 'g' ? item.amount * item.unit_weight_g + item.unit : item.amount + item.unit }}</view>
-					<view class="column">{{ (item.amount * item[elementData.key]).toFixed(1) + elementData.units }}</view>
-					<view class="column">{{ item.unit_energy?item.amount * item.unit_energy:item.amount * item.energy }}千卡</view>
+					<view class="column">{{ Number((item.amount * item[elementData.key]).toFixed(1)) + elementData.units }}</view>
+					<view class="column">{{ item.unit_energy ? item.amount * item.unit_energy : (item.amount * item.energy) | toFixed1 }}千卡</view>
 					<view class="move column"><view class="" @click="deleteItem(item)">删除</view></view>
 				</view>
 				<view class="diet-item total" v-if="dietRecord.length > 0">
 					<view class="column">共计:</view>
 					<view class="column">{{ totalWeight }}g</view>
-					<view class="column">{{ totalNutrient + elementData.units }}</view>
-					<view class="column heat">{{ totalCalories }}千卡</view>
+					<view class="column">{{ Number(totalNutrient.toFixed(1)) + elementData.units }}</view>
+					<view class="column heat">{{ totalCalories | toFixed1 }}千卡</view>
 				</view>
 			</view>
-		
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
 			<view class="cu-dialog current-diet-detail" v-if="currentDiet">
@@ -129,7 +122,7 @@
 					<view class="date">{{ currentDiet.hdate + ' ' + currentDiet.htime.slice(0, 5) }}</view>
 				</view>
 				<view class="diet-info">
-					<view class="img"><u-image width="100%" height="100%" :src="currentDietImgUrl"></u-image></view>
+					<view class="img"><image width="100%" mode="aspectFit" height="100%" :src="currentDietImgUrl"></image></view>
 					<view class="info">
 						<view class="name">
 							{{ currentDiet.name }}
@@ -241,6 +234,15 @@ export default {
 			}
 		}
 	},
+	filters: {
+		toFixed1: function(value) {
+			if (value.toFixed(1)) {
+				return parseFloat(value.toFixed(1));
+			} else {
+				return '';
+			}
+		}
+	},
 	data() {
 		return {
 			currentDietChartData: {},
@@ -253,7 +255,7 @@ export default {
 				series: []
 			},
 			elementData: {},
-			eleDetail:{},
+			eleDetail: {},
 			copyElementData: {},
 			user_no: '',
 			date: '',
@@ -483,7 +485,11 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni
+										? item.val_rni * self.userInfo.weight
+										: item.val_ear
+										? item.val_ear * self.userInfo.weight
+										: mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -566,9 +572,12 @@ export default {
 					this.currentUnitIndex = index;
 				}
 			});
-			this.showEditModal = true;
-			this.currentDiet = this.deepClone(item);
-			this.buildCurrenDietChartOption();
+			// this.showEditModal = true;
+			// this.currentDiet = this.deepClone(item);
+			// this.buildCurrenDietChartOption();
+			uni.navigateTo({
+				url: `/archivesPages/DietDetail/DietDetail?chooseDate=${this.date}&no=${item.diet_record_no}`
+			});
 		},
 		async UpdateDietInfo() {
 			let self = this;
@@ -791,18 +800,16 @@ export default {
 			this.ec = result;
 			return result;
 		},
-		async getElementDetail(){
+		async getElementDetail() {
 			let url = this.getServiceUrl('health', 'srvhealth_biochemical_substance_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_biochemical_substance_select',
 				colNames: ['*'],
-				condition: [
-					{ colName: 'name', ruleType: 'like', value: this.copyElementData.name }
-				]
+				condition: [{ colName: 'name', ruleType: 'like', value: this.copyElementData.name }]
 			};
-			let res  = await this.$http.post(url,req)
-			if(Array.isArray(res.data.data)&&res.data.data.length>0){
-				this.eleDetail = res.data.data[0]
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				this.eleDetail = res.data.data[0];
 			}
 		},
 		// ListTouch触摸开始
@@ -842,7 +849,7 @@ export default {
 					_self.elementData.value_left = JSON.parse(e.data).value_left;
 				}, 1000);
 				this.copyElementData = JSON.parse(e.data);
-				this.getElementDetail()
+				this.getElementDetail();
 			} catch (e) {
 				//TODO handle the exception
 			}
@@ -871,7 +878,7 @@ export default {
 			background: #f0f9eb;
 			border-color: #c2e7b0;
 		}
-		.desc-box{
+		.desc-box {
 			padding: 20rpx;
 			display: flex;
 			color: #67c23a;

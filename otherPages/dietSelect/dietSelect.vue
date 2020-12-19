@@ -150,7 +150,8 @@
 								<text @click="countDietNum('-0.1')">-0.1</text>
 								<text @click="countDietNum('-1')">-1</text>
 							</view>
-							<u-input placeholder=" " :disabled="true" :clearable="false" :border="true" maxlength="20" v-model="choiceNum" type="number" />
+							<input placeholder=" " :disabled="true" :clearable="false" :border="true" maxlength="20" v-model="choiceNum" type="number" />
+							<!-- <u-input placeholder=" " :disabled="true" :clearable="false" :border="true" maxlength="20" v-model="choiceNum" type="number" /> -->
 							<view class="key-right">
 								<text @click="countDietNum('+1')">+1</text>
 								<text @click="countDietNum('+0.1')">+0.1</text>
@@ -224,8 +225,8 @@
 				<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal" @click.self="hideModal" :class="{ show: modalName === 'recent' }">
-			<view class="cu-dialog" style="height: auto;max-height: 90vh;overflow: scroll;">
+		<view class="cu-modal bottom-modal" @tap="hideModal" :class="{ show: modalName === 'recent' }">
+			<view class="cu-dialog" @tap.stop="" style="height: auto;max-height: 90vh;overflow: scroll;">
 				<view class="recent-diet">
 					<view class="title-bar ">
 						<text class="title">近期饮食记录</text>
@@ -239,7 +240,9 @@
 						<view class="diet-item" v-for="item in recentDiet" :key="item.diet_record_no">
 							<image :src="getImagePath(item.image)" mode="aspectFill" class="image"></image>
 							<view class="info">
-								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'"><text class="cuIcon-check text-bold" v-if="item.checked"></text></view>
+								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'">
+									<text class="cuIcon-check text-bold" v-if="item.checked"></text>
+								</view>
 								<view class="food-name">{{ item.name }}</view>
 								<view class="food-info">
 									<view class="amount">
@@ -255,7 +258,8 @@
 						</view>
 					</view>
 					<view class="footer" v-if="recentDietMode === 'edit' && checkedRecentDiet.length > 0">
-						<button class="cu-btn bg-cyan" @click="insertIntoDietRecord">添加到今日饮食记录</button>
+						<button class="cu-btn bg-gray margin-right" @click="hideModal">取消</button>
+						<button class="cu-btn bg-cyan " @click="insertIntoDietRecord">添加到今日饮食记录</button>
 					</view>
 				</view>
 			</view>
@@ -1054,6 +1058,8 @@ export default {
 						delete item._userno_disp;
 						delete item.checked;
 						delete item.amountEditable;
+						item.hdate = this.selectDate
+						item.htime = this.nowDateTime
 						return item;
 					})
 				}
@@ -1156,8 +1162,9 @@ export default {
 				});
 			} else {
 				uni.navigateTo({
-					url: '/publicPages/newForm/newForm?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&fieldsCond=' + decodeURIComponent(JSON.stringify(cond))
-					// url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&cond='+decodeURIComponent(JSON.stringify(cond))
+					url:
+						'/publicPages/newForm/newForm?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&fieldsCond=' +
+						decodeURIComponent(JSON.stringify(cond))
 				});
 			}
 		},
@@ -1817,7 +1824,10 @@ export default {
 			if (this.searchArg.type === 'food') {
 				uni.navigateTo({
 					url:
-						'/pages/specific/health/foodDetail/foodDetail?foods=' + encodeURIComponent(JSON.stringify(itemFood)) + '&filters=' + encodeURIComponent(JSON.stringify(this.filterArr))
+						'/pages/specific/health/foodDetail/foodDetail?foods=' +
+						encodeURIComponent(JSON.stringify(itemFood)) +
+						'&filters=' +
+						encodeURIComponent(JSON.stringify(this.filterArr))
 				});
 			} else if (this.searchArg.type === 'sport') {
 				uni.navigateTo({
@@ -2997,6 +3007,9 @@ export default {
 	.footer {
 		text-align: center;
 		margin-bottom: 20rpx;
+		.cu-btn {
+			min-width: 45%;
+		}
 	}
 }
 </style>

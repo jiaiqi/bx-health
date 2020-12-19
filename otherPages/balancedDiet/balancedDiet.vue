@@ -303,7 +303,7 @@
 		</view>
 		<!-- <u-popup v-model="showEditModal" mode="bottom" border-radius="50"> -->
 		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
-			<view class="cu-dialog current-diet-detail" v-if="currentRecord">
+			<view class="cu-dialog current-diet-detail" v-if="currentRecord"  @tap.stop="">
 				<view class="title-bar" v-if="currentRecord.hdate && currentRecord.htime">
 					<view class="date">{{ currentRecord.hdate + ' ' + currentRecord.htime.slice(0, 5) }}</view>
 				</view>
@@ -355,8 +355,8 @@
 			</view>
 		</view>
 		<view class="add-button" @click="clickAddButton"><view class="cuIcon-add"></view></view>
-		<view class="cu-modal bottom-modal" :class="{ show: showPopup }">
-			<view class="cu-dialog">
+		<view class="cu-modal bottom-modal" :class="{ show: showPopup }" >
+			<view class="cu-dialog"  @tap.stop="">
 				<view class="popup-box">
 					<view class="icon-item" @click="toPages('food')">
 						<image src="@/otherPages/static/icon/yinshi.png" mode="" class="icon"></image>
@@ -395,7 +395,7 @@
 			</view>
 		</view>
 		<view @click.self="closeDay" class="cu-modal" style="display: flex; align-items: center" :class="modalName == 'Modal' ? 'show' : ''">
-			<view style="height: 43vh" class="cu-dialog">
+			<view style="height: 43vh" class="cu-dialog"  @tap.stop="">
 				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :markDays="markDays" :headerBar="true" @onDayClick="onDayClick"></bx-date-stamp>
 			</view>
 		</view>

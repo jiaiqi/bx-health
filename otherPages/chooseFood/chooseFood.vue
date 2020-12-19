@@ -29,7 +29,7 @@
 					<text
 						@click="changeCate(item, index)"
 						v-for="(item, index) in categoryTop"
-						v-if="item.name === '食材组成' ? (currFood.meal_no || (currFood.mix_type && currFood.mix_type === '混合')) : true"
+						v-if="item.name === '食材组成' ? currFood.meal_no || (currFood.mix_type && currFood.mix_type === '混合') : true"
 						:key="index"
 						:class="categoryTopIndex === index ? 'active-text-top-tit' : ''"
 					>
@@ -49,7 +49,9 @@
 							<view class="ele-text">
 								<text>碳水化合物:</text>
 								<text>{{ currFood.carbohydrate ? Number(currFood.carbohydrate).toFixed(1) : '' }}g</text>
-								<text style="color: red;">({{ currFood.carbohydrate >= 51.9 ? '高' : currFood.carbohydrate >= 25.74 && currFood.carbohydrate < 51.9 ? '中' : '低' }})</text>
+								<text style="color: red;">
+									({{ currFood.carbohydrate >= 51.9 ? '高' : currFood.carbohydrate >= 25.74 && currFood.carbohydrate < 51.9 ? '中' : '低' }})
+								</text>
 							</view>
 							<view class="ele-text">
 								<text>脂肪:</text>
@@ -79,7 +81,9 @@
 							<view class="ele-text">
 								<text>VB1:</text>
 								<text>{{ currFood.vitamin_b1 ? Number(currFood.vitamin_b1).toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.vitamin_b1 >= 0.61 ? '高' : currFood.vitamin_b1 >= 0.32 && currFood.vitamin_b1 < 0.61 ? '中' : '低' }})</text>
+								<text style="color: red;">
+									({{ currFood.vitamin_b1 >= 0.61 ? '高' : currFood.vitamin_b1 >= 0.32 && currFood.vitamin_b1 < 0.61 ? '中' : '低' }})
+								</text>
 							</view>
 							<view class="ele-text">
 								<text>VB2:</text>
@@ -89,7 +93,9 @@
 							<view class="ele-text">
 								<text>VB3:</text>
 								<text>{{ currFood.vitamin_b3 ? Number(currFood.vitamin_b3).toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.vitamin_b3 >= 4.52 ? '高' : currFood.vitamin_b3 >= 2.26 && currFood.vitamin_b3 < 4.52 ? '中' : '低' }})</text>
+								<text style="color: red;">
+									({{ currFood.vitamin_b3 >= 4.52 ? '高' : currFood.vitamin_b3 >= 2.26 && currFood.vitamin_b3 < 4.52 ? '中' : '低' }})
+								</text>
 							</view>
 							<view class="ele-text">
 								<text>VC:</text>
@@ -109,17 +115,23 @@
 							<view class="ele-text">
 								<text>镁:</text>
 								<text>{{ currFood.element_mg ? Number(currFood.element_mg).toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_mg >= 111.6 ? '高' : currFood.element_mg >= 55.8 && currFood.element_mg < 111.6 ? '中' : '低' }})</text>
+								<text style="color: red;">
+									({{ currFood.element_mg >= 111.6 ? '高' : currFood.element_mg >= 55.8 && currFood.element_mg < 111.6 ? '中' : '低' }})
+								</text>
 							</view>
 							<view class="ele-text">
 								<text>磷:</text>
 								<text>{{ currFood.element_p ? Number(currFood.element_p).toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_p >= 296.4 ? '高' : currFood.element_p >= 148.2 && currFood.element_p < 296.4 ? '中' : '低' }})</text>
+								<text style="color: red;">
+									({{ currFood.element_p >= 296.4 ? '高' : currFood.element_p >= 148.2 && currFood.element_p < 296.4 ? '中' : '低' }})
+								</text>
 							</view>
 							<view class="ele-text">
 								<text>钾:</text>
 								<text>{{ currFood.element_k ? Number(currFood.element_k).toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_k >= 526.2 ? '高' : currFood.element_k >= 263.1 && currFood.element_k < 526.2 ? '中' : '低' }})</text>
+								<text style="color: red;">
+									({{ currFood.element_k >= 526.2 ? '高' : currFood.element_k >= 263.1 && currFood.element_k < 526.2 ? '中' : '低' }})
+								</text>
 							</view>
 						</view>
 					</view>
@@ -140,17 +152,23 @@
 							<view class="ele-text">
 								<text>硒:</text>
 								<text>{{ currFood.element_se ? Number(currFood.element_se).toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_se >= 23.82 ? '高' : currFood.element_se >= 11.91 && currFood.element_se < 23.82 ? '中' : '低' }})</text>
+								<text style="color: red;">
+									({{ currFood.element_se >= 23.82 ? '高' : currFood.element_se >= 11.91 && currFood.element_se < 23.82 ? '中' : '低' }})
+								</text>
 							</view>
 							<view class="ele-text">
 								<text>铜:</text>
 								<text>{{ currFood.element_cu ? Number(currFood.element_cu).toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_cu >= 1.12 ? '高' : currFood.element_cu >= 0.56 && currFood.element_cu < 1.12 ? '中' : '低' }})</text>
+								<text style="color: red;">
+									({{ currFood.element_cu >= 1.12 ? '高' : currFood.element_cu >= 0.56 && currFood.element_cu < 1.12 ? '中' : '低' }})
+								</text>
 							</view>
 							<view class="ele-text">
 								<text>锰:</text>
 								<text>{{ currFood.element_mn ? Number(currFood.element_mn).toFixed(1) : '' }}mg</text>
-								<text style="color: red;">({{ currFood.element_mn >= 4.44 ? '高' : currFood.element_mn >= 2.22 && currFood.element_mn < 4.44 ? '中' : '低' }})</text>
+								<text style="color: red;">
+									({{ currFood.element_mn >= 4.44 ? '高' : currFood.element_mn >= 2.22 && currFood.element_mn < 4.44 ? '中' : '低' }})
+								</text>
 							</view>
 						</view>
 					</view>
@@ -175,7 +193,14 @@
 					</view>
 					<view class="uni-ec-canvas-bot">
 						<!-- #ifdef MP-WEIXIN -->
-						<uniEcCanvas v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcCanvas>
+						<uniEcCanvas
+							v-if="categoryTopIndex == 0"
+							class="uni-ec-canvas"
+							id="uni-ec-canvas"
+							ref="uni-ec-canvas"
+							canvas-id="uni-ec-canvas"
+							:ec="stepData"
+						></uniEcCanvas>
 						<!-- #endif -->
 						<!-- #ifdef H5 -->
 						<uniEcharts v-if="categoryTopIndex == 0" class="uni-ec-canvas" id="uni-ec-canvas" ref="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="stepData"></uniEcharts>
@@ -233,7 +258,9 @@
 				</view>
 				<view v-if="!pageDetailType" class="weight">
 					<view class="calculate-l">时间：</view>
-					<view @click="chooseTime(u, ids)" v-for="(u, ids) in dinnerTime" :key="ids" :class="currFoodTime == u.value ? 'active-unit' : ''" class="unit">{{ u.value }}</view>
+					<view @click="chooseTime(u, ids)" v-for="(u, ids) in dinnerTime" :key="ids" :class="currFoodTime == u.value ? 'active-unit' : ''" class="unit">
+						{{ u.value }}
+					</view>
 				</view>
 				<view v-if="!pageDetailType" class="weight">
 					<view class="calculate-l">单位：</view>
@@ -249,7 +276,8 @@
 						<text @click="countDietNum('-0.1')">-0.1</text>
 						<text @click="countDietNum('-1')">-1</text>
 					</view>
-					<u-input placeholder=" " :disabled="true" :clearable="false" :border="true" maxlength="20" v-model="choiceNum" type="number" />
+					<input placeholder=" " :disabled="true" maxlength="20" v-model="choiceNum" type="number" />
+					<!-- <u-input placeholder=" " :disabled="true" :clearable="false" :border="true" maxlength="20" v-model="choiceNum" type="number" /> -->
 					<view class="key-right">
 						<text @click="countDietNum('+1')">+1</text>
 						<text @click="countDietNum('+0.1')">+0.1</text>
@@ -301,7 +329,11 @@
 		<view class="cu-modal bottom-modal" :class="{ show: showUserHealtManagePopup }">
 			<view class="cu-dialog">
 				<view class="health-item">
-					<bx-checkbox-group v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType === 'minkes'" mode="button" v-model="checkedMinceValue">
+					<bx-checkbox-group
+						v-if="currFood.dish_type && currFood.dish_type === '自选臊子面食' && poupType && poupType === 'minkes'"
+						mode="button"
+						v-model="checkedMinceValue"
+					>
 						<bx-checkbox v-model="item.checked" v-for="(item, index) in minceList" :key="item.id" :name="item.name">{{ item.name }}</bx-checkbox>
 					</bx-checkbox-group>
 
@@ -824,24 +856,11 @@ export default {
 				];
 				uni.navigateTo({
 					url: '/publicPages/newForm/newForm?type=update&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
-					// url: '/publicPages/form/form?type=update&params=' + encodeURIComponent(JSON.stringify(params))
 				});
 			} else if (type === 'add') {
-				// let cond = [{
-				// 	colName:"unit",
-				// 	ruleType:"eq",
-				// 	value:''
-				// },{
-				// 	colName:"meal_no",
-				// 	ruleType:"eq",
-				// 	value:this.currFood.meal_no
-				// }]
 				uni.navigateTo({
 					url: '/otherPages/shop/foodMaterial?itemFood=' + encodeURIComponent(JSON.stringify(this.currFood))
 				});
-				// uni.navigateTo({
-				//   url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_item_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
-				// });
 			}
 		},
 		/*点击切换图表顶部类型**/
@@ -871,9 +890,9 @@ export default {
 			if (item.type === 'NRV') {
 				this.currentAppr = this.approveData[0];
 			} else if (item.type === 'material') {
-				if(this.currFood.mix_type && this.currFood.mix_type === '混合'){
+				if (this.currFood.mix_type && this.currFood.mix_type === '混合') {
 					this.getMaterialMixChildFood();
-				}else{
+				} else {
 					this.getMixChildFood();
 				}
 			}
@@ -1094,8 +1113,7 @@ export default {
 			}
 			this.goBalanceDiet();
 		},
-		async getMaterialMixChildFood(){
-			
+		async getMaterialMixChildFood() {
 			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_diet_contents_item_select', 'select');
 			let req = {
@@ -1110,8 +1128,8 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			this.foodChild = res.data.data
-			console.log("食材配料----->",res.data.data)
+			this.foodChild = res.data.data;
+			console.log('食材配料----->', res.data.data);
 		},
 		/* 获取当前食物得食材含量**/
 		async getMixChildFood() {
@@ -1249,8 +1267,8 @@ export default {
 						hdate: this.nowDate,
 						htime: this.currTime ? this.currTime : this.nowDateTime,
 						name: item.name,
-						person_info_no:this.vuex_userInfo.no,
-						person_name:this.vuex_userInfo.name,
+						person_info_no: this.vuex_userInfo.no,
+						person_name: this.vuex_userInfo.name,
 						amount: item.amount,
 						unit: this.radioLabel.unit ? this.radioLabel.unit : item.unit,
 						energy: item.heatNum,
@@ -2069,11 +2087,11 @@ export default {
 			background-color: rgb(240, 240, 240);
 			padding: 5px 0;
 			width: 95%;
-			margin: 0 auto;			
+			margin: 0 auto;
 			text {
 				width: 24%;
 				text-align: center;
-				&:first-child{
+				&:first-child {
 					width: 50%;
 				}
 			}

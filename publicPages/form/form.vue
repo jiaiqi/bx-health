@@ -226,7 +226,6 @@ export default {
 			};
 			uni.navigateTo({
 				url: `/publicPages/newForm/newForm?serviceName=${params.serviceName}&type=update&fieldsCond=${encodeURIComponent(JSON.stringify(this.params.condition))}`
-				// url: '/publicPages/form/form?params=' + JSON.stringify(params)
 			});
 		},
 		async getDefaultVal() {

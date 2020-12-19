@@ -23,7 +23,7 @@
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTypeSelector }">
-			<view class="cu-dialog">
+			<view class="cu-dialog"  @tap.stop="">
 				<view class=" bg-white cook-top"><text>常见烹调方式</text></view>
 				<view class="cooktype-wrap" v-if="dietInfo">
 					<bx-radio-group v-model="cook_method" mode="button">

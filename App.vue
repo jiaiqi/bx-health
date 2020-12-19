@@ -109,7 +109,9 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			return res.data.data.length;
+			if (Array.isArray(res.data.data)) {
+				return res.data.data.length;
+			}
 		}
 	},
 	onShow: function() {
@@ -117,12 +119,12 @@ export default {
 		let userNo = uni.getStorageSync('current_user_info');
 		if (userNo.userno) {
 			this.getDoctorRecod(userNo.userno).then(length => {
-				if(length > 99){
-					length = '99+'
-				}else{
-					length = length.toString()
+				if (length > 99) {
+					length = '99+';
+				} else {
+					length = length.toString();
 				}
-				if(length != 0){
+				if (length != 0) {
 					uni.setTabBarBadge({
 						index: 3,
 						text: length,
@@ -133,12 +135,11 @@ export default {
 							console.log('fails----', fails);
 						}
 					});
-				}else{
-				uni.removeTabBarBadge({
-					index: 3,
-				})
-			}
-				
+				} else {
+					uni.removeTabBarBadge({
+						index: 3
+					});
+				}
 			});
 		}
 
@@ -173,5 +174,4 @@ body {
 uni-page-body > uni-view {
 	height: 100%;
 }
-
 </style>

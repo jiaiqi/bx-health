@@ -1226,9 +1226,6 @@ export default {
 									"defaultVal": row
 								}
 								console.log("点击了【有效】的公共编辑按钮", row)
-								// uni.navigateTo({
-								// 	url: "/publicPages/form/form?params=" + JSON.stringify(params)
-								// })
 							} else {
 								console.log("点击了【无效】的公共编辑按钮")
 							}
@@ -1329,26 +1326,6 @@ export default {
 				} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 					return 0
 					// 没有角色 提示跳转到创建角色页面
-					// uni.showModal({
-					// 	title: '提示',
-					// 	content: '当前账号未登记个人信息，即将跳转到信息登记页面',
-					// 	showCancel: false,
-					// 	success(res) {
-					// 		if (res.confirm) {
-					// Vue.prototype.toAddPage()
-					// let condition = [{
-					// 	colName: 'userno',
-					// 	ruleType: 'eq',
-					// 	value: uni.getStorageSync('login_user_info').user_no
-					// }];
-					// uni.setStorageSync('activeApp', 'health');
-					// uni.navigateTo({
-					// 	url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&cond=' + decodeURIComponent(
-					// 		JSON.stringify(condition))
-					// });
-					// 		}
-					// 	}
-					// });
 				}
 			} else {
 				// 没有user_no 跳转到登录页面
@@ -1419,9 +1396,6 @@ export default {
 								url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' +
 									decodeURIComponent(
 										JSON.stringify(fieldsCond))
-								// url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' +
-								// 	decodeURIComponent(
-								// 		JSON.stringify(fieldsCond))
 							});
 						} else {
 							uni.switchTab({

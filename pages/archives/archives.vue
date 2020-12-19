@@ -127,7 +127,7 @@
 					<view class="data text-blue">{{ sleepScore ? sleepScore : 0 }}</view>
 					<view class="action"></view>
 				</view>
-				<view class="grid-item"  @click="toPages('symptom')">
+				<view class="grid-item" @click="toPages('symptom')">
 					<view class="title">
 						症状
 						<text class="ratio">[10%]</text>
@@ -182,7 +182,7 @@
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showAddRecord }">
-			<view class="cu-dialog ">
+			<view class="cu-dialog " @tap.stop="">
 				<view class="inspect-record">
 					<view class="title">选择检查报告类型</view>
 					<view class="cu-bar search bg-white">
@@ -206,9 +206,8 @@
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal"></view>
-		<view class="cu-modal" :class="{ show: showUserListPopup }" @tap="showUserListPopup=false">
-		<!-- <u-popup v-model="showUserListPopup" border-radius="40" mode="top"> -->
-			<view class="cu-dialog">
+		<view class="cu-modal" :class="{ show: showUserListPopup }" @tap="showUserListPopup = false">
+			<view class="cu-dialog" @tap.stop="">
 				<view class="user-list">
 					<view class="user-item" @click="switchUser(item)" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
 						<image class="avatar" :src="getImagePath(item.profile_url)" size="60"></image>
@@ -217,17 +216,16 @@
 				</view>
 				<view class="button-box"><button class="cu-btn bg-white text-blue" @click="toAddPages">添加新用户</button></view>
 			</view>
-		<!-- </u-popup> -->
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showUserHealtManagePopup }" @tap="showUserHealtManagePopup=false">
-			<view class="cu-dialog health-item">
-					<bx-checkbox-group max="5" checkboxMode="button" v-model="checkedList">
-						<bx-checkbox v-model="item.checked" v-for="item in checkboxList" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
-					</bx-checkbox-group>
-					<view class="button-box">
-						<button class="cu-btn" @click="cancelSelectTag">取消</button>
-						<button class="cu-btn " @click="changeSelectedTag">确定</button>
-					</view>
+		<view class="cu-modal bottom-modal" :class="{ show: showUserHealtManagePopup }" @tap="showUserHealtManagePopup = false">
+			<view class="cu-dialog health-item" @tap.stop="">
+				<bx-checkbox-group max="5" checkboxMode="button" v-model="checkedList">
+					<bx-checkbox v-model="item.checked" v-for="item in checkboxList" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
+				</bx-checkbox-group>
+				<view class="button-box">
+					<button class="cu-btn" @click="cancelSelectTag">取消</button>
+					<button class="cu-btn " @click="changeSelectedTag">确定</button>
+				</view>
 			</view>
 		</view>
 	</view>
@@ -894,7 +892,11 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni
+										? item.val_rni * self.userInfo.weight
+										: item.val_ear
+										? item.val_ear * self.userInfo.weight
+										: mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -1056,18 +1058,13 @@ export default {
 			if (type === 'history') {
 				uni.navigateTo({
 					url: '/archivesPages/archives-history/archives-history?isAll=true'
-					// url:'/otherPages/balancedDiet/balancedDiet'
 				});
 			} else if (type === 'drug') {
 				// let condition = [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]; //默认值
 				let fieldsCond = [{ column: 'person_no', display: false, value: this.userInfo.no }];
 				uni.navigateTo({
 					url: '/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
-					// url: '/pages/form/form?serviceName=srvhealth_drug_schedule_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 				});
-				// uni.navigateTo({
-				// 	url: '/publicPages/form/form?serviceName=srvhealth_drug_schedule_add&type=add&cond=' + decodeURIComponent(JSON.stringify(condition))
-				// });
 			}
 		},
 		toCouple() {
@@ -1075,11 +1072,6 @@ export default {
 				url: '/questionnaire/couple/couple'
 			});
 		},
-		// getavatarUrl(fileNo) {
-		// 	if (fileNo) {
-		// 		return this.$api.downloadFile + fileNo + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
-		// 	}
-		// },
 		// 查找当前帐号建立的用户列表
 		async selectUserList() {
 			const url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
@@ -1236,11 +1228,7 @@ export default {
 			uni.setStorageSync('activeApp', 'health');
 			uni.navigateTo({
 				url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
-				// url: '/pages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 			});
-			// uni.navigateTo({
-			// 	url: '/publicPages/form/form?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
-			// });
 		},
 		async getuserinfo(e) {
 			// #ifdef MP-WEIXIN
@@ -1268,7 +1256,7 @@ export default {
 			// #endif
 		}
 	},
-	
+
 	onTabItemTap(e) {
 		this.initPage();
 	},
@@ -1284,7 +1272,7 @@ export default {
 			menus: ['shareAppMessage', 'shareTimeline']
 		});
 		// #endif
-		if(this.is_login&&this.authSetting['userInfo']){
+		if (this.is_login && this.authSetting['userInfo']) {
 			this.initPage();
 		}
 		uni.$on('healthTotalScoreChanged', result => {
@@ -1296,18 +1284,18 @@ export default {
 				this.healthTotalScore = result;
 			}
 		});
-		uni.$on('data-update',()=>{
-			if(this.is_login){
+		uni.$on('data-update', () => {
+			if (this.is_login) {
 				this.initPage();
 			}
-		})
+		});
 		let score = uni.getStorageSync('healthTotalScore');
 		if (score) {
 			this.healthTotalScore = score;
 		}
 	},
 	onShow() {
-		if(this.is_login){
+		if (this.is_login) {
 			this.initPage();
 		}
 	}
@@ -1800,10 +1788,10 @@ export default {
 		color: #fff;
 		margin-right: 50rpx;
 		flex: 1;
-		&:nth-child(2n),&:last-child {
+		&:nth-child(2n),
+		&:last-child {
 			margin-right: 0;
 		}
-		
 	}
 }
 .inspect-record {

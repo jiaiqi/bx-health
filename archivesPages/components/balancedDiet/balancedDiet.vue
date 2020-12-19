@@ -458,7 +458,7 @@
 			</view>
 		</view>
 		<view @click.self="closeDay" class="cu-modal" style="display: flex; align-items: center" :class="modalName == 'Modal' ? 'show' : ''">
-			<view style="height: 43vh" class="cu-dialog">
+			<view style="height: 43vh" class="cu-dialog" @tap.stop="">
 				<bx-date-stamp v-show="showTimeSignPicker" ref="ren" :markDays="markDays" :headerBar="true" @onDayClick="onDayClick"></bx-date-stamp>
 			</view>
 		</view>
@@ -2886,11 +2886,6 @@ export default {
 		align-items: center;
 		background-color: #fff;
 		color: #333;
-		.u-icon {
-			padding-left: 10rpx;
-			position: relative;
-			top: -2px;
-		}
 	}
 	.header-wrap {
 		// 顶部导航栏
@@ -2919,9 +2914,6 @@ export default {
 			align-items: center;
 			background-color: #0bc99d;
 			color: #fff;
-			.u-icon {
-				padding-left: 10rpx;
-			}
 		}
 		.user-info {
 			display: flex;
@@ -2932,12 +2924,6 @@ export default {
 				display: flex;
 				.text {
 					padding: 0 10rpx 0 20rpx;
-				}
-				.u-icon {
-					transition: all 0.5s;
-					&.active {
-						transform: rotate(90deg);
-					}
 				}
 			}
 			.user-list {

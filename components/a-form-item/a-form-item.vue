@@ -131,12 +131,10 @@
 		</view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showRichEditor }" @click.self="showRichEditor = false">
-			<view class="cu-dialog">
-				<jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor"></jin-edit>
-			</view>
+			<view class="cu-dialog" @tap.stop=""><jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor"></jin-edit></view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTextArea }" @click.self="showTextArea = false">
-			<view class="cu-dialog">
+			<view class="cu-dialog" @tap.stop="">
 				<textarea
 					style="min-height: 300px;width: 100%;text-align: left;text-indent: 40rpx;padding: 20rpx;"
 					:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 100"
@@ -147,17 +145,17 @@
 					:placeholder="'请输入'"
 				></textarea>
 			</view>
-			<view class="button">
-				
-			</view>
+			<view class="button"></view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }" @tap.self="showTreeSelector = false">
-			<view class="cu-dialog">
-				<view class="tree-selector cascader" v-if="showTreeSelector"><cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="fieldData.srvInfo"></cascader-selector></view>
+			<view class="cu-dialog" @tap.stop="">
+				<view class="tree-selector cascader" v-if="showTreeSelector">
+					<cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="fieldData.srvInfo"></cascader-selector>
+				</view>
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showSelectorPopup || showMultiSelectorPopup }">
-			<view class="cu-dialog">
+			<view class="cu-dialog" @tap.stop="">
 				<view class="tree-selector">
 					<view class="content">
 						<view class="cu-bar search bg-white" v-if="showSelectorPopup && fieldData.showSearch !== false">
@@ -205,8 +203,8 @@ export default {
 			} else if (!val) {
 				val = '';
 			}
-			if(val==='null'){
-				val = '—'
+			if (val === 'null') {
+				val = '—';
 			}
 			return val;
 		}
@@ -292,7 +290,7 @@ export default {
 			showMultiSelectorPopup: false,
 			showTreeSelector: false,
 			showTextArea: false,
-			showRichEditor:false,
+			showRichEditor: false,
 			textareaValue: this.fieldData && this.fieldData.value ? this.fieldData.value : '',
 			treePageInfo: { total: 0, rownumber: 20, pageNo: 1 },
 			selectorData: [],
@@ -312,7 +310,7 @@ export default {
 			immediate: true,
 			handler(newValue, oldValue) {
 				this.fieldData = newValue;
-				if (newValue.type === 'textarea'||newValue.type === 'RichText') {
+				if (newValue.type === 'textarea' || newValue.type === 'RichText') {
 					this.textareaValue = newValue.value;
 				}
 			}
@@ -676,7 +674,11 @@ export default {
 		},
 		getValid() {
 			if (this.fieldData.isRequire && this.fieldData.value) {
-				if (this.fieldData.hasOwnProperty('_validators') && this.fieldData._validators.hasOwnProperty('isType') && typeof this.fieldData._validators.isType === 'function') {
+				if (
+					this.fieldData.hasOwnProperty('_validators') &&
+					this.fieldData._validators.hasOwnProperty('isType') &&
+					typeof this.fieldData._validators.isType === 'function'
+				) {
 					this.fieldData.valid = this.fieldData._validators.isType(this.fieldData.value);
 					this.valid.valid = true;
 				} else {

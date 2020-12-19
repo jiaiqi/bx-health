@@ -136,14 +136,25 @@
 		</view>
 		<!-- <u-calendar v-model="showCalender" :mode="'date'" @change="changeBirthday"></u-calendar> -->
 		<!-- <u-select v-model="showSexModal" :list="sexList" @confirm="changeSex"></u-select> -->
-		<u-modal v-model="showModel" :mask-close-able="true" :show-title="false" :show-cancel-button="true" @confirm="changeInput">
+		<view class="cu-modal" :class="{ show: showModel }">
+			<view class="cu-dialog">
+				<view class="slot-content">
+					<input v-model="modifyUserInfo.name" type="text" :border="false" placeholder="请输入姓名" v-if="currentModel === 'name'" />
+					<input v-model="modifyUserInfo.height" type="text" :border="false" placeholder="请输入身高(cm)" v-if="currentModel === 'height'" />
+					<input v-model="modifyUserInfo.weight" type="text" :border="false" placeholder="请输入体重(kg)" v-if="currentModel === 'weight'" />
+					<input v-model="modifyUserInfo.job" type="text" :border="false" placeholder="请输入您的职业" v-if="currentModel === 'job'" />
+				</view>
+			</view>
+		</view>
+
+		<!-- 	<u-modal v-model="showModel" :mask-close-able="true" :show-title="false" :show-cancel-button="true" @confirm="changeInput">
 			<view class="slot-content">
 				<u-input v-model="modifyUserInfo.name" :type="modelInputType" :border="false" :placeholder="modelInputHint" v-if="currentModel === 'name'" />
 				<u-input v-model="modifyUserInfo.height" :type="modelInputType" :border="false" placeholder="请输入身高(cm)" v-if="currentModel === 'height'" />
 				<u-input v-model="modifyUserInfo.weight" :type="modelInputType" :border="false" placeholder="请输入体重(kg)" v-if="currentModel === 'weight'" />
 				<u-input v-model="modifyUserInfo.job" :type="modelInputType" :border="false" placeholder="请输入您的职业" v-if="currentModel === 'job'" />
 			</view>
-		</u-modal>
+		</u-modal> -->
 	</view>
 </template>
 
@@ -176,9 +187,7 @@ export default {
 				}
 			],
 			showModel: false,
-			currentModel: 'name',
-			modelInputType: 'text',
-			modelInputHint: '请输入姓名'
+			currentModel: 'name'
 		};
 	},
 	methods: {
@@ -259,9 +268,9 @@ export default {
 				let currentUser = userList.filter(item => {
 					return item.name === current_user;
 				});
-				if (Array.isArray(currentUser) && currentUser.length > 0){
-					this.currentUser = currentUser[0]
-				} ;
+				if (Array.isArray(currentUser) && currentUser.length > 0) {
+					this.currentUser = currentUser[0];
+				}
 				this.modifyUserInfo = this.deepClone(this.currentUser);
 			}
 		}

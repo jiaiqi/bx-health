@@ -175,7 +175,7 @@
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTypePopup }">
-			<view class="cu-dialog">
+			<view class="cu-dialog" @tap.stop="">
 				<view class="switch-type-box">
 					<view class="type-item cu-btn round" :class="{ 'bg-blue': item.name === currentType }" v-for="item in typeList" :key="item.name" @click="currentType = item.name">
 						{{ item.name }}

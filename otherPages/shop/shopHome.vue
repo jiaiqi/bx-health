@@ -348,7 +348,6 @@ export default {
 			];
 			uni.navigateTo({
 				url: '/publicPages/newForm/newForm?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
-				// url: '/publicPages/form/form?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&cond='+decodeURIComponent(JSON.stringify(cond))
 			});
 		},
 		/*添加食材**/
@@ -415,7 +414,6 @@ export default {
 			};
 			uni.navigateTo({
 				url: `/publicPages/newForm/newForm?type=update&serviceName=srvhealth_mixed_food_nutrition_contents_update&fieldsCond=${encodeURIComponent(JSON.stringify(cond))}`
-				// url: '/publicPages/form/form?type=update&params='+ encodeURIComponent(JSON.stringify(params))
 			});
 		}
 	}
