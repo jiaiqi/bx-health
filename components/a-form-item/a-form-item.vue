@@ -60,13 +60,13 @@
 			>
 				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
 			</bx-checkbox-group>
-			<view class="form-item-content_value picker" v-else-if="popupFieldTypeList.includes(fieldData.type)" @click="openPopup(fieldData.type)">
-				<text class="place-holder" v-if="!fieldData.value">{{ '请选择' }}</text>
+			<view class="form-item-content_value picker" v-else-if="popupFieldTypeList.includes(fieldData.type)" @click="openModal(fieldData.type)">
+				<text class="place-holder" v-if="!fieldData.value">请选择</text>
 				<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">{{ fieldData.value.toString() }}</view>
 				<text class="value hidden" v-else>{{ fkFieldLabel ? fkFieldLabel : '' }}</text>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="pickerFieldList.includes(fieldData.type)">
-				<picker class="uni-picker" :mode="pickerMode" :value="fieldData.value" start="09:01" end="21:01" @change="bindTimeChange">
+				<picker class="uni-picker" :mode="pickerMode" :value="fieldData.value" @change="bindTimeChange">
 					<view class="picker-content">
 						<view class="place-holder" v-if="!fieldData.value">请选择</view>
 						<view class="value" v-else>{{ fieldData.value }}</view>
@@ -165,7 +165,7 @@
 							<bx-checkbox v-for="item in setOptionList" :key="item.label" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
 						</bx-checkbox-group>
 						<bx-radio-group v-if="modalName === 'Selector'" class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
-							<bx-radio v-for="item in selectorData" :key="item.id" :name="item.value">{{ item.label }}</bx-radio>
+							<bx-radio v-for="item in selectorData"  :name="item.value">{{ item.label }}</bx-radio>
 						</bx-radio-group>
 					</view>
 					<view class="dialog-button">
@@ -639,7 +639,7 @@ export default {
 		bindTimeChange(e) {
 			this.fieldData.value = e.detail.value;
 		},
-		openPopup(type) {
+		openModal(type) {
 			// 打开弹出层
 			let fieldData = this.deepClone(this.fieldData);
 			switch (type) {
@@ -658,7 +658,7 @@ export default {
 					this.modalName = 'Selector';
 					break;
 				case 'TreeSelector':
-					this.modalName = 'TreeMultiSelector';
+					this.modalName = 'TreeSelector';
 					break;
 			}
 		},

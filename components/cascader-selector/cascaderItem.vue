@@ -1,11 +1,16 @@
 <template>
 	<view class="bx-tagbox-c">
-		<view class="bx-item" @click="selectArea(item)" :class="item.isChoose?'choose-item':''" v-for="(item, index) in areaList" :key="index">{{ item.name ? item.name : showCol ? item[showCol] : '' }}</view>
+		<view class="bx-item-wrap">
+			<view class="bx-item" @click="selectArea(item)" :class="item.no === currentItem.no?'choose-item':''" v-for="(item, index) in areaList" :key="index">{{ item.name ? item.name : showCol ? item[showCol] : '' }}</view>
+		</view>		
 		<cascaderItem v-if="currentItem.child && currentItem.child.length > 0" @selectAreaItem="selectArea2" :areaList="currentItem.child"></cascaderItem>
 	</view>
 </template>
 
 <script>
+	// #ifdef MP-WEIXIN
+	import cascaderItem from './cascaderItem.vue'
+	// #endif
 export default {
 	name: 'cascaderItem',
 	data() {
@@ -14,6 +19,11 @@ export default {
 			copyCurrentItem: {},
 			no: ''
 		};
+	},
+	components:{
+		// #ifdef MP-WEIXIN
+			cascaderItem
+		// #endif
 	},
 	methods: {
 		selectArea2(e) {
@@ -32,14 +42,17 @@ export default {
 		},
 		recursionArealist(oldAreaList) {
 			let self = this;
+			debugger
 			if (!Array.isArray(self.copyCurrentItem.child)) {
 				self.copyCurrentItem.child = [];
 			}
 			oldAreaList.forEach(item => {
 				if (Array.isArray(item.child)) {
-					item.isChoose = false
+					// this.$set(item,'isChoose',false)
+					// item.isChoose = false
 					if (item.no === self.currentItem.no) {
-						item.isChoose = true
+						// this.$set(item,'isChoose',true)
+						// item.isChoose = true
 						self.currentItem = self.deepClone(item);
 					} else {
 						self.recursionArealist(item.child);
@@ -65,7 +78,17 @@ export default {
 			handler(newval, oldval) {
 				// this.valuationChild(newval);
 				if (newval.length > 0) {
-					this.recursionArealist(newval);
+					let rest = false
+					newval.forEach(item=>{
+						if(Array.isArray(item.child)){
+							rest = true
+						}
+					})					
+					if(rest){
+						this.recursionArealist(newval);
+					}else{
+						this.currentItem = ""
+					}
 					// newval.forEach(item => {
 					// 	if (item.no === this.currentItem.no) {
 					// 		this.currentItem.child = item.child;
@@ -139,5 +162,8 @@ export default {
 		background-color: #007aff;
 		color: white;
 	}
+}
+.bx-item-wrap{
+	// box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 </style>

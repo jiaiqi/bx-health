@@ -1,13 +1,14 @@
 <template>
-	<view class="relation-graph" :style="{
-		'--global-text-font-size':globalTextFontSize+'px',
-		'--global-label-font-size':globalLabelFontSize+'px'
-	}">
+	<view
+		class="relation-graph"
+		:style="{
+			'--global-text-font-size': globalTextFontSize + 'px',
+			'--global-label-font-size': globalLabelFontSize + 'px'
+		}"
+	>
 		<view class="serach-bar">
 			<view class="cu-bar search bg-white">
-				<view class="search-form round" @click="toSearchPage">
-					<text class="cuIcon-search"></text>
-				</view>
+				<view class="search-form round" @click="toSearchPage"><text class="cuIcon-search"></text></view>
 			</view>
 		</view>
 		<view class="node-path">
@@ -126,17 +127,6 @@ export default {
 				url: '/archivesPages/GraphSearch/GraphSearch'
 			});
 		},
-		async getCurrentNodeInfo() {
-			let url = this.getServiceUrl('health', 'srvhealth_knowledge_graph_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_knowledge_graph_select',
-				colNames: ['*'],
-				condition: [],
-				page: { pageNo: 1, rownumber: 1000 },
-				order: [],
-				draft: false
-			};
-		},
 		async geteChartsData() {
 			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_knowledge_graph_select', 'select');
@@ -152,10 +142,7 @@ export default {
 			let res = await this.$http.post(url, req);
 			let data = res.data.data;
 			this.graphData = this.deepClone(data);
-			if (!res.data.data || !Array.isArray(res.data.data) || res.data.data.length == 0) {
-				this.emptyText = '数据为空';
-				return;
-			}
+
 			let nodeData = [];
 			if (Array.isArray(data)) {
 				let nodeNoArr = data.reduce((pre, cur) => {
@@ -173,6 +160,17 @@ export default {
 				await this.getNodeDetail(nodeNoArr.toString(), 'total');
 				nodeData = this.nodeData;
 			}
+
+			if (!res.data.data || !Array.isArray(res.data.data) || res.data.data.length == 0) {
+				this.emptyText = '关系数据为空';
+				data = await this.getNodeDetail(this.currentNodeNo, 'total');
+				nodeData = [data];
+				data = nodeData.map(item => {
+					item.relation = 'source';
+					return item;
+				});
+			}
+
 			let nameArr = [];
 			let nodes = [];
 			nodeData = nodeData.map(node => {
@@ -187,6 +185,7 @@ export default {
 				return node;
 			});
 			console.log(this.deepClone(nodeData));
+			debugger;
 			nodeData.forEach(node => {
 				nodes.push({
 					// #ifdef H5

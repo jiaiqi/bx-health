@@ -543,7 +543,11 @@ export default {
 
 		Vue.prototype.formateDate = function(date, type = 'date') {
 			console.log(date)
-			date = new Date(date)
+			if (!date) {
+				date = new Date()
+			} else {
+				date = new Date(date)
+			}
 			let o = {
 				'yy': date.getFullYear(),
 				'MM': (() => {
@@ -1453,7 +1457,8 @@ export default {
 			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
 				return no
 			} else if (no) {
-				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+ '&thumbnailType=fwsu_100';
+				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
+					'&thumbnailType=fwsu_100';
 			}
 		}
 		Vue.prototype.requestSuccess = (res) => {

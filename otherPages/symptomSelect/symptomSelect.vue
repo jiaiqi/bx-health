@@ -68,8 +68,7 @@
 									<view @click="chooseItem(single)" v-for="(single, idx) in illnes.children" :key="idx" :class="single.is_checked ? 'actived' : ''" class="wrapCont_row_item">
 										{{ single.name }}
 									</view>
-								</view>
-								
+								</view>								
 							</view>
 						</view>												
 					</view>

@@ -68,7 +68,8 @@ export default {
         if (this.treeData.length === 0) {
           return true;
         } else {
-          return this.treeData.filter(tree => tree._childNode && Array.isArray(tree._childNode) && tree._childNode.length > 0||(tree._childNode && Array.isArray(tree._childNode) &&tree._childNode.length === 0&&tree.parent_no!==null)).length > 0 ? false : true;
+			return false;
+          // return this.treeData.filter(tree => tree._childNode && Array.isArray(tree._childNode) && tree._childNode.length > 0||(tree._childNode && Array.isArray(tree._childNode) &&tree._childNode.length === 0&&tree.parent_no!==null)).length > 0 ? false : true;
         }
       }
     }

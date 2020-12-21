@@ -6,7 +6,7 @@
 		</view>
 		<view class="docter-list">
 			<view class="doctor-item" v-for="item in doctorList" :key="item.id">
-				<view class="profile"><image class="image" :src="getPicPath(item.dt_pic) ? getPicPath(item.dt_pic) : getPicPath(item.dt_profile_url)" mode="aspectFit"></image></view>
+				<view class="profile"><image class="image" :src="getPicPath(item.dt_pic) ? getPicPath(item.dt_pic) : getPicPath(item.dt_profile_url)" mode="aspectFill"></image></view>
 				<view class="content">
 					<view class="content-left">
 						<text class="doctor-name">{{ item.dt_name }}</text>
@@ -16,7 +16,7 @@
 						<image src="../static/chat.png" mode=""></image>
 					</view>
 				</view>
-				<view class="content"><text class="hospital-address">xx市xx区xx路xx医院</text></view>
+				<!-- <view class="content"><text class="hospital-address">xx市xx区xx路xx医院</text></view> -->
 			</view>
 		</view>
 	</view>
@@ -279,40 +279,50 @@ export default {
 		}
 	}
 	.docter-list {
+		display: flex;
+		flex-wrap: wrap;
 		.doctor-item {
+			width:calc( 33% - 40rpx/3);
 			margin-top: 20rpx;
+			margin-right: 20rpx;
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
 			background-color: #fff;
 			border-radius: 20rpx;
-			min-height: 300rpx;
-			padding-bottom: 50rpx;
+			overflow: hidden;
+			&:nth-child(3n){
+				margin-right: 0;
+			}
 			.profile {
-				width: 100rpx;
-				height: 100rpx;
-				border-radius: 50%;
+				width:100%;
+				// height: 150rpx;
+				// border-radius: 50%;
 				overflow: hidden;
 				margin-bottom: 10rpx;
-				background-color: #0081ff;
 				.cuIcon-my {
 					font-size: 100rpx;
 					color: #fff;
 				}
 				.image {
-					width: 100rpx;
-					height: 100rpx;
+					width:100%;
+					height:200rpx;
 				}
 			}
 			.content {
 				display: flex;
 				padding-top: 10rpx;
+				position: relative;
 				.content-left {
+					line-height: 1.8;
+					margin-right: 20rpx;
+					font-weight: bold;
 				}
 				.content-right {
 					display: flex;
-					position: relative;
+					position: absolute;
+					right: -40rpx;
 					text {
 						background: red;
 						min-width: 30rpx;

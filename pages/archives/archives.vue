@@ -348,7 +348,9 @@ export default {
 			if (this.userInfo.profile_url) {
 				return this.getImagePath(this.userInfo.profile_url);
 			} else if (this.loginUserInfo.headimgurl) {
-				return this.getImagePath(this.userInfo.headimgurl);
+				return this.getImagePath(this.loginUserInfo.headimgurl);
+			}else if(this.wxUserInfo.headimgurl){
+				return this.getImagePath(this.wxUserInfo.headimgurl);
 			}
 		},
 		bmi() {
@@ -892,11 +894,7 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni
-										? item.val_rni * self.userInfo.weight
-										: item.val_ear
-										? item.val_ear * self.userInfo.weight
-										: mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
@@ -1072,13 +1070,30 @@ export default {
 				url: '/questionnaire/couple/couple'
 			});
 		},
+		updateUserProfile() {
+			const url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'opetare');
+			const req = [
+				{
+					serviceName: 'srvhealth_person_info_update',
+					condition: [{ colName: 'no', ruleType: 'eq', value: this.userInfo.no }],
+					data: [{ profile_url: this.wxUserInfo.headimgurl }]
+				}
+			];
+			this.$http.post(url, req).htn(res => {
+				if (res.data.state === 'SUCCESS') {
+					uni.showToast({
+						title: '头像更新成功！'
+					});
+				}
+			});
+		},
 		// 查找当前帐号建立的用户列表
 		async selectUserList() {
 			const url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
 				colNames: ['*'],
-				condition: [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }],
+				condition: [{ colName: 'create_user', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }],
 				order: [
 					{
 						colName: 'create_time',
@@ -1095,6 +1110,12 @@ export default {
 							uni.setStorageSync('current_user', item.name);
 							console.log(this.checkboxList);
 							this.userInfo = item;
+							console.log(this.wxUserInfo);
+							if (!item.profile_url) {
+								if (this.wxUserInfo.headimgurl) {
+									this.userInfo.profile_url = this.wxUserInfo.headimgurl;
+								}
+							}
 							this.$store.commit('SET_USERINFO', item);
 						}
 					});
@@ -1102,6 +1123,11 @@ export default {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					uni.setStorageSync('current_user', res.data.data[0].name);
 					this.userInfo = res.data.data[0];
+					if (!item.profile_url) {
+						if (this.wxUserInfo.headimgurl) {
+							this.userInfo.profile_url = this.wxUserInfo.headimgurl;
+						}
+					}
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
 				}
 				this.$store.commit('SET_USERLIST', res.data.data);
@@ -1206,14 +1232,13 @@ export default {
 			}
 		},
 		toAddPages() {
-			// let condition = [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }];
 			let fieldsCond = [
 				{ column: 'profile_url', display: false },
 				{
 					column: 'userno',
-					display: false,
-					value: uni.getStorageSync('login_user_info').user_no,
-					condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }]
+					display: false
+					// value: uni.getStorageSync('login_user_info').user_no,
+					// condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }]
 				}
 			];
 			let userInfo = uni.getStorageSync('wxUserInfo');

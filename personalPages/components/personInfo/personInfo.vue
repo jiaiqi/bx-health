@@ -438,7 +438,7 @@ export default {
 	.profile-box {
 		margin-top: 20rpx;
 		width: 100%;
-		height: 200rpx;
+		min-height: 200rpx;
 		background-color: #ffff;
 		border-radius: 20rpx;
 		&.tags {
@@ -476,6 +476,7 @@ export default {
 			display: flex;
 			align-items: flex-start;
 			flex: 1;
+			flex-wrap: wrap;
 			.require-item {
 				margin: 10rpx;
 				padding: 10rpx 20rpx;

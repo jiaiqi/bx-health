@@ -1,13 +1,13 @@
 <template>
 	<view v-if="currFood" class="food_wrap">
 		<view class="cu-bar bg-white food_wrap_top" :class="pageType ? '' : 'ingredient'">
-			<view @click="clickTop('edit')" v-if="pageType && !pageDetailType" class=" button">编辑</view>
+			<view @click="clickTop('edit')" v-if="pageType" class=" button">编辑</view>
 			<view class="date-time">
 				<view class="date-time-rq">{{ nowDate }}</view>
 				/
 				<view class="date-time-rq">{{ currTime ? currTime : nowDateTime }}</view>
 			</view>
-			<view @click="clickTop('add')" v-if="pageType && !pageDetailType" class=" button confir-btn">增加食材</view>
+			<view @click="clickTop('add')" v-if="pageType" class=" button confir-btn">增加食材</view>
 		</view>
 
 		<view class="content">
@@ -236,7 +236,7 @@
 					<text v-if="currentCookData" @click.stop="clickCook" :class="isCookDataChoose ? 'active-cook-data' : ''">{{ currentCookData }}</text>
 					<text @click="chooseCook">更多</text>
 				</view>
-				<view v-if="isShowZx && !pageDetailType" class="minced">
+				<view v-if="isShowZx" class="minced">
 					<view class="calculate-l">自选臊子：</view>
 					<!-- <view class="minced-item-all"> -->
 					<text v-for="(item, index) in minceListChoose" :key="item.id" class="minced-item minced-item-active">{{ item.name }}</text>
@@ -245,7 +245,7 @@
 					<text @click="chooseCook('minkes')" class="lg text-gray cuIcon-add minced-right-add"></text>
 					<!-- </view>			 -->
 				</view>
-				<view v-if="isShowZx && !pageDetailType" class="minced">
+				<view v-if="isShowZx" class="minced">
 					<view class="calculate-l">自选配料：</view>
 					<!-- <view class="minced-item-all"> -->
 					<!-- <view class="minced-item-all"> -->
@@ -256,20 +256,20 @@
 					<!-- </view> -->
 					<!-- </view> -->
 				</view>
-				<view v-if="!pageDetailType" class="weight">
+				<view class="weight">
 					<view class="calculate-l">时间：</view>
 					<view @click="chooseTime(u, ids)" v-for="(u, ids) in dinnerTime" :key="ids" :class="currFoodTime == u.value ? 'active-unit' : ''" class="unit">
 						{{ u.value }}
 					</view>
 				</view>
-				<view v-if="!pageDetailType" class="weight">
+				<view class="weight">
 					<view class="calculate-l">单位：</view>
 					<view @click="chooseUnit(u, ids)" v-for="(u, ids) in unitList" :key="ids" :class="currIndex == ids ? 'active-unit' : ''" class="unit">
 						{{ u.unit_amount ? u.unit_amount + u.unit : u.unit }}
 					</view>
 				</view>
 			</view>
-			<view v-if="!pageDetailType" class="amount">
+			<view class="amount">
 				<view class="amount-left"><text>数量：</text></view>
 				<view class="input-box">
 					<view class="key-left">
@@ -285,7 +285,7 @@
 				</view>
 			</view>
 		</view>
-		<view v-if="!pageDetailType" class="foods-btn">
+		<view class="foods-btn">
 			<text @click="showBottomModal">取消</text>
 			<text @click="confirms">确认</text>
 		</view>
@@ -350,7 +350,7 @@
 							v-for="item in cookData"
 							v-model="item.checked"
 							:key="item.value"
-							:disabled="pageDetailType ? true : item.disable"
+							:disabled="item.disable"
 							:name="item.value"
 							@change="checkboxGroupChange"
 						>

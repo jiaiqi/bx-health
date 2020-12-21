@@ -144,7 +144,7 @@ export default {
 						// 展示更多
 						that.areaList = that.areaList.concat(res.data.data);
 					} else {
-						that.areaList = res.data.data;
+						that.areaList = res.data.data;						
 					}
 					if (page.total > page.pageNo * page.rownumber) {
 						that.isShowMore = true;
@@ -235,6 +235,7 @@ export default {
 		},
 		clickLine(e, index) {
 			console.log('click-line:', e, index);
+			debugger
 			this.page.pageNo = 1;
 			if (index < this.lineDataDefault.length - 1) {
 				this.lineDataDefault = this.lineDataDefault.slice(0, index + 1);
@@ -260,7 +261,9 @@ export default {
 				}
 			} else if (!e) {
 				this.lineDataDefault = [];
-				this.getAreaData();
+				this.getAreaData().then(data=>{
+					this.oldAreaList = this.deepClone(data)
+				});
 				this.showSelect = true;
 			}
 		},

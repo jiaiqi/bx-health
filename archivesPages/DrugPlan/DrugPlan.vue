@@ -42,7 +42,7 @@
 					</view>
 				</view>
 			</view>
-			<view class="child-service-item">
+			<!-- 		<view class="child-service-item">
 				<view class="child-service-title"><text class="title-text">今日用药情况</text></view>
 				<view class="child-service-data-wrap">
 					<view class="child-service-data" v-for="(data, dataIndex) in drugList" :key="dataIndex">
@@ -50,21 +50,10 @@
 						<view class="detail">
 							<view class="detail-label">已用{{ data.times }}次</view>
 							<view class="detail-label">应用{{ data.take_times }}</view>
-				<!-- 			<view class="data-item">
-								<text class="label">
-									<text class="value">{{ data.times }}</text>
-								</text>
-							</view> -->
-						<!-- 	<view class="data-item">
-								<text class="label">
-									<text class="value">{{ data.dosage_each_time }}</text>
-									{{ data.dosage_unit }}/次
-								</text>
-							</view> -->
 						</view>
 					</view>
 				</view>
-			</view>
+			</view> -->
 			<view class="child-service-item">
 				<view class="child-service-title">
 					<text class="title-text">用药记录</text>
@@ -80,7 +69,7 @@
 							class="cu-item text-gray"
 							v-for="record in item.data"
 							:class="{ 'text-bluess': item.date === nowDate, 'text-grayss': item.date !== nowDate }"
-							:key="record.take_time"
+							:key="record.create_time"
 						>
 							<view class="timeline-content " :class="{ 'bg-bluess': item.date === nowDate, 'bg-grayss': item.date !== nowDate }">
 								<view class="top">
@@ -92,12 +81,47 @@
 								</view>
 								<view class="drug-detail" v-if="isArray(record.detail)">
 									<view class="detail-item" v-for="detail in record.detail" :class="{ 'text-blue': item.date === nowDate }">
-										<text class="cuIcon-squarecheck "></text>
+										<text class="cuIcon-squarecheck"></text>
 										<text>{{ detail.general_name }}</text>
 									</view>
 								</view>
 							</view>
 						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+		<view class="cu-modal" :class="{ show: modalName === 'drugDetail' }">
+			<view class="cu-dialog">
+				<view class="drug-detail" v-if="drugDetail && drugDetail.med_no">
+					<view class="detail-item">
+						<view class="label">药品名称:</view>
+						<view class="value">{{ drugDetail.medicine_name }}</view>
+						<image class="icon" src="../static/icon/drug.png" mode="aspectFit" @click="toAdd('detail', item)"></image>
+					</view>
+					<view class="detail-item">
+						<view class="label">每天服用次数:</view>
+						<view class="value">
+							<bx-radio-group class="form-item-content_value radio-group" v-model="drugDetail.take_times" mode="button">
+								<bx-radio v-for="item in times" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
+							</bx-radio-group>
+						</view>
+					</view>
+					<view class="detail-item">
+						<view class="label">每次用量:</view>
+						<view class="value"><input type="text" v-model="drugDetail.dosage_each_time" /></view>
+					</view>
+					<view class="detail-item">
+						<view class="label">用量单位:</view>
+						<view class="value">
+							<bx-radio-group class="form-item-content_value radio-group" v-model="drugDetail.dosage_unit" mode="button">
+								<bx-radio v-for="item in useDrugUnit" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
+							</bx-radio-group>
+						</view>
+					</view>
+					<view class="button-box">
+						<view class="button cu-btn gray" @click="hideModal">取消</view>
+						<view class="button cu-btn bg-cyan" @click="addDrugItem(drugDetail)">确定</view>
 					</view>
 				</view>
 			</view>
@@ -112,17 +136,55 @@ export default {
 	data() {
 		return {
 			planNo: '',
-			drugList:[], //当前用药计划的药品列表
+			drugList: [], //当前用药计划的药品列表
 			planDetail: {}, //用药计划
 			colsV2Data: {},
 			drugRecord: [], //用药记录
-			todayRecord: [],  
+			todayRecord: [],
+			currentRecord: {
+				take_date: '',
+				take_time: ''
+			},
 			fields: [],
 			childServiceData: [],
 			type: 'detail',
 			appName: 'health',
 			serviceName: 'srvhealth_drug_schedule_select',
-			login_user_info: uni.getStorageSync('login_user_info')
+			login_user_info: uni.getStorageSync('login_user_info'),
+			drugDetail: null, // 药品详情
+			modalName: '',
+			useDrugUnit: [
+				{
+					label: '片',
+					value: '片'
+				},
+				{
+					label: '颗/粒',
+					value: '颗/粒'
+				},
+				{
+					label: '毫升',
+					value: '毫升'
+				}
+			],
+			times: [
+				{
+					label: '1次',
+					value: '1次'
+				},
+				{
+					label: '2次',
+					value: '2次'
+				},
+				{
+					label: '3次',
+					value: '3次'
+				},
+				{
+					label: '2天1次',
+					value: '2天1次'
+				}
+			]
 		};
 	},
 	computed: {
@@ -130,9 +192,15 @@ export default {
 			return dayjs().format('YYYY-MM-DD');
 		}
 	},
+	watch: {
+		drugRecord: {
+			deep: true,
+			handler(newValue, oldValue) {}
+		}
+	},
 	methods: {
 		deleteRecord(e) {
-			const self = this
+			const self = this;
 			uni.showModal({
 				title: '提示',
 				content: '删除此条记录?',
@@ -158,7 +226,9 @@ export default {
 						title: '删除成功'
 					});
 					if (this.planNo) {
-						this.getFieldsV2(this.serviceName);
+						// this.getFieldsV2(this.serviceName);
+						debugger;
+						this.getDrugRecord(this.planNo);
 					}
 				}
 			});
@@ -192,18 +262,49 @@ export default {
 			let url = '';
 			switch (type) {
 				case 'detail':
-					 fieldsCond = [{ column: 'ds_no',value: this.planNo,display:false }]
-					 url = `/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`
+					fieldsCond = [{ column: 'ds_no', value: this.planNo, display: false }];
+					// url = `/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
+					url = '../DrugSelect/DrugSelect?ds_no=' + this.planNo;
 					break;
-					case 'scan':
-					uni.scanCode({
-					    scanType: ['barCode'],
-					    success: function (res) {
-								 debugger
-					        console.log('条码类型：' + res.scanType);
-					        console.log('条码内容：' + res.result);
-					    }
+				case 'scan':
+					let self = this;
+					// #ifdef H5
+					// 6930171800267
+					// self.selectDrugWithBarCode('6930171800267').then(result => {
+					// 	if (result) {
+					// 		result.take_times = '3次'; //每天次数
+					// 		result.dosage_each_time = ''; // 每次用量
+					// 		result.dosage_unit = '片'; // 用量单位
+					// 		self.drugDetail = result;
+					// 		self.modalName = 'drugDetail';
+					// 		// self.addDrugItem(result);
+					// 	}
+					// });
+					uni.showToast({
+						title: '请在小程序端进行此操作',
+						icon: 'none'
 					});
+					// #endif
+					// #ifdef MP
+					uni.scanCode({
+						scanType: ['barCode'],
+						success: function(res) {
+							console.log('条码类型：' + res.scanType);
+							console.log('条码内容：' + res.result);
+							if (res.result) {
+								self.selectDrugWithBarCode(res.result).then(result => {
+									if (result) {
+										result.take_times = '';
+										self.drugDetail = result;
+										self.modalName = 'drugDetail';
+										// self.addDrugItem(result);
+									}
+								});
+							}
+						}
+					});
+					// #endif
+
 					break;
 				case 'record':
 					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
@@ -213,6 +314,48 @@ export default {
 			}
 			uni.navigateTo({
 				url: url
+			});
+		},
+		async selectDrugWithBarCode(medicine_barcode) {
+			let url = this.getServiceUrl('health', 'srvhealth_medicine_info_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_medicine_info_select',
+				colNames: ['*'],
+				condition: [{ colName: 'medicine_barcode', ruleType: 'eq', value: medicine_barcode }],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				return res.data.data[0];
+			}
+		},
+		async addDrugItem(info) {
+			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_detail_list_add', 'operate');
+			let req = [
+				{
+					serviceName: 'srvhealth_drug_schedule_detail_list_add',
+					data: [
+						{
+							med_no: info.med_no,
+							s_code: info.s_code,
+							drug_reg_name: info.register_name,
+							general_code: info.medicine_no,
+							general_name: info.medicine_name,
+							take_times: '2次',
+							dosage_each_time: 2,
+							dosage_unit: 2,
+							ds_no: this.planNo
+						}
+					]
+				}
+			];
+			this.$http.post(url, req).then(res => {
+				if (res.data.state === 'SUCCESS') {
+					uni.showToast({
+						title: '添加成功'
+					});
+					this.modalName = '';
+				}
 			});
 		},
 		async getFieldsV2(serviceName) {
@@ -238,6 +381,7 @@ export default {
 							colVs: item,
 							data: res.data.data
 						});
+						this.drugList = res.data.data;
 					}
 				}
 				this.childServiceData = childServiceData;
@@ -261,7 +405,6 @@ export default {
 					defaultVal = await this.getPlanDetail(this.planNo);
 					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 					let hideColumns = ['ds_no', 'create_time', 'create_user', 'create_user_disp', 'modify_user', 'modify_user_disp', 'modify_time', 'person_no'];
-
 					this.fields = fields.filter(item => {
 						return !hideColumns.includes(item.column);
 					});
@@ -297,12 +440,15 @@ export default {
 				req.condition.push({ colName: 'create_user', ruleType: 'eq', value: this.login_user_info.user_no });
 			}
 			let res = await this.$http.post(url, req);
-			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+			if (Array.isArray(res.data.data)) {
 				// this.drugRecord =
+				if (res.data.data.length == 0) {
+					this.drugRecord = [];
+					return;
+				}
 				let dateArr = [];
 				let DrugRecordDetailList = await this.getDrugRecordDetail();
 				res.data.data.forEach(item => {
-					
 					if (!dateArr.includes(item.take_date)) {
 						dateArr.push(item.take_date);
 					}
@@ -319,8 +465,8 @@ export default {
 								if (detail.dsr_no === item.dsr_no) {
 									item.detail.push(detail);
 									if (item.take_date === this.nowDate) {
-										let hasExist = this.todayRecord.find((record)=>record.take_time===item.take_time)
-										if(!hasExist){
+										let hasExist = this.todayRecord.find(record => record.take_time === item.take_time);
+										if (!hasExist) {
 											this.todayRecord.push(item);
 										}
 									}
@@ -334,23 +480,23 @@ export default {
 					return record;
 				});
 				this.drugRecord = recordList;
-				this.buildTodayCase()
+				this.buildTodayCase();
 				return res.data.data;
 			}
 		},
-		buildTodayCase(){
-			let drugList  =this.deepClone(this.childServiceData[0].data)
-			let todayDrugDetail = this.todayRecord.reduce((a,b)=>a.concat(b.detail),[])
-			this.drugList = drugList.map(drug=>{
-				let times = 0
-				todayDrugDetail.forEach(item=>{
-					if(item.s_code===drug.s_code){
-						times ++
+		buildTodayCase() {
+			let drugList = this.deepClone(this.childServiceData[0].data);
+			let todayDrugDetail = this.todayRecord.reduce((a, b) => a.concat(b.detail), []);
+			this.drugList = drugList.map(drug => {
+				let times = 0;
+				todayDrugDetail.forEach(item => {
+					if (item.s_code === drug.s_code) {
+						times++;
 					}
-				})
-				drug.times = times
-				return drug
-			})
+				});
+				drug.times = times;
+				return drug;
+			});
 		},
 		async getPlanDetail(no) {
 			// 查找此用药计划的详细信息
@@ -366,12 +512,22 @@ export default {
 				this.planDetail = res.data.data[0];
 				return res.data.data[0];
 			}
+		},
+		hideModal() {
+			this.modalName = '';
 		}
 	},
 	onShow() {
 		if (this.planNo) {
 			this.getFieldsV2(this.serviceName);
 		}
+	},
+	created() {
+		let self = this;
+		uni.$on('selectDrug', e => {
+			self.drugDetail = e;
+			self.modalName = 'drugDetail';
+		});
 	},
 	onLoad(options) {
 		if (options.ds_no) {
@@ -552,6 +708,55 @@ export default {
 						margin-right: 10rpx;
 					}
 				}
+			}
+		}
+	}
+}
+.cu-dialog .drug-detail {
+	display: flex;
+	flex-direction: column;
+	padding: 20rpx;
+	.detail-item {
+		display: flex;
+		margin-bottom: 20rpx;
+		// flex-direction: column;
+		align-items: flex-start;
+		align-items: center;
+		.label {
+			margin-right: 20rpx;
+			font-size: 24rpx;
+			// text-align: left;
+		}
+		&:first-child {
+			// justify-content: center;
+			justify-content: space-between;
+			margin-bottom: 20rpx;
+			.value {
+				font-weight: bold;
+				color: #0bc99d;
+				flex: 1;
+				text-align: left;
+				text-indent: 20rpx;
+			}
+			.icon {
+				width: 50rpx;
+				height: 50rpx;
+				margin-right: 50rpx;
+			}
+		}
+		&:nth-child(2) {
+			align-items: flex-start;
+			flex-direction: column;
+		}
+		&:nth-child(3) {
+			.value {
+				flex: 1;
+				margin: 10rpx;
+				// border: 1rpx solid #bababa;
+				border-bottom: 1rpx solid #bababa;
+				width: 200rpx;
+				text-align: left;
+				padding-bottom: 10rpx;
 			}
 		}
 	}

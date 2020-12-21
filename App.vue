@@ -119,15 +119,15 @@ export default {
 		let userNo = uni.getStorageSync('current_user_info');
 		if (userNo.userno) {
 			this.getDoctorRecod(userNo.userno).then(length => {
-				if(!length&&length!==0){
-					length = 0
+				if (!length && length !== 0) {
+					length = 0;
 				}
 				if (length > 99) {
 					length = '99+';
 				} else {
 					length = `${length}`;
 				}
-				if (length !== 0) {
+				if (length != 0) {
 					uni.setTabBarBadge({
 						index: 3,
 						text: length,
@@ -176,5 +176,13 @@ body {
 }
 uni-page-body > uni-view {
 	height: 100%;
+}
+.button-box {
+	display: flex;
+	justify-content: space-around;
+	flex-wrap: wrap;
+	.button {
+		min-width: 45%;
+	}
 }
 </style>

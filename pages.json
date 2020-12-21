@@ -133,7 +133,16 @@
 					}
 
 				}
-			]
+			    ,{
+                    "path" : "DrugSelect/DrugSelect",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "药品选择",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "pregnancy",

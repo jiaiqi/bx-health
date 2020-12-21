@@ -172,7 +172,7 @@ fly.interceptors.response.use(
 			// 没有访问权限
 			uni.setStorageSync('isLogin', false)
 			uni.showToast({
-				title: data.resultMessage,
+				title: res.data.resultMessage,
 				icon: "none"
 			})
 		} else {

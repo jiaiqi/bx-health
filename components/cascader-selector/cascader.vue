@@ -1,15 +1,6 @@
 <template>
 	<view class="cascader-content">
 		<view class="tag-line">
-			<view class="bx-tagbox">
-				<view v-if="showSelect">
-					<!-- <view class="bx-item" @click="selectArea(item)" v-for="(item, index) in areaList" :key="index">
-						{{ item.name ? item.name : showCol ? item[showCol] : '' }}
-					</view> -->
-					<cascaderItem :currentNo="currentNo" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem>
-					<view class="bx-item more" @click="showMore" v-if="isShowMore"><view class="content">更多</view></view>
-				</view>
-			</view>
 			<view class="bx-tagline">
 				<view
 					@click="lineClick(item, index)"
@@ -24,6 +15,16 @@
 				</view>
 				<view class="bx-item bx-text-yellow line-end" v-if="showSelect || (lineData.length === 0 && areaList.length > 0)">请选择</view>
 			</view>
+			<view class="bx-tagbox">
+				<view v-if="showSelect">
+					<!-- <view class="bx-item" @click="selectArea(item)" v-for="(item, index) in areaList" :key="index">
+						{{ item.name ? item.name : showCol ? item[showCol] : '' }}
+					</view> -->
+					<cascaderItem :currentNo="currentNo" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem>
+					<view class="bx-item more" @click="showMore" v-if="isShowMore"><view class="content">更多</view></view>
+				</view>
+			</view>
+			
 		</view>
 	</view>
 </template>
@@ -159,14 +160,25 @@ export default {
 			line-height: 80rpx;
 			position: relative;
 			display: flex;
+			
 			&::after {
-				content: '';
-				height: 20rpx;
-				width: 4rpx;
-				background-color: #007aff;
-				transform: rotate(20deg);
-				// width: 100rpx;
-				margin: 30rpx 20rpx;
+				// content: '';
+				// height: 20rpx;
+				// width: 4rpx;
+				// background-color: #007aff;
+				// transform: rotate(20deg);
+				// margin: 30rpx 20rpx;
+				 content: '';
+				    display: inline-block;
+				    width: 10rpx;
+				    height: 10rpx;
+				    border-top: 2px solid #656565;
+				    border-right: 2px solid #656565;
+				    transform: rotate(45deg);
+				    -webkit-transform: rotate(45deg);
+					// background-color: #007aff;
+					border-color: #007aff;
+					margin: 32rpx 20rpx;
 			}
 			// &::before {
 			// 	content: '⚪';
@@ -224,6 +236,21 @@ export default {
 				height: 0upx;
 				top: 0;
 				z-index: 8;
+				border: none;
+				
+			}
+			.tag-item{
+				// width:0;
+				// height:0;
+				// display:block;
+				// position:absolute;
+				// left:0;
+				// top:0;
+				// border-top:10px transparent dashed;
+				// border-right:10px transparent dashed;
+				// border-bottom:10px transparent dashed;
+				// border-left:10px white solid;
+				// overflow:hidden;
 			}
 		}
 	}

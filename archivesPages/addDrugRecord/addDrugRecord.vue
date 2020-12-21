@@ -1,5 +1,17 @@
 <template>
 	<view class="form-page">
+		<view class="drug-select-box" v-if="fields && fields.length > 0">
+			<!-- 药品选择 -->
+			<view class="title">选择药物</view>
+			<view class="drug-list">
+				<view class="drug-item" v-for="item in drugList" :class="{ active: item.checked }" @click="changeDrugChecked(item)">
+					<view class="title">{{ item.label }}</view>
+				</view>
+			</view>
+			<!-- 			<bx-checkbox-group mode="button" v-model="checkDrugNoList">
+				<bx-checkbox v-for="item in drugList" v-model="item.checked" :key="item.id" :name="item.value">{{ item.label }}</bx-checkbox>
+			</bx-checkbox-group> -->
+		</view>
 		<a-form
 			ref="bxForm"
 			v-if="colsV2Data && isArray(fields)"
@@ -9,34 +21,7 @@
 			:formType="type"
 			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
 		></a-form>
-		<!-- 		<bxform
-			ref="bxForm"
-			:service="serviceName"
-			:addType="addType"
-			:pageType="type"
-			:BxformType="type"
-			:fields="fields"
-			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
-		></bxform> -->
-		<view class="drug-select-box" v-if="fields && fields.length > 0">
-			<!-- 药品选择 -->
-			<!-- <view class="action"><button class="cu-btn">选择药物</button></view> -->
-			<!-- 	<bxFormItem :field="item" v-for="(item, index) in detailField" :key="index + detailField[index].value" ref="drugForm" @on-selector-change="selectorChange($event, index)">
-				<view class="delete-button" @click="deleteDetailItem(index)" v-if="detailField[index].value"><text class="cuIcon-delete"></text></view>
-			</bxFormItem> -->
-			<view class="title">选择药物</view>
-			<bx-checkbox-group mode="normal" v-model="checkDrugNoList">
-				<bx-checkbox v-for="item in drugList" v-model="item.checked" :key="item.id" :name="item.value">{{ item.label }}</bx-checkbox>
-			</bx-checkbox-group>
-			<!-- 		<bxform
-					ref="bxForm2"
-					service="srvhealth_drug_schedule_record_detail_list_add"
-					addType="add"
-					pageType="add"
-					BxformType="add"
-					:fields="detailField"
-				></bxform> -->
-		</view>
+
 		<view class="button-box" v-if="colsV2Data && isArray(fields) && fields.length > 0">
 			<view v-for="(item, index) in buttons" :key="index" class="button">
 				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue">
@@ -185,6 +170,9 @@ export default {
 		}
 	},
 	methods: {
+		changeDrugChecked(e) {
+			this.$set(e, 'checked', !e.checked);
+		},
 		getDrugItemList() {
 			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_detail_list_select', 'select');
 			let req = {
@@ -197,11 +185,12 @@ export default {
 				this.$http.post(url, req).then(res => {
 					if (Array.isArray(res.data.data)) {
 						this.drugList = res.data.data.map(item => {
-							item.checked = false;
+							item.checked = true;
 							item.label = item.general_name;
-							item.value = item.s_code;
+							item.value = item.med_no;
 							return item;
 						});
+						this.checkDrugNoList = this.drugList.map(item => item.med_no);
 					}
 				});
 			}
@@ -270,6 +259,13 @@ export default {
 						}
 						if (field.label === '用药计划编码') {
 							field.label = '用药计划';
+							field.display = false;
+						}
+						if (field.column === 'take_date') {
+							field.value = this.formateDate();
+						}
+						if (field.column === 'take_time') {
+							field.value = this.formateDate('', 'dateTime');
 						}
 						if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs._fieldInfo && Array.isArray(colVs._fieldInfo)) {
 							this.defaultCondition.forEach(cond => {
@@ -319,13 +315,16 @@ export default {
 							general_name: '脂芪口服液',
 							take_times: '2次',
 							dosage_each_time: 15,
-							dosage_unit: '毫升'
+							dosage_unit: '毫升',
+							med_no: ''
 						}
 					]
 				}
 			];
-			let checkDrugList = this.drugList.filter(item => this.checkDrugNoList.includes(item.s_code));
+			let checkDrugList = this.drugList.filter(item => item.checked);
+			// let checkDrugList = this.drugList.filter(item => this.checkDrugNoList.includes(item.med_no));
 			req[0].data = checkDrugList.map(item => {
+				debugger;
 				return {
 					dsr_no: recordInfo.dsr_no,
 					ds_no: item.ds_no,
@@ -467,7 +466,40 @@ export default {
 	.title {
 		line-height: 60rpx;
 		font-size: 28rpx;
+		padding-left: 10rpx;
+		color: #666;
 	}
+	.drug-list {
+		display: flex;
+		flex-wrap: wrap;
+		.drug-item {
+			width: calc(33% - 40rpx / 3);
+			margin-right: 20rpx;
+			margin-bottom: 20rpx;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			transition: all 0.5s;
+			border: 1rpx solid #f1f1f1;
+			background-color: #f1f1f1;
+			border-radius: 10rpx;
+			min-height: 200rpx;
+			&:nth-child(3n) {
+				margin-right: 0;
+			}
+			&:active {
+				transform: scale(1.2);
+			}
+			&.active {
+				border-color: #0bc99d;
+				background-color: rgba(11, 201, 157, 0.1);
+				.title {
+					color: #0bc99d;
+				}
+			}
+		}
+	}
+
 	.delete-button {
 		width: 100rpx;
 		display: flex;
