@@ -96,7 +96,10 @@ export default {
 					value: this.searchKey
 				});
 			}
-			this.getAreaData(condition).then(_ => {
+			this.getAreaData(condition).then(data => {
+				// if(this.searchKey){
+					this.oldAreaList = this.deepClone(data)
+				// }
 				// uni.hideLoading()
 			});
 			this.showSelect = true;
@@ -151,6 +154,7 @@ export default {
 					} else {
 						that.isShowMore = false;
 					}
+					
 					return that.areaList;
 				} else {
 					const data = res.data.data;

@@ -6,6 +6,9 @@
 			<view class="drug-list">
 				<view class="drug-item" v-for="item in drugList" :class="{ active: item.checked }" @click="changeDrugChecked(item)">
 					<view class="title">{{ item.label }}</view>
+					<view class="check-box">
+						<text class="cuIcon-check"></text>
+					</view>
 				</view>
 			</view>
 			<!-- 			<bx-checkbox-group mode="button" v-model="checkDrugNoList">
@@ -468,6 +471,8 @@ export default {
 		font-size: 28rpx;
 		padding-left: 10rpx;
 		color: #666;
+		text-align: center;
+		font-weight: bold;
 	}
 	.drug-list {
 		display: flex;
@@ -484,6 +489,7 @@ export default {
 			background-color: #f1f1f1;
 			border-radius: 10rpx;
 			min-height: 200rpx;
+			position: relative;
 			&:nth-child(3n) {
 				margin-right: 0;
 			}
@@ -496,6 +502,27 @@ export default {
 				.title {
 					color: #0bc99d;
 				}
+				.check-box{
+					border-color:inherit;
+					border-bottom: 0;
+					border-right: 0;
+					color: #0bc99d;
+					font-size: 30rpx;
+					line-height: 50rpx;
+					background-color: #fff;
+					text-align: center;
+					font-weight: bold;
+				}
+			}
+			.check-box{
+				position: absolute;
+				bottom: 1rpx;
+				right: 1rpx;
+				width: 50rpx;
+				height: 50rpx;
+				border-radius: 10rpx;
+				border: 1px solid #f1f1f1;
+				color: transparent;
 			}
 		}
 	}

@@ -2,6 +2,7 @@
 	<view class="person-chat-wrap">
 		<!-- <cu-custom class="nav-chat-top" bgColor="#0bc99d" :isBack="true"><block slot="backText">返回</block><block slot="content">交流</block></cu-custom> -->
 		<view class="person-chat-top" @click.stop="closeBottomPoup" :style="{ height: heightStyle }" :class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
+			<audio v-if="currentChat.id" class="audio" @ended="playEnd" :action="audioAction" id="myMp3" style="height: 0;opacity: 0;" :src="currentChat.voice_url" controls />
 			<scroll-view @scroll="chatScroll" scroll-y="true" :style="{ height: heightStyle }" :scroll-into-view="chatTextBottom">
 				<view
 					:id="`person-chat-item${item.id}`"
@@ -45,11 +46,19 @@
 							<!-- <text>{{item.msg_link}}</text> -->
 						</view>
 
-						<view @tap="handleAudio(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'" hover-class="contentType2-hover-class" class="content contentType2">
+						<!-- <view @tap="handleAudio(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'" hover-class="contentType2-hover-class" class="content contentType2">
 							<view class="voice_icon_left-wrap">
 								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
 								<view class="voice_icon voice_icon_left" :class="item.anmitionPlay ? 'voice_icon_left_an' : ''"></view>
 							</view>
+							<audio id="myMp3" :id="item.id.toString()" style="height: 0;" src="https://srvms.100xsys.cn/file/download?filePath=/20201202/20201202175639960100/20201202175639960101.mp3" controls />
+						</view> -->
+						<view @tap="audioPlay(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'" hover-class="contentType2-hover-class" class="content contentType2">
+							<view class="voice_icon_left-wrap">
+								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
+								<view class="voice_icon voice_icon_left" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_left_an' : ''"></view>
+							</view>
+							<!-- <audio class="audio" @ended="playEnd(item)" :action="audioAction" id="myMp3" :id="item.id.toString()" style="height: 0;opacity: 0;" :src="currentChat.voice_url" controls />							 -->
 						</view>
 
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
@@ -99,15 +108,16 @@
 						</view>
 
 						<view
-							@tap="handleAudio(item)"
+							@tap="audioPlay(item)"
 							v-else-if="item.msg_link && item.msg_content_type === '语音'"
 							hover-class="contentType2-hover-class"
 							class="content contentType2 content-type-right"
 						>
 							<view class="voice_icon_right-wrap">
-								<view class="voice_icon voice_icon_right" :class="item.anmitionPlay ? 'voice_icon_right_an' : ''"></view>
+								<view class="voice_icon voice_icon_right" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''"></view>
 								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
 							</view>
+							<!-- <audio class="audio" @ended="playEnd(item)" :action="audioAction" id="myMp3" :id="item.id.toString()" style="width:0;height: 0;opacity: 0;" :src="currentChat.voice_url" controls />							 -->
 						</view>
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
@@ -259,11 +269,16 @@ export default {
 	},
 	onReady() {
 		this.videoContext = uni.createVideoContext('myVideo');
+		this.videoMp3Context = wx.createVideoContext('myMp3');
 	},
 	data() {
 		return {
 			heightStyle: '',
 			videoContext: '',
+			audioAction: {
+				method: 'pause'
+			},
+			videoMp3Context:"",
 			checkRadioValue: '',
 			chatText: '',
 			isSendLink: false,
@@ -300,10 +315,39 @@ export default {
 			showFunBtn: false, //是否展示功能型按钮
 			AudioExam: null, //正在播放音频的实例
 			isLoading: false,
-			isAll: false
+			isAll: false,
+			currentChat:{
+			}
 		};
 	},
+	
 	methods: {
+		audioPlay(item){
+			if(!item.voice_url){
+				return
+			}
+			this.$set(this.currentChat,'src',item.voice_url)
+			this.currentChat = item.voice_url
+			if(item.id != this.currentChat.id){
+				this.currentChat =""
+				setTimeout(()=>{
+					this.currentChat =item
+					this.$set(this.audioAction,'method','play')
+					this.currentChat.anmitionPlay = true
+				},100)
+			}else if(item.id == this.currentChat.id){
+				this.currentChat.anmitionPlay = false
+			}
+		},
+		playEnd(item){
+			// console.log("播放结束",item)
+			// item.anmitionPlay = false;
+			if(this.currentChat){
+				this.currentChat.anmitionPlay = false
+			}
+			this.audioAction.method = 'pause'
+			// this.closeAnmition();
+		},
 		/*关闭底部选择按钮**/
 		closeBottomPoup(){
 			this.$nextTick(()=>{
@@ -317,6 +361,7 @@ export default {
 			})
 			this.isSendLink = false
 		},
+		
 		/*播放视频**/
 		openVideo(item) {
 			// let self = this
@@ -334,7 +379,7 @@ export default {
 		playAudio(item) {
 			// this.Audio.src = item.msg_link;
 			console.log('------', item);
-			this.Audio.src = item.msg_link;
+			// this.Audio.src = item.msg_link;
 			// this.Audio.src = "https://srvms.100xsys.cn/file/download?filePath=/20201202/20201202175639960100/20201202175639960101.mp3"
 			// this.Audio.src = item.voice_url;
 			this.Audio.id = item.id;
@@ -451,11 +496,39 @@ export default {
 				content: tempFilePath,
 				contentDuration: Math.ceil(contentDuration)
 			};
-			this.canSend && this.sendMessageLanguageInfo('语音', params);
-			// this.canSend && this.sendMsg(params);
+			// this.canSend && this.sendMessageLanguageInfo('语音', params);
+			this.canSend && this.sendMsg(params);
 		},
 		/*发送语音**/
-		sendVoiceMesage(params) {},
+		sendMsg(params) {
+			let self = this
+			let reqHeader = {
+				bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+			};
+			let formData = {
+				serviceName: 'srv_bxfile_service',
+				interfaceName: 'add',
+				app_no: 'health',
+				table_name: '',
+				columns: 'msg_link'
+			};
+			uni.uploadFile({
+				url: self.$api.upload,
+				header: reqHeader,
+				formData: formData,
+				filePath: params.content,
+				name: 'file',
+				success: e => {
+					if (e.statusCode === 200) {
+						let photoDataNo = JSON.parse(e.data).file_no;
+						params.content = photoDataNo
+						self.sendMessageLanguageInfo('语音', params);
+					} else {
+					}
+					// console.log(uploadFileRes.data);
+				}
+			});
+		},
 		/*滚动**/
 		chatScroll(e) {
 			// if(!this.isLoading){
@@ -641,7 +714,8 @@ export default {
 				});
 			} else if (type === 'video') {
 				let reqHeader = {
-					bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+					bx_auth_ticket: uni.getStorageSync('bx_auth_ticket'),
+					'content-type': 'audio/mpeg'
 				};
 				let formData = {
 					serviceName: 'srv_bxfile_service',
@@ -1077,14 +1151,14 @@ export default {
 					if (item.msg_content_type === '语音') {
 						this.$set(resData[i], 'anmitionPlay', false);
 						// item.msg_link = '20201202175639960100'
-						// this.getFilePath(item.msg_link).then(obj=>{
-						// 	// debugger
-						// 	console.log("语音内容-----",obj,item.msg_link)
-						// 	// if(obj){
-						// 		let video_url = this.$api.getFilePath + obj[0].fileurl
-						// 		this.$set(item,'voice_url',video_url)
-						// 	// }
-						// })
+						this.getFilePath(item.msg_link).then(obj=>{
+							debugger
+							console.log("语音内容-----",obj,item.msg_link)
+							if(obj){
+								let video_url = this.$api.getFilePath + obj[0].fileurl
+								this.$set(item,'voice_url',video_url)
+							}
+						})
 						// let video_url = this.$api.downloadFile + item.msg_link + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
 						// this.$set(resData[i],'voice_url',video_url)
 					}
@@ -1104,6 +1178,7 @@ export default {
 						});
 					}
 					if (item.msg_content_type === '视频' && item.video) {
+						// this.getFilePath(item.attachment).
 						let video_url = this.$api.downloadFile + item.video + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 						this.$set(resData[i], 'video_url', video_url);
 					}
@@ -1742,6 +1817,12 @@ export default {
 			border-radius: 1px;
 			left: -7px;
 			top: 16rpx;
+		}
+	}
+	.audio{
+		/deep/ .uni-audio-default{
+			height: 0!important;
+			border: none;
 		}
 	}
 	.voice_icon {

@@ -93,7 +93,7 @@
 						</view>
 					</view>
 				</view>
-				<view @click.stop="tofeedback" class="cu-item boxfood couple-boxfood" v-if="isLoad && !pageDetType">
+				<view @click.stop="tofeedback" class="cu-item boxfood couple-boxfood" v-if="isLoad">
 					<view class="smallbox couple-smallbox">
 						<view class="smallbox-couple-top"><u-icon size="70" name="plus"></u-icon></view>
 						<view v-if="!isShowMyList" class="smallbox-couple-bot">
@@ -220,7 +220,7 @@
 		/>
 		<!-- <flyInCart ref="inCart" :cartBasketRect="cartBasketRect"></flyInCart> -->
 		<jumpBall :backgroundImage="currFood.imgurl" :start.sync="num" :element.sync="element" @msg="jbMsg" />
-		<view v-if="!pageDetType" class="public-button-box add-button">
+		<view class="public-button-box add-button">
 			<view @click="openCar" class="lg text-gray cuIcon-cart add-button-wrap">
 				<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>
 			</view>
@@ -689,8 +689,12 @@ export default {
 	},
 	onShow() {
 		this.getChooseFoodList();
-		this.getElementLabel();
-		this.onRefresh();
+		this.getElementLabel();		
+		if(this.searchValue){
+			this.getSearchValue(this.searchValue)
+		}else{
+			this.onRefresh();
+		}
 	},
 	onLoad(option) {
 		let query = JSON.parse(decodeURIComponent(option.condType));
@@ -1786,7 +1790,7 @@ export default {
 			let page = this.pageInfo;
 			this.pageInfo.pageNo = 1;
 			let self = this;
-			setTimeout(() => {
+			setTimeout(() => {				
 				this.getFoodsList(this.order, this.condObj);
 				// self.getDrawCoupon(self.req.serviceName, self.req.cond).then(callBackData => {
 				// if (callBackData.page.rownumber * callBackData.page.pageNo >= callBackData.page.total) {
@@ -2088,6 +2092,7 @@ export default {
 		},
 
 		async getFoodsList(order = null, cond = null, type = null, serviceName = null) {
+			
 			let self = this;
 			let url = this.getServiceUrl('health', serviceName ? serviceName : this.searchArg.serviceName, 'select');
 			let req = {

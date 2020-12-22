@@ -29,7 +29,7 @@
 							<view class="detail-label">用法：</view>
 							<view class="data-item">
 								<text class="label">
-									<text class="value">{{ data.take_times }}</text>
+									<text class="value">一天{{ data.take_times }}次</text>
 								</text>
 							</view>
 							<view class="data-item">
@@ -64,8 +64,23 @@
 				</view>
 				<view class="drug-record-timeline">
 					<view class="cu-timeline" v-for="item in drugRecord" :key="item.date">
-						<view class="cu-time" :class="{ 'text-blue': item.date === nowDate }">{{ item.date === nowDate ? `${item.date.slice(5)}(今天)` : item.date.slice(5) }}</view>
-						<view
+						<view class="cu-item">
+							<view class="cu-time" :class="{ 'text-blue': item.date === nowDate }">{{ item.date === nowDate ? `${item.date.slice(5)}(今天)` : item.date.slice(5) }}</view>
+							<view class="timeline-content">
+								<view class="timeline-item" v-for="record in item.data" :class="{ 'bg-blue': item.date === nowDate, 'bg-gray': item.date !== nowDate }">
+									<view class="time">
+										{{record.take_time.slice(0,5)}}
+									</view>
+									<view class="info" v-if="isArray(record.drugList)">
+										缺少：{{record.drugList.filter(item=>!item.hasTook).map(item=>item.general_name).toString()}}
+									</view>
+									<view class="info" v-if="isArray(record.drugList)">
+										已服用：{{record.drugList.filter(item=>item.hasTook).length}} / {{record.drugList.length}}
+									</view>
+								</view>
+							</view>
+						</view>
+				<!-- 		<view
 							class="cu-item text-gray"
 							v-for="record in item.data"
 							:class="{ 'text-bluess': item.date === nowDate, 'text-grayss': item.date !== nowDate }"
@@ -86,7 +101,7 @@
 									</view>
 								</view>
 							</view>
-						</view>
+						</view> -->
 					</view>
 				</view>
 			</view>
@@ -191,8 +206,8 @@ export default {
 			drugDetail: {}, // 药品详情
 			drugInfo: {
 				dosage_unit: '片',
-				take_times: '3次',
-				dosage_each_time: 0 //每次用量
+				take_times: '3',
+				dosage_each_time: 1 //每次用量
 			},
 			timer: '',
 			modalName: '',
@@ -213,15 +228,15 @@ export default {
 			times: [
 				{
 					label: '1次',
-					value: '1次'
+					value: '1'
 				},
 				{
 					label: '2次',
-					value: '2次'
+					value: '2'
 				},
 				{
 					label: '3次',
-					value: '3次'
+					value: '3'
 				}
 				// {
 				// 	label: '2天1次',
@@ -534,6 +549,19 @@ export default {
 								}
 							});
 						}
+						let drugList = this.deepClone(this.drugList)
+						item.drugList = drugList.map(d=>{
+							d.hasTook = false
+							if(Array.isArray(item.detail)&&item.detail.length>0){
+								item.detail.forEach(drug=>{
+									if(d.s_code===drug.s_code){
+										d.hasTook = true //已服用
+									}
+								})
+							}
+							return d
+						})
+						
 						if (date === item.take_date) {
 							record.data.push(item);
 						}
@@ -642,14 +670,36 @@ export default {
 	}
 }
 .drug-record-timeline {
-	.cu-timeline .cu-time {
-		width: 150rpx;
+	.cu-timeline {
+		&>.cu-item{
+			padding: 20rpx 20rpx 20rpx 90rpx;
+		}
+		.cu-time {
+			width: 150rpx;
+			text-align: left;
+			&.text-blue{
+				color: #0081FF;
+			}
+		}
 	}
 	.timeline-content {
-		padding: 30rpx;
-		min-height: 200rpx;
 		background-color: #fff;
-		box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		display: flex;
+		// flex-direction: column;
+		// box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12);
+		.timeline-item{
+			width: calc(50% -10rpx);
+			margin-right: 10rpx;
+			margin-bottom: 20rpx;
+			padding: 10rpx 20rpx;
+			box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+			display: flex;
+			flex-direction: column;
+			border-radius: 20rpx;
+			.info{
+				margin: 10rpx 0;
+			}
+		}
 		.top {
 			display: flex;
 			justify-content: space-between;

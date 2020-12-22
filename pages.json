@@ -339,6 +339,13 @@
 					}
 				},
 				{
+					"path": "symptomSelect/symptomSelect2",
+					"style": {
+						"navigationBarTitleText": "症状选择",
+						"navigationStyle": "custom"
+					}
+				},
+				{
 					"path": "indicatorsDetails/dietUp/dietUp",
 					"style": {}
 				},

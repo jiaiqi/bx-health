@@ -1,8 +1,10 @@
 <template>
 	<view class="bx-tagbox-c">
-		<view class="bx-item-wrap">
-			<view class="bx-item" @click="selectArea(item)" :class="item.no === currentItem.no?'choose-item':''" v-for="(item, index) in areaList" :key="index">{{ item.name ? item.name : showCol ? item[showCol] : '' }}</view>
-		</view>		
+		<view class="bx-tagbox-c-wrap">
+			<view class="bx-item-wrap">
+				<view class="bx-item" @click="selectArea(item)" :class="item.no === currentItem.no?'choose-item':''" v-for="(item, index) in areaList" :key="index">{{ item.name ? item.name : showCol ? item[showCol] : '' }}</view>
+			</view>	
+		</view>			
 		<cascaderItem v-if="currentItem.child && currentItem.child.length > 0" @selectAreaItem="selectArea2" :areaList="currentItem.child"></cascaderItem>
 	</view>
 </template>
@@ -116,6 +118,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+	.bx-tagbox-c-wrap{
+		margin: 20rpx;
+		padding: 20rpx;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		border-radius: 30rpx;
+	}
 .bx-tagbox-c {
 	// margin: 20rpx;
 	// padding: 20rpx;

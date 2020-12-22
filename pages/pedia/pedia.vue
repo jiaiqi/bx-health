@@ -264,7 +264,6 @@ export default {
 			}
 			// #endif
 			if (!userInfo) {
-				debugger;
 				// 未登录 h5跳转到登录页,小程序端进行静默登录
 				// #ifdef MP-WEIXIN
 				const result = await wx.login();

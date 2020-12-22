@@ -1381,20 +1381,37 @@ export default {
 				let serviceName = 'srvhealth_diet_record_add';
 				let url = this.getServiceUrl('health', serviceName, 'operate');
 				let req = [{ serviceName: serviceName, colNames: ['*'], data: arr }];
-				let res = await this.$http.post(url, req);
-				if (res.data.state === 'SUCCESS') {
-					console.log('-------添加---', res);
-					this.addRecodChildData(res.data.response[0].response.effect_data[0].diet_record_no);
-					// if (this.searchArg.type === 'food') {
-					// this.getChooseFoodList();
-
-					// 通知健康追踪页面，饮食记录已改变，需要刷新数据
-					uni.$emit('dietUpdate');
-					uni.navigateBack({
-						delta: 0
+				if(this.userInfo && this.userInfo.sex && this.userInfo.weight && this.userInfo.age){
+					let res = await this.$http.post(url, req);
+					if (res.data.state === 'SUCCESS') {
+						console.log('-------添加---', res);
+						this.addRecodChildData(res.data.response[0].response.effect_data[0].diet_record_no);
+						// if (this.searchArg.type === 'food') {
+						// this.getChooseFoodList();
+					
+						// 通知健康追踪页面，饮食记录已改变，需要刷新数据
+						uni.$emit('dietUpdate');
+						uni.navigateBack({
+							delta: 0
+						});
+						// }
+					}
+				}else{
+					uni.showModal({
+						title: '提示',
+						content: '当前没有进行登记年龄、性别和体重，是否去登记?',
+						success: function(res) {
+							if (res.confirm) {
+								uni.navigateTo({
+									url: '/otherPages/chooseFood/myFoodsInfo'
+								});
+							} else if (res.cancel) {
+								console.log('用户点击取消');
+							}
+						}
 					});
-					// }
 				}
+				
 			}
 		},
 		async addRecodChildData(id) {

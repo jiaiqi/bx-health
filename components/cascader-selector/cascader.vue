@@ -21,7 +21,7 @@
 						{{ item.name ? item.name : showCol ? item[showCol] : '' }}
 					</view> -->
 					<cascaderItem :currentNo="currentNo" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem>
-					<view class="bx-item more" @click="showMore" v-if="isShowMore"><view class="content">更多</view></view>
+					<!-- <view class="bx-item more" @click="showMore" v-if="isShowMore"><view class="content">更多</view></view> -->
 				</view>
 			</view>
 			
@@ -255,8 +255,8 @@ export default {
 		}
 	}
 	.bx-tagbox {
-		margin: 20rpx;
-		padding: 20rpx;
+		// margin: 20rpx;
+		// padding: 20rpx;
 		// height: 700rpx;
 		text-align: left;
 		flex: 1;
