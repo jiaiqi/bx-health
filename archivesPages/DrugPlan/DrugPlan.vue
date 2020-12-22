@@ -94,28 +94,65 @@
 		<view class="cu-modal" :class="{ show: modalName === 'drugDetail' }">
 			<view class="cu-dialog">
 				<view class="drug-detail" v-if="drugDetail && drugDetail.med_no">
-					<view class="detail-item">
+					<view class="detail-item item-title">
 						<view class="label">药品名称:</view>
 						<view class="value">{{ drugDetail.medicine_name }}</view>
 						<image class="icon" src="../static/icon/drug.png" mode="aspectFit" @click="toAdd('detail', item)"></image>
 					</view>
-					<view class="detail-item">
-						<view class="label">每天服用次数:</view>
+					<view class="detail-item column">
+						<view class="label">类别:</view>
 						<view class="value">
-							<bx-radio-group class="form-item-content_value radio-group" v-model="drugDetail.take_times" mode="button">
-								<bx-radio v-for="item in times" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
+							{{ delNotChineseChar(drugDetail.one_type) }}
+							<text class="spec" v-if="drugDetail.two_type">/</text>
+							{{ delNotChineseChar(drugDetail.two_type) }}
+							<text class="spec" v-if="drugDetail.three_type">/</text>
+							{{ delNotChineseChar(drugDetail.three_type) }}
+							<text class="spec" v-if="drugDetail.four_type">/</text>
+							{{ delNotChineseChar(drugDetail.four_type) }}
+							<text class="spec" v-if="drugDetail.five_type">/</text>
+							{{ delNotChineseChar(drugDetail.five_type) }}
+						</view>
+					</view>
+					<view class="detail-item">
+						<view class="label">药品注册剂型:</view>
+						<view class="value">{{ drugDetail.register_frug_form }}</view>
+					</view>
+					<view class="detail-item border-bottom">
+						<view class="label">生产企业:</view>
+						<view class="value">{{ drugDetail.medicine_company }}</view>
+					</view>
+
+					<view class="detail-item">
+						<view class="label">用量单位:</view>
+						<view class="value">
+							<bx-radio-group class="form-item-content_value radio-group" v-model="drugInfo.dosage_unit" mode="button">
+								<bx-radio v-for="item in useDrugUnit" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
 							</bx-radio-group>
 						</view>
 					</view>
 					<view class="detail-item">
 						<view class="label">每次用量:</view>
-						<view class="value"><input type="text" v-model="drugDetail.dosage_each_time" /></view>
+						<view class="value input">
+							<text class="operate" :class="{ disabled: drugInfo.dosage_each_time - 1 < 0 }" @click="changeAmount(-1)" @longpress="longChange(-1)" @touchend="longChangeEnd">
+								- 1
+							</text>
+							<text class="operate" :class="{ disabled: drugInfo.dosage_each_time - 0.5 < 0 }" @click="changeAmount(-0.5)" @longpress="longChange(-0.5)" @touchend="longChangeEnd">
+								- 0.5
+							</text>
+							<input class="input" type="text" v-model="drugInfo.dosage_each_time" />
+							<text class="operate" :class="{ disabled: drugInfo.dosage_each_time + 0.5 < 0 }" @click="changeAmount(0.5)" @longpress="longChange(0.5)" @touchend="longChangeEnd">
+								+ 0.5
+							</text>
+							<text class="operate" :class="{ disabled: drugInfo.dosage_each_time + 1 < 0 }" @click="changeAmount(1)" @longpress="longChange(1)" @touchend="longChangeEnd">
+								+ 1
+							</text>
+						</view>
 					</view>
 					<view class="detail-item">
-						<view class="label">用量单位:</view>
+						<view class="label">每天服用次数:</view>
 						<view class="value">
-							<bx-radio-group class="form-item-content_value radio-group" v-model="drugDetail.dosage_unit" mode="button">
-								<bx-radio v-for="item in useDrugUnit" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
+							<bx-radio-group class="form-item-content_value radio-group" v-model="drugInfo.take_times" mode="button">
+								<bx-radio v-for="item in times" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
 							</bx-radio-group>
 						</view>
 					</view>
@@ -151,7 +188,13 @@ export default {
 			appName: 'health',
 			serviceName: 'srvhealth_drug_schedule_select',
 			login_user_info: uni.getStorageSync('login_user_info'),
-			drugDetail: null, // 药品详情
+			drugDetail: {}, // 药品详情
+			drugInfo: {
+				dosage_unit: '片',
+				take_times: '3次',
+				dosage_each_time: 0 //每次用量
+			},
+			timer: '',
 			modalName: '',
 			useDrugUnit: [
 				{
@@ -179,11 +222,11 @@ export default {
 				{
 					label: '3次',
 					value: '3次'
-				},
-				{
-					label: '2天1次',
-					value: '2天1次'
 				}
+				// {
+				// 	label: '2天1次',
+				// 	value: '2天1次'
+				// }
 			]
 		};
 	},
@@ -199,6 +242,21 @@ export default {
 		}
 	},
 	methods: {
+		longChange(num) {
+			this.timer = setInterval(() => {
+				this.changeAmount(num);
+			}, 200);
+		},
+		longChangeEnd() {
+			clearInterval(this.timer);
+		},
+		changeAmount(num) {
+			let amount = Number(this.drugInfo.dosage_each_time);
+			if (amount + num >= 0) {
+				amount += num;
+			}
+			this.drugInfo.dosage_each_time = Number(amount.toFixed(1));
+		},
 		deleteRecord(e) {
 			const self = this;
 			uni.showModal({
@@ -329,21 +387,23 @@ export default {
 				return res.data.data[0];
 			}
 		},
-		async addDrugItem(info) {
+		async addDrugItem() {
+			let detail = this.drugDetail;
+			let info = this.drugInfo;
 			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_detail_list_add', 'operate');
 			let req = [
 				{
 					serviceName: 'srvhealth_drug_schedule_detail_list_add',
 					data: [
 						{
-							med_no: info.med_no,
-							s_code: info.s_code,
-							drug_reg_name: info.register_name,
-							general_code: info.medicine_no,
-							general_name: info.medicine_name,
-							take_times: '2次',
-							dosage_each_time: 2,
-							dosage_unit: 2,
+							med_no: detail.med_no,
+							s_code: detail.s_code,
+							drug_reg_name: detail.register_name,
+							general_code: detail.medicine_no,
+							general_name: detail.medicine_name,
+							take_times: info.take_times, //每天用药次数
+							dosage_each_time: info.dosage_each_time, //每次用量
+							dosage_unit: info.dosage_unit, //用量单位
 							ds_no: this.planNo
 						}
 					]
@@ -355,6 +415,7 @@ export default {
 						title: '添加成功'
 					});
 					this.modalName = '';
+					this.getFieldsV2();
 				}
 			});
 		},
@@ -525,6 +586,7 @@ export default {
 	created() {
 		let self = this;
 		uni.$on('selectDrug', e => {
+			(e.dosage_unit = '片'), (e.take_times = '3次');
 			self.drugDetail = e;
 			self.modalName = 'drugDetail';
 		});
@@ -608,6 +670,7 @@ export default {
 				min-width: 45%;
 				display: flex;
 				align-items: center;
+				flex-wrap: wrap;
 				.cuIcon-squarecheck {
 					font-size: 40rpx;
 					margin-right: 10rpx;
@@ -720,15 +783,19 @@ export default {
 		display: flex;
 		margin-bottom: 20rpx;
 		// flex-direction: column;
-		align-items: flex-start;
 		align-items: center;
-		.label {
-			margin-right: 20rpx;
-			font-size: 24rpx;
-			// text-align: left;
+		&.border-bottom {
+			border-bottom: 2rpx dashed #ccc;
+			padding-bottom: 20rpx;
 		}
-		&:first-child {
-			// justify-content: center;
+		&.column {
+			flex-direction: column;
+			align-items: flex-start;
+			// &:last-child{
+			// 	border-top: 2rpx dashed #ccc;
+			// }
+		}
+		&.item-title {
 			justify-content: space-between;
 			margin-bottom: 20rpx;
 			.value {
@@ -738,26 +805,62 @@ export default {
 				text-align: left;
 				text-indent: 20rpx;
 			}
-			.icon {
-				width: 50rpx;
-				height: 50rpx;
-				margin-right: 50rpx;
+		}
+		.label {
+			margin-right: 20rpx;
+			font-weight: bold;
+			min-width: 150rpx;
+			text-align: left;
+			// font-size: 24rpx;
+			// text-align: left;
+		}
+		.value {
+			text-align: left;
+			.spec {
+				display: inline-block;
+				color: #0bc99d;
+				margin-top: 10rpx;
+				padding: 0 10rpx;
 			}
-		}
-		&:nth-child(2) {
-			align-items: flex-start;
-			flex-direction: column;
-		}
-		&:nth-child(3) {
-			.value {
+			&.input {
 				flex: 1;
 				margin: 10rpx;
-				// border: 1rpx solid #bababa;
-				border-bottom: 1rpx solid #bababa;
 				width: 200rpx;
-				text-align: left;
-				padding-bottom: 10rpx;
+				display: flex;
+				text-align: center;
+				align-items: center;
+				.input {
+					display: inline-block;
+					width: 100rpx;
+					margin-right: 10rpx;
+				}
+				.operate {
+					display: inline-block;
+					color: #fff;
+					background-color: rgba(11, 201, 157, 0.7);
+					// background-color: #bababa;
+					width: 100rpx;
+					height: 50rpx;
+					line-height: 50rpx;
+					margin-right: 10rpx;
+					border-radius: 50rpx;
+					transition: all 0.5s;
+					cursor: pointer;
+					&.disabled {
+						background-color: #dcdfe6;
+						cursor: no-drop;
+						color: #bcbec2;
+					}
+					&:active {
+						transform: scale(1.1);
+					}
+				}
 			}
+		}
+		.icon {
+			width: 50rpx;
+			height: 50rpx;
+			margin-right: 50rpx;
 		}
 	}
 }

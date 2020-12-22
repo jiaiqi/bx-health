@@ -87,7 +87,7 @@ export default {
 				imgCol: 'customer_profile_url',
 				isShowCouple:true,
 				pageRowNumber:20,
-				topNum:220,
+				topNum:250,
 				condition: [{ colName: 'manager_no', ruleType: 'like', value: doctorInfo && doctorInfo.dt_no ? doctorInfo.dt_no : '**' }],
 				wordKey: {
 					title: 'customer_name'

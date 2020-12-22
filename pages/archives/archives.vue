@@ -73,8 +73,11 @@
 			</view>
 			<view class="content todo-list">
 				<view class="todo-item" v-for="(item, index) in todoList" :key="index" @click="clickTodoItem(item, index)">
-					<!-- <view class="check-box" :class="{ checked: item.checked }"><view class="checked cuIcon-check" v-if="item.checked"></view></view> -->
-					<view class="todo-item-content" :class="{ checked: item.checked }">{{ item.ds_name }}</view>
+					<!-- <view class="todo-item-content" :class="{ checked: item.checked }"> -->
+						<view class="type">{{ item.typeExplain }}</view>
+						<view class="title">{{ item.ds_name }}</view>
+						<view class="cycle">{{ getCycle(item) }}</view>
+					<!-- </view> -->
 				</view>
 			</view>
 		</view>
@@ -235,6 +238,7 @@
 <script>
 import energyListWrap from '@/static/js/element_info.js';
 import { mapGetters } from 'vuex';
+import dayjs from '@/static/js/dayjs.min.js';
 export default {
 	data() {
 		return {
@@ -349,7 +353,7 @@ export default {
 				return this.getImagePath(this.userInfo.profile_url);
 			} else if (this.loginUserInfo.headimgurl) {
 				return this.getImagePath(this.loginUserInfo.headimgurl);
-			}else if(this.wxUserInfo.headimgurl){
+			} else if (this.wxUserInfo.headimgurl) {
 				return this.getImagePath(this.wxUserInfo.headimgurl);
 			}
 		},
@@ -434,11 +438,16 @@ export default {
 		}
 	},
 	methods: {
+		getCycle(e) {
+			let endDate = dayjs(e.start_date).add(e.take_days, 'day');
+			return `${dayjs(e.start_date).format('MM.DD')}-${dayjs(endDate).format('MM.DD')}`
+		},
 		switchUser(item) {
 			this.userInfo = item;
 			uni.setStorageSync('current_user_info', item);
 			uni.setStorageSync('current_user', item.name);
 			this.showUserListPopup = false;
+			this.initPage()
 		},
 		clickTodoItem(item, index) {
 			// this.$set(item, 'checked', !item.checked);
@@ -458,7 +467,11 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data)) {
-				this.todoList = res.data.data;
+				this.todoList = res.data.data.map(item => {
+					item.type = 'drugSchedule';
+					item.typeExplain = '用药';
+					return item;
+				});
 			}
 		},
 		showAddRecordLayout() {
@@ -1070,23 +1083,7 @@ export default {
 				url: '/questionnaire/couple/couple'
 			});
 		},
-		updateUserProfile() {
-			const url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'opetare');
-			const req = [
-				{
-					serviceName: 'srvhealth_person_info_update',
-					condition: [{ colName: 'no', ruleType: 'eq', value: this.userInfo.no }],
-					data: [{ profile_url: this.wxUserInfo.headimgurl }]
-				}
-			];
-			this.$http.post(url, req).htn(res => {
-				if (res.data.state === 'SUCCESS') {
-					uni.showToast({
-						title: '头像更新成功！'
-					});
-				}
-			});
-		},
+
 		// 查找当前帐号建立的用户列表
 		async selectUserList() {
 			const url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
@@ -1113,7 +1110,8 @@ export default {
 							console.log(this.wxUserInfo);
 							if (!item.profile_url) {
 								if (this.wxUserInfo.headimgurl) {
-									this.userInfo.profile_url = this.wxUserInfo.headimgurl;
+									this.updateUserInfo()
+									// this.userInfo.profile_url = this.wxUserInfo.headimgurl;
 								}
 							}
 							this.$store.commit('SET_USERINFO', item);
@@ -1125,7 +1123,8 @@ export default {
 					this.userInfo = res.data.data[0];
 					if (!item.profile_url) {
 						if (this.wxUserInfo.headimgurl) {
-							this.userInfo.profile_url = this.wxUserInfo.headimgurl;
+							this.updateUserInfo()
+							// this.userInfo.profile_url = this.wxUserInfo.headimgurl;
 						}
 					}
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
@@ -1169,35 +1168,16 @@ export default {
 			}
 		},
 		async initPage() {
+			let self = this;
 			let userInfo = uni.getStorageSync('login_user_info');
 			// #ifdef MP-WEIXIN
 			let res = await wx.getSetting();
 			if (!res.authSetting['scope.userInfo']) {
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
 				// 没有获取用户信息授权
-				// uni.showModal({
-				// 	title: '提示',
-				// 	content: '您还没有登录,请登录后查看',
-				// 	confirmText: '去登录',
-				// 	confirmColor: '#02D199',
-				// 	success(res) {
-				// 		if (res.confirm) {
-				// 			// 	// 确认 跳转到登录页
-				// 			uni.navigateTo({
-				// 				url: '/publicPages/accountExec/accountExec'
-				// 			});
-				// 		} else if (res.cancel) {
-				// 			// 取消 返回首页
-				// 			uni.switchTab({
-				// 				url: '/pages/pedia/pedia'
-				// 			});
-				// 		}
-				// 	}
-				// });
 				return;
 			} else {
-				this.isAuthUserInfo = true;
-				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				this.updateUserInfo()
 			}
 			// #endif
 			if (!userInfo || !uni.getStorageSync('isLogin')) {
@@ -1231,6 +1211,32 @@ export default {
 				this.getToDoList();
 			}
 		},
+		updateUserInfo(){
+			let self = this;
+			uni.getUserInfo({
+				provider: 'weixin',
+				success: function(user) {
+					let rawData = {
+						nickname: user.userInfo.nickName,
+						sex: user.userInfo.gender,
+						country: user.userInfo.country,
+						province: user.userInfo.province,
+						city: user.userInfo.city,
+						headimgurl: user.userInfo.avatarUrl
+					};
+					self.$store.commit('SET_WX_USERINFO', rawData);
+					console.log(self.wxUserInfo);
+					console.log(self.userInfo);
+					if (self.userInfo && self.userInfo.no && !self.userInfo.profile_url) {
+						self.updateUserProfile(rawData.headimgurl,self.userInfo.no).then(_=>{
+							self.userInfo.profile_url = self.wxUserInfo.headimgurl;
+						});
+					}
+				}
+			});
+			this.isAuthUserInfo = true;
+			this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+		},
 		toAddPages() {
 			let fieldsCond = [
 				{ column: 'profile_url', display: false },
@@ -1241,11 +1247,11 @@ export default {
 					// condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }]
 				}
 			];
-			let userInfo = uni.getStorageSync('wxUserInfo');
-			if (userInfo && userInfo.headimgurl) {
+			let wxUserInfo = uni.getStorageSync('wxUserInfo');
+			if (wxUserInfo && wxUserInfo.headimgurl) {
 				fieldsCond = fieldsCond.map(item => {
 					if (item.column === 'profile_url') {
-						item.value = userInfo.headimgurl;
+						item.value = wxUserInfo.headimgurl;
 					}
 					return item;
 				});
@@ -1588,7 +1594,6 @@ export default {
 				grid-row-gap: 20rpx;
 				grid-column-gap: 20rpx;
 				.grid-item {
-					border-radius: 10rpx;
 					display: flex;
 					// justify-content: center;
 					height: 150rpx;
@@ -1675,7 +1680,6 @@ export default {
 					display: flex;
 					flex-direction: column;
 					box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-					border-radius: 20rpx;
 					padding-bottom: 20rpx;
 					&:nth-child(4n) {
 						margin-right: 0;
@@ -1702,34 +1706,40 @@ export default {
 				grid-column-gap: 20rpx;
 				font-weight: normal;
 				.todo-item {
-					height: 100rpx;
 					display: flex;
+					flex-direction: column;
 					justify-content: center;
 					align-items: center;
-					// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-					border-radius: 20rpx;
 					color: #e6a23c;
 					background: #fdf6ec;
 					border-color: #f5dab1;
 					box-shadow: 0px 0px 4px #f5dab1, 0 0 6px #fdf6ec;
-					.check-box {
-						border: 2px solid #666;
-						border-radius: 30rpx;
-						width: 50rpx;
-						height: 50rpx;
-						margin-right: 10rpx;
-						display: flex;
-						justify-content: center;
-						align-items: center;
-						&.checked {
-							color: #fff;
-							background-color: #666;
-							font-size: 34rpx;
-						}
+					padding: 20rpx;
+					position: relative;
+					overflow: hidden;
+					.type{
+						text-align: center;
+						font-weight: normal;
+						width: 100%;
+						position: absolute;
+						transform: rotate(-45deg) scale(0.8);
+						background-color: #fff;
+						font-size: 24rpx;
+						left: -75rpx;
+						padding: 5rpx;
+						top: 10rpx;
+						letter-spacing: 5rpx;
+					}
+					.title{
+						padding: 10rpx;
+					}
+					.cycle{
+						font-size: 24rpx;
 					}
 					.todo-item-content {
 						font-weight: 700;
-
+						.title {
+						}
 						&.checked {
 							text-decoration: line-through;
 							// text-underline: thr;

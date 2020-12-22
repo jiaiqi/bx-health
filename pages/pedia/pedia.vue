@@ -21,9 +21,8 @@
 		>
 			<view class="page-slide">
 				<swiper
-					class="screen-swiper item-box"
+					class="screen-swiper item-box round-dot"
 					:height="300"
-					:class="'round-dot'"
 					:indicator-dots="true"
 					:circular="true"
 					:autoplay="true"
@@ -76,6 +75,7 @@ export default {
 	},
 	computed: {
 		...mapState({
+			userInfo:state=>state.user.userInfo,
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize
 		})
@@ -231,30 +231,40 @@ export default {
 			}
 		},
 		async initPage() {
+			let self = this
 			let userInfo = uni.getStorageSync('login_user_info');
 			// #ifdef MP-WEIXIN
 			let res = await wx.getSetting();
 			if (!res.authSetting['scope.userInfo']) {
 				// 没有获取用户信息授权
-				// uni.showModal({
-				// 	title: '提示',
-				// 	content: '请登录并授权获取用户信息后再进行查看',
-				// 	confirmText: '去登录',
-				// 	confirmColor: '#02D199',
-				// 	success(res) {
-				// 		if (res.confirm) {
-				// 			// 确认 跳转到登录页
-				// 			uni.navigateTo({
-				// 				url: '/publicPages/accountExec/accountExec'
-				// 			});
-				// 		}
-				// 	}
-				// });
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
 				return;
+			} else {
+				uni.getUserInfo({
+					provider: 'weixin',
+					success: function(user) {
+						let rawData = {
+							nickname: user.userInfo.nickName,
+							sex: user.userInfo.gender,
+							country: user.userInfo.country,
+							province: user.userInfo.province,
+							city: user.userInfo.city,
+							headimgurl: user.userInfo.avatarUrl
+						};
+						self.$store.commit('SET_WX_USERINFO', rawData);
+						console.log(self.wxUserInfo);
+						console.log(self.userInfo);
+						if (self.userInfo && self.userInfo.no && !self.userInfo.profile_url) {
+							self.updateUserProfile(rawData.headimgurl, self.userInfo.no);
+						}
+					}
+				});
+				this.isAuthUserInfo = true;
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
 			}
 			// #endif
 			if (!userInfo) {
-				debugger
+				debugger;
 				// 未登录 h5跳转到登录页,小程序端进行静默登录
 				// #ifdef MP-WEIXIN
 				const result = await wx.login();

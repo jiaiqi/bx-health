@@ -1482,5 +1482,34 @@ export default {
 				})
 			})
 		}
+		Vue.prototype.updateUserProfile = async (profile_url, user_no) => {
+			const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
+			const req = [{
+				serviceName: 'srvhealth_person_info_update',
+				condition: [{
+					colName: 'no',
+					ruleType: 'eq',
+					value: user_no
+				}],
+				data: [{
+					profile_url: profile_url
+				}]
+			}];
+			let res = await Vue.prototype.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				uni.showToast({
+					title: '头像更新成功！'
+				});
+				return true
+			}
+		}
+		Vue.prototype.delNotChineseChar = (str) => {
+			if (str) {
+				str = str.replace(/\w/g, '')
+			} else {
+				str = ''
+			}
+			return str
+		}
 	}
 }

@@ -20,6 +20,8 @@ export default {
 		if(option.webUrl){
 			this.webUrl = decodeURIComponent(option.webUrl)
 			// this.webUrl = 'http://srvms.100xsys.cn/health/remote/getPage?address=https://xw.qq.com/cmsid/20201201A0296600'
+		}else{
+			this.webUrl ='https://wx2.100xsys.cn/pages/specific/testPage/testPage'
 		}
 		// if(option.doctor_no){
 		// 	this.doctor_no = decodeURIComponent(option.doctor_no)
