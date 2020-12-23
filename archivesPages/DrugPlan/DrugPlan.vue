@@ -23,7 +23,7 @@
 					</view>
 				</view>
 				<view class="child-service-data-wrap">
-					<view class="child-service-data" v-for="(data, dataIndex) in item.data" :key="dataIndex">
+					<view class="child-service-data" v-for="(data, dataIndex) in item.data" :key="dataIndex" @click="showDetailBox(data)">
 						<view class="title">{{ data.general_name }}</view>
 						<view class="detail">
 							<view class="detail-label">用法：</view>
@@ -42,151 +42,113 @@
 					</view>
 				</view>
 			</view>
-			<!-- 		<view class="child-service-item">
-				<view class="child-service-title"><text class="title-text">今日用药情况</text></view>
-				<view class="child-service-data-wrap">
-					<view class="child-service-data" v-for="(data, dataIndex) in drugList" :key="dataIndex">
-						<view class="title">{{ data.general_name }}</view>
-						<view class="detail">
-							<view class="detail-label">已用{{ data.times }}次</view>
-							<view class="detail-label">应用{{ data.take_times }}</view>
-						</view>
-					</view>
-				</view>
-			</view> -->
 			<view class="child-service-item">
 				<view class="child-service-title">
 					<text class="title-text">用药记录</text>
+					<text class="title-action" @click="toAdd('open-calendar')">
+						<text class="cuIcon-calendar"></text>
+						<text class="margin-left-xs">日期</text>
+					</text>
 					<text class="title-action" @click="toAdd('record')">
 						<text class="cuIcon-add "></text>
 						<text class="see-histroy">添加</text>
 					</text>
 				</view>
 				<view class="drug-record-timeline">
+					<view class="cu-timeline none-data" v-if="!drugRecord || drugRecord.length === 0">
+						<text class="cuIcon-warn margin-right-xs"></text>
+						未找到今日用药记录
+					</view>
 					<view class="cu-timeline" v-for="item in drugRecord" :key="item.date">
 						<view class="cu-item">
 							<view class="cu-time" :class="{ 'text-blue': item.date === nowDate }">{{ item.date === nowDate ? `${item.date.slice(5)}(今天)` : item.date.slice(5) }}</view>
 							<view class="timeline-content">
 								<view class="timeline-item" v-for="record in item.data" :class="{ 'bg-blue': item.date === nowDate, 'bg-gray': item.date !== nowDate }">
-									<view class="time">
-										{{record.take_time.slice(0,5)}}
-									</view>
-									<view class="info" v-if="isArray(record.drugList)">
+									<view class="time">{{ record.take_time.slice(0, 5) }}</view>
+									<!-- 		<view class="info" v-if="isArray(record.drugList)">
 										缺少：{{record.drugList.filter(item=>!item.hasTook).map(item=>item.general_name).toString()}}
-									</view>
-									<view class="info" v-if="isArray(record.drugList)">
-										已服用：{{record.drugList.filter(item=>item.hasTook).length}} / {{record.drugList.length}}
-									</view>
+									</view> -->
+									<view class="info" v-if="isArray(record.drugList)">已服用：{{ getDegree(record.drugList, 'degree') }}</view>
+									<view class="progress bg-blue" :style="{ width: getDegree(record.drugList).width }" v-if="getDegree(record.drugList) && getDegree(record.drugList).width"></view>
+									<view class="delete-bar" @click="deleteRecord(record)"><text class="cuIcon-delete"></text></view>
 								</view>
 							</view>
 						</view>
-				<!-- 		<view
-							class="cu-item text-gray"
-							v-for="record in item.data"
-							:class="{ 'text-bluess': item.date === nowDate, 'text-grayss': item.date !== nowDate }"
-							:key="record.create_time"
-						>
-							<view class="timeline-content " :class="{ 'bg-bluess': item.date === nowDate, 'bg-grayss': item.date !== nowDate }">
-								<view class="top">
-									<view class="cu-capsule radius">
-										<view class="cu-tag " :class="{ 'bg-blue': item.date === nowDate, 'bg-grey': item.date !== nowDate }">{{ calcTime(record.take_time) }}</view>
-										<view class="cu-tag " :class="{ 'line-blue': item.date === nowDate, 'line-grey': item.date !== nowDate }">{{ record.take_time.slice(0, 5) }}</view>
-									</view>
-									<view class="delete-icon" @click="deleteRecord(record)"><text class="cuIcon-delete"></text></view>
-								</view>
-								<view class="drug-detail" v-if="isArray(record.detail)">
-									<view class="detail-item" v-for="detail in record.detail" :class="{ 'text-blue': item.date === nowDate }">
-										<text class="cuIcon-squarecheck"></text>
-										<text>{{ detail.general_name }}</text>
-									</view>
-								</view>
-							</view>
-						</view> -->
 					</view>
 				</view>
 			</view>
 		</view>
 		<view class="cu-modal" :class="{ show: modalName === 'drugDetail' }">
 			<view class="cu-dialog">
-				<view class="drug-detail" v-if="drugDetail && drugDetail.med_no">
-					<view class="detail-item item-title">
-						<view class="label">药品名称:</view>
-						<view class="value">{{ drugDetail.medicine_name }}</view>
-						<image class="icon" src="../static/icon/drug.png" mode="aspectFit" @click="toAdd('detail', item)"></image>
-					</view>
-					<view class="detail-item column">
-						<view class="label">类别:</view>
-						<view class="value">
-							{{ delNotChineseChar(drugDetail.one_type) }}
-							<text class="spec" v-if="drugDetail.two_type">/</text>
-							{{ delNotChineseChar(drugDetail.two_type) }}
-							<text class="spec" v-if="drugDetail.three_type">/</text>
-							{{ delNotChineseChar(drugDetail.three_type) }}
-							<text class="spec" v-if="drugDetail.four_type">/</text>
-							{{ delNotChineseChar(drugDetail.four_type) }}
-							<text class="spec" v-if="drugDetail.five_type">/</text>
-							{{ delNotChineseChar(drugDetail.five_type) }}
-						</view>
-					</view>
-					<view class="detail-item">
-						<view class="label">药品注册剂型:</view>
-						<view class="value">{{ drugDetail.register_frug_form }}</view>
-					</view>
-					<view class="detail-item border-bottom">
-						<view class="label">生产企业:</view>
-						<view class="value">{{ drugDetail.medicine_company }}</view>
-					</view>
-
-					<view class="detail-item">
-						<view class="label">用量单位:</view>
-						<view class="value">
-							<bx-radio-group class="form-item-content_value radio-group" v-model="drugInfo.dosage_unit" mode="button">
-								<bx-radio v-for="item in useDrugUnit" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
-							</bx-radio-group>
-						</view>
-					</view>
-					<view class="detail-item">
-						<view class="label">每次用量:</view>
-						<view class="value input">
-							<text class="operate" :class="{ disabled: drugInfo.dosage_each_time - 1 < 0 }" @click="changeAmount(-1)" @longpress="longChange(-1)" @touchend="longChangeEnd">
-								- 1
-							</text>
-							<text class="operate" :class="{ disabled: drugInfo.dosage_each_time - 0.5 < 0 }" @click="changeAmount(-0.5)" @longpress="longChange(-0.5)" @touchend="longChangeEnd">
-								- 0.5
-							</text>
-							<input class="input" type="text" v-model="drugInfo.dosage_each_time" />
-							<text class="operate" :class="{ disabled: drugInfo.dosage_each_time + 0.5 < 0 }" @click="changeAmount(0.5)" @longpress="longChange(0.5)" @touchend="longChangeEnd">
-								+ 0.5
-							</text>
-							<text class="operate" :class="{ disabled: drugInfo.dosage_each_time + 1 < 0 }" @click="changeAmount(1)" @longpress="longChange(1)" @touchend="longChangeEnd">
-								+ 1
-							</text>
-						</view>
-					</view>
-					<view class="detail-item">
-						<view class="label">每天服用次数:</view>
-						<view class="value">
-							<bx-radio-group class="form-item-content_value radio-group" v-model="drugInfo.take_times" mode="button">
-								<bx-radio v-for="item in times" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
-							</bx-radio-group>
-						</view>
-					</view>
-					<view class="button-box">
-						<view class="button cu-btn gray" @click="hideModal">取消</view>
-						<view class="button cu-btn bg-cyan" @click="addDrugItem(drugDetail)">确定</view>
-					</view>
-				</view>
+				<DrugDetailInfo
+					:drugInfo="drugInfo"
+					:planNo="planNo"
+					:type="drugDetailType"
+					:drugDetail="drugDetail"
+					@hideModal="hideModal"
+					@updateSuccess="updateSuccess"
+				></DrugDetailInfo>
 			</view>
 		</view>
+		<uni-calendar
+			v-if="showCalender"
+			ref="calendar"
+			class="uni-calendar--hook"
+			:clear-date="true"
+			:range="false"
+			:startDate="info.startDate"
+			:endDate="info.endDate"
+			:date="info.date"
+			:insert="info.insert"
+			:selected="info.selected"
+			:lunar="info.lunar"
+			@confirm="confirmDate"
+			@monthSwitch="monthSwitch"
+		/>
 	</view>
 </template>
 
 <script>
 import dayjs from '../static/dayjs/dayjs.min.js';
+import DrugDetailInfo from '../components/DrugInfo/DrugInfo.vue';
+/**
+ * 获取任意时间
+ */
+function getDate(date, AddDayCount = 0) {
+	if (!date) {
+		date = new Date();
+	}
+	if (typeof date !== 'object') {
+		date = date.replace(/-/g, '/');
+	}
+	const dd = new Date(date);
 
+	dd.setDate(dd.getDate() + AddDayCount); // 获取AddDayCount天后的日期
+
+	const y = dd.getFullYear();
+	const m = dd.getMonth() + 1 < 10 ? '0' + (dd.getMonth() + 1) : dd.getMonth() + 1; // 获取当前月份的日期，不足10补0
+	const d = dd.getDate() < 10 ? '0' + dd.getDate() : dd.getDate(); // 获取当前几号，不足10补0
+	return {
+		fullDate: y + '-' + m + '-' + d,
+		year: y,
+		month: m,
+		date: d,
+		day: dd.getDay()
+	};
+}
 export default {
+	components: {
+		DrugDetailInfo
+	},
 	data() {
 		return {
+			info: {
+				lunar: true,
+				insert: false,
+				startDate: '',
+				endDate: '',
+				selected: []
+			},
 			planNo: '',
 			drugList: [], //当前用药计划的药品列表
 			planDetail: {}, //用药计划
@@ -211,6 +173,8 @@ export default {
 			},
 			timer: '',
 			modalName: '',
+			showCalender:false,
+			drugDetailType: 'add',
 			useDrugUnit: [
 				{
 					label: '片',
@@ -238,10 +202,6 @@ export default {
 					label: '3次',
 					value: '3'
 				}
-				// {
-				// 	label: '2天1次',
-				// 	value: '2天1次'
-				// }
 			]
 		};
 	},
@@ -257,6 +217,37 @@ export default {
 		}
 	},
 	methods: {
+		confirmDate(e) {
+
+			this.getDrugRecord(this.planNo, e.fulldate);
+		},
+		monthSwitch(e) {
+			this.getDrugRecord(this.planNo,  `${e.year}-${e.month}`);
+		},
+		openCalendar() {},
+		getDegree(drugList, type) {
+			if (type === 'degree') {
+				return `${drugList.filter(item => item.hasTook).length}/${drugList.length}`;
+			} else {
+				let num = drugList.filter(item => item.hasTook).length / drugList.length;
+				if (num < 0.5) {
+					return {
+						width: `${num * 100}%`,
+						bg: 'bg-red'
+					};
+				} else if (num >= 0.5 && num < 1) {
+					return {
+						width: `${num * 100}%`,
+						bg: 'bg-orange'
+					};
+				} else if (num === 1) {
+					return {
+						width: `${num * 100}%`,
+						bg: 'bg-green'
+					};
+				}
+			}
+		},
 		longChange(num) {
 			this.timer = setInterval(() => {
 				this.changeAmount(num);
@@ -300,8 +291,7 @@ export default {
 					});
 					if (this.planNo) {
 						// this.getFieldsV2(this.serviceName);
-						debugger;
-						this.getDrugRecord(this.planNo);
+						this.getDrugRecord(this.planNo, this.nowDate);
 					}
 				}
 			});
@@ -336,23 +326,11 @@ export default {
 			switch (type) {
 				case 'detail':
 					fieldsCond = [{ column: 'ds_no', value: this.planNo, display: false }];
-					// url = `/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_detail_list_add&type=add&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}`;
 					url = '../DrugSelect/DrugSelect?ds_no=' + this.planNo;
 					break;
 				case 'scan':
 					let self = this;
 					// #ifdef H5
-					// 6930171800267
-					// self.selectDrugWithBarCode('6930171800267').then(result => {
-					// 	if (result) {
-					// 		result.take_times = '3次'; //每天次数
-					// 		result.dosage_each_time = ''; // 每次用量
-					// 		result.dosage_unit = '片'; // 用量单位
-					// 		self.drugDetail = result;
-					// 		self.modalName = 'drugDetail';
-					// 		// self.addDrugItem(result);
-					// 	}
-					// });
 					uni.showToast({
 						title: '请在小程序端进行此操作',
 						icon: 'none'
@@ -369,6 +347,7 @@ export default {
 									if (result) {
 										result.take_times = '';
 										self.drugDetail = result;
+										self.drugDetailType = 'update';
 										self.modalName = 'drugDetail';
 										// self.addDrugItem(result);
 									}
@@ -384,10 +363,22 @@ export default {
 						JSON.stringify(condition)
 					)}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}&ds_no=${this.planNo}`;
 					break;
+				case 'open-calendar':
+					// if (this.drugRecord.length > 0) {
+						this.$refs.calendar.open();
+					// } else {
+					// 	uni.showToast({
+					// 		title: '没有记录！',
+					// 		icon: 'none'
+					// 	});
+					// }
+					break;
 			}
-			uni.navigateTo({
-				url: url
-			});
+			if (url) {
+				uni.navigateTo({
+					url: url
+				});
+			}
 		},
 		async selectDrugWithBarCode(medicine_barcode) {
 			let url = this.getServiceUrl('health', 'srvhealth_medicine_info_select', 'select');
@@ -433,6 +424,11 @@ export default {
 					this.getFieldsV2();
 				}
 			});
+		},
+		showDetailBox(item) {
+			this.drugInfo = item;
+			this.modalName = 'drugDetail';
+			this.drugDetailType = 'update';
 		},
 		async getFieldsV2(serviceName) {
 			let colVs = await this.getServiceV2('srvhealth_drug_schedule_select', 'detail', 'detail', 'health');
@@ -480,7 +476,7 @@ export default {
 				case 'detail':
 					defaultVal = await this.getPlanDetail(this.planNo);
 					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
-					let hideColumns = ['ds_no', 'create_time', 'create_user', 'create_user_disp', 'modify_user', 'modify_user_disp', 'modify_time', 'person_no'];
+					let hideColumns = ['ds_no', 'create_time', 'create_user', 'create_user_disp', 'modify_user', 'modify_user_disp', 'modify_time', 'person_no', 'end_date'];
 					this.fields = fields.filter(item => {
 						return !hideColumns.includes(item.column);
 					});
@@ -488,7 +484,8 @@ export default {
 				default:
 					break;
 			}
-			this.getDrugRecord(this.planNo);
+		
+			this.getDrugRecord(this.planNo, this.nowDate);
 		},
 		async getDrugRecordDetail() {
 			// 查找此用药计划的用药记录
@@ -503,7 +500,7 @@ export default {
 				return res.data.data;
 			}
 		},
-		async getDrugRecord(no) {
+		async getDrugRecord(no, date) {
 			// 查找此用药计划的用药记录
 			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_record_select', 'select');
 			let req = {
@@ -512,10 +509,17 @@ export default {
 				order: [{ colName: 'take_date', orderType: 'desc' }],
 				condition: [{ colName: 'ds_no', ruleType: 'eq', value: no }]
 			};
+			// if (condition) {
+			// 	req.condition = [...req.condition, ...condition];
+			// }
 			if (this.login_user_info && this.login_user_info.user_no) {
 				req.condition.push({ colName: 'create_user', ruleType: 'eq', value: this.login_user_info.user_no });
 			}
+			
 			let res = await this.$http.post(url, req);
+			setTimeout(()=>{
+				this.showCalender = true
+			},2000)
 			if (Array.isArray(res.data.data)) {
 				// this.drugRecord =
 				if (res.data.data.length == 0) {
@@ -549,28 +553,58 @@ export default {
 								}
 							});
 						}
-						let drugList = this.deepClone(this.drugList)
-						item.drugList = drugList.map(d=>{
-							d.hasTook = false
-							if(Array.isArray(item.detail)&&item.detail.length>0){
-								item.detail.forEach(drug=>{
-									if(d.s_code===drug.s_code){
-										d.hasTook = true //已服用
+						let drugList = this.deepClone(this.drugList);
+						item.drugList = drugList.map(d => {
+							d.hasTook = false;
+							if (Array.isArray(item.detail) && item.detail.length > 0) {
+								item.detail.forEach(drug => {
+									if (d.s_code === drug.s_code) {
+										d.hasTook = true; //已服用
 									}
-								})
+								});
 							}
-							return d
-						})
-						
+							return d;
+						});
+
 						if (date === item.take_date) {
 							record.data.push(item);
 						}
 					});
 					return record;
 				});
-				this.drugRecord = recordList;
-				this.buildTodayCase();
-				return res.data.data;
+				if (Array.isArray(recordList) && recordList.length > 0) {
+					this.info.selected = recordList.reduce((pre, cur) => {
+						console.log(this.planDetail);
+						let info = {
+							date: cur.date,
+							info: '',
+							status: 'primary'
+						};
+						if (Array.isArray(cur.data) && cur.data.length > 0) {
+							cur.data.forEach(detail => {
+								if (Array.isArray(detail.drugList)) {
+									if (detail.drugList.length === this.drugList.length) {
+										info.status = 'success';
+										info.info = '正常';
+									} else if (detail.drugList.length > 0 && detail.drugList.length < this.drugList.length) {
+										info.status = 'warning';
+										info.info = '漏服药';
+									} else if (detail.drugList.length == 0) {
+										info.status = 'error';
+										info.info = '未服药';
+									}
+								}
+							});
+						}
+						pre.push(info);
+						return pre;
+					}, []);
+				}
+				// this.buildTodayCase();
+				this.drugRecord = recordList.filter(item=>{
+					return item.date.indexOf(date)!==-1
+				});
+				return recordList;
 			}
 		},
 		buildTodayCase() {
@@ -599,8 +633,16 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.planDetail = res.data.data[0];
+				this.info.startDate = this.planDetail.start_date;
+				this.info.endDate = dayjs(this.planDetail.start_date)
+					.add(this.planDetail.take_days)
+					.format('YYYY-MM-DD');
 				return res.data.data[0];
 			}
+		},
+		updateSuccess() {
+			this.hideModal();
+			this.getFieldsV2(this.serviceName);
 		},
 		hideModal() {
 			this.modalName = '';
@@ -618,6 +660,9 @@ export default {
 			self.drugDetail = e;
 			self.modalName = 'drugDetail';
 		});
+		uni.$on('addDrug', e => {
+			this.getFieldsV2(this.serviceName);
+		});
 	},
 	onLoad(options) {
 		if (options.ds_no) {
@@ -634,21 +679,31 @@ export default {
 	background-color: #fff;
 	overflow: hidden;
 	.main-table {
-		min-height: 180rpx;
+		padding: 20rpx 0;
 		display: grid;
 		margin: 20rpx;
 		grid-template-columns: repeat(2, calc(50% - 10rpx));
-		// grid-row-gap: 20rpx;
 		grid-column-gap: 20rpx;
 		background-color: #409eff;
 		box-shadow: 0px 1px 4px 0px #4e87c6, 0px 5px 2px 0px #b3d8ff;
 		// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-		border-radius: 10rpx;
+		border-radius: 20rpx;
+		min-height: 150rpx;
 		.table-item {
 			display: flex;
 			padding: 10rpx 20rpx;
 			line-height: 40rpx;
 			color: #fff;
+			&.delete {
+				justify-content: center;
+				grid-column-end: 3;
+				grid-column-start: 1;
+				background-color: #fff;
+				color: #f76260;
+				border: 1rpx solid #409eff;
+				border-bottom-left-radius: 10rpx;
+				border-bottom-right-radius: 10rpx;
+			}
 			.label {
 				flex: 0.8;
 			}
@@ -671,15 +726,24 @@ export default {
 }
 .drug-record-timeline {
 	.cu-timeline {
-		&>.cu-item{
+		& > .cu-item {
 			padding: 20rpx 20rpx 20rpx 90rpx;
 		}
 		.cu-time {
 			width: 150rpx;
 			text-align: left;
-			&.text-blue{
-				color: #0081FF;
+			&.text-blue {
+				color: #0081ff;
 			}
+		}
+		&.none-data {
+			display: flex;
+			min-height: 200rpx;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+			color: #999;
+			font-weight: bold;
 		}
 	}
 	.timeline-content {
@@ -687,17 +751,45 @@ export default {
 		display: flex;
 		// flex-direction: column;
 		// box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12);
-		.timeline-item{
-			width: calc(50% -10rpx);
-			margin-right: 10rpx;
+		.timeline-item {
+			min-width: calc(50% - 20rpx);
+			margin-right: 20rpx;
 			margin-bottom: 20rpx;
 			padding: 10rpx 20rpx;
 			box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 			display: flex;
 			flex-direction: column;
-			border-radius: 20rpx;
-			.info{
+			border-radius: 30rpx;
+			position: relative;
+			overflow: hidden;
+			background-color: #999;
+			color: #fff;
+			&:nth-child(2n) {
+				margin-right: 0;
+			}
+			.info {
 				margin: 10rpx 0;
+				z-index: 2;
+			}
+			.time {
+				z-index: 2;
+			}
+			.delete-bar {
+				position: absolute;
+				right: 20rpx;
+				top: calc(50% - 20rpx);
+				z-index: 2;
+			}
+			.progress {
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 0;
+				height: 100%;
+				transition: all 2s ease-in-out;
+				&.bg-blue {
+					background-color: #409eff;
+				}
 			}
 		}
 		.top {
@@ -705,7 +797,7 @@ export default {
 			justify-content: space-between;
 			.delete-icon {
 				font-size: 40rpx;
-				transition: 0.5s all ease-out;
+				transition: 0.5s all ease-in-out;
 				&:active {
 					transform: scale(1.3);
 				}
@@ -825,15 +917,24 @@ export default {
 		}
 	}
 }
+.cu-modal {
+	z-index: 900;
+	.cu-dialog {
+		overflow: initial;
+	}
+}
+
 .cu-dialog .drug-detail {
 	display: flex;
 	flex-direction: column;
 	padding: 20rpx;
+	.button-box {
+		margin: 40rpx 0;
+	}
 	.detail-item {
 		display: flex;
-		margin-bottom: 20rpx;
-		// flex-direction: column;
 		align-items: center;
+		padding: 10rpx 0;
 		&.border-bottom {
 			border-bottom: 2rpx dashed #ccc;
 			padding-bottom: 20rpx;
@@ -890,10 +991,10 @@ export default {
 					background-color: rgba(11, 201, 157, 0.7);
 					// background-color: #bababa;
 					width: 100rpx;
-					height: 50rpx;
-					line-height: 50rpx;
+					height: 80rpx;
+					line-height: 80rpx;
 					margin-right: 10rpx;
-					border-radius: 50rpx;
+					border-radius: 30rpx;
 					transition: all 0.5s;
 					cursor: pointer;
 					&.disabled {

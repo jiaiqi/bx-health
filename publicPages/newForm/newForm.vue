@@ -1,8 +1,11 @@
 <template>
-	<view class="form" :style="{
-		'--global-text-font-size':globalTextFontSize+'px',
-		'--global-label-font-size':globalLabelFontSize+'px'
-	}">
+	<view
+		class="form"
+		:style="{
+			'--global-text-font-size': globalTextFontSize + 'px',
+			'--global-label-font-size': globalLabelFontSize + 'px'
+		}"
+	>
 		<a-form v-if="colsV2Data && isArray(fields)" :fields="fields" :pageType="srvType" :formType="use_type" ref="bxForm" @value-blur="valueChange"></a-form>
 		<view class="button-box">
 			<button class="cu-btn bg-blue" type="primary" v-if="isArray(fields) && fields.length > 0" v-for="btn in colsV2Data._formButtons" :key="btn.id" @click="onButton(btn)">
@@ -16,8 +19,8 @@
 export default {
 	data() {
 		return {
-			globalTextFontSize:14,
-			globalLabelFontSize:12,
+			globalTextFontSize: 14,
+			globalLabelFontSize: 12,
 			serviceName: '',
 			srvType: 'add', // 表单信息 add | update  | select |list | detail
 			use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
@@ -29,15 +32,21 @@ export default {
 			condition: [],
 			fieldsCond: [],
 			params: {}
-			
 		};
 	},
 	methods: {
 		toPages(type) {
 			this.srvType = type;
-			uni.redirectTo({
-				url: `/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(JSON.stringify(this.fieldsCond))}`
-			});
+			if (this.params.to && this.params.idCol && this.params.submitData && this.params.submitData[this.params.idCol]) {
+				debugger;
+				uni.redirectTo({
+					url: `${this.params.to}?${this.params.idCol}=${this.params.submitData[this.params.idCol]}`
+				});
+			} else {
+				uni.redirectTo({
+					url: `/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(JSON.stringify(this.fieldsCond))}`
+				});
+			}
 		},
 		async onButton(e) {
 			let self = this;
@@ -96,10 +105,17 @@ export default {
 						req = [{ serviceName: e.service_name, data: [data] }];
 						let app = uni.getStorageSync('activeApp');
 						let url = this.getServiceUrl(app, e.service_name, 'add');
-						console.log(url, e);
 						let res = await this.$http.post(url, req);
-						console.log(url, res.data);
 						if (res.data.state === 'SUCCESS') {
+							if (
+								Array.isArray(res.data.response) &&
+								res.data.response.length > 0 &&
+								res.data.response[0].response &&
+								Array.isArray(res.data.response[0].response.effect_data) &&
+								res.data.response[0].response.effect_data.length > 0
+							) {
+								this.params.submitData = res.data.response[0].response.effect_data[0];
+							}
 							uni.showModal({
 								title: '提示',
 								content: '添加成功',
@@ -107,10 +123,6 @@ export default {
 								success(res) {
 									if (res.confirm) {
 										self.toPages('detail');
-										// uni.navigateTo({
-										// 	url:`/pages/form/form?serviceName=${e.service_name.replace(/_add|_update/,'_select')}&type=detail`
-										// })
-										// uni.navigateBack();
 									}
 								}
 							});
@@ -194,13 +206,15 @@ export default {
 		async getDefaultVal() {
 			if (this.use_type === 'detail' || this.use_type === 'update') {
 				let serviceName = this.serviceName.replace('_update', '_select').replace('_add', '_select');
-				let condition = this.fieldsCond.filter(item=>item.value).map(item => {
-					return {
-						colName: item.column,
-						ruleType: 'in',
-						value: item.value
-					};
-				});
+				let condition = this.fieldsCond
+					.filter(item => item.value)
+					.map(item => {
+						return {
+							colName: item.column,
+							ruleType: 'in',
+							value: item.value
+						};
+					});
 				let app = uni.getStorageSync('activeApp');
 				let url = this.getServiceUrl(app, serviceName, 'select');
 				let req = {
@@ -315,17 +329,17 @@ export default {
 			}
 		}
 	},
-	mounted() {
-
-	},
 	onShow() {
-		this.globalTextFontSize =  getApp().globalData.globalTextFontSize?getApp().globalData.globalTextFontSize:14
-		this.globalLabelFontSize =  getApp().globalData.globalLabelFontSize?getApp().globalData.globalLabelFontSize:14
+		this.globalTextFontSize = getApp().globalData.globalTextFontSize ? getApp().globalData.globalTextFontSize : 14;
+		this.globalLabelFontSize = getApp().globalData.globalLabelFontSize ? getApp().globalData.globalLabelFontSize : 14;
 	},
 	onLoad(option) {
 		const destApp = option.destApp;
 		if (destApp) {
 			uni.setStorageSync('activeApp', destApp);
+		}
+		if (option.params) {
+			this.params = JSON.parse(decodeURIComponent(option.params));
 		}
 		if (option.serviceName) {
 			this.serviceName = option.serviceName;

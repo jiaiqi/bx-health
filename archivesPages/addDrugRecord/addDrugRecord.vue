@@ -266,6 +266,7 @@ export default {
 						}
 						if (field.column === 'take_date') {
 							field.value = this.formateDate();
+							field.end = this.formateDate()
 						}
 						if (field.column === 'take_time') {
 							field.value = this.formateDate('', 'dateTime');

@@ -12,7 +12,7 @@
 			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasLineC'" :ec="sleepEcData"></uniEcCharts>
 		</view>
 		<view class="button-box" v-if="isAllPages">
-			<button class="button" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
+			<button class="buttons" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
 				{{ item.name }}
 			</button>
 		</view>
@@ -1711,7 +1711,7 @@ export default {
 	justify-content: center;
 	align-items: center;
 	height: 100rpx;
-	.button {
+	.buttons {
 		flex: 1;
 		margin: 0 10rpx 10rpx;
 		padding: 0;

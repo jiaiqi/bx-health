@@ -74,9 +74,9 @@
 			<view class="content todo-list">
 				<view class="todo-item" v-for="(item, index) in todoList" :key="index" @click="clickTodoItem(item, index)">
 					<!-- <view class="todo-item-content" :class="{ checked: item.checked }"> -->
-						<view class="type">{{ item.typeExplain }}</view>
-						<view class="title">{{ item.ds_name }}</view>
-						<view class="cycle">{{ getCycle(item) }}</view>
+					<view class="type">{{ item.typeExplain }}</view>
+					<view class="title">{{ item.ds_name }}</view>
+					<view class="cycle">{{ getCycle(item) }}</view>
 					<!-- </view> -->
 				</view>
 			</view>
@@ -440,14 +440,14 @@ export default {
 	methods: {
 		getCycle(e) {
 			let endDate = dayjs(e.start_date).add(e.take_days, 'day');
-			return `${dayjs(e.start_date).format('MM.DD')}-${dayjs(endDate).format('MM.DD')}`
+			return `${dayjs(e.start_date).format('MM.DD')}-${dayjs(endDate).format('MM.DD')}`;
 		},
 		switchUser(item) {
 			this.userInfo = item;
 			uni.setStorageSync('current_user_info', item);
 			uni.setStorageSync('current_user', item.name);
 			this.showUserListPopup = false;
-			this.initPage()
+			this.initPage();
 		},
 		clickTodoItem(item, index) {
 			// this.$set(item, 'checked', !item.checked);
@@ -467,11 +467,13 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data)) {
-				this.todoList = res.data.data.map(item => {
-					item.type = 'drugSchedule';
-					item.typeExplain = '用药';
-					return item;
-				});
+				this.todoList = res.data.data
+					.map(item => {
+						item.type = 'drugSchedule';
+						item.typeExplain = '用药';
+						return item;
+					})
+					.filter(item => dayjs(item.start_date).add(item.take_days, 'day') >= dayjs().subtract(1, 'day'));
 			}
 		},
 		showAddRecordLayout() {
@@ -1071,10 +1073,15 @@ export default {
 					url: '/archivesPages/archives-history/archives-history?isAll=true'
 				});
 			} else if (type === 'drug') {
-				// let condition = [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]; //默认值
 				let fieldsCond = [{ column: 'person_no', display: false, value: this.userInfo.no }];
+				let params = {
+					to: '/archivesPages/DrugPlan/DrugPlan', //提交后要跳转的页面
+					idCol: 'ds_no' // 跳转时携带的参数
+				};
 				uni.navigateTo({
-					url: '/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+					url: `/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_add&type=add&fieldsCond=${encodeURIComponent(
+						JSON.stringify(fieldsCond)
+					)}&params=${encodeURIComponent(JSON.stringify(params))}`
 				});
 			}
 		},
@@ -1110,7 +1117,7 @@ export default {
 							console.log(this.wxUserInfo);
 							if (!item.profile_url) {
 								if (this.wxUserInfo.headimgurl) {
-									this.updateUserInfo()
+									this.updateUserInfo();
 									// this.userInfo.profile_url = this.wxUserInfo.headimgurl;
 								}
 							}
@@ -1123,7 +1130,7 @@ export default {
 					this.userInfo = res.data.data[0];
 					if (!item.profile_url) {
 						if (this.wxUserInfo.headimgurl) {
-							this.updateUserInfo()
+							this.updateUserInfo();
 							// this.userInfo.profile_url = this.wxUserInfo.headimgurl;
 						}
 					}
@@ -1177,7 +1184,7 @@ export default {
 				// 没有获取用户信息授权
 				return;
 			} else {
-				this.updateUserInfo()
+				this.updateUserInfo();
 			}
 			// #endif
 			if (!userInfo || !uni.getStorageSync('isLogin')) {
@@ -1211,7 +1218,7 @@ export default {
 				this.getToDoList();
 			}
 		},
-		updateUserInfo(){
+		updateUserInfo() {
 			let self = this;
 			uni.getUserInfo({
 				provider: 'weixin',
@@ -1228,7 +1235,7 @@ export default {
 					console.log(self.wxUserInfo);
 					console.log(self.userInfo);
 					if (self.userInfo && self.userInfo.no && !self.userInfo.profile_url) {
-						self.updateUserProfile(rawData.headimgurl,self.userInfo.no).then(_=>{
+						self.updateUserProfile(rawData.headimgurl, self.userInfo.no).then(_ => {
 							self.userInfo.profile_url = self.wxUserInfo.headimgurl;
 						});
 					}
@@ -1717,7 +1724,7 @@ export default {
 					padding: 20rpx;
 					position: relative;
 					overflow: hidden;
-					.type{
+					.type {
 						text-align: center;
 						font-weight: normal;
 						width: 100%;
@@ -1729,11 +1736,13 @@ export default {
 						padding: 5rpx;
 						top: 10rpx;
 						letter-spacing: 5rpx;
+						background-color: #409eff;
+						color: #fff;
 					}
-					.title{
+					.title {
 						padding: 10rpx;
 					}
-					.cycle{
+					.cycle {
 						font-size: 24rpx;
 					}
 					.todo-item-content {

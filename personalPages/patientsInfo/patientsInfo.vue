@@ -108,6 +108,9 @@ export default {
 		if(option.dp_no){
 			this.dp_no = option.dp_no
 		}
+		if(option.tab){
+			this.current_tab = option.tab
+		}
 	},
 	onPullDownRefresh() {
 		// 下拉

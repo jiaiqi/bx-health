@@ -11,13 +11,23 @@
 			<view class="drug-item" v-for="item in drugList" @click="toAdd(item)">{{ item.medicine_name }}</view>
 		</view>
 		<uni-load-more :status="more"></uni-load-more>
+		<view class="cu-modal" :class="{ show: showModal }">
+			<view class="cu-dialog">
+				<drug-info :planNo="ds_no" type="add"  :drugDetail="drugDetail" @hideModal="hideModal" @addSuccess="addSuccess"></drug-info>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
+import DrugInfo from '../components/DrugInfo/DrugInfo.vue';
 export default {
+	components: {
+		DrugInfo
+	},
 	data() {
 		return {
+			showModal: false,
 			keywords: '', //搜索关键词
 			drugList: [],
 			page: {
@@ -25,7 +35,8 @@ export default {
 				rownumber: 27
 			},
 			ds_no: '',
-			more: 'more' //more,loading,noMore
+			more: 'more', //more,loading,noMore
+			drugDetail: {}
 		};
 	},
 	watch: {
@@ -42,25 +53,21 @@ export default {
 		}
 	},
 	methods: {
+		addSuccess(){
+			this.hideModal()
+			uni.navigateBack()
+		},
+		hideModal() {
+			this.showModal = false;
+		},
 		toAdd(e) {
 			let ds_no = this.ds_no;
 			if (e.medicine_name) {
-				uni.showModal({
-					title: '提示',
-					content: '是否选择此药品：' + e.medicine_name,
-					success(res) {
-						if (res.confirm) {
-							e.take_times = '3次'; //每天次数
-							e.dosage_each_time = ''; // 每次用量
-							e.dosage_unit = '片'; // 用量单位
-							uni.$emit('selectDrug', e);
-							uni.navigateBack();
-							// uni.redirectTo({
-							// 	url: '../DrugPlan/DrugPlan?ds_no=' + ds_no
-							// });
-						}
-					}
-				});
+				this.showModal = true;
+				e.take_times = 3; //每天次数
+				e.dosage_each_time = 1; // 每次用量
+				e.dosage_unit = '片'; // 用量单位
+				this.drugDetail = this.deepClone(e);
 			}
 		},
 		searchVal(e) {
@@ -96,11 +103,8 @@ export default {
 						}
 					]
 				};
-
-				// });
 			}
 			let res = await this.$http.post(url, req);
-			// .then(res => {
 			if (Array.isArray(res.data.data)) {
 				if (isMore) {
 					this.drugList = [...this.drugList, ...res.data.data];
@@ -146,6 +150,9 @@ export default {
 <style scoped lang="scss">
 .drug-select {
 	background-color: #fff;
+}
+.cu-modal{
+	z-index: 800;
 }
 .drug-list {
 	/* #ifdef H5 */

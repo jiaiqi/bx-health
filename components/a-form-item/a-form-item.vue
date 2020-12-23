@@ -66,7 +66,7 @@
 				<text class="value hidden" v-else>{{ fkFieldLabel ? fkFieldLabel : '' }}</text>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="pickerFieldList.includes(fieldData.type)">
-				<picker class="uni-picker" :mode="pickerMode" :value="fieldData.value" @change="bindTimeChange">
+				<picker class="uni-picker" :mode="pickerMode" :end="fieldData.end" :value="fieldData.value" @change="bindTimeChange">
 					<view class="picker-content">
 						<view class="place-holder" v-if="!fieldData.value">请选择</view>
 						<view class="value" v-else>{{ fieldData.value }}</view>
@@ -74,9 +74,11 @@
 					</view>
 				</picker>
 			</view>
+			<!-- <view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'"> -->
 			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'" @click="showModal('TextArea')">
 				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
-				<view class="value" v-else>{{ fieldData.value | html2text }}</view>
+				<view class="value" v-else-if="modalName !== 'TextArea'">{{ fieldData.value | html2text }}</view>
+				<!-- <textarea v-model="fieldData.value"/> -->
 			</view>
 			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'RichText'" @click="showModal('RichEditor')">
 				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
@@ -100,7 +102,7 @@
 				<slider
 					class="uni-slider"
 					@change="changeSlider"
-					:step="fieldData.type === 'digit' ? 0.5 : 1"
+					:step="fieldData.sliderStep?fieldData.sliderStep:fieldData.type === 'digit' ? 0.5 : 1"
 					:min="fieldData.value && fieldData.value >= fieldData.min ? fieldData.min : 0"
 					:max="fieldData.max"
 					:value="fieldData.value < fieldData.min ? fieldData.min : fieldData.value"
@@ -130,7 +132,7 @@
 		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'RichEditor' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop=""><jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor" /></view>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'TextArea' }" @click="hideModal">
+		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'TextArea11' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop="">
 				<textarea
 					style="min-height: 300px;width: 100%;text-align: left;text-indent: 40rpx;padding: 20rpx;color: #000000;"
@@ -165,7 +167,7 @@
 							<bx-checkbox v-for="item in setOptionList" :key="item.label" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
 						</bx-checkbox-group>
 						<bx-radio-group v-if="modalName === 'Selector'" class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
-							<bx-radio v-for="item in selectorData"  :name="item.value">{{ item.label }}</bx-radio>
+							<bx-radio v-for="item in selectorData" :name="item.value">{{ item.label }}</bx-radio>
 						</bx-radio-group>
 					</view>
 					<view class="dialog-button">
@@ -674,11 +676,7 @@ export default {
 		},
 		getValid() {
 			if (this.fieldData.isRequire && this.fieldData.value) {
-				if (
-					this.fieldData.hasOwnProperty('_validators') &&
-					this.fieldData._validators.hasOwnProperty('isType') &&
-					typeof this.fieldData._validators.isType === 'function'
-				) {
+				if (this.fieldData.hasOwnProperty('_validators') && this.fieldData._validators.hasOwnProperty('isType') && typeof this.fieldData._validators.isType === 'function') {
 					this.fieldData.valid = this.fieldData._validators.isType(this.fieldData.value);
 					this.valid.valid = true;
 				} else {
@@ -832,6 +830,10 @@ export default {
 			font: inherit;
 			display: flex;
 			flex: 1;
+			uni-textarea{
+				width: 100%;
+				height: 200rpx;
+			}
 			&.slider {
 				display: flex;
 				height: 80rpx;

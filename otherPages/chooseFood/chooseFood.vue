@@ -1083,8 +1083,8 @@ export default {
 					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
 				}
 			}
-			// debugger
-			this.assembleData();
+			debugger
+			this.originalData();
 		},
 		/*选择单位**/
 		RadioChange(e) {
@@ -1096,6 +1096,7 @@ export default {
 					this.radioLabel = item;
 				}
 			});
+			
 		},
 		/*点击确定**/
 		confirms() {
@@ -1222,10 +1223,12 @@ export default {
 				}
 				result.forEach(re => {
 					if (nut.name === re.nutrient) {
-						num = ((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100;
+						// num = ((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * 100;
+						num = ((currFood[nut.key] * Number(self.choiceNum)) / Number(re.val_rni)) * currFood.unit_amount;
 						if (nut.name === '蛋白质') {
 							// num = Number((self.currentAppr.weight * 0.9)).toFixed(1)
-							num = ((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100;
+							num = ((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * currFood.unit_amount;
+							// num = ((currFood[nut.key] * Number(self.choiceNum)) / (Number(re.val_rni) * self.currentAppr.weight)) * 100;
 						}
 						num = parseInt(num * 10) / 10;
 						if (re.nutrient === '叶酸') {
@@ -1259,6 +1262,7 @@ export default {
 			}
 		},
 		async goBalanceDiet() {
+			let self = this
 			if (this.chooseFoods.length > 0) {
 				let arr = [];
 				this.chooseFoods.forEach(item => {
@@ -1381,11 +1385,12 @@ export default {
 				let serviceName = 'srvhealth_diet_record_add';
 				let url = this.getServiceUrl('health', serviceName, 'operate');
 				let req = [{ serviceName: serviceName, colNames: ['*'], data: arr }];
-				if(this.userInfo && this.userInfo.sex && this.userInfo.weight && this.userInfo.age){
-					let res = await this.$http.post(url, req);
+				console.log("this.userInfo",self.userInfo)
+				if(self.userInfo && self.userInfo.sex && self.userInfo.weight && self.userInfo.birthday){
+					let res = await self.$http.post(url, req);
 					if (res.data.state === 'SUCCESS') {
 						console.log('-------添加---', res);
-						this.addRecodChildData(res.data.response[0].response.effect_data[0].diet_record_no);
+						self.addRecodChildData(res.data.response[0].response.effect_data[0].diet_record_no);
 						// if (this.searchArg.type === 'food') {
 						// this.getChooseFoodList();
 					

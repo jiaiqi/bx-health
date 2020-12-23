@@ -61,7 +61,6 @@ export default {
 			let self = this;
 			let dietInfo = this.deepClone(this.dietInfo);
 			let serviceName = 'srvhealth_diet_record_update';
-			debugger;
 			dietInfo.energy = dietInfo.amount * dietInfo.unit_energy;
 			let url = this.getServiceUrl('health', serviceName, 'operate');
 			let req = [
@@ -188,8 +187,8 @@ export default {
 						];
 						self.$http.post(url, req).then(res => {
 							uni.hideLoading();
+							uni.$emit('dietUpdate');
 							if (res.data.resultCode === 'SUCCESS') {
-								debugger;
 								uni.showToast({
 									title: '删除成功!',
 									icon: 'none'

@@ -2,7 +2,59 @@
 	<view class="info-wrap">
 		<view class="info">
 			<view class="info-item">
-				<view class="info-item-top">
+				<view class="form-item">
+					<label
+						class="form-item-label"
+					>
+						<text class="text-red is-required">*</text>
+						<text class="label">出生日期</text>
+					</label>
+					<view class="form-item-content_value picker">
+						<picker class="uni-picker" :mode="pickerMode" :value="info.bir" @change="bindTimeChange">
+							<view class="picker-content">
+								<view class="place-holder" v-if="!info.bir">请选择</view>
+								<view class="value" v-else>{{ info.bir }}</view>
+								<text class="cuIcon-calendar"></text>
+							</view>
+						</picker>
+					</view>
+				</view>
+				<view class="form-item">
+					<label
+						class="form-item-label"
+					>
+						<text class="text-red is-required">*</text>
+						<text class="label">性别</text>
+					</label>
+					<view class="form-item-content_value picker">
+						<bx-radio-group class="form-item-content_value radio-group" mode="button" v-model="info.sex" @change="radioChange">
+							<bx-radio class="radio" color="#2979ff" v-for="item in sexOption" :key="item" :name="item">
+								{{ item }}
+							</bx-radio>
+						</bx-radio-group>
+					</view>
+				</view>
+				
+				<view class="form-item">
+					<label
+						class="form-item-label"
+					>
+						<text class="text-red is-required">*</text>
+						<text class="label">体重</text>
+					</label>
+					<view class="form-item-content_value slider">
+						<input
+							class="form-item-content_value"
+							type="number"
+							:placeholder="'请输入'"						
+							max="400"
+							min="0"
+							v-model.number="info.weight"												
+						/>
+					</view>
+				</view>
+			</view>
+				<!-- <view class="info-item-top">
 					<text>出生日期：</text>
 				</view>
 				<view class="info-item-bot">
@@ -17,18 +69,6 @@
 						style="width: 100%;"
 						name="input"
 					/>
-					<!-- <text
-						class="input-icon cuIcon-calendar"
-						style="position: absolute;top:10upx;right: 20upx;color: #0bc99d;"
-						@click.stop="toggleData"
-					></text> -->
-					<!-- <w-picker mode="yearMonth" startYear="1900" endYear="2030" :current="false" @confirm="onConfirm" :disabledAfter="false" ref="yearMonth" themeColor="#f00"></w-picker> -->
-					<!-- <w-picker mode="date" startYear="1900" endYear="2030" :current="false" @confirm="onConfirm" :disabledAfter="false" ref="Date" themeColor="#f00"></w-picker> -->
-					<!-- <picker v-show="dateIsShow" mode="date" :value="info.bir" start="1900-09-01" end="2030-09-01" @change="DateChange">
-						<view class="picker">
-							{{info.bir}}
-						</view>
-					</picker> -->
 				</view>
 			</view>
 			<view class="info-item">
@@ -49,7 +89,7 @@
 				<view class="info-item-bot">
 					<input v-model="info.weight" type="text" value="" />
 				</view>
-			</view>
+			</view> -->
 		</view>
 		<view class="info-bot">
 			<uni-button @click="submitData" class="cu-btn bg-blue">提交</uni-button>
@@ -69,14 +109,44 @@
 					sex:'',
 					weight:''
 				},
+				pickerMode:'date',
 				radio:'男',
-				dateIsShow:false
+				dateIsShow:false,
+				sexOption:['男','女']
 			}
 		},
 		// components:{
 		// 	wPicker
 		// },
 		methods:{
+			numberChange(type) {
+				let step = 0.5
+				if (type === 'add') {
+					if (this.fieldData.value + step <= this.fieldData.max) {
+						this.fieldData.value = this.fieldData.value + step;
+					}
+				} else if (type === 'minus') {
+					if (this.fieldData.value - step >= this.fieldData.min) {
+						this.fieldData.value = this.fieldData.value - step;
+					}
+				}
+				// if (this.fieldData.type === 'number' || this.fieldData.type === 'digit') {
+				// 	let step = this.fieldData.type === 'number' ? 1 : this.fieldData.type === 'digit' ? 0.5 : 0;
+				// 	if (!this.fieldData.value) {
+				// 		this.fieldData.value = this.fieldData.min ? this.fieldData.min : 0;
+				// 	}
+				// 	if (this.fieldData.max) {
+						
+				// 	}
+				// }
+			},
+			bindTimeChange(e){
+				this.info.bir = e.detail.value
+				console.log("出生日期",e)
+			},
+			radioChange(e){
+				console.log("性别",e)
+			},
 			DateChange(e) {
 				this.info.bir = e.detail.value
 			},
@@ -98,6 +168,13 @@
 				})
 			},
 			async submitData(){
+				if(!this.info.bir || !this.info.weight || !this.info.sex){
+					uni.showToast({
+						'title':'请完善信息',
+						'icon':'none'
+					})
+					return
+				}
 				let self = this;
 				let url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
 				let req = [{
@@ -137,6 +214,188 @@
 </script>
 
 <style scoped lang="scss">
+	.form-item {
+		display: flex;
+		flex-wrap: wrap;
+		min-height: 100rpx;
+		align-items: center;
+		// background-color: #fff;
+		padding: 10rpx;
+		position: relative;
+		&.form-detail {
+			min-height: 80rpx;
+			align-items: center;
+		}
+		.valid_msg {
+			width: 100%;
+			color: #f76260;
+			text-indent: 220rpx;
+			font-size: 32rpx;
+		}
+		&::after {
+			position: absolute;
+			box-sizing: border-box;
+			content: ' ';
+			pointer-events: none;
+			right: 16px;
+			bottom: 0;
+			left: 16px;
+			border-bottom: 1px solid #ebedf0;
+			transform: scaleY(0.5);
+		}
+		.form-item-label {
+			display: flex;
+			min-width: 200rpx;
+			padding: 20rpx 10rpx;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+			color: #666;
+			font-size: 32rpx;
+			white-space: normal;
+			line-height: 1.8;
+			&.form-detail {
+				padding: 0 10rpx;
+			}
+			&.label-top {
+				width: 100%;
+				padding: 20rpx 10rpx 0;
+			}
+			.is-required {
+				display: inline-flex;
+				align-items: center;
+				width: 20rpx;
+			}
+		}
+		.form-item-content_value.checkbox-group {
+			margin-top: 50rpx;
+		}
+		.form-item-content {
+			flex: 1;
+			display: flex;
+			flex-wrap: nowrap;
+			padding: 20rpx 0;
+			padding-left: 20rpx;
+			color: #000;
+			font-size: var(--global-text-font-size);
+			&.form-detail {
+				padding: 0;
+			}
+			&.valid_error {
+				border: 1rpx dashed #f37b1d;
+				margin-bottom: 10rpx;
+			}
+			.form-item-content_detail {
+				&.image {
+					width: 100rpx;
+					height: 100rpx;
+				}
+			}
+			// .form-item-content_value {
+			// 	line-height: 1.4em;
+			// 	min-height: 1.4em;
+			// 	position: relative;
+			// 	height: 100%;
+			// 	font: inherit;
+			// 	display: flex;
+			// 	flex: 1;
+			// 	&.slider {
+			// 		display: flex;
+			// 		height: 80rpx;
+			// 		align-items: center;
+			// 		.operate {
+			// 			display: inline-block;
+			// 			padding: 5rpx 20rpx;
+			// 			background-color: #f1f1f1;
+			// 			position: relative;
+			// 			font-size: 40rpx;
+			// 			&.active {
+			// 				transition: all 0.2s;
+			// 				transform: scale(1.2);
+			// 			}
+			// 			&::before {
+			// 				content: '';
+			// 				width: 130%;
+			// 				height: 130%;
+			// 				top: -15%;
+			// 				left: -15%;
+			// 				position: absolute;
+			// 			}
+			// 		}
+			// 		.uni-slider {
+			// 			flex: 1;
+			// 		}
+			// 	}
+			// 	&.picker {
+			// 		.uni-picker {
+			// 			width: 100%;
+			// 			.picker-content {
+			// 				width: 100%;
+			// 				display: flex;
+			// 				justify-content: space-between;
+			// 			}
+			// 		}
+			// 		.value {
+			// 			width: 400rpx;
+			// 			text-overflow: ellipsis;
+			// 			overflow: hidden;
+			// 			white-space: nowrap;
+			// 		}
+			// 		&:active {
+			// 			background-color: #f1f1f1;
+			// 			transition: all 0.5s ease-out;
+			// 		}
+			// 	}
+			// 	.place-holder {
+			// 		color: grey;
+			// 		overflow: hidden;
+			// 		text-overflow: clip;
+			// 		word-break: keep-all;
+			// 		pointer-events: none;
+			// 		padding: 0 10rpx;
+			// 	}
+			// 	.value {
+			// 		padding: 0 10rpx;
+			// 	}
+			// }
+		}
+		.icon-area {
+			display: inline-flex;
+			align-content: center;
+			text-align: left;
+			margin-right: 20rpx;
+			padding: 20rpx 0;
+			font-size: 40rpx;
+		}
+		.tree-selector {
+			height: calc(90vh - var(--window-top) - var(--window-bottom));
+			display: flex;
+			flex-direction: column;
+			.content {
+				flex: 1;
+				background-color: #fff;
+				.bx-radio-group {
+					margin: 0 20rpx;
+				}
+				.button-mode {
+					margin-bottom: 10rpx;
+				}
+			}
+		}
+	}
+	.form-item-label{
+		display: flex;
+		min-width: 100px;
+		padding: 10px 5px;
+		text-overflow: ellipsis;
+		// white-space: nowrap;
+		overflow: hidden;
+		color: #666;
+		font-size: 32rpx;
+		white-space: normal;
+		line-height: 1.8;
+		
+	}
 	.info-wrap{
 		height: 100vh;
 		background-color: #fff;
@@ -174,6 +433,74 @@
 			/deep/ .uni-radio-wrapper{
 				margin-right: 50rpx;
 			}
+		}
+	}
+	.form-item-content_value {
+		line-height: 1.4em;
+		min-height: 1.4em;
+		position: relative;
+		height: 100%;
+		font: inherit;
+		display: flex;
+		flex: 1;
+		font-size: 32rpx;
+		&.slider {
+			display: flex;
+			height: 80rpx;
+			align-items: center;
+			.operate {
+				display: inline-block;
+				padding: 5rpx 20rpx;
+				background-color: #f1f1f1;
+				position: relative;
+				font-size: 40rpx;
+				&.active {
+					transition: all 0.2s;
+					transform: scale(1.2);
+				}
+				&::before {
+					content: '';
+					width: 130%;
+					height: 130%;
+					top: -15%;
+					left: -15%;
+					position: absolute;
+				}
+			}
+			.uni-slider {
+				flex: 1;
+			}
+		}
+		&.picker {
+			.uni-picker {
+				width: 100%;
+				.picker-content {
+					width: 100%;
+					display: flex;
+					justify-content: space-between;
+				}
+			}
+			.value {
+				width: 400rpx;
+				text-overflow: ellipsis;
+				overflow: hidden;
+				white-space: nowrap;
+			}
+			&:active {
+				background-color: #f1f1f1;
+				transition: all 0.5s ease-out;
+			}
+		}
+		.place-holder {
+			color: grey;
+			overflow: hidden;
+			text-overflow: clip;
+			word-break: keep-all;
+			pointer-events: none;
+			padding: 0 10rpx;
+		}
+		.value {
+			padding: 0 10rpx;
 		}
 	}
 </style>
