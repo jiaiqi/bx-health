@@ -595,10 +595,10 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (this.requestSuccess(res)) {
 				let list = res.data.data;
+				this.isLoad = true;
 				if (res.data.data.length > 0) {
 					let no = list.map(item => item.report_daq_survey_activity_no).toString();
 					let result = await this.getQuestRecord(no);
-					this.isLoad = true;
 					if (result) {
 						this.inspectReportRecord = list.map(record => {
 							result.forEach(item => {
@@ -1671,9 +1671,6 @@ export default {
 				}
 			}
 			&.disease-risk {
-				// display: flex;
-				// // flex-direction: column;
-				// flex-wrap: wrap;
 				display: grid;
 				grid-template-columns: repeat(3, calc(33.33% - 20rpx));
 				grid-row-gap: 20rpx;

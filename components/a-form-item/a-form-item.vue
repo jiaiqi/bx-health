@@ -2,13 +2,13 @@
 	<view class="form-item" v-if="fieldData.display" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid }">
 		<label
 			class="form-item-label"
-			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' }"
+			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }"
 			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
 		>
 			<text class="text-red is-required">{{ fieldData.isRequire ? '*' : '' }}</text>
 			<text class="label">{{ fieldData.label }}</text>
 		</label>
-		<view class="form-item-content" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid }">
+		<view class="form-item-content" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }">
 			<!-- detail-详情-start -->
 			<view class="form-item_image" v-if="pageType === 'detail' && fieldData.type === 'images'">
 				<image
@@ -60,10 +60,20 @@
 			>
 				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
 			</bx-checkbox-group>
-			<view class="form-item-content_value picker" v-else-if="popupFieldTypeList.includes(fieldData.type)" @click="openModal(fieldData.type)">
-				<text class="place-holder" v-if="!fieldData.value">请选择</text>
-				<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">{{ fieldData.value.toString() }}</view>
-				<text class="value hidden" v-else>{{ fkFieldLabel ? fkFieldLabel : '' }}</text>
+			<view class="form-item-content_value picker" v-else-if="popupFieldTypeList.includes(fieldData.type)">
+				<view v-if="(setOptionList.length < 15 && fieldData.type === 'MultiSelectorPopup') || (selectorData.length < 15 && fieldData.type === 'Selector')">
+					<bx-checkbox-group v-if="fieldData.type === 'MultiSelectorPopup'" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
+						<bx-checkbox v-for="item in setOptionList" :key="item.label" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
+					</bx-checkbox-group>
+					<bx-radio-group v-if="fieldData.type === 'Selector'" class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
+						<bx-radio v-for="item in selectorData" :name="item.value">{{ item.label }}</bx-radio>
+					</bx-radio-group>
+				</view>
+				<view v-else @click="openModal(fieldData.type)">
+					<text class="place-holder" v-if="!fieldData.value">请选择</text>
+					<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">{{ fieldData.value.toString() }}</view>
+					<text class="value hidden" v-else>{{ fkFieldLabel ? fkFieldLabel : '' }}</text>
+				</view>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="pickerFieldList.includes(fieldData.type)">
 				<picker class="uni-picker" :mode="pickerMode" :end="fieldData.end" :value="fieldData.value" @change="bindTimeChange">
@@ -102,9 +112,9 @@
 				<slider
 					class="uni-slider"
 					@change="changeSlider"
-					:step="fieldData.sliderStep?fieldData.sliderStep:fieldData.type === 'digit' ? 0.5 : 1"
+					:step="fieldData.sliderStep ? fieldData.sliderStep : fieldData.type === 'digit' ? 0.5 : 1"
 					:min="fieldData.value && fieldData.value >= fieldData.min ? fieldData.min : 0"
-					:max="fieldData.max?fieldData.value>fieldData.max?fieldData.value:fieldData.max:null"
+					:max="fieldData.max ? (fieldData.value > fieldData.max ? fieldData.value : fieldData.max) : null"
 					:value="fieldData.value < fieldData.min ? fieldData.min : fieldData.value"
 					v-model="fieldData.value"
 					show-value
@@ -251,7 +261,17 @@ export default {
 	},
 	computed: {
 		label_width() {
-			return this.labelPosition === 'left' ? 'auto' : '100%';
+			let result = '';
+			if (this.labelPosition === 'left') {
+				result = 'auto';
+			}
+			if (
+				this.pageType !== 'detail' &&
+				((this.setOptionList.length < 15 && this.fieldData.type === 'MultiSelectorPopup') || (this.selectorData.length < 15 && this.fieldData.type === 'Selector'))
+			) {
+				result = '100%';
+			}
+			return result;
 		},
 		pickerMode() {
 			let type = this.fieldData.type;
@@ -270,7 +290,7 @@ export default {
 	},
 	data() {
 		return {
-			focusTextArea:false,
+			focusTextArea: false,
 			checkedList: [],
 			fieldData: {},
 			imagesUrl: [],
@@ -287,7 +307,7 @@ export default {
 				columns: ''
 			},
 			listModel: {},
-			textareaValue:  '',
+			textareaValue: '',
 			treePageInfo: { total: 0, rownumber: 20, pageNo: 1 },
 			selectorData: [],
 			setOptionList: [],
@@ -392,11 +412,11 @@ export default {
 		},
 		showModal(name) {
 			this.modalName = name;
-			this.$nextTick(function(){
-				if(name==='TextArea'){
-					this.focusTextArea = true
+			this.$nextTick(function() {
+				if (name === 'TextArea') {
+					this.focusTextArea = true;
 				}
-			})
+			});
 		},
 		hideModal() {
 			this.modalName = '';
@@ -713,7 +733,6 @@ export default {
 				columns: ''
 			};
 			this.uploadFormData['app_no'] = this.fieldData.srvInfo.appNo;
-			// this.uploadFormData['table_name'] = this.fieldData.srvInfo.tableName;
 			this.uploadFormData['columns'] = this.fieldData.column;
 			if (this.fieldData.value !== '' && this.fieldData.value !== null && this.fieldData.value !== undefined) {
 				this.uploadFormData['file_no'] = this.fieldData.value;
@@ -738,7 +757,7 @@ export default {
 
 <style lang="scss" scoped>
 .cu-dialog {
-	&.bottom-modal{
+	&.bottom-modal {
 		padding: 0 0 50rpx;
 	}
 	background-color: #fff;
@@ -800,7 +819,7 @@ export default {
 		}
 		&.label-top {
 			width: 100%;
-			padding: 20rpx 10rpx 0;
+			padding: 10rpx 10rpx 0;
 		}
 		.is-required {
 			display: inline-flex;
@@ -819,6 +838,9 @@ export default {
 		padding-left: 20rpx;
 		color: #000;
 		font-size: var(--global-text-font-size);
+		&.label-top {
+			padding: 0 20rpx 20rpx;
+		}
 		&.form-detail {
 			padding: 0;
 		}
@@ -840,7 +862,7 @@ export default {
 			font: inherit;
 			display: flex;
 			flex: 1;
-			uni-textarea{
+			uni-textarea {
 				width: 100%;
 				height: 200rpx;
 			}

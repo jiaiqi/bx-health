@@ -263,7 +263,9 @@ export default {
 		}
 	}
 	&.button-mode {
-		margin: 5rpx 0;
+		margin-right:20rpx;
+		margin-bottom: 20rpx;
+		padding: 0;
 		.bx-radio-icon {
 			display: none;
 		}
