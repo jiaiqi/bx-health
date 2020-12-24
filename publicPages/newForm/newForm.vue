@@ -382,8 +382,8 @@ export default {
 .form {
 	width: 100%;
 	background-color: #fff;
-	height: calc(100vh - var(--window-top) - var(--window-bottom));
-	overflow: scroll;
+	min-height: calc(100vh - var(--window-top) - var(--window-bottom));
+	// overflow: scroll;
 	.button-box {
 		width: 100%;
 		display: flex;

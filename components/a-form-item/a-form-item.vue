@@ -8,7 +8,10 @@
 			<text class="text-red is-required">{{ fieldData.isRequire ? '*' : '' }}</text>
 			<text class="label">{{ fieldData.label }}</text>
 		</label>
-		<view class="form-item-content" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }">
+		<view
+			class="form-item-content"
+			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }"
+		>
 			<!-- detail-详情-start -->
 			<view class="form-item_image" v-if="pageType === 'detail' && fieldData.type === 'images'">
 				<image
@@ -60,9 +63,9 @@
 			>
 				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
 			</bx-checkbox-group>
-			<view class="form-item-content_value picker" v-else-if="popupFieldTypeList.includes(fieldData.type)">
-				<view v-if="(setOptionList.length < 15 && fieldData.type === 'MultiSelectorPopup') || (selectorData.length < 15 && fieldData.type === 'Selector')">
-					<bx-checkbox-group v-if="fieldData.type === 'MultiSelectorPopup'" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
+			<view class="form-item-content_value" v-else-if="popupFieldTypeList.includes(fieldData.type)">
+				<view v-if="(setOptionList.length < 15 && fieldData.type === 'Set') || (selectorData.length < 15 && fieldData.type === 'Selector')">
+					<bx-checkbox-group v-if="fieldData.type === 'Set'" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
 						<bx-checkbox v-for="item in setOptionList" :key="item.label" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
 					</bx-checkbox-group>
 					<bx-radio-group v-if="fieldData.type === 'Selector'" class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
@@ -97,6 +100,7 @@
 			<input
 				class="form-item-content_value"
 				@blur="onBlur"
+				:adjust-position="true"
 				:type="fieldData.type"
 				:placeholder="'请输入'"
 				@input="onInput"
@@ -147,7 +151,6 @@
 				<textarea
 					style="min-height: 300px;width: 100%;text-align: left;text-indent: 40rpx;padding: 20rpx;color: #000000;"
 					auto-height
-					:focus="focusTextArea"
 					v-model="fieldData.value"
 					:placeholder="'请输入'"
 				></textarea>
@@ -164,7 +167,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'Selector' || modalName === 'MultiSelectorPopup' }">
+		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'Selector' || modalName === 'MultiSelector' }">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="tree-selector">
 					<view class="content">
@@ -174,7 +177,7 @@
 								<input @input="searchFKDataWithKey" :adjust-position="false" type="text" placeholder="搜索" confirm-type="search" />
 							</view>
 						</view>
-						<bx-checkbox-group v-if="modalName === 'MultiSelectorPopup'" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
+						<bx-checkbox-group v-if="modalName === 'MultiSelector'" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
 							<bx-checkbox v-for="item in setOptionList" :key="item.label" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
 						</bx-checkbox-group>
 						<bx-radio-group v-if="modalName === 'Selector'" class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
@@ -182,7 +185,7 @@
 						</bx-radio-group>
 					</view>
 					<view class="dialog-button">
-						<view class="cu-btn bg-blue shadow" @tap="hideModal" v-if="modalName === 'MultiSelectorPopup'">确定</view>
+						<view class="cu-btn bg-blue shadow" @tap="hideModal" v-if="modalName === 'MultiSelector'">确定</view>
 						<view class="cu-btn bg-grey shadow" @tap="hideModal" v-if="modalName === 'Selector'">取消</view>
 					</view>
 				</view>
@@ -267,7 +270,7 @@ export default {
 			}
 			if (
 				this.pageType !== 'detail' &&
-				((this.setOptionList.length < 15 && this.fieldData.type === 'MultiSelectorPopup') || (this.selectorData.length < 15 && this.fieldData.type === 'Selector'))
+				((this.setOptionList.length < 15 && this.fieldData.type === 'Set') || (this.selectorData.length < 15 && this.fieldData.type === 'Selector'))
 			) {
 				result = '100%';
 			}
@@ -671,11 +674,13 @@ export default {
 		openModal(type) {
 			// 打开弹出层
 			let fieldData = this.deepClone(this.fieldData);
+			debugger
 			switch (type) {
 				case 'Set':
 					if (Array.isArray(this.fieldData.option_list_v2)) {
 						this.setOptionList = this.fieldData.option_list_v2.map(item => {
-							if (fieldData.value && fieldData.value.includes(item.value)) {
+							debugger;
+							if (this.fieldData.value && this.fieldData.value.includes(item.value)) {
 								item.checked = true;
 							}
 							return item;
@@ -703,7 +708,11 @@ export default {
 		},
 		getValid() {
 			if (this.fieldData.isRequire && this.fieldData.value) {
-				if (this.fieldData.hasOwnProperty('_validators') && this.fieldData._validators.hasOwnProperty('isType') && typeof this.fieldData._validators.isType === 'function') {
+				if (
+					this.fieldData.hasOwnProperty('_validators') &&
+					this.fieldData._validators.hasOwnProperty('isType') &&
+					typeof this.fieldData._validators.isType === 'function'
+				) {
 					this.fieldData.valid = this.fieldData._validators.isType(this.fieldData.value);
 					this.valid.valid = true;
 				} else {
@@ -741,6 +750,16 @@ export default {
 		if (this.pageType === 'detail' || this.pageType === 'update') {
 			this.getDefVal();
 		}
+		this.$nextTick(function(){
+			if (Array.isArray(this.fieldData.option_list_v2)) {
+				this.setOptionList = this.fieldData.option_list_v2.map(item => {
+					if (this.fieldData.value && this.fieldData.value.includes(item.value)) {
+						item.checked = true;
+					}
+					return item;
+				});
+			}
+		})
 		if (self.fieldData && self.fieldData.type === 'Selector') {
 			let cond = null;
 			self.getSelectorData(cond).then(_ => {
@@ -820,6 +839,7 @@ export default {
 		&.label-top {
 			width: 100%;
 			padding: 10rpx 10rpx 0;
+			
 		}
 		.is-required {
 			display: inline-flex;
@@ -840,6 +860,9 @@ export default {
 		font-size: var(--global-text-font-size);
 		&.label-top {
 			padding: 0 20rpx 20rpx;
+			.form-item-content_value.checkbox-group {
+							margin-top: 10rpx;
+						}	
 		}
 		&.form-detail {
 			padding: 0;
