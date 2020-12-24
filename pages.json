@@ -132,17 +132,22 @@
 						"enablePullDownRefresh": false
 					}
 
+				}, {
+					"path": "DrugSelect/DrugSelect",
+					"style": {
+						"navigationBarTitleText": "药品选择",
+						"enablePullDownRefresh": true
+					}
+
+				}, {
+					"path": "report/report",
+					"style": {
+						"navigationBarTitleText": "检查报告",
+						"enablePullDownRefresh": false
+					}
+
 				}
-			    ,{
-                    "path" : "DrugSelect/DrugSelect",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "药品选择",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "pregnancy",

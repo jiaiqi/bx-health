@@ -60,6 +60,13 @@
 			</view>
 			<view class="page-list" v-if="pageItem.div_type === 'tablist'"></view>
 		</view>
+		<!-- #ifdef MP-WEIXIN -->
+		<!-- <view class="cu-modal" :class="{ show: modalName==='showOfficialAccount' }" @click="hideModal"> -->
+		<!-- <view class="cu-dialog" @click.stop=""> -->
+		<official-account></official-account>
+		<!-- </view> -->
+		<!-- </view> -->
+		<!-- #endif -->
 	</view>
 </template>
 
@@ -70,17 +77,21 @@ export default {
 	data() {
 		return {
 			pageItemList: [], // 页面项
-			code: '' // 微信登录用
+			code: '', // 微信登录用
+			modalName: 'showOfficialAccount'
 		};
 	},
 	computed: {
 		...mapState({
-			userInfo:state=>state.user.userInfo,
+			userInfo: state => state.user.userInfo,
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize
 		})
 	},
 	methods: {
+		hideModal() {
+			this.modalName = '';
+		},
 		isDoctor() {
 			// 查询当前用户是否是医生
 			let url = this.getServiceUrl('daq', 'srvdaq_website_page_item_select', 'select');
@@ -231,7 +242,7 @@ export default {
 			}
 		},
 		async initPage() {
-			let self = this
+			let self = this;
 			let userInfo = uni.getStorageSync('login_user_info');
 			// #ifdef MP-WEIXIN
 			let res = await wx.getSetting();

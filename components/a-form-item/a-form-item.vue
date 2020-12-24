@@ -104,7 +104,7 @@
 					@change="changeSlider"
 					:step="fieldData.sliderStep?fieldData.sliderStep:fieldData.type === 'digit' ? 0.5 : 1"
 					:min="fieldData.value && fieldData.value >= fieldData.min ? fieldData.min : 0"
-					:max="fieldData.max"
+					:max="fieldData.max?fieldData.value>fieldData.max?fieldData.value:fieldData.max:null"
 					:value="fieldData.value < fieldData.min ? fieldData.min : fieldData.value"
 					v-model="fieldData.value"
 					show-value
@@ -132,16 +132,17 @@
 		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'RichEditor' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop=""><jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor" /></view>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'TextArea11' }" @click="hideModal">
+		<view class="cu-modal" :class="{ show: modalName === 'TextArea' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop="">
 				<textarea
 					style="min-height: 300px;width: 100%;text-align: left;text-indent: 40rpx;padding: 20rpx;color: #000000;"
 					auto-height
-					v-model="textareaValue"
+					:focus="focusTextArea"
+					v-model="fieldData.value"
 					:placeholder="'请输入'"
 				></textarea>
 				<view class="button-box">
-					<view class="cu-btn button bg-gray" @click="saveRichText({ isSave: false, type: 'textarea' })">取消</view>
+					<!-- <view class="cu-btn button bg-gray" @click="saveRichText({ isSave: false, type: 'textarea' })">取消</view> -->
 					<view class="cu-btn button bg-cyan" @click="saveRichText({ isSave: true, type: 'textarea' })">确定</view>
 				</view>
 			</view>
@@ -269,6 +270,7 @@ export default {
 	},
 	data() {
 		return {
+			focusTextArea:false,
 			checkedList: [],
 			fieldData: {},
 			imagesUrl: [],
@@ -285,7 +287,7 @@ export default {
 				columns: ''
 			},
 			listModel: {},
-			textareaValue: this.fieldData && this.fieldData.value ? this.fieldData.value : '',
+			textareaValue:  '',
 			treePageInfo: { total: 0, rownumber: 20, pageNo: 1 },
 			selectorData: [],
 			setOptionList: [],
@@ -390,6 +392,11 @@ export default {
 		},
 		showModal(name) {
 			this.modalName = name;
+			this.$nextTick(function(){
+				if(name==='TextArea'){
+					this.focusTextArea = true
+				}
+			})
 		},
 		hideModal() {
 			this.modalName = '';
@@ -731,7 +738,9 @@ export default {
 
 <style lang="scss" scoped>
 .cu-dialog {
-	padding: 0 0 50rpx;
+	&.bottom-modal{
+		padding: 0 0 50rpx;
+	}
 	background-color: #fff;
 	.form-item-content_value {
 		width: 100%;
@@ -740,6 +749,7 @@ export default {
 	.dialog-button {
 		display: flex;
 		justify-content: space-around;
+		margin-bottom: 40rpx;
 		.cu-btn {
 			min-width: 45%;
 		}

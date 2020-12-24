@@ -27,7 +27,11 @@
 			<view class="label">生产企业:</view>
 			<view class="value">{{ drugDetail.medicine_company || '' }}</view>
 		</view>
-
+		<view class="detail-item item-title" v-if="drugInfos && drugInfos.med_no">
+			<view class="label">药品名称:</view>
+			<view class="value">{{ drugInfos.general_name }}</view>
+			<image class="icon" src="../../static/icon/drug.png" mode="aspectFit"></image>
+		</view>
 		<view class="detail-item" v-if="drugInfos">
 			<view class="label">用量单位:</view>
 			<view class="value">
@@ -213,10 +217,29 @@ export default {
 			]
 		};
 	},
-	mounted() {
-		if (this.drugInfo && this.drugInfo.id) {
-			this.drugInfos = this.drugInfo;
+	watch: {
+		drugInfo:{
+			deep:true,
+			handler(newValue, oldValue) {
+				if (newValue && newValue.id) {
+					this.drugInfos = this.drugInfo;
+					if (this.drugInfos.remind_time&&typeof this.drugInfos.remind_time==='string') {
+						this.drugInfos.remind_time = this.drugInfos.remind_time.split(',');
+						this.selectorData = this.selectorData.map(item => {
+							if (this.drugInfos.remind_time.indexOf(item.value) !== -1) {
+								item.checked = true;
+							}else{
+								item.checked = false
+							}
+							return item;
+						});
+					}
+				}
+			}
 		}
+	},
+	created() {
+	
 	},
 	methods: {
 		deleteDrugItem() {
@@ -306,18 +329,19 @@ export default {
 			}
 			this.$http.post(url, req).then(res => {
 				if (res.data.state === 'SUCCESS') {
-					if(this.type==='add')[
-						uni.showModal({
-							title:'提示',
-							content:'添加成功',
-							showCancel:false,
-							success(res) {
-								if(res.confirm){
-									uni.navigateBack()
+					if (this.type === 'add')
+						[
+							uni.showModal({
+								title: '提示',
+								content: '添加成功',
+								showCancel: false,
+								success(res) {
+									if (res.confirm) {
+										uni.navigateBack();
+									}
 								}
-							}
-						})
-					]
+							})
+						];
 					this.$emit('updateSuccess');
 				} else {
 					uni.showToast({

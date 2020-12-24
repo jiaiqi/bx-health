@@ -7,10 +7,12 @@
 		}"
 	>
 		<a-form v-if="colsV2Data && isArray(fields)" :fields="fields" :pageType="srvType" :formType="use_type" ref="bxForm" @value-blur="valueChange"></a-form>
-		<view class="button-box">
-			<button class="cu-btn bg-blue" type="primary" v-if="isArray(fields) && fields.length > 0" v-for="btn in colsV2Data._formButtons" :key="btn.id" @click="onButton(btn)">
-				{{ btn.button_name }}
-			</button>
+		<view class="button-box" v-if="isArray(fields) && fields.length > 0 && !params.to">
+			<button class="cu-btn bg-blue" type="primary" v-for="btn in colsV2Data._formButtons" :key="btn.id" @click="onButton(btn)">{{ btn.button_name }}</button>
+		</view>
+		<view class="button-box" v-if="isArray(fields) && fields.length > 0 && params.to"><button class="cu-btn bg-blue" @click="onButton(nextBtn)">下一步</button></view>
+		<view class="button-box" v-if="this.params.defaultVal && this.params.defaultVal.report_daq_survey_activity_no && this.params.defaultVal.report_daq_survey_ack_no">
+			<button class="cu-btn bg-blue" @click="toPages('quest')">查看更多</button>
 		</view>
 	</view>
 </template>
@@ -31,23 +33,41 @@ export default {
 			fields: [],
 			condition: [],
 			fieldsCond: [],
-			params: {}
+			params: {},
+			nextBtn: {
+				action: 'nextPage',
+				page_type: '增加',
+				button_type: 'submit',
+				button_name: '提交',
+				service_name: 'srvhealth_examination_report_add',
+				application: 'health'
+			}
 		};
 	},
 	methods: {
 		toPages(type) {
-			this.srvType = type;
-			if (this.params.to && this.params.idCol && this.params.submitData && this.params.submitData[this.params.idCol]) {
-				uni.redirectTo({
-					url: `${this.params.to}?${this.params.idCol}=${this.params.submitData[this.params.idCol]}`
+			if (type === 'quest') {
+				uni.navigateTo({
+					url: `/questionnaire/index/index?formType=detail&activity_no=${this.params.defaultVal.report_daq_survey_activity_no}&status=完成&fill_batch_no=${
+						this.params.defaultVal.report_daq_survey_ack_no
+					}`
 				});
-			} else {
-				uni.redirectTo({
-					url: `/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(JSON.stringify(this.fieldsCond))}`
-				});
+			}else{
+				this.srvType = type;
+				if (this.params.to && this.params.idCol && this.params.submitData && this.params.submitData[this.params.idCol]) {
+					uni.redirectTo({
+						url: `${this.params.to}?${this.params.idCol}=${this.params.submitData[this.params.idCol]}`
+					});
+				} else {
+					uni.redirectTo({
+						url: `/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(JSON.stringify(this.fieldsCond))}`
+					});
+				}
 			}
 		},
 		async onButton(e) {
+			console.log(e);
+			debugger;
 			let self = this;
 			let req = this.$refs.bxForm.getFieldModel();
 			for (let key in req) {
@@ -115,25 +135,31 @@ export default {
 						let url = this.getServiceUrl(app, e.service_name, 'add');
 						let res = await this.$http.post(url, req);
 						if (res.data.state === 'SUCCESS') {
-							if (
-								Array.isArray(res.data.response) &&
-								res.data.response.length > 0 &&
-								res.data.response[0].response &&
-								Array.isArray(res.data.response[0].response.effect_data) &&
-								res.data.response[0].response.effect_data.length > 0
-							) {
-								this.params.submitData = res.data.response[0].response.effect_data[0];
-							}
-							uni.showModal({
-								title: '提示',
-								content: '添加成功',
-								showCancel: false,
-								success(res) {
-									if (res.confirm) {
-										self.toPages('detail');
-									}
+							if (e.action === 'nextPage') {
+								uni.redirectTo({
+									url: this.params.to
+								});
+							} else {
+								if (
+									Array.isArray(res.data.response) &&
+									res.data.response.length > 0 &&
+									res.data.response[0].response &&
+									Array.isArray(res.data.response[0].response.effect_data) &&
+									res.data.response[0].response.effect_data.length > 0
+								) {
+									this.params.submitData = res.data.response[0].response.effect_data[0];
 								}
-							});
+								uni.showModal({
+									title: '提示',
+									content: '操作成功',
+									showCancel: false,
+									success(res) {
+										if (res.confirm) {
+											self.toPages('detail');
+										}
+									}
+								});
+							}
 						}
 					}
 					break;
@@ -244,16 +270,11 @@ export default {
 			let app = uni.getStorageSync('activeApp');
 			let colVs = await this.getServiceV2(this.serviceName, this.srvType, this.use_type, app);
 			let defaultVal = null;
+			colVs._formButtons = colVs._formButtons.filter(item => {
+				return item.button_type !== 'edit';
+			});
 			this.colsV2Data = colVs;
 			colVs = this.deepClone(colVs);
-			// if(Array.isArray(colVs._fieldInfo)){
-			// 	colVs._fieldInfo = colVs._fieldInfo.map(field=>{
-			// 		if(field.type==='digit'||field.type==='number'){
-			// 			debugger
-			// 		}
-			// 		return field
-			// 	})
-			// }
 			if (colVs.service_view_name) {
 				uni.setNavigationBarTitle({
 					title: colVs.service_view_name
@@ -331,8 +352,26 @@ export default {
 				case 'detail':
 					defaultVal = await this.getDefaultVal();
 					this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
-					break;
-				default:
+					this.fields = this.fields.map(field => {
+						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
+							this.fieldsCond.forEach(item => {
+								if (item.column === field.column) {
+									if (item.hasOwnProperty('display')) {
+										field.display = item.display;
+									}
+									if (item.hasOwnProperty('value')) {
+										field.value = item.value;
+									}
+									if (field.option_list_v2 && Array.isArray(field.option_list_v2.conditions) && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = field.option_list_v2.conditions.concat(item.condition);
+									} else if (field.option_list_v2 && !field.option_list_v2.conditions && Array.isArray(item.condition)) {
+										field.option_list_v2.conditions = item.condition;
+									}
+								}
+							});
+						}
+						return field;
+					});
 					break;
 			}
 		}
@@ -352,9 +391,6 @@ export default {
 		if (option.serviceName) {
 			this.serviceName = option.serviceName;
 		}
-		// srvType: 'add', // 表单信息 add | update  | select |list | detail
-		// use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
-
 		if (option.type) {
 			if (option.type.indexOf(',') !== -1) {
 				option.type = option.type.split(',')[0];

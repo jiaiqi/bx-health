@@ -151,7 +151,8 @@
 			<view class="content inspection-report">
 				<view class="report-item" v-for="item in inspectReportRecord" :key="item.id" @click="toRecord(item)">
 					<view class="images"><image class="image" src="../../static/xuehzi.png" mode="aspectFill"></image></view>
-					<view class="title">{{ item.name + item.examination_type }}</view>
+					<view class="title">{{ item.name }}</view>
+					<!-- <view class="title">{{ item.name + item.examination_type }}</view> -->
 					<view class="date">{{ item.end_time.slice(0, 10) }}</view>
 				</view>
 				<view class="empty-data" v-if="inspectReportRecord.length === 0 || !inspectReportRecord">
@@ -231,6 +232,7 @@
 				</view>
 			</view>
 		</view>
+		<!-- <official-account></official-account> -->
 	</view>
 	<bx-auth v-else-if="authBoxDisplay" @getuserinfo="getuserinfo"></bx-auth>
 </template>
@@ -524,53 +526,91 @@ export default {
 			}
 		},
 		confirmTree(e) {
-			if (e.item && e.item.daq_survey_activity_no) {
-				this.selectedQuestNo = e.item.daq_survey_activity_no;
-				this.toQuestionnaire(e.item.daq_survey_activity_no);
+			if (e.item && e.item.jy_no) {
+				// e.item.daq_survey_activity_no
+				let fieldsCond = [
+					{ column: 'jy_no', display: false, value: e.item.jy_no },
+					{ column: 'examinate_person_no', display: false, value: this.userInfo.no },
+					{ column: 'examinate_name', display: false, value: this.userInfo.name },
+					{ column: 'examinate_account', display: false, value: this.userInfo.userno },
+					{ column: 'examinate_date', display: true, value: dayjs().format('YYYY-MM-DD') },
+					{ column: 'report_daq_survey_activity_no', display: false },
+					{ column: 'report_record', display: false },
+					{ column: 'report_daq_survey_ack_no', display: false }
+				];
+
+				let url = `/archivesPages/report/report?serviceName=srvhealth_examination_report_add&type=add&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`;
+				if (e.item.daq_survey_activity_no) {
+					let params = {
+						to: `/archivesPages/report/report?serviceName=srvhealth_examination_report_add&type=add`, //提交后要跳转的页面
+						idCol: 'report_daq_survey_activity_no', // 跳转时携带的参数
+						buttonLabel: '下一步',
+						fieldsCond: fieldsCond
+					};
+					fieldsCond[fieldsCond.findIndex(item => item.column === 'report_daq_survey_activity_no')].value = e.item.daq_survey_activity_no;
+					url = `/questionnaire/index/index?formType=form&activity_no=${e.item.daq_survey_activity_no}&status=进行中&params=${encodeURIComponent(JSON.stringify(params))}`;
+				}
+				uni.navigateTo({
+					url: url
+				});
 			}
 		},
 		toQuestionnaire(no) {
 			uni.navigateTo({
-				url: `/questionnaire/index/index?formType=form&activity_no=${this.selectedQuestNo}&status=进行中`
+				url: `/questionnaire/index/index?formType=form&activity_no=${no}&status=进行中`
 			});
 		},
 		toRecord(item) {
 			// 跳转到血脂检查记录页面。
 			// fill_batch_no activity_no
-			if (item.activity_no && item.fill_batch_no) {
-				uni.navigateTo({
-					url: `/questionnaire/index/index?formType=detail&activity_no=${item.activity_no}&status=完成&fill_batch_no=${item.fill_batch_no}`
-				});
-			}
+			let fieldsCond = [
+				{ column: 'jybg_no', display: false, value: item.jybg_no },
+				{ column: 'jy_no', display: false },
+				{ column: 'examinate_person_no', display: false },
+				{ column: 'examinate_name', display: false },
+				{ column: 'examinate_account', display: false },
+				{ column: 'report_daq_survey_activity_no', display: false },
+				{ column: 'report_record', display: false },
+				{ column: 'report_daq_survey_ack_no', display: false }
+			];
+			let url = `/archivesPages/report/report?serviceName=srvhealth_examination_report_select&type=detail&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`;
+			debugger
+			uni.navigateTo({
+				url:url
+			})
+			// if (item.activity_no && item.fill_batch_no) {
+			// 	uni.navigateTo({
+			// 		url: `/questionnaire/index/index?formType=detail&activity_no=${item.activity_no}&status=完成&fill_batch_no=${item.fill_batch_no}`
+			// 	});
+			// }
 		},
 		async selectInspectionReport() {
 			// 查询检查报告
-			let url = this.getServiceUrl('health', 'srvhealth_see_doctor_lab_examination_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_examination_report_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_see_doctor_lab_examination_select',
+				serviceName: 'srvhealth_examination_report_select',
 				colNames: ['*'],
-				condition: [{ colName: 'daq_survey_activity_no', ruleType: 'notnull', value: '' }]
+				page: { rownumber: 10, pageNo: 1 }
 			};
 			let res = await this.$http.post(url, req);
 			if (this.requestSuccess(res)) {
 				let list = res.data.data;
 				if (res.data.data.length > 0) {
-					let no = list.map(item => item.daq_survey_activity_no).toString();
+					let no = list.map(item => item.report_daq_survey_activity_no).toString();
 					let result = await this.getQuestRecord(no);
 					this.isLoad = true;
 					if (result) {
-						this.inspectReportRecord = result.map(item => {
-							list.forEach(record => {
-								if (record.daq_survey_activity_no === item.activity_no) {
-									item.name = record.name;
-									item.attention = record.attention;
-									item.examination_type = record.examination_type;
-									item.content_desc = record.content_desc;
-									item.specimen = record.specimen;
-									item.ref_price = record.ref_price;
+						this.inspectReportRecord = list.map(record => {
+							result.forEach(item => {
+								if (record.report_daq_survey_activity_no === item.activity_no) {
+									record.activity_no = item.activity_no;
+									record.fill_batch_no = item.fill_batch_no;
+									record.end_time = item.end_time;
+								} else {
+									record.end_time = record.create_time;
 								}
 							});
-							return item;
+							return record;
 						});
 					}
 				}
@@ -1688,6 +1728,7 @@ export default {
 					flex-direction: column;
 					box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 					padding-bottom: 20rpx;
+
 					&:nth-child(4n) {
 						margin-right: 0;
 					}
@@ -1698,6 +1739,9 @@ export default {
 					.title {
 						text-indent: 10rpx;
 						padding: 5rpx 0;
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: nowrap;
 					}
 					.date {
 						font-size: 24rpx;

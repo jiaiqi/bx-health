@@ -12,7 +12,7 @@
 						<text class="doctor-name">{{ item.dt_name }}</text>
 					</view>
 					<view @click="toChatPage(item)" class="content-right">
-						<text v-if="item.count_num !== 0" style="z-index: 1;">{{ item.count_num }}</text>
+						<text v-if="item.count_num" style="z-index: 1;">{{ item.count_num }}</text>
 						<image src="../static/chat.png" mode=""></image>
 					</view>
 				</view>

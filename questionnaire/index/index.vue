@@ -24,23 +24,17 @@
 				<view class="text-content-text"><view v-html="JSON.parse(JSON.stringify(formData.end_remark).replace(/\<img/gi, '<img width=100%'))"></view></view>
 			</view>
 		</view>
-		<view
-			class="button-box"
-			style="margin: 30upx;"
-			v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')"
-		>
+		<view class="button-box" v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')">
 			<button class="button" type="" @click="submitForm()">提交</button>
 		</view>
 		<view
 			class="button-box"
-			style="margin: 30upx;"
 			v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no"
 		>
 			<button class="button cu-btn" type="" @click="seeReport()">查看评估结果</button>
 		</view>
 		<view
 			class="button-box"
-			style="margin: 30upx;"
 			v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '自测' && formData.user_state === '完成' && fill_batch_no"
 		>
 			<button class="button cu-btn" type="" @click="seeScore" v-if="!scoreInfo.score && scoreInfo.score !== 0">查看分数</button>
@@ -49,6 +43,7 @@
 				<view class="score">{{ scoreInfo.score === 0 ? '0' : scoreInfo.score }}</view>
 			</view>
 		</view>
+		<view class="button-box" v-if="showNextBtn"><button class="button cu-btn" @click="toNextPages">下一步</button></view>
 	</view>
 </template>
 
@@ -79,7 +74,9 @@ export default {
 			wxUserInfo: {}, // 微信用户信息
 			questionData: {},
 			fill_batch_no: '', //活动批次编号
-			scoreInfo: {} // 得分情况
+			scoreInfo: {}, // 得分情况
+			params: {},
+			showNextBtn: false
 		};
 	},
 	props: {
@@ -113,6 +110,15 @@ export default {
 		}
 	},
 	methods: {
+		toNextPages() {
+			let params = this.deepClone(this.params);
+			let fieldsCond = params.fieldsCond;
+			fieldsCond[fieldsCond.findIndex(item => item.column === 'report_daq_survey_ack_no')].value = params.fill_batch_no;
+			// let url = `params.to&${encodeURIComponent(JSON.stringify(fieldsCond))}`;
+			uni.redirectTo({
+				url:`${params.to}&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`
+			})
+		},
 		toHistory() {
 			uni.navigateTo({
 				url: '/questionnaire/history/history?activity_no=' + this.activity_no + '&title=' + this.formData.title
@@ -266,6 +272,13 @@ export default {
 											});
 											self.formType = 'detail';
 											self.getQuestionnaireData(self.formData);
+											if (Array.isArray(res.data.response) && res.data.response.length > 0 && res.data.response[0].response && res.data.response[0].response.fill_batch_no) {
+												self.params.fill_batch_no = res.data.response[0].response.fill_batch_no;
+											}
+											if (self.params.to && self.params.fill_batch_no) {
+												self.showNextBtn = true;
+												// self.toNextPages()
+											}
 											if (self.target && self.target === 'health') {
 												let data = {
 													from: '饮食',
@@ -657,6 +670,9 @@ export default {
 		}
 	},
 	onLoad(option) {
+		if (option.params) {
+			this.params = JSON.parse(decodeURIComponent(option.params));
+		}
 		this.emptyText = '正在请求问卷配置数据';
 		setTimeout(() => {
 			this.emptyText = '未找到问卷配置数据';
@@ -753,6 +769,7 @@ export default {
 .button-box {
 	display: flex;
 	justify-content: center;
+	padding: 30rpx;
 	.button {
 		color: #fff;
 		background-color: #0bc99d;

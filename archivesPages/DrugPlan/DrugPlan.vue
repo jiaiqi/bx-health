@@ -1,7 +1,7 @@
 <template>
 	<view class="drug-plan">
 		<view class="total-title"><view class="child-service-title"></view></view>
-		<view class="main-table">
+		<view class="main-table" @click="toPages('update')">
 			<view class="table-item" v-for="item in fields" :key="item.column">
 				<view class="label">{{ item.label }}</view>
 				<view class="value">{{ item.value ? item.value : '' }}</view>
@@ -12,11 +12,11 @@
 				<view class="child-service-title" v-if="item && item.colVs">
 					<text class="title-text">药品清单</text>
 					<view class="" style="display: flex;">
-						<text class="title-action margin-right-xs" @click="toAdd('detail', item)">
+						<text class="title-action margin-right-xs" @click="toPages('detail', item)">
 							<text class="cuIcon-add "></text>
 							<text class="see-histroy">添加</text>
 						</text>
-						<text class="title-action" @click="toAdd('scan', item)">
+						<text class="title-action" @click="toPages('scan', item)">
 							<text class="cuIcon-scan margin-right-xs"></text>
 							<text class="see-histroy">扫一扫</text>
 						</text>
@@ -45,11 +45,14 @@
 			<view class="child-service-item">
 				<view class="child-service-title">
 					<text class="title-text">用药记录</text>
-					<text class="title-action" @click="toAdd('open-calendar')">
-						<text class="cuIcon-calendar"></text>
-						<text class="margin-left-xs">日期</text>
-					</text>
-					<text class="title-action" @click="toAdd('record')">
+					<view class="center-action">
+						<text class="cuIcon-back operate" @click="changeDate('-')"></text>
+						<text @click="toPages('open-calendar')">
+							<text>{{ info.currentDate || nowDate }}</text>
+						</text>
+						<text class="cuIcon-right operate" @click="changeDate('+')"></text>
+					</view>
+					<text class="title-action" @click="toPages('record')">
 						<text class="cuIcon-add "></text>
 						<text class="see-histroy">添加</text>
 					</text>
@@ -147,7 +150,8 @@ export default {
 				insert: false,
 				startDate: '',
 				endDate: '',
-				selected: []
+				selected: [],
+				currentDate: ''
 			},
 			planNo: '',
 			drugList: [], //当前用药计划的药品列表
@@ -173,7 +177,7 @@ export default {
 			},
 			timer: '',
 			modalName: '',
-			showCalender:false,
+			showCalender: false,
 			drugDetailType: 'add',
 			useDrugUnit: [
 				{
@@ -218,11 +222,24 @@ export default {
 	},
 	methods: {
 		confirmDate(e) {
-
-			this.getDrugRecord(this.planNo, e.fulldate);
+			this.info.currentDate = e.fulldate;
+			this.getDrugRecord(this.planNo, this.info.currentDate);
+		},
+		changeDate(e) {
+			let fullDate = this.info.currentDate;
+			if (e === '-') {
+				this.info.currentDate = dayjs(this.info.currentDate)
+					.subtract(1, 'day')
+					.format('YYYY-MM-DD');
+			} else if (e === '+') {
+				this.info.currentDate = dayjs(this.info.currentDate)
+					.add(1, 'day')
+					.format('YYYY-MM-DD');
+			}
+			this.getDrugRecord(this.planNo, this.info.currentDate);
 		},
 		monthSwitch(e) {
-			this.getDrugRecord(this.planNo,  `${e.year}-${e.month}`);
+			this.getDrugRecord(this.planNo, `${e.year}-${e.month}`);
 		},
 		openCalendar() {},
 		getDegree(drugList, type) {
@@ -319,7 +336,7 @@ export default {
 				return '早晨';
 			}
 		},
-		toAdd(type, item) {
+		toPages(type, item) {
 			let condition = [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }];
 			let fieldsCond = [{ column: 'ds_no', condition: [{ colName: 'person_no', ruleType: 'eq', value: this.planDetail.person_no }] }];
 			let url = '';
@@ -349,7 +366,6 @@ export default {
 										self.drugDetail = result;
 										self.drugDetailType = 'update';
 										self.modalName = 'drugDetail';
-										// self.addDrugItem(result);
 									}
 								});
 							}
@@ -359,19 +375,26 @@ export default {
 
 					break;
 				case 'record':
-					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${decodeURIComponent(
-						JSON.stringify(condition)
-					)}&fieldsCond=${decodeURIComponent(JSON.stringify(fieldsCond))}&ds_no=${this.planNo}`;
+					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${encodeURIComponent(JSON.stringify(condition))}&ds_no=${
+						this.planNo
+					}`;
 					break;
 				case 'open-calendar':
-					// if (this.drugRecord.length > 0) {
+					if (this.$refs.calendar) {
 						this.$refs.calendar.open();
-					// } else {
-					// 	uni.showToast({
-					// 		title: '没有记录！',
-					// 		icon: 'none'
-					// 	});
-					// }
+					}
+					break;
+				case 'update':
+					let fieldsCond = [{ column: 'ds_no', display: false, value: this.planDetail.ds_no }, { column: 'end_date', display: false }, { column: 'person_no', display: false }];
+					let params = {
+						to: '/archivesPages/DrugPlan/DrugPlan', //提交后要跳转的页面
+						idCol: 'ds_no' // 跳转时携带的参数
+					};
+					uni.navigateTo({
+						url: `/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_update&type=update&fieldsCond=${encodeURIComponent(
+							JSON.stringify(fieldsCond)
+						)}&params=${encodeURIComponent(JSON.stringify(params))}`
+					});
 					break;
 			}
 			if (url) {
@@ -484,7 +507,7 @@ export default {
 				default:
 					break;
 			}
-		
+			this.info.currentDate = this.nowDate;
 			this.getDrugRecord(this.planNo, this.nowDate);
 		},
 		async getDrugRecordDetail() {
@@ -515,11 +538,11 @@ export default {
 			if (this.login_user_info && this.login_user_info.user_no) {
 				req.condition.push({ colName: 'create_user', ruleType: 'eq', value: this.login_user_info.user_no });
 			}
-			
+
 			let res = await this.$http.post(url, req);
-			setTimeout(()=>{
-				this.showCalender = true
-			},2000)
+			setTimeout(() => {
+				this.showCalender = true;
+			}, 2000);
 			if (Array.isArray(res.data.data)) {
 				// this.drugRecord =
 				if (res.data.data.length == 0) {
@@ -601,8 +624,8 @@ export default {
 					}, []);
 				}
 				// this.buildTodayCase();
-				this.drugRecord = recordList.filter(item=>{
-					return item.date.indexOf(date)!==-1
+				this.drugRecord = recordList.filter(item => {
+					return item.date.indexOf(date) !== -1;
 				});
 				return recordList;
 			}
@@ -675,7 +698,7 @@ export default {
 
 <style lang="scss" scoped>
 .drug-plan {
-	min-height: 100vh;
+	min-height: calc(100vh - var(--window-top) - var(--window-bottom));
 	background-color: #fff;
 	overflow: hidden;
 	.main-table {
@@ -688,7 +711,7 @@ export default {
 		box-shadow: 0px 1px 4px 0px #4e87c6, 0px 5px 2px 0px #b3d8ff;
 		// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		border-radius: 20rpx;
-		min-height: 150rpx;
+		min-height: 160rpx;
 		.table-item {
 			display: flex;
 			padding: 10rpx 20rpx;
@@ -831,6 +854,33 @@ export default {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	.center-action {
+		display: flex;
+		align-items: center;
+		color: #0081ff;
+		padding: 10rpx 0;
+		box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.32), 0 0 6px rgba(0, 0, 0, 0.04);
+		border-radius: 50rpx;
+		padding-right: 20rpx;
+		.title-action {
+			box-shadow: none;
+			border: none;
+		}
+		.operate {
+			height: 50rpx;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			border-radius: 50%;
+			&.margin-right-xs {
+				margin-right: 15rpx;
+			}
+			&:active {
+				background-color: #f1f1f1;
+			}
+			// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.32), 0 0 6px rgba(0, 0, 0, 0.04);
+		}
+	}
 	.title-text {
 		margin: 0;
 		padding: 0;
@@ -862,6 +912,7 @@ export default {
 			background-color: #999;
 			color: #fff;
 		}
+
 		.see-histroy {
 			font-size: 24rpx;
 			text-indent: 0;
@@ -874,6 +925,7 @@ export default {
 	.child-service-item {
 		padding: 0 20rpx;
 		margin-bottom: 40rpx;
+		min-height: 220rpx;
 		&:first-child {
 			min-height: 220rpx;
 		}
