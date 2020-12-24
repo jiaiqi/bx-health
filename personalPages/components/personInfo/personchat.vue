@@ -356,7 +356,7 @@ export default {
 					this.heightStyle = 'calc(100vh - 50px);';
 				} else {
 					// uni.setStorageSync('doctor_no', '');
-					this.heightStyle = 'calc(100vh - 90px);';
+					this.heightStyle = 'calc(100vh - 145px);';
 				}
 			})
 			this.isSendLink = false
@@ -531,12 +531,8 @@ export default {
 		},
 		/*滚动**/
 		chatScroll(e) {
-			// if(!this.isLoading){
-			// console.log("滚动-------",e)
-			// 	return
-			// }
 			this.scrollNum = e.detail.scrollTop;
-			if (e.detail.scrollTop < 50 && !this.isLoading && !this.isAll) {
+			if (e.detail.scrollTop < 50 && e.detail.scrollTop != 0 && !this.isLoading && !this.isAll) {
 				this.isLoading = true;
 				this.pageInfo.pageNo += 1;
 				this.getMessageInfo().then(_ => {
@@ -908,7 +904,7 @@ export default {
 			if (this.doctor_no.owner_account) {
 				this.heightStyle = 'calc(100vh - 50px)';
 			} else {
-				this.heightStyle = 'calc(100vh - 100px)';
+				this.heightStyle = 'calc(100vh - 145px)';
 			}
 			// this.heightStyle = 'calc(100vh - 100px)'
 		},
@@ -919,17 +915,6 @@ export default {
 			console.log('----------', type);
 			this.currentVoiceType = type;
 		},
-		/*input框内有没有内容**/
-		// changeTest() {
-		// 	if (this.chatText) {
-		// 		this.isSendLink = false;
-		// 		if (this.doctor_no.owner_account) {
-		// 			this.heightStyle = 'calc(100vh - 50px)';
-		// 		} else {
-		// 			this.heightStyle = 'calc(100vh - 100px)';
-		// 		}
-		// 	}
-		// },
 		downloadfile(item) {
 			var url = this.$api.downloadFile + item.attachment + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 			uni.showToast({
@@ -970,6 +955,7 @@ export default {
 		},
 		/*点击发送后添加图片或语音数据**/
 		async sendMessageLanguageInfo(type, value) {
+			console.log("type----sendMessageLanguageInfo",type)
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
 			let req = [
 				{
@@ -1015,6 +1001,7 @@ export default {
 		},
 		/*点击发送后添加数据**/
 		async sendMessageInfo() {
+			console.log("数据-------")
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
 			let req = [
 				{
@@ -1041,7 +1028,7 @@ export default {
 				console.log('发送成功');
 				this.isAll = false;
 				this.pageInfo.pageNo = 1;
-				this.getMessageInfo();
+				this.getMessageInfo()
 			}
 		},
 		_SortJson(json) {
@@ -1050,6 +1037,7 @@ export default {
 				return new Date(a.create_time).getTime() - new Date(b.create_time).getTime(); //时间反序
 			});
 			console.log('--------排序', json);
+			return json
 		},
 		/*查询当前登陆人和其他人聊天记录**/
 		async getMessageInfo(type = null) {
@@ -1152,7 +1140,6 @@ export default {
 						this.$set(resData[i], 'anmitionPlay', false);
 						// item.msg_link = '20201202175639960100'
 						this.getFilePath(item.msg_link).then(obj=>{
-							debugger
 							console.log("语音内容-----",obj,item.msg_link)
 							if(obj){
 								let video_url = this.$api.getFilePath + obj[0].fileurl
@@ -1201,12 +1188,13 @@ export default {
 							});
 						}
 					}
-				});	
+				});
+				let _SortJsonData = null
 				this.$nextTick(()=>{
 					if (!this.isAll) {
-						this._SortJson(resData);
+						_SortJsonData = this._SortJson(resData);
 						this.recordList.unshift(...resData);					
-						console.log("排序============",this.recordList)
+						console.log("排序============",_SortJsonData)
 					}
 					if(type && type === 'update'){
 						this._SortJson(resData);
@@ -1218,8 +1206,10 @@ export default {
 				})
 				
 				this.$nextTick(() => {
-					if(resData.length > 0){
-						this.chatTextBottom = 'person-chat-item' + resData[resData.length - 1].id;
+					// debugger
+					console.log("滚动条位置")
+					if(this.recordList.length > 0){
+						this.chatTextBottom = 'person-chat-item' + _SortJsonData[_SortJsonData.length - 1].id;
 					}
 				})
 				// this.getUserInfoList()
@@ -1316,7 +1306,7 @@ export default {
 					this.heightStyle = 'calc(100vh - 50px);';
 				} else {
 					uni.setStorageSync('doctor_no', '');
-					this.heightStyle = 'calc(100vh - 90px);';
+					this.heightStyle = 'calc(100vh - 145px);';
 				}
 			});
 		}, 500);
@@ -1354,7 +1344,8 @@ export default {
 
 <style lang="scss" scoped>
 .person-chat-wrap {
-	height: 100vh;
+	// padding-top: 120rpx;
+	height: calc(100vh - 90rpx);
 	background-color: #eeeeee;
 	.nav-chat-top {
 		background-color: rgb(11, 201, 157) !important;

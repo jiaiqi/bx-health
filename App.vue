@@ -128,6 +128,7 @@ export default {
 					length = `${length}`;
 				}
 				if (length != 0) {
+					
 					uni.setTabBarBadge({
 						index: 3,
 						text: length,
