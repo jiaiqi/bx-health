@@ -66,7 +66,7 @@
 		<view class="health-archive-item health-todos">
 			<view class="subtitle">
 				<text class="title-text">待办事项</text>
-				<view class="title-action" @click="navPages('drug')">
+				<view class="title-action" @click="navPages('plan')">
 					<text class="cuIcon-add "></text>
 					<text class="see-histroy">添加</text>
 				</view>
@@ -74,7 +74,7 @@
 			<view class="content todo-list">
 				<view class="todo-item" v-for="(item, index) in todoList" :key="index" @click="clickTodoItem(item, index)">
 					<!-- <view class="todo-item-content" :class="{ checked: item.checked }"> -->
-					<view class="type">{{ item.typeExplain }}</view>
+					<view class="type">{{ item.play_srv }}</view>
 					<view class="title">{{ item.ds_name }}</view>
 					<view class="cycle">{{ getCycle(item) }}</view>
 					<!-- </view> -->
@@ -452,27 +452,29 @@ export default {
 			this.initPage();
 		},
 		clickTodoItem(item, index) {
-			// this.$set(item, 'checked', !item.checked);
 			if (item.ds_no) {
-				uni.navigateTo({
-					url: `/archivesPages/DrugPlan/DrugPlan?ds_no=${item.ds_no}`
-				});
+				if (item.play_srv === '用药' || item.play_srv === '运动') {
+					uni.navigateTo({
+						url: `/archivesPages/DrugPlan/DrugPlan?ds_no=${item.ds_no}`
+					});
+				}
 			}
 		},
 		async getToDoList() {
-			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_plan_schedule_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_drug_schedule_select',
+				serviceName: 'srvhealth_plan_schedule_select',
 				colNames: ['*'],
-				condition: [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }],
+				condition: [{ colName: 'owner_person_no', ruleType: 'eq', value: this.userInfo.no }],
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data)) {
 				this.todoList = res.data.data
 					.map(item => {
-						item.type = 'drugSchedule';
-						item.typeExplain = '用药';
+						if (!item.play_srv) {
+							item.play_srv = '用药';
+						}
 						return item;
 					})
 					.filter(item => dayjs(item.start_date).add(item.take_days, 'day') >= dayjs().subtract(1, 'day'));
@@ -574,10 +576,10 @@ export default {
 				{ column: 'report_daq_survey_ack_no', display: false }
 			];
 			let url = `/archivesPages/report/report?serviceName=srvhealth_examination_report_select&type=detail&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`;
-			debugger
+			debugger;
 			uni.navigateTo({
-				url:url
-			})
+				url: url
+			});
 			// if (item.activity_no && item.fill_batch_no) {
 			// 	uni.navigateTo({
 			// 		url: `/questionnaire/index/index?formType=detail&activity_no=${item.activity_no}&status=完成&fill_batch_no=${item.fill_batch_no}`
@@ -1112,14 +1114,14 @@ export default {
 				uni.navigateTo({
 					url: '/archivesPages/archives-history/archives-history?isAll=true'
 				});
-			} else if (type === 'drug') {
-				let fieldsCond = [{ column: 'person_no', display: false, value: this.userInfo.no }];
+			} else if (type === 'plan') {
+				let fieldsCond = [{ column: 'create_manager_no', display: false }, { column: 'owner_person_no', display: false, value: this.userInfo.no }];
 				let params = {
 					to: '/archivesPages/DrugPlan/DrugPlan', //提交后要跳转的页面
 					idCol: 'ds_no' // 跳转时携带的参数
 				};
 				uni.navigateTo({
-					url: `/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_add&type=add&fieldsCond=${encodeURIComponent(
+					url: `/publicPages/newForm/newForm?serviceName=srvhealth_plan_schedule_add&type=add&fieldsCond=${encodeURIComponent(
 						JSON.stringify(fieldsCond)
 					)}&params=${encodeURIComponent(JSON.stringify(params))}`
 				});
@@ -1782,6 +1784,10 @@ export default {
 					}
 					.title {
 						padding: 10rpx;
+						overflow: hidden;
+						white-space: nowrap;
+						text-overflow: ellipsis;
+						width: 100%;
 					}
 					.cycle {
 						font-size: 24rpx;

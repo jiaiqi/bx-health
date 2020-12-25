@@ -28,9 +28,9 @@ export default {
 			
 		},
 		toPages(type, item) {
-			if (type === 'patients' && item.customer_no) {
+			if (type === 'patients') {
 				uni.navigateTo({
-					url: `/personalPages/patientsInfo/patientsInfo?customer_no=${item.customer_no}&dp_no=${item.dp_no}`
+					url: `/personalPages/patientsInfo/patientsInfo?customer_no=${item.userb_person_no}&dp_no=${item.dp_no}`
 				});
 			}
 		},
@@ -83,14 +83,14 @@ export default {
 		},
 		buildSearchArg(doctorInfo) {
 			this.searchArg = {
-				serviceName: 'srvhealth_patient_doctor_select',
-				imgCol: 'customer_profile_url',
+				serviceName: 'srvhealth_person_relation_select',
+				imgCol: 'userb_profile_url',
 				isShowCouple:true,
 				pageRowNumber:20,
 				topNum:250,
-				condition: [{ colName: 'manager_no', ruleType: 'like', value: doctorInfo && doctorInfo.dt_no ? doctorInfo.dt_no : '**' }],
+				condition: [{ colName: 'usera_person_no', ruleType: 'like', value: this.currentUser.no}],
 				wordKey: {
-					title: 'customer_name'
+					title: 'userb_name'
 				}
 			};
 		}

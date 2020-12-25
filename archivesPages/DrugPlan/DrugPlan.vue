@@ -10,13 +10,14 @@
 		<view class="child-service">
 			<view class="child-service-item" v-for="(item, index) in childServiceData" :key="index">
 				<view class="child-service-title" v-if="item && item.colVs">
-					<text class="title-text">药品清单</text>
+					<text class="title-text" v-if="item.colVs.service_view_name.indexOf('用药') !== -1">药品列表</text>
+					<text class="title-text" v-if="item.colVs.service_view_name.indexOf('运动') !== -1">运动项目</text>
 					<view class="" style="display: flex;">
-						<text class="title-action margin-right-xs" @click="toPages('detail', item)">
+						<text class="title-action margin-right-xs" @click="toPages('addPlan', item)">
 							<text class="cuIcon-add "></text>
 							<text class="see-histroy">添加</text>
 						</text>
-						<text class="title-action" @click="toPages('scan', item)">
+						<text class="title-action" @click="toPages('scanDrug', item)" v-if="item.colVs.service_view_name.indexOf('用药') !== -1">
 							<text class="cuIcon-scan margin-right-xs"></text>
 							<text class="see-histroy">扫一扫</text>
 						</text>
@@ -24,8 +25,9 @@
 				</view>
 				<view class="child-service-data-wrap">
 					<view class="child-service-data" v-for="(data, dataIndex) in item.data" :key="dataIndex" @click="showDetailBox(data)">
-						<view class="title">{{ data.general_name }}</view>
-						<view class="detail">
+						<view class="title" v-if="data.general_name">{{ data.general_name }}</view>
+						<view class="title align-center" v-if="data.sport_name">{{ data.sport_name }}</view>
+						<view class="detail" v-if="data.med_no">
 							<view class="detail-label">用法：</view>
 							<view class="data-item">
 								<text class="label">
@@ -44,7 +46,9 @@
 			</view>
 			<view class="child-service-item">
 				<view class="child-service-title">
-					<text class="title-text">用药记录</text>
+					<text class="title-text" v-if="planDetail.play_srv==='运动'">运动记录</text>
+					<text class="title-text" v-else>用药记录</text>
+					
 					<view class="center-action">
 						<text class="cuIcon-back operate" @click="changeDate('-')"></text>
 						<text @click="toPages('open-calendar')">
@@ -60,7 +64,7 @@
 				<view class="drug-record-timeline">
 					<view class="cu-timeline none-data" v-if="!drugRecord || drugRecord.length === 0">
 						<text class="cuIcon-warn margin-right-xs"></text>
-						未找到今日用药记录
+						未找到今日{{planDetail.play_srv}}记录
 					</view>
 					<view class="cu-timeline" v-for="item in drugRecord" :key="item.date">
 						<view class="cu-item">
@@ -71,7 +75,7 @@
 									<!-- 		<view class="info" v-if="isArray(record.drugList)">
 										缺少：{{record.drugList.filter(item=>!item.hasTook).map(item=>item.general_name).toString()}}
 									</view> -->
-									<view class="info" v-if="isArray(record.drugList)">已服用：{{ getDegree(record.drugList, 'degree') }}</view>
+									<view class="info" v-if="isArray(record.drugList)">已完成：{{ getDegree(record.drugList, 'degree') }}</view>
 									<view class="progress bg-blue" :style="{ width: getDegree(record.drugList).width }" v-if="getDegree(record.drugList) && getDegree(record.drugList).width"></view>
 									<view class="delete-bar" @click="deleteRecord(record)"><text class="cuIcon-delete"></text></view>
 								</view>
@@ -167,7 +171,7 @@ export default {
 			childServiceData: [],
 			type: 'detail',
 			appName: 'health',
-			serviceName: 'srvhealth_drug_schedule_select',
+			serviceName: 'srvhealth_plan_schedule_select',
 			login_user_info: uni.getStorageSync('login_user_info'),
 			drugDetail: {}, // 药品详情
 			drugInfo: {
@@ -287,8 +291,8 @@ export default {
 				content: '删除此条记录?',
 				success(res) {
 					if (res.confirm) {
-						let url = self.getServiceUrl('health', 'srvhealth_drug_schedule_record_delete', 'operate');
-						let req = [{ serviceName: 'srvhealth_drug_schedule_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+						let url = self.getServiceUrl('health', 'srvhealth_plan_schedule_record_delete', 'operate');
+						let req = [{ serviceName: 'srvhealth_plan_schedule_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
 						self.$http.post(url, req).then(res => {
 							if (res.data.state === 'SUCCESS') {
 								self.deleteRecordDetail(e.dsr_no);
@@ -341,11 +345,11 @@ export default {
 			let fieldsCond = [{ column: 'ds_no', condition: [{ colName: 'person_no', ruleType: 'eq', value: this.planDetail.person_no }] }];
 			let url = '';
 			switch (type) {
-				case 'detail':
+				case 'addPlan':
 					fieldsCond = [{ column: 'ds_no', value: this.planNo, display: false }];
-					url = '../DrugSelect/DrugSelect?ds_no=' + this.planNo;
+					url = '../DrugSelect/DrugSelect?ds_no=' + this.planNo + '&type=' + this.planDetail.play_srv;
 					break;
-				case 'scan':
+				case 'scanDrug':
 					let self = this;
 					// #ifdef H5
 					uni.showToast({
@@ -375,9 +379,12 @@ export default {
 
 					break;
 				case 'record':
-					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_drug_schedule_record_add&type=add&cond=${encodeURIComponent(JSON.stringify(condition))}&ds_no=${
+					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_plan_schedule_record_add&pb_no=${this.planDetail.owner_person_no}&type=add&cond=${encodeURIComponent(JSON.stringify(condition))}&ds_no=${
 						this.planNo
 					}`;
+					if(this.planDetail.play_srv==='运动'){
+						url+='&addType=sport'
+					}
 					break;
 				case 'open-calendar':
 					if (this.$refs.calendar) {
@@ -385,13 +392,19 @@ export default {
 					}
 					break;
 				case 'update':
-					let fieldsCond = [{ column: 'ds_no', display: false, value: this.planDetail.ds_no }, { column: 'end_date', display: false }, { column: 'person_no', display: false }];
+					let fieldsCond = [
+						{ column: 'ds_no', display: false, value: this.planDetail.ds_no },
+						{ column: 'end_date', display: false },
+						{ column: 'person_no', display: false },
+						{ column: 'create_manager_no', display: false },
+						{ column: 'owner_person_no', display: false }
+					];
 					let params = {
 						to: '/archivesPages/DrugPlan/DrugPlan', //提交后要跳转的页面
 						idCol: 'ds_no' // 跳转时携带的参数
 					};
 					uni.navigateTo({
-						url: `/publicPages/newForm/newForm?serviceName=srvhealth_drug_schedule_update&type=update&fieldsCond=${encodeURIComponent(
+						url: `/publicPages/newForm/newForm?serviceName=srvhealth_plan_schedule_update&type=update&fieldsCond=${encodeURIComponent(
 							JSON.stringify(fieldsCond)
 						)}&params=${encodeURIComponent(JSON.stringify(params))}`
 					});
@@ -454,11 +467,14 @@ export default {
 			this.drugDetailType = 'update';
 		},
 		async getFieldsV2(serviceName) {
-			let colVs = await this.getServiceV2('srvhealth_drug_schedule_select', 'detail', 'detail', 'health');
-			let defaultVal = null;
+			let colVs = await this.getServiceV2('srvhealth_plan_schedule_select', 'detail', 'detail', 'health');
+			let defaultVal = '';
+			if (this.planNo) {
+				defaultVal = await this.getPlanDetail(this.planNo);
+			}
 			this.colsV2Data = colVs;
 			if (!colVs) {
-				this.getPlanDetail(this.planNo);
+				// this.getPlanDetail(this.planNo);
 				return;
 			}
 			if (Array.isArray(colVs.child_service)) {
@@ -472,11 +488,13 @@ export default {
 					};
 					let res = await this.$http.post(url, req);
 					if (res.data.data) {
-						childServiceData.push({
-							colVs: item,
-							data: res.data.data
-						});
-						this.drugList = res.data.data;
+						if (item.service_view_name.indexOf(this.planDetail.play_srv) !== -1) {
+							childServiceData.push({
+								colVs: item,
+								data: res.data.data
+							});
+							this.drugList = res.data.data;
+						}
 					}
 				}
 				this.childServiceData = childServiceData;
@@ -497,9 +515,24 @@ export default {
 					break;
 				case 'update':
 				case 'detail':
-					defaultVal = await this.getPlanDetail(this.planNo);
 					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
-					let hideColumns = ['ds_no', 'create_time', 'create_user', 'create_user_disp', 'modify_user', 'modify_user_disp', 'modify_time', 'person_no', 'end_date'];
+					let hideColumns = [
+						'play_srv',
+						'create_manager_no',
+						'manager_user_no',
+						'owner_user_profile_url',
+						'owner_user_no',
+						'owner_person_no',
+						'ds_no',
+						'create_time',
+						'create_user',
+						'create_user_disp',
+						'modify_user',
+						'modify_user_disp',
+						'modify_time',
+						'person_no',
+						'end_date'
+					];
 					this.fields = fields.filter(item => {
 						return !hideColumns.includes(item.column);
 					});
@@ -525,9 +558,9 @@ export default {
 		},
 		async getDrugRecord(no, date) {
 			// 查找此用药计划的用药记录
-			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_record_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_plan_schedule_record_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_drug_schedule_record_select',
+				serviceName: 'srvhealth_plan_schedule_record_select',
 				colNames: ['*'],
 				order: [{ colName: 'take_date', orderType: 'desc' }],
 				condition: [{ colName: 'ds_no', ruleType: 'eq', value: no }]
@@ -646,9 +679,9 @@ export default {
 		},
 		async getPlanDetail(no) {
 			// 查找此用药计划的详细信息
-			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_plan_schedule_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_drug_schedule_select',
+				serviceName: 'srvhealth_plan_schedule_select',
 				colNames: ['*'],
 				condition: [{ colName: 'ds_no', ruleType: 'eq', value: no }],
 				page: { pageNo: 1, rownumber: 10 }
@@ -711,7 +744,7 @@ export default {
 		box-shadow: 0px 1px 4px 0px #4e87c6, 0px 5px 2px 0px #b3d8ff;
 		// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		border-radius: 20rpx;
-		min-height: 160rpx;
+		min-height: 220rpx;
 		.table-item {
 			display: flex;
 			padding: 10rpx 20rpx;
@@ -772,6 +805,7 @@ export default {
 	.timeline-content {
 		background-color: #fff;
 		display: flex;
+		flex-wrap: wrap;
 		// flex-direction: column;
 		// box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12);
 		.timeline-item {
@@ -952,6 +986,9 @@ export default {
 					// text-align: center;
 					font-weight: 700;
 					padding: 0 10rpx;
+					&.align-center{
+						text-align: center;
+					}
 				}
 				.detail {
 					display: flex;

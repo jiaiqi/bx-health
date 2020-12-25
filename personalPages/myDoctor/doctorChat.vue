@@ -1,6 +1,6 @@
 <template>
 	<view class="doctor-wrap">
-		<person-chat :customer_no="no" ref="chat" :doctor_no="doctor_no" pageType="patient"></person-chat>
+		<person-chat :customer_no="no" ref="chat" :doctor_no="doctor_no" :pageType="pageType"></person-chat>
 	</view>
 </template>
 
@@ -14,7 +14,8 @@
 		data() {
 			return {
 				no:"",
-				doctor_no:""
+				doctor_no:{},
+				pageType:'patient',
 			}
 		},
 		onLoad(option) {
@@ -23,7 +24,10 @@
 			}
 			if(option.doctor){
 				this.doctor_no = JSON.parse(decodeURIComponent(option.doctor)) 
+			}else{
+				this.pageType = ""
 			}
+			
 		},
 		onPullDownRefresh() {
 			// 下拉

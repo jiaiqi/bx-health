@@ -75,7 +75,7 @@
 						</view>
 						<view class="textbox">
 							<view class="title-food">{{ food[searchArg.wordKey.title] }}</view>
-							<view v-if="searchArg.serviceName === 'srvhealth_patient_doctor_select'" class="content-right">
+							<view v-if="searchArg.serviceName === 'srvhealth_person_relation_select'" class="content-right">
 								<text v-if="food.message_num" style="z-index: 1;">{{food.message_num>99?'99+':food.message_num}}</text>
 								<image src="/static/chat.png" mode=""></image>
 							</view>
@@ -588,7 +588,7 @@ export default {
 				return res.data.data[0]
 			}
 		},
-		async getFoodsList(order = null, cond = null, type = null, serviceName = null) {
+		async getFoodsList(order = null, cond = null, type = null, serviceName = null) {			
 			let self = this;
 			let url = this.getServiceUrl('health', serviceName ? serviceName : this.searchArg.serviceName, 'select');
 			let req = {
@@ -676,13 +676,13 @@ export default {
 						self.$set(data[i], 'imgurl', url);
 					}
 				}
-				if(this.searchArg.serviceName === 'srvhealth_patient_doctor_select'){
-					this.foodList.forEach(mes=>{
-						this.getUserInfo(mes.customer_no).then(no=>{
+				if(self.searchArg.serviceName === 'srvhealth_person_relation_select'){
+					self.foodList.forEach(mes=>{
+						self.getUserInfo(mes.userb_person_no).then(no=>{
 							console.log('no-----',no)
 							if(no){
-								this.getMessageInfo(no.userno).then(a=>{
-									this.$set(mes,'message_num',a)
+								self.getMessageInfo(no.userno).then(a=>{
+									self.$set(mes,'message_num',a)
 								})
 							}
 						})

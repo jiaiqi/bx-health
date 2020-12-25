@@ -6,17 +6,16 @@
 		</view>
 		<view class="docter-list">
 			<view class="doctor-item" v-for="item in doctorList" :key="item.id">
-				<view class="profile"><image class="image" :src="getPicPath(item.dt_pic) ? getPicPath(item.dt_pic) : getPicPath(item.dt_profile_url)" mode="aspectFill"></image></view>
+				<view class="profile"><image class="image" :src="item.usera_image? getImagePath(item.usera_image): item.usera_profile_url? getImagePath(item.usera_profile_url) : '../../static/none.png'" mode="aspectFill"></image></view>
 				<view class="content">
 					<view class="content-left">
-						<text class="doctor-name">{{ item.dt_name }}</text>
+						<text class="doctor-name">{{ item.usera_name }}</text>
 					</view>
 					<view @click="toChatPage(item)" class="content-right">
 						<text v-if="item.count_num" style="z-index: 1;">{{ item.count_num }}</text>
 						<image src="../static/chat.png" mode=""></image>
 					</view>
 				</view>
-				<!-- <view class="content"><text class="hospital-address">xx市xx区xx路xx医院</text></view> -->
 			</view>
 		</view>
 	</view>
@@ -32,6 +31,11 @@ export default {
 			doctorList: [],
 		};
 	},
+	mounted() {
+		uni.$on('updateSuccess',()=>{
+			this.getBindDoctor();
+		})
+	},
 	methods: {
 		getPicPath(no) {
 			if (no) {
@@ -40,23 +44,29 @@ export default {
 		},
 		async getBindDoctor() {
 			// 查找医生信息
-			let url = this.getServiceUrl('health', 'srvhealth_patient_doctor_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_person_relation_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_patient_doctor_select',
+				serviceName: 'srvhealth_person_relation_select',
 				colNames: ['*'],
-				condition: [{ colName: 'customer_no', ruleType: 'like', value: this.userInfo.no }],
+				condition: [{ colName: 'userb_person_no', ruleType: 'like', value: this.userInfo.no }],
 				page: { pageNo: 1, rownumber: 10 },
 				order: []
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				// this.doctorList = res.data.data;
-				let noList = res.data.data.map(item => item.manager_no);
+				this.doctorList = res.data.data;
+				let noList = res.data.data.map(item => item.usera_no);
 				let noStr = noList.toString();
-				let doctorList = await this.getDoctorInfo(noStr, true);
-				if (Array.isArray(doctorList)) {
-					this.doctorList = doctorList;
-				}
+				let count_num = 0
+				this.doctorList.forEach(item => {
+					this.getDoctorRecod(item).then(length => {
+						count_num += length
+						this.count_num = count_num
+						this.$set(item, 'count_num', length);						
+						console.log("-----------------length---",length)
+					});
+				});
 			}
 		},
 		/*点击前往聊天页面**/
@@ -97,7 +107,7 @@ export default {
 					{
 						colName: 'sender_account',
 						ruleType: 'eq',
-						value: userNo
+						value: userNo.usera_no
 					},
 					{
 						colName: 'receiver_account',
@@ -108,6 +118,11 @@ export default {
 						colName: 'msg_state',
 						ruleType: 'eq',
 						value: '未读'
+					},
+					{
+						colName: 'identity',
+						ruleType: 'eq',
+						value: '医生'
 					}
 				],
 				order: [
@@ -189,6 +204,7 @@ export default {
 				});
 			}
 		},
+		
 		async getDoctorInfo(no, isSelf) {
 			// 查找医生信息
 			let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
@@ -202,16 +218,7 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				if (isSelf === true) {
 					this.doctorList = res.data.data;
-					let count_num = 0
-					this.doctorList.forEach(item => {
-						this.getDoctorRecod(item.owner_account).then(length => {
-							count_num += length
-							this.count_num = count_num
-							this.$set(item, 'count_num', length);
 							
-							// console.log("-----------------length---",length)
-						});
-					});
 				}
 				return res.data.data[0];
 			} else {
@@ -245,9 +252,9 @@ export default {
 			});
 		}
 	},
-	onShow() {
-		this.getBindDoctor();
-	},
+	// onShow() {
+	// 	this.getBindDoctor();
+	// },
 	onReachBottom() {
 		// 下拉到底部
 		console.log('下拉到底部');

@@ -32,7 +32,7 @@
 			<view class="value">{{ drugInfos.general_name }}</view>
 			<image class="icon" src="../../static/icon/drug.png" mode="aspectFit"></image>
 		</view>
-		<view class="detail-item" v-if="drugInfos">
+		<view class="detail-item" v-if="drugInfos && drugInfos.med_no">
 			<view class="label">用量单位:</view>
 			<view class="value">
 				<bx-radio-group class="form-item-content_value radio-group" v-model="drugInfos.dosage_unit" mode="button">
@@ -40,7 +40,7 @@
 				</bx-radio-group>
 			</view>
 		</view>
-		<view class="detail-item" v-if="drugInfos">
+		<view class="detail-item" v-if="drugInfos && drugInfos.med_no">
 			<view class="label">每次用量:</view>
 			<view class="value input">
 				<text class="operate shadow-blur" :class="{ disabled: drugInfos.dosage_each_time - 1 < 0 }" @click="changeAmount(-1)" @longpress="longChange(-1)" @touchend="longChangeEnd">
@@ -51,17 +51,64 @@
 				</text>
 				<input class="input" type="text" v-model="drugInfos.dosage_each_time" />
 				<text class="operate" :class="{ disabled: drugInfos.dosage_each_time + 0.5 < 0 }" @click="changeAmount(0.5)" @longpress="longChange(0.5)" @touchend="longChangeEnd">
-					+ 0.5
+					+0.5
 				</text>
 				<text class="operate" :class="{ disabled: drugInfos.dosage_each_time + 1 < 0 }" @click="changeAmount(1)" @longpress="longChange(1)" @touchend="longChangeEnd">+ 1</text>
 			</view>
 		</view>
-		<view class="detail-item" v-if="drugInfos">
+		<view class="detail-item" v-if="drugInfos && drugInfos.med_no">
 			<view class="label">每天服用次数:</view>
 			<view class="value">
 				<bx-radio-group class="form-item-content_value radio-group" v-model="drugInfos.take_times" mode="button">
 					<bx-radio v-for="item in times" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
 				</bx-radio-group>
+			</view>
+		</view>
+		<!-- 		<view class="detail-item" v-if="drugInfos && drugInfos.sport_no">
+			<view class="label">每天服用次数:</view>
+			<view class="value">
+				<bx-radio-group class="form-item-content_value radio-group" v-model="drugInfos.take_times" mode="button">
+					<bx-radio v-for="item in times" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
+				</bx-radio-group>
+			</view>
+		</view> -->
+		<view class="detail-item item-title" v-if="drugDetail && (drugDetail.sport_no || drugInfos.sport_no)">
+			<view class="label">运动名称:</view>
+			<view class="value">{{ drugDetail.name || drugInfos.sport_name }}</view>
+		</view>
+
+		<view class="detail-item item-title" v-if="drugDetail && (drugDetail.sport_no || drugInfos.sport_no)">
+			<view class="label">单位:</view>
+			<view class="value">{{ drugDetail.unit || drugInfos.unit }}</view>
+		</view>
+
+		<view class="detail-item item-title" v-if="drugDetail && drugDetail.sport_no">
+			<view class="label">单位消耗热量:</view>
+			<view class="value">{{ drugDetail.unit_energy }}千卡</view>
+		</view>
+
+		<view class="detail-item item-title" v-if="drugInfos && (drugDetail.sport_no || drugInfos.sport_no)">
+			<view class="label">每次运动量:</view>
+			<view class="value input">
+				<text class="operate shadow-blur" :class="{ disabled: drugInfos.amount_each_time - 1 < 0 }" @click="changeAmount(-1)" @longpress="longChange(-1)" @touchend="longChangeEnd">
+					- 1
+				</text>
+				<text class="operate" :class="{ disabled: drugInfos.amount_each_time - 0.1 < 0 }" @click="changeAmount(-0.1)" @longpress="longChange(-0.1)" @touchend="longChangeEnd">
+					- 0.1
+				</text>
+				<input class="input" type="text" v-model="drugInfos.amount_each_time" />
+				<text class="operate" :class="{ disabled: drugInfos.amount_each_time + 0.1 < 0 }" @click="changeAmount(0.1)" @longpress="longChange(0.1)" @touchend="longChangeEnd">
+					+0.1
+				</text>
+				<text class="operate" :class="{ disabled: drugInfos.amount_each_time + 1 < 0 }" @click="changeAmount(1)" @longpress="longChange(1)" @touchend="longChangeEnd">+ 1</text>
+			</view>
+		</view>
+		<view class="detail-item column" v-if="drugInfos && (drugDetail.sport_no || drugInfos.sport_no)">
+			<view class="label">请选择每周安排:</view>
+			<view class="value">
+				<bx-checkbox-group v-model="drugInfos.take_times_each_week" mode="button">
+					<bx-checkbox v-model="item.checked" v-for="item in weekDate" :name="item.value">{{ item.label }}</bx-checkbox>
+				</bx-checkbox-group>
 			</view>
 		</view>
 		<view class="detail-item column" v-if="drugInfos">
@@ -76,7 +123,7 @@
 			<view class="button cu-btn gray" @click="hideModal">取消</view>
 			<view class="button cu-btn bg-cyan" @click="addDrugItem(drugDetail)">确定</view>
 		</view>
-		<view class="delete-icon" v-if="drugInfo && drugInfo.id" @click="deleteDrugItem"><text class=" cuIcon-delete"></text></view>
+		<view class="delete-icon" v-if="drugInfo && drugInfo.id" @click="deleteDrugItem"><text class="cuIcon-delete"></text></view>
 	</view>
 </template>
 
@@ -100,6 +147,11 @@ export default {
 	data() {
 		return {
 			drugInfos: {
+				energy: '', // 消耗热量
+				sport_no: '', //运动项目编号
+				unit: '', // 运动项目单位
+				amount_each_time: 1, //每次运动数量
+				take_times_each_week: '', //每周安排
 				dosage_unit: '片',
 				take_times: '3',
 				dosage_each_time: 1, //每次用量
@@ -201,6 +253,43 @@ export default {
 					value: '毫升'
 				}
 			],
+			weekDate: [
+				{
+					label: '周一',
+					value: '周一',
+					checked: false
+				},
+				{
+					label: '周二',
+					value: '周二',
+					checked: false
+				},
+				{
+					label: '周三',
+					value: '周三',
+					checked: false
+				},
+				{
+					label: '周四',
+					value: '周四',
+					checked: false
+				},
+				{
+					label: '周五',
+					value: '周五',
+					checked: false
+				},
+				{
+					label: '周六',
+					value: '周六',
+					checked: false
+				},
+				{
+					label: '周日',
+					value: '周日',
+					checked: false
+				}
+			],
 			times: [
 				{
 					label: '1次',
@@ -218,28 +307,38 @@ export default {
 		};
 	},
 	watch: {
-		drugInfo:{
-			deep:true,
+		drugInfo: {
+			deep: true,
 			handler(newValue, oldValue) {
 				if (newValue && newValue.id) {
 					this.drugInfos = this.drugInfo;
-					if (this.drugInfos.remind_time&&typeof this.drugInfos.remind_time==='string') {
+					if (this.drugInfos.remind_time && typeof this.drugInfos.remind_time === 'string') {
 						this.drugInfos.remind_time = this.drugInfos.remind_time.split(',');
-						this.selectorData = this.selectorData.map(item => {
-							if (this.drugInfos.remind_time.indexOf(item.value) !== -1) {
+					}
+					if (newValue.sport_no) {
+						if (this.drugInfos.take_times_each_week && typeof this.drugInfos.take_times_each_week === 'string') {
+							this.drugInfos.take_times_each_week = this.drugInfos.take_times_each_week.split(',');
+						}
+						this.weekDate = this.weekDate.map(item => {
+							if (this.drugInfos.take_times_each_week.indexOf(item.value) !== -1) {
 								item.checked = true;
-							}else{
-								item.checked = false
+							} else {
+								item.checked = false;
 							}
 							return item;
 						});
 					}
+					this.selectorData = this.selectorData.map(item => {
+						if (this.drugInfos.remind_time.indexOf(item.value) !== -1) {
+							item.checked = true;
+						} else {
+							item.checked = false;
+						}
+						return item;
+					});
 				}
 			}
 		}
-	},
-	created() {
-	
 	},
 	methods: {
 		deleteDrugItem() {
@@ -279,10 +378,17 @@ export default {
 		},
 		changeAmount(num) {
 			let amount = Number(this.drugInfos.dosage_each_time);
+			if (this.drugDetail.sport_no) {
+				amount = this.drugInfos.amount_each_time;
+			}
 			if (amount + num >= 0) {
 				amount += num;
 			}
-			this.drugInfos.dosage_each_time = Number(amount.toFixed(1));
+			if (this.drugDetail.sport_no) {
+				this.drugInfos.amount_each_time = Number(amount.toFixed(1));
+			} else {
+				this.drugInfos.dosage_each_time = Number(amount.toFixed(1));
+			}
 		},
 		async addDrugItem() {
 			let detail = this.drugDetail;
@@ -310,11 +416,28 @@ export default {
 						]
 					}
 				];
+				if (this.drugDetail.sport_no) {
+					url = this.getServiceUrl('health', 'srvhealth_plan_schedule_sports_detail_add', 'operate');
+					req[0] = {
+						serviceName: 'srvhealth_plan_schedule_sports_detail_add',
+						data: [
+							{
+								sport_no: detail.sport_no,
+								sport_name: detail.name,
+								unit: detail.unit, //运动单位
+								amount_each_time: info.amount_each_time, //每次数量
+								take_times_each_week: info.take_times_each_week.toString(), //每周安排
+								remind_time: info.remind_time.toString(), //提醒时间
+								ds_no: this.planNo
+							}
+						]
+					};
+				}
 			} else if (this.type === 'update' && this.drugInfo.id) {
-				url = this.getServiceUrl('health', 'srvhealth_drug_schedule_detail_list_update', 'operate');
+				url = this.getServiceUrl('health', 'srvhealth_plan_schedule_sports_detail_update', 'operate');
 				req = [
 					{
-						serviceName: 'srvhealth_drug_schedule_detail_list_update',
+						serviceName: 'srvhealth_plan_schedule_sports_detail_update',
 						condition: [{ colName: 'id', ruleType: 'eq', value: this.drugInfo.id }],
 						data: [
 							{
@@ -326,22 +449,34 @@ export default {
 						]
 					}
 				];
+				if (this.drugInfo.sport_no) {
+					url = this.getServiceUrl('health', 'srvhealth_plan_schedule_sports_detail_update', 'operate');
+					serviceName: 'srvhealth_plan_schedule_sports_detail_update';
+					req[0] = {
+						data: [
+							{
+								unit: detail.unit, //运动单位
+								amount_each_time: info.amount_each_time, //
+								take_times_each_week: info.take_times_each_week.toString(), // 每周安排
+								remind_time: info.remind_time.toString() //提醒时间
+							}
+						]
+					};
+				}
 			}
 			this.$http.post(url, req).then(res => {
 				if (res.data.state === 'SUCCESS') {
 					if (this.type === 'add')
-						[
-							uni.showModal({
-								title: '提示',
-								content: '添加成功',
-								showCancel: false,
-								success(res) {
-									if (res.confirm) {
-										uni.navigateBack();
-									}
+						uni.showModal({
+							title: '提示',
+							content: '添加成功',
+							showCancel: false,
+							success(res) {
+								if (res.confirm) {
+									uni.navigateBack();
 								}
-							})
-						];
+							}
+						});
 					this.$emit('updateSuccess');
 				} else {
 					uni.showToast({
@@ -431,15 +566,15 @@ export default {
 					display: inline-block;
 					width: 100rpx;
 					margin-right: 10rpx;
+					border-bottom: 1rpx solid #ccc;
 				}
 				.operate {
 					display: inline-block;
 					color: #fff;
 					background-color: rgba(11, 201, 157, 0.7);
-					// background-color: #bababa;
 					width: 100rpx;
-					height: 80rpx;
-					line-height: 80rpx;
+					height: 50rpx;
+					line-height: 50rpx;
 					margin-right: 10rpx;
 					border-radius: 30rpx;
 					transition: all 0.5s;

@@ -252,7 +252,7 @@ export default {
 				}
 			];
 			uni.navigateTo({
-				url: `/publicPages/newForm/newForm?type=update&serviceName=srvhealth_restaurant_mgmt_select&fieldsCond=${JSON.stringify(fieldsCond)}`
+				url: `/publicPages/newForm/newForm?type=update&serviceName=srvhealth_store_mgmt_select&fieldsCond=${JSON.stringify(fieldsCond)}`
 			});
 		},
 		/*删除**/
@@ -314,19 +314,23 @@ export default {
 		},
 		/*跳转至商铺详情*/
 		toShopDetail(item) {
-			console.log('---------');
+			console.log('---------',item);
 			uni.navigateTo({
-				url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.restaurant_no
+				url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.row_no
 			});
 		},
 		/* 获取商户列表**/
 		async getShopList(type = null, search_val) {
 			let self = this;
-			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_restaurant_mgmt_select',
+				serviceName: 'srvhealth_store_mgmt_select',
 				colNames: ['*'],
-				condition: [],
+				condition: [{
+					colName:"type",
+					ruleType:'eq',
+					value:'饭馆'
+				}],
 				order: [],
 				page: self.pageInfo
 			};
@@ -377,15 +381,20 @@ export default {
 		/* 获取当前登录人得商铺**/
 		async getMyShopList(type = null, search_val) {
 			let self = this;
-			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_restaurant_mgmt_select',
+				serviceName: 'srvhealth_store_mgmt_select',
 				colNames: ['*'],
 				condition: [
 					{
 						colName: 'create_user',
 						ruleType: 'eq',
 						value: uni.getStorageSync('login_user_info').user_no
+					},
+					{
+						colName: 'type',
+						ruleType: 'eq',
+						value: '饭馆'
 					}
 				],
 				order: [],

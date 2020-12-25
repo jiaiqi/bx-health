@@ -155,19 +155,28 @@ export default {
 		},
 		async getBindDoctor() {
 			// 查找医生信息
-			let url = this.getServiceUrl('health', 'srvhealth_patient_doctor_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_person_relation_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_patient_doctor_select',
+				serviceName: 'srvhealth_person_relation_select',
 				colNames: ['*'],
-				condition: [{ colName: 'customer_no', ruleType: 'like', value: this.userInfo.no }],
+				condition: [{ colName: 'userb_person_no', ruleType: 'like', value: this.userInfo.no }],
+				page: { pageNo: 1, rownumber: 10 },
 				order: []
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				// this.doctorList = res.data.data;
-				let noList = res.data.data.map(item => item.manager_no);
+				this.doctorList = res.data.data;
+				let noList = res.data.data.map(item => item.usera_no);
 				let noStr = noList.toString();
-				let doctorList = await this.getDoctorInfoMessage(noStr, true);
+				let count_num = 0
+				// this.doctorList.forEach(item => {
+					this.getDoctorRecod(noStr, '医生').then(length => {
+						count_num += length;
+						this.doctor_message = count_num;
+						console.log('-----------------length---', count_num);
+					});
+				// });
 			}
 		},
 		async getUserDoctorInfo(customer_no) {
@@ -186,32 +195,21 @@ export default {
 		},
 		async getBindhzDoctor(no) {
 			// 查询患者信息
-			let url = this.getServiceUrl('health', 'srvhealth_patient_doctor_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_person_relation_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_patient_doctor_select',
+				serviceName: 'srvhealth_person_relation_select',
 				colNames: ['*'],
-				condition: [{ colName: 'manager_no', ruleType: 'like', value: no }],
+				condition: [{ colName: 'usera_person_no', ruleType: 'like', value: this.userInfo.no }],
 				order: []
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				// this.doctorList = res.data.data;
-				let arr = [];
-				res.data.data.forEach(items => {
-					this.getUserDoctorInfo(items.customer_no)
-						.then(r => {
-							if (r && r.userno) {
-								arr.push(r.userno);
-							}
-						})
-						.then(_ => {
-							let noStr = arr.toString();
-							// let doctorList = await this.getDoctorRecod(noStr)
-							this.getDoctorRecod(noStr, '患者').then(l => {
-								console.log('l------------>', l);
-								this.hzMessage = l;
-							});
-						});
+				let arr =res.data.data.map(items =>items.userb_no).toString()
+				
+				this.getDoctorRecod(arr, '患者').then(l => {
+					console.log('l------------>', l);
+					this.hzMessage = l;
 				});
 				// let noList = res.data.data.map(item => item.customer_name);
 
@@ -253,7 +251,7 @@ export default {
 					break;
 				case 'userList':
 					this.getDoctorInfo().then(res => {
-						if (res && res.dt_no) {
+						if (res) {
 							this.$store.commit('SET_DOCTOR_INFO', res);
 							uni.navigateTo({
 								url: '/personalPages/userList/userList'
@@ -336,16 +334,16 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				if (isSelf === true) {
 					this.doctorList = res.data.data;
-					let arr = res.data.data.map(item => {
-						return item.owner_account;
-					});
-					let str = arr.join(',');
-					let count_num = 0;
-					this.getDoctorRecod(str, '医生').then(length => {
-						count_num += length;
-						this.doctor_message = count_num;
-						console.log('-----------------length---', count_num);
-					});
+					// let arr = res.data.data.map(item => {
+					// 	return item.owner_account;
+					// });
+					// let str = arr.join(',');
+					// let count_num = 0;
+					// this.getDoctorRecod(str, '医生').then(length => {
+					// 	count_num += length;
+					// 	this.doctor_message = count_num;
+					// 	console.log('-----------------length---', count_num);
+					// });
 				}
 				return res.data.data[0];
 			} else {
@@ -354,11 +352,11 @@ export default {
 		},
 		async getDoctorInfo() {
 			// 查找医生信息
-			let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_person_relation_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_doctor_select',
+				serviceName: 'srvhealth_person_relation_select',
 				colNames: ['*'],
-				condition: [{ colName: 'owner_account', ruleType: 'like', value: this.wxuserinfo.user_no ? this.wxuserinfo.user_no : this.vuex_userInfo.userno }]
+				condition: [{ colName: 'usera_person_no', ruleType: 'like', value: this.userInfo.no }]
 			};
 			if (req.condition[0].value) {
 				let res = await this.$http.post(url, req);

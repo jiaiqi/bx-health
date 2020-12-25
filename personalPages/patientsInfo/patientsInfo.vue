@@ -5,8 +5,8 @@
 			<block slot="content">患者信息</block>
 		</cu-custom>
 		<patients-info :customer_no="customer_no" :dp_no="dp_no" v-if="current_tab == 0"></patients-info>
-		<person-chat ref="chat" :customer_no="customer_no" v-if="current_tab == 1"></person-chat>
-		<view class="health-bottom">
+		<!-- <person-chat ref="chat" :customer_no="customer_no" v-if="current_tab == 1"></person-chat> -->
+		<!-- <view class="health-bottom">
 			<view @click="changeTab(index)" v-for="(item,index) in bottom_tab_data" :key="index" class="info-bottom-tab" :class="current_tab==index?'active-text':''">
 				<view class="info-bottom-tab-top">
 					<image style="width: 70rpx;" v-show="current_tab!=index && item.name==='交流'" src="../static/chats.png" mode=""></image>
@@ -20,7 +20,7 @@
 					<text>{{item.name}}</text>
 				</view>
 			</view>
-		</view>
+		</view> -->
 	</view>
 </template>
 

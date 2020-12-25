@@ -3,17 +3,30 @@
 		<view class="search-bar cu-bar search bg-white">
 			<view class="search-form round">
 				<text class="cuIcon-search"></text>
-				<input @confirm="searchVal" :adjust-position="false" type="text" placeholder="搜索药品" confirm-type="search" v-model="keywords" />
+				<input @confirm="searchVal" :adjust-position="false" type="text" :placeholder="`搜索${dataType}名称`" confirm-type="search" v-model="keywords" />
 			</view>
 			<view class="action"><button class="cu-btn bg-blue shadow-blur round">搜索</button></view>
 		</view>
 		<view class="drug-list">
-			<view class="drug-item" v-for="item in drugList" @click="toAdd(item)">{{ item.medicine_name }}</view>
+			<view class="drug-item" v-for="item in drugList" @click="toAdd(item)">
+				<text v-if="dataType === '用药'">{{ item.medicine_name }}</text>
+				<text v-if="dataType === '运动'">{{ item.name }}</text>
+			</view>
 		</view>
 		<uni-load-more :status="more"></uni-load-more>
 		<view class="cu-modal" :class="{ show: showModal }">
 			<view class="cu-dialog">
-				<drug-info :planNo="ds_no" type="add"  :drugDetail="drugDetail" @hideModal="hideModal" @addSuccess="addSuccess"></drug-info>
+				<drug-info :planNo="ds_no" type="add" :drugDetail="drugDetail" @hideModal="hideModal" @addSuccess="addSuccess"></drug-info>
+				<!-- 		<view class="sport-info" v-if="drugDetail.sport_no">
+					<view class="info-item">
+						<view class="label">
+						 名称：
+						</view>
+						<view class="value">
+							{{drugDetail.name}}
+						</view>
+					</view>
+				</view> -->
 			</view>
 		</view>
 	</view>
@@ -36,7 +49,8 @@ export default {
 			},
 			ds_no: '',
 			more: 'more', //more,loading,noMore
-			drugDetail: {}
+			drugDetail: {},
+			dataType: ''
 		};
 	},
 	watch: {
@@ -47,27 +61,32 @@ export default {
 	onLoad(option) {
 		if (option.ds_no) {
 			this.ds_no = option.ds_no;
+			if (option.type) {
+				this.dataType = option.type;
+			}
 			uni.startPullDownRefresh();
 		} else {
 			uni.navigateBack();
 		}
 	},
 	methods: {
-		addSuccess(){
-			this.hideModal()
-			uni.navigateBack()
+		addSuccess() {
+			this.hideModal();
+			uni.navigateBack();
 		},
 		hideModal() {
 			this.showModal = false;
 		},
 		toAdd(e) {
 			let ds_no = this.ds_no;
+			this.showModal = true;
+			this.drugDetail = this.deepClone(e);
 			if (e.medicine_name) {
-				this.showModal = true;
-				e.take_times = 3; //每天次数
+				e.take_times = 3; //每天次数55
 				e.dosage_each_time = 1; // 每次用量
 				e.dosage_unit = '片'; // 用量单位
-				this.drugDetail = this.deepClone(e);
+			} else if (e.sport_no) {
+				// debugger
 			}
 		},
 		searchVal(e) {
@@ -75,34 +94,56 @@ export default {
 			this.getDrugList('', this.keywords);
 		},
 		async getDrugList(isMore, val) {
-			let url = this.getServiceUrl('health', 'srvhealth_medicine_info_select', 'select');
+			let serviceName = 'srvhealth_medicine_info_select';
+			if (this.dataType === '运动') {
+				serviceName = 'srvhealth_body_activity_contents_select';
+			}
+			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
-				serviceName: 'srvhealth_medicine_info_select',
+				serviceName: serviceName,
 				colNames: ['*'],
 				page: { pageNo: this.page.pageNo, rownumber: this.page.rownumber }
 			};
 			if (val) {
-				req.relation_condition = {
-					relation: 'OR',
-					data: [
-						{
-							colName: 'medicine_goods_name',
-							value: val,
-							ruleType: 'like'
-						},
-						{
-							colName: 'medicine_instruction',
-							value: val,
-							ruleType: 'like'
-						},
+				if (this.dataType === '用药') {
+					req.relation_condition = {
+						relation: 'OR',
+						data: [
+							{
+								colName: 'medicine_goods_name',
+								value: val,
+								ruleType: 'like'
+							},
+							{
+								colName: 'medicine_instruction',
+								value: val,
+								ruleType: 'like'
+							},
 
-						{
-							colName: 'medicine_name',
-							value: val,
-							ruleType: 'like'
-						}
-					]
-				};
+							{
+								colName: 'medicine_name',
+								value: val,
+								ruleType: 'like'
+							}
+						]
+					};
+				} else if (this.dataType === '运动') {
+					req.relation_condition = {
+						relation: 'OR',
+						data: [
+							{
+								colName: 'classify',
+								value: val,
+								ruleType: 'like'
+							},
+							{
+								colName: 'name',
+								value: val,
+								ruleType: 'like'
+							}
+						]
+					};
+				}
 			}
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data)) {
@@ -151,8 +192,14 @@ export default {
 .drug-select {
 	background-color: #fff;
 }
-.cu-modal{
+.cu-modal {
 	z-index: 800;
+	.sport-info {
+		padding: 20rpx;
+		.info-item {
+			display: flex;
+		}
+	}
 }
 .drug-list {
 	/* #ifdef H5 */

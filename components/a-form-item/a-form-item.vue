@@ -674,12 +674,10 @@ export default {
 		openModal(type) {
 			// 打开弹出层
 			let fieldData = this.deepClone(this.fieldData);
-			debugger
 			switch (type) {
 				case 'Set':
 					if (Array.isArray(this.fieldData.option_list_v2)) {
 						this.setOptionList = this.fieldData.option_list_v2.map(item => {
-							debugger;
 							if (this.fieldData.value && this.fieldData.value.includes(item.value)) {
 								item.checked = true;
 							}

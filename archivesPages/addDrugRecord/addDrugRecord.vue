@@ -2,19 +2,15 @@
 	<view class="form-page">
 		<view class="drug-select-box" v-if="fields && fields.length > 0">
 			<!-- 药品选择 -->
-			<view class="title">选择药物</view>
-			<view class="drug-list">
+			<view class="title" v-if="drugList && drugList.length > 0">{{ addType === 'sport' ? '选择已完成运动项目' : '选择药物' }}</view>
+			<view class="drug-list" v-if="drugList && drugList.length > 0">
 				<view class="drug-item" v-for="item in drugList" :class="{ active: item.checked }" @click="changeDrugChecked(item)">
 					<view class="title">{{ item.label }}</view>
-					<view class="check-box">
-						<text class="cuIcon-check"></text>
-					</view>
+					<view class="check-box"><text class="cuIcon-check"></text></view>
 				</view>
 			</view>
-			<!-- 			<bx-checkbox-group mode="button" v-model="checkDrugNoList">
-				<bx-checkbox v-for="item in drugList" v-model="item.checked" :key="item.id" :name="item.value">{{ item.label }}</bx-checkbox>
-			</bx-checkbox-group> -->
 		</view>
+
 		<a-form
 			ref="bxForm"
 			v-if="colsV2Data && isArray(fields)"
@@ -37,11 +33,7 @@
 </template>
 
 <script>
-// import bxform from '@/components/bx-form/bx-form.vue';
-// import bxButtons from '../components/bx-buttons/bx-buttons.vue';
-// import bxFormItem from '@/components/bx-form/bx-form-item.vue';
 export default {
-	// components: { bxform, bxFormItem },
 	props: {},
 	data() {
 		return {
@@ -88,7 +80,8 @@ export default {
 			fieldsCond: [], //treeSelector类型字段的条件
 			drugDetailItem: [],
 			drugList: [], //当前用药计划的药物列表
-			checkDrugNoList: [] //已选药物
+			checkPlanItemNoList: [] ,//已选药物
+			pb_no:''
 		};
 	},
 	computed: {
@@ -110,7 +103,8 @@ export default {
 					btn['display'] = eval(btn.disp_exps);
 				}
 				if (btn.button_name === '提交') {
-					btn.button_name = '服药';
+					// btn.button_name = '服药';
+					btn.button_name = this.addType === 'sport' ? '完成' : '服药';
 				}
 				if (btn.operate_params) {
 					let fieldData = btn.operate_params['data'];
@@ -131,6 +125,7 @@ export default {
 			return buttons;
 		}
 	},
+
 	onLoad(option) {
 		const destApp = option.destApp;
 		if (destApp) {
@@ -140,8 +135,14 @@ export default {
 			this.fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
 		}
 		if (option.cond) {
-			this.defaultCondition = JSON.parse(option.cond);
-			this.detailField[0].option_list_v2.conditions = JSON.parse(option.cond);
+			this.defaultCondition = JSON.parse(decodeURIComponent(option.cond));
+			this.detailField[0].option_list_v2.conditions = JSON.parse(decodeURIComponent(option.cond));
+		}
+		if(option.pb_no){
+			this.pb_no = option.pb_no
+		}
+		if (option.addType) {
+			this.addType = option.addType;
 		}
 		if (option.ds_no) {
 			this.ds_no = option.ds_no;
@@ -150,9 +151,6 @@ export default {
 		this.oldDetailField = this.deepClone(this.detailField);
 		if (option.params) {
 			this.params = JSON.parse(decodeURIComponent(option.params));
-		}
-		if (option.addType) {
-			this.addType = option.addType;
 		}
 
 		if (option.hasOwnProperty('params')) {
@@ -177,9 +175,14 @@ export default {
 			this.$set(e, 'checked', !e.checked);
 		},
 		getDrugItemList() {
-			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_detail_list_select', 'select');
+			let serviceName = 'srvhealth_drug_schedule_detail_list_select';
+			debugger;
+			if (this.addType === 'sport') {
+				serviceName = 'srvhealth_plan_schedule_sports_detail_select';
+			}
+			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
-				serviceName: 'srvhealth_drug_schedule_detail_list_select',
+				serviceName: serviceName,
 				colNames: ['*'],
 				page: { pageNo: 1, rownumber: 20 },
 				condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.ds_no }]
@@ -189,11 +192,14 @@ export default {
 					if (Array.isArray(res.data.data)) {
 						this.drugList = res.data.data.map(item => {
 							item.checked = true;
-							item.label = item.general_name;
+							item.label = item.general_name ? item.general_name : item.sport_name;
 							item.value = item.med_no;
 							return item;
 						});
-						this.checkDrugNoList = this.drugList.map(item => item.med_no);
+						this.checkPlanItemNoList = this.drugList.map(item => item.med_no);
+						if(this.addType=='sport'){
+							this.checkPlanItemNoList = this.drugList.map(item => item.sport_no);
+						}
 					}
 				});
 			}
@@ -259,6 +265,7 @@ export default {
 					this.fields = colVs._fieldInfo.map(field => {
 						if (field.column === 'person_no') {
 							field.display = false;
+							field.value = this.pb_no
 						}
 						if (field.label === '用药计划编码') {
 							field.label = '用药计划';
@@ -266,7 +273,7 @@ export default {
 						}
 						if (field.column === 'take_date') {
 							field.value = this.formateDate();
-							field.end = this.formateDate()
+							field.end = this.formateDate();
 						}
 						if (field.column === 'take_time') {
 							field.value = this.formateDate('', 'dateTime');
@@ -304,31 +311,19 @@ export default {
 			if (!recordInfo || !recordInfo.dsr_no) {
 				return;
 			}
+			if (this.addType === 'sport') {
+				return;
+			}
 			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_record_detail_list_add', 'operate');
 			let req = [
 				{
 					serviceName: 'srvhealth_drug_schedule_record_detail_list_add',
 					condition: [],
-					data: [
-						{
-							dsr_no: 'DSR202011271043520006',
-							ds_no: 'DS202011270940210003',
-							s_code: '86900026000308',
-							drug_reg_name: '脂芪口服液',
-							general_code: 'Z-Z01AA-Z0160',
-							general_name: '脂芪口服液',
-							take_times: '2次',
-							dosage_each_time: 15,
-							dosage_unit: '毫升',
-							med_no: ''
-						}
-					]
+					data: []
 				}
 			];
 			let checkDrugList = this.drugList.filter(item => item.checked);
-			// let checkDrugList = this.drugList.filter(item => this.checkDrugNoList.includes(item.med_no));
 			req[0].data = checkDrugList.map(item => {
-				debugger;
 				return {
 					dsr_no: recordInfo.dsr_no,
 					ds_no: item.ds_no,
@@ -336,24 +331,12 @@ export default {
 					drug_reg_name: item.drug_reg_name,
 					general_code: item.general_code,
 					general_name: item.general_name,
-					take_times: item.take_times,
+					// take_times: item.take_times,
 					dosage_each_time: item.dosage_each_time,
 					dosage_unit: item.dosage_unit
 				};
 			});
-			// req[0].data = this.drugDetailItem.map(item => {
-			// 	return {
-			// 		dsr_no: recordInfo.dsr_no,
-			// 		ds_no: item.ds_no,
-			// 		s_code: item.s_code,
-			// 		drug_reg_name: item.drug_reg_name,
-			// 		general_code: item.general_code,
-			// 		general_name: item.general_name,
-			// 		take_times: item.take_times,
-			// 		dosage_each_time: item.dosage_each_time,
-			// 		dosage_unit: item.dosage_unit
-			// 	};
-			// });
+			debugger;
 			this.$http.post(url, req);
 		},
 		async onButton(e) {
@@ -503,8 +486,8 @@ export default {
 				.title {
 					color: #0bc99d;
 				}
-				.check-box{
-					border-color:inherit;
+				.check-box {
+					border-color: inherit;
 					border-bottom: 0;
 					border-right: 0;
 					color: #0bc99d;
@@ -515,7 +498,7 @@ export default {
 					font-weight: bold;
 				}
 			}
-			.check-box{
+			.check-box {
 				position: absolute;
 				bottom: 1rpx;
 				right: 1rpx;

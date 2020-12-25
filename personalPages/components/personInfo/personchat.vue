@@ -11,10 +11,11 @@
 					class="person-chat-item"
 					:class="item.sender_account === currentUserInfo.userno ? 'person-chat-item-my' : ''"
 				>
-					<view v-if="doctor_no.owner_account ? item.sender_account === doctor_no.owner_account && item.receiver_account != item.sender_account : item.sender_account === userInfo.userno && item.receiver_account != item.sender_account" class="person-chat-item-accept">
+					<!-- <view v-if="doctor_no.id ? item.sender_account === doctor_no.userb_no && item.receiver_account != item.sender_account : item.sender_account === userInfo.userno && item.receiver_account != item.sender_account" class="person-chat-item-accept"> -->
+					<view v-if="item.sender_account != currentUserInfo.userno" class="person-chat-item-accept">
 						<view class="person-chat-item-left">
-							<image v-if="!doctor_no.owner_account" :src="userInfo.img_url ? userInfo.img_url : '/personalPages/static/doctor_default.jpg'" mode=""></image>
-							<image v-else :src="doctor_no.dt_pic ? `${apiUrl + doctor_no.dt_pic}&bx_auth_ticket=${ticket}` : '/personalPages/static/doctor_default.jpg'" mode=""></image>
+							<image :src="doctor_no.usera_image ? getImagePath(doctor_no.usera_image) : '/personalPages/static/doctor_default.jpg'" mode=""></image>
+							<!-- <image v-else :src="doctor_no.usera_image ? `${apiUrl + doctor_no.usera_image}&bx_auth_ticket=${ticket}` : '/personalPages/static/doctor_default.jpg'" mode=""></image> -->
 						</view>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
 							<image :src="item.img_url" mode=""></image>
@@ -136,7 +137,7 @@
 							</view>
 						</view>
 						<view class="person-chat-item-left">
-							<image :src="currentUserInfo.headimgurl ? currentUserInfo.headimgurl : '/personalPages/static/doctor_default.jpg'" mode=""></image>
+							<image :src="currentUserInfo.profile_url ? currentUserInfo.profile_url : '/personalPages/static/doctor_default.jpg'" mode=""></image>
 						</view>
 					</view>
 				</view>
@@ -154,7 +155,7 @@
 				<view class="text">{{ voiceIconText }}</view>
 			</view>
 		</view>
-		<view class="person-chat-bot" :class="doctor_no.owner_account ? 'person-doctor-chat-bot' : ''">
+		<view class="person-chat-bot">
 			<view class="person-chat-bot-top">
 				<view class="person-chat-left">
 					<image @click="changeVoice('keyword')" v-if="currentVoiceType === 'voice'" src="../../static/voice.png" mode=""></image>
@@ -351,13 +352,7 @@ export default {
 		/*关闭底部选择按钮**/
 		closeBottomPoup(){
 			this.$nextTick(()=>{
-				if (this.doctor_no.owner_account) {
-					// uni.setStorageSync('doctor_no', this.doctor_no);
-					this.heightStyle = 'calc(100vh - 50px);';
-				} else {
-					// uni.setStorageSync('doctor_no', '');
-					this.heightStyle = 'calc(100vh - 145px);';
-				}
+				this.heightStyle = 'calc(100vh - 50px);';				
 			})
 			this.isSendLink = false
 		},
@@ -874,24 +869,10 @@ export default {
 		openLink() {
 			this.isSendLink = !this.isSendLink;
 
-			// setTimeout(() => {
-			//    uni.pageScrollTo({scrollTop: 99999999, duration: 0});
-			// }, 50);
-			if (this.doctor_no.owner_account) {
 				this.heightStyle = 'calc(100vh - 240px)';
 				if (!this.isSendLink) {
 					this.heightStyle = 'calc(100vh - 50px)';
 				}
-			} else {
-				this.heightStyle = 'calc(100vh - 280px)';
-				if (!this.isSendLink) {
-					this.heightStyle = 'calc(100vh - 84px)';
-				}
-			}
-
-			// if(!this.isSendLink){
-			// 	this.heightStyle = 'calc(100vh - 84px)'
-			// }
 		},
 		/*切换文字或者链接**/
 		changeType(type) {
@@ -901,11 +882,7 @@ export default {
 		sendMessage() {
 			this.sendMessageInfo();
 			(this.chatText = ''), (this.isSendLink = false);
-			if (this.doctor_no.owner_account) {
 				this.heightStyle = 'calc(100vh - 50px)';
-			} else {
-				this.heightStyle = 'calc(100vh - 145px)';
-			}
 			// this.heightStyle = 'calc(100vh - 100px)'
 		},
 		changeVoice(type) {
@@ -964,7 +941,9 @@ export default {
 					data: [
 						{
 							sender_account: this.currentUserInfo.userno,
-							receiver_account: this.doctor_no.owner_account ? this.doctor_no.owner_account : this.userInfo.userno,
+							receiver_account: this.doctor_no.userb_no ? this.doctor_no.userb_no : this.userInfo.userno,
+							receiver_person_no:this.doctor_no.userb_person_no ? this.doctor_no.userb_person_no : this.userInfo.no,
+							sender_person_no: this.currentUserInfo.no,
 							msg_content_type: type,
 							identity:this.pageType?'患者':'医生'
 						}
@@ -1010,7 +989,13 @@ export default {
 					data: [
 						{
 							sender_account: this.currentUserInfo.userno,
-							receiver_account: this.doctor_no.owner_account ? this.doctor_no.owner_account : this.userInfo.userno,
+							// receiver_account: this.doctor_no.owner_account ? this.doctor_no.owner_account : this.userInfo.userno,
+							// receiver_person_no:this.doctor_no.owner_account ? this.customer_no : this.userInfo.no,
+							
+							receiver_account: this.doctor_no.usera_no ? this.doctor_no.usera_no : this.userInfo.userno,
+							receiver_person_no:this.doctor_no.usera_person_no ? this.doctor_no.usera_person_no : this.userInfo.no,
+							
+							sender_person_no: this.currentUserInfo.no,
 							msg_content_type: !this.isSendLink ? '文本' : '链接',
 							identity:this.pageType?'患者':'医生'
 						}
@@ -1066,12 +1051,12 @@ export default {
 							{
 								colName: 'sender_account',
 								ruleType: 'eq',
-								value: this.doctor_no.owner_account
+								value: this.doctor_no.usera_no
 							},
 							{
 								colName: 'receiver_account',
 								ruleType: 'eq',
-								value: this.userInfo.userno
+								value: this.currentUserInfo.userno
 							}
 						]
 					},
@@ -1081,12 +1066,12 @@ export default {
 							{
 								colName: 'sender_account',
 								ruleType: 'eq',
-								value: this.userInfo.userno
+								value: this.currentUserInfo.userno
 							},
 							{
 								colName: 'receiver_account',
 								ruleType: 'eq',
-								value: this.doctor_no.owner_account
+								value: this.doctor_no.usera_no
 							}
 						]
 					}
@@ -1232,7 +1217,12 @@ export default {
 						{
 							colName: 'sender_account',
 							ruleType: 'eq',
-							value: this.doctor_no.owner_account ? this.doctor_no.owner_account : this.userInfo.userno
+							value: this.doctor_no.id ? this.doctor_no.usera_no : this.userInfo.userno
+						},
+						{
+							colName: 'receiver_person_no',
+							ruleType: 'eq',
+							value:this.userInfo.no
 						},
 						{
 							colName: 'msg_state',
@@ -1249,7 +1239,9 @@ export default {
 			];
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				this.getMessageInfo('update');
+				this.getMessageInfo('update').then(_=>{
+					uni.$emit('updateSuccess')
+				})
 				console.log('更新成功');
 			}
 		},
@@ -1301,13 +1293,10 @@ export default {
 		}
 		setTimeout(() => {
 			this.$nextTick(() => {
-				if (this.doctor_no.owner_account) {
-					uni.setStorageSync('doctor_no', this.doctor_no);
+				// if (this.doctor_no.owner_account) {
+					// uni.setStorageSync('doctor_no', this.doctor_no);
 					this.heightStyle = 'calc(100vh - 50px);';
-				} else {
-					uni.setStorageSync('doctor_no', '');
-					this.heightStyle = 'calc(100vh - 145px);';
-				}
+				// } 				
 			});
 		}, 500);
 	},	
@@ -1653,7 +1642,7 @@ export default {
 		// background-color: #f7f7f7;
 		// box-shadow: 0px 1px 4px rgba(26, 26, 26, 0.2);
 		position: fixed;
-		bottom: 100rpx;
+		bottom: 0;
 		width: 100%;
 		// display: flex;
 		// padding: 10rpx 20rpx;

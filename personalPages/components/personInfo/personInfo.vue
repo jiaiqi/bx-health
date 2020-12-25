@@ -9,7 +9,14 @@
 				<view class="avatar-bar">
 					<image :src="avatorPath ? avatorPath : '/static/icon/wode_selected.png'" mode="aspectFit" class="avatar-iamge"></image>
 					<view class="info">
-						<text class="username">{{ userInfo.name }}</text>
+						<view class="info_top">
+							<text class="username">{{ userInfo.name }}</text>
+							<view @click="toChatPage" class="content-right">
+								<text style="z-index: 1;" v-if="unreadMessage != 0">{{ unreadMessage }}</text>
+								<image src="../../static/chat.png" mode=""></image>
+							</view>
+						</view>
+
 						<view class="other-info">
 							<view class="info-item">
 								<text class="label">性别:</text>
@@ -167,7 +174,8 @@ export default {
 			isLoad: false,
 			inspectReportRecord: [],
 			totalInspectReportRecord: [],
-			tagList: []
+			tagList: [],
+			unreadMessage: 0
 		};
 	},
 	props: {
@@ -188,9 +196,7 @@ export default {
 			}
 		},
 		avatorPath() {
-			if (this.userInfo.profile_url) {
-				return this.$api.downloadFile + this.userInfo.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-			}
+			return this.userInfo.profile_url ? this.getImagePath(this.userInfo.profile_url) : this.userInfo.user_image ? this.getImagePath(this.userInfo.user_image) : '';
 		},
 		requirement() {
 			if (this.userInfo.requirement) {
@@ -213,12 +219,55 @@ export default {
 		})
 	},
 	methods: {
+		async getMessageInfo(no) {
+			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
+			let userno = this.$store.state.user.userInfo.userno;
+			let req = {
+				serviceName: 'srvhealth_consultation_chat_record_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'sender_account',
+						ruleType: 'eq',
+						value: no
+					},
+					{
+						colName: 'receiver_account',
+						ruleType: 'eq',
+						value: userno
+					},
+					{
+						colName: 'identity',
+						ruleType: 'eq',
+						value: '患者'
+					},
+					{
+						colName: 'msg_state',
+						ruleType: 'eq',
+						value: '未读'
+					}
+				],
+				order: [
+					{
+						colName: 'create_time',
+						orderType: 'asc'
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			this.unreadMessage = res.data.data.length;
+		},
+		toChatPage() {
+			uni.navigateTo({
+				url: '/personalPages/myDoctor/doctorChat?no=' + this.customer_no
+			});
+		},
 		getTagList() {
 			let url = this.getServiceUrl('health', 'srvhealth_user_label_set_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_user_label_set_select',
 				colNames: ['*'],
-				condition: [{ colName: 'dp_no', ruleType: 'eq', value: this.dp_no}]
+				condition: [{ colName: 'dp_no', ruleType: 'eq', value: this.dp_no }]
 			};
 			this.$http.post(url, req).then(res => {
 				if (res.data.state === 'SUCCESS') {
@@ -330,7 +379,7 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.userInfo = res.data.data[0];
-				 uni.$emit('userInfos',res.data.data[0])
+				uni.$emit('userInfos', res.data.data[0]);
 				this.selectInspectionReport();
 				this.getTagList();
 				return res.data.data[0];
@@ -343,11 +392,20 @@ export default {
 		}
 	},
 	mounted() {
+		uni.$on('userInfos', e => {
+			console.log('----------', e);
+			this.getMessageInfo(e.userno);
+		});
+		uni.$on('updateSuccess', () => {
+			console.log('0000000000000');
+			this.getMessageInfo(this.userInfo.userno);
+		});
 		if (this.customer_no) {
 			this.getUserInfo(this.customer_no);
 		}
 	},
 	onLoad(option) {
+		this.getMessageInfo();
 		if (option.customer_no) {
 			this.customer_no = option.customer_no;
 		}
@@ -413,7 +471,37 @@ export default {
 					justify-content: center;
 					padding-left: 20rpx;
 					align-items: flex-start;
-					flex: 1;
+					// flex: 1;
+					.info_top {
+						display: flex;
+						align-items: center;
+						// position: relative;
+						.content-right {
+							display: flex;
+							position: relative;
+							text {
+								background: red;
+								min-width: 30rpx;
+								height: 30rpx;
+								color: #fff;
+								font-weight: 600;
+								display: flex;
+								align-items: center;
+								justify-content: center;
+								border-radius: 20rpx;
+								font-size: 24rpx;
+								padding: 0 4rpx;
+								position: absolute;
+								left: 50%;
+								top: -10rpx;
+								z-index: 1px !important;
+							}
+							image {
+								width: 50rpx;
+								height: 50rpx;
+							}
+						}
+					}
 					.username {
 						display: inline-block;
 						color: #fff;
