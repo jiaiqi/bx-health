@@ -46,9 +46,7 @@
 			</view>
 			<view class="child-service-item">
 				<view class="child-service-title">
-					<text class="title-text" v-if="planDetail.play_srv==='运动'">运动记录</text>
-					<text class="title-text" v-else>用药记录</text>
-					
+					<text class="title-text">{{ planDetail.play_srv }}记录</text>
 					<view class="center-action">
 						<text class="cuIcon-back operate" @click="changeDate('-')"></text>
 						<text @click="toPages('open-calendar')">
@@ -64,19 +62,23 @@
 				<view class="drug-record-timeline">
 					<view class="cu-timeline none-data" v-if="!drugRecord || drugRecord.length === 0">
 						<text class="cuIcon-warn margin-right-xs"></text>
-						未找到今日{{planDetail.play_srv}}记录
+						未找到今日{{ planDetail.play_srv }}记录
 					</view>
 					<view class="cu-timeline" v-for="item in drugRecord" :key="item.date">
 						<view class="cu-item">
-							<view class="cu-time" :class="{ 'text-blue': item.date === nowDate }">{{ item.date === nowDate ? `${item.date.slice(5)}(今天)` : item.date.slice(5) }}</view>
+							<view class="cu-time" :class="{ 'text-blue': item.date === nowDate }">
+								{{ item.date === nowDate ? `${item.date.slice(5)}(今天)` : item.date.slice(5) }}
+							</view>
 							<view class="timeline-content">
 								<view class="timeline-item" v-for="record in item.data" :class="{ 'bg-blue': item.date === nowDate, 'bg-gray': item.date !== nowDate }">
 									<view class="time">{{ record.take_time.slice(0, 5) }}</view>
-									<!-- 		<view class="info" v-if="isArray(record.drugList)">
-										缺少：{{record.drugList.filter(item=>!item.hasTook).map(item=>item.general_name).toString()}}
-									</view> -->
-									<view class="info" v-if="isArray(record.drugList)">已完成：{{ getDegree(record.drugList, 'degree') }}</view>
-									<view class="progress bg-blue" :style="{ width: getDegree(record.drugList).width }" v-if="getDegree(record.drugList) && getDegree(record.drugList).width"></view>
+									<view class="info" v-if="planDetail.play_srv === '运动'">{{ record.name + record.amount + record.unit }}</view>
+									<view class="info" v-if="isArray(record.drugList) && planDetail.play_srv !== '运动'">已完成：{{ getDegree(record.drugList, 'degree') }}</view>
+									<view
+										class="progress bg-blue"
+										:style="{ width: getDegree(record.drugList).width }"
+										v-if="planDetail.play_srv !== '运动' && getDegree(record.drugList) && getDegree(record.drugList).width"
+									></view>
 									<view class="delete-bar" @click="deleteRecord(record)"><text class="cuIcon-delete"></text></view>
 								</view>
 							</view>
@@ -379,11 +381,13 @@ export default {
 
 					break;
 				case 'record':
-					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_plan_schedule_record_add&pb_no=${this.planDetail.owner_person_no}&type=add&cond=${encodeURIComponent(JSON.stringify(condition))}&ds_no=${
-						this.planNo
-					}`;
-					if(this.planDetail.play_srv==='运动'){
-						url+='&addType=sport'
+					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_plan_schedule_record_add&pb_no=${
+						this.planDetail.owner_person_no
+					}&type=add&cond=${encodeURIComponent(JSON.stringify(condition))}&ds_no=${this.planNo}`;
+					if (this.planDetail.play_srv === '运动') {
+						url += '&addType=sport';
+					} else if (this.planDetail.play_srv) {
+						url += '&addType=' + this.planDetail.play_srv;
 					}
 					break;
 				case 'open-calendar':
@@ -544,13 +548,20 @@ export default {
 			this.getDrugRecord(this.planNo, this.nowDate);
 		},
 		async getDrugRecordDetail() {
-			// 查找此用药计划的用药记录
-			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_record_detail_list_select', 'select');
+			// 查找此计划的记录
+			let serviceName = 'srvhealth_drug_schedule_record_detail_list_select';
+			if (this.planDetail.play_srv === '运动') {
+				serviceName = 'srvhealth_body_activity_record_select';
+			}
+			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
-				serviceName: 'srvhealth_drug_schedule_record_detail_list_select',
+				serviceName: serviceName,
 				colNames: ['*'],
 				condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }]
 			};
+			if (this.planDetail.play_srv === '运动') {
+				req.condition = [{ colName: 'plan_no', ruleType: 'eq', value: this.planNo }];
+			}
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				return res.data.data;
@@ -565,9 +576,7 @@ export default {
 				order: [{ colName: 'take_date', orderType: 'desc' }],
 				condition: [{ colName: 'ds_no', ruleType: 'eq', value: no }]
 			};
-			// if (condition) {
-			// 	req.condition = [...req.condition, ...condition];
-			// }
+
 			if (this.login_user_info && this.login_user_info.user_no) {
 				req.condition.push({ colName: 'create_user', ruleType: 'eq', value: this.login_user_info.user_no });
 			}
@@ -584,8 +593,12 @@ export default {
 				}
 				let dateArr = [];
 				let DrugRecordDetailList = await this.getDrugRecordDetail();
+				if (!DrugRecordDetailList) {
+					return;
+				}
+
 				res.data.data.forEach(item => {
-					if (!dateArr.includes(item.take_date)) {
+					if (item.take_date && !dateArr.includes(item.take_date)) {
 						dateArr.push(item.take_date);
 					}
 				});
@@ -621,9 +634,20 @@ export default {
 							}
 							return d;
 						});
-
-						if (date === item.take_date) {
-							record.data.push(item);
+						if (this.planDetail.play_srv === '运动') {
+							if (Array.isArray(DrugRecordDetailList) && DrugRecordDetailList.length > 0) {
+								DrugRecordDetailList.forEach(detail => {
+									detail.date = detail.hdate;
+									detail.take_date = detail.hdate;
+									detail.hasTook = true; //已服用
+									detail.take_time = detail.htime;
+									record.data.push(detail);
+								});
+							}
+						} else {
+							if (date === item.take_date) {
+								record.data.push(item);
+							}
 						}
 					});
 					return record;
@@ -656,7 +680,6 @@ export default {
 						return pre;
 					}, []);
 				}
-				// this.buildTodayCase();
 				this.drugRecord = recordList.filter(item => {
 					return item.date.indexOf(date) !== -1;
 				});
@@ -819,7 +842,6 @@ export default {
 			border-radius: 30rpx;
 			position: relative;
 			overflow: hidden;
-			background-color: #999;
 			color: #fff;
 			&:nth-child(2n) {
 				margin-right: 0;
@@ -834,7 +856,7 @@ export default {
 			.delete-bar {
 				position: absolute;
 				right: 20rpx;
-				top: calc(50% - 20rpx);
+				top: 10rpx;
 				z-index: 2;
 			}
 			.progress {
@@ -986,7 +1008,7 @@ export default {
 					// text-align: center;
 					font-weight: 700;
 					padding: 0 10rpx;
-					&.align-center{
+					&.align-center {
 						text-align: center;
 					}
 				}

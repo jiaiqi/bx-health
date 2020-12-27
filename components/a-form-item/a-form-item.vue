@@ -148,12 +148,7 @@
 		</view>
 		<view class="cu-modal" :class="{ show: modalName === 'TextArea' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop="">
-				<textarea
-					style="min-height: 300px;width: 100%;text-align: left;text-indent: 40rpx;padding: 20rpx;color: #000000;"
-					auto-height
-					v-model="fieldData.value"
-					:placeholder="'请输入'"
-				></textarea>
+				<textarea class="textarea" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
 				<view class="button-box">
 					<!-- <view class="cu-btn button bg-gray" @click="saveRichText({ isSave: false, type: 'textarea' })">取消</view> -->
 					<view class="cu-btn button bg-cyan" @click="saveRichText({ isSave: true, type: 'textarea' })">确定</view>
@@ -363,23 +358,30 @@ export default {
 			if (type) {
 				this.longpressTimer = setInterval(() => {
 					this.numberChange(type);
-				}, 50);
+				}, 100);
 			}
 		},
 		numberChange(type) {
 			if (this.fieldData.type === 'number' || this.fieldData.type === 'digit') {
 				let step = this.fieldData.type === 'number' ? 1 : this.fieldData.type === 'digit' ? 0.5 : 0;
+				if (this.fieldData.step) {
+					step = this.fieldData.step;
+				}
 				if (!this.fieldData.value) {
 					this.fieldData.value = this.fieldData.min ? this.fieldData.min : 0;
 				}
 				if (this.fieldData.max) {
 					if (type === 'add') {
 						if (this.fieldData.value + step <= this.fieldData.max) {
-							this.fieldData.value = this.fieldData.value + step;
+							this.fieldData.value = Number((this.fieldData.value + step).toFixed(1));
+						}else{
+							clearInterval(this.longpressTimer);
 						}
 					} else if (type === 'minus') {
 						if (this.fieldData.value - step >= this.fieldData.min) {
-							this.fieldData.value = this.fieldData.value - step;
+							this.fieldData.value = Number((this.fieldData.value - step).toFixed(1));
+						}else{
+							clearInterval(this.longpressTimer);
 						}
 					}
 				}
@@ -674,10 +676,12 @@ export default {
 		openModal(type) {
 			// 打开弹出层
 			let fieldData = this.deepClone(this.fieldData);
+			debugger;
 			switch (type) {
 				case 'Set':
 					if (Array.isArray(this.fieldData.option_list_v2)) {
 						this.setOptionList = this.fieldData.option_list_v2.map(item => {
+							debugger;
 							if (this.fieldData.value && this.fieldData.value.includes(item.value)) {
 								item.checked = true;
 							}
@@ -748,7 +752,7 @@ export default {
 		if (this.pageType === 'detail' || this.pageType === 'update') {
 			this.getDefVal();
 		}
-		this.$nextTick(function(){
+		this.$nextTick(function() {
 			if (Array.isArray(this.fieldData.option_list_v2)) {
 				this.setOptionList = this.fieldData.option_list_v2.map(item => {
 					if (this.fieldData.value && this.fieldData.value.includes(item.value)) {
@@ -757,7 +761,7 @@ export default {
 					return item;
 				});
 			}
-		})
+		});
 		if (self.fieldData && self.fieldData.type === 'Selector') {
 			let cond = null;
 			self.getSelectorData(cond).then(_ => {
@@ -789,6 +793,17 @@ export default {
 		.cu-btn {
 			min-width: 45%;
 		}
+	}
+	.textarea {
+		width: calc(100% - 40rpx);
+		border: 1rpx solid #ccc;
+		border-radius: 10rpx;
+		margin: 20rpx;
+		padding: 20rpx;
+		min-height: 300px;
+		text-align: left;
+		text-indent: 40rpx;
+		color: #000000;
 	}
 }
 .form-item {
@@ -837,7 +852,6 @@ export default {
 		&.label-top {
 			width: 100%;
 			padding: 10rpx 10rpx 0;
-			
 		}
 		.is-required {
 			display: inline-flex;
@@ -859,8 +873,8 @@ export default {
 		&.label-top {
 			padding: 0 20rpx 20rpx;
 			.form-item-content_value.checkbox-group {
-							margin-top: 10rpx;
-						}	
+				margin-top: 10rpx;
+			}
 		}
 		&.form-detail {
 			padding: 0;
@@ -883,10 +897,6 @@ export default {
 			font: inherit;
 			display: flex;
 			flex: 1;
-			uni-textarea {
-				width: 100%;
-				height: 200rpx;
-			}
 			&.slider {
 				display: flex;
 				height: 80rpx;

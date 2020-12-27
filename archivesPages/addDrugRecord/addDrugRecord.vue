@@ -10,7 +10,8 @@
 				</view>
 			</view>
 		</view>
-
+		<a-form-item v-if="selectedDrug" :field="sportField" pageType="add" ref="fitem"></a-form-item>
+		<a-form-item v-if="selectedDrug" :field="sportUnit" pageType="add" ref="fitem"></a-form-item>
 		<a-form
 			ref="bxForm"
 			v-if="colsV2Data && isArray(fields)"
@@ -34,42 +35,10 @@
 
 <script>
 export default {
-	props: {},
 	data() {
 		return {
 			fields: [],
 			ds_no: '',
-			detailField: [
-				{
-					column: 's_code',
-					label: '添加药物',
-					placeholder: '点击选择药物',
-					defaultValue: null,
-					isRequire: false,
-					type: 'treeSelector',
-					seq: 500,
-					option_list_v2: {
-						refed_col: 's_code',
-						serviceName: 'srvhealth_drug_schedule_detail_list_select',
-						conditions: [{ colName: 'ds_no', ruleType: 'eq', value: 'DS202011270940210003' }],
-						key_disp_col: 'general_name',
-						is_tree: false
-					},
-					bx_col_type: 'fk',
-					redundant: '__vue_devtool_undefined__',
-					col_type: 'bxhealth_medicine',
-					section: null,
-					validators: 'ngMaxlength=50',
-					showExp: true,
-					display: true,
-					in_add: 1,
-					disabled: false,
-					_validators: { max: 50, min: null, reg: '', required: false, msg: '', isType: { _custom: { type: 'function', display: '<span>ƒ</span> (e)' } } },
-					value: '',
-					valid: { column: 's_code', valid: true, msg: '不能为空!' }
-				}
-			],
-			oldDetailField: [],
 			colsV2Data: null,
 			type: '',
 			serviceName: '',
@@ -80,11 +49,39 @@ export default {
 			fieldsCond: [], //treeSelector类型字段的条件
 			drugDetailItem: [],
 			drugList: [], //当前用药计划的药物列表
-			checkPlanItemNoList: [] ,//已选药物
-			pb_no:''
+			checkPlanItemNoList: [], //已选药物
+			pb_no: '',
+			sportField: {
+				column: 'amount',
+				label: '运动量',
+				isRequire: true,
+				type: 'digit',
+				max: null,
+				min: null,
+				showExp: true,
+				display: true,
+				value: '',
+				step: 0.1
+			},
+			sportUnit: {
+				column: 'unit',
+				label: '单位',
+				type: 'text',
+				showExp: true,
+				display: true,
+				disabled: true,
+				value: ''
+			}
 		};
 	},
 	computed: {
+		selectedDrug() {
+			if (this.addType === 'sport') {
+				return this.drugList.find(function(item) {
+					return item.checked;
+				});
+			}
+		},
 		buttons: function() {
 			let buttons = [];
 			if (this.colsV2Data && this.colsV2Data._buttonInfo) {
@@ -103,8 +100,8 @@ export default {
 					btn['display'] = eval(btn.disp_exps);
 				}
 				if (btn.button_name === '提交') {
-					// btn.button_name = '服药';
-					btn.button_name = this.addType === 'sport' ? '完成' : '服药';
+					btn.button_name = '完成';
+					// btn.button_name = this.addType === 'sport' ? '完成' : '服药';
 				}
 				if (btn.operate_params) {
 					let fieldData = btn.operate_params['data'];
@@ -136,10 +133,9 @@ export default {
 		}
 		if (option.cond) {
 			this.defaultCondition = JSON.parse(decodeURIComponent(option.cond));
-			this.detailField[0].option_list_v2.conditions = JSON.parse(decodeURIComponent(option.cond));
 		}
-		if(option.pb_no){
-			this.pb_no = option.pb_no
+		if (option.pb_no) {
+			this.pb_no = option.pb_no;
 		}
 		if (option.addType) {
 			this.addType = option.addType;
@@ -148,7 +144,6 @@ export default {
 			this.ds_no = option.ds_no;
 			this.getDrugItemList();
 		}
-		this.oldDetailField = this.deepClone(this.detailField);
 		if (option.params) {
 			this.params = JSON.parse(decodeURIComponent(option.params));
 		}
@@ -172,11 +167,51 @@ export default {
 	},
 	methods: {
 		changeDrugChecked(e) {
-			this.$set(e, 'checked', !e.checked);
+			this.drugList.forEach(item => {
+				if (item.id === e.id) {
+					this.$set(item, 'checked', !e.checked);
+				} else {
+					if (this.addType === 'sport') {
+						this.$set(item, 'checked', false);
+					}
+				}
+			});
+			if (this.addType === 'sport') {
+				this.sportField.value = this.selectedDrug.amount_each_time;
+				this.sportField.max = this.selectedDrug.amount_each_time * 20;
+				this.sportUnit.value = this.selectedDrug.unit;
+			}
 		},
-		getDrugItemList() {
+		async getSportItemInfo(list) {
+			if (!list) {
+				return;
+			}
+			let serviceName = 'srvhealth_body_activity_contents_select';
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: serviceName,
+				colNames: ['*'],
+				page: { pageNo: 1, rownumber: 20 },
+				condition: [{ colName: 'sport_no', ruleType: 'in', value: list.map(item => item.sport_no).toString() }]
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				list = list.map(item => {
+					if (res.data.data.find(d => d.sport_no === item.sport_no)) {
+						item.image = res.data.data.find(d => d.sport_no === item.sport_no)['image'];
+						item.unit_amount = res.data.data.find(d => d.sport_no === item.sport_no)['unit_amount'];
+						item.unit_energy = res.data.data.find(d => d.sport_no === item.sport_no)['unit_energy'];
+						item.checked = false;
+						item.label = item.sport_name;
+						item.value = item.sport_no;
+					}
+					return item;
+				});
+			}
+			return list;
+		},
+		async getDrugItemList() {
 			let serviceName = 'srvhealth_drug_schedule_detail_list_select';
-			debugger;
 			if (this.addType === 'sport') {
 				serviceName = 'srvhealth_plan_schedule_sports_detail_select';
 			}
@@ -188,8 +223,13 @@ export default {
 				condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.ds_no }]
 			};
 			if (this.ds_no) {
-				this.$http.post(url, req).then(res => {
-					if (Array.isArray(res.data.data)) {
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data)) {
+					if (this.addType == 'sport') {
+						this.drugList = await this.getSportItemInfo(res.data.data);
+						this.checkPlanItemNoList = this.drugList.map(item => item.sport_no);
+					} else {
+						// 药物
 						this.drugList = res.data.data.map(item => {
 							item.checked = true;
 							item.label = item.general_name ? item.general_name : item.sport_name;
@@ -197,35 +237,8 @@ export default {
 							return item;
 						});
 						this.checkPlanItemNoList = this.drugList.map(item => item.med_no);
-						if(this.addType=='sport'){
-							this.checkPlanItemNoList = this.drugList.map(item => item.sport_no);
-						}
 					}
-				});
-			}
-		},
-		deleteDetailItem(index) {
-			if (this.detailField[index].value && this.detailField.length > 1) {
-				this.drugDetailItem.splice(index, 1);
-				this.detailField.splice(index, 1);
-			} else {
-				this.detailField[index].value = '';
-			}
-			this.oldDetailField = this.deepClone(this.detailField);
-		},
-		selectorChange(e, index) {
-			if (!e) {
-				return;
-			}
-			let selectorInfo = this.deepClone(e);
-			if (selectorInfo.colData && !this.oldDetailField[index].value) {
-				this.drugDetailItem.push(selectorInfo.colData);
-				let field = this.deepClone(this.oldDetailField[0]);
-				field.value = '';
-				// let field = this.deepClone(this.oldDetailField[this.oldDetailField.length - 1]);
-				this.detailField.push(field);
-				this.oldDetailField = this.deepClone(this.detailField);
-			} else {
+				}
 			}
 		},
 		async getDefaultVal() {
@@ -265,7 +278,7 @@ export default {
 					this.fields = colVs._fieldInfo.map(field => {
 						if (field.column === 'person_no') {
 							field.display = false;
-							field.value = this.pb_no
+							field.value = this.pb_no;
 						}
 						if (field.label === '用药计划编码') {
 							field.label = '用药计划';
@@ -311,9 +324,6 @@ export default {
 			if (!recordInfo || !recordInfo.dsr_no) {
 				return;
 			}
-			if (this.addType === 'sport') {
-				return;
-			}
 			let url = this.getServiceUrl('health', 'srvhealth_drug_schedule_record_detail_list_add', 'operate');
 			let req = [
 				{
@@ -322,6 +332,7 @@ export default {
 					data: []
 				}
 			];
+
 			let checkDrugList = this.drugList.filter(item => item.checked);
 			req[0].data = checkDrugList.map(item => {
 				return {
@@ -336,6 +347,32 @@ export default {
 					dosage_unit: item.dosage_unit
 				};
 			});
+			debugger;
+			if (this.addType === 'sport') {
+				url = this.getServiceUrl('health', 'srvhealth_body_activity_record_add', 'operate');
+				req = [
+					{
+						serviceName: 'srvhealth_body_activity_record_add',
+						colNames: ['*'],
+						data: checkDrugList.map(item => {
+							return {
+								amount: this.sportField.value,
+								energy: item.unit_energy * this.sportField.value,
+								hdate: recordInfo.take_date,
+								htime: recordInfo.take_time,
+								image: item.image,
+								name: item.sport_name,
+								plan_no: recordInfo.ds_no,
+								sports_detail_no: item.spp_no,
+								sports_no: item.sport_no,
+								unit: item.unit,
+								user_name: uni.getStorageSync('current_user_info').name,
+								userno: uni.getStorageSync('current_user_info').userno
+							};
+						})
+					}
+				];
+			}
 			debugger;
 			this.$http.post(url, req);
 		},

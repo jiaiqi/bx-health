@@ -453,7 +453,7 @@ export default {
 		},
 		clickTodoItem(item, index) {
 			if (item.ds_no) {
-				if (item.play_srv === '用药' || item.play_srv === '运动') {
+				if (item.play_srv) {
 					uni.navigateTo({
 						url: `/archivesPages/DrugPlan/DrugPlan?ds_no=${item.ds_no}`
 					});
@@ -1115,6 +1115,7 @@ export default {
 					url: '/archivesPages/archives-history/archives-history?isAll=true'
 				});
 			} else if (type === 'plan') {
+				debugger
 				let fieldsCond = [{ column: 'create_manager_no', display: false }, { column: 'owner_person_no', display: false, value: this.userInfo.no }];
 				let params = {
 					to: '/archivesPages/DrugPlan/DrugPlan', //提交后要跳转的页面
