@@ -6,7 +6,13 @@
 		</view>
 		<view class="docter-list">
 			<view class="doctor-item" v-for="item in doctorList" :key="item.id">
-				<view class="profile"><image class="image" :src="item.usera_image? getImagePath(item.usera_image): item.usera_profile_url? getImagePath(item.usera_profile_url) : '../../static/none.png'" mode="aspectFill"></image></view>
+				<view class="profile">
+					<image
+						class="image"
+						:src="usera_profile_url(item)"
+						mode="aspectFill"
+					></image>
+				</view>
 				<view class="content">
 					<view class="content-left">
 						<text class="doctor-name">{{ item.usera_name }}</text>
@@ -28,15 +34,18 @@ export default {
 			userInfo: {},
 			docInfo: {},
 			qrcodeParams: '',
-			doctorList: [],
+			doctorList: []
 		};
 	},
 	mounted() {
-		uni.$on('updateSuccess',()=>{
+		uni.$on('updateSuccess', () => {
 			this.getBindDoctor();
-		})
+		});
 	},
 	methods: {
+		usera_profile_url(item) {
+			return item.usera_image ? this.getImagePath(item.usera_image) : item.usera_profile_url ? this.getImagePath(item.usera_profile_url) : '/static/man-profile.png'
+		},
 		getPicPath(no) {
 			if (no) {
 				return this.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
@@ -58,13 +67,13 @@ export default {
 				this.doctorList = res.data.data;
 				let noList = res.data.data.map(item => item.usera_no);
 				let noStr = noList.toString();
-				let count_num = 0
+				let count_num = 0;
 				this.doctorList.forEach(item => {
 					this.getDoctorRecod(item).then(length => {
-						count_num += length
-						this.count_num = count_num
-						this.$set(item, 'count_num', length);						
-						console.log("-----------------length---",length)
+						count_num += length;
+						this.count_num = count_num;
+						this.$set(item, 'count_num', length);
+						console.log('-----------------length---', length);
 					});
 				});
 			}
@@ -112,7 +121,7 @@ export default {
 					{
 						colName: 'receiver_account',
 						ruleType: 'eq',
-						value: this.userInfo?this.userInfo.userno:''
+						value: this.userInfo ? this.userInfo.userno : ''
 					},
 					{
 						colName: 'msg_state',
@@ -133,9 +142,9 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			let length = 0
-			if(res.data.data && res.data.data.length > 0){
-				length = res.data.data.length
+			let length = 0;
+			if (res.data.data && res.data.data.length > 0) {
+				length = res.data.data.length;
 			}
 			return length;
 		},
@@ -204,7 +213,7 @@ export default {
 				});
 			}
 		},
-		
+
 		async getDoctorInfo(no, isSelf) {
 			// 查找医生信息
 			let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
@@ -218,7 +227,6 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				if (isSelf === true) {
 					this.doctorList = res.data.data;
-							
 				}
 				return res.data.data[0];
 			} else {
@@ -289,7 +297,7 @@ export default {
 		display: flex;
 		flex-wrap: wrap;
 		.doctor-item {
-			width:calc( 33% - 40rpx/3);
+			width: calc(33% - 40rpx / 3);
 			margin-top: 20rpx;
 			margin-right: 20rpx;
 			display: flex;
@@ -299,11 +307,11 @@ export default {
 			background-color: #fff;
 			border-radius: 20rpx;
 			overflow: hidden;
-			&:nth-child(3n){
+			&:nth-child(3n) {
 				margin-right: 0;
 			}
 			.profile {
-				width:100%;
+				width: 100%;
 				// height: 150rpx;
 				// border-radius: 50%;
 				overflow: hidden;
@@ -313,8 +321,8 @@ export default {
 					color: #fff;
 				}
 				.image {
-					width:100%;
-					height:200rpx;
+					width: 100%;
+					height: 200rpx;
 				}
 			}
 			.content {

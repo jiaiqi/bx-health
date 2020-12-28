@@ -151,7 +151,7 @@
 			<view class="content inspection-report">
 				<view class="report-item" v-for="item in inspectReportRecord" :key="item.id" @click="toRecord(item)">
 					<view class="images"><image class="image" src="../../static/xuehzi.png" mode="aspectFill"></image></view>
-					<view class="title">{{ item.name }}</view>
+					<view class="title">{{ item.name || '' }}</view>
 					<!-- <view class="title">{{ item.name + item.examination_type }}</view> -->
 					<view class="date">{{ item.end_time.slice(0, 10) }}</view>
 				</view>
@@ -205,6 +205,10 @@
 						:nodeKey="configCols.option_list_v2 && configCols.option_list_v2['refed_col'] ? configCols.option_list_v2['refed_col'] : 'no'"
 						@clickLastNode="confirmTree"
 					></tree-selector>
+					<view class="">
+						<text>未找到想要的报告类型？</text>
+						<text class="text-blue" @click="confirmTree">直接添加</text>
+					</view>
 					<view class="button-box"><button class="cu-btn bg-grey" @tap="showAddRecord = false">取消</button></view>
 				</view>
 			</view>
@@ -455,7 +459,7 @@ export default {
 			if (item.ds_no) {
 				if (item.play_srv) {
 					uni.navigateTo({
-						url: `/archivesPages/DrugPlan/DrugPlan?ds_no=${item.ds_no}`
+						url: `/archivesPages/DrugPlan/DrugPlan?play_srv=${item.play_srv}&ds_no=${item.ds_no}`
 					});
 				}
 			}
@@ -529,8 +533,9 @@ export default {
 		},
 		confirmTree(e) {
 			if (e.item && e.item.jy_no) {
-				// e.item.daq_survey_activity_no
 				let fieldsCond = [
+					{ column: 'specimen', value: e.item.specimen }, //标本类型
+					{ column: 'examination_type', value: e.item.examination_type }, //检查类别
 					{ column: 'jy_no', display: false, value: e.item.jy_no },
 					{ column: 'examinate_person_no', display: false, value: this.userInfo.no },
 					{ column: 'examinate_name', display: false, value: this.userInfo.name },
@@ -540,7 +545,6 @@ export default {
 					{ column: 'report_record', display: false },
 					{ column: 'report_daq_survey_ack_no', display: false }
 				];
-
 				let url = `/archivesPages/report/report?serviceName=srvhealth_examination_report_add&type=add&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`;
 				if (e.item.daq_survey_activity_no) {
 					let params = {
@@ -554,6 +558,20 @@ export default {
 				}
 				uni.navigateTo({
 					url: url
+				});
+			} else {
+				let fieldsCond = [
+					{ column: 'jy_no', display: false },
+					{ column: 'examinate_person_no', display: false, value: this.userInfo.no },
+					{ column: 'examinate_name', display: false, value: this.userInfo.name },
+					{ column: 'examinate_account', display: false, value: this.userInfo.userno },
+					{ column: 'examinate_date', display: true, value: dayjs().format('YYYY-MM-DD') },
+					{ column: 'report_daq_survey_activity_no', display: false },
+					{ column: 'report_record', display: false },
+					{ column: 'report_daq_survey_ack_no', display: false }
+				];
+				uni.navigateTo({
+					url: `/archivesPages/report/report?serviceName=srvhealth_examination_report_add&type=add&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`
 				});
 			}
 		},
@@ -1115,7 +1133,7 @@ export default {
 					url: '/archivesPages/archives-history/archives-history?isAll=true'
 				});
 			} else if (type === 'plan') {
-				debugger
+				debugger;
 				let fieldsCond = [{ column: 'create_manager_no', display: false }, { column: 'owner_person_no', display: false, value: this.userInfo.no }];
 				let params = {
 					to: '/archivesPages/DrugPlan/DrugPlan', //提交后要跳转的页面
@@ -1441,7 +1459,13 @@ export default {
 			font-size: 30rpx;
 			line-height: 30rpx;
 			margin: 0 20rpx;
+			overflow: hidden;
+			width: 100%;
+			white-space: nowrap;
+			text-overflow: ellipsis;
 			.tag-box {
+				overflow: scroll;
+				width: 100%;
 				.tag-item {
 					padding: 10rpx;
 					border-radius: 5rpx;
@@ -1892,7 +1916,7 @@ export default {
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	max-height: 80vh;
+	height: 80vh;
 	.selector-wrap {
 		overflow: scroll;
 		flex: 1;

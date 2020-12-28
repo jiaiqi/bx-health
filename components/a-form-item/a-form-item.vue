@@ -64,7 +64,7 @@
 				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
 			</bx-checkbox-group>
 			<view class="form-item-content_value" v-else-if="popupFieldTypeList.includes(fieldData.type)">
-				<view v-if="(setOptionList.length < 15 && fieldData.type === 'Set') || (selectorData.length < 15 && fieldData.type === 'Selector')">
+				<view v-if="(setOptionList.length < 15 && fieldData.type === 'Set') || (selectorData.length < 5 && fieldData.type === 'Selector')">
 					<bx-checkbox-group v-if="fieldData.type === 'Set'" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
 						<bx-checkbox v-for="item in setOptionList" :key="item.label" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
 					</bx-checkbox-group>
@@ -265,7 +265,7 @@ export default {
 			}
 			if (
 				this.pageType !== 'detail' &&
-				((this.setOptionList.length < 15 && this.fieldData.type === 'Set') || (this.selectorData.length < 15 && this.fieldData.type === 'Selector'))
+				((this.setOptionList.length < 15 && this.fieldData.type === 'Set') || (this.selectorData.length < 5 && this.fieldData.type === 'Selector'))
 			) {
 				result = '100%';
 			}
@@ -783,7 +783,7 @@ export default {
 	}
 	background-color: #fff;
 	.form-item-content_value {
-		width: 100%;
+		// width: 100%;
 		padding: 20rpx;
 	}
 	.dialog-button {
@@ -969,6 +969,7 @@ export default {
 		height: calc(90vh - var(--window-top) - var(--window-bottom));
 		display: flex;
 		flex-direction: column;
+		margin-top: 20rpx;
 		.content {
 			flex: 1;
 			background-color: #fff;

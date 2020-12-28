@@ -3,7 +3,8 @@
 		<view class="detail-item item-title" v-if="drugDetail && drugDetail.med_no">
 			<view class="label">药品名称:</view>
 			<view class="value">{{ drugDetail.medicine_name }}</view>
-			<image class="icon" src="../../static/icon/drug.png" mode="aspectFit"></image>
+			<text class="cuIcon-delete icon" @click="deleteDrugItem"></text>
+			<!-- <image class="icon" src="../../static/icon/drug.png" mode="aspectFit"></image> -->
 		</view>
 		<view class="detail-item column" v-if="drugDetail && drugDetail.med_no">
 			<view class="label">类别:</view>
@@ -30,7 +31,8 @@
 		<view class="detail-item item-title" v-if="drugInfos && drugInfos.med_no">
 			<view class="label">药品名称:</view>
 			<view class="value">{{ drugInfos.general_name }}</view>
-			<image class="icon" src="../../static/icon/drug.png" mode="aspectFit"></image>
+			<text class="cuIcon-delete icon" @click="deleteDrugItem"></text>
+			<!-- <image class="icon" src="../../static/icon/drug.png" mode="aspectFit"></image> -->
 		</view>
 		<view class="detail-item" v-if="drugInfos && drugInfos.med_no">
 			<view class="label">用量单位:</view>
@@ -75,6 +77,7 @@
 		<view class="detail-item item-title" v-if="drugDetail && (drugDetail.sport_no || drugInfos.sport_no)">
 			<view class="label">运动名称:</view>
 			<view class="value">{{ drugDetail.name || drugInfos.sport_name }}</view>
+			<text class="cuIcon-delete icon" @click="deleteDrugItem"></text>
 		</view>
 
 		<view class="detail-item item-title" v-if="drugDetail && (drugDetail.sport_no || drugInfos.sport_no)">
@@ -123,7 +126,7 @@
 			<view class="button cu-btn gray" @click="hideModal">取消</view>
 			<view class="button cu-btn bg-cyan" @click="addDrugItem(drugDetail)">确定</view>
 		</view>
-		<view class="delete-icon" v-if="drugInfo && drugInfo.id" @click="deleteDrugItem"><text class="cuIcon-delete"></text></view>
+		<!-- <view class="delete-icon" v-if="drugInfo && drugInfo.id" @click="deleteDrugItem"><text class="cuIcon-delete"></text></view> -->
 	</view>
 </template>
 
@@ -350,8 +353,12 @@ export default {
 					content: '确认删除?',
 					success(res) {
 						if (res.confirm) {
-							let url = self.getServiceUrl('health', 'srvhealth_drug_schedule_detail_list_delete', 'operate');
-							let req = [{ serviceName: 'srvhealth_drug_schedule_detail_list_delete', condition: [{ colName: 'id', ruleType: 'in', value: self.drugInfo.id }] }];
+							let serviceName = 'srvhealth_drug_schedule_detail_list_delete';
+							if (self.drugInfos.sport_no || self.drugDetail.sport_no) {
+								serviceName = 'srvhealth_plan_schedule_sports_detail_delete';
+							}
+							let url = self.getServiceUrl('health', serviceName, 'operate');
+							let req = [{ serviceName: serviceName, condition: [{ colName: 'id', ruleType: 'in', value: self.drugInfo.id }] }];
 							self.$http.post(url, req).then(res => {
 								if (res.data.state === 'SUCCESS') {
 									uni.showToast({
@@ -377,14 +384,16 @@ export default {
 			clearInterval(this.timer);
 		},
 		changeAmount(num) {
-			let amount = Number(this.drugInfos.dosage_each_time);
-			if (this.drugDetail.sport_no) {
-				amount = this.drugInfos.amount_each_time;
+			let amount = 0;
+			if (this.drugDetail.sport_no || this.drugInfos.sport_no) {
+				amount = Number(this.drugInfos.amount_each_time);
+			} else {
+				amount = Number(this.drugInfos.dosage_each_time);
 			}
 			if (amount + num >= 0) {
 				amount += num;
 			}
-			if (this.drugDetail.sport_no) {
+			if (this.drugDetail.sport_no || this.drugInfos.sport_no) {
 				this.drugInfos.amount_each_time = Number(amount.toFixed(1));
 			} else {
 				this.drugInfos.dosage_each_time = Number(amount.toFixed(1));
@@ -434,10 +443,10 @@ export default {
 					};
 				}
 			} else if (this.type === 'update' && this.drugInfo.id) {
-				url = this.getServiceUrl('health', 'srvhealth_plan_schedule_sports_detail_update', 'operate');
+				url = this.getServiceUrl('health', 'srvhealth_drug_schedule_detail_list_update', 'operate');
 				req = [
 					{
-						serviceName: 'srvhealth_plan_schedule_sports_detail_update',
+						serviceName: 'srvhealth_drug_schedule_detail_list_update',
 						condition: [{ colName: 'id', ruleType: 'eq', value: this.drugInfo.id }],
 						data: [
 							{
@@ -451,8 +460,9 @@ export default {
 				];
 				if (this.drugInfo.sport_no) {
 					url = this.getServiceUrl('health', 'srvhealth_plan_schedule_sports_detail_update', 'operate');
-					serviceName: 'srvhealth_plan_schedule_sports_detail_update';
 					req[0] = {
+						serviceName: 'srvhealth_plan_schedule_sports_detail_update',
+						condition: [{ colName: 'id', ruleType: 'eq', value: this.drugInfo.id }],
 						data: [
 							{
 								unit: detail.unit, //运动单位
@@ -498,18 +508,8 @@ export default {
 	/deep/ .bx-checkbox-group .bx-checkbox .bx-checkbox__label {
 		padding: 5rpx 20rpx;
 	}
-	.delete-icon {
-		font-size: 60rpx;
-		color: #fff;
-		display: inline-block;
-		width: 100rpx;
-		height: 100rpx;
-		line-height: 100rpx;
-		border-radius: 50%;
-		border: 1rpx solid #fff;
-		position: absolute;
-		bottom: -200rpx;
-		left: calc(50% - 50rpx);
+	.cuIcon-delete.icon {
+		font-size: 40rpx;
 	}
 	.button-box {
 		margin: 40rpx 0;
@@ -525,9 +525,6 @@ export default {
 		&.column {
 			flex-direction: column;
 			align-items: flex-start;
-			// &:last-child{
-			// 	border-top: 2rpx dashed #ccc;
-			// }
 		}
 		&.item-title {
 			justify-content: space-between;
@@ -544,8 +541,6 @@ export default {
 			font-weight: bold;
 			min-width: 150rpx;
 			text-align: left;
-			// font-size: 24rpx;
-			// text-align: left;
 		}
 		.value {
 			text-align: left;

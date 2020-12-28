@@ -4,7 +4,7 @@
 		<view class="main-table" @click="toPages('update')">
 			<view class="table-item" v-for="item in fields" :key="item.column">
 				<view class="label">{{ item.label }}</view>
-				<view class="value">{{ item.value ? item.value : '' }}</view>
+				<view class="value">{{ item.value || '' }}</view>
 			</view>
 		</view>
 		<view class="child-service">
@@ -46,7 +46,7 @@
 			</view>
 			<view class="child-service-item">
 				<view class="child-service-title">
-					<text class="title-text">{{ planDetail.play_srv }}记录</text>
+					<text class="title-text">{{ planDetail.play_srv || '' }}记录</text>
 					<view class="center-action">
 						<text class="cuIcon-back operate" @click="changeDate('-')"></text>
 						<text @click="toPages('open-calendar')">
@@ -60,17 +60,20 @@
 					</text>
 				</view>
 				<view class="drug-record-timeline">
-					<view class="cu-timeline none-data" v-if="!drugRecord || drugRecord.length === 0">
+					<view class="cu-timeline none-data" v-if="noRecord === true">
 						<text class="cuIcon-warn margin-right-xs"></text>
-						未找到今日{{ planDetail.play_srv }}记录
+						未找到今日{{ planDetail.play_srv || '' }}记录
 					</view>
 					<view class="cu-timeline" v-for="item in drugRecord" :key="item.date">
 						<view class="cu-item">
-							<view class="cu-time" :class="{ 'text-blue': item.date === nowDate }">
-								{{ item.date === nowDate ? `${item.date.slice(5)}(今天)` : item.date.slice(5) }}
-							</view>
+							<view class="cu-time" :class="{ 'text-blue': item.date === nowDate }">{{ item.date === nowDate ? `${item.date.slice(5)}(今天)` : item.date.slice(5) }}</view>
 							<view class="timeline-content">
-								<view class="timeline-item" v-for="record in item.data" :class="{ 'bg-blue': item.date === nowDate, 'bg-gray': item.date !== nowDate }">
+								<view
+									class="timeline-item"
+									v-for="record in item.data"
+									@click="toPages('record-detail', record)"
+									:class="{ 'bg-blue': item.date === nowDate, 'bg-gray': item.date !== nowDate }"
+								>
 									<view class="time">{{ record.take_time.slice(0, 5) }}</view>
 									<view class="info" v-if="planDetail.play_srv === '运动'">{{ record.name + record.amount + record.unit }}</view>
 									<view class="info" v-if="isArray(record.drugList) && planDetail.play_srv !== '运动'">已完成：{{ getDegree(record.drugList, 'degree') }}</view>
@@ -79,7 +82,7 @@
 										:style="{ width: getDegree(record.drugList).width }"
 										v-if="planDetail.play_srv !== '运动' && getDegree(record.drugList) && getDegree(record.drugList).width"
 									></view>
-									<view class="delete-bar" @click="deleteRecord(record)"><text class="cuIcon-delete"></text></view>
+									<!-- <view class="delete-bar" @click="deleteRecord(record)"><text class="cuIcon-delete"></text></view> -->
 								</view>
 							</view>
 						</view>
@@ -159,6 +162,7 @@ export default {
 				selected: [],
 				currentDate: ''
 			},
+			noRecord: false, //没有记录
 			planNo: '',
 			drugList: [], //当前用药计划的药品列表
 			planDetail: {}, //用药计划
@@ -380,6 +384,21 @@ export default {
 					// #endif
 
 					break;
+				case 'record-detail':
+					if (item.sports_detail_no) {
+						// condition.push({ colName: 'sports_detail_no', ruleType: 'eq', value: item.sports_detail_no });
+					} else if (item.dsr_no) {
+						condition.push({ colName: 'dsr_no', ruleType: 'eq', value: item.dsr_no });
+					}
+					url = `/archivesPages/addDrugRecord/addDrugRecord?formType=detail&serviceName=srvhealth_plan_schedule_record_select&pb_no=${
+						this.planDetail.owner_person_no
+					}&type=add&cond=${encodeURIComponent(JSON.stringify(condition))}&ds_no=${this.planNo}`;
+					if (this.planDetail.play_srv === '运动') {
+						url += '&addType=sport';
+					} else if (this.planDetail.play_srv) {
+						url += '&addType=' + this.planDetail.play_srv;
+					}
+					break;
 				case 'record':
 					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_plan_schedule_record_add&pb_no=${
 						this.planDetail.owner_person_no
@@ -568,7 +587,8 @@ export default {
 			}
 		},
 		async getDrugRecord(no, date) {
-			// 查找此用药计划的用药记录
+			// 查找此计划的记录
+			this.noRecord = false;
 			let url = this.getServiceUrl('health', 'srvhealth_plan_schedule_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_plan_schedule_record_select',
@@ -576,17 +596,14 @@ export default {
 				order: [{ colName: 'take_date', orderType: 'desc' }],
 				condition: [{ colName: 'ds_no', ruleType: 'eq', value: no }]
 			};
-
 			if (this.login_user_info && this.login_user_info.user_no) {
 				req.condition.push({ colName: 'create_user', ruleType: 'eq', value: this.login_user_info.user_no });
 			}
-
 			let res = await this.$http.post(url, req);
 			setTimeout(() => {
 				this.showCalender = true;
 			}, 2000);
 			if (Array.isArray(res.data.data)) {
-				// this.drugRecord =
 				if (res.data.data.length == 0) {
 					this.drugRecord = [];
 					return;
@@ -596,7 +613,6 @@ export default {
 				if (!DrugRecordDetailList) {
 					return;
 				}
-
 				res.data.data.forEach(item => {
 					if (item.take_date && !dateArr.includes(item.take_date)) {
 						dateArr.push(item.take_date);
@@ -634,7 +650,7 @@ export default {
 							}
 							return d;
 						});
-						if (this.planDetail.play_srv === '运动') {
+						if (this.planDetail.play_srv === '运动' && date === item.take_date) {
 							if (Array.isArray(DrugRecordDetailList) && DrugRecordDetailList.length > 0) {
 								DrugRecordDetailList.forEach(detail => {
 									detail.date = detail.hdate;
@@ -683,6 +699,11 @@ export default {
 				this.drugRecord = recordList.filter(item => {
 					return item.date.indexOf(date) !== -1;
 				});
+				if (this.drugRecord.length === 0) {
+					this.noRecord = true;
+				} else {
+					this.noRecord = false;
+				}
 				return recordList;
 			}
 		},
@@ -747,6 +768,51 @@ export default {
 		if (options.ds_no) {
 			this.planNo = options.ds_no;
 			this.getFieldsV2(this.serviceName);
+		}
+		if (options.play_srv == '用药' || options.play_srv == '运动') {
+			this.childServiceData = [
+				{
+					colVs: {
+						main_table: 'bxhealth_drug_schedule_detail_list',
+						service_name: 'srvhealth_drug_schedule_detail_list_select',
+						foreign_key: {
+							table_name: 'bxhealth_drug_schedule_detail_list',
+							column_name: 'ds_no',
+							referenced_table_name: 'bxhealth_plan_schedule',
+							referenced_column_name: 'ds_no',
+							keydispcol: 'ds_name',
+							foreign_key_type: '字段引用',
+							update_rule: 'CASCADE',
+							delete_rule: 'CASCADE',
+							create_to_physical: '否',
+							actual_physical_state: null,
+							show_ui_child_table: '是',
+							show_child_list_expr: null,
+							show_ui_seq: 10,
+							show_ui_model: 'collapse',
+							view_model: 'list',
+							card_no: null,
+							child_table_readonly: '否',
+							section_name: '用药明细',
+							show_ui_grandson_table: '否',
+							section_grandson_name: null,
+							biz_no: null,
+							biz_path: null,
+							more_config: null,
+							create_user: 'wangyl',
+							create_time: '2020-11-25 15:30:50',
+							modify_time: '2020-11-25 15:30:50',
+							modify_user: null,
+							create_user_disp: '王永利/11000006',
+							modify_user_disp: null,
+							del_flag: '否',
+							conditions: []
+						},
+						service_view_name: '用药计划明细列表',
+						data: []
+					}
+				}
+			];
 		}
 	}
 };
@@ -843,6 +909,7 @@ export default {
 			position: relative;
 			overflow: hidden;
 			color: #fff;
+			background-color: #999;
 			&:nth-child(2n) {
 				margin-right: 0;
 			}

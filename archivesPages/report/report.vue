@@ -67,7 +67,6 @@ export default {
 		},
 		async onButton(e) {
 			console.log(e);
-			debugger;
 			let self = this;
 			let req = this.$refs.bxForm.getFieldModel();
 			for (let key in req) {
@@ -418,8 +417,7 @@ export default {
 .form {
 	width: 100%;
 	background-color: #fff;
-	height: calc(100vh - var(--window-top) - var(--window-bottom));
-	overflow: scroll;
+	min-height: calc(100vh - var(--window-top) - var(--window-bottom));
 	.button-box {
 		width: 100%;
 		display: flex;

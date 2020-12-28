@@ -87,7 +87,7 @@
 				}, {
 					"path": "DrugPlan/DrugPlan",
 					"style": {
-						"navigationBarTitleText": "用药计划详情",
+						"navigationBarTitleText": "方案计划详情",
 						"navigationBarBackgroundColor": "#409eff",
 						"enablePullDownRefresh": false
 					}
@@ -147,7 +147,16 @@
 					}
 
 				}
-			]
+			    ,{
+                    "path" : "SportItemList/SportItemList",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "运动项目列表",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "pregnancy",
@@ -243,7 +252,16 @@
 					}
 
 				}
-			]
+			    ,{
+                    "path" : "tagManagement/tagManagement",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "标签管理",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "disease",
@@ -435,7 +453,16 @@
 					"navigationBarTitleText": "医院简介",
 					"transparentTitle": "auto"
 				}
-			}]
+			}    ,{
+                    "path" : "HospitalList/HospitalList",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "列表",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "publicPages",

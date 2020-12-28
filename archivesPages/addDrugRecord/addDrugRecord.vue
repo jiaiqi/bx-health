@@ -2,7 +2,7 @@
 	<view class="form-page">
 		<view class="drug-select-box" v-if="fields && fields.length > 0">
 			<!-- 药品选择 -->
-			<view class="title" v-if="drugList && drugList.length > 0">{{ addType === 'sport' ? '选择已完成运动项目' : '选择药物' }}</view>
+			<view class="title" v-if="drugList && drugList.length > 0">{{ addType === 'sport' ? '运动项目清单' : '药物清单' }}</view>
 			<view class="drug-list" v-if="drugList && drugList.length > 0">
 				<view class="drug-item" v-for="item in drugList" :class="{ active: item.checked }" @click="changeDrugChecked(item)">
 					<view class="title">{{ item.label }}</view>
@@ -21,7 +21,7 @@
 			:formType="type"
 			:moreConfig="colsV2Data && colsV2Data.more_config ? colsV2Data.more_config : null"
 		></a-form>
-
+		<view class="button-box" v-if="formType === 'detail' && isArray(fields) && fields.length > 0"><button class="cu-btn bg-red button" @click="deleteItem">删除</button></view>
 		<view class="button-box" v-if="colsV2Data && isArray(fields) && fields.length > 0">
 			<view v-for="(item, index) in buttons" :key="index" class="button">
 				<button v-if="item.display !== false" @click="onButton(item)" class="cu-btn bg-blue">
@@ -38,7 +38,9 @@ export default {
 	data() {
 		return {
 			fields: [],
+			formType: '',
 			ds_no: '',
+			dsr_no: '',
 			colsV2Data: null,
 			type: '',
 			serviceName: '',
@@ -48,6 +50,7 @@ export default {
 			addType: '',
 			fieldsCond: [], //treeSelector类型字段的条件
 			drugDetailItem: [],
+			defaultVal: {},
 			drugList: [], //当前用药计划的药物列表
 			checkPlanItemNoList: [], //已选药物
 			pb_no: '',
@@ -101,7 +104,9 @@ export default {
 				}
 				if (btn.button_name === '提交') {
 					btn.button_name = '完成';
-					// btn.button_name = this.addType === 'sport' ? '完成' : '服药';
+				}
+				if (btn.button_name === '编辑') {
+					btn.display = false;
 				}
 				if (btn.operate_params) {
 					let fieldData = btn.operate_params['data'];
@@ -123,7 +128,7 @@ export default {
 		}
 	},
 
-	onLoad(option) {
+	async onLoad(option) {
 		const destApp = option.destApp;
 		if (destApp) {
 			uni.setStorageSync('activeApp', destApp);
@@ -131,21 +136,20 @@ export default {
 		if (option.fieldsCond) {
 			this.fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
 		}
-		if (option.cond) {
-			this.defaultCondition = JSON.parse(decodeURIComponent(option.cond));
-		}
+
 		if (option.pb_no) {
 			this.pb_no = option.pb_no;
 		}
 		if (option.addType) {
 			this.addType = option.addType;
 		}
-		if (option.ds_no) {
-			this.ds_no = option.ds_no;
-			this.getDrugItemList();
-		}
+
 		if (option.params) {
 			this.params = JSON.parse(decodeURIComponent(option.params));
+		}
+		if (option.formType) {
+			this.formType = option.formType;
+			this.type = option.formType;
 		}
 
 		if (option.hasOwnProperty('params')) {
@@ -156,7 +160,8 @@ export default {
 			this.getFieldsV2();
 		} else if (option.serviceName && option.type) {
 			this.serviceName = option.serviceName;
-			this.type = option.type;
+			this.params.serviceName = option.serviceName;
+			this.type = option.formType ? option.formType : option.type;
 			this.getFieldsV2();
 		} else {
 			uni.showToast({
@@ -164,9 +169,56 @@ export default {
 				icon: 'none'
 			});
 		}
+		if (option.cond) {
+			this.defaultCondition = JSON.parse(decodeURIComponent(option.cond));
+			if (option.formType === 'detail') {
+				this.params.condition = this.defaultCondition;
+				let defaultVal = await this.getDefaultVal();
+				console.log(defaultVal);
+			}
+		}
+
+		if (option.ds_no) {
+			this.ds_no = option.ds_no;
+			this.getDrugItemList();
+		}
 	},
 	methods: {
+		deleteItem() {
+			let self = this;
+			if (self.defaultVal.id) {
+				uni.showModal({
+					title: '提醒',
+					content: '确认删除?',
+					success(res) {
+						if (res.confirm) {
+							let serviceName = 'srvhealth_plan_schedule_record_delete';
+							let url = self.getServiceUrl('health', serviceName, 'operate');
+							let req = [{ serviceName: serviceName, condition: [{ colName: 'id', ruleType: 'in', value: self.defaultVal.id }] }];
+							self.$http.post(url, req).then(res => {
+								if (res.data.state === 'SUCCESS') {
+									self.$emit('updateSuccess');
+									uni.showModal({
+										title: '提示',
+										content: '删除成功，即将返回上一级页面',
+										showCancel: false,
+										success(res) {
+											if (res.confirm) {
+												uni.navigateBack();
+											}
+										}
+									});
+								}
+							});
+						}
+					}
+				});
+			}
+		},
 		changeDrugChecked(e) {
+			if (this.formType === 'detail') {
+				return;
+			}
 			this.drugList.forEach(item => {
 				if (item.id === e.id) {
 					this.$set(item, 'checked', !e.checked);
@@ -187,6 +239,9 @@ export default {
 				return;
 			}
 			let serviceName = 'srvhealth_body_activity_contents_select';
+			if (this.formType === 'detail') {
+				serviceName = 'srvhealth_body_activity_record_select';
+			}
 			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
 				serviceName: serviceName,
@@ -194,15 +249,23 @@ export default {
 				page: { pageNo: 1, rownumber: 20 },
 				condition: [{ colName: 'sport_no', ruleType: 'in', value: list.map(item => item.sport_no).toString() }]
 			};
+			if (this.formType === 'detail') {
+				req.condition = [{ colName: 'plan_no', ruleType: 'eq', value: this.defaultVal.ds_no }, { colName: 'dsr_no', ruleType: 'eq', value: this.defaultVal.dsr_no }];
+			}
 			let res = await this.$http.post(url, req);
+			debugger;
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				list = list.map(item => {
+					debugger;
 					if (res.data.data.find(d => d.sport_no === item.sport_no)) {
 						item.image = res.data.data.find(d => d.sport_no === item.sport_no)['image'];
 						item.unit_amount = res.data.data.find(d => d.sport_no === item.sport_no)['unit_amount'];
 						item.unit_energy = res.data.data.find(d => d.sport_no === item.sport_no)['unit_energy'];
 						item.checked = false;
-						item.label = item.sport_name;
+						if (this.formType === 'detail') {
+							item.checked = true;
+						}
+						item.label = item.sport_name || item.name;
 						item.value = item.sport_no;
 					}
 					return item;
@@ -222,12 +285,46 @@ export default {
 				page: { pageNo: 1, rownumber: 20 },
 				condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.ds_no }]
 			};
+			if (this.defaultVal && this.defaultVal.dsr_no) {
+				console.log(this.defaultVal);
+				if (this.addType === 'sport') {
+					serviceName = 'srvhealth_body_activity_record_select';
+					req = {
+						serviceName: serviceName,
+						colNames: ['*'],
+						page: { pageNo: 1, rownumber: 20 },
+						condition: [{ colName: 'plan_no', ruleType: 'eq', value: this.ds_no }, { colName: 'dsr_no', ruleType: 'eq', value: this.defaultVal.dsr_no }]
+					};
+				} else {
+					serviceName = 'srvhealth_drug_schedule_record_detail_list_select';
+					req = {
+						serviceName: serviceName,
+						colNames: ['*'],
+						page: { pageNo: 1, rownumber: 20 },
+						condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.ds_no }, { colName: 'dsr_no', ruleType: 'eq', value: this.defaultVal.dsr_no }]
+					};
+				}
+				url = this.getServiceUrl('health', serviceName, 'select');
+			}
 			if (this.ds_no) {
 				let res = await this.$http.post(url, req);
 				if (Array.isArray(res.data.data)) {
 					if (this.addType == 'sport') {
-						this.drugList = await this.getSportItemInfo(res.data.data);
-						this.checkPlanItemNoList = this.drugList.map(item => item.sport_no);
+						if (this.formType === 'detail') {
+							this.drugList = res.data.data.map(item => {
+								item.label = item.name;
+								item.value = item.sports_no;
+								item.checked = true;
+								this.sportUnit.value = item.unit;
+								this.sportUnit.disabled = true;
+								this.sportField.value = item.amount;
+								this.sportField.disabled = true;
+								return item;
+							});
+						} else {
+							this.drugList = await this.getSportItemInfo(res.data.data);
+							this.checkPlanItemNoList = this.drugList.map(item => item.sport_no);
+						}
 					} else {
 						// 药物
 						this.drugList = res.data.data.map(item => {
@@ -254,6 +351,7 @@ export default {
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS') {
 					if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+						this.defaultVal = res.data.data[0];
 						return res.data.data[0];
 					}
 				}
@@ -269,9 +367,16 @@ export default {
 					title: colVs.service_view_name
 				});
 			}
+			let ignoreColumn = ['ds_no', 'person_no', 'dsr_no', 'create_time', 'create_user_disp'];
+			colVs._fieldInfo = colVs._fieldInfo.map(item => {
+				if (ignoreColumn.includes(item.column)) {
+					item.display = false;
+				}
+				return item;
+			});
 			switch (this.type) {
 				case 'update':
-					defaultVal = await this.getDefaultVal();
+					defaultVal = this.defaultVal;
 					this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 					break;
 				case 'add':
@@ -312,7 +417,10 @@ export default {
 					});
 					break;
 				case 'detail':
-					defaultVal = await this.getDefaultVal();
+					defaultVal = this.defaultVal;
+					if (defaultVal.dsr_no) {
+						this.dsr_no = defaultVal.dsr_no;
+					}
 					this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 					break;
 				default:
@@ -332,10 +440,11 @@ export default {
 					data: []
 				}
 			];
-
 			let checkDrugList = this.drugList.filter(item => item.checked);
 			req[0].data = checkDrugList.map(item => {
 				return {
+					ds_detail_no: item.ds_detail_no,
+					med_no: item.med_no,
 					dsr_no: recordInfo.dsr_no,
 					ds_no: item.ds_no,
 					s_code: item.s_code,
@@ -347,7 +456,6 @@ export default {
 					dosage_unit: item.dosage_unit
 				};
 			});
-			debugger;
 			if (this.addType === 'sport') {
 				url = this.getServiceUrl('health', 'srvhealth_body_activity_record_add', 'operate');
 				req = [
@@ -363,6 +471,7 @@ export default {
 								image: item.image,
 								name: item.sport_name,
 								plan_no: recordInfo.ds_no,
+								dsr_no: recordInfo.dsr_no,
 								sports_detail_no: item.spp_no,
 								sports_no: item.sport_no,
 								unit: item.unit,
@@ -373,7 +482,6 @@ export default {
 					}
 				];
 			}
-			debugger;
 			this.$http.post(url, req);
 		},
 		async onButton(e) {

@@ -209,12 +209,11 @@ export default {
 	height: calc(100vh - var(--window-top) - var(--window-bottom) - 100rpx);
 	/* #endif */
 	padding: 20rpx;
-	display: flex;
-	flex-wrap: wrap;
 	.drug-item {
 		display: inline-flex;
 		width: calc(33.33% - 40rpx / 3);
 		min-height: 100rpx;
+		max-height: 200rpx;
 		margin-right: 20rpx;
 		margin-bottom: 20rpx;
 		justify-content: center;

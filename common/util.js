@@ -1459,6 +1459,8 @@ export default {
 			} else if (no) {
 				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
 					'&thumbnailType=fwsu_100';
+			}else{
+				return false
 			}
 		}
 		Vue.prototype.requestSuccess = (res) => {

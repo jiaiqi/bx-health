@@ -16,9 +16,7 @@
 								confirm-type="search"
 							/>
 						</view>
-						<view class="action">
-							<text style="margin-right: 20rpx;" @click="search">搜索</text>
-						</view>
+						<view class="action"><text style="margin-right: 20rpx;" @click="search">搜索</text></view>
 					</view>
 				</view>
 			</view>
@@ -26,11 +24,11 @@
 		<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 			<text>已选择：</text>
 			<view v-for="(item, index) in childChooseArr" class="filtrate-choose-item">
-				<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light" ></text>
+				<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"></text>
 			</view>
 		</view>
 		<view class="filtrate-item-wrap">
-			<view v-for="(item, index) in copyData" :key="index" class="filtrate-item" :class="showSearch?'':'padding-filtrate-item'">
+			<view v-for="(item, index) in copyData" :key="index" class="filtrate-item" :class="showSearch ? '' : 'padding-filtrate-item'">
 				<view class="filtrate-item-left" style="display: flex;flex-shrink: 0;max-width: 152rpx;">{{ item.classify_name }}</view>
 				<view class="" style="display: flex;  flex-flow: wrap;">
 					<view @click="chooseMenu(item, cate)" v-for="(cate, i) in item.children" :class="cate.choose ? 'cate-active' : ''" class="filtrate-item-right">
@@ -70,13 +68,13 @@
 				>
 					<view class="smallbox">
 						<view v-if="searchArg.imgCol" class="smallbox-img">
-							<image width="100%" height="100%" v-if="!getImageUrl(food)" src="/static/none.png"></image>
+							<image width="100%" height="100%" v-if="getImageUrl(food)" src="/static/man-profile.png"></image>
 							<image width="100%" height="100%" v-else :src="getImageUrl(food)"></image>
 						</view>
 						<view class="textbox">
 							<view class="title-food">{{ food[searchArg.wordKey.title] }}</view>
 							<view v-if="searchArg.serviceName === 'srvhealth_person_relation_select'" class="content-right">
-								<text v-if="food.message_num" style="z-index: 1;">{{food.message_num>99?'99+':food.message_num}}</text>
+								<text v-if="food.message_num" style="z-index: 1;">{{ food.message_num > 99 ? '99+' : food.message_num }}</text>
 								<image src="/static/chat.png" mode=""></image>
 							</view>
 						</view>
@@ -93,10 +91,16 @@
 
 <script>
 import sPullScroll from '@/components/s-pull-scroll';
+import { mapState } from 'vuex';
 export default {
 	name: 'bx-filtrate',
 	components: {
 		sPullScroll
+	},
+	computed: {
+		...mapState({
+			vuex_userInfo: state => state.user.userInfo
+		})
 	},
 	props: {
 		childChooseArr: {
@@ -105,8 +109,8 @@ export default {
 				return [];
 			}
 		},
-		showSearch:{
-			type:Boolean,
+		showSearch: {
+			type: Boolean,
 			efault: false
 		},
 		menuAgList: {
@@ -125,7 +129,7 @@ export default {
 	data() {
 		return {
 			childChooseArrLength: 0,
-			searchValue:"",
+			searchValue: '',
 			heightStyle: 'calc(100vh-200upx)',
 			isShowMyList: false,
 			topNum: 100,
@@ -149,13 +153,12 @@ export default {
 			this.childChooseArrLength = newValue.length;
 		}
 	},
-	computed: {},
 	mounted() {
 		// this.getFoodsList()
 		if (this.menuAgList) {
 			this.copyData = this.deepClone(this.menuAgList);
 		}
-		console.log("----mounted----")
+		console.log('----mounted----');
 		this.onRefresh();
 	},
 	methods: {
@@ -186,9 +189,9 @@ export default {
 			if (serValue) {
 				this.getSearchValue(serValue);
 			} else {
-				this.isSeekValue = true
-				this.pageInfo.pageNo = 1
-				this.getFoodsList(null,this.classifyCond);
+				this.isSeekValue = true;
+				this.pageInfo.pageNo = 1;
+				this.getFoodsList(null, this.classifyCond);
 			}
 		},
 		/*触发搜索框**/
@@ -198,24 +201,24 @@ export default {
 			let req = { serviceName: this.searchArg.serviceName, colNames: ['*'], condition: [{ colName: this.searchArg.serColname, ruleType: 'like', value: value }] };
 			let res = await this.$http.post(url, req);
 			let resData = res.data.data;
-			if(resData.length === 0){
-				this.isSeekValue = false
-			}else{
-				let isHas = false
-				resData.forEach(seek=>{
-					if(seek.name === value){
-						isHas=true
+			if (resData.length === 0) {
+				this.isSeekValue = false;
+			} else {
+				let isHas = false;
+				resData.forEach(seek => {
+					if (seek.name === value) {
+						isHas = true;
 					}
-				})
-				if(!isHas){
-					this.isSeekValue = false
+				});
+				if (!isHas) {
+					this.isSeekValue = false;
 				}
 			}
 			this.foodList = resData;
 			for (let i = 0; i < resData.length; i++) {
 				if (resData[i][self.searchArg.imgCol]) {
 					let fileDatas = await self.getFilePath(resData[i][self.searchArg.imgCol]);
-					url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
+					url = self.$api.getFilePath + fileDatas[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
 					self.$set(resData[i], 'imgurl', url);
 				}
 			}
@@ -506,7 +509,7 @@ export default {
 		},
 		tofeedback() {
 			console.log('点击新增----');
-			this.$emit('click-add-item')
+			this.$emit('click-add-item');
 		},
 		onRefresh() {
 			this.pageInfo.pageNo = 1;
@@ -532,13 +535,26 @@ export default {
 			this.getFoodsList(this.order, this.condObj);
 		},
 		getImageUrl(item) {
+			let src = '';
 			if (item[this.searchArg.imgCol]) {
-				return this.$api.downloadFile + item[this.searchArg.imgCol] + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
+				src = this.getImagePath(item[this.searchArg.imgCol]);
 			}
+			if (!src) {
+				if (this.vuex_userInfo) {
+					if (this.vuex_userInfo.sex === '女') {
+						src = '/static/man-profile.png';
+					} else {
+						src = '/static/woman-profile.png';
+					}
+				} else {
+					src = '/static/woman-profile.png';
+				}
+			}
+			return src;
 		},
-		async getMessageInfo(no){
+		async getMessageInfo(no) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
-			let userno = this.$store.state.user.userInfo.userno
+			let userno = this.$store.state.user.userInfo.userno;
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
 				colNames: ['*'],
@@ -574,7 +590,7 @@ export default {
 			let res = await this.$http.post(url, req);
 			return res.data.data.length;
 		},
-		async getUserInfo(customer_no){
+		async getUserInfo(customer_no) {
 			let url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
@@ -583,12 +599,12 @@ export default {
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);
-			console.log("iserInfo-----",res)
+			console.log('iserInfo-----', res);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				return res.data.data[0]
+				return res.data.data[0];
 			}
 		},
-		async getFoodsList(order = null, cond = null, type = null, serviceName = null) {			
+		async getFoodsList(order = null, cond = null, type = null, serviceName = null) {
 			let self = this;
 			let url = this.getServiceUrl('health', serviceName ? serviceName : this.searchArg.serviceName, 'select');
 			let req = {
@@ -676,20 +692,18 @@ export default {
 						self.$set(data[i], 'imgurl', url);
 					}
 				}
-				if(self.searchArg.serviceName === 'srvhealth_person_relation_select'){
-					self.foodList.forEach(mes=>{
-						self.getUserInfo(mes.userb_person_no).then(no=>{
-							console.log('no-----',no)
-							if(no){
-								self.getMessageInfo(no.userno).then(a=>{
-									self.$set(mes,'message_num',a)
-								})
+				if (self.searchArg.serviceName === 'srvhealth_person_relation_select') {
+					self.foodList.forEach(mes => {
+						self.getUserInfo(mes.userb_person_no).then(no => {
+							console.log('no-----', no);
+							if (no) {
+								self.getMessageInfo(no.userno).then(a => {
+									self.$set(mes, 'message_num', a);
+								});
 							}
-						})
-						
-					})
+						});
+					});
 				}
-				
 			}
 			console.log('res---', res.data.data, this.colData);
 		}
@@ -738,7 +752,7 @@ export default {
 				background-color: rgba($color: #0bc99d, $alpha: 0.1);
 			}
 		}
-		.padding-filtrate-item{
+		.padding-filtrate-item {
 			padding: 30rpx 0;
 		}
 	}
@@ -918,6 +932,7 @@ export default {
 	flex-direction: column;
 	font-weight: 700;
 	align-items: center;
+	min-height: 200rpx;
 	.add-btn {
 		flex: 1;
 		font-size: 40rpx;
@@ -1252,29 +1267,29 @@ export default {
 	padding: 0 10rpx;
 }
 .content-right {
-			display: flex;
-			position: relative;
-			margin-top: 10rpx;
-			text {
-				background: red;
-				min-width: 30rpx;
-				height: 30rpx;
-				color: #fff;
-				font-weight: 600;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				border-radius: 20rpx;
-				font-size: 24rpx;
-				padding: 0 4rpx;
-				position: absolute;
-				left: 50%;
-				top: -10rpx;
-				z-index: 1px !important;
-			}
-			image {
-				width: 50rpx;
-				height: 50rpx;
-			}
-		}
+	display: flex;
+	position: relative;
+	margin-top: 10rpx;
+	text {
+		background: red;
+		min-width: 30rpx;
+		height: 30rpx;
+		color: #fff;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 20rpx;
+		font-size: 24rpx;
+		padding: 0 4rpx;
+		position: absolute;
+		left: 50%;
+		top: -10rpx;
+		z-index: 1px !important;
+	}
+	image {
+		width: 50rpx;
+		height: 50rpx;
+	}
+}
 </style>

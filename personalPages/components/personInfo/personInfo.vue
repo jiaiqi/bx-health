@@ -356,16 +356,17 @@ export default {
 				});
 			}
 			if (type === 'addTag') {
+				debugger
 				let fieldsCond = [
 					{ column: 'manager_no', display: false, value: this.doctorInfo.dt_no },
 					{ column: 'customer_no', display: false, value: this.userInfo.no },
 					{ column: 'dp_no', display: false, value: this.dp_no }
 				];
-				if (fieldsCond.filter(item => item.value && item.value).length === 3) {
+				// if (fieldsCond.filter(item => item.value && item.value).length === 3) {
 					uni.navigateTo({
 						url: '/publicPages/newForm/newForm?serviceName=srvhealth_user_label_set_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 					});
-				}
+				// }
 			}
 		},
 		async getUserInfo(customer_no) {

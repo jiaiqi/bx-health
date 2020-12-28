@@ -18,7 +18,7 @@
 					</view>
 				</view>
 				<view class="right">
-					<text class="cuIcon-pic" @click="makePhoneCall"></text>
+					<text class="cuIcon-phone" @click="makePhoneCall"></text>
 					<!-- <u-icon name="phone" @click="makePhoneCall"></u-icon> -->
 					</view>
 			</view>
