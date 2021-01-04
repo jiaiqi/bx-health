@@ -576,7 +576,9 @@ export default {
 				return o.MM + '-' + o.dd
 			} else if (type === 'dateTime') {
 				return o.HH + ':' + o.mm
-			} else {
+			} else if (type === 'time') {
+				return o.HH + ':' + o.mm+':'+o.ss
+			}else {
 				return o.yy + '-' + o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm + ':' + o.ss;
 			}
 		};
