@@ -6,60 +6,81 @@
 			<view class="weight">
 				<text class="label margin-right-xs">热量:</text>
 				<text class="heat">
-					{{ dietInfo.energy }}
+					{{ hotNum || '' }}
 					<text class="unit">千卡</text>
 				</text>
 			</view>
-			<view class="">
+			<view class="unit-box">
 				<text class="label text-bold margin-right-xs">单位:</text>
-				<text class="unit">{{ dietInfo.unit }}</text>
+				<text class="unit">
+					{{
+						dietInfo.unit_weight_g && dietInfo.unit === 'g'
+							? dietInfo.unit_weight_g + dietInfo.unit
+							: dietInfo.unit_amount && dietInfo.unit === 'g'
+							? dietInfo.unit_amount + dietInfo.unit
+							: dietInfo.unit
+					}}
+				</text>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-import eleData from './data.js'
+import eleData from './data.js';
 export default {
 	data() {
 		return {
-			eleData:eleData
+			eleData: eleData
 		};
+	},
+	computed: {
+		hotNum() {
+			let res = '';
+			if (this.dietInfo.energy) {
+				res = this.dietInfo.energy;
+			} else if (this.dietInfo.unit_energy && this.dietInfo.unit_amount) {
+				res = (this.dietInfo.unit_energy * this.dietInfo.unit_amount) / 100;
+			}
+			return res;
+		}
 	},
 	watch: {
 		dietInfo: {
-			handler(newValue, oldValue) {
-			}
+			handler(newValue, oldValue) {}
 		}
 	},
 	props: {
 		dietInfo: {
 			type: Object
 		}
-	},
-
+	}
 };
 </script>
 
 <style scoped lang="scss">
 .diet-info {
 	display: flex;
-	padding: 20rpx;
+	margin: 0 20rpx;
+	padding: 20rpx 0;
+	border-bottom: #eee 1rpx solid;
+	display: flex;
 	.img {
-		width: 150rpx;
-		height: 150rpx;
+		width: 100rpx;
+		height: 100rpx;
 		border-radius: 10rpx;
 		overflow: hidden;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	}
 	.info {
+		flex: 1;
 		min-width: 400rpx;
 		padding-left: 50rpx;
 		display: flex;
-		flex-direction: column;
+		flex-wrap: wrap;
 		.name {
+			width: 100%;
 			font-weight: 700;
-			max-width: 400rpx;
 			font-size: 16px;
 			display: flex;
 			flex-wrap: wrap;
@@ -67,8 +88,13 @@ export default {
 		.element {
 			color: #8dc63f;
 		}
+		.unit-box,
 		.weight {
-			padding: 10rpx 0;
+			display: flex;
+			align-items: center;
+			width: 50%;
+		}
+		.weight {
 			color: #ffb347;
 			.heat {
 				color: #ffb347;

@@ -13,7 +13,7 @@
 					class="image"
 					:src="getImagePath(vuex_userInfo.user_image) ? getImagePath(vuex_userInfo.user_image) : getImagePath(vuex_userInfo.profile_url)"
 				></image>
-				<text class="cuIcon-people image" v-else></text>
+				<image class="image" src="../../static/man-profile.png" v-else></image>
 			</view>
 			<view class="top-right" v-if="vuex_userInfo && vuex_userInfo.name && ((authSetting && authSetting.userInfo) || client_env === 'h5')">
 				<view class="top-right-name">{{ vuex_userInfo.name }}</view>
@@ -56,18 +56,38 @@
 							<text class="text-grey">身体数据</text>
 						</view>
 					</view>
-					<view class="cu-item arrow" @click="toPages('beDoctor')">
+					<view class="cu-item arrow" @click="toPages('beDoctor')" v-if="!manager_type">
 						<view class="content">
-							<text class="cuIcon-text"></text>
-							<text class="text-grey">成为医生</text>
+							<text class="cuIcon-form"></text>
+							<text class="text-grey">成为管理者</text>
 						</view>
 					</view>
-					<view class="cu-item arrow" @click="toPages('card')">
+					<view class="cu-item arrow" @click="toPages('card')" v-if="manager_type">
 						<view class="content">
-							<text class="cuIcon-text"></text>
+							<text class="cuIcon-card"></text>
 							<text class="text-grey">医生名片</text>
 						</view>
 					</view>
+					<view class="cu-item arrow" @click="toPages('font')">
+						<view class="content">
+							<text class="cuIcon-font"></text>
+							<text class="text-grey">字体设置</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+		<view class="cu-modal" :class="{ show: showModal }" v-if="!manager_type">
+			<view class="cu-dialog">
+				<view class="padding-sm">
+					<view class="text-bold">选择您要申请的管理者类型</view>
+					<bx-checkbox-group mode="button" class="margin-top" v-model="checkedManagerType">
+						<bx-checkbox v-for="item in managerTypeList" :key="item.label"  v-model="item.checked" :name="item.value">{{ item.label }}</bx-checkbox>
+					</bx-checkbox-group>
+				</view>
+				<view class="button-box">
+					<button class="bg-grey cu-btn button" @click="hideModal">取消</button>
+					<button class="bg-blue button" @click="updateManagerType">确定</button>
 				</view>
 			</view>
 		</view>
@@ -83,7 +103,32 @@ export default {
 			wxUserInfo: '',
 			userInfo: '',
 			doctor_message: 0,
-			hzMessage: 0
+			hzMessage: 0,
+			manager_type: '',
+			showModal: false,
+			checkedManagerType:[ '医师'],
+			managerTypeList: [
+				{
+					label: '医师',
+					value: '医师',
+					checked: true
+				},
+				{
+					label: '营养师',
+					value: '营养师',
+					checked: false
+				},
+				{
+					value: '健身教练',
+					label: '健身教练',
+					checked: false
+				},
+				{
+					value: '健康管理师',
+					label: '健康管理师',
+					checked: false
+				}
+			]
 		};
 	},
 	computed: {
@@ -102,6 +147,9 @@ export default {
 		})
 	},
 	methods: {
+		hideModal() {
+			this.showModal = false;
+		},
 		async getDoctorAllRecod(userNo) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
@@ -123,26 +171,6 @@ export default {
 						ruleType: 'notnull'
 					}
 				],
-				// relation_condition: {
-				// 	relation: 'OR',
-				// 	data: [
-				// 		{
-				// 			relation: 'AND',
-				// 			data: [
-				// 				{
-				// 					colName: 'receiver_account',
-				// 					ruleType: 'eq',
-				// 					value: userNo
-				// 				},
-				// 				{
-				// 					colName: 'msg_state',
-				// 					ruleType: 'eq',
-				// 					value: '未读'
-				// 				}
-				// 			]
-				// 		}
-				// 	]
-				// },
 				order: [
 					{
 						colName: 'create_time',
@@ -169,13 +197,13 @@ export default {
 				this.doctorList = res.data.data;
 				let noList = res.data.data.map(item => item.usera_no);
 				let noStr = noList.toString();
-				let count_num = 0
+				let count_num = 0;
 				// this.doctorList.forEach(item => {
-					this.getDoctorRecod(noStr, '医生').then(length => {
-						count_num += length;
-						this.doctor_message = count_num;
-						console.log('-----------------length---', count_num);
-					});
+				this.getDoctorRecod(noStr, '医生').then(length => {
+					count_num += length;
+					this.doctor_message = count_num;
+					console.log('-----------------length---', count_num);
+				});
 				// });
 			}
 		},
@@ -205,8 +233,8 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				// this.doctorList = res.data.data;
-				let arr =res.data.data.map(items =>items.userb_no).toString()
-				
+				let arr = res.data.data.map(items => items.userb_no).toString();
+
 				this.getDoctorRecod(arr, '患者').then(l => {
 					console.log('l------------>', l);
 					this.hzMessage = l;
@@ -234,47 +262,93 @@ export default {
 						url: '/personalPages/myDoctor/myDoctor'
 					});
 					break;
+				case 'font':
+					uni.navigateTo({
+						url: '/personalPages/FontSizeSetting/FontSizeSetting'
+					});
+					break;
 				case 'card':
 					uni.navigateTo({
 						url: '/personalPages/nameCard/nameCard'
 					});
 					break;
 				case 'beDoctor':
-					let userInfo = uni.getStorageSync('wxUserInfo');
-					let fieldsCond = [
-						{ column: 'dt_profile_url', display: false, value: this.vuex_userInfo ? this.vuex_userInfo.profile_url : '' },
-						{ column: 'owner_account', display: false, value: uni.getStorageSync('login_user_info').user_no }
-					];
-					uni.navigateTo({
-						url: '/publicPages/newForm/newForm?serviceName=srvhealth_doctor_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
-					});
-					break;
+					this.showModal = true;
+				// 	let userInfo = uni.getStorageSync('wxUserInfo');
+				// 	let fieldsCond = [
+				// 		{ column: 'dt_profile_url', display: false, value: this.vuex_userInfo ? this.vuex_userInfo.profile_url : '' },
+				// 		{ column: 'owner_account', display: false, value: uni.getStorageSync('login_user_info').user_no }
+				// 	];
+				// 	uni.navigateTo({
+				// 		url: '/publicPages/newForm/newForm?serviceName=srvhealth_doctor_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+				// 	});
+				// 	break;
 				case 'userList':
-					this.getDoctorInfo().then(res => {
-						if (res) {
-							this.$store.commit('SET_DOCTOR_INFO', res);
-							uni.navigateTo({
-								url: '/personalPages/userList/userList'
-							});
-						} else {
-							uni.showModal({
-								title: '提示',
-								content: '您还不是医生，是否申请成为医生',
-								success(res) {
-									if (res.confirm) {
-										self.toPages('beDoctor');
-									}
+					if (this.manager_type) {
+						uni.navigateTo({
+							url: '/personalPages/userList/userList'
+						});
+					} else {
+						uni.showModal({
+							title: '提示',
+							content: '当前用户不是管理人员,是否申请成为管理人员',
+							success(res) {
+								if (res.confirm) {
+									self.toPages('beDoctor');
 								}
-							});
-						}
-					});
+							}
+						});
+					}
+					// this.getDoctorInfo().then(res => {
+					// 	if (res) {
+					// 		this.$store.commit('SET_DOCTOR_INFO', res);
+					// 		uni.navigateTo({
+					// 			url: '/personalPages/userList/userList'
+					// 		});
+					// 	} else {
+					// 		uni.showModal({
+					// 			title: '提示',
+					// 			content: '您还不是医生，是否申请成为医生',
+					// 			success(res) {
+					// 				if (res.confirm) {
+					// 					self.toPages('beDoctor');
+					// 				}
+					// 			}
+					// 		});
+					// 	}
+					// });
 					break;
 				case 'updateInfo':
 					if (this.vuex_userInfo.no) {
 						let fieldsCond = [
 							{
 								column: 'no',
-								value: this.vuex_userInfo.no
+								value: this.vuex_userInfo.no,
+								display: false
+							},
+							{
+								column: '_userno_disp',
+								display: false
+							},
+							{
+								column: 'font_size',
+								display: false
+							},
+							{
+								column: 'userno',
+								display: false
+							},
+							{
+								column: 'create_time',
+								display: false
+							},
+							{
+								column: 'create_user',
+								display: false
+							},
+							{
+								column: 'create_user_disp',
+								display: false
 							}
 						];
 						uni.navigateTo({
@@ -379,6 +453,20 @@ export default {
 			// #endif
 			uni.navigateTo({
 				url: '/otherPages/personalDetail/personalDetail?type=' + type
+			});
+		},
+		updateManagerType() {
+			this.manager_type = this.checkedManagerType;
+			let url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
+			let req = [
+				{ serviceName: 'srvhealth_person_info_update', condition: [{ colName: 'id', ruleType: 'eq', value: this.userInfo.id }], data: [{ manager_type: this.checkedManagerType.toString() }] }
+			];
+			this.$http.post(url, req).then(res => {
+				if ((res.data.state = 'SUCCESS')) {
+					uni.showToast({
+						title: '申请成功'
+					});
+				}
 			});
 		},
 		async initPage() {
@@ -523,6 +611,9 @@ export default {
 			menus: ['shareAppMessage', 'shareTimeline']
 		});
 		// #endif
+		if (this.vuex_userInfo && this.vuex_userInfo.manager_type) {
+			this.manager_type = this.vuex_userInfo.manager_type;
+		}
 	}
 };
 </script>

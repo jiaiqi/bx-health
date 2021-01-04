@@ -240,9 +240,7 @@
 						<view class="diet-item" v-for="item in recentDiet" :key="item.diet_record_no">
 							<image :src="getImagePath(item.image)" mode="aspectFill" class="image"></image>
 							<view class="info">
-								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'">
-									<text class="cuIcon-check text-bold" v-if="item.checked"></text>
-								</view>
+								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'"><text class="cuIcon-check text-bold" v-if="item.checked"></text></view>
 								<view class="food-name">{{ item.name }}</view>
 								<view class="food-info">
 									<view class="amount">
@@ -689,10 +687,10 @@ export default {
 	},
 	onShow() {
 		this.getChooseFoodList();
-		this.getElementLabel();		
-		if(this.searchValue){
-			this.getSearchValue(this.searchValue)
-		}else{
+		this.getElementLabel();
+		if (this.searchValue) {
+			this.getSearchValue(this.searchValue);
+		} else {
 			this.onRefresh();
 		}
 	},
@@ -1062,8 +1060,8 @@ export default {
 						delete item._userno_disp;
 						delete item.checked;
 						delete item.amountEditable;
-						item.hdate = this.selectDate
-						item.htime = this.nowDateTime
+						item.hdate = this.selectDate;
+						item.htime = this.nowDateTime;
 						return item;
 					})
 				}
@@ -1166,9 +1164,7 @@ export default {
 				});
 			} else {
 				uni.navigateTo({
-					url:
-						'/publicPages/newForm/newForm?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&fieldsCond=' +
-						decodeURIComponent(JSON.stringify(cond))
+					url: '/publicPages/newForm/newForm?serviceName=srvhealth_mixed_food_nutrition_contents_add&type=add&addType=onwer&fieldsCond=' + decodeURIComponent(JSON.stringify(cond))
 				});
 			}
 		},
@@ -1790,7 +1786,7 @@ export default {
 			let page = this.pageInfo;
 			this.pageInfo.pageNo = 1;
 			let self = this;
-			setTimeout(() => {				
+			setTimeout(() => {
 				this.getFoodsList(this.order, this.condObj);
 				// self.getDrawCoupon(self.req.serviceName, self.req.cond).then(callBackData => {
 				// if (callBackData.page.rownumber * callBackData.page.pageNo >= callBackData.page.total) {
@@ -1828,10 +1824,7 @@ export default {
 			if (this.searchArg.type === 'food') {
 				uni.navigateTo({
 					url:
-						'/pages/specific/health/foodDetail/foodDetail?foods=' +
-						encodeURIComponent(JSON.stringify(itemFood)) +
-						'&filters=' +
-						encodeURIComponent(JSON.stringify(this.filterArr))
+						'/pages/specific/health/foodDetail/foodDetail?foods=' + encodeURIComponent(JSON.stringify(itemFood)) + '&filters=' + encodeURIComponent(JSON.stringify(this.filterArr))
 				});
 			} else if (this.searchArg.type === 'sport') {
 				uni.navigateTo({
@@ -2092,7 +2085,6 @@ export default {
 		},
 
 		async getFoodsList(order = null, cond = null, type = null, serviceName = null) {
-			
 			let self = this;
 			let url = this.getServiceUrl('health', serviceName ? serviceName : this.searchArg.serviceName, 'select');
 			let req = {
@@ -2242,8 +2234,11 @@ export default {
 			if (this.pageType === 'food') {
 				let food = encodeURIComponent(JSON.stringify(this.currFood));
 				if (!this.isShowMyList) {
+					// uni.navigateTo({
+					// 	url: '/otherPages/chooseFood/chooseFood?currFood=' + food + '&pageType=' + this.pageDetType
+					// });
 					uni.navigateTo({
-						url: '/otherPages/chooseFood/chooseFood?currFood=' + food + '&pageType=' + this.pageDetType
+						url: `/archivesPages/DietDetail/DietDetail?chooseDate=${this.nowDate}&no=${this.currFood.food_no}`
 					});
 				} else {
 					uni.navigateTo({

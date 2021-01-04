@@ -1,6 +1,6 @@
 <template>
 	<view class="page-wrap">
-		<view class="filter-box" v-if="classifyList.length>0"></view>
+		<view class="filter-box" v-if="classifyList.length > 0"></view>
 		<view class="layout-switch text-green">
 			<text class="cuIcon-cascades" v-if="layout === 'list'" @click="switchLayout('grid')"></text>
 			<text class="cuIcon-list" v-if="layout === 'grid'" @click="switchLayout('list')"></text>
@@ -9,9 +9,7 @@
 			<view class="list-item" v-for="(item, index) in list" :key="index" @click="toItemDetail">
 				<view class="profile"><image class="image" :src="getImagePath(item[fieldMap.image])" mode="aspectFit"></image></view>
 				<view class="content">
-					<view class="label">
-						{{ item[fieldMap.label] || '' }}
-					</view>
+					<view class="label">{{ item[fieldMap.label] || '' }}</view>
 				</view>
 			</view>
 		</view>
@@ -24,8 +22,8 @@ export default {
 	data() {
 		return {
 			list: [],
-			layout:'grid',
-			classifyList:[],
+			layout: 'list',
+			classifyList: [],
 			serviceName: 'srvhealth_store_mgmt_select',
 			condition: [{ colName: 'type', ruleType: 'like', value: '诊所医院' }],
 			page: {
@@ -44,10 +42,10 @@ export default {
 		switchLayout(e) {
 			this.layout = e;
 		},
-		toItemDetail(){
+		toItemDetail() {
 			uni.navigateTo({
-				url:'/pediaPages/hospitalOverview/hospitalOverview'
-			})
+				url: '/pediaPages/hospitalOverview/hospitalOverview'
+			});
 		},
 		async getList() {
 			let url = this.getServiceUrl('health', this.serviceName, 'select');
@@ -99,7 +97,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>.page-wrap {
+<style lang="scss" scoped>
+.page-wrap {
 	width: 100%;
 	padding: 20rpx;
 	.filter-box {
@@ -136,7 +135,7 @@ export default {
 			}
 		}
 	}
-	.text-green{
+	.text-green {
 		color: #0bc99d;
 	}
 	.layout-switch {

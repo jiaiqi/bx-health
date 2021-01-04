@@ -7,13 +7,13 @@
 			></view>
 			<view class="content-box">
 				<view class="avatar-bar">
-					<image :src="avatorPath ? avatorPath : '/static/icon/wode_selected.png'" mode="aspectFit" class="avatar-iamge"></image>
+					<image :src="avatorPath ? avatorPath : '/static/man-profile.png'" mode="aspectFit" class="avatar-iamge"></image>
 					<view class="info">
 						<view class="info_top">
 							<text class="username">{{ userInfo.name }}</text>
 							<view @click="toChatPage" class="content-right">
-								<text style="z-index: 1;" v-if="unreadMessage != 0">{{ unreadMessage }}</text>
-								<image src="../../static/chat.png" mode=""></image>
+								<text style="z-index: 1;" class="text" v-if="unreadMessage != 0">{{ unreadMessage }}</text>
+								<!-- <image class="image" src="../../static/chat.png" mode="aspectFit"></image> -->
 							</view>
 						</view>
 
@@ -48,7 +48,7 @@
 			<view class="title">
 				<view class="text">标签</view>
 				<view class="title-action" @click="navPages('addTag')">
-					<text class="cuIcon-time"></text>
+					<text class="cuIcon-tag"></text>
 					<text class="see-histroy">添加标签</text>
 				</view>
 				<!-- <view class="icon"><text class="cuIcon-right"></text></view> -->
@@ -171,6 +171,7 @@ export default {
 		return {
 			// customer_no: '',
 			userInfo: {},
+			manager_info: {},
 			isLoad: false,
 			inspectReportRecord: [],
 			totalInspectReportRecord: [],
@@ -197,6 +198,9 @@ export default {
 		},
 		avatorPath() {
 			return this.userInfo.profile_url ? this.getImagePath(this.userInfo.profile_url) : this.userInfo.user_image ? this.getImagePath(this.userInfo.user_image) : '';
+		},
+		managerInfo() {
+			return uni.getStorageSync('current_user_info');
 		},
 		requirement() {
 			if (this.userInfo.requirement) {
@@ -267,7 +271,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_user_label_set_select',
 				colNames: ['*'],
-				condition: [{ colName: 'dp_no', ruleType: 'eq', value: this.dp_no }]
+				condition: [{ colName: 'dp_no', ruleType: 'eq', value:this.doctorInfo.row_no }]
 			};
 			this.$http.post(url, req).then(res => {
 				if (res.data.state === 'SUCCESS') {
@@ -275,9 +279,6 @@ export default {
 				}
 			});
 		},
-		// getPatientInfo(){
-
-		// },
 		async selectInspectionReport() {
 			// 查询检查报告
 			let url = this.getServiceUrl('health', 'srvhealth_see_doctor_lab_examination_select', 'select');
@@ -356,17 +357,11 @@ export default {
 				});
 			}
 			if (type === 'addTag') {
-				debugger
-				let fieldsCond = [
-					{ column: 'manager_no', display: false, value: this.doctorInfo.dt_no },
-					{ column: 'customer_no', display: false, value: this.userInfo.no },
-					{ column: 'dp_no', display: false, value: this.dp_no }
-				];
-				// if (fieldsCond.filter(item => item.value && item.value).length === 3) {
-					uni.navigateTo({
-						url: '/publicPages/newForm/newForm?serviceName=srvhealth_user_label_set_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
-					});
-				// }
+				let fieldsCond = [{ column: 'manager_no', display: false, value: this.managerInfo.no }, { column: 'customer_no', display: false, value: this.userInfo.no }];
+				uni.navigateTo({
+					url: `/personalPages/tagManagement/tagManagement?manager_no=${this.managerInfo.no}&customer_no=${this.userInfo.no}`
+					// url: '/publicPages/newForm/newForm?serviceName=srvhealth_user_label_set_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+				});
 			}
 		},
 		async getUserInfo(customer_no) {
@@ -398,9 +393,11 @@ export default {
 			this.getMessageInfo(e.userno);
 		});
 		uni.$on('updateSuccess', () => {
-			console.log('0000000000000');
 			this.getMessageInfo(this.userInfo.userno);
 		});
+		uni.$on('tagsUpdate',(e)=>{
+			this.getTagList();
+		})
 		if (this.customer_no) {
 			this.getUserInfo(this.customer_no);
 		}
@@ -479,8 +476,33 @@ export default {
 						// position: relative;
 						.content-right {
 							display: flex;
-							position: relative;
-							text {
+							flex-wrap: wrap;
+							position: fixed;
+							bottom: 150rpx;
+							right: 100rpx;
+							width: 120rpx;
+							height: 120rpx;
+							border-radius: 50%;
+							background-color: #fff;
+							box-shadow: 18px 18px 30px #fff, -18px -18px 30px #fff, inset -18px -18px 30px #d1d9e6, inset 9px 9px 15px #d1d9e6, inset -9px -9px 15px #d1d9e6;
+							justify-content: center;
+							align-items: center;
+							&::before {
+								content: '';
+								position: absolute;
+								width: 100%;
+								height: 100%;
+								top: 2%;
+								left: 2%;
+								border-radius: 100%;
+								background: #ecf0f3;
+								box-shadow: 9px 9px 15px #d1d9e6, -9px -9px 15px #fff;
+								background-image: url(../../static/chat.png);
+								background-size: 60% 60%;
+								background-repeat: no-repeat;
+								background-position: center;
+							}
+							.text {
 								background: red;
 								min-width: 30rpx;
 								height: 30rpx;
@@ -497,9 +519,9 @@ export default {
 								top: -10rpx;
 								z-index: 1px !important;
 							}
-							image {
-								width: 50rpx;
-								height: 50rpx;
+							.image {
+								width: 80rpx;
+								height: 80rpx;
 							}
 						}
 					}

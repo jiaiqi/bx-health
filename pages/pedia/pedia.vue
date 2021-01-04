@@ -326,6 +326,22 @@ export default {
 					uni.setStorageSync('current_user', res.data.data[0].name);
 				}
 				this.$store.commit('SET_USERLIST', res.data.data);
+				if (this.userInfo && this.userInfo.font_size) {
+					switch (this.userInfo.font_size) {
+						case '小':
+							this.$store.commit('SET_GLOBAL_TEXT_SIZE', 14);
+							this.$store.commit('SET_GLOBAL_LABEL_SIZE', 14);
+							break;
+						case '中':
+							this.$store.commit('SET_GLOBAL_TEXT_SIZE', 16);
+							this.$store.commit('SET_GLOBAL_LABEL_SIZE', 16);
+							break;
+						case '大':
+							this.$store.commit('SET_GLOBAL_TEXT_SIZE', 18);
+							this.$store.commit('SET_GLOBAL_LABEL_SIZE', 18);
+							break;
+					}
+				}
 				uni.setStorageSync('user_info_list', res.data.data);
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {
@@ -348,7 +364,7 @@ export default {
 	},
 	created() {
 		this.getPageItem();
-		this.getPageConfig();
+		// this.getPageConfig();
 	},
 	onShow() {
 		this.initPage();

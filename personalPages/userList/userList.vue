@@ -24,9 +24,7 @@ export default {
 		};
 	},
 	methods: {
-		onBack(){
-			
-		},
+		onBack() {},
 		toPages(type, item) {
 			if (type === 'patients') {
 				uni.navigateTo({
@@ -60,7 +58,7 @@ export default {
 			let obj = {
 				classify_name: '性别',
 				type: 'food',
-				colunn: 'sex',
+				colunn: 'userb_sex',
 				children: [
 					{
 						title: '全部',
@@ -85,10 +83,10 @@ export default {
 			this.searchArg = {
 				serviceName: 'srvhealth_person_relation_select',
 				imgCol: 'userb_profile_url',
-				isShowCouple:true,
-				pageRowNumber:20,
-				topNum:250,
-				condition: [{ colName: 'usera_person_no', ruleType: 'like', value: this.currentUser.no}],
+				isShowCouple: true,
+				pageRowNumber: 20,
+				topNum: 250,
+				condition: [{ colName: 'usera_person_no', ruleType: 'like', value: this.currentUser.no }],
 				wordKey: {
 					title: 'userb_name'
 				}
@@ -96,7 +94,7 @@ export default {
 		}
 	},
 	onReady() {
-		console.log("app-onReady======>")
+		console.log('app-onReady======>');
 	},
 	onShow() {
 		let userInfo = uni.getStorageSync('wxUserInfo');
@@ -112,13 +110,13 @@ export default {
 				this.buildSearchArg(res);
 				this.buildMenuAgList();
 			});
-		}		
+		}
 	},
 	mounted() {
-		uni.$on('backPage',()=>{
-			this.$refs.filter.onRefresh()
-		})
-		console.log("--mounted---")
+		uni.$on('backPage', () => {
+			this.$refs.filter.onRefresh();
+		});
+		console.log('--mounted---');
 	}
 };
 </script>

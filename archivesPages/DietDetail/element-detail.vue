@@ -48,8 +48,7 @@ export default {
 			showChart: true,
 			eleData: eleData,
 			nutrientList: [],
-			chartData: {
-			}
+			chartData: {}
 		};
 	},
 	props: {
@@ -69,8 +68,9 @@ export default {
 	watch: {
 		dietInfo: {
 			handler(newValue, oldValue) {
-				if (newValue && newValue.diet_record_no) {
-						this.switchTab(true)
+				if (newValue &&( newValue.diet_record_no||newValue.food_no)) {
+					this.switchTab(true);
+					// this.buildChartOption();
 				}
 			}
 		}
@@ -98,6 +98,7 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
+			
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.nutrientList = res.data.data;
 				let result = res.data.data.filter(item => {
@@ -146,6 +147,9 @@ export default {
 		},
 		getEnergyListValue(foodInfo) {
 			let currentDiet = this.deepClone(this.dietInfo);
+			if (currentDiet.amount === 0) {
+				currentDiet.amount = 1;
+			}
 			let dietRecordList = this.deepClone(this.dietList);
 			let energyList = this.deepClone(this.eleData);
 			let eleArr = [];
@@ -177,7 +181,7 @@ export default {
 			let foodTypes = this.deepClone(dietRecordList);
 			eleArr = eleArr.map(ele => {
 				dietRecordList.forEach(diet => {
-					if (diet.diet_record_no === currentDiet.diet_record_no) {
+					if (diet.diet_record_no === currentDiet.diet_record_no || diet.food_no === currentDiet.food_no) {
 						diet = currentDiet;
 					}
 					let ratio = 1;
@@ -194,6 +198,9 @@ export default {
 		},
 		async buildChartOption(dietInfo) {
 			let currentDiet = this.deepClone(this.dietInfo);
+			if (currentDiet.amount === 0) {
+				currentDiet.amount = 1;
+			}
 			// if(dietInfo){
 			// 	 currentDiet = this.deepClone(dietInfo);
 			// }
@@ -203,6 +210,9 @@ export default {
 				return item.name;
 			});
 			let legendData = ['其它食物', '当前食物', 'NRV%达标线'];
+			if (currentDiet.food_no && !currentDiet.diet_record_no) {
+				legendData = ['当前食物', 'NRV%达标线'];
+			}
 			let seriesData = legendData.map(le => {
 				let obj = {
 					name: le,
@@ -230,6 +240,9 @@ export default {
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
 							let ratio = currentDiet.unit_weight_g / 100;
+							if (!currentDiet.unit_weight_g && currentDiet.unit_amount) {
+								ratio = currentDiet.unit_amount / 100;
+							}
 							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
 							let num = (val * 100) / Number(cur.EAR);
 							num = parseFloat(num.toFixed(1));
@@ -286,8 +299,8 @@ export default {
 						type: 'value',
 						axisLabel: {
 							// formatter: `{value}%`
-							formatter(val){
-								return `${parseInt(val.toFixed(1))}%`
+							formatter(val) {
+								return `${parseInt(val.toFixed(1))}%`;
 							}
 						}
 					}
@@ -393,7 +406,7 @@ export default {
 	.view-tabs {
 		display: flex;
 		width: 100%;
-		margin: 30rpx 20rpx 0;
+		margin: 10rpx 20rpx 0;
 		.view-tab {
 			text-align: center;
 			line-height: 30rpx;

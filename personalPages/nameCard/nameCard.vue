@@ -7,8 +7,8 @@
 					<text>{{ userInfo.name }}</text>
 				</view>
 			</view>
-			<view class="qr-code" v-if="doctoreInfo && doctoreInfo.dt_no">
-				<uni-qrcode cid="qrcodeCanvas" :text="doctoreInfo.dt_no" :size="size" foregroundColor="#333" makeOnLoad @makeComplete="qrcodeCanvasComplete"></uni-qrcode>
+			<view class="qr-code" v-if="userInfo && userInfo.no">
+				<uni-qrcode cid="qrcodeCanvas" :text="userInfo.no" :size="size" foregroundColor="#333" makeOnLoad @makeComplete="qrcodeCanvasComplete"></uni-qrcode>
 			</view>
 			<view class="tips">扫描上方二维码关注当前医生</view>
 		</view>
@@ -29,8 +29,10 @@ export default {
 	},
 	computed: {
 		avatarUrl() {
-			if (this.userInfo.profile_url) {
-				return this.$api.downloadFile + this.userInfo.profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+			if (this.userInfo.user_image) {
+				return this.getImagePath(this.userInfo.user_image);
+			} else if (this.userInfo.profile_url) {
+				return this.getImagePath(this.userInfo.profile_url);
 			}
 		}
 	},
@@ -63,11 +65,11 @@ export default {
 		}
 		if (userInfo) {
 			this.userInfo = userInfo;
-			let docInfo = await this.getDoctorInfo();
-			if (docInfo && docInfo.dt_no) {
-				docInfo.dt_no = `https://wx2.100xsys.cn/mpwc/${docInfo.dt_no}`;
-				this.doctoreInfo = docInfo;
-			}
+			// let docInfo = await this.getDoctorInfo();
+			// if (docInfo && docInfo.dt_no) {
+			// 	docInfo.dt_no = `https://wx2.100xsys.cn/mpwc/${docInfo.dt_no}`;
+			// 	this.doctoreInfo = docInfo;
+			// }
 		} else {
 			uni.showToast({
 				title: '未发现用户信息',
@@ -89,7 +91,7 @@ export default {
 	.card {
 		width: 100%;
 		background-color: #fff;
-		border-radius: 20rpx;
+		border-radius: 10rpx;
 		// height: 300rpx;
 		min-height: 840rpx;
 		padding: 20rpx;

@@ -20,8 +20,8 @@
 			<view class="symptom-page" v-if="pageType === 'symptom'">
 				<view class="symptom-item-list">
 					<view class="symptom-item" v-for="item in symptomRecord" :key="item.id">
-						<view class="name">{{ item.symptoms_name?item.symptoms_name:'' }}</view>
-						<view class="describe">{{ item.symptoms_remark?item.symptoms_remark:'' }}</view>
+						<view class="name">{{ item.symptoms_name ? item.symptoms_name : '' }}</view>
+						<view class="describe">{{ item.symptoms_remark ? item.symptoms_remark : '' }}</view>
 						<view class="date">{{ item.create_time.slice(5, 16) }}</view>
 					</view>
 				</view>
@@ -329,8 +329,15 @@ export default {
 
 		bmi() {
 			// 体重（kg）/身高*身高（m）
+
 			if (this.userInfo.weight && this.userInfo.height) {
-				return Number(((this.userInfo.weight * 10000) / this.userInfo.height ** 2).toFixed(1));
+				if (Array.isArray(this.historyRecord) && this.historyRecord.length > 0) {
+					if (this.historyRecord[0].weight) {
+						return Number(((this.historyRecord[0].weight * 10000) / this.userInfo.height ** 2).toFixed(1));
+					}
+				} else {
+					return Number(((this.userInfo.weight * 10000) / this.userInfo.height ** 2).toFixed(1));
+				}
 			}
 		},
 		weightForBmi() {
@@ -928,7 +935,7 @@ export default {
 					});
 				}
 				pushData = pushData.reverse();
-				if(pushData.length>0){
+				if (pushData.length > 0) {
 					this.insertStepData(pushData);
 				}
 			}

@@ -182,8 +182,25 @@ uni-page-body > uni-view {
 	display: flex;
 	justify-content: space-around;
 	flex-wrap: wrap;
+	align-items: center;
+	margin-bottom: 20rpx;
 	.button {
 		min-width: 45%;
+		  position: relative;
+		  border: 0px;
+		  display: inline-flex;
+		  align-items: center;
+		  justify-content: center;
+		  box-sizing: border-box;
+		  padding: 0 15px;
+		  font-size: 14px;
+		  height: 32px;
+		  line-height: 1;
+		  text-align: center;
+		  text-decoration: none;
+		  overflow: visible;
+		  margin-left: initial;
+		  margin-right: initial;
 	}
 }
 </style>

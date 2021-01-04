@@ -11,8 +11,15 @@
 			<button class="cu-btn bg-blue" type="primary" v-for="btn in colsV2Data._formButtons" :key="btn.id" @click="onButton(btn)">{{ btn.button_name }}</button>
 		</view>
 		<view class="button-box" v-if="isArray(fields) && fields.length > 0 && params.to"><button class="cu-btn bg-blue" @click="onButton(nextBtn)">下一步</button></view>
-		<view class="button-box" v-if="this.params.defaultVal && this.params.defaultVal.report_daq_survey_activity_no && this.params.defaultVal.report_daq_survey_ack_no">
-			<button class="cu-btn bg-blue" @click="toPages('quest')">查看更多</button>
+		<view class="button-box" v-if="isArray(fields) && fields.length > 0">
+			<button class="cu-btn bg-red" @click="toPages('delete')" v-if="params.defaultVal && params.defaultVal.jybg_no">删除报告</button>
+			<button
+				class="cu-btn bg-blue"
+				@click="toPages('quest')"
+				v-if="this.params.defaultVal && this.params.defaultVal.report_daq_survey_activity_no && this.params.defaultVal.report_daq_survey_ack_no"
+			>
+				查看更多
+			</button>
 		</view>
 	</view>
 </template>
@@ -45,14 +52,52 @@ export default {
 		};
 	},
 	methods: {
+		async deleteReport() {
+			if (this.params.defaultVal && this.params.defaultVal.jybg_no) {
+				let url = this.getServiceUrl('health', 'srvhealth_examination_report_delete', 'operate');
+				let req = [{ serviceName: 'srvhealth_examination_report_delete', condition: [{ colName: 'jybg_no', ruleType: 'in', value: this.params.defaultVal.jybg_no }] }];
+				let res = await this.$http.post(url, req);
+				if (res.data.state === 'SUCCESS') {
+					uni.showModal({
+						title: '提示',
+						content: '删除成功，即将返回上一页面',
+						showCancel: false,
+						success(res) {
+							if (res.confirm) {
+								uni.switchTab({
+									url: '/pages/archives/archives'
+								});
+							}
+						}
+					});
+				}
+			} else {
+				uni.showToast({
+					title: '数据有误，请重新进入此页面后再进行操作',
+					icon: none
+				});
+			}
+		},
 		toPages(type) {
-			if (type === 'quest') {
+			let self = this;
+			if (type === 'delete') {
+				// 删除报告
+				uni.showModal({
+					title: '提示',
+					content: '确认删除此报告?',
+					success(res) {
+						if (res.confirm) {
+							self.deleteReport();
+						}
+					}
+				});
+			} else if (type === 'quest') {
 				uni.navigateTo({
 					url: `/questionnaire/index/index?formType=detail&activity_no=${this.params.defaultVal.report_daq_survey_activity_no}&status=完成&fill_batch_no=${
 						this.params.defaultVal.report_daq_survey_ack_no
 					}`
 				});
-			}else{
+			} else {
 				this.srvType = type;
 				if (this.params.to && this.params.idCol && this.params.submitData && this.params.submitData[this.params.idCol]) {
 					uni.redirectTo({
@@ -352,12 +397,16 @@ export default {
 					defaultVal = await this.getDefaultVal();
 					this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 					this.fields = this.fields.map(field => {
+						if (field.column === 'create_user_disp') {
+							field.display = false;
+						}
 						if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
 							this.fieldsCond.forEach(item => {
 								if (item.column === field.column) {
 									if (item.hasOwnProperty('display')) {
 										field.display = item.display;
 									}
+
 									if (item.hasOwnProperty('value')) {
 										field.value = item.value;
 									}

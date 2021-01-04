@@ -6,13 +6,7 @@
 		</view>
 		<view class="docter-list">
 			<view class="doctor-item" v-for="item in doctorList" :key="item.id">
-				<view class="profile">
-					<image
-						class="image"
-						:src="usera_profile_url(item)"
-						mode="aspectFill"
-					></image>
-				</view>
+				<view class="profile"><image class="image" :src="usera_profile_url(item)" mode="aspectFill"></image></view>
 				<view class="content">
 					<view class="content-left">
 						<text class="doctor-name">{{ item.usera_name }}</text>
@@ -44,7 +38,7 @@ export default {
 	},
 	methods: {
 		usera_profile_url(item) {
-			return item.usera_image ? this.getImagePath(item.usera_image) : item.usera_profile_url ? this.getImagePath(item.usera_profile_url) : '/static/man-profile.png'
+			return item.usera_image ? this.getImagePath(item.usera_image) : item.usera_profile_url ? this.getImagePath(item.usera_profile_url) : '/static/man-profile.png';
 		},
 		getPicPath(no) {
 			if (no) {
@@ -153,14 +147,39 @@ export default {
 				console.log('未找到医生信息');
 				return;
 			}
-			let url = this.getServiceUrl('health', 'srvhealth_patient_doctor_add', 'operate');
+			let serviceName = 'srvhealth_person_relation_add';
+			let url = this.getServiceUrl('health', serviceName, 'operate');
 			let req = [
 				{
-					serviceName: 'srvhealth_patient_doctor_add',
+					serviceName: serviceName,
 					condition: [],
 					data: [{ customer_no: this.userInfo.no, customer_name: this.userInfo.name, manager_no: docInfo.dt_no, manager_name: docInfo.dt_name }]
 				}
 			];
+			req[0].data = [
+				{
+					serviceName: 'srvhealth_person_relation_add',
+					condition: [],
+					data: [
+						{
+							usera_person_no: docInfo.no,
+							usera_name: docInfo.name,
+							usera_no: docInfo.userno,
+							usera_profile_url: docInfo.profile_url,
+							usera_image: docInfo.user_image,
+							relation_type: '管理',
+							userb_person_no: this.userInfo.no,
+							userb_name: this.userInfo.name,
+							userb_image: this.userInfo.user_image,
+							userb_no: this.userInfo.userno,
+							userb_profile_url: this.userInfo.profile_url,
+							userb_sex: this.userInfo.sex,
+							state: '正常'
+						}
+					]
+				}
+			];
+			debugger
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				this.getBindDoctor();
@@ -178,7 +197,7 @@ export default {
 			let doctorList = self.deepClone(self.doctorList);
 			if (Array.isArray(doctorList) && doctorList.length > 0) {
 				doctorList.forEach(item => {
-					if (item.dt_no === dtno) {
+					if (item.usera_person_no === dtno) {
 						hasBind = true;
 					}
 				});
@@ -193,10 +212,10 @@ export default {
 				});
 			} else {
 				this.getDoctorInfo(dtno).then(docInfo => {
-					if (docInfo && docInfo.dt_no) {
+					if (docInfo && docInfo.no) {
 						uni.showModal({
 							title: '提示',
-							content: '确认是否绑定' + docInfo.dt_name + '为您的医生',
+							content: '确认是否绑定' + docInfo.name + '为您的医生',
 							confirmText: '绑定',
 							success(res) {
 								if (res.confirm) {
@@ -216,11 +235,12 @@ export default {
 
 		async getDoctorInfo(no, isSelf) {
 			// 查找医生信息
-			let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
+			let serviceName = 'srvhealth_person_info_select';
+			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
-				serviceName: 'srvhealth_doctor_select',
+				serviceName: serviceName,
 				colNames: ['*'],
-				condition: [{ colName: 'dt_no', ruleType: 'in', value: no }],
+				condition: [{ colName: 'no', ruleType: 'in', value: no }],
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);

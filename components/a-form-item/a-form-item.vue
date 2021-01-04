@@ -1,17 +1,15 @@
 <template>
 	<view class="form-item" v-if="fieldData.display" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid }">
 		<label
+			:for="fieldData.column"
 			class="form-item-label"
 			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }"
 			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
 		>
 			<text class="text-red is-required">{{ fieldData.isRequire ? '*' : '' }}</text>
-			<text class="label">{{ fieldData.label }}</text>
+			<text class="label" :for="fieldData.column">{{ fieldData.label }}</text>
 		</label>
-		<view
-			class="form-item-content"
-			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }"
-		>
+		<view class="form-item-content" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }">
 			<!-- detail-详情-start -->
 			<view class="form-item_image" v-if="pageType === 'detail' && fieldData.type === 'images'">
 				<image
@@ -374,13 +372,13 @@ export default {
 					if (type === 'add') {
 						if (this.fieldData.value + step <= this.fieldData.max) {
 							this.fieldData.value = Number((this.fieldData.value + step).toFixed(1));
-						}else{
+						} else {
 							clearInterval(this.longpressTimer);
 						}
 					} else if (type === 'minus') {
 						if (this.fieldData.value - step >= this.fieldData.min) {
 							this.fieldData.value = Number((this.fieldData.value - step).toFixed(1));
-						}else{
+						} else {
 							clearInterval(this.longpressTimer);
 						}
 					}
@@ -710,11 +708,7 @@ export default {
 		},
 		getValid() {
 			if (this.fieldData.isRequire && this.fieldData.value) {
-				if (
-					this.fieldData.hasOwnProperty('_validators') &&
-					this.fieldData._validators.hasOwnProperty('isType') &&
-					typeof this.fieldData._validators.isType === 'function'
-				) {
+				if (this.fieldData.hasOwnProperty('_validators') && this.fieldData._validators.hasOwnProperty('isType') && typeof this.fieldData._validators.isType === 'function') {
 					this.fieldData.valid = this.fieldData._validators.isType(this.fieldData.value);
 					this.valid.valid = true;
 				} else {
@@ -885,8 +879,8 @@ export default {
 		}
 		.form-item-content_detail {
 			&.image {
-				width: 100rpx;
-				height: 100rpx;
+				width: 200rpx;
+				height: 200rpx;
 			}
 		}
 		.form-item-content_value {

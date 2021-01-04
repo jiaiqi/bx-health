@@ -1457,6 +1457,9 @@ export default {
 			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
 				return no
 			} else if (no) {
+				if(no.indexOf('&bx_auth_ticket')!==-1){
+					no = no.split('&bx_auth_ticket')[0]
+				}
 				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
 					'&thumbnailType=fwsu_100';
 			}else{

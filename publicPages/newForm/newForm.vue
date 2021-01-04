@@ -261,6 +261,7 @@ export default {
 			}
 			switch (colVs.use_type) {
 				case 'update':
+				case 'detail':
 					defaultVal = await this.getDefaultVal();
 					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 					this.fields = fields.map(field => {
@@ -328,12 +329,12 @@ export default {
 						return field;
 					});
 					break;
-				case 'detail':
-					defaultVal = await this.getDefaultVal();
-					this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
-					break;
-				default:
-					break;
+				// case 'detail':
+				// 	defaultVal = await this.getDefaultVal();
+				// 	this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
+				// 	break;
+				// default:
+				// 	break;
 			}
 		}
 	},

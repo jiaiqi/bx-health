@@ -70,9 +70,12 @@ export default {
 			uni.startPullDownRefresh();
 		},
 		toItemDetail() {
-			uni.navigateTo({
-				url: '/pediaPages/hospitalOverview/hospitalOverview'
-			});
+			// uni.showToast({
+				
+			// })
+			// uni.navigateTo({
+			// 	url: '/pediaPages/hospitalOverview/hospitalOverview'
+			// });
 		},
 		async getClassifyList() {
 			let url = this.getServiceUrl('health', this.serviceName, 'select');
@@ -141,12 +144,10 @@ export default {
 <style lang="scss" scoped>
 .page-wrap {
 	width: 100%;
-	padding: 20rpx;
 	.filter-box {
 		display: flex;
 		background-color: #fff;
 		padding: 20rpx;
-		border-radius: 20rpx;
 		align-items: center;
 		.label {
 			margin-right: 20rpx;
@@ -187,7 +188,7 @@ export default {
 	.list-box {
 		display: flex;
 		flex-wrap: wrap;
-
+		padding:0 20rpx;
 		.list-item {
 			width: calc(25% - 60rpx / 4);
 			margin-bottom: 20rpx;

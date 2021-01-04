@@ -50,7 +50,7 @@
 					<view class="center-action">
 						<text class="cuIcon-back operate" @click="changeDate('-')"></text>
 						<text @click="toPages('open-calendar')">
-							<text>{{ info.currentDate || nowDate }}</text>
+							<text>{{ info.currentDate || nowDate }}{{ info.currentDate === nowDate ? '(今天)' : '' }}</text>
 						</text>
 						<text class="cuIcon-right operate" @click="changeDate('+')"></text>
 					</view>
@@ -253,6 +253,7 @@ export default {
 		},
 		openCalendar() {},
 		getDegree(drugList, type) {
+			
 			if (type === 'degree') {
 				return `${drugList.filter(item => item.hasTook).length}/${drugList.length}`;
 			} else {
@@ -272,6 +273,11 @@ export default {
 						width: `${num * 100}%`,
 						bg: 'bg-green'
 					};
+				}else if(this.planDetail.play_srv!=='用药'||this.planDetail.play_srv!=='运动'){
+					return {
+						width: `100%`,
+						bg: 'bg-blue'
+					}
 				}
 			}
 		},
@@ -398,15 +404,22 @@ export default {
 					} else if (this.planDetail.play_srv) {
 						url += '&addType=' + this.planDetail.play_srv;
 					}
+					if (this.planDetail.play_srv === '测血压') {
+						return 
+						url = '/otherPages/otherIndicator/otherIndicator?type=bp&planNo=' + this.planNo;
+					}
 					break;
 				case 'record':
-					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_plan_schedule_record_add&pb_no=${
+					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_plan_schedule_record_add&date=${this.info.currentDate}&pb_no=${
 						this.planDetail.owner_person_no
 					}&type=add&cond=${encodeURIComponent(JSON.stringify(condition))}&ds_no=${this.planNo}`;
 					if (this.planDetail.play_srv === '运动') {
 						url += '&addType=sport';
 					} else if (this.planDetail.play_srv) {
 						url += '&addType=' + this.planDetail.play_srv;
+					}
+					if (this.planDetail.play_srv === '测血压') {
+						url = '/otherPages/otherIndicator/otherIndicator?type=bp&planNo=' + this.planNo;
 					}
 					break;
 				case 'open-calendar':
@@ -599,6 +612,31 @@ export default {
 			if (this.login_user_info && this.login_user_info.user_no) {
 				req.condition.push({ colName: 'create_user', ruleType: 'eq', value: this.login_user_info.user_no });
 			}
+			if (this.planDetail.play_srv === '测血压') {
+				url = this.getServiceUrl('health', 'srvhealth_blood_pressure_record_select', 'select');
+				req.serviceName = 'srvhealth_blood_pressure_record_select';
+				req.condition = [{ colName: 'ps_no', ruleType: 'eq', value: no }];
+				req.order = [];
+				if (date) {
+					req.condition.push({ colName: 'create_time', ruleType: 'like', value: date });
+				}
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data)) {
+					this.drugRecord = [
+						{
+							date: date,
+							data: res.data.data.map(item => {
+								item.take_time = item.create_time.slice(11);
+								item.date = item.create_time.slice(0, 10);
+								item.take_date = item.date;
+								item.hasTook = true; //已服用
+								return item;
+							})
+						}
+					];
+				}
+				return;
+			}
 			let res = await this.$http.post(url, req);
 			setTimeout(() => {
 				this.showCalender = true;
@@ -684,10 +722,10 @@ export default {
 										info.info = '正常';
 									} else if (detail.drugList.length > 0 && detail.drugList.length < this.drugList.length) {
 										info.status = 'warning';
-										info.info = '漏服药';
+										info.info = '缺少';
 									} else if (detail.drugList.length == 0) {
 										info.status = 'error';
-										info.info = '未服药';
+										info.info = '未进行';
 									}
 								}
 							});
@@ -990,11 +1028,6 @@ export default {
 			border: none;
 		}
 		.operate {
-			height: 50rpx;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			border-radius: 50%;
 			&.margin-right-xs {
 				margin-right: 15rpx;
 			}

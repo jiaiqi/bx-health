@@ -10,6 +10,7 @@
 				</view>
 			</view>
 		</view>
+		
 		<a-form-item v-if="selectedDrug" :field="sportField" pageType="add" ref="fitem"></a-form-item>
 		<a-form-item v-if="selectedDrug" :field="sportUnit" pageType="add" ref="fitem"></a-form-item>
 		<a-form
@@ -54,6 +55,7 @@ export default {
 			drugList: [], //当前用药计划的药物列表
 			checkPlanItemNoList: [], //已选药物
 			pb_no: '',
+			selectDate: '',
 			sportField: {
 				column: 'amount',
 				label: '运动量',
@@ -79,10 +81,8 @@ export default {
 	},
 	computed: {
 		selectedDrug() {
-			if (this.addType === 'sport') {
-				return this.drugList.find(function(item) {
-					return item.checked;
-				});
+			if (this.addType === 'sport'||this.addType === 'sport'==='运动') {
+				return this.drugList.find(item=>item.checked);
 			}
 		},
 		buttons: function() {
@@ -136,7 +136,9 @@ export default {
 		if (option.fieldsCond) {
 			this.fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
 		}
-
+		if (option.date) {
+			this.selectDate = option.date;
+		}
 		if (option.pb_no) {
 			this.pb_no = option.pb_no;
 		}
@@ -390,7 +392,7 @@ export default {
 							field.display = false;
 						}
 						if (field.column === 'take_date') {
-							field.value = this.formateDate();
+							field.value = this.selectDate ? this.selectDate : this.formateDate();
 							field.end = this.formateDate();
 						}
 						if (field.column === 'take_time') {

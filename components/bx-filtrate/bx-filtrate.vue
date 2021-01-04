@@ -68,7 +68,7 @@
 				>
 					<view class="smallbox">
 						<view v-if="searchArg.imgCol" class="smallbox-img">
-							<image width="100%" height="100%" v-if="getImageUrl(food)" src="/static/man-profile.png"></image>
+							<image width="100%" height="100%" v-if="!getImageUrl(food)" src="/static/man-profile.png"></image>
 							<image width="100%" height="100%" v-else :src="getImageUrl(food)"></image>
 						</view>
 						<view class="textbox">

@@ -224,6 +224,7 @@ export default {
 	components: { MxDatePicker,bxRadio,bxRadioGroup },
 	data() {
 		return {
+			planNo:'', //关联方按计划编码
 			inputVal: {
 				// top_title:'',
 				weight: '',
@@ -530,6 +531,7 @@ export default {
 							serviceName: 'srvhealth_body_fat_measurement_record_add',
 							data: [
 								{
+									ps_no:this.planNo,
 									service_no: this.serviceLog.no,
 									name: this.serviceLog.name,
 									weight: this.inputVal.weight,
@@ -550,6 +552,7 @@ export default {
 							serviceName: serviceName,
 							data: [
 								{
+									ps_no:this.planNo,
 									service_no: this.serviceLog.no,
 									user_info_no: this.serviceLog.user_info_no,
 									retire_time: this.inputVal.retire_time,
@@ -573,6 +576,7 @@ export default {
 							serviceName: serviceName,
 							data: [
 								{
+									ps_no:this.planNo,
 									service_no: this.serviceLog.no,
 									name: this.serviceLog.name,
 									heart_rate: this.inputVal.heart_rate,
@@ -593,6 +597,7 @@ export default {
 							serviceName: serviceName,
 							data: [
 								{
+									ps_no:this.planNo,
 									service_no: this.serviceLog.no,
 									name: this.serviceLog.name,
 									start_time: this.inputVal.start_time,
@@ -614,6 +619,7 @@ export default {
 							serviceName: serviceName,
 							data: [
 								{
+									ps_no:this.planNo,
 									service_no: this.serviceLog.no,
 									name: this.serviceLog.name,
 									glucose_time: this.inputVal.glucose_time,
@@ -684,6 +690,9 @@ export default {
 		}
 	},
 	onLoad(option) {
+		if(option.planNo){
+			this.planNo = option.planNo
+		}
 		if (option && option.type) {
 			this.type = option.type;
 		}

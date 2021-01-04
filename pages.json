@@ -146,17 +146,15 @@
 						"enablePullDownRefresh": false
 					}
 
+				}, {
+					"path": "SportItemList/SportItemList",
+					"style": {
+						"navigationBarTitleText": "运动项目列表",
+						"enablePullDownRefresh": true
+					}
+
 				}
-			    ,{
-                    "path" : "SportItemList/SportItemList",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "运动项目列表",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "pregnancy",
@@ -251,17 +249,22 @@
 						"navigationStyle": "custom"
 					}
 
+				}, {
+					"path": "tagManagement/tagManagement",
+					"style": {
+						"navigationBarTitleText": "标签管理",
+						"enablePullDownRefresh": true
+					}
+
+				}, {
+					"path": "FontSizeSetting/FontSizeSetting",
+					"style": {
+						"navigationBarTitleText": "字体大小与粗细",
+						"enablePullDownRefresh": false
+					}
+
 				}
-			    ,{
-                    "path" : "tagManagement/tagManagement",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "标签管理",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "disease",
@@ -453,16 +456,14 @@
 					"navigationBarTitleText": "医院简介",
 					"transparentTitle": "auto"
 				}
-			}    ,{
-                    "path" : "HospitalList/HospitalList",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "列表",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-            ]
+			}, {
+				"path": "HospitalList/HospitalList",
+				"style": {
+					"navigationBarTitleText": "列表",
+					"enablePullDownRefresh": true
+				}
+
+			}]
 		},
 		{
 			"root": "publicPages",

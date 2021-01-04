@@ -153,7 +153,7 @@
 					<view class="images"><image class="image" src="../../static/xuehzi.png" mode="aspectFill"></image></view>
 					<view class="title">{{ item.name || '' }}</view>
 					<!-- <view class="title">{{ item.name + item.examination_type }}</view> -->
-					<view class="date">{{ item.end_time.slice(0, 10) }}</view>
+					<view class="date">{{ item.create_time.slice(0, 10) }}</view>
 				</view>
 				<view class="empty-data" v-if="inspectReportRecord.length === 0 || !inspectReportRecord">
 					<view class="cu-load" :class="!isLoad ? 'loading' : ''"></view>
@@ -192,7 +192,7 @@
 					<view class="cu-bar search bg-white">
 						<view class="search-form round">
 							<text class="cuIcon-search"></text>
-							<input @focus="InputFocus" @blur="InputBlur" :adjust-position="false" type="text" placeholder="搜索检查报告类型" confirm-type="search" />
+							<input @blur="InputBlur" :adjust-position="false" type="text" placeholder="搜索检查报告类型" confirm-type="search" />
 						</view>
 						<view class="action"><button class="cu-btn bg-green shadow-blur round">搜索</button></view>
 					</view>
@@ -205,7 +205,7 @@
 						:nodeKey="configCols.option_list_v2 && configCols.option_list_v2['refed_col'] ? configCols.option_list_v2['refed_col'] : 'no'"
 						@clickLastNode="confirmTree"
 					></tree-selector>
-					<view class="">
+					<view class="" v-if="showCustomAddRecord">
 						<text>未找到想要的报告类型？</text>
 						<text class="text-blue" @click="confirmTree">直接添加</text>
 					</view>
@@ -266,6 +266,7 @@ export default {
 			inspectReportRecord: [],
 			isLoad: false,
 			showAddRecord: false,
+			showCustomAddRecord: false,
 			treeSelectorData: [],
 			treePageInfo: {
 				pageNo: 1,
@@ -365,7 +366,7 @@ export default {
 		},
 		bmi() {
 			if (this.userInfo.weight && this.userInfo.height) {
-				return (Number(this.userInfo.weight) / Math.pow(Number(this.userInfo.height) / 100, 2)).toFixed(1);
+				return Number((Number(this.userInfo.weight) / Math.pow(Number(this.userInfo.height) / 100, 2)).toFixed(1));
 			}
 		},
 		age() {
@@ -440,6 +441,8 @@ export default {
 					result = (Math.abs(10 - bmi) * 2.5) / 8.5;
 				}
 				return Number(result.toFixed(1));
+			}else{
+				return 0
 			}
 		}
 	},
@@ -486,17 +489,19 @@ export default {
 		},
 		showAddRecordLayout() {
 			this.showAddRecord = true;
+			this.showCustomAddRecord = false;
 			this.getTreeSelectorData();
 		},
 		saveValue(e) {
 			console.log(e);
 		},
-		InputFocus(e) {},
 		InputBlur(e) {
 			let value = e.detail.value;
 			if (e.detail.value) {
-				let cond = [{ colName: 'name', ruleType: 'eq', value: value }];
+				let cond = [{ colName: 'name', ruleType: 'like', value: value }];
 				this.getTreeSelectorData(cond);
+			} else {
+				this.getTreeSelectorData();
 			}
 		},
 		async getTreeSelectorData(cond) {
@@ -510,6 +515,11 @@ export default {
 			};
 			if (cond) {
 				req.condition = [...req.condition, ...cond];
+				setTimeout(() => {
+					this.showCustomAddRecord = true;
+				}, 1000);
+			} else {
+				this.showCustomAddRecord = false;
 			}
 			let appName = self.configCols.option_list_v2.srv_app;
 			let res = await self.onRequest('select', req.serviceName, req, appName);
@@ -610,29 +620,31 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_examination_report_select',
 				colNames: ['*'],
-				page: { rownumber: 10, pageNo: 1 }
+				page: { rownumber: 10, pageNo: 1 },
+				condition: [{ colName: 'examinate_account', ruleType: 'eq', value: this.userInfo.userno }, { colName: 'examinate_person_no', ruleType: 'eq', value: this.userInfo.no }]
 			};
 			let res = await this.$http.post(url, req);
 			if (this.requestSuccess(res)) {
 				let list = res.data.data;
 				this.isLoad = true;
-				if (res.data.data.length > 0) {
-					let no = list.map(item => item.report_daq_survey_activity_no).toString();
-					let result = await this.getQuestRecord(no);
-					if (result) {
-						this.inspectReportRecord = list.map(record => {
-							result.forEach(item => {
-								if (record.report_daq_survey_activity_no === item.activity_no) {
-									record.activity_no = item.activity_no;
-									record.fill_batch_no = item.fill_batch_no;
-									record.end_time = item.end_time;
-								} else {
-									record.end_time = record.create_time;
-								}
-							});
-							return record;
-						});
-					}
+				if (Array.isArray(res.data.data)) {
+					this.inspectReportRecord  = res.data.data
+					// let no = list.map(item => item.report_daq_survey_activity_no).toString();
+					// let result = await this.getQuestRecord(no);
+					// if (result) {
+					// 	this.inspectReportRecord = list.map(record => {
+					// 		result.forEach(item => {
+					// 			if (record.report_daq_survey_activity_no === item.activity_no) {
+					// 				record.activity_no = item.activity_no;
+					// 				record.fill_batch_no = item.fill_batch_no;
+					// 				record.end_time = item.end_time;
+					// 			} else {
+					// 				record.end_time = record.create_time;
+					// 			}
+					// 		});
+					// 		return record;
+					// 	});
+					// }
 				}
 			} else {
 				this.isLoad = true;
@@ -1421,8 +1433,6 @@ export default {
 			color: #fff;
 			border-top-right-radius: 50rpx;
 			border-bottom-right-radius: 50rpx;
-			// border-top-left-radius: 50rpx;
-			// border-bottom-left-radius: 50rpx;
 			background-color: #2b85e4;
 			padding: 10rpx 20rpx;
 			animation: 2s ease slidein;
@@ -1452,7 +1462,7 @@ export default {
 		background-color: #fff;
 		justify-content: space-between;
 		margin-bottom: 20rpx;
-		flex-wrap: wrap;
+		// flex-wrap: wrap;
 		.left {
 			display: flex;
 			align-items: center;
@@ -1463,6 +1473,7 @@ export default {
 			width: 100%;
 			white-space: nowrap;
 			text-overflow: ellipsis;
+			flex: 1;
 			.tag-box {
 				overflow: scroll;
 				width: 100%;
@@ -1745,14 +1756,15 @@ export default {
 					color: #999;
 				}
 				.report-item {
-					width: calc(25% - 10rpx);
+					width: calc(25% - 30rpx / 4);
+					min-height: 200rpx;
 					overflow: hidden;
 					margin: 0 10rpx 10rpx 0;
 					display: flex;
 					flex-direction: column;
 					box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 					padding-bottom: 20rpx;
-
+					border-radius: 20rpx;
 					&:nth-child(4n) {
 						margin-right: 0;
 					}
@@ -1761,6 +1773,7 @@ export default {
 						height: 100rpx;
 					}
 					.title {
+						height: 46rpx;
 						text-indent: 10rpx;
 						padding: 5rpx 0;
 						overflow: hidden;
