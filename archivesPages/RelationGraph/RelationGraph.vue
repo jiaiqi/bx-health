@@ -184,8 +184,6 @@ export default {
 				});
 				return node;
 			});
-			console.log(this.deepClone(nodeData));
-			debugger;
 			nodeData.forEach(node => {
 				nodes.push({
 					// #ifdef H5
@@ -368,6 +366,9 @@ export default {
 						switch (cur.link_type) {
 							case '外部页面':
 								key = 'outPage';
+								if (cur.external_page_link_url && cur.external_page_link_url.indexOf('https://view.inews.qq.com/a/') !== -1) {
+									cur.external_page_link_url = cur.external_page_link_url.replace('https://view.inews.qq.com/a/', 'https://xw.qq.com/cmsid/');
+								}
 								break;
 							case '内部页面':
 								key = 'inPage';
@@ -377,7 +378,6 @@ export default {
 								break;
 						}
 					}
-
 					if (pre[key] && Array.isArray(pre[key]) === true) {
 						pre[key].push(cur);
 					} else {
@@ -589,22 +589,6 @@ export default {
 		async requestVideoUrls(part_format_id, vid, fileName, index, host) {
 			var keyApi = 'https://vv.video.qq.com/getkey?otype=json&platform=11&format=' + part_format_id + '&vid=' + vid + '&filename=' + fileName + '&appver=3.2.19.333';
 			var that = this;
-			// wx.request({
-			// 	url: keyApi,
-			// 	success: function(res) {
-			// 		var dataJson = res.data.replace(/QZOutputJson=/, '') + 'qwe';
-			// 		var dataJson1 = dataJson.replace(/;qwe/, '');
-			// 		var data = JSON.parse(dataJson1);
-			// 		var part_urls = new Array();
-			// 		if (data.key != undefined) {
-			// 			var vkey = data['key'];
-			// 			var url = host + fileName + '?vkey=' + vkey;
-			// 			part_urls[index] = String(url);
-			// 			debugger
-			// 			that.txv_path = part_urls.index1;
-			// 		}
-			// 	}
-			// });
 			let res = await uni.request({
 				url: keyApi
 			});
@@ -619,7 +603,6 @@ export default {
 						var vkey = data['key'];
 						var url = host + fileName + '?vkey=' + vkey;
 						part_urls[index] = String(url);
-						// that.txv_path = part_urls.index1;
 						return part_urls.index1;
 					}
 				}

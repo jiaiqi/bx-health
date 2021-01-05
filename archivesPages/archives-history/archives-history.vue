@@ -127,8 +127,64 @@
 					<view class="history-record">
 						<view class="title">历史数据</view>
 						<u-empty mode="history" v-if="historyRecord && historyRecord.length === 0"></u-empty>
-						<view class="list-box" v-if="historyRecord && historyRecord.length > 0">
-							<view class="list-item" v-for="(item, index) in historyRecord" :key="index">
+						<view class="list-box cu-list" v-if="historyRecord && historyRecord.length > 0">
+							<view
+								class="cu-item list-item"
+								:class="modalName == 'move-box-' + index ? 'move-cur' : ''"
+								@touchstart="ListTouchStart"
+								@touchmove="ListTouchMove"
+								@touchend="ListTouchEnd"
+								:data-target="'move-box-' + index"
+								v-for="(item, index) in historyRecord"
+							>
+								<image src="../static/icon/xueya.png" mode="" class="icon" v-if="pageType === 'bp'"></image>
+								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
+								<image src="../static/icon/tizhong.png" mode="" class="icon" v-if="pageType === 'weight'"></image>
+								<view class="content">
+									<view class="item">
+										<text
+											class="digital"
+											:class="{
+												'text-green': item.systolic_pressure < 120,
+												'text-yellow': item.systolic_pressure >= 120 && item.systolic_pressure < 140,
+												'text-red': item.systolic_pressure >= 140
+											}"
+											v-if="pageType === 'bp' && item && item.systolic_pressure"
+										>
+											{{ item.systolic_pressure ? getFixedNum(item.systolic_pressure) : '-' }}
+										</text>
+										<text class="digital" v-if="pageType === 'weight'">{{ item.weight ? getFixedNum(item.weight) : '-' }}</text>
+										<text class="digital" v-if="pageType === 'sleep'">{{ item.sleep_time ? item.sleep_time.slice(0, 5) : '-' }}</text>
+									</view>
+									<view class="item" v-if="pageType === 'bp' && item && item.diastolic_pressure">
+										<text class="text-gray">/</text>
+										<text
+											:class="{
+												'text-green': item.diastolic_pressure < 80,
+												'text-yellow': item.diastolic_pressure < 90 && item.diastolic_pressure >= 80,
+												'text-red': item.diastolic_pressure >= 90
+											}"
+											class="digital bp"
+										>
+											{{ item.diastolic_pressure ? getFixedNum(item.diastolic_pressure) : '-' }}
+										</text>
+									</view>
+									<view class="unit">
+										<text v-if="pageType === 'bp'">mmHg</text>
+										<text v-if="pageType === 'weight'">kg</text>
+										<text v-if="pageType === 'sleep'">（时长）</text>
+									</view>
+								</view>
+								<view class="action">
+									<text class="cu-tag text-grey sm">{{ item.create_time.slice(10, 16) }}</text>
+									<text class="cu-tag bg-grey sm">
+										<text v-if="item.create_time.slice(0, 3) !== new Date().getFullYear()"></text>
+										{{ getDate(item.create_time) }}
+									</text>
+								</view>
+								<view class="move"><view class="bg-red" @click.stop="deleteItem(item)">删除</view></view>
+							</view>
+							<!-- 	<view class="list-item" v-for="(item, index) in historyRecord" :key="index">
 								<image src="../static/icon/xueya.png" mode="" class="icon" v-if="pageType === 'bp'"></image>
 								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
 								<image src="../static/icon/tizhong.png" mode="" class="icon" v-if="pageType === 'weight'"></image>
@@ -168,7 +224,7 @@
 								<view class="item">
 									<text>{{ item.create_time.slice(0, 16) }}</text>
 								</view>
-							</view>
+							</view> -->
 						</view>
 					</view>
 				</view>
@@ -199,6 +255,9 @@ export default {
 	},
 	data() {
 		return {
+			modalName: null,
+			listTouchStart: 0,
+			listTouchDirection: null,
 			customer_no: '',
 			chatChoseTime: '',
 			isAllPages: false,
@@ -373,6 +432,34 @@ export default {
 		}
 	},
 	methods: {
+		deleteItem(e) {
+			debugger;
+			let serviceName = '';
+			let req = [];
+			switch (this.pageType) {
+				case 'weight': //体重
+					serviceName = 'srvhealth_body_fat_measurement_record_delete';
+					req = [{ serviceName: 'srvhealth_body_fat_measurement_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+					break;
+				case 'sleep': //睡眠
+					serviceName = 'srvhealth_sleep_record_delete';
+					req = [{ serviceName: 'srvhealth_sleep_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+					break;
+				case 'bp': //血压
+					serviceName = 'srvhealth_blood_pressure_record_delete';
+					req = [{ serviceName: 'srvhealth_blood_pressure_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+					break;
+			}
+			let url = this.getServiceUrl('health', serviceName, 'operate');
+			this.$http.post(url, req).then(res => {
+				if (res.data.state === 'SUCCESS') {
+					uni.showToast({
+						title: '删除成功'
+					});
+					this.initPage();
+				}
+			});
+		},
 		getFixedNum(num) {
 			if (num) {
 				return num.toFixed(1);
@@ -1299,6 +1386,13 @@ export default {
 					break;
 			}
 		},
+		getDate(e) {
+			if (new Date(e).getFullYear() !== new Date().getFullYear()) {
+				return e.slice(0, 10);
+			} else {
+				return e.slice(5, 10);
+			}
+		},
 		/*查询当前登录人创建得用户信息**/
 		async getCurrUserInfo() {
 			let self = this;
@@ -1347,6 +1441,26 @@ export default {
 		},
 		onBack() {
 			uni.$emit('data-update');
+		},
+
+		// ListTouch触摸开始
+		ListTouchStart(e) {
+			this.listTouchStart = e.touches[0].pageX;
+		},
+
+		// ListTouch计算方向
+		ListTouchMove(e) {
+			this.listTouchDirection = e.touches[0].pageX - this.listTouchStart > 0 ? 'right' : 'left';
+		},
+
+		// ListTouch计算滚动
+		ListTouchEnd(e) {
+			if (this.listTouchDirection == 'left') {
+				this.modalName = e.currentTarget.dataset.target;
+			} else {
+				this.modalName = null;
+			}
+			this.listTouchDirection = null;
 		}
 	},
 	onShow() {
@@ -1362,7 +1476,6 @@ export default {
 		if (option.pageType) {
 			this.pageType = option.pageType;
 		}
-
 		if (option.chatChoseTime) {
 			this.chatChoseTime = option.chatChoseTime;
 		}
@@ -1451,7 +1564,7 @@ export default {
 				text-align: center;
 				padding: 20rpx 0;
 				background-color: #fff;
-				border-radius: 20rpx 20rpx 0 0;
+				// border-radius: 20rpx 20rpx 0 0;
 			}
 			.record-data {
 				background-color: #fff;
@@ -1464,7 +1577,7 @@ export default {
 				padding: 0 20rpx 40rpx;
 				flex: 1;
 				justify-content: flex-end;
-				border-radius: 0 0 20rpx 20rpx;
+				// border-radius: 0 0 20rpx 20rpx;
 				.last-data {
 					padding: 0 0 10rpx;
 					flex: 1;
@@ -1617,7 +1730,6 @@ export default {
 			.history-record {
 				margin-top: 20rpx;
 				background-color: #fff;
-				border-radius: 20rpx;
 				.title {
 					padding: 20rpx;
 					border-bottom: 1px solid #f1f1f1;
@@ -1625,13 +1737,30 @@ export default {
 				.list-box {
 					display: flex;
 					flex-direction: column;
-					padding: 20rpx;
+					overflow: hidden;
 					.list-item {
 						padding: 20rpx 0;
 						display: flex;
 						justify-content: space-around;
 						border-bottom: 1rpx solid #f1f1f1;
 						align-items: center;
+						padding: 20rpx;
+						.content {
+							display: flex;
+							flex: 1;
+							align-items: center;
+						}
+						.action {
+							display: flex;
+							flex-direction: column;
+							border-radius: 10rpx;
+							overflow: hidden;
+							.cu-tag {
+								margin-left: 0;
+								display: flex;
+								justify-content: flex-end;
+							}
+						}
 						.icon {
 							width: 50rpx;
 							height: 50rpx;

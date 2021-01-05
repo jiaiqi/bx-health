@@ -239,7 +239,6 @@ export default {
 		},
 		clickLine(e, index) {
 			console.log('click-line:', e, index);
-			debugger
 			this.page.pageNo = 1;
 			if (index < this.lineDataDefault.length - 1) {
 				this.lineDataDefault = this.lineDataDefault.slice(0, index + 1);

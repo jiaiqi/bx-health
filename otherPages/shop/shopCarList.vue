@@ -114,7 +114,6 @@
 				}else{
 					this.checkAll = false
 				}
-				debugger
 				if(item.iSchoose){
 					this.total = this.total + (Number(item.price) * item.car_num)
 					this.chooseCarData.push(item)

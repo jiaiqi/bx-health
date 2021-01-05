@@ -62,6 +62,7 @@ export default {
 			emptyText: '', //无数据时提示文字
 			formType: 'form', // 表单类型 预览:detail 正常:form
 			activity_no: '', // 问卷编号
+			playNo: '',
 			status: '未开始',
 			target: '',
 			configCols: [],
@@ -113,11 +114,26 @@ export default {
 		toNextPages() {
 			let params = this.deepClone(this.params);
 			let fieldsCond = params.fieldsCond;
+			if (this.planNo) {
+				fieldsCond.push({
+					column:'ps_no',
+					display:false,
+					value:this.planNo
+				})
+			}else{
+				fieldsCond.push({
+					column:'ps_no',
+					display:false
+				})
+			}
 			fieldsCond[fieldsCond.findIndex(item => item.column === 'report_daq_survey_ack_no')].value = params.fill_batch_no;
-			// let url = `params.to&${encodeURIComponent(JSON.stringify(fieldsCond))}`;
+			let url = `${params.to}&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`;
+			if (this.planNo) {
+				url += `&planNo=${this.planNo}`;
+			}
 			uni.redirectTo({
-				url:`${params.to}&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`
-			})
+				url: url
+			});
 		},
 		toHistory() {
 			uni.navigateTo({
@@ -670,6 +686,9 @@ export default {
 		}
 	},
 	onLoad(option) {
+		if (option.planNo) {
+			this.planNo = option.planNo;
+		}
 		if (option.params) {
 			this.params = JSON.parse(decodeURIComponent(option.params));
 		}

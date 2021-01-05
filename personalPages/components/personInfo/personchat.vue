@@ -1191,7 +1191,6 @@ export default {
 				})
 				
 				this.$nextTick(() => {
-					// debugger
 					console.log("滚动条位置")
 					if(this.recordList.length > 0){
 						this.chatTextBottom = 'person-chat-item' + _SortJsonData[_SortJsonData.length - 1].id;

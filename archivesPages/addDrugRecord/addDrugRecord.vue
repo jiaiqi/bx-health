@@ -255,10 +255,8 @@ export default {
 				req.condition = [{ colName: 'plan_no', ruleType: 'eq', value: this.defaultVal.ds_no }, { colName: 'dsr_no', ruleType: 'eq', value: this.defaultVal.dsr_no }];
 			}
 			let res = await this.$http.post(url, req);
-			debugger;
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				list = list.map(item => {
-					debugger;
 					if (res.data.data.find(d => d.sport_no === item.sport_no)) {
 						item.image = res.data.data.find(d => d.sport_no === item.sport_no)['image'];
 						item.unit_amount = res.data.data.find(d => d.sport_no === item.sport_no)['unit_amount'];

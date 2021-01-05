@@ -161,7 +161,6 @@ fly.interceptors.response.use(
 					}
 				} else {
 					// #ifdef H5
-					debugger
 					uni.navigateTo({
 						url: '/publicPages/accountExec/accountExec'
 					})

@@ -1,19 +1,26 @@
 <template>
 	<view class="manager-tag">
 		<view class="selectedTag">
-			<input class="input tag-item" type="text" placeholder="添加标签" v-model="curTag" @confirm="createTag" />
 			<view class="tag-item" @click="checkeTag(item)" v-for="item in curTags" :class="{ active: item.label_no === activeTagNo }">
 				<text>{{ item.label_name }}</text>
 				<text class="cuIcon-delete margin-left-xs" @click.stop="cancelCheckTag(item)" v-if="item.label_no === activeTagNo"></text>
 			</view>
+			<input class="input tag-item" type="text" placeholder="添加标签" v-model="curTag" @confirm="createTag" />
 		</view>
-		<view class="tag-list">
+		<view class="button-box"><button class="cu-btn bg-blue" type="primary" v-if="curTag" @click="createTag({detail:{value:curTag}})">添加</button></view>
+		<view class="tag-list" v-if="curTag">
+			<!-- <view class="title">所有标签</view> -->
+			<view class="tag-item" @click="insertTag(item)" :class="{ checked: curTags.find(tag => tag.label_no === item.label_no) }" v-for="item in keyTags" :key="item.label_no">
+				{{ item.label_name }}
+			</view>
+		</view>
+		<view class="tag-list" v-if="!curTag">
 			<view class="title">所有标签</view>
 			<view class="tag-item" @click="insertTag(item)" :class="{ checked: curTags.find(tag => tag.label_no === item.label_no) }" v-for="item in tagList" :key="item.label_no">
 				{{ item.label_name }}
 			</view>
 		</view>
-		<view class="button-box"><button class="cu-btn bg-cyan" @click="saveUserTag">保存</button></view>
+		<view class="button-box"><button class="cu-btn bg-cyan" v-if="!curTag" @click="saveUserTag">保存</button></view>
 	</view>
 </template>
 
@@ -32,6 +39,10 @@ export default {
 		};
 	},
 	computed: {
+		keyTags() {
+			let tags = this.deepClone(this.tagList);
+			return tags.filter(item => item.label_name.indexOf(this.curTag) !== -1);
+		},
 		...mapState({
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize,
@@ -77,15 +88,14 @@ export default {
 			let tags = this.curTags;
 			req[0].data = tags
 				.filter(item => {
-					debugger;
 					return !self.curTagsCopy.find(tag => tag.label_no === item.label_no);
 				})
 				.map(tag => {
 					return { dp_no: this.doctorInfo.row_no, manager_no: this.manager_no, customer_no: this.customer_no, label_no: tag.label_no, label_name: tag.label_name };
 				});
-			if (!Array.isArray(req[0].data)||req[0].data.length===0) {
+			if (!Array.isArray(req[0].data) || req[0].data.length === 0) {
 				uni.showToast({
-					icon:'none',
+					icon: 'none',
 					title: '用户标签未发生改变'
 				});
 				return;
@@ -129,7 +139,7 @@ export default {
 								console.log(resultData);
 								if (Array.isArray(resultData)) {
 									this.curTags = [...this.curTags, ...resultData];
-									this.curTagsCopy = this.deepClone(this.curTags);
+									// this.curTagsCopy = this.deepClone(this.curTags);
 								}
 							}
 							this.selectTagList();

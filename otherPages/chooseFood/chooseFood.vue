@@ -1083,7 +1083,6 @@ export default {
 					this.heatNum = Number(this.choiceNum) * ((this.radioLabel.amount / 100) * this.currFood.unit_energy);
 				}
 			}
-			debugger
 			this.originalData();
 		},
 		/*选择单位**/

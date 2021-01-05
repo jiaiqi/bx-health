@@ -82,7 +82,7 @@
 				<view class="padding-sm">
 					<view class="text-bold">选择您要申请的管理者类型</view>
 					<bx-checkbox-group mode="button" class="margin-top" v-model="checkedManagerType">
-						<bx-checkbox v-for="item in managerTypeList" :key="item.label"  v-model="item.checked" :name="item.value">{{ item.label }}</bx-checkbox>
+						<bx-checkbox v-for="item in managerTypeList" :key="item.label" v-model="item.checked" :name="item.value">{{ item.label }}</bx-checkbox>
 					</bx-checkbox-group>
 				</view>
 				<view class="button-box">
@@ -106,7 +106,7 @@ export default {
 			hzMessage: 0,
 			manager_type: '',
 			showModal: false,
-			checkedManagerType:[ '医师'],
+			checkedManagerType: ['医师'],
 			managerTypeList: [
 				{
 					label: '医师',
@@ -285,10 +285,22 @@ export default {
 				// 	break;
 				case 'userList':
 					if (this.manager_type) {
-						uni.navigateTo({
-							url: '/personalPages/userList/userList'
+						this.getDoctorInfo().then(res => {
+							if (res) {
+								this.$store.commit('SET_DOCTOR_INFO', res);
+								uni.navigateTo({
+									url: '/personalPages/userList/userList'
+								});
+							}
 						});
 					} else {
+						// this.getDoctorInfo().then(res => {
+						// if (res) {
+						// 	this.$store.commit('SET_DOCTOR_INFO', res);
+						// 	uni.navigateTo({
+						// 		url: '/personalPages/userList/userList'
+						// 	});
+						// } else {
 						uni.showModal({
 							title: '提示',
 							content: '当前用户不是管理人员,是否申请成为管理人员',
@@ -298,25 +310,18 @@ export default {
 								}
 							}
 						});
+						// uni.showModal({
+						// 	title: '提示',
+						// 	content: '您还不是医生，是否申请成为医生',
+						// 	success(res) {
+						// 		if (res.confirm) {
+						// 			self.toPages('beDoctor');
+						// 		}
+						// 	}
+						// });
+						// }
+						// });
 					}
-					// this.getDoctorInfo().then(res => {
-					// 	if (res) {
-					// 		this.$store.commit('SET_DOCTOR_INFO', res);
-					// 		uni.navigateTo({
-					// 			url: '/personalPages/userList/userList'
-					// 		});
-					// 	} else {
-					// 		uni.showModal({
-					// 			title: '提示',
-					// 			content: '您还不是医生，是否申请成为医生',
-					// 			success(res) {
-					// 				if (res.confirm) {
-					// 					self.toPages('beDoctor');
-					// 				}
-					// 			}
-					// 		});
-					// 	}
-					// });
 					break;
 				case 'updateInfo':
 					if (this.vuex_userInfo.no) {
@@ -397,11 +402,11 @@ export default {
 		},
 		async getDoctorInfoMessage(no, isSelf) {
 			// 查找医生信息
-			let url = this.getServiceUrl('health', 'srvhealth_doctor_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_person_relation_select', 'select');
 			let req = {
-				serviceName: 'srvhealth_doctor_select',
+				serviceName: 'srvhealth_person_relation_select',
 				colNames: ['*'],
-				condition: [{ colName: 'dt_no', ruleType: 'in', value: no }],
+				condition: [{ colName: 'userb_person_no', ruleType: 'in', value: no }],
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);
@@ -459,7 +464,11 @@ export default {
 			this.manager_type = this.checkedManagerType;
 			let url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
 			let req = [
-				{ serviceName: 'srvhealth_person_info_update', condition: [{ colName: 'id', ruleType: 'eq', value: this.userInfo.id }], data: [{ manager_type: this.checkedManagerType.toString() }] }
+				{
+					serviceName: 'srvhealth_person_info_update',
+					condition: [{ colName: 'id', ruleType: 'eq', value: this.userInfo.id }],
+					data: [{ manager_type: this.checkedManagerType.toString() }]
+				}
 			];
 			this.$http.post(url, req).then(res => {
 				if ((res.data.state = 'SUCCESS')) {

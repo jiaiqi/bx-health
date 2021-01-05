@@ -2,7 +2,6 @@
 	<view class="handler-bar">
 		<view class="cook-type-box" v-if="dietInfo">
 			<view class="title">烹调方式:</view>
-			<!-- <view class="current-cook-type cook-type" v-if="dietInfo.cook_method" @click="showTypeSelector = true">{{ dietInfo.cook_method }}</view> -->
 			<view
 				class="cook-type"
 				:class="{ 'current-cook-type': item.value === cook_method || item.value === dietInfo.cook_method }"
@@ -15,20 +14,14 @@
 			<text class="cook-type" v-if="!dietInfo.cook_method || !dietInfo.diet_record_no" @click="showTypeSelector = true">更多</text>
 			<text class="lg text-gray cuIcon-right" v-if="cookTypes.length > 0"></text>
 		</view>
-		<view class="dinner-time unit-box">
+		<view class="dinner-time unit-box" v-if="dietInfo.food_no && !dietInfo.diet_record_no">
 			<view class="title">时间:</view>
-			<!-- 			<bx-radio-group v-model="dining_type" mode="button">
-				<bx-radio v-for="item in dinnerTime" :key="item.value" :name="item.value">{{ item.value }}</bx-radio>
-			</bx-radio-group> -->
 			<view class="unit-item" :class="{ 'active-unit': dining_type === u.value }" v-for="(u, index) in dinnerTime" :key="index" @click="changeDiningType(u, index)">
 				{{ u.value }}
 			</view>
 		</view>
 		<view class="dinner-time unit-box">
 			<view class="title">单位:</view>
-			<!-- <bx-radio-group v-model="dietInfo.unit" mode="button" v-if="unitList.length > 0">
-				<bx-radio :key="item.value" :name="item.value" v-for="(item, index) in unitList" @change="checkUnit(item, index)">{{ item.value }}</bx-radio>
-			</bx-radio-group> -->
 			<view class="unit-item" :class="{ 'active-unit': dietInfo.unit === u.unit }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">
 				{{ u.unit_weight_g && u.unit === 'g' ? u.unit_weight_g + u.unit : u.unit_amount && u.unit === 'g' ? u.unit_amount + u.unit : u.unit }}
 			</view>
@@ -133,15 +126,21 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			let unitList = [];
-			if (this.dietInfo.unit !== 'g') {
+			let self = this;
+			if (this.dietInfo.unit !== 'g' && this.dietInfo.unit.indexOf('g') !== -1) {
 				let basicUnit = this.deepClone(this.dietInfo);
 				basicUnit.unit = 'g';
 				basicUnit.amount = 1;
 				basicUnit.energy = (this.dietInfo.energy * 100) / this.dietInfo.unit_weight_g;
 				basicUnit.unit_weight_g = 100;
 				unitList.push(basicUnit);
+			} else if (self.dietInfo.unit !== 'g') {
+				let basicUnit = self.deepClone(self.dietInfo);
+				basicUnit.amount = 1;
+				// basicUnit.energy = (basicUnit.energy * 100) / basicUnit.unit_weight_g;
+				unitList.push(basicUnit);
 			} else {
-				unitList.push(this.dietInfo);
+				unitList.push(self.dietInfo);
 			}
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				unitList = [...unitList, ...res.data.data];
@@ -203,7 +202,7 @@ export default {
 		},
 		changeDiningType(item) {
 			this.dining_type = item.value;
-			this.$emit('changeDiningType',this.dining_type)
+			this.$emit('changeDiningType', this.dining_type);
 		},
 		checkUnit(item, index) {
 			// 切换单位

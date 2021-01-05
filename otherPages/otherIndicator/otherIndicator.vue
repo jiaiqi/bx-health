@@ -3,55 +3,32 @@
 		<view class="other-top">
 			<view class="other-top-tit">
 				<text>*</text>
-				<text>{{topTitle}}</text>
+				<text>{{ topTitle }}</text>
 			</view>
 			<view v-if="type && type === 'weight'" class="item-wrap">
 				<view class="item-list" @click="showWeightSelect = true">
 					<text>衣着穿戴</text>
-					<!-- <u-select v-model="showWeightSelect" :list="list" @confirm="confirmChoose($event, 'clothing')"></u-select> -->
-					<!-- <radio-group class="block weight-radio-group" @change="RadioChange($event, 'clothing')">
-						<view v-for="(item, index) in list" :key="index" class="weight-radio-group-item">
-							<view class="title">{{ item.value }}</view>
-							<radio :class="weightCurrentRadio == item.value ? 'checked' : ''" :checked="weightCurrentRadio == item.value ? true : false" :value="item.value"></radio>
-						</view>
-					</radio-group> -->
-					<checkbox-group @change="checkboxGroupChange($event,'clothing')" class="check-box-group">
-						<label v-for="(item, index) in list" :key="item.value" class="check-box-item">
-							<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" />
-							{{ item.value }}
-						</label>
-					</checkbox-group>
-					<!-- <view class="item-list-bot"><input type="text" value="" disabled /></view> -->
+					<bx-checkbox-group v-model="inputVal.wearing" mode="button">
+						<bx-checkbox v-for="item in list" :key="item.value" :name="item.value" v-model="item.checked">{{ item.value }}</bx-checkbox>
+					</bx-checkbox-group>
 				</view>
 
 				<view class="item-list" @click="showWeightDigSelect = true">
 					<text>消化道情况</text>
-					<checkbox-group @change="checkboxGroupChange($event,'digestion')" class="check-box-group">
-						<label v-for="(item, index) in DigList" :key="item.value" class="check-box-item">
-							<checkbox :value="item.value" :checked="item.checked" color="#FFCC33" style="transform:scale(0.7)" />
-							{{ item.value }}
-						</label>
-					</checkbox-group>
-					<!-- <radio-group class="block weight-radio-group" @change="RadioChange($event, 'digestion')">
-						<view v-for="(item, index) in DigList" :key="index" class="weight-radio-group-item">
-							<view class="title">{{ item.value }}</view>
-							<radio :class="digeCurrentRadio == item.value ? 'checked' : ''" :checked="digeCurrentRadio == item.value ? true : false" :value="item.value"></radio>
-						</view>
-					</radio-group> -->
-					<!-- <u-select v-model="showWeightDigSelect" :list="DigList" @confirm="confirmChoose($event, 'digestion')"></u-select> -->
-					<!-- <view class="item-list-bot"><input type="text" value="" disabled /></view> -->
+					<bx-checkbox-group v-model="inputVal.wearing" mode="button">
+						<bx-checkbox v-for="item in DigList" :key="item.value" :name="item.value" v-model="item.checked">{{ item.value }}</bx-checkbox>
+					</bx-checkbox-group>
 				</view>
 				<view class="item-list">
 					<view class="item-list-top">
 						<text>*</text>
 						<text>体重(千克)</text>
 					</view>
-					
-					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.weight" /></view>
+					<slider-number v-model="inputVal.weight" :max="200" :min="0"></slider-number>
 				</view>
 				<view class="item-list">
 					<text>体脂率(%)</text>
-					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.body_fat_rate" /></view>
+					<slider-number v-model="inputVal.body_fat_rate" :max="50" :min="5"></slider-number>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'sleep'" class="item-wrap">
@@ -88,50 +65,38 @@
 				</view>
 				<view class="item-list">
 					<text>心率(次/分)</text>
-					<view class="item-list-bot"><input type="text" value="" /></view>
+					<slider-number v-model="inputVal.heart_rate" :max="200" :min="50"></slider-number>
+					<!-- <view class="item-list-bot"><input type="text" value="" /></view> -->
 				</view>
 			</view>
 			<view v-else-if="type && (type === 'pressure' || type === 'bp')" class="item-wrap">
 				<!-- 血压 -->
 				<view class="item-list">
-						<text>姿势</text>
+					<text>姿势</text>
 					<!-- <text>收缩压(高压 毫米汞柱)</text> -->
-					<bx-radio-group value="坐位" @change="radioChange($event,'posture')">
-						<bx-radio
-							class="radio"
-							color="#2979ff"
-							v-for="(item,i) in postList"							
-							:key="i"
-							:name="item.value"
-						>
-							{{ item.value }}
-						</bx-radio>
+					<bx-radio-group v-model="inputVal.posture" mode="button">
+						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in postList" :key="i" :name="item.value">{{ item.value }}</bx-radio>
 					</bx-radio-group>
 					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.systolic_pressure" /></view> -->
 				</view>
 				<view class="item-list">
-						<text>测量位置</text>
+					<text>测量位置</text>
 					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.systolic_pressure" /></view> -->
-					<bx-radio-group value="右上臂" @change="radioChange($event,'postion')">
-						<bx-radio
-							class="radio"
-							color="#2979ff"
-							v-for="(item,i) in measureList"							
-							:key="i"
-							:name="item.value"
-						>
-							{{ item.value }}
-						</bx-radio>
+					<bx-radio-group v-model="inputVal.measure_position" mode="button">
+						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in measureList" :key="i" :name="item.value">{{ item.value }}</bx-radio>
 					</bx-radio-group>
 				</view>
-				
+
 				<view class="item-list">
 					<view class="item-list-top">
 						<text>*</text>
 						<text>收缩压(高压 毫米汞柱)</text>
 					</view>
 					<!-- <text>收缩压(高压 毫米汞柱)</text> -->
-					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.systolic_pressure" /></view>
+					<!-- <view class="item-list-bot"> -->
+					<slider-number v-model="inputVal.systolic_pressure" :max="200" :min="50"></slider-number>
+					<!-- 	<input type="text" value="" v-model="inputVal.systolic_pressure" /> -->
+					<!-- </view> -->
 				</view>
 				<view class="item-list">
 					<view class="item-list-top">
@@ -139,11 +104,13 @@
 						<text>舒张压(低压 毫米汞柱)</text>
 					</view>
 					<!-- <text>舒张压(低压 毫米汞柱)</text> -->
-					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.diastolic_pressure" /></view>
+					<slider-number v-model="inputVal.diastolic_pressure" :max="120" :min="50"></slider-number>
+					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.diastolic_pressure" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>心率</text>
-					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.heart_rate" /></view>
+					<slider-number v-model="inputVal.heart_rate" :max="200" :min="30"></slider-number>
+					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.heart_rate" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>说明</text>
@@ -161,15 +128,18 @@
 				</view>
 				<view class="item-list">
 					<text>血氧饱和度最大值(%)</text>
-					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.oxygen_saturation_max" /></view>
+					<slider-number v-model="inputVal.oxygen_saturation_max" :max="100" :min="70"></slider-number>
+					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.oxygen_saturation_max" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>血氧饱和度最小值(%)</text>
-					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.oxygen_saturation_min" /></view>
+					<slider-number v-model="inputVal.oxygen_saturation_min" :max="100" :min="70"></slider-number>
+					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.oxygen_saturation_min" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>血氧饱和度平均(%)</text>
-					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.oxygen_saturation_avg" /></view>
+					<slider-number v-model="inputVal.oxygen_saturation_avg" :max="100" :min="70"></slider-number>
+					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.oxygen_saturation_avg" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>说明</text>
@@ -182,11 +152,13 @@
 				<!-- <u-select v-model="showSelect" :list="glucose_time_option"></u-select> -->
 				<view class="item-list" @click="showSelect = true">
 					<text>测量时机</text>
-					<view class="item-list-bot"><input type="text" value="" disabled v-model="inputVal.glucose_time" /></view>
+					<bx-radio-group v-model="inputVal.glucose_time" mode="button">
+						<bx-radio class="radio" color="#2979ff" v-for="item in glucose_time_option" :key="item.value" :name="item.value">{{ item.value }}</bx-radio>
+					</bx-radio-group>
 				</view>
 				<view class="item-list">
 					<text>血糖值(mmol/l)</text>
-					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.blood_glucose_val" /></view>
+					<slider-number v-model="inputVal.blood_glucose_val" :max="28" :min="0.5" :step="0.1"></slider-number>
 				</view>
 				<view class="item-list">
 					<text>说明</text>
@@ -221,32 +193,32 @@ import bxRadio from '@/components/bx-radio/bx-radio.vue';
 import bxRadioGroup from '@/components/bx-radio-group/bx-radio-group.vue';
 export default {
 	name: 'otherIndicator',
-	components: { MxDatePicker,bxRadio,bxRadioGroup },
+	components: { MxDatePicker, bxRadio, bxRadioGroup },
 	data() {
 		return {
-			planNo:'', //关联方按计划编码
+			planNo: '', //关联方按计划编码
 			inputVal: {
 				// top_title:'',
-				weight: '',
-				body_fat_rate: '',
+				weight: 50,
+				body_fat_rate: 20,
 				glucose_time: '', //血糖 - 测量时机
 				remark: '', // 说明
-				blood_glucose_val: '', // 血糖 - 血糖值
+				blood_glucose_val: 6, // 血糖 - 血糖值
 				start_time: '', // 血氧 - 起始时间
 				end_time: '', // 血氧 - 结束时间
-				oxygen_saturation_max: '', // 血氧饱和度最大值%
-				oxygen_saturation_min: '', //血氧饱和度最小值%
-				oxygen_saturation_avg: '', // 血氧饱和度平均值%
-				heart_rate: 0, // 血压- 心率
-				diastolic_pressure: '', //血压 - 舒张压
-				systolic_pressure: '', //血压-收缩压
+				oxygen_saturation_max: 90, // 血氧饱和度最大值%
+				oxygen_saturation_min: 90, //血氧饱和度最小值%
+				oxygen_saturation_avg: 90, // 血氧饱和度平均值%
+				heart_rate: 60, // 血压- 心率
+				diastolic_pressure: 70, //血压 - 舒张压
+				systolic_pressure: 110, //血压-收缩压
 				wearing: '', // 体重体脂 - 衣着穿戴
 				alimentary_canal: '', // 体重体脂-  消化道情况
 				retire_time: '', //睡眠 - 就寝时间
 				getup_time: '', //睡眠 - 起床时间
-				sleepy_daytime: '' ,//睡眠 - 犯困情况
-				posture:'坐位', //血压 - 姿势
-				measure_position:'右上臂' // 血压 - 测量位置
+				sleepy_daytime: '', //睡眠 - 犯困情况
+				posture: '坐位', //血压 - 姿势
+				measure_position: '右上臂' // 血压 - 测量位置
 			},
 			sleepy_option: [{ label: '从不', value: '从不' }, { label: '很少', value: '很少' }, { label: '经常', value: '经常' }, { label: '严重', value: '严重' }],
 			showSelect: false,
@@ -266,29 +238,38 @@ export default {
 			showWeightDigSelect: false,
 			weightCurrentRadio: '',
 			digeCurrentRadio: '',
-			measureList:[{
-				value:'右上臂',
-				label:'右上臂',
-			},{
-				value:'左上臂',
-				label:'左上臂',
-			},{
-				value:'右手腕',
-				label:'右手腕',
-			},{
-				value:'左手腕',
-				label:'左手腕',
-			}],
-			postList:[{
-				value:'坐位',
-				label:'坐位',
-			},{
-				value:'躺卧位',
-				label:'躺卧位',
-			},{
-				value:'站立位',
-				label:'站立位',
-			}],
+			measureList: [
+				{
+					value: '右上臂',
+					label: '右上臂'
+				},
+				{
+					value: '左上臂',
+					label: '左上臂'
+				},
+				{
+					value: '右手腕',
+					label: '右手腕'
+				},
+				{
+					value: '左手腕',
+					label: '左手腕'
+				}
+			],
+			postList: [
+				{
+					value: '坐位',
+					label: '坐位'
+				},
+				{
+					value: '躺卧位',
+					label: '躺卧位'
+				},
+				{
+					value: '站立位',
+					label: '站立位'
+				}
+			],
 			list: [
 				{
 					value: '穿鞋',
@@ -345,19 +326,16 @@ export default {
 			}
 			return result;
 		},
-		topTitle(){
+		topTitle() {
 			let str = '';
 			switch (this.type) {
 				case 'weight':
-					str = '称体重时注意保持空腹并且不要穿太多得衣服哦,否则测量会有偏差。'
+					str = '称体重时注意保持空腹并且不要穿太多得衣服哦,否则测量会有偏差。';
 					break;
 				case 'sleep':
-					str = '每天最少保证睡眠时间在7小时左右并且不要熬夜哦,可以有效地缓解疲劳'
+					str = '每天最少保证睡眠时间在7小时左右并且不要熬夜哦,可以有效地缓解疲劳';
 					break;
 				// case 'heartRate':
-				// 	break;
-				// case 'pressure':
-				// 	result = this.inputVal.systolic_pressure && this.inputVal.diastolic_pressure ? true : false;
 				// 	break;
 				// case 'oxygen':
 				// 	result =
@@ -365,11 +343,11 @@ export default {
 				// 			? true
 				// 			: false;
 				// 	break;
-				// case 'glucose':
-				// 	result = this.inputVal.glucose_time && this.inputVal.blood_glucose_val ? true : false;
-				// 	break;
+				case 'glucose':
+					str = '如果您是以为内最近感染、发热、呕吐、腹泻、外伤等疾病性就诊，抽血化验“顺带”发现血糖高，那么，这个“高血糖”尚不能作为糖尿病的依据。您应当在病好后再次化验血糖';
+					break;
 				case 'bp':
-					str = '测量血压时要注意保持心情平稳，测量前最好休息15分钟，避免情绪激动、劳累、吸烟、憋尿等。'
+					str = '测量血压时要注意保持心情平稳，测量前最好休息15分钟，避免情绪激动、劳累、吸烟、憋尿等。';
 					break;
 			}
 			return str;
@@ -377,19 +355,19 @@ export default {
 	},
 	methods: {
 		/*血压-姿势单选**/
-		radioChange(e,type){
-			console.log("e=====>",e)
-			if(type === 'posture'){
-				this.inputVal.posture = e
-			}else if(type === 'postion'){
-				this.inputVal.measure_position = e
+		radioChange(e, type) {
+			console.log('e=====>', e);
+			if (type === 'posture') {
+				this.inputVal.posture = e;
+			} else if (type === 'postion') {
+				this.inputVal.measure_position = e;
 			}
 		},
 		/*体重--衣着穿戴多选**/
-		checkboxGroupChange(e,type) {
-			let str = ""
-			if(e.detail.value.length > 0){
-				str = e.detail.value.join(',')
+		checkboxGroupChange(e, type) {
+			let str = '';
+			if (e.detail.value.length > 0) {
+				str = e.detail.value.join(',');
 			}
 			switch (type) {
 				case 'clothing':
@@ -399,7 +377,7 @@ export default {
 					this.inputVal.alimentary_canal = str;
 					break;
 			}
-			
+
 			// var items = this.checkboxList,
 			// 	values = e.detail.value;
 			// for (var i = 0, lenI = items.length; i < lenI; ++i) {
@@ -514,28 +492,28 @@ export default {
 			// 提交并保存身体数据
 			if (!this.canSave) {
 				uni.showToast({
-					title:'请完善信息',
-					icon:'none'
-				})
+					title: '请完善信息',
+					icon: 'none'
+				});
 				return;
 			}
-			
+
 			let serviceName = '';
 			let req = [];
-			let verify = false
+			let verify = false;
 			switch (this.type) {
-				case 'weight':				
+				case 'weight':
 					serviceName = 'srvhealth_body_fat_measurement_record_add';
 					req = [
 						{
 							serviceName: 'srvhealth_body_fat_measurement_record_add',
 							data: [
 								{
-									ps_no:this.planNo,
+									ps_no: this.planNo,
 									service_no: this.serviceLog.no,
 									name: this.serviceLog.name,
 									weight: this.inputVal.weight,
-									body_fat_rate: this.inputVal.body_fat_rate?this.inputVal.body_fat_rate:0,
+									body_fat_rate: this.inputVal.body_fat_rate ? this.inputVal.body_fat_rate : 0,
 									wearing: this.inputVal.wearing,
 									alimentary_canal: this.inputVal.alimentary_canal
 								}
@@ -552,7 +530,7 @@ export default {
 							serviceName: serviceName,
 							data: [
 								{
-									ps_no:this.planNo,
+									ps_no: this.planNo,
 									service_no: this.serviceLog.no,
 									user_info_no: this.serviceLog.user_info_no,
 									retire_time: this.inputVal.retire_time,
@@ -576,14 +554,14 @@ export default {
 							serviceName: serviceName,
 							data: [
 								{
-									ps_no:this.planNo,
+									ps_no: this.planNo,
 									service_no: this.serviceLog.no,
 									name: this.serviceLog.name,
 									heart_rate: this.inputVal.heart_rate,
 									systolic_pressure: this.inputVal.systolic_pressure,
 									diastolic_pressure: this.inputVal.diastolic_pressure,
-									posture:this.inputVal.posture,
-									measure_position:this.inputVal.measure_position,
+									posture: this.inputVal.posture,
+									measure_position: this.inputVal.measure_position,
 									remark: this.inputVal.remark
 								}
 							]
@@ -597,7 +575,7 @@ export default {
 							serviceName: serviceName,
 							data: [
 								{
-									ps_no:this.planNo,
+									ps_no: this.planNo,
 									service_no: this.serviceLog.no,
 									name: this.serviceLog.name,
 									start_time: this.inputVal.start_time,
@@ -619,7 +597,7 @@ export default {
 							serviceName: serviceName,
 							data: [
 								{
-									ps_no:this.planNo,
+									ps_no: this.planNo,
 									service_no: this.serviceLog.no,
 									name: this.serviceLog.name,
 									glucose_time: this.inputVal.glucose_time,
@@ -633,16 +611,16 @@ export default {
 			}
 			let url = this.getServiceUrl('health', serviceName, 'operate');
 			if (serviceName) {
-					let res = await this.$http.post(url, req);
-					if (res.data.state === 'SUCCESS' && Array.isArray(res.data.response) && res.data.response.length > 0) {
-						if(this.type==='weight'){
-							this.changeWeightForBasicInfo(this.inputVal.weight)
-						}
-						uni.showToast({
-							title: '提交成功'
-						});
-						this.isSubmit = true;
+				let res = await this.$http.post(url, req);
+				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.response) && res.data.response.length > 0) {
+					if (this.type === 'weight') {
+						this.changeWeightForBasicInfo(this.inputVal.weight);
 					}
+					uni.showToast({
+						title: '提交成功'
+					});
+					this.isSubmit = true;
+				}
 			} else {
 				uni.showToast({
 					title: '此功能正在开发中',
@@ -650,20 +628,22 @@ export default {
 				});
 			}
 		},
-		changeWeightForBasicInfo(weight){
+		changeWeightForBasicInfo(weight) {
 			let url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
-			let req = [{"serviceName":"srvhealth_person_info_update","condition":[{"colName":"userno","ruleType":"eq","value":this.currentUserInfo.userno}],"data":[{"weight":weight}]}]
-			this.$http.post(url,req).then(res=>{
-				if(res.data.state === 'SUCCESS'){
-					this.selectBasicUserList()
+			let req = [
+				{ serviceName: 'srvhealth_person_info_update', condition: [{ colName: 'userno', ruleType: 'eq', value: this.currentUserInfo.userno }], data: [{ weight: weight }] }
+			];
+			this.$http.post(url, req).then(res => {
+				if (res.data.state === 'SUCCESS') {
+					this.selectBasicUserList();
 					uni.showToast({
-						title:'体重数据已更新',
-					})
+						title: '体重数据已更新'
+					});
 					uni.navigateBack({
-						delta:0
-					})
+						delta: 0
+					});
 				}
-			})
+			});
 		},
 		openTime(e) {
 			this.showTimePicker = true;
@@ -690,8 +670,8 @@ export default {
 		}
 	},
 	onLoad(option) {
-		if(option.planNo){
-			this.planNo = option.planNo
+		if (option.planNo) {
+			this.planNo = option.planNo;
 		}
 		if (option && option.type) {
 			this.type = option.type;
@@ -728,18 +708,18 @@ export default {
 		padding-top: 30upx;
 		margin: 0 auto 0;
 		min-height: 85vh;
-		.other-top-tit{
+		.other-top-tit {
 			background-color: #f5f5f5;
 			padding: 10rpx 20rpx;
-			text{
-				&:first-child{
+			text {
+				&:first-child {
 					color: red;
 					margin-right: 8rpx;
 				}
 			}
 		}
 		.item-wrap {
-			width: 90%;
+			width: calc(100% - 40rpx);
 			margin: 0 auto;
 			.item-list {
 				// border-bottom: 1px solid #cfcfcf;
@@ -750,11 +730,10 @@ export default {
 					color: #5e5e5e;
 					margin-bottom: 10upx;
 					font-weight: 700;
-					
 				}
-				.item-list-top{
-					text{
-						&:first-child{
+				.item-list-top {
+					text {
+						&:first-child {
 							color: red;
 							margin-right: 8rpx;
 						}

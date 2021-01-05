@@ -143,7 +143,6 @@
 						numbers = 0;
 					}
 				}
-				debugger
 				item.value = Number(numbers).toFixed(1)
 			},
 			// 选中某个复选框时，由checkbox时触发
@@ -151,7 +150,6 @@
 				let value = e.detail.value
 				let itemType = this.itemType
 				let currValue = ""
-				debugger
 				itemType.data.forEach(I=>{
 					if(I.name === value){
 						currValue = I
@@ -165,7 +163,6 @@
 			},
 			//选中某个单选框时，由radio时触发
 			radioChange(e){
-				debugger
 				// this.showTimePicker = true;
 				this.radio = e.detail.value
 				console.log("e---",e)

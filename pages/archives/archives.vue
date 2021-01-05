@@ -604,7 +604,6 @@ export default {
 				{ column: 'report_daq_survey_ack_no', display: false }
 			];
 			let url = `/archivesPages/report/report?serviceName=srvhealth_examination_report_select&type=detail&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`;
-			debugger;
 			uni.navigateTo({
 				url: url
 			});
@@ -1145,7 +1144,6 @@ export default {
 					url: '/archivesPages/archives-history/archives-history?isAll=true'
 				});
 			} else if (type === 'plan') {
-				debugger;
 				let fieldsCond = [{ column: 'create_manager_no', display: false }, { column: 'owner_person_no', display: false, value: this.userInfo.no }];
 				let params = {
 					to: '/archivesPages/DrugPlan/DrugPlan', //提交后要跳转的页面

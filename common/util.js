@@ -1344,7 +1344,6 @@ export default {
 				}
 				// #endif
 				// #ifdef H5
-				debugger
 				uni.navigateTo({
 					url: '/publicPages/accountExec/accountExec'
 				});

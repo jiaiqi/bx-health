@@ -2,8 +2,8 @@
 	<view class="drug-plan">
 		<view class="total-title"><view class="child-service-title"></view></view>
 		<view class="main-table" @click="toPages('update')">
-			<view class="table-item" v-for="item in fields" :key="item.column">
-				<view class="label">{{ item.label }}</view>
+			<view class="table-item" v-for="item in fields" :key="item.column" :class="{ 'wrap-row': ['take_times_each_week', 'remark'].includes(item.column) }">
+				<view class="label"><text class="text">{{ item.label }}</text></view>
 				<view class="value">{{ item.value || '' }}</view>
 			</view>
 		</view>
@@ -74,19 +74,51 @@
 									@click="toPages('record-detail', record)"
 									:class="{ 'bg-blue': item.date === nowDate, 'bg-gray': item.date !== nowDate }"
 								>
-									<view class="time">{{ record.take_time.slice(0, 5) }}</view>
+									<view class="time">
+										<text>{{ record.take_time.slice(0, 5) }}</text>
+										<text class="margin-left-xs" v-if="record.blood_glucose_val">({{ record.blood_glucose_val }}mmol/L)</text>
+										<text class="margin-left-xs" v-if="record.weight">({{ record.weight }}kg)</text>
+										<text class="margin-left-xs" v-if="record.name">({{ record.name }})</text>
+									</view>
 									<view class="info" v-if="planDetail.play_srv === '运动'">{{ record.name + record.amount + record.unit }}</view>
 									<view class="info" v-if="isArray(record.drugList) && planDetail.play_srv !== '运动'">已完成：{{ getDegree(record.drugList, 'degree') }}</view>
 									<view
 										class="progress bg-blue"
 										:style="{ width: getDegree(record.drugList).width }"
-										v-if="planDetail.play_srv !== '运动' && getDegree(record.drugList) && getDegree(record.drugList).width"
+										v-if="isArray(record.drugList) && planDetail.play_srv !== '运动' && getDegree(record.drugList) && getDegree(record.drugList).width"
 									></view>
-									<!-- <view class="delete-bar" @click="deleteRecord(record)"><text class="cuIcon-delete"></text></view> -->
 								</view>
 							</view>
 						</view>
 					</view>
+				</view>
+			</view>
+		</view>
+		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'showAddRecord' }">
+			<view class="cu-dialog " @tap.stop="">
+				<view class="inspect-record">
+					<view class="title">选择检查报告类型</view>
+					<view class="cu-bar search bg-white">
+						<view class="search-form round">
+							<text class="cuIcon-search"></text>
+							<input @blur="InputBlur" :adjust-position="false" type="text" placeholder="搜索检查报告类型" confirm-type="search" />
+						</view>
+						<view class="action"><button class="cu-btn bg-green shadow-blur round">搜索</button></view>
+					</view>
+					<tree-selector
+						class="selector-wrap"
+						:srvInfo="isArray(configCols.option_list_v2) ? null : configCols.option_list_v2"
+						:treeData="treeSelectorData"
+						:childNodeCol="'_childNode'"
+						:disColName="configCols && configCols.option_list_v2 && configCols.option_list_v2['key_disp_col'] ? configCols.option_list_v2['key_disp_col'] : ''"
+						:nodeKey="configCols.option_list_v2 && configCols.option_list_v2['refed_col'] ? configCols.option_list_v2['refed_col'] : 'no'"
+						@clickLastNode="confirmTree"
+					></tree-selector>
+					<view class="" v-if="showCustomAddRecord">
+						<text>未找到想要的报告类型？</text>
+						<text class="text-blue" @click="confirmTree">直接添加</text>
+					</view>
+					<view class="button-box"><button class="cu-btn bg-grey" @tap="hideModal">取消</button></view>
 				</view>
 			</view>
 		</view>
@@ -121,6 +153,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import dayjs from '../static/dayjs/dayjs.min.js';
 import DrugDetailInfo from '../components/DrugInfo/DrugInfo.vue';
 /**
@@ -216,10 +249,30 @@ export default {
 					label: '3次',
 					value: '3'
 				}
-			]
+			],
+			showCustomAddRecord: false,
+			configCols: {
+				column: 'activity_no',
+				label: '选择检查报告类型',
+				srvInfo: { serviceName: 'srvdaq_activity_result_submit', appNo: 'daq' },
+				type: 'treeSelector',
+				isRequire: false,
+				display: true,
+				option_list_v2: { refed_col: 'daq_survey_activity_no', srv_app: 'health', serviceName: 'srvhealth_see_doctor_lab_examination_select', key_disp_col: 'name' },
+				showExp: true,
+				value: ''
+			},
+			treeSelectorData: [],
+			treePageInfo: {
+				pageNo: 1,
+				rownumber: 20
+			}
 		};
 	},
 	computed: {
+		...mapState({
+			userInfo: state => state.user.userInfo
+		}),
 		nowDate() {
 			return dayjs().format('YYYY-MM-DD');
 		}
@@ -253,7 +306,6 @@ export default {
 		},
 		openCalendar() {},
 		getDegree(drugList, type) {
-			
 			if (type === 'degree') {
 				return `${drugList.filter(item => item.hasTook).length}/${drugList.length}`;
 			} else {
@@ -273,11 +325,11 @@ export default {
 						width: `${num * 100}%`,
 						bg: 'bg-green'
 					};
-				}else if(this.planDetail.play_srv!=='用药'||this.planDetail.play_srv!=='运动'){
+				} else if (this.planDetail.play_srv !== '用药' || this.planDetail.play_srv !== '运动') {
 					return {
 						width: `100%`,
 						bg: 'bg-blue'
-					}
+					};
 				}
 			}
 		},
@@ -352,6 +404,51 @@ export default {
 				return '早晨';
 			}
 		},
+		InputBlur(e) {
+			let value = e.detail.value;
+			if (e.detail.value) {
+				let cond = [{ colName: 'name', ruleType: 'like', value: value }];
+				this.getTreeSelectorData(cond);
+			} else {
+				this.getTreeSelectorData();
+			}
+		},
+		async getTreeSelectorData(cond) {
+			let self = this;
+			let req = {
+				serviceName: self.configCols.option_list_v2.serviceName,
+				colNames: ['*'],
+				condition: [],
+				page: { pageNo: this.treePageInfo.pageNo, rownumber: this.treePageInfo.rownumber }
+			};
+			if (cond) {
+				req.condition = [...req.condition, ...cond];
+				setTimeout(() => {
+					this.showCustomAddRecord = true;
+				}, 1000);
+			} else {
+				this.showCustomAddRecord = false;
+			}
+			let appName = self.configCols.option_list_v2.srv_app;
+			let res = await self.onRequest('select', req.serviceName, req, appName);
+			if (res.data.state === 'SUCCESS') {
+				if (res.data.page) {
+					this.treePageInfo = res.data.page;
+				}
+				if (res.data.page && res.data.page.pageNo > 1) {
+					let data = res.data.data;
+					self.treeSelectorData = [...self.treeSelectorData, ...data];
+				} else {
+					if (res.data.data.length === 0) {
+						uni.showToast({
+							title: '没有找到相关数据',
+							icon: 'none'
+						});
+					}
+					self.treeSelectorData = res.data.data;
+				}
+			}
+		},
 		toPages(type, item) {
 			let condition = [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }];
 			let fieldsCond = [{ column: 'ds_no', condition: [{ colName: 'person_no', ruleType: 'eq', value: this.planDetail.person_no }] }];
@@ -405,7 +502,7 @@ export default {
 						url += '&addType=' + this.planDetail.play_srv;
 					}
 					if (this.planDetail.play_srv === '测血压') {
-						return 
+						return;
 						url = '/otherPages/otherIndicator/otherIndicator?type=bp&planNo=' + this.planNo;
 					}
 					break;
@@ -413,13 +510,45 @@ export default {
 					url = `/archivesPages/addDrugRecord/addDrugRecord?serviceName=srvhealth_plan_schedule_record_add&date=${this.info.currentDate}&pb_no=${
 						this.planDetail.owner_person_no
 					}&type=add&cond=${encodeURIComponent(JSON.stringify(condition))}&ds_no=${this.planNo}`;
-					if (this.planDetail.play_srv === '运动') {
-						url += '&addType=sport';
-					} else if (this.planDetail.play_srv) {
-						url += '&addType=' + this.planDetail.play_srv;
-					}
-					if (this.planDetail.play_srv === '测血压') {
-						url = '/otherPages/otherIndicator/otherIndicator?type=bp&planNo=' + this.planNo;
+					switch (this.planDetail.play_srv) {
+						case '运动':
+							url += '&addType=sport';
+							break;
+						case '测血压':
+							url = '/otherPages/otherIndicator/otherIndicator?type=bp&planNo=' + this.planNo;
+							break;
+						case '测体重':
+							url = '/otherPages/otherIndicator/otherIndicator?type=weight&planNo=' + this.planNo;
+							break;
+						case '测血糖':
+							url = '/otherPages/otherIndicator/otherIndicator?type=glucose&planNo=' + this.planNo;
+							break;
+						case '饮食':
+							let contentType = {
+								type: 'food',
+								date: this.info.currentDate,
+								serviceName: 'srvhealth_diet_contents_select',
+								colName: 'name',
+								imgCol: 'image',
+								wordKey: {
+									title: 'name',
+									unit: 'unit',
+									energy: 'unit_energy'
+								}
+							};
+							url = `/otherPages/dietSelect/dietSelect?condType=${encodeURIComponent(JSON.stringify(contentType))}&planNo=${this.planNo}`;
+							break;
+						case '检查':
+						case '治疗':
+						case '就医':
+							this.modalName = 'showAddRecord';
+							this.showCustomAddRecord = false;
+							this.getTreeSelectorData();
+							url = '';
+							break;
+						default:
+							url += '&addType=' + this.planDetail.play_srv;
+							break;
 					}
 					break;
 				case 'open-calendar':
@@ -637,6 +766,106 @@ export default {
 				}
 				return;
 			}
+			if (this.planDetail.play_srv === '测体重') {
+				url = this.getServiceUrl('health', 'srvhealth_body_fat_measurement_record_select', 'select');
+				req.serviceName = 'srvhealth_body_fat_measurement_record_select';
+				req.condition = [{ colName: 'ps_no', ruleType: 'eq', value: no }];
+				req.order = [];
+				if (date) {
+					req.condition.push({ colName: 'create_time', ruleType: 'like', value: date });
+				}
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data)) {
+					this.drugRecord = [
+						{
+							date: date,
+							data: res.data.data.map(item => {
+								item.take_time = item.create_time.slice(11);
+								item.date = item.create_time.slice(0, 10);
+								item.take_date = item.date;
+								item.hasTook = true; //已服用
+								return item;
+							})
+						}
+					];
+				}
+				return;
+			}
+			if (this.planDetail.play_srv === '测血糖') {
+				url = this.getServiceUrl('health', 'srvhealth_blood_glucose_measurement_record_select', 'select');
+				req.serviceName = 'srvhealth_blood_glucose_measurement_record_select';
+				req.condition = [{ colName: 'ps_no', ruleType: 'eq', value: no }];
+				req.order = [];
+				if (date) {
+					req.condition.push({ colName: 'create_time', ruleType: 'like', value: date });
+				}
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data)) {
+					this.drugRecord = [
+						{
+							date: date,
+							data: res.data.data.map(item => {
+								item.take_time = item.create_time.slice(11);
+								item.date = item.create_time.slice(0, 10);
+								item.take_date = item.date;
+								item.hasTook = true; //已服用
+								return item;
+							})
+						}
+					];
+				}
+				return;
+			}
+			if (['检查', '就医', '治疗'].includes(this.planDetail.play_srv)) {
+				url = this.getServiceUrl('health', 'srvhealth_examination_report_select', 'select');
+				req.serviceName = 'srvhealth_examination_report_select';
+				req.condition = [{ colName: 'ps_no', ruleType: 'eq', value: no }];
+				req.order = [];
+				if (date) {
+					req.condition.push({ colName: 'create_time', ruleType: 'like', value: date });
+				}
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data)) {
+					this.drugRecord = [
+						{
+							date: date,
+							data: res.data.data.map(item => {
+								item.take_time = item.create_time.slice(11);
+								item.date = item.create_time.slice(0, 10);
+								item.take_date = item.date;
+								item.hasTook = true; //已服用
+								return item;
+							})
+						}
+					];
+				}
+				return;
+			}
+			if (this.planDetail.play_srv === '饮食') {
+				url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
+				req.serviceName = 'srvhealth_diet_record_select';
+				req.condition = [{ colName: 'ps_no', ruleType: 'eq', value: no }];
+				req.order = [];
+				if (date) {
+					req.condition.push({ colName: 'create_time', ruleType: 'like', value: date });
+				}
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data)) {
+					this.drugRecord = [
+						{
+							date: date,
+							data: res.data.data.map(item => {
+								item.take_time = item.create_time.slice(11);
+								item.date = item.create_time.slice(0, 10);
+								item.take_date = item.date;
+								item.hasTook = true; //已服用
+								return item;
+							})
+						}
+					];
+				}
+				return;
+			}
 			let res = await this.$http.post(url, req);
 			setTimeout(() => {
 				this.showCalender = true;
@@ -784,6 +1013,54 @@ export default {
 		},
 		hideModal() {
 			this.modalName = '';
+		},
+		confirmTree(e) {
+			if (e.item && e.item.jy_no) {
+				let fieldsCond = [
+					{ column: 'specimen', value: e.item.specimen }, //标本类型
+					{ column: 'examination_type', value: e.item.examination_type }, //检查类别
+					{ column: 'jy_no', display: false, value: e.item.jy_no },
+					{ column: 'examinate_person_no', display: false, value: this.userInfo.no },
+					{ column: 'examinate_name', display: false, value: this.userInfo.name },
+					{ column: 'examinate_account', display: false, value: this.userInfo.userno },
+					{ column: 'examinate_date', display: true, value: dayjs().format('YYYY-MM-DD') },
+					{ column: 'report_daq_survey_activity_no', display: false },
+					{ column: 'report_record', display: false },
+					{ column: 'report_daq_survey_ack_no', display: false }
+				];
+				let url = `/archivesPages/report/report?serviceName=srvhealth_examination_report_add&type=add&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`;
+				if (e.item.daq_survey_activity_no) {
+					let params = {
+						to: `/archivesPages/report/report?serviceName=srvhealth_examination_report_add&type=add`, //提交后要跳转的页面
+						idCol: 'report_daq_survey_activity_no', // 跳转时携带的参数
+						buttonLabel: '下一步',
+						fieldsCond: fieldsCond
+					};
+					fieldsCond[fieldsCond.findIndex(item => item.column === 'report_daq_survey_activity_no')].value = e.item.daq_survey_activity_no;
+					url = `/questionnaire/index/index?formType=form&planNo=${this.planNo}&activity_no=${e.item.daq_survey_activity_no}&status=进行中&params=${encodeURIComponent(
+						JSON.stringify(params)
+					)}`;
+				}
+				uni.navigateTo({
+					url: url
+				});
+			} else {
+				let fieldsCond = [
+					{ column: 'jy_no', display: false },
+					{ column: 'examinate_person_no', display: false, value: this.userInfo.no },
+					{ column: 'examinate_name', display: false, value: this.userInfo.name },
+					{ column: 'examinate_account', display: false, value: this.userInfo.userno },
+					{ column: 'examinate_date', display: true, value: dayjs().format('YYYY-MM-DD') },
+					{ column: 'report_daq_survey_activity_no', display: false },
+					{ column: 'report_record', display: false },
+					{ column: 'report_daq_survey_ack_no', display: false }
+				];
+				uni.navigateTo({
+					url: `/archivesPages/report/report?serviceName=srvhealth_examination_report_add&planNo=${this.planNo}&type=add&fieldsCond=${encodeURIComponent(
+						JSON.stringify(fieldsCond)
+					)}`
+				});
+			}
 		}
 	},
 	onShow() {
@@ -862,21 +1139,36 @@ export default {
 	background-color: #fff;
 	overflow: hidden;
 	.main-table {
-		padding: 20rpx 0;
+		// padding: 20rpx 0;
 		display: grid;
 		margin: 20rpx;
-		grid-template-columns: repeat(2, calc(50% - 10rpx));
-		grid-column-gap: 20rpx;
+		grid-template-columns: repeat(2, calc(50% - 0rpx));
+		// grid-column-gap: 20rpx;
 		background-color: #409eff;
 		box-shadow: 0px 1px 4px 0px #4e87c6, 0px 5px 2px 0px #b3d8ff;
 		// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		border-radius: 20rpx;
 		min-height: 220rpx;
+		overflow: hidden;
 		.table-item {
 			display: flex;
 			padding: 10rpx 20rpx;
 			line-height: 40rpx;
 			color: #fff;
+			// border: 1px solid #f1f1f1;
+			margin-left: -1px;
+			margin-top: -1px;
+			&.wrap-row {
+				// flex-direction: column;
+				grid-column-end: 3;
+				grid-column-start: 1;
+				.label{
+					flex: 0.5;
+				}
+				.value {
+					margin: 10rpx 0;
+				}
+			}
 			&.delete {
 				justify-content: center;
 				grid-column-end: 3;
@@ -889,6 +1181,19 @@ export default {
 			}
 			.label {
 				flex: 0.8;
+				display: flex;
+				align-items: center;
+				.text{
+					position: relative;
+					// &::after{
+					// 	content: '';
+					// 	position: absolute;
+					// 	width: 80%;
+					// 	bottom: -10rpx;
+					// 	left: 0;
+					// 	border-bottom: 5rpx solid #fff;
+					// }
+				}
 			}
 			.value {
 				font-weight: 700;
@@ -947,7 +1252,7 @@ export default {
 			position: relative;
 			overflow: hidden;
 			color: #fff;
-			background-color: #999;
+			text-align: center;
 			&:nth-child(2n) {
 				margin-right: 0;
 			}
@@ -1223,6 +1528,32 @@ export default {
 			width: 50rpx;
 			height: 50rpx;
 			margin-right: 50rpx;
+		}
+	}
+}
+.inspect-record {
+	width: 100%;
+	background-color: #fff;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 80vh;
+	.selector-wrap {
+		overflow: scroll;
+		flex: 1;
+	}
+	.title {
+		width: 100%;
+		text-align: center;
+		font-size: 36rpx;
+		font-weight: 700;
+		padding: 20rpx;
+	}
+	.button-box {
+		// position: absolute;
+		// bottom: 20rpx;
+		.cu-btn {
+			width: 45%;
 		}
 	}
 }

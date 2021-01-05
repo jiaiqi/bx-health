@@ -30,6 +30,7 @@ export default {
 		return {
 			globalTextFontSize: 14,
 			globalLabelFontSize: 12,
+			planNo: '',
 			serviceName: '',
 			srvType: 'add', // 表单信息 add | update  | select |list | detail
 			use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
@@ -174,6 +175,9 @@ export default {
 						}
 						this.params.defaultVal = req;
 						let data = this.deepClone(req);
+						if(this.planNo){
+							data.ps_no = this.planNo
+						}
 						req = [{ serviceName: e.service_name, data: [data] }];
 						let app = uni.getStorageSync('activeApp');
 						let url = this.getServiceUrl(app, e.service_name, 'add');
@@ -429,6 +433,9 @@ export default {
 		this.globalLabelFontSize = getApp().globalData.globalLabelFontSize ? getApp().globalData.globalLabelFontSize : 14;
 	},
 	onLoad(option) {
+		if (option.planNo) {
+			this.planNo = option.planNo;
+		}
 		const destApp = option.destApp;
 		if (destApp) {
 			uni.setStorageSync('activeApp', destApp);

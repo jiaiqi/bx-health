@@ -40,6 +40,7 @@ export default {
 	},
 	data() {
 		return {
+			planNo: '', //计划编号
 			chartData: {
 				option: {}
 			},
@@ -67,15 +68,16 @@ export default {
 				let arr = [];
 				this.dietRecordList.forEach(item => {
 					let obj = {
+						cook_method: this.dietInfo.cook_method,
 						userno: uni.getStorageSync('login_user_info').user_no,
-						hdate: this.formateDate(new Date(),'date'),
-						htime: this.formateDate(new Date(),'time'),
+						hdate: this.formateDate(new Date(), 'date'),
+						htime: this.formateDate(new Date(), 'time'),
 						name: item.name,
 						person_info_no: this.userInfo.no,
 						person_name: this.userInfo.name,
 						amount: item.amount,
 						unit: item.unit,
-						energy: item.unit_amount*item.unit_energy/100,
+						energy: (item.unit_amount * item.unit_energy) / 100,
 						user_name: this.userInfo.name,
 						image: item.image,
 						unit_weight_g: 100,
@@ -106,6 +108,9 @@ export default {
 						element_cu: Number(this.dietInfo.element_cu) * item.amount,
 						element_mn: Number(this.dietInfo.element_mn) * item.amount
 					};
+					if (this.planNo) {
+						obj.ps_no = this.planNo;
+					}
 					// if (this.searchArg.type === 'food') {
 					if (item.meal_no) {
 						obj['mixed_food_no'] = item.meal_no;
@@ -360,7 +365,6 @@ export default {
 			} else {
 				this.dietInfo.amount = Number((this.dietInfo.amount + step).toFixed(1));
 			}
-			debugger;
 			this.dietInfo.energy = this.dietInfo.unit_energy * this.dietInfo.amount;
 			setTimeout(() => {
 				this.$refs.elementDetail.buildChartOption(this.dietInfo);
@@ -383,14 +387,11 @@ export default {
 			} else {
 				this.dietInfo.unit_energy = (currentUnit.amount * this.dietInfo.unit_energy) / this.dietInfo.unit_weight_g;
 			}
-			// this.amount  =
-			debugger;
 			this.dietInfo.unit = currentUnit.unit;
 			this.dietInfo.energy = this.dietInfo.unit_energy * this.dietInfo.amount;
 			setTimeout(() => {
 				this.$refs.elementDetail.buildChartOption(this.dietInfo);
 			}, 200);
-			// this.$refs.elementDetail.buildChartOption(this.dietInfo);
 		},
 		deleteItem(item) {
 			let self = this;
@@ -440,6 +441,9 @@ export default {
 		}
 	},
 	onLoad(option) {
+		if (option.planNo) {
+			this.planNo = option.planNo;
+		}
 		if (option.chooseDate && option.no) {
 			this.chooseDate = option.chooseDate;
 			if (option.no.indexOf('DR') !== -1) {

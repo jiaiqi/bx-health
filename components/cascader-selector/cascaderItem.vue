@@ -32,7 +32,6 @@ export default {
 			this.$emit('selectAreaItem', e);
 		},
 		selectArea(e) {
-			debugger;
 			// if(e.is_leaf != '是'){
 				if ( this.currentNo !== e.no) {
 					this.currentItem = e;
@@ -44,7 +43,6 @@ export default {
 		},
 		recursionArealist(oldAreaList) {
 			let self = this;
-			debugger
 			if (!Array.isArray(self.copyCurrentItem.child)) {
 				self.copyCurrentItem.child = [];
 			}

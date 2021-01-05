@@ -249,7 +249,6 @@ export default {
 			// if(Array.isArray(colVs._fieldInfo)){
 			// 	colVs._fieldInfo = colVs._fieldInfo.map(field=>{
 			// 		if(field.type==='digit'||field.type==='number'){
-			// 			debugger
 			// 		}
 			// 		return field
 			// 	})

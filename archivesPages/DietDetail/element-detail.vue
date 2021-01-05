@@ -4,13 +4,18 @@
 			<view class="view-tab" :class="{ 'active-tab': showChart }" @click="switchTab(true)">NRV%占比</view>
 			<view class="view-tab" :class="{ 'active-tab': !showChart }" @click="switchTab(false)">营养素含量</view>
 		</view>
+		<view class="crowd-list" v-if="dietInfo.food_no && !dietInfo.diet_record_no">
+			<view class="crowd-item" :class="{ 'active-crowd': currentCrowd === item.type }" v-for="item in crowdList" :key="item.type" @click="changeCrowd(item)">
+				{{ item.name }}({{ item.weight }}kg)
+			</view>
+		</view>
 		<view class="visual-detail" v-if="showChart"><uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="chartData" /></view>
 		<view class="visual-detail" v-if="!showChart">
 			<view class="ele-item" v-for="item in eleData" :key="item.title">
 				<view class="title">{{ item.title }}</view>
 				<view class="content">
 					<view class="ele-item" v-for="ele in item.matterList" :key="ele.key">
-						<text class="label">{{ ele.label }}</text>
+						<text class="label">{{ ele.label }}：</text>
 						<text class="value">{{ dietInfo[ele.key] ? Number(dietInfo[ele.key]).toFixed(1) : '' }}</text>
 						<text
 							:class="{
@@ -48,7 +53,31 @@ export default {
 			showChart: true,
 			eleData: eleData,
 			nutrientList: [],
-			chartData: {}
+			chartData: {},
+			currentCrowd: 'man',
+			crowdList: [
+				{
+					name: '男性',
+					type: 'man',
+					sex: '男',
+					age: 18,
+					weight: 65
+				},
+				{
+					name: '女性',
+					type: 'woman',
+					sex: '女',
+					age: 18,
+					weight: 55
+				},
+				{
+					name: '我的',
+					type: 'mine',
+					sex: null,
+					age: null,
+					weight: null
+				}
+			]
 		};
 	},
 	props: {
@@ -65,10 +94,18 @@ export default {
 		// 	type: Object
 		// }
 	},
+	mounted() {
+		if (this.userInfo.no && this.userInfo.sex && this.userInfo.weight) {
+			this.crowdList[2].sex = this.userInfo.sex;
+			this.crowdList[2].age = this.age;
+			this.crowdList[2].weight = this.userInfo.weight;
+			this.currentCrowd = 'mine';
+		}
+	},
 	watch: {
 		dietInfo: {
 			handler(newValue, oldValue) {
-				if (newValue &&( newValue.diet_record_no||newValue.food_no)) {
+				if (newValue && (newValue.diet_record_no || newValue.food_no)) {
 					this.switchTab(true);
 					// this.buildChartOption();
 				}
@@ -76,6 +113,29 @@ export default {
 		}
 	},
 	methods: {
+		changeCrowd(item) {
+			// 切换人群
+			if (item.type === 'mine' && (!item.age || !item.sex)) {
+				uni.showModal({
+					title: '提示',
+					content: '当前没有进行登记年龄、性别和体重，是否去登记?',
+					success: function(res) {
+						if (res.confirm) {
+							uni.navigateTo({
+								url: '/otherPages/chooseFood/myFoodsInfo'
+							});
+						} else if (res.cancel) {
+							console.log('用户点击取消');
+						}
+					}
+				});
+			} else {
+				this.currentCrowd = item.type;
+				this.getNutrientRecommended().then(_ => {
+					this.buildChartOption();
+				});
+			}
+		},
 		switchTab(show) {
 			this.showChart = show;
 			if (show) {
@@ -98,15 +158,25 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			
+			let weight =
+				this.crowdList.find(item => item.type === this.currentCrowd) && this.crowdList.find(item => item.type === this.currentCrowd).weight
+					? this.crowdList.find(item => item.type === this.currentCrowd).weight
+					: self.userInfo.weight;
+			let age =
+				this.crowdList.find(item => item.type === this.currentCrowd) && this.crowdList.find(item => item.type === this.currentCrowd).age
+					? this.crowdList.find(item => item.type === this.currentCrowd).age
+					: self.age;
+			let sex =
+				this.crowdList.find(item => item.type === this.currentCrowd) && this.crowdList.find(item => item.type === this.currentCrowd).sex
+					? this.crowdList.find(item => item.type === this.currentCrowd).sex
+					: self.userInfo.sex;
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-				this.nutrientList = res.data.data;
 				let result = res.data.data.filter(item => {
-					if ((item.sex && item.sex.indexOf(self.userInfo.sex) !== -1) || !item.sex) {
+					if ((item.sex && item.sex.indexOf(sex) !== -1) || !item.sex) {
 						if (item.age_start && item.age_end) {
-							return self.age >= item.age_start && self.age < item.age_end;
+							return age >= item.age_start && age < item.age_end;
 						} else if (item.age_start && !item.age_end) {
-							return self.age >= item.age_start;
+							return age >= item.age_start;
 						} else if (!item.age_start && !item.age_end) {
 							return true;
 						} else {
@@ -126,22 +196,23 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * weight : item.val_ear ? item.val_ear * weight : mat.EAR * weight;
 									mat.UL = 0;
 								}
 							} else {
 								if (mat.name === '脂肪') {
-									mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
+									mat.EAR = Number((weight * 50 * 0.2) / 9).toFixed(2);
 									mat.UL = 0;
 								}
 								if (mat.name === '碳水') {
-									mat.EAR = self.userInfo.weight * 4;
+									mat.EAR = weight * 4;
 									mat.UL = 0;
 								}
 							}
 						});
 					});
 				});
+				this.nutrientList = result;
 				return result;
 			}
 		},
@@ -187,6 +258,8 @@ export default {
 					let ratio = 1;
 					if (diet['unit'] === 'g') {
 						ratio = (diet.unit_weight_g * diet.amount) / (diet.unit_amount ? diet.unit_amount : diet.unit_weight_g);
+					} else if (diet['unit'].indexOf('g') === -1) {
+						ratio = 1;
 					} else {
 						ratio = (diet.unit_weight_g * diet.amount) / 100;
 					}
@@ -201,9 +274,6 @@ export default {
 			if (currentDiet.amount === 0) {
 				currentDiet.amount = 1;
 			}
-			// if(dietInfo){
-			// 	 currentDiet = this.deepClone(dietInfo);
-			// }
 			let serviceName = '';
 			let eleArr = this.getEnergyListValue();
 			let category = eleArr.map(item => {
@@ -230,6 +300,9 @@ export default {
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
 							let ratio = currentDiet.unit_weight_g / 100;
+							if (currentDiet.unit.indexOf('g') === -1) {
+								ratio = 1;
+							}
 							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
 							let num = (val * 100) / Number(cur.EAR);
 							num = parseFloat(num.toFixed(1));
@@ -240,6 +313,9 @@ export default {
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
 							let ratio = currentDiet.unit_weight_g / 100;
+							if (currentDiet.unit.indexOf('g') === -1) {
+								ratio = 1;
+							}
 							if (!currentDiet.unit_weight_g && currentDiet.unit_amount) {
 								ratio = currentDiet.unit_amount / 100;
 							}
@@ -422,6 +498,25 @@ export default {
 			}
 		}
 	}
+	.crowd-list {
+		display: flex;
+		padding: 20rpx;
+		.crowd-item {
+			border-radius: 50rpx;
+			background-color: #f1f1f1;
+			color: #ccc;
+			border: 1rpx solid #ccc;
+			padding: 10rpx 20rpx;
+			& + .crowd-item {
+				margin-left: 10rpx;
+			}
+			&.active-crowd {
+				background-color: #8dc63f;
+				border-color: #8dc63f;
+				color: #fff;
+			}
+		}
+	}
 	.visual-detail {
 		margin: 0 20rpx;
 		height: 650rpx;
@@ -436,7 +531,7 @@ export default {
 				width: 100%;
 				display: flex;
 				flex-wrap: wrap;
-				padding: 10rpx 20rpx;
+				padding: 5rpx 0rpx;
 				.ele-item {
 					color: #909399;
 					margin-right: 30rpx;

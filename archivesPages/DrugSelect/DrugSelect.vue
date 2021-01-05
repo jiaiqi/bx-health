@@ -86,7 +86,6 @@ export default {
 				e.dosage_each_time = 1; // 每次用量
 				e.dosage_unit = '片'; // 用量单位
 			} else if (e.sport_no) {
-				// debugger
 			}
 		},
 		searchVal(e) {

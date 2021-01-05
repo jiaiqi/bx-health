@@ -70,7 +70,6 @@ export default {
 			let defaultVal = null;
 			this.colsV2Data = colVs;
 			colVs = this.deepClone(colVs);
-			// debugger;
 			if (colVs.service_view_name) {
 				uni.setNavigationBarTitle({
 					title: colVs.service_view_name

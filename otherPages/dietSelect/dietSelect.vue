@@ -24,7 +24,6 @@
 				</view>
 			</view>
 		</view>
-		<!-- <bx-filtrate :menuAgList='menuAgList' :childChooseArr='childChooseArr' @clickMenu="chooseMenu" @clickTag="tagClick"></bx-filtrate> -->
 		<view class="filtrate-wrap">
 			<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 				<text>已选择：</text>
@@ -310,6 +309,7 @@ export default {
 	},
 	data() {
 		return {
+			planNo: null,
 			recentDiet: [],
 			recentDietMode: 'edit',
 			heightStyle: 'calc(100vh-200upx)',
@@ -699,6 +699,9 @@ export default {
 		console.log('query-----', query);
 		if (query.date) {
 			this.selectDate = query.date;
+		}
+		if (option.planNo) {
+			this.planNo = option.planNo;
 		}
 		if (query.pagetType) {
 			this.pageDetType = query.pagetType;
@@ -2237,8 +2240,12 @@ export default {
 					// uni.navigateTo({
 					// 	url: '/otherPages/chooseFood/chooseFood?currFood=' + food + '&pageType=' + this.pageDetType
 					// });
+					let url = `/archivesPages/DietDetail/DietDetail?chooseDate=${this.nowDate}&no=${this.currFood.food_no}`;
+					if (this.planNo) {
+						url += `&planNo=${this.planNo}`;
+					}
 					uni.navigateTo({
-						url: `/archivesPages/DietDetail/DietDetail?chooseDate=${this.nowDate}&no=${this.currFood.food_no}`
+						url: url
 					});
 				} else {
 					uni.navigateTo({

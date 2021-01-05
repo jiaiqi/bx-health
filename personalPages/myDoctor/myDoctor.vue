@@ -87,9 +87,9 @@ export default {
 				success: function(res) {
 					console.log('条码类型：' + res.scanType);
 					console.log('条码内容：' + res.result);
-					if (res.result && res.result.indexOf('DT') !== -1) {
+					if (res.result && res.result.indexOf('PB') !== -1) {
 						// 进行绑定
-						if (res.result.indexOf('https://wx2.100xsys.cn/mpwc/' !== -1)) {
+						if (res.result.indexOf('https://wx2.100xsys.cn/mpwc/') !== -1) {
 							let result = res.result.split('https://wx2.100xsys.cn/mpwc/')[1];
 							self.qrcodeParams = result;
 							self.toBindDoctor(result);
@@ -150,36 +150,49 @@ export default {
 			let serviceName = 'srvhealth_person_relation_add';
 			let url = this.getServiceUrl('health', serviceName, 'operate');
 			let req = [
-				{
-					serviceName: serviceName,
-					condition: [],
-					data: [{ customer_no: this.userInfo.no, customer_name: this.userInfo.name, manager_no: docInfo.dt_no, manager_name: docInfo.dt_name }]
-				}
+				// {
+				// 	serviceName: serviceName,
+				// 	condition: [],
+				// 	data: [{ customer_no: this.userInfo.no, customer_name: this.userInfo.name, manager_no: docInfo.dt_no, manager_name: docInfo.dt_name }]
+				// }
 			];
-			req[0].data = [
+			req = [
 				{
 					serviceName: 'srvhealth_person_relation_add',
 					condition: [],
 					data: [
 						{
-							usera_person_no: docInfo.no,
+							relation_type: '管理',
+							state: '正常',
 							usera_name: docInfo.name,
 							usera_no: docInfo.userno,
+							usera_person_no: docInfo.no,
 							usera_profile_url: docInfo.profile_url,
-							usera_image: docInfo.user_image,
-							relation_type: '管理',
-							userb_person_no: this.userInfo.no,
 							userb_name: this.userInfo.name,
-							userb_image: this.userInfo.user_image,
 							userb_no: this.userInfo.userno,
+							userb_person_no: this.userInfo.no,
+							userb_image: this.userInfo.user_image,
 							userb_profile_url: this.userInfo.profile_url,
-							userb_sex: this.userInfo.sex,
-							state: '正常'
+							userb_sex: this.userInfo.sex
 						}
+						// {
+						// 	usera_person_no: docInfo.no,
+						// 	usera_name: docInfo.name,
+						// 	usera_no: docInfo.userno,
+						// 	usera_profile_url: docInfo.profile_url,
+						// 	usera_image: docInfo.user_image,
+						// 	relation_type: '管理',
+						// 	userb_person_no: this.userInfo.no,
+						// 	userb_name: this.userInfo.name,
+						// 	userb_image: this.userInfo.user_image,
+						// 	userb_no: this.userInfo.userno,
+						// 	userb_profile_url: this.userInfo.profile_url,
+						// 	userb_sex: this.userInfo.sex,
+						// 	state: '正常'
+						// }
 					]
 				}
 			];
-			debugger
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				this.getBindDoctor();
@@ -266,7 +279,7 @@ export default {
 			this.getBindDoctor().then(_ => {
 				if (options.q) {
 					let text = decodeURIComponent(options.q);
-					if (text.indexOf('https://wx2.100xsys.cn/mpwc/' !== -1)) {
+					if (text.indexOf('https://wx2.100xsys.cn/mpwc/') !== -1) {
 						let result = text.split('https://wx2.100xsys.cn/mpwc/')[1];
 						self.qrcodeParams = result;
 						self.toBindDoctor(result);
