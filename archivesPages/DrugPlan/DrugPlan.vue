@@ -70,7 +70,8 @@
 							<view class="timeline-content">
 								<view
 									class="timeline-item"
-									v-for="record in item.data"
+									v-for="(record,index) in item.data"
+									:key="index"
 									@click="toPages('record-detail', record)"
 									:class="{ 'bg-blue': item.date === nowDate, 'bg-gray': item.date !== nowDate }"
 								>
@@ -78,7 +79,7 @@
 										<text>{{ record.take_time.slice(0, 5) }}</text>
 										<text class="margin-left-xs" v-if="record.blood_glucose_val">({{ record.blood_glucose_val }}mmol/L)</text>
 										<text class="margin-left-xs" v-if="record.weight">({{ record.weight }}kg)</text>
-										<text class="margin-left-xs" v-if="record.name">({{ record.name }})</text>
+										<text class="margin-left-xs" v-if="record.name&&!record.blood_glucose_val&&!record.weight">({{ record.name }})</text>
 									</view>
 									<view class="info" v-if="planDetail.play_srv === '运动'">{{ record.name + record.amount + record.unit }}</view>
 									<view class="info" v-if="isArray(record.drugList) && planDetail.play_srv !== '运动'">已完成：{{ getDegree(record.drugList, 'degree') }}</view>
@@ -309,27 +310,29 @@ export default {
 			if (type === 'degree') {
 				return `${drugList.filter(item => item.hasTook).length}/${drugList.length}`;
 			} else {
-				let num = drugList.filter(item => item.hasTook).length / drugList.length;
-				if (num < 0.5) {
-					return {
-						width: `${num * 100}%`,
-						bg: 'bg-red'
-					};
-				} else if (num >= 0.5 && num < 1) {
-					return {
-						width: `${num * 100}%`,
-						bg: 'bg-orange'
-					};
-				} else if (num === 1) {
-					return {
-						width: `${num * 100}%`,
-						bg: 'bg-green'
-					};
-				} else if (this.planDetail.play_srv !== '用药' || this.planDetail.play_srv !== '运动') {
-					return {
-						width: `100%`,
-						bg: 'bg-blue'
-					};
+				if(Array.isArray(drugList)){
+					let num = drugList.filter(item => item.hasTook).length / drugList.length;
+					if (num < 0.5) {
+						return {
+							width: `${num * 100}%`,
+							bg: 'bg-red'
+						};
+					} else if (num >= 0.5 && num < 1) {
+						return {
+							width: `${num * 100}%`,
+							bg: 'bg-orange'
+						};
+					} else if (num === 1) {
+						return {
+							width: `${num * 100}%`,
+							bg: 'bg-green'
+						};
+					} else if (this.planDetail.play_srv !== '用药' || this.planDetail.play_srv !== '运动') {
+						return {
+							width: `100%`,
+							bg: 'bg-blue'
+						};
+					}
 				}
 			}
 		},

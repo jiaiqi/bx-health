@@ -15,7 +15,7 @@
 
 				<view class="item-list" @click="showWeightDigSelect = true">
 					<text>消化道情况</text>
-					<bx-checkbox-group v-model="inputVal.wearing" mode="button">
+					<bx-checkbox-group v-model="inputVal.alimentary_canal" mode="button">
 						<bx-checkbox v-for="item in DigList" :key="item.value" :name="item.value" v-model="item.checked">{{ item.value }}</bx-checkbox>
 					</bx-checkbox-group>
 				</view>
@@ -514,8 +514,8 @@ export default {
 									name: this.serviceLog.name,
 									weight: this.inputVal.weight,
 									body_fat_rate: this.inputVal.body_fat_rate ? this.inputVal.body_fat_rate : 0,
-									wearing: this.inputVal.wearing,
-									alimentary_canal: this.inputVal.alimentary_canal
+									wearing: this.inputVal.wearing.toString(),
+									alimentary_canal: this.inputVal.alimentary_canal.toString()
 								}
 							]
 						}
