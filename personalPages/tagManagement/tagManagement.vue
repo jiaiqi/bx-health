@@ -64,6 +64,7 @@ export default {
 			// 给该用户添加标签(临时)
 			if (!this.curTags.find(item => item.label_no === tag.label_no)) {
 				this.curTags.push(tag);
+				this.curTag = ''
 			} else {
 				if (this.curTags.find(item => item.label_no === tag.label_no).label_no === this.activeTagNo) {
 					this.activeTagNo = '';

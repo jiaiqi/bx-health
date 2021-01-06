@@ -114,7 +114,7 @@ export default {
 	methods: {
 		async getFoodUnit() {
 			// 查找当前食物的单位
-			if (!this.dietInfo.diet_record_no && !this.dietInfo.food_no) {
+			if (!this.dietInfo.diet_record_no && !this.dietInfo.food_no && !this.dietInfo.meal_no) {
 				return;
 			}
 			let url = this.getServiceUrl('health', 'srvhealth_food_unit_amount_estimate_select', 'select');
@@ -127,15 +127,14 @@ export default {
 			let res = await this.$http.post(url, req);
 			let unitList = [];
 			let self = this;
+			let basicUnit = this.deepClone(this.dietInfo);
 			if (this.dietInfo.unit !== 'g' && this.dietInfo.unit.indexOf('g') !== -1) {
-				let basicUnit = this.deepClone(this.dietInfo);
 				basicUnit.unit = 'g';
 				basicUnit.amount = 1;
 				basicUnit.energy = (this.dietInfo.energy * 100) / this.dietInfo.unit_weight_g;
 				basicUnit.unit_weight_g = 100;
 				unitList.push(basicUnit);
 			} else if (self.dietInfo.unit !== 'g') {
-				let basicUnit = self.deepClone(self.dietInfo);
 				basicUnit.amount = 1;
 				// basicUnit.energy = (basicUnit.energy * 100) / basicUnit.unit_weight_g;
 				unitList.push(basicUnit);
@@ -189,8 +188,13 @@ export default {
 			} else {
 				this.cook_method = this.dietInfo.cook_method;
 			}
-			let index = this.defaultCookTypes.findIndex(item => item.value !== this.dietInfo.cook_method && this.dietInfo.cook_method_default.indexOf(item.value) === -1);
-			this.defaultCookTypes.splice(index, 1);
+			if (this.dietInfo.cook_method_default) {
+				let index = this.defaultCookTypes.findIndex(item => item.value !== this.dietInfo.cook_method && this.dietInfo.cook_method_default.indexOf(item.value) === -1);
+				this.defaultCookTypes.splice(index, 1);
+			} else {
+				let index = this.defaultCookTypes.findIndex(item => item.value !== this.dietInfo.cook_method);
+				this.defaultCookTypes.splice(index, 1);
+			}
 			if (!this.defaultCookTypes.find(item => item.value === this.dietInfo.cook_method)) {
 				this.defaultCookTypes.push({
 					label: this.dietInfo.cook_method,

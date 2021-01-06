@@ -2235,12 +2235,14 @@ export default {
 			this.currFood.hdate = this.selectDate;
 			this.heatNum = this.currFood.unit_energy;
 			if (this.pageType === 'food') {
+				let curFood = this.deepClone(this.currFood)
 				let food = encodeURIComponent(JSON.stringify(this.currFood));
 				if (!this.isShowMyList) {
-					// uni.navigateTo({
-					// 	url: '/otherPages/chooseFood/chooseFood?currFood=' + food + '&pageType=' + this.pageDetType
-					// });
-					let url = `/archivesPages/DietDetail/DietDetail?chooseDate=${this.nowDate}&no=${this.currFood.food_no}`;
+					let no =curFood.food_no?curFood.food_no:curFood.meal_no?curFood.meal_no:''
+					let url = `/archivesPages/DietDetail/DietDetail?chooseDate=${this.nowDate}`;
+					if(no){
+						url += `&no=${no}`;
+					}
 					if (this.planNo) {
 						url += `&planNo=${this.planNo}`;
 					}

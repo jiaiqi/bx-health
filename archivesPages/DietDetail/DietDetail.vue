@@ -47,6 +47,7 @@ export default {
 			chooseDate: '',
 			diet_record_no: '', //饮食记录编号 有此编号则此页面是饮食记录详情，否则为食物库中的食物详情
 			food_no: '', //食物编号
+			meal_no: '', //混合食物编号
 			dietInfo: {},
 			dietRecordList: [],
 			backUrl: '',
@@ -108,6 +109,9 @@ export default {
 						element_cu: Number(this.dietInfo.element_cu) * item.amount,
 						element_mn: Number(this.dietInfo.element_mn) * item.amount
 					};
+					if (item.meal_no) {
+						obj.energy = item.unit_amount * item.unit_energy;
+					}
 					if (this.planNo) {
 						obj.ps_no = this.planNo;
 					}
@@ -119,63 +123,65 @@ export default {
 							if (this.minceListChoose && this.minceListChoose.length > 0) {
 								this.minceListChoose.forEach(m => {
 									obj.energy = (Number(obj.energy) + m.unit_energy * item.amount).toFixed(1);
-									(obj.protein = (Number(obj.protein) + Number(m.protein) * item.amount).toFixed(1)),
-										(obj.axunge = (Number(obj.axunge) + Number(m.axunge) * item.amount).toFixed(1)),
-										(obj.carbohydrate = (Number(obj.carbohydrate) + Number(m.carbohydrate) * item.amount).toFixed(1)),
-										(obj.cholesterol = (Number(obj.cholesterol) + Number(m.cholesterol) * item.amount).toFixed(1)),
-										(obj.vitamin_a = (Number(obj.vitamin_a) + Number(m.vitamin_a) * item.amount).toFixed(1)),
-										(obj.vitamin_d = (Number(obj.vitamin_d) + Number(m.vitamin_d) * item.amount).toFixed(1)),
-										(obj.vitamin_e = (Number(obj.vitamin_e) + Number(m.vitamin_e) * item.amount).toFixed(1)),
-										(obj.vitamin_k = (Number(obj.vitamin_k) + Number(m.vitamin_k) * item.amount).toFixed(1)),
-										(obj.vitamin_b1 = (Number(obj.vitamin_b1) + Number(m.vitamin_b1) * item.amount).toFixed(1)),
-										(obj.vitamin_b2 = (Number(obj.vitamin_b2) + Number(m.vitamin_b2) * item.amount).toFixed(1)),
-										(obj.vitamin_b3 = (Number(obj.vitamin_b3) + Number(m.vitamin_b3) * item.amount).toFixed(1)),
-										(obj.vitamin_b6 = (Number(obj.vitamin_b6) + Number(m.vitamin_b6) * item.amount).toFixed(1)),
-										(obj.vitamin_b12 = (Number(obj.vitamin_b12) + Number(m.vitamin_b12) * item.amount).toFixed(1)),
-										(obj.folic_acid = (Number(obj.folic_acid) + Number(m.folic_acid) * item.amount).toFixed(1)),
-										(obj.vitamin_c = (Number(obj.vitamin_c) + Number(m.vitamin_c) * item.amount).toFixed(1)),
-										(obj.element_ca = (Number(obj.element_ca) + Number(m.element_ca) * item.amount).toFixed(1)),
-										(obj.element_p = (Number(obj.element_p) + Number(m.element_p) * item.amount).toFixed(1)),
-										(obj.element_mg = (Number(obj.element_mg) + Number(m.element_mg) * item.amount).toFixed(1)),
-										(obj.element_k = (Number(obj.element_k) + Number(m.element_k) * item.amount).toFixed(1)),
-										(obj.element_na = (Number(obj.element_na) + Number(m.element_na) * item.amount).toFixed(1)),
-										(obj.element_fe = (Number(obj.element_fe) + Number(m.element_fe) * item.amount).toFixed(1)),
-										(obj.element_zn = (Number(obj.element_zn) + Number(m.element_zn) * item.amount).toFixed(1)),
-										(obj.element_se = (Number(obj.element_se) + Number(m.element_se) * item.amount).toFixed(1)),
-										(obj.element_cu = (Number(obj.element_cu) + Number(m.element_cu) * item.amount).toFixed(1)),
-										(obj.element_mn = (Number(obj.element_mn) + Number(m.element_mn) * item.amount).toFixed(1));
+									obj.protein = (Number(obj.protein) + Number(m.protein) * item.amount).toFixed(1);
+									obj.axunge = (Number(obj.axunge) + Number(m.axunge) * item.amount).toFixed(1);
+									obj.carbohydrate = (Number(obj.carbohydrate) + Number(m.carbohydrate) * item.amount).toFixed(1);
+									obj.cholesterol = (Number(obj.cholesterol) + Number(m.cholesterol) * item.amount).toFixed(1);
+									obj.vitamin_a = (Number(obj.vitamin_a) + Number(m.vitamin_a) * item.amount).toFixed(1);
+									obj.vitamin_d = (Number(obj.vitamin_d) + Number(m.vitamin_d) * item.amount).toFixed(1);
+									obj.vitamin_e = (Number(obj.vitamin_e) + Number(m.vitamin_e) * item.amount).toFixed(1);
+									obj.vitamin_k = (Number(obj.vitamin_k) + Number(m.vitamin_k) * item.amount).toFixed(1);
+									obj.vitamin_b1 = (Number(obj.vitamin_b1) + Number(m.vitamin_b1) * item.amount).toFixed(1);
+									obj.vitamin_b2 = (Number(obj.vitamin_b2) + Number(m.vitamin_b2) * item.amount).toFixed(1);
+									obj.vitamin_b3 = (Number(obj.vitamin_b3) + Number(m.vitamin_b3) * item.amount).toFixed(1);
+									obj.vitamin_b6 = (Number(obj.vitamin_b6) + Number(m.vitamin_b6) * item.amount).toFixed(1);
+									obj.vitamin_b12 = (Number(obj.vitamin_b12) + Number(m.vitamin_b12) * item.amount).toFixed(1);
+									obj.folic_acid = (Number(obj.folic_acid) + Number(m.folic_acid) * item.amount).toFixed(1);
+									obj.vitamin_c = (Number(obj.vitamin_c) + Number(m.vitamin_c) * item.amount).toFixed(1);
+									obj.element_ca = (Number(obj.element_ca) + Number(m.element_ca) * item.amount).toFixed(1);
+									obj.element_p = (Number(obj.element_p) + Number(m.element_p) * item.amount).toFixed(1);
+									obj.element_mg = (Number(obj.element_mg) + Number(m.element_mg) * item.amount).toFixed(1);
+									obj.element_k = (Number(obj.element_k) + Number(m.element_k) * item.amount).toFixed(1);
+									obj.element_na = (Number(obj.element_na) + Number(m.element_na) * item.amount).toFixed(1);
+									obj.element_fe = (Number(obj.element_fe) + Number(m.element_fe) * item.amount).toFixed(1);
+									obj.element_zn = (Number(obj.element_zn) + Number(m.element_zn) * item.amount).toFixed(1);
+									obj.element_se = (Number(obj.element_se) + Number(m.element_se) * item.amount).toFixed(1);
+									obj.element_cu = (Number(obj.element_cu) + Number(m.element_cu) * item.amount).toFixed(1);
+									obj.element_mn = (Number(obj.element_mn) + Number(m.element_mn) * item.amount).toFixed(1);
 								});
 							}
 							if (this.chooseBurdening && this.chooseBurdening.length > 0) {
 								this.chooseBurdening.forEach(n => {
 									obj.energy = (Number(obj.energy) + n.unit_energy * item.amount).toFixed(1);
-									(obj.protein = (Number(obj.protein) + Number(n.protein) * item.amount).toFixed(1)),
-										(obj.axunge = (Number(obj.axunge) + Number(n.axunge) * item.amount).toFixed(1)),
-										(obj.carbohydrate = (Number(obj.carbohydrate) + Number(n.carbohydrate) * item.amount).toFixed(1)),
-										(obj.cholesterol = (Number(obj.cholesterol) + Number(n.cholesterol) * item.amount).toFixed(1)),
-										(obj.vitamin_a = (Number(obj.vitamin_a) + Number(n.vitamin_a) * item.amount).toFixed(1)),
-										(obj.vitamin_d = (Number(obj.vitamin_d) + Number(n.vitamin_d) * item.amount).toFixed(1)),
-										(obj.vitamin_e = (Number(obj.vitamin_e) + Number(n.vitamin_e) * item.amount).toFixed(1)),
-										(obj.vitamin_k = (Number(obj.vitamin_k) + Number(n.vitamin_k) * item.amount).toFixed(1)),
-										(obj.vitamin_b1 = (Number(obj.vitamin_b1) + Number(n.vitamin_b1) * item.amount).toFixed(1)),
-										(obj.vitamin_b2 = (Number(obj.vitamin_b2) + Number(n.vitamin_b2) * item.amount).toFixed(1)),
-										(obj.vitamin_b3 = (Number(obj.vitamin_b3) + Number(n.vitamin_b3) * item.amount).toFixed(1)),
-										(obj.vitamin_b6 = (Number(obj.vitamin_b6) + Number(n.vitamin_b6) * item.amount).toFixed(1)),
-										(obj.vitamin_b12 = (Number(obj.vitamin_b12) + Number(n.vitamin_b12) * item.amount).toFixed(1)),
-										(obj.folic_acid = (Number(obj.folic_acid) + Number(n.folic_acid) * item.amount).toFixed(1)),
-										(obj.vitamin_c = (Number(obj.vitamin_c) + Number(n.vitamin_c) * item.amount).toFixed(1)),
-										(obj.element_ca = (Number(obj.element_ca) + Number(n.element_ca) * item.amount).toFixed(1)),
-										(obj.element_p = (Number(obj.element_p) + Number(n.element_p) * item.amount).toFixed(1)),
-										(obj.element_mg = (Number(obj.element_mg) + Number(n.element_mg) * item.amount).toFixed(1)),
-										(obj.element_k = (Number(obj.element_k) + Number(n.element_k) * item.amount).toFixed(1)),
-										(obj.element_na = (Number(obj.element_na) + Number(n.element_na) * item.amount).toFixed(1)),
-										(obj.element_fe = (Number(obj.element_fe) + Number(n.element_fe) * item.amount).toFixed(1)),
-										(obj.element_zn = (Number(obj.element_zn) + Number(n.element_zn) * item.amount).toFixed(1)),
-										(obj.element_se = (Number(obj.element_se) + Number(n.element_se) * item.amount).toFixed(1)),
-										(obj.element_cu = (Number(obj.element_cu) + Number(n.element_cu) * item.amount).toFixed(1)),
-										(obj.element_mn = (Number(obj.element_mn) + Number(n.element_mn) * item.amount).toFixed(1));
+									obj.protein = (Number(obj.protein) + Number(n.protein) * item.amount).toFixed(1);
+									obj.axunge = (Number(obj.axunge) + Number(n.axunge) * item.amount).toFixed(1);
+									obj.carbohydrate = (Number(obj.carbohydrate) + Number(n.carbohydrate) * item.amount).toFixed(1);
+									obj.cholesterol = (Number(obj.cholesterol) + Number(n.cholesterol) * item.amount).toFixed(1);
+									obj.vitamin_a = (Number(obj.vitamin_a) + Number(n.vitamin_a) * item.amount).toFixed(1);
+									obj.vitamin_d = (Number(obj.vitamin_d) + Number(n.vitamin_d) * item.amount).toFixed(1);
+									obj.vitamin_e = (Number(obj.vitamin_e) + Number(n.vitamin_e) * item.amount).toFixed(1);
+									obj.vitamin_k = (Number(obj.vitamin_k) + Number(n.vitamin_k) * item.amount).toFixed(1);
+									obj.vitamin_b1 = (Number(obj.vitamin_b1) + Number(n.vitamin_b1) * item.amount).toFixed(1);
+									obj.vitamin_b2 = (Number(obj.vitamin_b2) + Number(n.vitamin_b2) * item.amount).toFixed(1);
+									obj.vitamin_b3 = (Number(obj.vitamin_b3) + Number(n.vitamin_b3) * item.amount).toFixed(1);
+									obj.vitamin_b6 = (Number(obj.vitamin_b6) + Number(n.vitamin_b6) * item.amount).toFixed(1);
+									obj.vitamin_b12 = (Number(obj.vitamin_b12) + Number(n.vitamin_b12) * item.amount).toFixed(1);
+									obj.folic_acid = (Number(obj.folic_acid) + Number(n.folic_acid) * item.amount).toFixed(1);
+									obj.vitamin_c = (Number(obj.vitamin_c) + Number(n.vitamin_c) * item.amount).toFixed(1);
+									obj.element_ca = (Number(obj.element_ca) + Number(n.element_ca) * item.amount).toFixed(1);
+									obj.element_p = (Number(obj.element_p) + Number(n.element_p) * item.amount).toFixed(1);
+									obj.element_mg = (Number(obj.element_mg) + Number(n.element_mg) * item.amount).toFixed(1);
+									obj.element_k = (Number(obj.element_k) + Number(n.element_k) * item.amount).toFixed(1);
+									obj.element_na = (Number(obj.element_na) + Number(n.element_na) * item.amount).toFixed(1);
+									obj.element_fe = (Number(obj.element_fe) + Number(n.element_fe) * item.amount).toFixed(1);
+									obj.element_zn = (Number(obj.element_zn) + Number(n.element_zn) * item.amount).toFixed(1);
+									obj.element_se = (Number(obj.element_se) + Number(n.element_se) * item.amount).toFixed(1);
+									obj.element_cu = (Number(obj.element_cu) + Number(n.element_cu) * item.amount).toFixed(1);
+									obj.element_mn = (Number(obj.element_mn) + Number(n.element_mn) * item.amount).toFixed(1);
 								});
 							}
+						} else {
+							console.log(obj);
 						}
 					} else {
 						obj['diet_contents_no'] = item.food_no;
@@ -184,7 +190,6 @@ export default {
 							obj['cook_method'] = this.currentCookData;
 						}
 					}
-					// }
 					arr.push(obj);
 				});
 				let serviceName = 'srvhealth_diet_record_add';
@@ -258,7 +263,7 @@ export default {
 			let res = await this.$http.post(url, req);
 		},
 		async UpdateDietInfo() {
-			if (this.dietInfo.food_no && !this.dietInfo.diet_record_no) {
+			if ((this.dietInfo.food_no || this.dietInfo.meal_no) && !this.dietInfo.diet_record_no) {
 				this.addDietRecord();
 				return;
 			}
@@ -317,6 +322,16 @@ export default {
 					}
 				];
 			}
+			if (this.meal_no) {
+				serviceName = 'srvhealth_mixed_food_nutrition_contents_select';
+				condition = [
+					{
+						colName: 'meal_no',
+						ruleType: 'like',
+						value: this.meal_no
+					}
+				];
+			}
 			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
 				serviceName: serviceName,
@@ -343,7 +358,7 @@ export default {
 					});
 					this.$store.commit('SET_DIET_RECORD', res.data.data);
 					this.dietRecordList = res.data.data;
-				} else if (this.food_no && res.data.data.length > 0) {
+				} else if ((this.food_no || this.meal_no) && res.data.data.length > 0) {
 					if (!res.data.data[0].amount) {
 						res.data.data[0].amount = 1;
 					}
@@ -450,9 +465,15 @@ export default {
 				this.diet_record_no = option.no;
 			} else if (option.no.indexOf('FD') !== -1) {
 				uni.setNavigationBarTitle({
-					title: '食物信息'
+					title: '食材信息'
 				});
 				this.food_no = option.no;
+			} else if (option.no.indexOf('ML') !== -1) {
+				// 混合食物
+				uni.setNavigationBarTitle({
+					title: '食物信息'
+				});
+				this.meal_no = option.no;
 			}
 			this.getDietRecordDetail(this.chooseDate);
 		}
@@ -464,7 +485,7 @@ export default {
 .current-diet-detail {
 	width: 100vw;
 	height: 100vh;
-	overflow-x: hidden;
+	// overflow-x: hidden;
 	background-color: #f9f9f9;
 	.title-bar {
 		display: flex;

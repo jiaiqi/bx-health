@@ -85,11 +85,12 @@
 					</view>
 				</picker>
 			</view>
-			<!-- <view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'"> -->
-			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'" @click="showModal('TextArea')">
-				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
-				<view class="value" v-else-if="modalName !== 'TextArea'">{{ fieldData.value | html2text }}</view>
+			<view class="form-item-content_value textarea" v-else-if="fieldData.type === 'textarea'">
+			<!-- <view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'" @click="showModal('TextArea')"> -->
+				<!-- <text class="place-holder" v-if="!fieldData.value">点击输入</text> -->
+				<!-- <view class="value" v-else-if="modalName !== 'TextArea'">{{ fieldData.value | html2text }}</view> -->
 				<!-- <textarea v-model="fieldData.value"/> -->
+				<textarea class="textarea" style="width: 100%;" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'RichText'" @click="showModal('RichEditor')">
 				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
@@ -129,13 +130,13 @@
 				:value="imagesUrl"
 				:enable-del="fieldData.disabled ? !fieldData.disabled : true"
 				:enable-add="fieldData.disabled ? !fieldData.disabled : true"
-				:server-url="$api.upload"
+				:server-url="uploadUrl"
 				@delete="deleteImage"
 				@add="getImagesInfo"
 				:form-data="uploadFormData"
 				:header="reqHeader"
 				:showUploadProgress="true"
-				:server-url-delete-image="$api.deleteFile"
+				:server-url-delete-image="deleteUrl"
 				:limit="fieldData.fileNum"
 			></robby-image-upload>
 		</view>
@@ -148,7 +149,6 @@
 			<view class="cu-dialog" @tap.stop="">
 				<textarea class="textarea" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
 				<view class="button-box">
-					<!-- <view class="cu-btn button bg-gray" @click="saveRichText({ isSave: false, type: 'textarea' })">取消</view> -->
 					<view class="cu-btn button bg-cyan" @click="saveRichText({ isSave: true, type: 'textarea' })">确定</view>
 				</view>
 			</view>
@@ -256,6 +256,12 @@ export default {
 		}
 	},
 	computed: {
+		uploadUrl(){
+			return this.$api.upload
+		},
+		deleteUrl(){
+			return this.$api.deleteFile
+		},
 		label_width() {
 			let result = '';
 			if (this.labelPosition === 'left') {
@@ -466,9 +472,13 @@ export default {
 			}
 		},
 		getImagesInfo(e) {
-			let res = JSON.parse(e.allImages[0]);
+			let res = e.allImages[0]
+			try{
+				res = JSON.parse(e.allImages[0]);
+			}catch(e){
+				//TODO handle the exception
+			}
 			this.fieldData.value = res.file_no;
-			console.log('图片返回：', e, e.allImages[0], res, this.fieldData.value);
 			if (this.fieldData.value !== '' && this.fieldData.value !== null && this.fieldData.value !== undefined) {
 				this.uploadFormData['file_no'] = this.fieldData.value;
 			}
@@ -777,6 +787,9 @@ export default {
 	.form-item-content_value {
 		// width: 100%;
 		padding: 20rpx;
+		&.textarea{
+			border: 1rpx solid #f1f1f1;
+		}
 	}
 	.dialog-button {
 		display: flex;
@@ -787,15 +800,17 @@ export default {
 		}
 	}
 	.textarea {
-		width: calc(100% - 40rpx);
+		width: 100%;
+		// width: calc(100% - 40rpx);
 		border: 1rpx solid #ccc;
 		border-radius: 10rpx;
-		margin: 20rpx;
+		margin: 20rpx auto;
 		padding: 20rpx;
 		min-height: 300px;
 		text-align: left;
 		text-indent: 40rpx;
 		color: #000000;
+		border: 1rpx solid #ccc;
 	}
 }
 .form-item {

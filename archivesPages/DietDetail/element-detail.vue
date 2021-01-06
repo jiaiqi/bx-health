@@ -4,7 +4,7 @@
 			<view class="view-tab" :class="{ 'active-tab': showChart }" @click="switchTab(true)">NRV%占比</view>
 			<view class="view-tab" :class="{ 'active-tab': !showChart }" @click="switchTab(false)">营养素含量</view>
 		</view>
-		<view class="crowd-list" v-if="dietInfo.food_no && !dietInfo.diet_record_no">
+		<view class="crowd-list" v-if="(dietInfo.food_no || dietInfo.meal_no) && !dietInfo.diet_record_no">
 			<view class="crowd-item" :class="{ 'active-crowd': currentCrowd === item.type }" v-for="item in crowdList" :key="item.type" @click="changeCrowd(item)">
 				{{ item.name }}({{ item.weight }}kg)
 			</view>
@@ -105,7 +105,7 @@ export default {
 	watch: {
 		dietInfo: {
 			handler(newValue, oldValue) {
-				if (newValue && (newValue.diet_record_no || newValue.food_no)) {
+				if (newValue && (newValue.diet_record_no || newValue.food_no || newValue.meal_no)) {
 					this.switchTab(true);
 					// this.buildChartOption();
 				}
@@ -252,14 +252,22 @@ export default {
 			let foodTypes = this.deepClone(dietRecordList);
 			eleArr = eleArr.map(ele => {
 				dietRecordList.forEach(diet => {
-					if (diet.diet_record_no === currentDiet.diet_record_no || diet.food_no === currentDiet.food_no) {
-						diet = currentDiet;
+					if (diet.diet_record_no === currentDiet.diet_record_no || diet.food_no === currentDiet.food_no || diet.meal_no === currentDiet.meal_no) {
+						// diet = currentDiet;
 					}
 					let ratio = 1;
 					if (diet['unit'] === 'g') {
-						ratio = (diet.unit_weight_g * diet.amount) / (diet.unit_amount ? diet.unit_amount : diet.unit_weight_g);
+						if (diet.unit_amount) {
+							ratio = (diet.unit_weight_g * diet.amount) / diet.unit_amount;
+						} else if (diet.unit_weight_g) {
+							ratio = diet.amount;
+						}
 					} else if (diet['unit'].indexOf('g') === -1) {
-						ratio = 1;
+						if (diet.unit_weight_g) {
+							ratio = (diet.unit_weight_g * diet.amount) / 100;
+						} else {
+							ratio = diet.amount;
+						}
 					} else {
 						ratio = (diet.unit_weight_g * diet.amount) / 100;
 					}
@@ -280,7 +288,7 @@ export default {
 				return item.name;
 			});
 			let legendData = ['其它食物', '当前食物', 'NRV%达标线'];
-			if (currentDiet.food_no && !currentDiet.diet_record_no) {
+			if ((currentDiet.food_no || currentDiet.meal_no) && !currentDiet.diet_record_no) {
 				legendData = ['当前食物', 'NRV%达标线'];
 			}
 			let seriesData = legendData.map(le => {
@@ -321,6 +329,9 @@ export default {
 							}
 							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
 							let num = (val * 100) / Number(cur.EAR);
+							if (currentDiet.meal_no) {
+								num = (val * 10000) / Number(cur.EAR);
+							}
 							num = parseFloat(num.toFixed(1));
 							return num;
 						});

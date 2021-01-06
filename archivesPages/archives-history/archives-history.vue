@@ -433,7 +433,6 @@ export default {
 	},
 	methods: {
 		deleteItem(e) {
-			debugger;
 			let serviceName = '';
 			let req = [];
 			switch (this.pageType) {

@@ -24,11 +24,11 @@
 						<text>*</text>
 						<text>体重(千克)</text>
 					</view>
-					<slider-number v-model="inputVal.weight" :max="200" :min="0"></slider-number>
+					<slider-number v-model="inputVal.weight" :max="200" :min="0" :step="0.1"></slider-number>
 				</view>
 				<view class="item-list">
 					<text>体脂率(%)</text>
-					<slider-number v-model="inputVal.body_fat_rate" :max="50" :min="5"></slider-number>
+					<slider-number v-model="inputVal.body_fat_rate" :max="50" :min="5" :step="0.1"></slider-number>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'sleep'" class="item-wrap">
@@ -50,12 +50,15 @@
 				</view>
 				<view class="item-list">
 					<text>白天犯困情况</text>
-					<radio-group @change="sleepyRadioChange">
+					<bx-radio-group v-model="inputVal.sleepy_daytime" mode="button">
+						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in sleepy_option" :key="i" :name="item.value">{{ item.label }}</bx-radio>
+					</bx-radio-group>
+					<!-- 		<radio-group @change="sleepyRadioChange">
 						<label v-for="item in sleepy_option" :key="item.label" class="margin-right">
 							<radio :value="item.value" style="transform: scale(0.7);" />
 							<text>{{ item.label }}</text>
 						</label>
-					</radio-group>
+					</radio-group> -->
 				</view>
 			</view>
 			<view v-else-if="type && type === 'heartRate'" class="item-wrap">
@@ -148,8 +151,6 @@
 			</view>
 			<view v-else-if="type && type === 'glucose'" class="item-wrap">
 				<!-- 血糖 -->
-				<!-- <u-select v-model="showSelect" :list="glucose_time_option" @confirm="confirmSelect"></u-select> -->
-				<!-- <u-select v-model="showSelect" :list="glucose_time_option"></u-select> -->
 				<view class="item-list" @click="showSelect = true">
 					<text>测量时机</text>
 					<bx-radio-group v-model="inputVal.glucose_time" mode="button">
@@ -241,57 +242,69 @@ export default {
 			measureList: [
 				{
 					value: '右上臂',
-					label: '右上臂'
+					label: '右上臂',
+					checked:false
 				},
 				{
 					value: '左上臂',
-					label: '左上臂'
+					label: '左上臂',
+					checked:false
 				},
 				{
 					value: '右手腕',
-					label: '右手腕'
+					label: '右手腕',
+					checked:false
 				},
 				{
 					value: '左手腕',
-					label: '左手腕'
+					label: '左手腕',
+					checked:false
 				}
 			],
 			postList: [
 				{
 					value: '坐位',
-					label: '坐位'
+					label: '坐位',
+					checked:false
 				},
 				{
 					value: '躺卧位',
-					label: '躺卧位'
+					label: '躺卧位',
+					checked:false
 				},
 				{
 					value: '站立位',
-					label: '站立位'
+					label: '站立位',
+					checked:false
 				}
 			],
 			list: [
 				{
 					value: '穿鞋',
-					label: '穿鞋'
+					label: '穿鞋',
+					checked:false
 				},
 				{
 					value: '穿外套外衣',
-					label: '穿外套外衣'
+					label: '穿外套外衣',
+				checked:false
 				},
 				{
 					value: '穿轻薄内衣',
-					label: '穿轻薄内衣'
+					label: '穿轻薄内衣',
+					checked:false
 				}
 			],
 			DigList: [
 				{
 					value: '空腹',
-					label: '空腹'
+					label: '空腹',
+					checked:false
 				},
 				{
 					value: '排空大小便',
-					label: '排空大小便'
+					label: '排空大小便',
+					checked:false
 				}
 			]
 		};
@@ -354,69 +367,46 @@ export default {
 		}
 	},
 	methods: {
-		/*血压-姿势单选**/
-		radioChange(e, type) {
-			console.log('e=====>', e);
-			if (type === 'posture') {
-				this.inputVal.posture = e;
-			} else if (type === 'postion') {
-				this.inputVal.measure_position = e;
-			}
-		},
-		/*体重--衣着穿戴多选**/
-		checkboxGroupChange(e, type) {
-			let str = '';
-			if (e.detail.value.length > 0) {
-				str = e.detail.value.join(',');
-			}
-			switch (type) {
-				case 'clothing':
-					this.inputVal.wearing = str;
-					break;
-				case 'digestion':
-					this.inputVal.alimentary_canal = str;
-					break;
-			}
-
-			// var items = this.checkboxList,
-			// 	values = e.detail.value;
-			// for (var i = 0, lenI = items.length; i < lenI; ++i) {
-			// 	const item = items[i];
-			// 	if (values.includes(item.label)) {
-			// 		this.$set(item, 'checked', true);
-			// 	} else {
-			// 		this.$set(item, 'checked', false);
-			// 	}
-			// }
-			// this.checkedList = this.checkboxList.filter(item => item.checked).map(item => item.label);
-		},
-		sleepyRadioChange(evt) {
-			this.inputVal.sleepy_daytime = evt.target.value;
-		},
-		// RadioChange(e, type) {
-		// 	if (type === 'clothing') {
-		// 		this.inputVal.wearing = e.detail.value;
-		// 		this.weightCurrentRadio = e.detail.value;
-		// 	} else if (type === 'digestion') {
-		// 		this.inputVal.alimentary_canal = e.detail.value;
-		// 		this.digeCurrentRadio = e.detail.value;
-		// 	}
-		// },
-		confirmChoose(e, type) {
-			switch (type) {
-				case 'clothing':
-					this.inputVal.wearing = e[0].value;
-					break;
-				case 'digestion':
-					this.inputVal.alimentary_canal = e[0].value;
-					break;
-			}
-		},
-		confirmSelect(e) {
-			console.log(e);
-			if (Array.isArray(e) && e.length > 0) {
-				this.inputVal.glucose_time = e[0].value;
-			}
+		getLastWeightData() {
+			// 查找上一次的体重体脂数据
+			let serviceName = 'srvhealth_body_fat_measurement_record_select';
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: 'srvhealth_body_fat_measurement_record_select',
+				colNames: ['*'],
+				condition: [{ colName: 'service_no', ruleType: 'eq', value: this.serviceLog.no }],
+				order: [{ colName: 'create_time', orderType: 'desc' }],
+				page: { pageNo: 1, rownumber: 2 }
+			};
+			this.$http.post(url, req).then(res => {
+				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+					let info = res.data.data[0];
+					if (info.wearing) {
+						this.inputVal.wearing = info.wearing;
+						this.list = this.list.map(item=>{
+							if(info.wearing.indexOf(item.value)!==-1){
+								item.checked = true
+							}
+							return item
+						})
+					}
+					if (info.body_fat_rate) {
+						this.inputVal.body_fat_rate = info.body_fat_rate;
+					}
+					if (info.alimentary_canal) {
+						this.inputVal.alimentary_canal = info.alimentary_canal;
+						this.DigList = this.DigList.map(item=>{
+							if(info.alimentary_canal.indexOf(item.value)!==-1){
+								item.checked = true
+							}
+							return item
+						})
+					}
+					if (info.weight) {
+						this.inputVal.weight = info.weight;
+					}
+				}
+			});
 		},
 		async addServiceLog() {
 			let serviceName = 'srvhealth_service_record_add';
@@ -442,7 +432,7 @@ export default {
 				colNames: ['*'],
 				condition: [{ colName: 'user_info_no', ruleType: 'like', value: this.currentUserInfo.no }],
 				relation_condition: {},
-				page: { pageNo: 1, rownumber: 100 },
+				page: { pageNo: 1, rownumber: 30 },
 				order: []
 			};
 			let res = await this.$http.post(url, req);
@@ -451,6 +441,13 @@ export default {
 				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 					// 有记录
 					this.serviceLog = res.data.data[0];
+					switch (this.type) {
+						case 'weight':
+							this.getLastWeightData();
+							break;
+						default:
+							break;
+					}
 				} else {
 					// 没有记录，添加记录
 					await this.addServiceLog();
@@ -652,7 +649,7 @@ export default {
 			}
 		},
 		back() {
-			uni.navigateBack({});
+			uni.navigateBack();
 		},
 		onSelected(e) {
 			//时间选择器

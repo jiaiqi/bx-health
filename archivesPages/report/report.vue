@@ -458,9 +458,12 @@ export default {
 		}
 		if (option.fieldsCond) {
 			try {
-				this.fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
+				let fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
+				if(!fieldsCond.find(item=>item.column==='ps_no')){
+					fieldsCond.push({column:'ps_no',display:false})
+				}
+				this.fieldsCond = fieldsCond
 			} catch (e) {
-				//TODO handle the exception
 				console.warn(e);
 			}
 		}

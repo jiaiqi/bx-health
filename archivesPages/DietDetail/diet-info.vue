@@ -6,7 +6,7 @@
 			<view class="weight">
 				<text class="label margin-right-xs">热量:</text>
 				<text class="heat">
-					{{ hotNum || '' }}
+					{{ hotNum | toFixed1 }}
 					<text class="unit">千卡</text>
 				</text>
 			</view>
@@ -31,23 +31,39 @@ import eleData from './data.js';
 export default {
 	data() {
 		return {
-			eleData: eleData
+			eleData: eleData,
+			hotNum:0
 		};
 	},
-	computed: {
-		hotNum() {
-			let res = '';
-			if (this.dietInfo.energy) {
-				res = this.dietInfo.energy;
-			} else if (this.dietInfo.unit_energy && this.dietInfo.unit_amount) {
-				res = (this.dietInfo.unit_energy * this.dietInfo.unit_amount) / 100;
-			}
-			return res;
+	filters: {
+		toFixed1: function(value) {
+			return value?value.toFixed(1):'';
 		}
+	},
+	computed: {
+		// hotNum() {
+		// 	let res = '';
+		// 	if (this.dietInfo.energy) {
+		// 		res = this.dietInfo.energy;
+		// 	} else if (this.dietInfo.unit_energy && this.dietInfo.unit_amount) {
+		// 		res = (this.dietInfo.unit_energy * this.dietInfo.unit_amount) / 100;
+		// 	}
+		// 	return res;
+		// }
 	},
 	watch: {
 		dietInfo: {
-			handler(newValue, oldValue) {}
+			deep:true,
+			immediate:true,
+			handler(newValue, oldValue) {
+				let hotNum = '';
+				if (newValue.energy) {
+					hotNum = newValue.energy;
+				} else if (newValue.unit_energy && newValue.unit_amount) {
+					hotNum = (newValue.unit_energy * newValue.unit_amount) / 100;
+				}
+				this.hotNum = hotNum
+			}
 		}
 	},
 	props: {

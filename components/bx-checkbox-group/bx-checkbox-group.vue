@@ -2,10 +2,10 @@
 	<view class="bx-checkbox-group">
 		<view class="onmax-tip" v-show="onMax">
 			<text class="cuIcon-info"></text>
-			<text class="tip">最多只能勾选{{tipNumber}}项</text>
+			<text class="tip">最多只能勾选{{ tipNumber }}项</text>
 		</view>
 		<slot></slot>
-		</view>
+	</view>
 </template>
 
 <script>
@@ -36,9 +36,9 @@ export default {
 		},
 		// 所有选中项的 name
 		value: {
-			default: Array,
+			type: [Array, String],
 			default() {
-				return []
+				return [];
 			}
 		},
 		// 是否禁用所有复选框
@@ -102,21 +102,21 @@ export default {
 			onMax: false //是否已经达到选项数量限制
 		};
 	},
-	computed:{
-		tipNumber(){
-			let max = this.max
-			let tipNum = null
-			if(max){
-				switch (max){
+	computed: {
+		tipNumber() {
+			let max = this.max;
+			let tipNum = null;
+			if (max) {
+				switch (max) {
 					case '1':
-					 tipNum = '一';
-					break;
+						tipNum = '一';
+						break;
 					case '5':
-					 tipNum = '五';
-					break;
+						tipNum = '五';
+						break;
 				}
 			}
-			return tipNum
+			return tipNum;
 		}
 	},
 	created() {
@@ -126,16 +126,16 @@ export default {
 	methods: {
 		emitEvent() {
 			let values = [];
-			this.children.map((val,index) => {
+			this.children.map((val, index) => {
 				if (val.value) values.push(val.name);
 			});
-			if(values.length>=this.max){
-				this.onMax = true
-			}else{
-				this.onMax = false
+			if (values.length >= this.max) {
+				this.onMax = true;
+			} else {
+				this.onMax = false;
 			}
 			this.$emit('change', values);
-			this.$emit('input', values);
+			this.$emit('input', values.toString());
 		}
 	}
 };
@@ -146,11 +146,11 @@ export default {
 	width: 100%;
 	display: flex;
 	flex-wrap: wrap;
-	.onmax-tip{
+	.onmax-tip {
 		width: 100%;
 		padding: 20rpx 30rpx;
 		color: #ff976a;
-		.tip{
+		.tip {
 			margin-left: 10rpx;
 		}
 	}
