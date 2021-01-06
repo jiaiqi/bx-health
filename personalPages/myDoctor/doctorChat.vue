@@ -1,6 +1,6 @@
 <template>
 	<view class="doctor-wrap">
-		<person-chat :customer_no="no" ref="chat" :doctor_no="doctor_no" :pageType="pageType"></person-chat>
+		<person-chat :customer_no="no" ref="chat" :doctor_no="doctor_no" :group-info="groupInfo" :pageType="pageType"></person-chat>
 	</view>
 </template>
 
@@ -15,6 +15,7 @@
 			return {
 				no:"",
 				doctor_no:{},
+				groupInfo:{},
 				pageType:'patient',
 			}
 		},
@@ -24,6 +25,9 @@
 			}
 			if(option.doctor){
 				this.doctor_no = JSON.parse(decodeURIComponent(option.doctor)) 
+			}else if(option.groupInfo){
+				this.groupInfo = JSON.parse(decodeURIComponent(option.groupInfo))
+				this.pageType = "groupChat"
 			}else{
 				this.pageType = ""
 			}

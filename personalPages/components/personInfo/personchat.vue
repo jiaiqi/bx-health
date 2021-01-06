@@ -172,7 +172,6 @@
 						{{ voiceTitle }}
 					</text>
 					<input v-else v-model="chatText" type="text" value="" />
-<!-- 					<input v-else @input="changeTest" v-model="chatText" type="text" value="" /> -->
 				</view>
 				<view class="person-chat-rig">
 					<view class="person-chat-rig-add-wrap">
@@ -229,8 +228,6 @@
 </template>
 
 <script>
-// import bxRadio from '@/components/bx-radio/bx-radio.vue';
-// import bxRadioGroup from '@/components/bx-radio-group/bx-radio-group.vue';
 import robbyImageUpload from '@/components/robby-image-upload/robby-image-upload.vue';
 export default {
 	name: 'personchat',
@@ -239,22 +236,16 @@ export default {
 	},
 	props: {
 		customer_no: {
-			type: String,
-			default() {
-				return '';
-			}
+			type: String
+		},
+		groupInfo: {
+			type: Object
 		},
 		pageType: {
-			type: String,
-			default() {
-				return '';
-			}
+			type: String
 		},
 		doctor_no: {
-			type: Object,
-			default() {
-				return {};
-			}
+			type: Object
 		}
 	},
 	computed: {
@@ -279,7 +270,7 @@ export default {
 			audioAction: {
 				method: 'pause'
 			},
-			videoMp3Context:"",
+			videoMp3Context: '',
 			checkRadioValue: '',
 			chatText: '',
 			isSendLink: false,
@@ -317,46 +308,45 @@ export default {
 			AudioExam: null, //正在播放音频的实例
 			isLoading: false,
 			isAll: false,
-			currentChat:{
-			}
+			currentChat: {}
 		};
 	},
-	
+
 	methods: {
-		audioPlay(item){
-			if(!item.voice_url){
-				return
+		audioPlay(item) {
+			if (!item.voice_url) {
+				return;
 			}
-			this.$set(this.currentChat,'src',item.voice_url)
-			this.currentChat = item.voice_url
-			if(item.id != this.currentChat.id){
-				this.currentChat =""
-				setTimeout(()=>{
-					this.currentChat =item
-					this.$set(this.audioAction,'method','play')
-					this.currentChat.anmitionPlay = true
-				},100)
-			}else if(item.id == this.currentChat.id){
-				this.currentChat.anmitionPlay = false
+			this.$set(this.currentChat, 'src', item.voice_url);
+			this.currentChat = item.voice_url;
+			if (item.id != this.currentChat.id) {
+				this.currentChat = '';
+				setTimeout(() => {
+					this.currentChat = item;
+					this.$set(this.audioAction, 'method', 'play');
+					this.currentChat.anmitionPlay = true;
+				}, 100);
+			} else if (item.id == this.currentChat.id) {
+				this.currentChat.anmitionPlay = false;
 			}
 		},
-		playEnd(item){
+		playEnd(item) {
 			// console.log("播放结束",item)
 			// item.anmitionPlay = false;
-			if(this.currentChat){
-				this.currentChat.anmitionPlay = false
+			if (this.currentChat) {
+				this.currentChat.anmitionPlay = false;
 			}
-			this.audioAction.method = 'pause'
+			this.audioAction.method = 'pause';
 			// this.closeAnmition();
 		},
 		/*关闭底部选择按钮**/
-		closeBottomPoup(){
-			this.$nextTick(()=>{
-				this.heightStyle = 'calc(100vh - 50px);';				
-			})
-			this.isSendLink = false
+		closeBottomPoup() {
+			this.$nextTick(() => {
+				this.heightStyle = 'calc(100vh - 50px);';
+			});
+			this.isSendLink = false;
 		},
-		
+
 		/*播放视频**/
 		openVideo(item) {
 			// let self = this
@@ -496,7 +486,7 @@ export default {
 		},
 		/*发送语音**/
 		sendMsg(params) {
-			let self = this
+			let self = this;
 			let reqHeader = {
 				bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
 			};
@@ -516,7 +506,7 @@ export default {
 				success: e => {
 					if (e.statusCode === 200) {
 						let photoDataNo = JSON.parse(e.data).file_no;
-						params.content = photoDataNo
+						params.content = photoDataNo;
 						self.sendMessageLanguageInfo('语音', params);
 					} else {
 					}
@@ -773,11 +763,6 @@ export default {
 				serviceName: serviceName,
 				colNames: ['*'],
 				condition: [
-					// {
-					// 	colName:'user_no',
-					// 	ruleType:'eq',
-					// 	value:uni.getStorageSync('login_user_info').user_no
-					// },
 					{
 						colName: 'status',
 						ruleType: 'eq',
@@ -869,10 +854,10 @@ export default {
 		openLink() {
 			this.isSendLink = !this.isSendLink;
 
-				this.heightStyle = 'calc(100vh - 240px)';
-				if (!this.isSendLink) {
-					this.heightStyle = 'calc(100vh - 50px)';
-				}
+			this.heightStyle = 'calc(100vh - 240px)';
+			if (!this.isSendLink) {
+				this.heightStyle = 'calc(100vh - 50px)';
+			}
 		},
 		/*切换文字或者链接**/
 		changeType(type) {
@@ -882,7 +867,7 @@ export default {
 		sendMessage() {
 			this.sendMessageInfo();
 			(this.chatText = ''), (this.isSendLink = false);
-				this.heightStyle = 'calc(100vh - 50px)';
+			this.heightStyle = 'calc(100vh - 50px)';
 			// this.heightStyle = 'calc(100vh - 100px)'
 		},
 		changeVoice(type) {
@@ -932,7 +917,7 @@ export default {
 		},
 		/*点击发送后添加图片或语音数据**/
 		async sendMessageLanguageInfo(type, value) {
-			console.log("type----sendMessageLanguageInfo",type)
+			console.log('type----sendMessageLanguageInfo', type);
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
 			let req = [
 				{
@@ -942,15 +927,15 @@ export default {
 						{
 							sender_account: this.currentUserInfo.userno,
 							receiver_account: this.doctor_no.userb_no ? this.doctor_no.userb_no : this.userInfo.userno,
-							receiver_person_no:this.doctor_no.userb_person_no ? this.doctor_no.userb_person_no : this.userInfo.no,
+							receiver_person_no: this.doctor_no.userb_person_no ? this.doctor_no.userb_person_no : this.userInfo.no,
 							sender_person_no: this.currentUserInfo.no,
 							msg_content_type: type,
-							identity:this.pageType?'患者':'医生'
+							identity: this.pageType ? '患者' : '医生'
 						}
 					]
 				}
 			];
-			
+
 			if (type === '图片') {
 				req[0].data[0].image = value;
 			} else if (type === '语音') {
@@ -980,7 +965,6 @@ export default {
 		},
 		/*点击发送后添加数据**/
 		async sendMessageInfo() {
-			console.log("数据-------")
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
 			let req = [
 				{
@@ -989,19 +973,27 @@ export default {
 					data: [
 						{
 							sender_account: this.currentUserInfo.userno,
-							// receiver_account: this.doctor_no.owner_account ? this.doctor_no.owner_account : this.userInfo.userno,
-							// receiver_person_no:this.doctor_no.owner_account ? this.customer_no : this.userInfo.no,
-							
 							receiver_account: this.doctor_no.usera_no ? this.doctor_no.usera_no : this.userInfo.userno,
-							receiver_person_no:this.doctor_no.usera_person_no ? this.doctor_no.usera_person_no : this.userInfo.no,
-							
+							receiver_person_no: this.doctor_no.usera_person_no ? this.doctor_no.usera_person_no : this.userInfo.no,
 							sender_person_no: this.currentUserInfo.no,
 							msg_content_type: !this.isSendLink ? '文本' : '链接',
-							identity:this.pageType?'患者':'医生'
+							identity: this.pageType ? '患者' : '医生'
 						}
 					]
 				}
 			];
+			if (this.pageType === 'groupChat') {
+				// 群组聊天
+				req[0].data[0] = {
+					sender_account: this.currentUserInfo.userno,
+					rcv_group_no: this.groupInfo.gc_no,
+					receiver_account:this.groupInfo.gc_no,
+					receiver_person_no: this.groupInfo.gc_no,
+					sender_person_no: this.currentUserInfo.no,
+					msg_content_type: !this.isSendLink ? '文本' : '链接',
+					identity: this.groupInfo.group_role
+				};
+			}
 			if (!this.isSendLink) {
 				req[0].data[0].msg_content = this.chatText;
 			} else {
@@ -1013,19 +1005,19 @@ export default {
 				console.log('发送成功');
 				this.isAll = false;
 				this.pageInfo.pageNo = 1;
-				this.getMessageInfo()
+				this.getMessageInfo();
 			}
 		},
 		_SortJson(json) {
 			json.sort((a, b) => {
-				// console.log('b,a',b,a,a.time - b.time)
 				return new Date(a.create_time).getTime() - new Date(b.create_time).getTime(); //时间反序
 			});
 			console.log('--------排序', json);
-			return json
+			return json;
 		},
 		/*查询当前登陆人和其他人聊天记录**/
 		async getMessageInfo(type = null) {
+			debugger;
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
@@ -1044,38 +1036,53 @@ export default {
 			};
 			let conditionData = [];
 			if (this.pageType) {
-				conditionData = [
-					{
-						relation: 'AND',
-						data: [
-							{
-								colName: 'sender_account',
-								ruleType: 'eq',
-								value: this.doctor_no.usera_no
-							},
-							{
-								colName: 'receiver_account',
-								ruleType: 'eq',
-								value: this.currentUserInfo.userno
-							}
-						]
-					},
-					{
-						relation: 'AND',
-						data: [
-							{
-								colName: 'sender_account',
-								ruleType: 'eq',
-								value: this.currentUserInfo.userno
-							},
-							{
-								colName: 'receiver_account',
-								ruleType: 'eq',
-								value: this.doctor_no.usera_no
-							}
-						]
-					}
-				];
+				if (this.pageType === 'groupChat' && this.groupInfo && this.groupInfo.gc_no) {
+					conditionData = [
+						{
+							relation: 'AND',
+							data: [
+								{
+									colName: 'rcv_group_no', //接收群组编码
+									ruleType: 'eq',
+									value: this.groupInfo.gc_no
+								}
+							]
+						}
+					];
+				} else {
+					conditionData = [
+						{
+							relation: 'AND',
+							data: [
+								{
+									colName: 'sender_account',
+									ruleType: 'eq',
+									value: this.doctor_no.usera_no
+								},
+								{
+									colName: 'receiver_account',
+									ruleType: 'eq',
+									value: this.currentUserInfo.userno
+								}
+							]
+						},
+						{
+							relation: 'AND',
+							data: [
+								{
+									colName: 'sender_account',
+									ruleType: 'eq',
+									value: this.currentUserInfo.userno
+								},
+								{
+									colName: 'receiver_account',
+									ruleType: 'eq',
+									value: this.doctor_no.usera_no
+								}
+							]
+						}
+					];
+				}
 			} else {
 				conditionData = [
 					{
@@ -1115,24 +1122,22 @@ export default {
 			let resData = res.data.data;
 			this.pageInfo.total = res.data.page.total;
 			if (this.pageInfo.pageNo == 1 && type !== 'update') {
-				console.log("page为0")
+				console.log('page为0');
 				this.recordList = [];
 			}
-			console.log("resData----->",resData)
-			if (resData.length > 0) {								
+			console.log('resData----->', resData);
+			if (resData.length > 0) {
 				resData.forEach((item, i) => {
 					if (item.msg_content_type === '语音') {
 						this.$set(resData[i], 'anmitionPlay', false);
 						// item.msg_link = '20201202175639960100'
-						this.getFilePath(item.msg_link).then(obj=>{
-							console.log("语音内容-----",obj,item.msg_link)
-							if(obj){
-								let video_url = this.$api.getFilePath + obj[0].fileurl
-								this.$set(item,'voice_url',video_url)
+						this.getFilePath(item.msg_link).then(obj => {
+							console.log('语音内容-----', obj, item.msg_link);
+							if (obj) {
+								let video_url = this.$api.getFilePath + obj[0].fileurl;
+								this.$set(item, 'voice_url', video_url);
 							}
-						})
-						// let video_url = this.$api.downloadFile + item.msg_link + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
-						// this.$set(resData[i],'voice_url',video_url)
+						});
 					}
 					if (item.image) {
 						let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
@@ -1140,10 +1145,6 @@ export default {
 					}
 					if (item.attachment) {
 						this.getFileNo(item.attachment).then(obj => {
-							// console.log("fileObj------>",obj)
-							if (item.attachment === '20201203093456744100') {
-								console.log('fileObj------>', obj);
-							}
 							this.$set(item, 'documents_name', obj.src_name);
 							this.$set(item, 'file_type', obj.file_type);
 							this.$set(item, 'file_size', obj.file_size);
@@ -1156,7 +1157,7 @@ export default {
 					}
 				});
 				// this.recordList = resData
-				
+
 				console.log('res00000', resData);
 				resData.forEach(links => {
 					if (links.msg_content_type === '链接') {
@@ -1174,31 +1175,31 @@ export default {
 						}
 					}
 				});
-				let _SortJsonData = null
-				this.$nextTick(()=>{
+				let _SortJsonData = null;
+				this.$nextTick(() => {
 					if (!this.isAll) {
 						_SortJsonData = this._SortJson(resData);
-						this.recordList.unshift(...resData);					
-						console.log("排序============",_SortJsonData)
+						this.recordList.unshift(...resData);
+						console.log('排序============', _SortJsonData);
 					}
-					if(type && type === 'update'){
+					if (type && type === 'update') {
 						this._SortJson(resData);
-						this.recordList = resData
+						this.recordList = resData;
 					}
 					if (this.pageInfo.pageNo * this.pageInfo.rownumber >= res.data.page.total) {
 						this.isAll = true;
 					}
-				})
-				
+				});
+
 				this.$nextTick(() => {
-					console.log("滚动条位置")
-					if(this.recordList.length > 0){
+					console.log('滚动条位置');
+					if (this.recordList.length > 0) {
 						this.chatTextBottom = 'person-chat-item' + _SortJsonData[_SortJsonData.length - 1].id;
 					}
-				})
+				});
 				// this.getUserInfoList()
 				if (type && type === 'onLoad') {
-					if(this.recordList.length > 0){
+					if (this.recordList.length > 0) {
 						this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
 					}
 					this.updateMessageInfo();
@@ -1221,7 +1222,7 @@ export default {
 						{
 							colName: 'receiver_person_no',
 							ruleType: 'eq',
-							value:this.userInfo.no
+							value: this.userInfo.no
 						},
 						{
 							colName: 'msg_state',
@@ -1238,9 +1239,9 @@ export default {
 			];
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				this.getMessageInfo('update').then(_=>{
-					uni.$emit('updateSuccess')
-				})
+				this.getMessageInfo('update').then(_ => {
+					uni.$emit('updateSuccess');
+				});
 				console.log('更新成功');
 			}
 		},
@@ -1290,15 +1291,15 @@ export default {
 		if (this.customer_no) {
 			this.getRecorderManagerList();
 		}
+		if (this.groupInfo && this.groupInfo.gc_no) {
+			this.getRecorderManagerList();
+		}
 		setTimeout(() => {
 			this.$nextTick(() => {
-				// if (this.doctor_no.owner_account) {
-					// uni.setStorageSync('doctor_no', this.doctor_no);
-					this.heightStyle = 'calc(100vh - 50px);';
-				// } 				
+				this.heightStyle = 'calc(100vh - 50px);';
 			});
 		}, 500);
-	},	
+	},
 	onLoad(option) {
 		//录音开始事件
 		this.Recorder.onStart(e => {
@@ -1798,9 +1799,9 @@ export default {
 			top: 16rpx;
 		}
 	}
-	.audio{
-		/deep/ .uni-audio-default{
-			height: 0!important;
+	.audio {
+		/deep/ .uni-audio-default {
+			height: 0 !important;
 			border: none;
 		}
 	}

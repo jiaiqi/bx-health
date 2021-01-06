@@ -264,7 +264,16 @@
 					}
 
 				}
-			]
+			    ,{
+                    "path" : "chatGroup/chatGroup",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "聊天社群",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "disease",

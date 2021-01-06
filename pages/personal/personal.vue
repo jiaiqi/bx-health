@@ -27,35 +27,46 @@
 		</view>
 		<view class="container-cen">
 			<view class="container-cen-top">
-				<view class="container-cen-top-list" @click="toPages('doctor')">
-					<text class="cuIcon-service text-blue" style="font-size: 70rpx;"></text>
+				<view class="container-cen-top-list bg-white" @click="toPages('doctor')">
+				<!-- <view class="container-cen-top-list bg-blue light" @click="toPages('doctor')"> -->
+					<text class="cuIcon-service " style="font-size: 70rpx;"></text>
+					<!-- <text class="cuIcon-service text-blue" style="font-size: 70rpx;"></text> -->
 					<text>我的医生</text>
 					<view v-if="doctor_message != 0" class="message-tag">{{ doctor_message }}</view>
 				</view>
-				<view class="container-cen-top-list" @click="toPages('userList')">
-					<text class="cuIcon-comment text-green" style="font-size: 70rpx;"></text>
+				<view class="container-cen-top-list bg-white" @click="toPages('userList')">
+				<!-- <view class="container-cen-top-list bg-green light" @click="toPages('userList')"> -->
+					<text class="cuIcon-comment " style="font-size: 70rpx;"></text>
+					<!-- <text class="cuIcon-comment text-green" style="font-size: 70rpx;"></text> -->
 					<text>我的用户</text>
 					<view v-if="hzMessage != 0" class="message-tag">{{ hzMessage }}</view>
 				</view>
-				<view class="container-cen-top-list" @click="toPages('pinggu')">
-					<text class="cuIcon-addressbook text-orange" style="font-size: 70rpx;"></text>
-					<text>家庭成员</text>
+				<view class="container-cen-top-list bg-white" @click="toPages('group')">
+				<!-- <view class="container-cen-top-list bg-yellow light" @click="toPages('group')"> -->
+					<text class="cuIcon-group " style="font-size: 70rpx;"></text>
+					<!-- <text class="cuIcon-group text-yellow" style="font-size: 70rpx;"></text> -->
+					<text>圈子</text>
 				</view>
+		<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('pinggu')">
+					<text class="cuIcon-addressbook " style="font-size: 70rpx;"></text>
+					<text>家庭成员</text>
+				</view> -->
 			</view>
 			<view class="container-bot">
 				<view class="cu-list menu sm-border">
-					<view @click="toPersonDetail('person')" class="cu-item arrow">
+					<view @click="toPages('updateInfo')" class="cu-item arrow">
+					<!-- <view @click="toPersonDetail('person')" class="cu-item arrow"> -->
 						<view class="content">
 							<text class="cuIcon-news"></text>
 							<text class="text-grey">基本信息</text>
 						</view>
 					</view>
-					<view @click="toPersonDetail('corp')" class="cu-item arrow">
+			<!-- 		<view @click="toPersonDetail('corp')" class="cu-item arrow">
 						<view class="content">
 							<text class="cuIcon-rank"></text>
 							<text class="text-grey">身体数据</text>
 						</view>
-					</view>
+					</view> -->
 					<view class="cu-item arrow" @click="toPages('beDoctor')" v-if="!manager_type">
 						<view class="content">
 							<text class="cuIcon-form"></text>
@@ -64,8 +75,8 @@
 					</view>
 					<view class="cu-item arrow" @click="toPages('card')" v-if="manager_type">
 						<view class="content">
-							<text class="cuIcon-card"></text>
-							<text class="text-grey">医生名片</text>
+							<text class="cuIcon-qr_code"></text>
+							<text class="text-grey">二维码名片</text>
 						</view>
 					</view>
 					<view class="cu-item arrow" @click="toPages('font')">
@@ -257,6 +268,11 @@ export default {
 
 			let self = this;
 			switch (e) {
+				case 'group':
+					uni.navigateTo({
+						url: '/personalPages/chatGroup/chatGroup'
+					});
+					break;
 				case 'doctor':
 					uni.navigateTo({
 						url: '/personalPages/myDoctor/myDoctor'
@@ -274,15 +290,6 @@ export default {
 					break;
 				case 'beDoctor':
 					this.showModal = true;
-				// 	let userInfo = uni.getStorageSync('wxUserInfo');
-				// 	let fieldsCond = [
-				// 		{ column: 'dt_profile_url', display: false, value: this.vuex_userInfo ? this.vuex_userInfo.profile_url : '' },
-				// 		{ column: 'owner_account', display: false, value: uni.getStorageSync('login_user_info').user_no }
-				// 	];
-				// 	uni.navigateTo({
-				// 		url: '/publicPages/newForm/newForm?serviceName=srvhealth_doctor_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
-				// 	});
-				// 	break;
 				case 'userList':
 					if (this.manager_type) {
 						this.getDoctorInfo().then(res => {
@@ -294,13 +301,6 @@ export default {
 							}
 						});
 					} else {
-						// this.getDoctorInfo().then(res => {
-						// if (res) {
-						// 	this.$store.commit('SET_DOCTOR_INFO', res);
-						// 	uni.navigateTo({
-						// 		url: '/personalPages/userList/userList'
-						// 	});
-						// } else {
 						uni.showModal({
 							title: '提示',
 							content: '当前用户不是管理人员,是否申请成为管理人员',
@@ -310,17 +310,6 @@ export default {
 								}
 							}
 						});
-						// uni.showModal({
-						// 	title: '提示',
-						// 	content: '您还不是医生，是否申请成为医生',
-						// 	success(res) {
-						// 		if (res.confirm) {
-						// 			self.toPages('beDoctor');
-						// 		}
-						// 	}
-						// });
-						// }
-						// });
 					}
 					break;
 				case 'updateInfo':
@@ -688,6 +677,8 @@ export default {
 		// color: #333;
 		.top-right-name {
 			min-height: 40rpx;
+			font-size: 50rpx;
+			font-weight: bold;
 		}
 		.auth-button {
 			border-radius: 30rpx;
@@ -708,11 +699,20 @@ export default {
 		display: flex;
 		justify-content: space-around;
 		padding-top: 20upx;
+		margin: 0 20rpx;
+
 		.container-cen-top-list {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			position: relative;
+			// border: 1rpx dotted #f1f1f1;
+			border-radius: 50rpx;
+			padding: 20rpx;
+			flex: 1;
+			& + .container-cen-top-list {
+				margin-left: 20rpx;
+			}
 			image {
 				width: 80upx;
 				height: 80upx;
