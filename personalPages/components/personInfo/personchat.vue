@@ -1188,13 +1188,14 @@ export default {
 				});
 				let _SortJsonData = null;
 				this.$nextTick(() => {
-					if (this.pageInfo.pageNo == 1 && type !== 'update') {
-						console.log('page为0');
-						this.recordList = [];
-					}
+					// if (this.pageInfo.pageNo == 1 && type !== 'update') {
+					// 	console.log('page为0');
+					// 	this.recordList = [];
+					// }
 					if (!this.isAll) {
 						_SortJsonData = this._SortJson(resData);
-						this.recordList.unshift(..._SortJsonData);
+						// this.recordList.unshift(..._SortJsonData);
+						this.recordList = _SortJsonData
 						console.log('排序============', _SortJsonData);
 					}
 					if (type && type === 'update') {

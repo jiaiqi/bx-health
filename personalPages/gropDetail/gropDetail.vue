@@ -58,7 +58,7 @@
 						<view class="logo"><image :src="groupInfo.icon ? getImagePath(groupInfo.icon) : '../static/chat-active.png'" mode="aspectFit" class="img"></image></view>
 						<view class="title">{{ groupInfo.name }}</view>
 					</view>
-					<uni-qrcode cid="qrcodeCanvas" class="qr-code-container" :text="groupInfo.gc_no" :size="qrCodeSize" foregroundColor="#333" makeOnLoad v-if="groupInfo.gc_no"></uni-qrcode>
+					<uni-qrcode cid="qrcodeCanvas" class="qr-code-container" :text="groupInfo.gc_no" :size="qrCodeSize" foregroundColor="#333" makeOnLoad v-if="showQrCode&&groupInfo.gc_no"></uni-qrcode>
 					<view class="action"><button class="cu-btn line-green text-green" @tap="showQrCodeModal(false)">取消</button></view>
 				</view>
 			</view>

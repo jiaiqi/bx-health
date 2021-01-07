@@ -1,7 +1,7 @@
 <template>
 	<view class="doctor-wrap">
 		<view class="util-bar">
-			<view class="util-item" @click="toPages('group-detail')" v-if="this.groupInfo && this.groupInfo.gc_no">
+			<view class="util-item" @click="toPages('group-detail')" v-if="groupInfo && groupInfo.gc_no">
 				<view class="icon"><text class="cuIcon-more"></text></view>
 				<text class="label">更多</text>
 			</view>
