@@ -866,7 +866,8 @@ export default {
 		/*点击发送**/
 		sendMessage() {
 			this.sendMessageInfo();
-			(this.chatText = ''), (this.isSendLink = false);
+			this.chatText = '';
+			this.isSendLink = false;
 			this.heightStyle = 'calc(100vh - 50px)';
 			// this.heightStyle = 'calc(100vh - 100px)'
 		},
@@ -935,7 +936,18 @@ export default {
 					]
 				}
 			];
-
+			if (this.pageType === 'groupChat') {
+				// 群组聊天
+				req[0].data[0] = {
+					sender_account: this.currentUserInfo.userno,
+					rcv_group_no: this.groupInfo.gc_no,
+					receiver_account: this.groupInfo.gc_no,
+					receiver_person_no: this.groupInfo.gc_no,
+					sender_person_no: this.currentUserInfo.no,
+					msg_content_type: type,
+					identity: this.groupInfo.group_role
+				};
+			}
 			if (type === '图片') {
 				req[0].data[0].image = value;
 			} else if (type === '语音') {
@@ -987,7 +999,7 @@ export default {
 				req[0].data[0] = {
 					sender_account: this.currentUserInfo.userno,
 					rcv_group_no: this.groupInfo.gc_no,
-					receiver_account:this.groupInfo.gc_no,
+					receiver_account: this.groupInfo.gc_no,
 					receiver_person_no: this.groupInfo.gc_no,
 					sender_person_no: this.currentUserInfo.no,
 					msg_content_type: !this.isSendLink ? '文本' : '链接',
@@ -1017,7 +1029,6 @@ export default {
 		},
 		/*查询当前登陆人和其他人聊天记录**/
 		async getMessageInfo(type = null) {
-			debugger;
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
@@ -1123,7 +1134,7 @@ export default {
 			this.pageInfo.total = res.data.page.total;
 			if (this.pageInfo.pageNo == 1 && type !== 'update') {
 				console.log('page为0');
-				this.recordList = [];
+				// this.recordList = [];
 			}
 			console.log('resData----->', resData);
 			if (resData.length > 0) {
@@ -1157,7 +1168,7 @@ export default {
 					}
 				});
 				// this.recordList = resData
-
+				debugger
 				console.log('res00000', resData);
 				resData.forEach(links => {
 					if (links.msg_content_type === '链接') {
@@ -1177,9 +1188,13 @@ export default {
 				});
 				let _SortJsonData = null;
 				this.$nextTick(() => {
+					if (this.pageInfo.pageNo == 1 && type !== 'update') {
+						console.log('page为0');
+						this.recordList = [];
+					}
 					if (!this.isAll) {
 						_SortJsonData = this._SortJson(resData);
-						this.recordList.unshift(...resData);
+						this.recordList.unshift(..._SortJsonData);
 						console.log('排序============', _SortJsonData);
 					}
 					if (type && type === 'update') {
@@ -1193,7 +1208,7 @@ export default {
 
 				this.$nextTick(() => {
 					console.log('滚动条位置');
-					if (this.recordList.length > 0) {
+					if (this.recordList.length > 0 && Array.isArray(_SortJsonData) && _SortJsonData.length > 0) {
 						this.chatTextBottom = 'person-chat-item' + _SortJsonData[_SortJsonData.length - 1].id;
 					}
 				});
@@ -1293,6 +1308,9 @@ export default {
 		}
 		if (this.groupInfo && this.groupInfo.gc_no) {
 			this.getRecorderManagerList();
+			uni.setNavigationBarTitle({
+				title: `${this.groupInfo.name}（${this.groupInfo.peopleNum}）`
+			});
 		}
 		setTimeout(() => {
 			this.$nextTick(() => {
@@ -1334,7 +1352,7 @@ export default {
 <style lang="scss" scoped>
 .person-chat-wrap {
 	// padding-top: 120rpx;
-	height: calc(100vh - 90rpx);
+	height: calc(100vh - 210rpx - var(--window-top) - var(--window-bottom));
 	background-color: #eeeeee;
 	.nav-chat-top {
 		background-color: rgb(11, 201, 157) !important;
@@ -1345,7 +1363,7 @@ export default {
 	.person-chat-top {
 		display: flex;
 		flex-direction: column;
-		max-height: calc(100vh - 100rpx);
+		max-height: calc(100vh - 210rpx - var(--window-top) - var(--window-bottom));
 		overflow-y: scroll;
 		// margin: 10rpx;
 		.person-chat-item {

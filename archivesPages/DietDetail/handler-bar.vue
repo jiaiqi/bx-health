@@ -4,7 +4,7 @@
 			<view class="title">烹调方式:</view>
 			<view
 				class="cook-type"
-				:class="{ 'current-cook-type': item.value === cook_method || item.value === dietInfo.cook_method }"
+				:class="{ 'current-cook-type': item.value === cook_method }"
 				@click="changeCookMethod(true, item.value)"
 				v-for="item in defaultCookTypes"
 				:key="item.value"
@@ -88,7 +88,8 @@ export default {
 					value: '其他',
 					type: 'other'
 				}
-			]
+			],
+			oldDefaultCOokTypes:[],
 		};
 	},
 	props: {
@@ -101,7 +102,9 @@ export default {
 			deep: true,
 			immediate: true,
 			handler(newValue, oldValue) {
-				this.cook_method = newValue.cook_method;
+				if (!this.cook_method) {
+					this.cook_method = newValue.cook_method_default;
+				}
 				// if (this.cookTypes.length === 0) {
 				this.getCookTypes();
 				// }
@@ -153,23 +156,38 @@ export default {
 			return this.unitList;
 		},
 		async getCookTypes() {
-			if (this.dietInfo.cook_method_default) {
+			if (this.dietInfo.cook_method_default && this.defaultCookTypes.length === 0) {
 				this.defaultCookTypes = this.dietInfo.cook_method_default.split(',').map(item => {
 					return {
 						label: item,
 						value: item,
-						checked: false
+						checked: true
 					};
 				});
 			}
 			if (this.dietInfo.cook_method) {
 				if (!this.defaultCookTypes.find(item => item.value === this.dietInfo.cook_method)) {
-					this.defaultCookTypes.push({
-						label: this.dietInfo.cook_method,
-						value: this.dietInfo.cook_method,
-						checked: true
-					});
+					let arr = this.dietInfo.cook_method.split(',');
+					if (arr.length > 0) {
+						arr.forEach(item => {
+							if (!this.defaultCookTypes.find(type => type.value === item)) {
+								let obj = {
+									label: item,
+									value: item,
+									checked: false
+								};
+								if (this.dietInfo.cook_method_default.indexOf(item) !== -1) {
+									// obj.checked = true
+									// this.cook_method = item
+								}
+								this.defaultCookTypes.push(obj);
+							}
+						});
+					}
 				}
+			}
+			if(this.oldDefaultCOokTypes.length===0){
+				this.oldDefaultCOokTypes = this.deepClone(this.defaultCookTypes)
 			}
 			let colVs = await this.getServiceV2('srvhealth_diet_contents_select', 'list', 'list', 'health');
 			let colData = colVs.srv_cols;
@@ -186,21 +204,39 @@ export default {
 			if (isChange) {
 				this.$emit('changeCookMethod', this.cook_method);
 			} else {
-				this.cook_method = this.dietInfo.cook_method;
+				this.cook_method = this.dietInfo.cook_method_default;
 			}
+			let defaultCookTypes = this.deepClone(this.oldDefaultCOokTypes);
+			let typeArr = defaultCookTypes.map(item => item.value);
 			if (this.dietInfo.cook_method_default) {
-				let index = this.defaultCookTypes.findIndex(item => item.value !== this.dietInfo.cook_method && this.dietInfo.cook_method_default.indexOf(item.value) === -1);
-				this.defaultCookTypes.splice(index, 1);
+				let index = this.defaultCookTypes.findIndex(
+					item => item.value !== this.dietInfo.cook_method && !typeArr.includes(item.value) && this.dietInfo.cook_method_default.indexOf(item.value) === -1
+				);
+				if (index !== -1) {
+					this.defaultCookTypes.splice(index, 1);
+				}
 			} else {
-				let index = this.defaultCookTypes.findIndex(item => item.value !== this.dietInfo.cook_method);
+				let index = this.defaultCookTypes.findIndex(item => item.value !== this.dietInfo.cook_method && !typeArr.includes(item.value));
 				this.defaultCookTypes.splice(index, 1);
 			}
 			if (!this.defaultCookTypes.find(item => item.value === this.dietInfo.cook_method)) {
-				this.defaultCookTypes.push({
-					label: this.dietInfo.cook_method,
-					value: this.dietInfo.cook_method,
-					checked: true
-				});
+				let arr = this.dietInfo.cook_method.split(',');
+				if (arr.length > 0) {
+					arr.forEach(item => {
+						if (!this.defaultCookTypes.find(type => type.value === item)) {
+							this.defaultCookTypes.push({
+								label: item,
+								value: item,
+								checked: false
+							});
+						}
+					});
+				}
+				// this.defaultCookTypes.push({
+				// 	label: this.dietInfo.cook_method,
+				// 	value: this.dietInfo.cook_method,
+				// 	checked: true
+				// });
 			}
 			this.showTypeSelector = false;
 		},
@@ -232,22 +268,37 @@ export default {
 		flex-wrap: wrap;
 		align-items: center;
 		.cook-type {
-			margin: 0 10rpx;
-			border-radius: 50rpx;
-			padding: 4rpx 20rpx;
+			// margin: 0 10rpx;
+			// border-radius: 50rpx;
+			// padding: 4rpx 20rpx;
+			// display: flex;
+			// align-items: center;
+			// justify-content: center;
+			// margin-bottom: 5px;
+			// color: #fff;
+			// border: 1px solid #f1f1f1;
+			// background-color: #f1f1f1;
+			// color: #333;
+			margin: 10rpx 5rpx;
+			background-color: #f8f8f8;
+			color: #999;
+			border-radius: 20px;
+			border: 1px solid #999;
+			padding: 0px 8px;
+			min-height: 27px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			margin-bottom: 5px;
-			color: #fff;
-			border: 1px solid #f1f1f1;
-			background-color: #f1f1f1;
-			color: #333;
+			font-size: 20rpx;
+			min-width: 80rpx;
 		}
 		.current-cook-type {
-			color: #f37b1d;
 			border: 1px solid #f37b1d;
-			background-color: rgba($color: #ffaf0e, $alpha: 0.3);
+			background-color: #f37b1d;
+			color: #fff;
+			// color: #f37b1d;
+			// border: 1px solid #f37b1d;
+			// background-color: rgba($color: #ffaf0e, $alpha: 0.3);
 		}
 	}
 	.unit-box {

@@ -263,17 +263,22 @@
 						"enablePullDownRefresh": false
 					}
 
+				}, {
+					"path": "chatGroup/chatGroup",
+					"style": {
+						"navigationBarTitleText": "圈子",
+						"enablePullDownRefresh": true
+					}
+
+				}, {
+					"path": "gropDetail/gropDetail",
+					"style": {
+						"navigationBarTitleText": "圈子设置",
+						"enablePullDownRefresh": true
+					}
+
 				}
-			    ,{
-                    "path" : "chatGroup/chatGroup",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "聊天社群",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "disease",

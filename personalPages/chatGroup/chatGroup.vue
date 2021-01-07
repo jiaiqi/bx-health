@@ -1,16 +1,48 @@
 <template>
 	<view class="chat-group">
-		<view class="group-list">
+		<!-- 		<cu-custom :isBack="true" @onBack="onBack">
+			<block slot="content"></block>
+		</cu-custom> -->
+		<view class="tab-view">
+			<view class="tab-item" :class="{ 'active-tab': index == TabCur }" v-for="(item, index) in tabList" :key="index" @tap="tabSelect" :data-id="index">{{ item.label }}</view>
+		</view>
+		<view class="group-list" v-if="TabCur === 0">
 			<view class="group-item" v-for="item in groupList" :key="item.gc_no" @click="toChat(item)">
-				<view class="icon"><image src="../static/chat-active.png" mode="aspectFit" class="image"></image></view>
+				<view class="icon"><image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit" class="image"></image></view>
 				<view class="content">
 					<view class="top">
 						<view class="name">{{ item.name }}</view>
-						<view class="time">{{ item.latest_sign_in_time.slice(10, 16) }}</view>
+						<view class="time">{{ formateTime(item.lastChatTime,true) }}</view>
 					</view>
 					<view class="bottom">
 						<text class="message">{{ item.lastChatText || '' }}</text>
+						<text class="unread">
+							<text class="text" v-if="item.unread">{{ item.unread || '' }}</text>
+						</text>
 					</view>
+				</view>
+			</view>
+		</view>
+		<view class="cu-bar search bg-white" v-if="TabCur === 1">
+			<view class="search-form round">
+				<text class="cuIcon-search"></text>
+				<input :adjust-position="false" type="text" placeholder="搜索圈子" confirm-type="search" v-model="keywords" @blur="InputBlur" />
+			</view>
+			<view class="action"><button class="cu-btn bg-green shadow-blur round">搜索</button></view>
+		</view>
+		<view class="group-list grid" v-if="TabCur === 1">
+			<view class="group-item" v-for="item in otherGroup" :key="item.gc_no" @click="toPages('group-info', item)">
+				<view class="icon"><image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit" class="image"></image></view>
+				<view class="content">
+					<view class="top">
+						<view class="name">{{ item.name }}</view>
+					</view>
+				</view>
+			</view>
+			<view class="group-item" @click="toPages('create-group')">
+				<view class="icon cuIcon-add"></view>
+				<view class="content">
+					<view class="top"><view class="name">创建圈子</view></view>
 				</view>
 			</view>
 		</view>
@@ -22,7 +54,18 @@ import { mapState } from 'vuex';
 export default {
 	data() {
 		return {
-			groupList: []
+			groupList: [],
+			otherGroup: [],
+			TabCur: 0,
+			keywords: '',
+			tabList: [
+				{
+					label: '我的'
+				},
+				{
+					label: '发现'
+				}
+			]
 		};
 	},
 	computed: {
@@ -31,11 +74,145 @@ export default {
 		})
 	},
 	methods: {
+		InputBlur(e) {
+			if (e.detail) {
+				let condition = [{ colName: 'name', ruleType: 'like', value: e.detail.value }];
+				this.selectOtherGroup(condition);
+			}
+		},
+		tabSelect(e) {
+			this.TabCur = Number(e.currentTarget.dataset.id);
+			if (this.TabCur === 1) {
+				this.selectOtherGroup();
+			} else {
+				this.selectMyGroup();
+			}
+		},
+		toPages(type, info) {
+			let self = this;
+			if (type === 'group-info') {
+				uni.showModal({
+					title: '提示',
+					content: `是否加入${info.name}圈子?`,
+					confirmText: '加入',
+					confirmColor: '#007AFF',
+					success(res) {
+						if (res.confirm) {
+							self.joinGroup(info);
+						}
+					}
+				});
+			} else if (type === 'create-group') {
+				let url = `/publicPages/newForm/newForm?serviceName=srvhealth_group_circle_select&type=add`;
+				uni.navigateTo({
+					url: url
+				});
+			}
+		},
 		toChat(item) {
 			//跳转到群组聊天页面
 			uni.navigateTo({
 				url: `/personalPages/myDoctor/doctorChat?no=${this.vuex_userInfo.no}&groupInfo=${encodeURIComponent(JSON.stringify(item))}`
 			});
+		},
+		joinGroup(e) {
+			let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_add', 'operate');
+			let req = [
+				{
+					serviceName: 'srvhealth_person_group_circle_add',
+					condition: [],
+					data: [
+						{
+							person_no: this.vuex_userInfo.no,
+							user_no: this.vuex_userInfo.userno,
+							gc_no: e.gc_no,
+							group_role: '用户',
+							latest_sign_in_time: this.formateDate('', 'DateTime')
+						}
+					]
+				}
+			];
+			this.$http.post(url, req).then(res => {
+				if (res.data.state === 'SUCCESS') {
+					uni.showToast({
+						title: '操作成功'
+					});
+					uni.startPullDownRefresh();
+					this.selectMyGroup();
+				}
+			});
+		},
+		async selectGroup(cond, page) {
+			// 查找圈子
+			let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_person_group_circle_select',
+				colNames: ['*'],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			if (Array.isArray(cond)) {
+				req.condition = cond;
+			}
+			if (page) {
+				req.page = page;
+			}
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data)) {
+				return res.data.data;
+			}
+		},
+		async selectOtherGroup(condition) {
+			// 查找当前登录用户未加入的圈子
+			// [{ colName: 'person_no', ruleType: 'ne', value: this.vuex_userInfo.no }]
+			let cond = [{ colName: 'gc_no', ruleType: 'notin', value: this.groupList.map(item => item.gc_no).toString() }];
+			if (condition) {
+				cond = [...cond, ...condition];
+			}
+			let res = await this.selectGroupInfo('', '', cond);
+			if (Array.isArray(res)) {
+				this.otherGroup = res;
+			}
+		},
+		async selectMyGroup() {
+			// 查找当前登录用户已加入的圈子
+			if (this.vuex_userInfo && this.vuex_userInfo.no) {
+				let res = await this.selectGroup([{ colName: 'person_no', ruleType: 'eq', value: this.vuex_userInfo.no }]);
+				if (Array.isArray(res) && res.length > 0) {
+					let no = res.map(item => item.gc_no);
+					this.groupList = await this.selectGroupInfo(no.toString(), res);
+					this.selectLastChatText(no.toString());
+				}
+			}
+		},
+		async selectGroupInfo(no, data, cond) {
+			if (no || cond) {
+				let url = this.getServiceUrl('health', 'srvhealth_group_circle_select', 'select');
+				let req = {
+					serviceName: 'srvhealth_group_circle_select',
+					colNames: ['*'],
+					condition: [{ colName: 'gc_no', ruleType: 'in', value: no }]
+				};
+				if (cond) {
+					req.condition = cond;
+				}
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data) && Array.isArray(data)) {
+					res.data.data = res.data.data.map(item => {
+						data.map(info => {
+							if (info.gc_no === item.gc_no) {
+								item.group_role = info.group_role;
+								item.latest_sign_in_time = info.latest_sign_in_time;
+								item.pg_no = info.pg_no;
+								item.peopleNum = data.length;
+							}
+						});
+						return item;
+					});
+					return res.data.data;
+				} else if (Array.isArray(res.data.data)) {
+					return res.data.data;
+				}
+			}
 		},
 		selectLastChatText(no) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
@@ -80,74 +257,66 @@ export default {
 					});
 				}
 			});
-		},
-		selectMyGroup() {
-			if (this.vuex_userInfo && this.vuex_userInfo.no) {
-				let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_select', 'select');
-				let req = {
-					serviceName: 'srvhealth_person_group_circle_select',
-					colNames: ['*'],
-					condition: [{ colName: 'person_no', ruleType: 'eq', value: this.vuex_userInfo.no }]
-				};
-				this.$http.post(url, req).then(res => {
-					if (Array.isArray(res.data.data)) {
-						let no = res.data.data.map(item => item.gc_no);
-						this.selectGroupInfo(no.toString(), res.data.data);
-						// this.groupList = res.data.data;
-					}
-				});
-			}
-		},
-		selectGroupInfo(no, data) {
-			if (no) {
-				let url = this.getServiceUrl('health', 'srvhealth_group_circle_select', 'select');
-				let req = {
-					serviceName: 'srvhealth_group_circle_select',
-					colNames: ['*'],
-					condition: [{ colName: 'gc_no', ruleType: 'in', value: no }]
-				};
-				this.$http.post(url, req).then(res => {
-					if (Array.isArray(res.data.data)) {
-						this.groupList = res.data.data.map(item => {
-							data.map(info => {
-								if (info.gc_no === item.gc_no) {
-									item.group_role = info.group_role;
-									item.latest_sign_in_time = info.latest_sign_in_time;
-									item.pg_no = info.pg_no;
-								}
-							});
-							return item;
-						});
-						this.selectLastChatText(no);
-					}
-				});
-			}
 		}
 	},
 	onPullDownRefresh() {
-		this.selectMyGroup();
+		if (this.TabCur === 1) {
+			this.selectOtherGroup();
+		} else if (this.TabCur === 0) {
+			this.selectMyGroup();
+		}
 		setTimeout(() => {
 			uni.stopPullDownRefresh();
 		}, 1000);
 	},
-	created() {
-		this.selectMyGroup();
+	onShow() {
+		this.$nextTick(function() {
+			if (this.TabCur === 1) {
+				this.selectOtherGroup();
+			} else if (this.TabCur === 0) {
+				this.selectMyGroup();
+			}
+		});
 	}
+	// created() {
+	// 	this.selectMyGroup();
+	// }
 };
 </script>
 
 <style lang="scss" scoped>
 .chat-group {
-	min-height: 100vh;
+	min-height: calc(100vh - var(--window-top) - var(--window-bottom));
 	background-color: #fff;
+}
+.tab-view {
+	display: flex;
+	.tab-item {
+		padding: 20rpx;
+		&.active-tab {
+			font-weight: bold;
+			position: relative;
+			&::after {
+				content: '';
+				height: 5rpx;
+				width: 40rpx;
+				bottom: 10rpx;
+				left: calc(50% - 20rpx);
+				background-color: #000000;
+				position: absolute;
+			}
+		}
+	}
 }
 .group-list {
 	display: flex;
 	flex-direction: column;
+
 	.group-item {
 		display: flex;
 		padding: 20rpx;
 		transition: all 0.5s ease-out;
+		overflow: hidden;
 		&:active {
 			background-color: #f1f1f1;
 		}
@@ -174,19 +343,62 @@ export default {
 				display: flex;
 				justify-content: space-between;
 				padding: 10rpx 0;
-				.name{
+				.name {
 					font-weight: bold;
 					font-size: 32rpx;
 					letter-spacing: 2px;
 				}
-				.time{
+				.time {
 					font-size: 24rpx;
 					color: #999;
 				}
 			}
 			.bottom {
-				.message{
+				display: flex;
+				.message {
 					color: #999;
+					flex: 1;
+				}
+				.unread {
+					width: 50rpx;
+					.text {
+						display: inline-block;
+						width: 50rpx;
+						height: 50rpx;
+						border-radius: 50%;
+						background-color: #dd525d;
+						line-height: 50rpx;
+						text-align: center;
+						color: #fff;
+						font-size: 20rpx;
+					}
+				}
+			}
+		}
+	}
+	&.grid {
+		flex-direction: row;
+		padding: 0 30rpx;
+		.group-item {
+			width: 33%;
+			padding: 20rpx 10rpx;
+			flex-direction: column;
+			align-items: center;
+			// border: 1rpx dashed #f1f1f1;
+			.icon {
+				border-radius: 10rpx;
+				position: relative;
+				.button {
+					position: absolute;
+					right: 0;
+					bottom: 0;
+				}
+			}
+			.top {
+				.name {
+					font-weight: bold;
+					font-size: 28rpx;
+					letter-spacing: 0;
 				}
 			}
 		}

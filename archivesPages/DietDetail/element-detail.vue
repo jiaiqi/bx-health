@@ -9,7 +9,7 @@
 				{{ item.name }}({{ item.weight }}kg)
 			</view>
 		</view>
-		<view class="visual-detail" v-if="showChart"><uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="chartData" /></view>
+		<view class="visual-detail chart" v-if="showChart"><uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="chartData" /></view>
 		<view class="visual-detail" v-if="!showChart">
 			<view class="ele-item" v-for="item in eleData" :key="item.title">
 				<view class="title">{{ item.title }}</view>
@@ -532,6 +532,9 @@ export default {
 		margin: 0 20rpx;
 		height: 650rpx;
 		padding: 10rpx;
+		&.chart{
+			height: 400rpx;
+		}
 		.ele-item {
 			.title {
 				color: #000;

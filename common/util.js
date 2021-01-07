@@ -540,6 +540,25 @@ export default {
 				delta: 1
 			});
 		}
+		Vue.prototype.formateTime = (date,returnNull) => {
+			console.log(date)
+			// TODO 上午下午 昨天前天 
+			if (!date) {
+				if(returnNull){
+					return ''
+				}
+				date = new Date()
+			} else {
+				date = new Date(date)
+			}
+			let curDate = new Date()
+			if (Vue.prototype.formateDate(date) === Vue.prototype.formateDate(curDate)) {
+				// 当天
+				return Vue.prototype.formateDate(date, 'dateTime')
+			} else {
+				return Vue.prototype.formateDate(date, 'MM-DD')
+			}
+		}
 
 		Vue.prototype.formateDate = function(date, type = 'date') {
 			console.log(date)
@@ -568,17 +587,17 @@ export default {
 				})(),
 				'ss': date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds()
 			};
-			if (type === 'date') {
+			if (type === 'date' || type === 'YYYY-MM-DD') {
 				return o.yy + '-' + o.MM + '-' + o.dd
 			} else if (type === 'YY-MM') {
 				return o.yy + '-' + o.MM
 			} else if (type === 'MM-DD') {
 				return o.MM + '-' + o.dd
-			} else if (type === 'dateTime') {
+			} else if (type === 'dateTime' || type === 'hh:mm') {
 				return o.HH + ':' + o.mm
-			} else if (type === 'time') {
-				return o.HH + ':' + o.mm+':'+o.ss
-			}else {
+			} else if (type === 'time' || type === 'hh:mm:ss') {
+				return o.HH + ':' + o.mm + ':' + o.ss
+			} else {
 				return o.yy + '-' + o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm + ':' + o.ss;
 			}
 		};
@@ -1352,7 +1371,10 @@ export default {
 			}
 		}
 		Vue.prototype.toAddPage = async () => {
-			let wxUserInfo = Vue.prototype ?.$store ?.state ?.user ?.wxUserInfo
+			let wxUserInfo = ''
+			if (Vue.prototype.$store && Vue.prototype.$store.state && Vue.prototype.$store.state.user) {
+				wxUserInfo = Vue.prototype.$store.state.user.wxUserInfo
+			}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_add', 'add')
 			let req = [{
 				"serviceName": "srvhealth_person_info_add",
@@ -1458,12 +1480,12 @@ export default {
 			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
 				return no
 			} else if (no) {
-				if(no.indexOf('&bx_auth_ticket')!==-1){
+				if (no.indexOf('&bx_auth_ticket') !== -1) {
 					no = no.split('&bx_auth_ticket')[0]
 				}
 				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
 					'&thumbnailType=fwsu_100';
-			}else{
+			} else {
 				return false
 			}
 		}

@@ -1,8 +1,15 @@
 <template>
 	<view class="slider-number">
-		<view class="operate" hover-class="active" @click="numberChange('minus')" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">-</view>
+		<view class="operate" hover-class="active" @click="numberChange('minus', 0.1)" @longpress="longpressNumChange('minus', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
+			-0.1
+		</view>
+		<view class="operate" hover-class="active" @click="numberChange('minus')" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">-1</view>
 		<slider class="uni-slider" @change="changeSlider" :step="step" :min="min" :max="max" :value="bindValue" :show-value="showValue" />
-		<view class="operate" hover-class="active" @click="numberChange('add')" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">+</view>
+		<input type="digit" v-model="bindValue" class="input" />
+		<view class="operate" hover-class="active" @click="numberChange('add')" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">+1</view>
+		<view class="operate" hover-class="active" @click="numberChange('add', 0.1)" @longpress="longpressNumChange('add', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
+			+0.1
+		</view>
 	</view>
 </template>
 
@@ -57,16 +64,21 @@ export default {
 			// 长按结束，清除定时器
 			clearInterval(this.longpressTimer);
 		},
-		longpressNumChange(type) {
+		longpressNumChange(type, num) {
 			// 开始长按
 			if (type) {
 				this.longpressTimer = setInterval(() => {
-					this.numberChange(type);
+					this.numberChange(type, num);
 				}, 200);
 			}
 		},
-		numberChange(type) {
+		numberChange(type, num) {
 			let step = this.step;
+			if (num) {
+				step = num;
+			} else {
+				step = 1;
+			}
 			if (this.max) {
 				if (type === 'add') {
 					if (this.bindValue + step <= this.max) {
@@ -93,24 +105,33 @@ export default {
 	display: flex;
 	height: 80rpx;
 	align-items: center;
+	position: relative;
 	.operate {
 		display: inline-block;
-		padding: 5rpx 20rpx;
+		text-align: center;
+		padding: 5rpx 10rpx;
 		background-color: #f1f1f1;
 		position: relative;
 		font-size: 40rpx;
+		margin-right: 10rpx;
+		width:80rpx;
 		&.active {
 			transition: all 0.2s;
-			transform: scale(1.2);
+			transform: scale(1.1);
 		}
-		&::before {
-			content: '';
-			width: 130%;
-			height: 130%;
-			top: -15%;
-			left: -15%;
-			position: absolute;
-		}
+		// &::before {
+		// 	content: '';
+		// 	width: 110%;
+		// 	height: 110%;
+		// 	top: 5%;
+		// 	left: 5%;
+		// 	position: absolute;
+		// }
+	}
+	.input {
+		width: 80rpx;
+		position: absolute;
+		right: 0;
 	}
 	.uni-slider {
 		flex: 1;
