@@ -150,13 +150,6 @@ export default {
 			let serviceName = 'srvhealth_person_relation_add';
 			let url = this.getServiceUrl('health', serviceName, 'operate');
 			let req = [
-				// {
-				// 	serviceName: serviceName,
-				// 	condition: [],
-				// 	data: [{ customer_no: this.userInfo.no, customer_name: this.userInfo.name, manager_no: docInfo.dt_no, manager_name: docInfo.dt_name }]
-				// }
-			];
-			req = [
 				{
 					serviceName: 'srvhealth_person_relation_add',
 					condition: [],
@@ -175,21 +168,6 @@ export default {
 							userb_profile_url: this.userInfo.profile_url,
 							userb_sex: this.userInfo.sex
 						}
-						// {
-						// 	usera_person_no: docInfo.no,
-						// 	usera_name: docInfo.name,
-						// 	usera_no: docInfo.userno,
-						// 	usera_profile_url: docInfo.profile_url,
-						// 	usera_image: docInfo.user_image,
-						// 	relation_type: '管理',
-						// 	userb_person_no: this.userInfo.no,
-						// 	userb_name: this.userInfo.name,
-						// 	userb_image: this.userInfo.user_image,
-						// 	userb_no: this.userInfo.userno,
-						// 	userb_profile_url: this.userInfo.profile_url,
-						// 	userb_sex: this.userInfo.sex,
-						// 	state: '正常'
-						// }
 					]
 				}
 			];

@@ -271,7 +271,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_user_label_set_select',
 				colNames: ['*'],
-				condition: [{ colName: 'dp_no', ruleType: 'eq', value:this.doctorInfo.row_no }]
+				condition: [{ colName: 'dp_no', ruleType: 'eq', value:this.dp_no}]
 			};
 			this.$http.post(url, req).then(res => {
 				if (res.data.state === 'SUCCESS') {
@@ -590,7 +590,11 @@ export default {
 			flex-wrap: wrap;
 			.require-item {
 				margin: 10rpx;
-				padding: 10rpx 20rpx;
+				padding: 0 20rpx;
+				height: 50rpx;
+				display: flex;
+				align-items: center;
+				font-size: 24rpx;
 				@for $i from 1 through 20 {
 					&:nth-child(#{$i}) {
 						@if $i%2==1 {

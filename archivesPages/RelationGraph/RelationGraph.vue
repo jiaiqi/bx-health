@@ -21,6 +21,7 @@
 		<view class="charts" v-if="nodeDetail && nutrientsChartOption.option && nutrientsChartOption.option.title">
 			<bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart>
 		</view>
+		<view class="node-img"><image class="image" :src="item" :key="item" mode="aspectFit" v-for="item in nodeImageList"></image></view>
 		<view class="detail-desc" v-if="nodeDetail">
 			<!-- 		<txv-video
 				:vid="nodeDetail.video_link"
@@ -93,6 +94,7 @@ export default {
 			graphData: [],
 			nodeData: [],
 			nodeDetail: null,
+			nodeImageList: [],
 			nodesLinkList: {
 				outPage: [],
 				inPage: [],
@@ -101,6 +103,23 @@ export default {
 		};
 	},
 	methods: {
+		getNodeImagePath(nodetail) {
+			if (this.nodeDetail.node_image) {
+				let url = this.getServiceUrl('file', 'srvfile_attachment_select', 'select');
+				let req = {
+					serviceName: 'srvfile_attachment_select',
+					colNames: ['*'],
+					condition: [{ colName: 'file_no', value: this.nodeDetail.node_image, ruleType: 'eq' }, { colName: 'is_delete', value: '1', ruleType: 'eq' }]
+				};
+				this.$http.post(url, req).then(res => {
+					if (res.data.state === 'SUCCESS') {
+						this.nodeImageList = res.data.data.map(item => {
+							return this.$api.getFilePath + item.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+						});
+					}
+				});
+			}
+		},
 		toLink(item) {
 			let url = '';
 			switch (item && item.link_type) {
@@ -412,6 +431,7 @@ export default {
 					}
 				}
 				this.nodeDetail = nodeDetail;
+				this.getNodeImagePath(nodeDetail);
 				// if (this.nodeDetail && this.nodeDetail.video_link) {
 				// 	// this.getVideoInfo(this.nodeDetail.video_link);
 				// } else {
@@ -649,6 +669,17 @@ export default {
 		width: 100%;
 		height: 700rpx;
 		margin-bottom: 20rpx;
+	}
+	.node-img {
+		padding: 20rpx;
+		display: flex;
+		.image {
+			width: 200rpx;
+			height: 200rpx;
+			& + .image {
+				margin-left: 10rpx;
+			}
+		}
 	}
 	.detail-desc {
 		padding: 20rpx;

@@ -28,7 +28,7 @@ export default {
 		toPages(type, item) {
 			if (type === 'patients') {
 				uni.navigateTo({
-					url: `/personalPages/patientsInfo/patientsInfo?customer_no=${item.userb_person_no}&dp_no=${item.dp_no}`
+					url: `/personalPages/patientsInfo/patientsInfo?customer_no=${item.userb_person_no}&dp_no=${item.row_no}`
 				});
 			}
 		},

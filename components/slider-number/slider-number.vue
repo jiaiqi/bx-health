@@ -5,7 +5,7 @@
 		</view>
 		<view class="operate" hover-class="active" @click="numberChange('minus')" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">-1</view>
 		<slider class="uni-slider" @change="changeSlider" :step="step" :min="min" :max="max" :value="bindValue" :show-value="showValue" />
-		<input type="digit" v-model="bindValue" class="input" />
+		<!-- <input type="digit" v-model="bindValue" class="input" /> -->
 		<view class="operate" hover-class="active" @click="numberChange('add')" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">+1</view>
 		<view class="operate" hover-class="active" @click="numberChange('add', 0.1)" @longpress="longpressNumChange('add', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
 			+0.1

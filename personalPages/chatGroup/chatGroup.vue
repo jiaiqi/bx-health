@@ -1,8 +1,5 @@
 <template>
 	<view class="chat-group">
-		<!-- 		<cu-custom :isBack="true" @onBack="onBack">
-			<block slot="content"></block>
-		</cu-custom> -->
 		<view class="tab-view">
 			<view class="tab-item" :class="{ 'active-tab': index == TabCur }" v-for="(item, index) in tabList" :key="index" @tap="tabSelect" :data-id="index">{{ item.label }}</view>
 		</view>
@@ -12,12 +9,12 @@
 				<view class="content">
 					<view class="top">
 						<view class="name">{{ item.name }}</view>
-						<view class="time">{{ formateTime(item.lastChatTime,true) }}</view>
+						<view class="time">{{ formateTime(item.lastChatTime, true) }}</view>
 					</view>
 					<view class="bottom">
 						<text class="message">{{ item.lastChatText || '' }}</text>
 						<text class="unread">
-							<text class="text" v-if="item.unread">{{ item.unread || '' }}</text>
+							<text class="text" v-if="item.unreadAmount">{{ item.unreadAmount || '' }}</text>
 						</text>
 					</view>
 				</view>
@@ -74,6 +71,19 @@ export default {
 		})
 	},
 	methods: {
+		async selectUnreadAmount(item) {
+			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_consultation_chat_record_select',
+				colNames: ['*'],
+				condition: [{ colName: 'rcv_group_no', ruleType: 'eq', value: item.gc_no }, { colName: 'create_time', ruleType: 'gt', value: item.latest_sign_in_time }],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				return res.data.page;
+			}
+		},
 		InputBlur(e) {
 			if (e.detail) {
 				let condition = [{ colName: 'name', ruleType: 'like', value: e.detail.value }];
@@ -163,7 +173,6 @@ export default {
 		},
 		async selectOtherGroup(condition) {
 			// 查找当前登录用户未加入的圈子
-			// [{ colName: 'person_no', ruleType: 'ne', value: this.vuex_userInfo.no }]
 			let cond = [{ colName: 'gc_no', ruleType: 'notin', value: this.groupList.map(item => item.gc_no).toString() }];
 			if (condition) {
 				cond = [...cond, ...condition];
@@ -180,6 +189,19 @@ export default {
 				if (Array.isArray(res) && res.length > 0) {
 					let no = res.map(item => item.gc_no);
 					this.groupList = await this.selectGroupInfo(no.toString(), res);
+					let lastTimeArr = res.map(item => {
+						return {
+							gc_no: item.gc_no,
+							latest_sign_in_time: item.latest_sign_in_time
+						};
+					});
+					for (let index in this.groupList) {
+						let result = await this.selectUnreadAmount(this.groupList[index]);
+						if (result && result.total) {
+							this.groupList[index].unreadAmount = result.total;
+							this.$set(this.groupList, index, this.groupList[index]);
+						}
+					}
 					this.selectLastChatText(no.toString());
 				}
 			}
@@ -203,7 +225,13 @@ export default {
 								item.group_role = info.group_role;
 								item.latest_sign_in_time = info.latest_sign_in_time;
 								item.pg_no = info.pg_no;
-								item.peopleNum = data.length;
+								// let peopleArr = data.reduce((pre, cur) => {
+								// 	if (!pre.includes(cur.person_no)) {
+								// 		pre.push(cur.person_no);
+								// 	}
+								// 	return pre;
+								// }, [])
+								// item.peopleNum = data.length;
 							}
 						});
 						return item;
@@ -292,15 +320,17 @@ export default {
 .tab-view {
 	display: flex;
 	.tab-item {
-		padding: 20rpx;
+		padding: 30rpx;
+		transition: all 0.5s ease-in;
 		&.active-tab {
 			font-weight: bold;
+			font-size: 36rpx;
 			position: relative;
 			&::after {
 				content: '';
 				height: 5rpx;
 				width: 40rpx;
-				bottom: 10rpx;
+				bottom: 20rpx;
 				left: calc(50% - 20rpx);
 				background-color: #000000;
 				position: absolute;
@@ -385,6 +415,9 @@ export default {
 			flex-direction: column;
 			align-items: center;
 			// border: 1rpx dashed #f1f1f1;
+			& + .group-item {
+				border-top: none;
+			}
 			.icon {
 				border-radius: 10rpx;
 				position: relative;

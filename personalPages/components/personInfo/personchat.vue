@@ -1,5 +1,10 @@
 <template>
-	<view class="person-chat-wrap">
+	<view
+		class="person-chat-wrap"
+		:style="{
+			'--chart-height': chartHeight
+		}"
+	>
 		<!-- <cu-custom class="nav-chat-top" bgColor="#0bc99d" :isBack="true"><block slot="backText">返回</block><block slot="content">交流</block></cu-custom> -->
 		<view class="person-chat-top" @click.stop="closeBottomPoup" :style="{ height: heightStyle }" :class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
 			<audio v-if="currentChat.id" class="audio" @ended="playEnd" :action="audioAction" id="myMp3" style="height: 0;opacity: 0;" :src="currentChat.voice_url" controls />
@@ -11,11 +16,18 @@
 					class="person-chat-item"
 					:class="item.sender_account === currentUserInfo.userno ? 'person-chat-item-my' : ''"
 				>
-					<!-- <view v-if="doctor_no.id ? item.sender_account === doctor_no.userb_no && item.receiver_account != item.sender_account : item.sender_account === userInfo.userno && item.receiver_account != item.sender_account" class="person-chat-item-accept"> -->
 					<view v-if="item.sender_account != currentUserInfo.userno" class="person-chat-item-accept">
+						<view class="sender-info" v-if="groupInfo && groupInfo.gc_no">
+							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
+							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
+						</view>
 						<view class="person-chat-item-left">
-							<image :src="doctor_no.usera_image ? getImagePath(doctor_no.usera_image) : '/personalPages/static/doctor_default.jpg'" mode=""></image>
-							<!-- <image v-else :src="doctor_no.usera_image ? `${apiUrl + doctor_no.usera_image}&bx_auth_ticket=${ticket}` : '/personalPages/static/doctor_default.jpg'" mode=""></image> -->
+							<image
+								:src="doctor_no.usera_image ? getImagePath(doctor_no.usera_image) : '/personalPages/static/doctor_default.jpg'"
+								mode="aspectFit"
+								v-if="!groupInfo || !groupInfo.gc_no"
+							></image>
+							<image :src="getSenderProfile(item) ? getSenderProfile(item) : '/static/man-profile.png'" mode="aspectFit" v-if="groupInfo && groupInfo.gc_no"></image>
 						</view>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
 							<image :src="item.img_url" mode=""></image>
@@ -23,9 +35,6 @@
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
 						</view>
-						<!-- <view v-else @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link?'person-chat-item-right-link':''">
-							<text>{{item.msg_content?item.msg_content:item.msg_link}}</text>
-						</view> -->
 						<view
 							v-else-if="item.msg_link && item.msg_content_type === '链接'"
 							@click="clickChatLink(item)"
@@ -43,23 +52,12 @@
 									<text>时间：{{ item.recode_num }}</text>
 								</view>
 							</view>
-							<!-- <text>{{item.quertion_name?item.quertion_name:item.recode_num}}</text> -->
-							<!-- <text>{{item.msg_link}}</text> -->
 						</view>
-
-						<!-- <view @tap="handleAudio(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'" hover-class="contentType2-hover-class" class="content contentType2">
-							<view class="voice_icon_left-wrap">
-								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
-								<view class="voice_icon voice_icon_left" :class="item.anmitionPlay ? 'voice_icon_left_an' : ''"></view>
-							</view>
-							<audio id="myMp3" :id="item.id.toString()" style="height: 0;" src="https://srvms.100xsys.cn/file/download?filePath=/20201202/20201202175639960100/20201202175639960101.mp3" controls />
-						</view> -->
 						<view @tap="audioPlay(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'" hover-class="contentType2-hover-class" class="content contentType2">
 							<view class="voice_icon_left-wrap">
 								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
 								<view class="voice_icon voice_icon_left" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_left_an' : ''"></view>
 							</view>
-							<!-- <audio class="audio" @ended="playEnd(item)" :action="audioAction" id="myMp3" :id="item.id.toString()" style="height: 0;opacity: 0;" :src="currentChat.voice_url" controls />							 -->
 						</view>
 
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
@@ -80,7 +78,11 @@
 						</view>
 					</view>
 					<view v-else-if="item.sender_account === currentUserInfo.userno" class="person-chat-item-send">
-						<text class="unread" v-if="item.msg_state === '未读'">{{ item.msg_state }}</text>
+						<view class="sender-info" v-if="groupInfo && groupInfo.gc_no">
+							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
+							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
+						</view>
+						<text class="unread" v-if="item.msg_state === '未读' && (!groupInfo || !groupInfo.gc_no)">{{ item.msg_state }}</text>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
 							<image :src="item.img_url" mode=""></image>
 						</view>
@@ -104,10 +106,7 @@
 									<text>时间：{{ item.recode_num }}</text>
 								</view>
 							</view>
-							<!-- <text>{{item.quertion_name?item.quertion_name:item.recode_num}}</text> -->
-							<!-- <text>{{item.msg_link}}</text> -->
 						</view>
-
 						<view
 							@tap="audioPlay(item)"
 							v-else-if="item.msg_link && item.msg_content_type === '语音'"
@@ -123,6 +122,20 @@
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
 							<video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video>
+						</view>
+						<view v-else-if="item.longitude && item.latitude && item.msg_content_type === '位置'" class="map-container" @tap="openMap(item)">
+							<view class="map-info">
+								<view class="name">{{ item.location_name }}</view>
+								<view class="address">{{ item.location_address }}</view>
+							</view>
+							<map
+								style="width: 500rpx; height: 300rpx;"
+								:enable-scroll="false"
+								:enable-rotate="false"
+								:latitude="item.latitude"
+								:longitude="item.longitude"
+								:markers="getCovers(item)"
+							></map>
 						</view>
 						<view @click="downloadfile(item)" v-else-if="item.msg_content_type === '文件'" class="documents-wrap">
 							<view class="documents-item">
@@ -206,6 +219,10 @@
 						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/video.png" mode=""></image></view>
 						<view class="person-chat-bot-bot-item-b"><text>视频</text></view>
 					</view>
+					<view @click="openMenuPoup('location')" class="person-chat-bot-bot-item">
+						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/address.png" mode=""></image></view>
+						<view class="person-chat-bot-bot-item-b"><text>位置</text></view>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -246,9 +263,20 @@ export default {
 		},
 		doctor_no: {
 			type: Object
+		},
+		topHeight: {
+			type: Number,
+			default: 0
 		}
 	},
 	computed: {
+		chartHeight() {
+			if (this.topHeight) {
+				return 'calc(100vh - 45px - ' + this.topHeight + 'px - var(--window-top) - var(--window-bottom))';
+			} else {
+				return 'calc(100vh - 45px - var(--window-top) - var(--window-bottom))';
+			}
+		},
 		isFeed() {
 			let feed = false;
 			if (this.chatText) {
@@ -313,6 +341,15 @@ export default {
 	},
 
 	methods: {
+		getCovers(item) {
+			return [
+				{
+					latitude: item.latitude,
+					longitude: item.longitude,
+					iconPath: '/static/icon_position.png'
+				}
+			];
+		},
 		audioPlay(item) {
 			if (!item.voice_url) {
 				return;
@@ -342,11 +379,26 @@ export default {
 		/*关闭底部选择按钮**/
 		closeBottomPoup() {
 			this.$nextTick(() => {
-				this.heightStyle = 'calc(100vh - 50px);';
+				if (this.topHeight) {
+					this.heightStyle = `calc(100vh - 50px - ${this.topHeight}px);`;
+				} else {
+					this.heightStyle = 'calc(100vh - 50px);';
+				}
 			});
 			this.isSendLink = false;
 		},
-
+		openMap(item) {
+			// 打开地图
+			uni.openLocation({
+				latitude: Number(item.latitude),
+				longitude: Number(item.longitude),
+				name: item.location_name,
+				address: item.location_address,
+				success: function() {
+					console.log('success');
+				}
+			});
+		},
 		/*播放视频**/
 		openVideo(item) {
 			// let self = this
@@ -587,10 +639,20 @@ export default {
 			this.checkRadioValue = e;
 			console.log('e----------', e);
 		},
-		checkboxGroupChange() {},
 		openMenuPoup(type) {
 			let self = this;
-			if (type == 'question' || type === 'bite') {
+			if (type == 'location') {
+				uni.chooseLocation({
+					success: function(res) {
+						console.log('位置名称：' + res.name);
+						console.log('详细地址：' + res.address);
+						console.log('纬度：' + res.latitude);
+						console.log('经度：' + res.longitude);
+						// self.sendMessageInfo(res);
+						self.sendMessageLanguageInfo('位置', res);
+					}
+				});
+			} else if (type == 'question' || type === 'bite') {
 				this.showBottom = true;
 				this.currentSendType = type;
 				this.seleceMenuConent();
@@ -734,6 +796,14 @@ export default {
 				});
 			}
 		},
+		getSenderProfile(item) {
+			// 查找发送者头像
+			if (item.sender_user_image) {
+				return this.getImagePath(item.sender_user_image);
+			} else if (item.sender_profile_url) {
+				return this.getImagePath(item.sender_profile_url);
+			}
+		},
 		confirmPoup() {
 			this.showBottom = false;
 			// url:`/questionnaire/index/index?formType=form&activity_no=${item.no}&status=进行中`
@@ -853,10 +923,18 @@ export default {
 		/*打开发送链接弹窗**/
 		openLink() {
 			this.isSendLink = !this.isSendLink;
-
-			this.heightStyle = 'calc(100vh - 240px)';
 			if (!this.isSendLink) {
-				this.heightStyle = 'calc(100vh - 50px)';
+				if (this.topHeight) {
+					this.heightStyle = `calc(100vh - 50px - ${this.topHeight}px);`;
+				} else {
+					this.heightStyle = 'calc(100vh - 50px);';
+				}
+			} else {
+				if (this.topHeight) {
+					this.heightStyle = `calc(100vh - 240px - ${this.topHeight}px);`;
+				} else {
+					this.heightStyle = 'calc(100vh - 240px);';
+				}
 			}
 		},
 		/*切换文字或者链接**/
@@ -869,6 +947,11 @@ export default {
 			this.chatText = '';
 			this.isSendLink = false;
 			this.heightStyle = 'calc(100vh - 50px)';
+			if (this.topHeight) {
+				this.heightStyle = `calc(100vh - 50px - ${this.topHeight}px);`;
+			} else {
+				this.heightStyle = 'calc(100vh - 50px);';
+			}
 			// this.heightStyle = 'calc(100vh - 100px)'
 		},
 		changeVoice(type) {
@@ -927,6 +1010,9 @@ export default {
 					data: [
 						{
 							sender_account: this.currentUserInfo.userno,
+							sender_name: this.currentUserInfo.name,
+							sender_profile_url: this.currentUserInfo.profile_url,
+							sender_user_image: this.currentUserInfo.user_image,
 							receiver_account: this.doctor_no.userb_no ? this.doctor_no.userb_no : this.userInfo.userno,
 							receiver_person_no: this.doctor_no.userb_person_no ? this.doctor_no.userb_person_no : this.userInfo.no,
 							sender_person_no: this.currentUserInfo.no,
@@ -940,6 +1026,10 @@ export default {
 				// 群组聊天
 				req[0].data[0] = {
 					sender_account: this.currentUserInfo.userno,
+					sender_name: this.currentUserInfo.name,
+					sender_profile_url: this.currentUserInfo.profile_url,
+					sender_user_image: this.currentUserInfo.user_image,
+					sender_group_role: this.groupInfo.group_role,
 					rcv_group_no: this.groupInfo.gc_no,
 					receiver_account: this.groupInfo.gc_no,
 					receiver_person_no: this.groupInfo.gc_no,
@@ -957,17 +1047,28 @@ export default {
 				req[0].data[0].attachment = value;
 			} else if (type === '视频') {
 				req[0].data[0].video = value;
+			} else if (type === '位置') {
+				if (value.latitude && value.longitude) {
+					// 发送位置
+					req[0].data[0].msg_content_type = '位置';
+					req[0].data[0].latitude = value.latitude; //纬度
+					req[0].data[0].longitude = value.longitude; //经度
+					req[0].data[0].location_name = value.name;
+					req[0].data[0].location_address = value.address;
+				} else {
+					uni.showToast({
+						title: '发送失败,请重试！',
+						icon: 'none'
+					});
+					return;
+				}
 			}
-			console.log('res========>', req);
 			let res = await this.$http.post(url, req);
-			// if(res.data.state === 'SUCCESS'){
-
 			console.log('发送成功', res);
+			this.$emit('completeSendMessage', req[0].data[0]);
 			this.isAll = false;
 			this.pageInfo.pageNo = 1;
 			this.getMessageInfo();
-
-			// }
 		},
 		/*查询文件**/
 		async getFileNo(no) {
@@ -976,7 +1077,7 @@ export default {
 			console.log('file——no', fileNo);
 		},
 		/*点击发送后添加数据**/
-		async sendMessageInfo() {
+		async sendMessageInfo(obj) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
 			let req = [
 				{
@@ -985,6 +1086,9 @@ export default {
 					data: [
 						{
 							sender_account: this.currentUserInfo.userno,
+							sender_name: this.currentUserInfo.name,
+							sender_profile_url: this.currentUserInfo.profile_url,
+							sender_user_image: this.currentUserInfo.user_image,
 							receiver_account: this.doctor_no.usera_no ? this.doctor_no.usera_no : this.userInfo.userno,
 							receiver_person_no: this.doctor_no.usera_person_no ? this.doctor_no.usera_person_no : this.userInfo.no,
 							sender_person_no: this.currentUserInfo.no,
@@ -998,6 +1102,10 @@ export default {
 				// 群组聊天
 				req[0].data[0] = {
 					sender_account: this.currentUserInfo.userno,
+					sender_name: this.currentUserInfo.name,
+					sender_profile_url: this.currentUserInfo.profile_url,
+					sender_user_image: this.currentUserInfo.user_image,
+					sender_group_role: this.groupInfo.group_role,
 					rcv_group_no: this.groupInfo.gc_no,
 					receiver_account: this.groupInfo.gc_no,
 					receiver_person_no: this.groupInfo.gc_no,
@@ -1014,6 +1122,7 @@ export default {
 			console.log('res========>', req);
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
+				this.$emit('completeSendMessage', req[0].data[0]);
 				console.log('发送成功');
 				this.isAll = false;
 				this.pageInfo.pageNo = 1;
@@ -1167,9 +1276,6 @@ export default {
 						this.$set(resData[i], 'video_url', video_url);
 					}
 				});
-				// this.recordList = resData
-				debugger
-				console.log('res00000', resData);
 				resData.forEach(links => {
 					if (links.msg_content_type === '链接') {
 						/*饮食记录**/
@@ -1195,7 +1301,7 @@ export default {
 					if (!this.isAll) {
 						_SortJsonData = this._SortJson(resData);
 						// this.recordList.unshift(..._SortJsonData);
-						this.recordList = _SortJsonData
+						this.recordList = _SortJsonData;
 						console.log('排序============', _SortJsonData);
 					}
 					if (type && type === 'update') {
@@ -1309,13 +1415,14 @@ export default {
 		}
 		if (this.groupInfo && this.groupInfo.gc_no) {
 			this.getRecorderManagerList();
-			uni.setNavigationBarTitle({
-				title: `${this.groupInfo.name}（${this.groupInfo.peopleNum}）`
-			});
 		}
 		setTimeout(() => {
 			this.$nextTick(() => {
-				this.heightStyle = 'calc(100vh - 50px);';
+				if (this.topHeight) {
+					this.heightStyle = `calc(100vh - 50px - ${this.topHeight}px);`;
+				} else {
+					this.heightStyle = 'calc(100vh - 50px);';
+				}
 			});
 		}, 500);
 	},
@@ -1353,7 +1460,8 @@ export default {
 <style lang="scss" scoped>
 .person-chat-wrap {
 	// padding-top: 120rpx;
-	height: calc(100vh - 210rpx - var(--window-top) - var(--window-bottom));
+	height: var(--chart-height);
+	// height: calc(100vh - 210rpx - var(--window-top) - var(--window-bottom));
 	background-color: #eeeeee;
 	.nav-chat-top {
 		background-color: rgb(11, 201, 157) !important;
@@ -1364,7 +1472,7 @@ export default {
 	.person-chat-top {
 		display: flex;
 		flex-direction: column;
-		max-height: calc(100vh - 210rpx - var(--window-top) - var(--window-bottom));
+		max-height: var(--chart-height);
 		overflow-y: scroll;
 		// margin: 10rpx;
 		.person-chat-item {
@@ -1373,6 +1481,17 @@ export default {
 			.person-chat-item-accept {
 				display: flex;
 				margin: 30rpx 10rpx;
+				flex-wrap: wrap;
+				.sender-info {
+					width: 100%;
+					font-size: 24rpx;
+					margin-bottom: 10rpx;
+					text-align: left;
+					.sender-name {
+						color: #999;
+						margin-left: 10rpx;
+					}
+				}
 				.person-chat-item-left {
 					margin-right: 20rpx;
 					image {
@@ -1494,6 +1613,31 @@ export default {
 				margin: 30rpx 10rpx;
 				justify-content: flex-end;
 				min-width: 40%;
+				flex-wrap: wrap;
+				.sender-info {
+					width: 75%;
+					font-size: 24rpx;
+					margin-bottom: 10rpx;
+					text-align: right;
+					.sender-name {
+						color: #999;
+						margin-left: 10rpx;
+					}
+				}
+				.map-container {
+					width: 500rpx;
+					background-color: #fff;
+					border-radius: 5rpx;
+					overflow: hidden;
+					.map-info {
+						padding: 20rpx;
+						.address {
+							font-size: 24rpx;
+							color: #999;
+							margin-top: 10rpx;
+						}
+					}
+				}
 				.unread {
 					line-height: 86rpx;
 					margin-right: 10rpx;

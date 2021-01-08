@@ -77,7 +77,6 @@
 				if (this.logo) {
 					filePath = await this.drawLogoSync(filePath)
 				}
-
 				this.makeComplete(filePath)
 			},
 			makeComplete(filePath) {
