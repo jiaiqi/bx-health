@@ -231,6 +231,12 @@ export default {
 			});
 		}
 	},
+	onPullDownRefresh() {
+		this.selectGroupInfo();
+		setTimeout(() => {
+			uni.stopPullDownRefresh();
+		}, 1000);
+	},
 	async onLoad(option) {
 		if (!this.userInfo || !this.userInfo.no) {
 			const result = await wx.login();
@@ -397,11 +403,12 @@ export default {
 /deep/.cu-dialog {
 	overflow: initial;
 }
-.join-button{
+.join-button {
 	height: 300rpx;
-  display: flex;
+	display: flex;
 	align-items: center;
-	.button{
+	justify-content: center;
+	.button {
 		width: 50%;
 	}
 }
