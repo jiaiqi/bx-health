@@ -1,7 +1,9 @@
 <template>
 	<view class="chat-group">
 		<view class="tab-view">
-			<view class="tab-item" :class="{ 'active-tab': index == TabCur }" v-for="(item, index) in tabList" :key="index" @tap="tabSelect" :data-id="index">{{ item.label }}</view>
+			<view class="tab-item" :class="{ 'active-tab': index == TabCur }" v-for="(item, index) in tabList" :key="index" @tap="tabSelect" :data-id="index">
+				{{ item.label }}
+			</view>
 		</view>
 		<view class="group-list" v-if="TabCur === 0">
 			<view class="group-item" v-for="item in groupList" :key="item.gc_no" @click="toChat(item)">
@@ -71,17 +73,51 @@ export default {
 		})
 	},
 	methods: {
-		async selectUnreadAmount(item) {
+		async selectUnreadAmount(list) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
 				colNames: ['*'],
-				condition: [{ colName: 'rcv_group_no', ruleType: 'eq', value: item.gc_no }, { colName: 'create_time', ruleType: 'gt', value: item.latest_sign_in_time }],
-				page: { pageNo: 1, rownumber: 10 }
+				group: [
+					{
+						colName: 'rcv_group_no',
+						type: 'by'
+					},
+					{
+						colName: 'create_time',
+						type: 'count'
+					}
+				]
 			};
+			if (Array.isArray(list)) {
+				let relationCondition = {
+					relation: 'OR',
+					data: [
+						{
+							relation: 'AND',
+							data: []
+						}
+					]
+				};
+				relationCondition.data = list.map(item => {
+					let obj = {
+						relation: 'AND',
+						data: [{ colName: 'rcv_group_no', ruleType: 'eq', value: item.gc_no }, { colName: 'create_time', ruleType: 'gt', value: item.latest_sign_in_time }]
+					};
+					return obj;
+				});
+				req.relation_condition = relationCondition;
+			}
 			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS') {
-				return res.data.page;
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				this.groupList = this.groupList.map(item => {
+					res.data.data.forEach(count => {
+						if (count.rcv_group_no === item.gc_no) {
+							item.unreadAmount = count.create_time;
+						}
+					});
+					return item;
+				});
 			}
 		},
 		InputBlur(e) {
@@ -195,13 +231,7 @@ export default {
 							latest_sign_in_time: item.latest_sign_in_time
 						};
 					});
-					for (let index in this.groupList) {
-						let result = await this.selectUnreadAmount(this.groupList[index]);
-						if (result && result.total) {
-							this.groupList[index].unreadAmount = result.total;
-							this.$set(this.groupList, index, this.groupList[index]);
-						}
-					}
+					this.selectUnreadAmount(this.groupList);
 					this.selectLastChatText(no.toString());
 				}
 			}
@@ -225,13 +255,6 @@ export default {
 								item.group_role = info.group_role;
 								item.latest_sign_in_time = info.latest_sign_in_time;
 								item.pg_no = info.pg_no;
-								// let peopleArr = data.reduce((pre, cur) => {
-								// 	if (!pre.includes(cur.person_no)) {
-								// 		pre.push(cur.person_no);
-								// 	}
-								// 	return pre;
-								// }, [])
-								// item.peopleNum = data.length;
 							}
 						});
 						return item;

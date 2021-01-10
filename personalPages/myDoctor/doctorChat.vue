@@ -55,10 +55,12 @@ export default {
 					{
 						serviceName: 'srvhealth_person_group_circle_update',
 						condition: [{ colName: 'pg_no', ruleType: 'eq', value: this.groupInfo.pg_no }],
-						data: [{ latest_sign_in_time: this.formateDate('DateTime') }]
+						data: [{ latest_sign_in_time: this.formateDate('','DateTime') }]
 					}
 				];
-				this.$http.post(url, req);
+				this.$http.post(url, req).then(res=>{
+					debugger
+				});
 			}
 		},
 		completeSendMessage(e) {
@@ -111,6 +113,7 @@ export default {
 		}
 	},
 	beforeDestroy() {
+		debugger
 		this.updateLastLookTime();
 	},
 	onPullDownRefresh() {

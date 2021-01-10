@@ -46,6 +46,7 @@
 					<text class="cuIcon-group " style="font-size: 70rpx;"></text>
 					<!-- <text class="cuIcon-group text-yellow" style="font-size: 70rpx;"></text> -->
 					<text>圈子</text>
+					<view v-if="groupMsgUnreadAmount != 0" class="message-tag">{{ groupMsgUnreadAmount }}</view>
 				</view>
 				<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('pinggu')">
 					<text class="cuIcon-addressbook " style="font-size: 70rpx;"></text>
@@ -115,6 +116,7 @@ export default {
 			userInfo: '',
 			doctor_message: 0,
 			hzMessage: 0,
+			groupMsgUnreadAmount:0,
 			manager_type: '',
 			showModal: false,
 			checkedManagerType: ['医师'],
@@ -446,7 +448,7 @@ export default {
 			let req = [
 				{
 					serviceName: 'srvhealth_person_info_update',
-					condition: [{ colName: 'no', ruleType: 'eq', value: this.vuex_userInfo.no}],
+					condition: [{ colName: 'no', ruleType: 'eq', value: this.vuex_userInfo.no }],
 					data: [{ manager_type: this.checkedManagerType.toString() }]
 				}
 			];
@@ -456,11 +458,11 @@ export default {
 				uni.showToast({
 					title: '申请成功'
 				});
-			}else{
+			} else {
 				uni.showModal({
-					title:'提示',
-					content:JSON.stringify(res.data)+JSON.stringify(req)
-				})
+					title: '提示',
+					content: JSON.stringify(res.data) + JSON.stringify(req)
+				});
 			}
 			this.hideModal();
 			this.initPage();
@@ -558,6 +560,115 @@ export default {
 				}
 			}
 			// #endif
+		},
+		async selectMyGroup() {
+			// 查找当前登录用户已加入的圈子
+			if (this.vuex_userInfo && this.vuex_userInfo.no) {
+				let res = await this.selectGroup([{ colName: 'person_no', ruleType: 'eq', value: this.vuex_userInfo.no }]);
+				if (Array.isArray(res) && res.length > 0) {
+					let no = res.map(item => item.gc_no);
+					let list = await this.selectGroupInfo(no.toString(), res);
+					let lastTimeArr = res.map(item => {
+						return {
+							gc_no: item.gc_no,
+							latest_sign_in_time: item.latest_sign_in_time
+						};
+					});
+					this.selectUnreadAmount(list);
+				}
+			}
+		},
+		async selectGroupInfo(no, data, cond) {
+			if (no || cond) {
+				let url = this.getServiceUrl('health', 'srvhealth_group_circle_select', 'select');
+				let req = {
+					serviceName: 'srvhealth_group_circle_select',
+					colNames: ['*'],
+					condition: [{ colName: 'gc_no', ruleType: 'in', value: no }]
+				};
+				if (cond) {
+					req.condition = cond;
+				}
+				let res = await this.$http.post(url, req);
+				if (Array.isArray(res.data.data) && Array.isArray(data)) {
+					res.data.data = res.data.data.map(item => {
+						data.map(info => {
+							if (info.gc_no === item.gc_no) {
+								item.group_role = info.group_role;
+								item.latest_sign_in_time = info.latest_sign_in_time;
+								item.pg_no = info.pg_no;
+							}
+						});
+						return item;
+					});
+					return res.data.data;
+				} else if (Array.isArray(res.data.data)) {
+					return res.data.data;
+				}
+			}
+		},
+		async selectGroup(cond, page) {
+			// 查找圈子
+			let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_person_group_circle_select',
+				colNames: ['*'],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			if (Array.isArray(cond)) {
+				req.condition = cond;
+			}
+			if (page) {
+				req.page = page;
+			}
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data)) {
+				return res.data.data;
+			}
+		},
+		async selectUnreadAmount(list) {
+			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_consultation_chat_record_select',
+				colNames: ['*'],
+				group: [
+					{
+						colName: 'rcv_group_no',
+						type: 'by'
+					},
+					{
+						colName: 'create_time',
+						type: 'count'
+					}
+				]
+			};
+			if (Array.isArray(list)) {
+				let relationCondition = {
+					relation: 'OR',
+					data: [
+						{
+							relation: 'AND',
+							data: []
+						}
+					]
+				};
+				relationCondition.data = list.map(item => {
+					let obj = {
+						relation: 'AND',
+						data: [{ colName: 'rcv_group_no', ruleType: 'eq', value: item.gc_no }, { colName: 'create_time', ruleType: 'gt', value: item.latest_sign_in_time }]
+					};
+					return obj;
+				});
+				req.relation_condition = relationCondition;
+			}
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				let amount = res.data.data.reduce((pre, cur) => {
+					pre += cur.create_time;
+					return pre;
+				}, 0);
+				this.groupMsgUnreadAmount = amount
+			}
 		}
 	},
 	onShow() {
@@ -565,6 +676,7 @@ export default {
 			this.manager_type = this.vuex_userInfo.manager_type;
 		}
 		this.userInfo = uni.getStorageSync('current_user_info');
+		this.selectMyGroup()
 		this.getDoctorAllRecod(this.userInfo.userno).then(r => {
 			if (r > 99) {
 				r = '99+';
