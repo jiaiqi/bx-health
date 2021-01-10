@@ -28,26 +28,26 @@
 		<view class="container-cen">
 			<view class="container-cen-top">
 				<view class="container-cen-top-list bg-white" @click="toPages('doctor')">
-				<!-- <view class="container-cen-top-list bg-blue light" @click="toPages('doctor')"> -->
+					<!-- <view class="container-cen-top-list bg-blue light" @click="toPages('doctor')"> -->
 					<text class="cuIcon-service " style="font-size: 70rpx;"></text>
 					<!-- <text class="cuIcon-service text-blue" style="font-size: 70rpx;"></text> -->
 					<text>我的医生</text>
 					<view v-if="doctor_message != 0" class="message-tag">{{ doctor_message }}</view>
 				</view>
 				<view class="container-cen-top-list bg-white" @click="toPages('userList')">
-				<!-- <view class="container-cen-top-list bg-green light" @click="toPages('userList')"> -->
+					<!-- <view class="container-cen-top-list bg-green light" @click="toPages('userList')"> -->
 					<text class="cuIcon-comment " style="font-size: 70rpx;"></text>
 					<!-- <text class="cuIcon-comment text-green" style="font-size: 70rpx;"></text> -->
 					<text>我的用户</text>
 					<view v-if="hzMessage != 0" class="message-tag">{{ hzMessage }}</view>
 				</view>
 				<view class="container-cen-top-list bg-white" @click="toPages('group')">
-				<!-- <view class="container-cen-top-list bg-yellow light" @click="toPages('group')"> -->
+					<!-- <view class="container-cen-top-list bg-yellow light" @click="toPages('group')"> -->
 					<text class="cuIcon-group " style="font-size: 70rpx;"></text>
 					<!-- <text class="cuIcon-group text-yellow" style="font-size: 70rpx;"></text> -->
 					<text>圈子</text>
 				</view>
-		<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('pinggu')">
+				<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('pinggu')">
 					<text class="cuIcon-addressbook " style="font-size: 70rpx;"></text>
 					<text>家庭成员</text>
 				</view> -->
@@ -55,13 +55,13 @@
 			<view class="container-bot">
 				<view class="cu-list menu sm-border">
 					<view @click="toPages('updateInfo')" class="cu-item arrow">
-					<!-- <view @click="toPersonDetail('person')" class="cu-item arrow"> -->
+						<!-- <view @click="toPersonDetail('person')" class="cu-item arrow"> -->
 						<view class="content">
 							<text class="cuIcon-news"></text>
 							<text class="text-grey">基本信息</text>
 						</view>
 					</view>
-			<!-- 		<view @click="toPersonDetail('corp')" class="cu-item arrow">
+					<!-- 		<view @click="toPersonDetail('corp')" class="cu-item arrow">
 						<view class="content">
 							<text class="cuIcon-rank"></text>
 							<text class="text-grey">身体数据</text>
@@ -290,6 +290,7 @@ export default {
 					break;
 				case 'beDoctor':
 					this.showModal = true;
+					break;
 				case 'userList':
 					if (this.manager_type) {
 						this.getDoctorInfo().then(res => {
@@ -402,16 +403,6 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				if (isSelf === true) {
 					this.doctorList = res.data.data;
-					// let arr = res.data.data.map(item => {
-					// 	return item.owner_account;
-					// });
-					// let str = arr.join(',');
-					// let count_num = 0;
-					// this.getDoctorRecod(str, '医生').then(length => {
-					// 	count_num += length;
-					// 	this.doctor_message = count_num;
-					// 	console.log('-----------------length---', count_num);
-					// });
 				}
 				return res.data.data[0];
 			} else {
@@ -562,6 +553,9 @@ export default {
 		}
 	},
 	onShow() {
+		if (this.vuex_userInfo && this.vuex_userInfo.hasOwnProperty('manager_type')) {
+			this.manager_type = this.vuex_userInfo.manager_type;
+		}
 		this.userInfo = uni.getStorageSync('current_user_info');
 		this.getDoctorAllRecod(this.userInfo.userno).then(r => {
 			if (r > 99) {
@@ -591,7 +585,6 @@ export default {
 			if (res) {
 				this.getBindhzDoctor(res.dt_no);
 			}
-			console.log('res-onshow---', res);
 		});
 	},
 	onPullDownRefresh() {
@@ -609,9 +602,6 @@ export default {
 			menus: ['shareAppMessage', 'shareTimeline']
 		});
 		// #endif
-		if (this.vuex_userInfo && this.vuex_userInfo.manager_type) {
-			this.manager_type = this.vuex_userInfo.manager_type;
-		}
 	}
 };
 </script>

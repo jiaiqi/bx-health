@@ -45,17 +45,31 @@
 		<view class="detail-item" v-if="drugInfos && drugInfos.med_no">
 			<view class="label">每次用量:</view>
 			<view class="value input">
-				<text class="operate shadow-blur" :class="{ disabled: drugInfos.dosage_each_time - 1 < 0 }" @click="changeAmount(-1)" @longpress="longChange(-1)" @touchend="longChangeEnd">
+				<text
+					class="operate shadow-blur"
+					:class="{ disabled: drugInfos.dosage_each_time - 1 < 0 }"
+					@click="changeAmount(-1)"
+					@longpress="longChange(-1)"
+					@touchend="longChangeEnd"
+				>
 					- 1
 				</text>
-				<text class="operate" :class="{ disabled: drugInfos.dosage_each_time - 0.5 < 0 }" @click="changeAmount(-0.5)" @longpress="longChange(-0.5)" @touchend="longChangeEnd">
+				<text
+					class="operate"
+					:class="{ disabled: drugInfos.dosage_each_time - 0.5 < 0 }"
+					@click="changeAmount(-0.5)"
+					@longpress="longChange(-0.5)"
+					@touchend="longChangeEnd"
+				>
 					- 0.5
 				</text>
 				<input class="input" type="text" v-model="drugInfos.dosage_each_time" />
 				<text class="operate" :class="{ disabled: drugInfos.dosage_each_time + 0.5 < 0 }" @click="changeAmount(0.5)" @longpress="longChange(0.5)" @touchend="longChangeEnd">
 					+0.5
 				</text>
-				<text class="operate" :class="{ disabled: drugInfos.dosage_each_time + 1 < 0 }" @click="changeAmount(1)" @longpress="longChange(1)" @touchend="longChangeEnd">+ 1</text>
+				<text class="operate" :class="{ disabled: drugInfos.dosage_each_time + 1 < 0 }" @click="changeAmount(1)" @longpress="longChange(1)" @touchend="longChangeEnd">
+					+ 1
+				</text>
 			</view>
 		</view>
 		<view class="detail-item" v-if="drugInfos && drugInfos.med_no">
@@ -93,17 +107,31 @@
 		<view class="detail-item item-title" v-if="drugInfos && (drugDetail.sport_no || drugInfos.sport_no)">
 			<view class="label">每次运动量:</view>
 			<view class="value input">
-				<text class="operate shadow-blur" :class="{ disabled: drugInfos.amount_each_time - 1 < 0 }" @click="changeAmount(-1)" @longpress="longChange(-1)" @touchend="longChangeEnd">
+				<text
+					class="operate shadow-blur"
+					:class="{ disabled: drugInfos.amount_each_time - 1 < 0 }"
+					@click="changeAmount(-1)"
+					@longpress="longChange(-1)"
+					@touchend="longChangeEnd"
+				>
 					- 1
 				</text>
-				<text class="operate" :class="{ disabled: drugInfos.amount_each_time - 0.1 < 0 }" @click="changeAmount(-0.1)" @longpress="longChange(-0.1)" @touchend="longChangeEnd">
+				<text
+					class="operate"
+					:class="{ disabled: drugInfos.amount_each_time - 0.1 < 0 }"
+					@click="changeAmount(-0.1)"
+					@longpress="longChange(-0.1)"
+					@touchend="longChangeEnd"
+				>
 					- 0.1
 				</text>
 				<input class="input" type="text" v-model="drugInfos.amount_each_time" />
 				<text class="operate" :class="{ disabled: drugInfos.amount_each_time + 0.1 < 0 }" @click="changeAmount(0.1)" @longpress="longChange(0.1)" @touchend="longChangeEnd">
 					+0.1
 				</text>
-				<text class="operate" :class="{ disabled: drugInfos.amount_each_time + 1 < 0 }" @click="changeAmount(1)" @longpress="longChange(1)" @touchend="longChangeEnd">+ 1</text>
+				<text class="operate" :class="{ disabled: drugInfos.amount_each_time + 1 < 0 }" @click="changeAmount(1)" @longpress="longChange(1)" @touchend="longChangeEnd">
+					+ 1
+				</text>
 			</view>
 		</view>
 		<view class="detail-item column" v-if="drugInfos && (drugDetail.sport_no || drugInfos.sport_no)">
@@ -404,6 +432,7 @@ export default {
 			let info = this.drugInfos;
 			let url = '';
 			let req = [];
+			console.log(this.type, this.drugInfo);
 			if (this.type === 'add') {
 				url = this.getServiceUrl('health', 'srvhealth_drug_schedule_detail_list_add', 'operate');
 				req = [

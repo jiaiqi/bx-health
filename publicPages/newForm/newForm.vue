@@ -51,9 +51,9 @@ export default {
 			let self = this;
 			let req = this.$refs.bxForm.getFieldModel();
 			for (let key in req) {
-				if (!req[key]) {
-					delete req[key];
-				}
+				// if (!req[key]) {
+				// 	delete req[key];
+				// }
 				if (Array.isArray(req[key])) {
 					req[key] = req[key].toString();
 				}

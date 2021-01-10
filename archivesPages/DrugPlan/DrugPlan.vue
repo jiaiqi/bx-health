@@ -480,8 +480,14 @@ export default {
 									if (result) {
 										result.take_times = '';
 										self.drugDetail = result;
-										self.drugDetailType = 'update';
+										self.drugDetailType = 'add';
 										self.modalName = 'drugDetail';
+									}else{
+										uni.showModal({
+											title:'提示',
+											content:'未找到相关药品信息',
+											showCancel:false
+										})
 									}
 								});
 							}
