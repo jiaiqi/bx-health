@@ -440,23 +440,31 @@ export default {
 				url: '/otherPages/personalDetail/personalDetail?type=' + type
 			});
 		},
-		updateManagerType() {
+		async updateManagerType() {
 			this.manager_type = this.checkedManagerType;
 			let url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
 			let req = [
 				{
 					serviceName: 'srvhealth_person_info_update',
-					condition: [{ colName: 'id', ruleType: 'eq', value: this.userInfo.id }],
+					condition: [{ colName: 'no', ruleType: 'eq', value: this.vuex_userInfo.no}],
 					data: [{ manager_type: this.checkedManagerType.toString() }]
 				}
 			];
-			this.$http.post(url, req).then(res => {
-				if ((res.data.state = 'SUCCESS')) {
-					uni.showToast({
-						title: '申请成功'
-					});
-				}
-			});
+			let res = await this.$http.post(url, req);
+			// .then(res => {
+			if (res.data.state === 'SUCCESS') {
+				uni.showToast({
+					title: '申请成功'
+				});
+			}else{
+				uni.showModal({
+					title:'提示',
+					content:JSON.stringify(res.data)+JSON.stringify(req)
+				})
+			}
+			this.hideModal();
+			this.initPage();
+			// });
 		},
 		async initPage() {
 			let self = this;
