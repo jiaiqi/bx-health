@@ -178,7 +178,7 @@
 									<view class="heart_rate">
 										<view class="data">
 											<text class="label cuIcon-likefill text-red margin-right-xs"></text>
-											<text class="value">{{item.heart_rate||'-'}}/分</text>
+											<text class="value">{{item.heart_rate||'-'}}次/分</text>
 										</view>
 									</view>
 								</view>
@@ -1773,7 +1773,7 @@ export default {
 							justify-content: flex-end;
 							.data{
 								font-size: 26rpx;
-								width: 120rpx;
+								width: 140rpx;
 							}
 						}
 						.action {
