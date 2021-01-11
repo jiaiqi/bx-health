@@ -19,6 +19,7 @@
 					<text class="label">邀请成员</text>
 				</view>
 			</view>
+			<view class="see-all" v-if="loadmoreMemeber!=='noMore'"><uni-load-more :status="loadmoreMemeber"></uni-load-more></view>
 		</view>
 		<view class="setting-item group-util" v-if="type === 'group-util'">
 			<view class="title">小工具</view>
@@ -94,9 +95,10 @@ export default {
 			qrCodeSize: uni.upx2px(500),
 			groupInfo: {},
 			memberList: [],
+			loadmoreMemeber: 'more', //more,loading,noMore
 			memberPage: {
 				total: 0,
-				rownumber: 20,
+				rownumber: 5,
 				pageNo: 1
 			},
 			showQrCode: false,
@@ -189,6 +191,11 @@ export default {
 				this.memberPage.total = res.data.page.total;
 				this.memberPage.pageNo = res.data.page.pageNo;
 				this.memberPage.rownumber = res.data.page.rownumber;
+				if (this.memberPage.total && this.memberPage.total > this.memberPage.rownumber) {
+					this.loadmoreMemeber = 'more';
+				} else {
+					this.loadmoreMemeber = 'noMore';
+				}
 				return res.data.data;
 			}
 		},
@@ -323,10 +330,10 @@ export default {
 	.content-list {
 		display: flex;
 		padding: 20rpx 0;
+		flex-wrap: wrap;
 		.content-item {
 			padding: 0 10rpx;
-			flex: 1;
-			max-width: 20%;
+			width: 20%;
 			display: flex;
 			flex-direction: column;
 			justify-content: center;

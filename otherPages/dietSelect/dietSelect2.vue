@@ -1825,7 +1825,7 @@ export default {
 						image: item.image,
 					};
 					if (this.searchArg.type === 'food') {
-						if(item.classify && item.classify === 'mixed_food'){
+						if(item.classify && item.classify === 'mixed_food'&&item.meal_no){
 							obj['mixed_food_no'] = item.meal_no
 							obj['diret_type'] = item.classify
 							obj['unit_weight_g'] = this.radioLabel?this.radioLabel.amount:100

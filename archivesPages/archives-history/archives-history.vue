@@ -135,6 +135,7 @@
 								@touchmove="ListTouchMove"
 								@touchend="ListTouchEnd"
 								:data-target="'move-box-' + index"
+								@tap="deleteItem(item)"
 								v-for="(item, index) in historyRecord"
 							>
 								<image src="../static/icon/xueya.png" mode="" class="icon" v-if="pageType === 'bp'"></image>
@@ -173,6 +174,12 @@
 										<text v-if="pageType === 'bp'">mmHg</text>
 										<text v-if="pageType === 'weight'">kg</text>
 										<text v-if="pageType === 'sleep'">（时长）</text>
+									</view>
+									<view class="heart_rate">
+										<view class="data">
+											<text class="label cuIcon-likefill text-red margin-right-xs"></text>
+											<text class="value">{{item.heart_rate||'-'}}/分</text>
+										</view>
 									</view>
 								</view>
 								<view class="action">
@@ -435,29 +442,38 @@ export default {
 		deleteItem(e) {
 			let serviceName = '';
 			let req = [];
-			switch (this.pageType) {
-				case 'weight': //体重
-					serviceName = 'srvhealth_body_fat_measurement_record_delete';
-					req = [{ serviceName: 'srvhealth_body_fat_measurement_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
-					break;
-				case 'sleep': //睡眠
-					serviceName = 'srvhealth_sleep_record_delete';
-					req = [{ serviceName: 'srvhealth_sleep_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
-					break;
-				case 'bp': //血压
-					serviceName = 'srvhealth_blood_pressure_record_delete';
-					req = [{ serviceName: 'srvhealth_blood_pressure_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
-					break;
-			}
-			let url = this.getServiceUrl('health', serviceName, 'operate');
-			this.$http.post(url, req).then(res => {
-				if (res.data.state === 'SUCCESS') {
-					uni.showToast({
-						title: '删除成功'
-					});
-					this.initPage();
+			let self = this
+			uni.showModal({
+				title:'提示',
+				content:'是否删除此条数据',
+				success(res) {
+					if(res.confirm){
+						switch (self.pageType) {
+							case 'weight': //体重
+								serviceName = 'srvhealth_body_fat_measurement_record_delete';
+								req = [{ serviceName: 'srvhealth_body_fat_measurement_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+								break;
+							case 'sleep': //睡眠
+								serviceName = 'srvhealth_sleep_record_delete';
+								req = [{ serviceName: 'srvhealth_sleep_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+								break;
+							case 'bp': //血压
+								serviceName = 'srvhealth_blood_pressure_record_delete';
+								req = [{ serviceName: 'srvhealth_blood_pressure_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+								break;
+						}
+						let url = self.getServiceUrl('health', serviceName, 'operate');
+						self.$http.post(url, req).then(res => {
+							if (res.data.state === 'SUCCESS') {
+								uni.showToast({
+									title: '删除成功'
+								});
+								self.initPage();
+							}
+						});
+					}
 				}
-			});
+			})
 		},
 		getFixedNum(num) {
 			if (num) {
@@ -1748,6 +1764,17 @@ export default {
 							display: flex;
 							flex: 1;
 							align-items: center;
+						}
+						.heart_rate{
+							padding: 0 20rpx;
+							display: flex;
+							flex: 1;
+							align-items: center;
+							justify-content: flex-end;
+							.data{
+								font-size: 26rpx;
+								width: 120rpx;
+							}
 						}
 						.action {
 							display: flex;

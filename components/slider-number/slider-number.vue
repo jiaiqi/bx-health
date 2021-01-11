@@ -112,7 +112,7 @@ export default {
 		padding: 5rpx 10rpx;
 		background-color: #f1f1f1;
 		position: relative;
-		font-size: 40rpx;
+		// font-size: 20rpx;
 		margin-right: 10rpx;
 		width:80rpx;
 		&.active {

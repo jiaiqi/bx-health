@@ -10,7 +10,7 @@
 		</view>
 		<diet-info :dietInfo="dietInfo"></diet-info>
 		<element-detail ref="elementDetail" :dietInfo="dietInfo" :dietList="dietRecordList" :userInfo="userInfo"></element-detail>
-		<handler-bar :dietInfo="dietInfo" @checkUnit="checkUnit" @changeCookMethod="chooseCookType" @changeDiningType="changeDiningType" @changeAmount="changeAmount"></handler-bar>
+		<handler-bar :dietInfo="dietInfo" :cook-method="cook_method" @checkUnit="checkUnit" @changeCookMethod="chooseCookType" @changeDiningType="changeDiningType" @changeAmount="changeAmount"></handler-bar>
 		<view class="button-box">
 			<view class="btn bg-grey" @click="cancel">取消</view>
 			<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
@@ -49,6 +49,7 @@ export default {
 			food_no: '', //食物编号
 			meal_no: '', //混合食物编号
 			dietInfo: {},
+			cook_method:'',
 			dietRecordList: [],
 			backUrl: '',
 			dining_type: '早餐'
@@ -69,7 +70,7 @@ export default {
 				let arr = [];
 				this.dietRecordList.forEach(item => {
 					let obj = {
-						cook_method: this.dietInfo.cook_method,
+						cook_method: this.cook_method,
 						userno: uni.getStorageSync('login_user_info').user_no,
 						hdate: this.formateDate(new Date(), 'date'),
 						htime: this.formateDate(new Date(), 'time'),
@@ -186,9 +187,6 @@ export default {
 					} else {
 						obj['diet_contents_no'] = item.food_no;
 						obj['diret_type'] = 'diet_contents';
-						if (this.isCookDataChoose) {
-							obj['cook_method'] = this.currentCookData;
-						}
 					}
 					arr.push(obj);
 				});
@@ -282,7 +280,7 @@ export default {
 							energy: dietInfo.energy,
 							unit_weight_g: dietInfo.unit_weight_g,
 							unit: dietInfo.unit,
-							cook_method: dietInfo.cook_method
+							cook_method: this.cook_method
 						}
 					]
 				}
@@ -365,6 +363,12 @@ export default {
 					this.dietInfo = res.data.data[0];
 					this.dietRecordList = res.data.data;
 				}
+				if(this.dietInfo.cook_method_default){
+					this.cook_method = this.dietInfo.cook_method_default
+				}
+				if(this.dietInfo.diet_record_no&&this.dietInfo.cook_method){
+					this.cook_method = this.dietInfo.cook_method
+				}
 			}
 		},
 		changeAmount(e, step = 1) {
@@ -390,7 +394,7 @@ export default {
 		},
 		chooseCookType(e) {
 			// 选择食物烹调方式
-			this.dietInfo.cook_method = e;
+			this.cook_method = e
 		},
 		checkUnit(currentUnit) {
 			// 切换单位

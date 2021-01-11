@@ -224,7 +224,7 @@ export default {
 					fieldInfo.showSearch = false
 					fieldInfo.option_list_v2 = item.option_list_v2
 					fieldInfo.options = item.option_list_v2
-				} else if (item.col_type === "MultilineText") {
+				} else if (item.col_type === "MultilineText" || item.col_type === 'longtext') {
 					fieldInfo.type = "textarea"
 				} else if (item.col_type === 'snote') {
 					fieldInfo.type = "RichText"
@@ -245,11 +245,6 @@ export default {
 						"refed_col": "user_no",
 						"srv_app": "sso",
 						"serviceName": "srvsso_user_select",
-						// "conditions": [{
-						//   "colName": "dept_no",
-						//   "ruleType": "eq",
-						//   "value": "bx100sys"
-						// }],
 						"key_disp_col": "user_disp"
 					}
 					// fieldInfo.srvInfo = {
@@ -269,7 +264,6 @@ export default {
 				} else {
 					fieldInfo.type = item.col_type
 				}
-
 				switch (useType) {
 					case "add":
 						fieldInfo.showExp = (item.in_add === 1)
@@ -540,11 +534,11 @@ export default {
 				delta: 1
 			});
 		}
-		Vue.prototype.formateTime = (date,returnNull) => {
+		Vue.prototype.formateTime = (date, returnNull, formate) => {
 			console.log(date)
 			// TODO 上午下午 昨天前天 
 			if (!date) {
-				if(returnNull){
+				if (returnNull) {
 					return ''
 				}
 				date = new Date()
@@ -555,6 +549,8 @@ export default {
 			if (Vue.prototype.formateDate(date) === Vue.prototype.formateDate(curDate)) {
 				// 当天
 				return Vue.prototype.formateDate(date, 'dateTime')
+			} else if (formate && formate === 'full') {
+				return Vue.prototype.formateDate(date, 'MM-DD') + ' ' + Vue.prototype.formateDate(date, 'hh:mm')
 			} else {
 				return Vue.prototype.formateDate(date, 'MM-DD')
 			}
@@ -597,6 +593,8 @@ export default {
 				return o.HH + ':' + o.mm
 			} else if (type === 'time' || type === 'hh:mm:ss') {
 				return o.HH + ':' + o.mm + ':' + o.ss
+			} else if (type === 'normal') {
+				return o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm;
 			} else {
 				return o.yy + '-' + o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm + ':' + o.ss;
 			}
@@ -1433,49 +1431,50 @@ export default {
 				});
 			}
 		}
-		Vue.prototype.getFoodsDetail = async (dietRecord) => {
-			// 根据饮食记录得到食物编号查找食物详细数据
-			if (Array.isArray(dietRecord) && dietRecord.length > 0) {
-				let mixDietList = dietRecord.filter(item => item.diret_type === 'mixed_food');
-				let basicDietList = dietRecord.filter(item => item.diret_type === 'diet_contents');
-				let condition1 = [{
-					colName: 'meal_no',
-					ruleType: 'in',
-					value: mixDietList.map(item => item.mixed_food_no).toString()
-				}];
-				let condition2 = [{
-					colName: 'food_no',
-					ruleType: 'in',
-					value: basicDietList.map(item => item.diet_contents_no).toString()
-				}];
-				let mix = await Vue.prototype.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
-				let basic = await Vue.prototype.getFoodType(condition2);
-				let foodType = [...mix, ...basic];
-				return foodType;
-			}
-		}
-		Vue.prototype.getFoodType = async (cond, serv) => {
-			// 食物类型
-			let serviceName = 'srvhealth_diet_contents_select';
-			if (serv) {
-				serviceName = serv;
-			}
-			let url = Vue.prototype.getServiceUrl('health', serviceName, 'select');
-			let req = {
-				serviceName: serviceName,
-				colNames: ['*'],
-				condition: [],
-				order: []
-			};
-			if (cond) {
-				req.condition = cond;
-			}
-			let res = await Vue.prototype.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && res.data.data.length > 0 && !serv) {
-				console.log(res.data.data);
-			}
-			return res.data.data ? res.data.data : [];
-		}
+		// Vue.prototype.getFoodsDetail = async (dietRecord) => {
+		// 	// 根据饮食记录得到食物编号查找食物详细数据
+		// 	if (Array.isArray(dietRecord) && dietRecord.length > 0) {
+		// 		let mixDietList = dietRecord.filter(item => item.diret_type === 'mixed_food');
+		// 		let basicDietList = dietRecord.filter(item => item.diret_type === 'diet_contents');
+		// 		let condition1 = [{
+		// 			colName: 'meal_no',
+		// 			ruleType: 'in',
+		// 			value: mixDietList.map(item => item.mixed_food_no).toString()
+		// 		}];
+		// 		let condition2 = [{
+		// 			colName: 'food_no',
+		// 			ruleType: 'in',
+		// 			value: basicDietList.map(item => item.diet_contents_no).toString()
+		// 		}];
+		// 		let mix = await Vue.prototype.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
+		// 		let basic = await Vue.prototype.getFoodType(condition2);
+		// 		let foodType = [...mix, ...basic];
+		// 		return foodType;
+		// 	}
+		// }
+		// Vue.prototype.getFoodType = async (cond, serv) => {
+		// 	// 食物类型
+		// 	let serviceName = 'srvhealth_diet_contents_select';
+		// 	if (serv) {
+		// 		serviceName = serv;
+		// 	}
+		// 	let url = Vue.prototype.getServiceUrl('health', serviceName, 'select');
+		// 	let req = {
+		// 		serviceName: serviceName,
+		// 		colNames: ['*'],
+		// 		condition: [],
+		// 		order: []
+		// 	};
+		// 	if (cond) {
+		// 		req.condition = cond;
+		// 	}
+		// 	let res = await Vue.prototype.$http.post(url, req);
+		// 	if (res.data.state === 'SUCCESS' && res.data.data.length > 0 && !serv) {
+		// 		console.log(res.data.data);
+		// 	}
+		// 	return res.data.data ? res.data.data : [];
+		// }
+		
 		Vue.prototype.getImagePath = (no) => {
 			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
 				return no
@@ -1489,9 +1488,11 @@ export default {
 				return false
 			}
 		}
+		
 		Vue.prototype.requestSuccess = (res) => {
 			return res.data.state === 'SUCCESS' && Array.isArray(res.data.data)
 		}
+		
 		Vue.prototype.getImageInfo = (item) => {
 			return new Promise((resolve, reject) => {
 				wx.getImageInfo({
@@ -1510,28 +1511,51 @@ export default {
 				})
 			})
 		}
-		Vue.prototype.updateUserProfile = async (profile_url, user_no) => {
-			const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
-			const req = [{
-				serviceName: 'srvhealth_person_info_update',
-				condition: [{
-					colName: 'no',
-					ruleType: 'eq',
-					value: user_no
-				}],
-				data: [{
-					profile_url: profile_url
-				}]
-			}];
-			let res = await Vue.prototype.$http.post(url, req);
-			if (res.data.state === 'SUCCESS') {
-				uni.showToast({
-					title: '头像更新成功！'
-				});
-				return true
+		// Vue.prototype.updateUserProfile = async (profile_url, user_no) => {
+		// 	const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
+		// 	const req = [{
+		// 		serviceName: 'srvhealth_person_info_update',
+		// 		condition: [{
+		// 			colName: 'no',
+		// 			ruleType: 'eq',
+		// 			value: user_no
+		// 		}],
+		// 		data: [{
+		// 			profile_url: profile_url
+		// 		}]
+		// 	}];
+		// 	let res = await Vue.prototype.$http.post(url, req);
+		// 	if (res.data.state === 'SUCCESS') {
+		// 		uni.showToast({
+		// 			title: '头像更新成功！'
+		// 		});
+		// 		return true
+		// 	}
+		// }
+
+		Vue.prototype.sliceDigitNumber = (num, length) => {
+			// 将数字分为整数部分和小数部分
+			if (length && typeof length === 'number') {
+				num = Number(num.toFixed(length))
+			} else {
+				num = Number(num.toFixed(1))
+			}
+			let number = Number(num)
+			if (!isNaN(number)) {
+				return {
+					integer: parseInt(num),
+					fraction: parseInt(num) === parseFloat(num) ? 0 : Number(parseFloat(num).toString().split('.')[1])
+				}
+			} else {
+				return {
+					int: 0,
+					decimal: 0
+				}
 			}
 		}
+		
 		Vue.prototype.delNotChineseChar = (str) => {
+			// 去掉非中文字符
 			if (str) {
 				str = str.replace(/\w/g, '')
 			} else {

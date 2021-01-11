@@ -3,7 +3,9 @@
 		<view class="total-title"><view class="child-service-title"></view></view>
 		<view class="main-table" @click="toPages('update')">
 			<view class="table-item" v-for="item in fields" :key="item.column" :class="{ 'wrap-row': ['take_times_each_week', 'remark'].includes(item.column) }">
-				<view class="label"><text class="text">{{ item.label }}</text></view>
+				<view class="label">
+					<text class="text">{{ item.label }}</text>
+				</view>
 				<view class="value">{{ item.value || '' }}</view>
 			</view>
 		</view>
@@ -70,7 +72,7 @@
 							<view class="timeline-content">
 								<view
 									class="timeline-item"
-									v-for="(record,index) in item.data"
+									v-for="(record, index) in item.data"
 									:key="index"
 									@click="toPages('record-detail', record)"
 									:class="{ 'bg-blue': item.date === nowDate, 'bg-gray': item.date !== nowDate }"
@@ -79,7 +81,7 @@
 										<text>{{ record.take_time.slice(0, 5) }}</text>
 										<text class="margin-left-xs" v-if="record.blood_glucose_val">({{ record.blood_glucose_val }}mmol/L)</text>
 										<text class="margin-left-xs" v-if="record.weight">({{ record.weight }}kg)</text>
-										<text class="margin-left-xs" v-if="record.name&&!record.blood_glucose_val&&!record.weight">({{ record.name }})</text>
+										<text class="margin-left-xs" v-if="record.name && !record.blood_glucose_val && !record.weight">({{ record.name }})</text>
 									</view>
 									<view class="info" v-if="planDetail.play_srv === '运动'">{{ record.name + record.amount + record.unit }}</view>
 									<view class="info" v-if="isArray(record.drugList) && planDetail.play_srv !== '运动'">已完成：{{ getDegree(record.drugList, 'degree') }}</view>
@@ -310,7 +312,7 @@ export default {
 			if (type === 'degree') {
 				return `${drugList.filter(item => item.hasTook).length}/${drugList.length}`;
 			} else {
-				if(Array.isArray(drugList)){
+				if (Array.isArray(drugList)) {
 					let num = drugList.filter(item => item.hasTook).length / drugList.length;
 					if (num < 0.5) {
 						return {
@@ -482,12 +484,25 @@ export default {
 										self.drugDetail = result;
 										self.drugDetailType = 'add';
 										self.modalName = 'drugDetail';
-									}else{
-										uni.showModal({
-											title:'提示',
-											content:'未找到相关药品信息',
-											showCancel:false
-										})
+									} else {
+										if (res.result) {
+											uni.showModal({
+												title: '提示',
+												content: '未找到相关药品信息,是否补充此药品信息?',
+												success(res) {
+													if (res.confirm) {
+														// 跳转到药品添加页面
+														let fieldsCond = [
+															{ column: 'medicine_barcode', value: res.result }, 
+															{ column: 'audit_status', value: '待审核', display: false },
+														];
+														uni.navigateTo({
+															url: '/publicPages/newForm/newForm?serviceName=srvhealth_medicine_info_add&type=add&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
+														});
+													}
+												}
+											});
+										}
 									}
 								});
 							}
@@ -1171,7 +1186,7 @@ export default {
 				// flex-direction: column;
 				grid-column-end: 3;
 				grid-column-start: 1;
-				.label{
+				.label {
 					flex: 0.5;
 				}
 				.value {
@@ -1192,7 +1207,7 @@ export default {
 				flex: 0.8;
 				display: flex;
 				align-items: center;
-				.text{
+				.text {
 					position: relative;
 					// &::after{
 					// 	content: '';

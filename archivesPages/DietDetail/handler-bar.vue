@@ -11,7 +11,7 @@
 			>
 				{{ item.value }}
 			</view>
-			<text class="cook-type" v-if="!dietInfo.cook_method || !dietInfo.diet_record_no" @click="showTypeSelector = true">更多</text>
+			<text class="cook-type" @click="showTypeSelector = true">更多</text>
 			<text class="lg text-gray cuIcon-right" v-if="cookTypes.length > 0"></text>
 		</view>
 		<view class="dinner-time unit-box" v-if="dietInfo.food_no && !dietInfo.diet_record_no">
@@ -29,8 +29,8 @@
 		<view class="amount">
 			<view class="title">数量:</view>
 			<view class="number-box">
-				<text @click="changeAmount('minus', 0.1)" class="symbol" :class="{'disabled':dietInfo.amount - 0.1 <=0 }">-0.1</text>
-				<text @click="changeAmount('minus')" class="symbol" :class="{'disabled':dietInfo.amount - 1 <=0 }">-1</text>
+				<text @click="changeAmount('minus', 0.1)" class="symbol" :class="{ disabled: dietInfo.amount - 0.1 <= 0 }">-0.1</text>
+				<text @click="changeAmount('minus')" class="symbol" :class="{ disabled: dietInfo.amount - 1 <= 0 }">-1</text>
 				<input class="input" v-model.number="dietInfo.amount" type="number" />
 				<text @click="changeAmount('plus')" class="symbol">+1</text>
 				<text @click="changeAmount('plus', 0.1)" class="symbol">+0.1</text>
@@ -38,7 +38,7 @@
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showTypeSelector }">
 			<view class="cu-dialog" @tap.stop="">
-				<view class=" bg-white cook-top"><text>常见烹调方式</text></view>
+				<view class="bg-white cook-top"><text>常见烹调方式</text></view>
 				<view class="cooktype-wrap" v-if="dietInfo">
 					<bx-radio-group v-model="cook_method" mode="button">
 						<bx-radio v-for="item in cookTypes" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
@@ -59,7 +59,7 @@ export default {
 		return {
 			showTypeSelector: false,
 			dining_type: '早餐',
-			cook_method: this.dietInfo && this.dietInfo.cook_method ? this.dietInfo.cook_method : '',
+			cook_method: '',
 			cookTypes: [],
 			defaultCookTypes: [],
 			unitList: [],
@@ -89,12 +89,15 @@ export default {
 					type: 'other'
 				}
 			],
-			oldDefaultCOokTypes:[],
+			oldDefaultCOokTypes: []
 		};
 	},
 	props: {
 		dietInfo: {
 			type: Object
+		},
+		cookMethod: {
+			type: String
 		}
 	},
 	watch: {
@@ -103,7 +106,10 @@ export default {
 			immediate: true,
 			handler(newValue, oldValue) {
 				if (!this.cook_method) {
-					this.cook_method = newValue.cook_method_default;
+					this.cook_method = newValue.cook_method_default?newValue.cook_method_default:'';
+					if(this.cookMethod){
+						this.cook_method = this.cookMethod;
+					}
 				}
 				// if (this.cookTypes.length === 0) {
 				this.getCookTypes();
@@ -165,6 +171,7 @@ export default {
 					};
 				});
 			}
+			
 			if (this.dietInfo.cook_method) {
 				if (!this.defaultCookTypes.find(item => item.value === this.dietInfo.cook_method)) {
 					let arr = this.dietInfo.cook_method.split(',');
@@ -176,18 +183,14 @@ export default {
 									value: item,
 									checked: false
 								};
-								if (this.dietInfo.cook_method_default.indexOf(item) !== -1) {
-									// obj.checked = true
-									// this.cook_method = item
-								}
 								this.defaultCookTypes.push(obj);
 							}
 						});
 					}
 				}
 			}
-			if(this.oldDefaultCOokTypes.length===0){
-				this.oldDefaultCOokTypes = this.deepClone(this.defaultCookTypes)
+			if (this.oldDefaultCOokTypes.length === 0) {
+				this.oldDefaultCOokTypes = this.deepClone(this.defaultCookTypes);
 			}
 			let colVs = await this.getServiceV2('srvhealth_diet_contents_select', 'list', 'list', 'health');
 			let colData = colVs.srv_cols;
@@ -204,7 +207,7 @@ export default {
 			if (isChange) {
 				this.$emit('changeCookMethod', this.cook_method);
 			} else {
-				this.cook_method = this.dietInfo.cook_method_default;
+				this.cook_method = this.cookMethod;
 			}
 			let defaultCookTypes = this.deepClone(this.oldDefaultCOokTypes);
 			let typeArr = defaultCookTypes.map(item => item.value);
@@ -232,11 +235,6 @@ export default {
 						}
 					});
 				}
-				// this.defaultCookTypes.push({
-				// 	label: this.dietInfo.cook_method,
-				// 	value: this.dietInfo.cook_method,
-				// 	checked: true
-				// });
 			}
 			this.showTypeSelector = false;
 		},
@@ -340,7 +338,7 @@ export default {
 			display: flex;
 			justify-content: center;
 			color: #009688;
-			
+
 			.title {
 				margin-right: 20rpx;
 			}
@@ -360,10 +358,10 @@ export default {
 				border: 1px solid #dcdfe6;
 				border-radius: 10rpx;
 			}
-			.disabled{
-				color: rgba($color: #009688, $alpha:0.5);
-				&.symbol{
-					background:rgba($color: #d6e2eb, $alpha: 0.5);
+			.disabled {
+				color: rgba($color: #009688, $alpha: 0.5);
+				&.symbol {
+					background: rgba($color: #d6e2eb, $alpha: 0.5);
 				}
 			}
 			.symbol {

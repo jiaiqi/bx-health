@@ -49,6 +49,15 @@ export default {
 		},
 		async onButton(e) {
 			let self = this;
+			if(!this.isOnButton){
+				this.isOnButton=true
+			}else{
+				uni.showToast({
+					title:'正在处理中，请勿重复操作',
+					icon:'none'
+				})
+				return
+			}
 			let req = this.$refs.bxForm.getFieldModel();
 			for (let key in req) {
 				// if (!req[key]) {
@@ -62,6 +71,7 @@ export default {
 				case 'edit':
 					if (e.page_type === '详情' && this.use_type === 'detail') {
 						this.toPages('update');
+						this.isOnButton = false
 					} else {
 						if (req) {
 							req = [{ serviceName: e.service_name, data: [req], condition: this.condition }];
@@ -98,6 +108,7 @@ export default {
 									}
 								});
 							}
+							this.isOnButton = false
 						}
 					}
 					break;
@@ -135,10 +146,12 @@ export default {
 								}
 							});
 						}
+						this.isOnButton = false
 					}
 					break;
 				case 'reset':
 					this.$refs.bxForm.onReset();
+					this.isOnButton = false
 					break;
 				case 'customize':
 					if (e.application && e.operate_service) {
@@ -169,6 +182,7 @@ export default {
 								icon: 'none'
 							});
 						}
+						this.isOnButton = false
 					}
 					break;
 				default:
@@ -176,6 +190,7 @@ export default {
 						title: e.button_name,
 						icon: false
 					});
+					this.isOnButton = false
 					break;
 			}
 		},

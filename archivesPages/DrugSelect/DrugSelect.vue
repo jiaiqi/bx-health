@@ -34,9 +34,15 @@
 
 <script>
 import DrugInfo from '../components/DrugInfo/DrugInfo.vue';
+import {mapState} from 'vuex'
 export default {
 	components: {
 		DrugInfo
+	},
+	computed: {
+		...mapState({
+			userInfo:state=>state.user.userInfo
+		})
 	},
 	data() {
 		return {
@@ -103,29 +109,52 @@ export default {
 				colNames: ['*'],
 				page: { pageNo: this.page.pageNo, rownumber: this.page.rownumber }
 			};
+			if (this.dataType === '用药') {
+				req.relation_condition = {
+					relation: 'OR',
+					data: [
+						{
+							colName: 'audit_status',
+							value: '正常',
+							ruleType: 'eq'
+						},
+						{
+							colName: 'create_user',
+							value: this.userInfo.userno,
+							ruleType: 'eq'
+						}
+					]
+				};
+			}
 			if (val) {
 				if (this.dataType === '用药') {
-					req.relation_condition = {
-						relation: 'OR',
-						data: [
-							{
-								colName: 'medicine_goods_name',
-								value: val,
-								ruleType: 'like'
-							},
-							{
-								colName: 'medicine_instruction',
-								value: val,
-								ruleType: 'like'
-							},
-
-							{
-								colName: 'medicine_name',
-								value: val,
-								ruleType: 'like'
-							}
-						]
-					};
+					req.relation_condition.data.concat([
+						{
+							colName: 'medicine_goods_name',
+							value: val,
+							ruleType: 'like'
+						},
+						{
+							colName: 'medicine_name',
+							value: val,
+							ruleType: 'like'
+						}
+					]);
+					// req.relation_condition = {
+					// 	relation: 'OR',
+					// 	data: [
+					// 		{
+					// 			colName: 'medicine_goods_name',
+					// 			value: val,
+					// 			ruleType: 'like'
+					// 		},
+					// 		{
+					// 			colName: 'medicine_name',
+					// 			value: val,
+					// 			ruleType: 'like'
+					// 		}
+					// 	]
+					// };
 				} else if (this.dataType === '运动') {
 					req.relation_condition = {
 						relation: 'OR',

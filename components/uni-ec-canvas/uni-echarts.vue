@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-		<div :id="canvasId" style="width: 100%;height:100%;"></div>
+		<div :id="canvasId" style="width: 100%;height:100%;" v-if="ec&&ec.option"></div>
 	</div>
 </template>
 

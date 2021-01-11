@@ -28,23 +28,17 @@
 		<view class="container-cen">
 			<view class="container-cen-top">
 				<view class="container-cen-top-list bg-white" @click="toPages('doctor')">
-					<!-- <view class="container-cen-top-list bg-blue light" @click="toPages('doctor')"> -->
 					<text class="cuIcon-service " style="font-size: 70rpx;"></text>
-					<!-- <text class="cuIcon-service text-blue" style="font-size: 70rpx;"></text> -->
 					<text>我的医生</text>
 					<view v-if="doctor_message != 0" class="message-tag">{{ doctor_message }}</view>
 				</view>
 				<view class="container-cen-top-list bg-white" @click="toPages('userList')">
-					<!-- <view class="container-cen-top-list bg-green light" @click="toPages('userList')"> -->
 					<text class="cuIcon-comment " style="font-size: 70rpx;"></text>
-					<!-- <text class="cuIcon-comment text-green" style="font-size: 70rpx;"></text> -->
 					<text>我的用户</text>
 					<view v-if="hzMessage != 0" class="message-tag">{{ hzMessage }}</view>
 				</view>
 				<view class="container-cen-top-list bg-white" @click="toPages('group')">
-					<!-- <view class="container-cen-top-list bg-yellow light" @click="toPages('group')"> -->
 					<text class="cuIcon-group " style="font-size: 70rpx;"></text>
-					<!-- <text class="cuIcon-group text-yellow" style="font-size: 70rpx;"></text> -->
 					<text>圈子</text>
 					<view v-if="groupMsgUnreadAmount != 0" class="message-tag">{{ groupMsgUnreadAmount }}</view>
 				</view>
@@ -62,12 +56,6 @@
 							<text class="text-grey">基本信息</text>
 						</view>
 					</view>
-					<!-- 		<view @click="toPersonDetail('corp')" class="cu-item arrow">
-						<view class="content">
-							<text class="cuIcon-rank"></text>
-							<text class="text-grey">身体数据</text>
-						</view>
-					</view> -->
 					<view class="cu-item arrow" @click="toPages('beDoctor')" v-if="!manager_type">
 						<view class="content">
 							<text class="cuIcon-form"></text>
@@ -116,7 +104,7 @@ export default {
 			userInfo: '',
 			doctor_message: 0,
 			hzMessage: 0,
-			groupMsgUnreadAmount:0,
+			groupMsgUnreadAmount: 0,
 			manager_type: '',
 			showModal: false,
 			checkedManagerType: ['医师'],
@@ -247,9 +235,7 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				// this.doctorList = res.data.data;
 				let arr = res.data.data.map(items => items.userb_no).toString();
-
 				this.getDoctorRecod(arr, '患者').then(l => {
-					console.log('l------------>', l);
 					this.hzMessage = l;
 				});
 				// let noList = res.data.data.map(item => item.customer_name);
@@ -574,7 +560,7 @@ export default {
 							latest_sign_in_time: item.latest_sign_in_time
 						};
 					});
-					this.selectUnreadAmount(list);
+					return await this.selectUnreadAmount(list);
 				}
 			}
 		},
@@ -667,17 +653,21 @@ export default {
 					pre += cur.create_time;
 					return pre;
 				}, 0);
-				this.groupMsgUnreadAmount = amount
+				this.groupMsgUnreadAmount = amount;
+				return amount;
 			}
 		}
 	},
-	onShow() {
+	async onShow() {
 		if (this.vuex_userInfo && this.vuex_userInfo.hasOwnProperty('manager_type')) {
 			this.manager_type = this.vuex_userInfo.manager_type;
 		}
 		this.userInfo = uni.getStorageSync('current_user_info');
-		this.selectMyGroup()
+		let amount = await this.selectMyGroup();
 		this.getDoctorAllRecod(this.userInfo.userno).then(r => {
+			if (amount) {
+				r += amount;
+			}
 			if (r > 99) {
 				r = '99+';
 			} else {
@@ -829,14 +819,15 @@ export default {
 			}
 			.message-tag {
 				position: absolute;
-				right: 0;
+				right: 50rpx;
+				top: 10rpx;
 				background: red;
 				color: white;
-				border-radius: 18rpx;
+				border-radius: 50rpx;
 				padding: 1px 2px;
-				top: -2px;
-				min-width: 44rpx;
-				height: 32rpx;
+				min-width: 45rpx;
+				height: 45rpx;
+				line-height: 45rpx;
 				text-align: center;
 				font-size: 24rpx;
 			}

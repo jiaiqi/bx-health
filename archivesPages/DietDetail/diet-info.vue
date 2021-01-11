@@ -14,15 +14,16 @@
 			</view>
 			<view class="gi">
 				<text class="label margin-right-xs">升糖指数:</text>
-				<text class="heat">{{ dietInfo.gi || '暂无数据' }}</text>
+				<text class="heat">{{ dietInfo.gi || ' - ' }}</text>
 			</view>
-			<!-- 			<view class="weight">
-				<text class="label margin-right-xs">热量:</text>
-				<text class="heat">
-					{{ hotNum | toFixed1 }}
-					<text class="unit">千卡</text>
-				</text>
-			</view> -->
+			<view class="gi" v-if="dietInfo.edible_portion">
+				<text class="label margin-right-xs">可食部数量:</text>
+				<text class="heat">{{ dietInfo.edible_portion || ' - ' }}/100g</text>
+			</view>
+			<view class="gi" v-if="dietInfo.moisture_content">
+				<text class="label margin-right-xs">水分(g):</text>
+				<text class="heat">{{ dietInfo.moisture_content || ' - ' }}g/100g</text>
+			</view>
 			<view class="unit-box">
 				<text class="label text-bold margin-right-xs">单位:</text>
 				<text class="unit">

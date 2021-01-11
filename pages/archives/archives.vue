@@ -2,7 +2,7 @@
 	<view class="health-archive-wrap" v-if="(is_login && authSetting && authSetting.userInfo) || (is_login && client_env === 'h5')">
 		<view class="top text-bold">
 			<view class="left">
-				<view class="avatar" @click="showUserListPopup = true"><image class="avatar" :src="avatarUrl"></image></view>
+				<view class="avatar" @click="showUserListPopup = true"><image class="avatar" :src="getUserImage(userInfo)"></image></view>
 				<view class="user-name" @click="showUserListPopup = true">{{ userInfo.name }}</view>
 				<view class="switch-icon cuIcon-right" @click="showUserListPopup = true"></view>
 				<view class="tag-box" @click="showUserHealtManagePopup = true">
@@ -218,7 +218,8 @@
 			<view class="cu-dialog" @tap.stop="">
 				<view class="user-list">
 					<view class="user-item" @click="switchUser(item)" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
-						<image class="avatar" :src="getImagePath(item.profile_url)" size="60"></image>
+						<image class="avatar" :src="getUserImage(item)" size="60" v-if="getUserImage(item)"></image>
+						<image class="avatar" src="/static/man-profile.png" v-else></image>
 						{{ item.name }}
 					</view>
 				</view>
@@ -348,22 +349,6 @@ export default {
 				}
 			}
 		},
-		disabledTag() {
-			if (this.checkedList.length >= 5) {
-				return true;
-			} else {
-				return false;
-			}
-		},
-		avatarUrl() {
-			if (this.userInfo.profile_url) {
-				return this.getImagePath(this.userInfo.profile_url);
-			} else if (this.loginUserInfo.headimgurl) {
-				return this.getImagePath(this.loginUserInfo.headimgurl);
-			} else if (this.wxUserInfo.headimgurl) {
-				return this.getImagePath(this.wxUserInfo.headimgurl);
-			}
-		},
 		bmi() {
 			if (this.userInfo.weight && this.userInfo.height) {
 				return Number((Number(this.userInfo.weight) / Math.pow(Number(this.userInfo.height) / 100, 2)).toFixed(1));
@@ -441,8 +426,8 @@ export default {
 					result = (Math.abs(10 - bmi) * 2.5) / 8.5;
 				}
 				return Number(result.toFixed(1));
-			}else{
-				return 0
+			} else {
+				return 0;
 			}
 		}
 	},
@@ -459,7 +444,7 @@ export default {
 			this.initPage();
 		},
 		clickTodoItem(item, index) {
-			if (item.ds_no) {
+			if (item && item.ds_no) {
 				if (item.play_srv) {
 					uni.navigateTo({
 						url: `/archivesPages/DrugPlan/DrugPlan?play_srv=${item.play_srv}&ds_no=${item.ds_no}`
@@ -627,7 +612,7 @@ export default {
 				let list = res.data.data;
 				this.isLoad = true;
 				if (Array.isArray(res.data.data)) {
-					this.inspectReportRecord  = res.data.data
+					this.inspectReportRecord = res.data.data;
 					// let no = list.map(item => item.report_daq_survey_activity_no).toString();
 					// let result = await this.getQuestRecord(no);
 					// if (result) {
@@ -927,7 +912,7 @@ export default {
 			eleArr = eleArr.map(ele => {
 				dietRecord.forEach(diet => {
 					foodType.forEach(food => {
-						if (food.food_no === diet.diet_contents_no || food.meal_no === diet.mixed_food_no) {
+						if ((food.food_no && food.food_no === diet.diet_contents_no) || (food.meal_no && food.meal_no === diet.mixed_food_no)) {
 							let ratio = 1;
 							if (food['unit'] === 'g') {
 								ratio = (diet.unit_weight_g * diet.amount) / food.unit_amount;

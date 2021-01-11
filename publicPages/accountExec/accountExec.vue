@@ -480,6 +480,7 @@ export default {
 							};
 							uni.setStorageSync('wxUserInfo', rawData);
 							self.$store.commit('SET_WX_USERINFO', rawData);
+							
 							rawData = JSON.stringify(rawData);
 							self.setWxUserInfo(rawData);
 							console.log(res);

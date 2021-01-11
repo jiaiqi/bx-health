@@ -16,6 +16,7 @@
 					class="person-chat-item"
 					:class="item.sender_account === currentUserInfo.userno ? 'person-chat-item-my' : ''"
 				>
+					<view class="send-time" v-if="showSendTime(item, index)">{{ formateDate(item.create_time, false) }}</view>
 					<view v-if="item.sender_account != currentUserInfo.userno" class="person-chat-item-accept">
 						<view class="sender-info" v-if="groupInfo && groupInfo.gc_no">
 							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
@@ -59,7 +60,20 @@
 								<view class="voice_icon voice_icon_left" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_left_an' : ''"></view>
 							</view>
 						</view>
-
+						<view v-else-if="item.longitude && item.latitude && item.msg_content_type === '位置'" class="map-container" @tap="openMap(item)">
+							<view class="map-info">
+								<view class="name">{{ item.location_name }}</view>
+								<view class="address">{{ item.location_address }}</view>
+							</view>
+							<map
+								style="width: 500rpx; height: 300rpx;"
+								:enable-scroll="false"
+								:enable-rotate="false"
+								:latitude="item.latitude"
+								:longitude="item.longitude"
+								:markers="getCovers(item)"
+							></map>
+						</view>
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
 							<video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video>
@@ -79,8 +93,8 @@
 					</view>
 					<view v-else-if="item.sender_account === currentUserInfo.userno" class="person-chat-item-send">
 						<view class="sender-info" v-if="groupInfo && groupInfo.gc_no">
-							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
+							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
 						</view>
 						<text class="unread" v-if="item.msg_state === '未读' && (!groupInfo || !groupInfo.gc_no)">{{ item.msg_state }}</text>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
@@ -184,7 +198,7 @@
 					>
 						{{ voiceTitle }}
 					</text>
-					<input v-else v-model="chatText" type="text" value="" />
+					<input v-else v-model="chatText" type="text"  @focus="onInput" @confirm="sendMessage" confirm-type="send"/>
 				</view>
 				<view class="person-chat-rig">
 					<view class="person-chat-rig-add-wrap">
@@ -386,6 +400,9 @@ export default {
 				}
 			});
 			this.isSendLink = false;
+		},
+		onInput(e){
+			this.isSendLink = false
 		},
 		openMap(item) {
 			// 打开地图
@@ -1133,8 +1150,15 @@ export default {
 			json.sort((a, b) => {
 				return new Date(a.create_time).getTime() - new Date(b.create_time).getTime(); //时间反序
 			});
-			console.log('--------排序', json);
 			return json;
+		},
+		showSendTime(item, index) {
+			// 此条消息记录上方是否显示发送时间 上一条消息和当前消息发送时间不在同一分钟 则显示
+			if (index === 0) {
+				return true;
+			} else if (index >= 1) {
+				return this.formateDate(item.create_time, 'normal') !== this.formateDate(this.recordList[index - 1].create_time, 'normal');
+			}
 		},
 		/*查询当前登陆人和其他人聊天记录**/
 		async getMessageInfo(type = null) {
@@ -1294,7 +1318,6 @@ export default {
 				});
 				let _SortJsonData = null;
 				this.$nextTick(() => {
-
 					if (!this.isAll) {
 						_SortJsonData = this._SortJson(resData);
 						// this.recordList.unshift(..._SortJsonData);
@@ -1475,9 +1498,18 @@ export default {
 		.person-chat-item {
 			// display: flex;
 			// margin-right: 20rpx;
+			flex-direction: column;
+			align-items: flex-end;
+			.send-time {
+				padding-top: 50rpx;
+				display: flex;
+				width: 100%;
+				justify-content: center;
+				color: #999;
+			}
 			.person-chat-item-accept {
 				display: flex;
-				margin: 30rpx 10rpx;
+				margin: 0rpx 10rpx 20rpx;
 				flex-wrap: wrap;
 				.sender-info {
 					width: 100%;
@@ -1489,6 +1521,21 @@ export default {
 						margin-left: 10rpx;
 					}
 				}
+				.map-container {
+					width: 500rpx;
+					background-color: #fff;
+					border-radius: 5rpx;
+					overflow: hidden;
+					.map-info {
+						padding: 20rpx;
+						.address {
+							font-size: 24rpx;
+							color: #999;
+							margin-top: 10rpx;
+						}
+					}
+				}
+
 				.person-chat-item-left {
 					margin-right: 20rpx;
 					image {
@@ -1499,8 +1546,8 @@ export default {
 				.person-chat-item-right {
 					min-width: 16%;
 					background: #fff;
-					border-radius: 5px;
-					padding: 5px;
+					border-radius: 10rpx;
+					padding: 10rpx;
 					font-weight: 700;
 					font-size: 12px;
 					position: relative;
@@ -1607,7 +1654,7 @@ export default {
 			}
 			.person-chat-item-send {
 				display: flex;
-				margin: 30rpx 10rpx;
+				margin: 0 10rpx 20rpx;
 				justify-content: flex-end;
 				min-width: 40%;
 				flex-wrap: wrap;
@@ -1616,9 +1663,12 @@ export default {
 					font-size: 24rpx;
 					margin-bottom: 10rpx;
 					text-align: right;
+					display: flex;
+					align-items: center;
+					justify-content: flex-end;
 					.sender-name {
 						color: #999;
-						margin-left: 10rpx;
+						margin-right: 10rpx;
 					}
 				}
 				.map-container {

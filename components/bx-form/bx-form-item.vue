@@ -237,14 +237,6 @@
 								/>
 							</view>
 							<view class="buttons">
-								<!-- 			<view
-									v-if="item.type !== 'draft' && optionsDatasRun[index]['valueChanged']"
-									class="cu-btn  bg-green light"
-									style="height:2.4em;min-height: 1.6em;line-height: 1.6em;"
-									@click="addListOptions(index, 'update')"
-								>
-									修改
-								</view> -->
 								<view
 									v-if="item.type !== 'draft' && item['model']['option_value']"
 									class="cu-btn  bg-blue light"

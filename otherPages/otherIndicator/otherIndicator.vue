@@ -97,7 +97,7 @@
 					</view>
 					<!-- <text>收缩压(高压 毫米汞柱)</text> -->
 					<!-- <view class="item-list-bot"> -->
-					<slider-number v-model="inputVal.systolic_pressure" :max="200" :min="50"></slider-number>
+					<slider-number v-model="inputVal.systolic_pressure" :max="200" :min="50" :step="0.1"></slider-number>
 					<!-- 	<input type="text" value="" v-model="inputVal.systolic_pressure" /> -->
 					<!-- </view> -->
 				</view>
@@ -107,12 +107,12 @@
 						<text>舒张压(低压 毫米汞柱)</text>
 					</view>
 					<!-- <text>舒张压(低压 毫米汞柱)</text> -->
-					<slider-number v-model="inputVal.diastolic_pressure" :max="120" :min="50"></slider-number>
+					<slider-number v-model="inputVal.diastolic_pressure" :max="120" :min="50" :step="0.1"></slider-number>
 					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.diastolic_pressure" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>心率</text>
-					<slider-number v-model="inputVal.heart_rate" :max="200" :min="30"></slider-number>
+					<slider-number v-model="inputVal.heart_rate" :max="200" :min="30" :step="0.1"></slider-number>
 					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.heart_rate" /></view> -->
 				</view>
 				<view class="item-list">
