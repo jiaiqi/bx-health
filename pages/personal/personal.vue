@@ -659,6 +659,9 @@ export default {
 		}
 	},
 	async onShow() {
+		// this.selectBasicUserInfo().then(res=>{
+		// 	debugger
+		// })
 		if (this.vuex_userInfo && this.vuex_userInfo.hasOwnProperty('manager_type')) {
 			this.manager_type = this.vuex_userInfo.manager_type;
 		}
@@ -704,6 +707,12 @@ export default {
 	},
 	onTabItemTap() {
 		this.initPage();
+	},
+	onShareAppMessage() {
+		return {
+			title: `${this.vuex_userInfo.name}邀请您体验小程序`,
+			path: `/pages/personal/personal?from=share&option.invite_user_no=${this.vuex_userInfo.userno}`
+		};
 	},
 	async created() {
 		// #ifdef MP-WEIXIN

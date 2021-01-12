@@ -14,7 +14,7 @@
 			<text class="cook-type" @click="showTypeSelector = true">更多</text>
 			<text class="lg text-gray cuIcon-right" v-if="cookTypes.length > 0"></text>
 		</view>
-		<view class="dinner-time unit-box" v-if="dietInfo.food_no && !dietInfo.diet_record_no">
+		<view class="dinner-time unit-box" v-if="dietInfo.food_no || dietInfo.diet_record_no">
 			<view class="title">时间:</view>
 			<view class="unit-item" :class="{ 'active-unit': dining_type === u.value }" v-for="(u, index) in dinnerTime" :key="index" @click="changeDiningType(u, index)">
 				{{ u.value }}
@@ -137,22 +137,22 @@ export default {
 			let unitList = [];
 			let self = this;
 			let basicUnit = this.deepClone(this.dietInfo);
-			if (this.dietInfo.unit !== 'g' && this.dietInfo.unit.indexOf('g') !== -1) {
+			if (basicUnit.unit !== 'g' && basicUnit.unit.indexOf('g') !== -1) {
 				basicUnit.unit = 'g';
 				basicUnit.amount = 1;
-				basicUnit.energy = (this.dietInfo.energy * 100) / this.dietInfo.unit_weight_g;
+				basicUnit.energy = (basicUnit.energy * 100) / basicUnit.unit_weight_g;
 				basicUnit.unit_weight_g = 100;
 				unitList.push(basicUnit);
-			} else if (self.dietInfo.unit !== 'g') {
+			} else if (basicUnit.unit !== 'g') {
 				basicUnit.amount = 1;
-				// basicUnit.energy = (basicUnit.energy * 100) / basicUnit.unit_weight_g;
 				unitList.push(basicUnit);
 			} else {
-				unitList.push(self.dietInfo);
+				unitList.push(basicUnit);
 			}
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				unitList = [...unitList, ...res.data.data];
 			}
+			
 			this.unitList = this.deepClone(unitList).map(item => {
 				item.label = item.unit_weight_g && item.unit === 'g' ? item.unit_weight_g + item.unit : item.unit_amount && item.unit === 'g' ? item.unit_amount + item.unit : item.unit;
 				item.value = item.label;
@@ -277,6 +277,7 @@ export default {
 			// border: 1px solid #f1f1f1;
 			// background-color: #f1f1f1;
 			// color: #333;
+			box-sizing: border-box;
 			margin: 10rpx 5rpx;
 			background-color: #f8f8f8;
 			color: #999;

@@ -83,6 +83,7 @@ export default {
 	},
 	computed: {
 		...mapState({
+			loginUserInfo: state => state.user.loginUserInfo,
 			userInfo: state => state.user.userInfo,
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize
@@ -291,7 +292,7 @@ export default {
 				// #endif
 			}
 			if (userInfo && userInfo.user_no) {
-				this.loginUserInfo = userInfo;
+				// this.loginUserInfo = userInfo;
 				this.$store.commit('SET_LOGIN_USER', userInfo);
 				await this.selectUserList(userInfo);
 			}
@@ -364,12 +365,26 @@ export default {
 	},
 	created() {
 		this.getPageItem();
-		// this.getPageConfig();
 	},
 	onShow() {
 		this.initPage();
 	},
-	onLoad() {
+	onShareAppMessage() {
+		let path = '';
+		let title = '百想健康'
+		if (this.userInfo && this.userInfo.no) {
+			path = `/pages/pedia/pedia?from=share&option.invite_user_no=${this.userInfo.userno}`;
+			title = `${this.userInfo.name}邀请你体验【百想健康】小程序`
+		} else if (this.loginUserInfo && this.loginUserInfo.user_no) {
+			path = `/pages/pedia/pedia?from=share&option.invite_user_no=${this.loginUserInfo.user_no}`;
+		}
+		return {
+			title:title,
+			path: path
+		};
+	},
+	onLoad(option) {
+		this.checkOptionParams(option)
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({
 			withShareTicket: true,

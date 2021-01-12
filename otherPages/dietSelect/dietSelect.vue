@@ -224,13 +224,12 @@
 				<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal" @tap="hideModal" :class="{ show: modalName === 'recent' }">
+	<!-- 	<view class="cu-modal bottom-modal" @tap="hideModal" :class="{ show: modalName === 'recent' }">
 			<view class="cu-dialog" @tap.stop="" style="height: auto;max-height: 90vh;overflow: scroll;">
 				<view class="recent-diet">
 					<view class="title-bar ">
 						<text class="title">近期饮食记录</text>
 						<view class="action">
-							<!-- <text class="cu-btn sm text-blue" @click="changeRecentDietMode">{{ recentDietMode === 'edit' ? '完成' : '编辑' }}</text> -->
 							<text class="cu-btn sm text-blue margin-right-xs" @click="selectAll(true)">全选</text>
 							<text class="cu-btn sm text-blue" @click="selectAll(false)">反选</text>
 						</view>
@@ -245,9 +244,7 @@
 									<view class="amount">
 										<text class="separator" @click="calc(item, 'minus')">-</text>
 										<text type="number" class="input">{{ item.amount }}</text>
-										<!-- <input type="number" class="input" v-model="item.amount" /> -->
 										<text class="separator" @click="calc(item, 'add')">+</text>
-										<!-- <text class="number"></text> -->
 									</view>
 									<text class="text-left margin-left-xs">{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}</text>
 								</view>
@@ -260,7 +257,7 @@
 					</view>
 				</view>
 			</view>
-		</view>
+		</view> -->
 	</view>
 </template>
 

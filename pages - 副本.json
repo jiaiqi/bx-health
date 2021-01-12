@@ -1,0 +1,558 @@
+{
+	"pages": [{
+			"path": "pages/pedia/pedia",
+			"style": {
+				// "navigationStyle": "custom",
+				"navigationBarTitleText": "健康宝典",
+				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		},
+		{
+			"path": "pages/store/store",
+			"style": {
+				"navigationBarTitleText": "健康生活",
+				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		},
+		{
+			"path": "pages/archives/archives",
+			"style": {
+				"navigationBarTitleText": "健康档案",
+				"enablePullDownRefresh": true
+
+			}
+		},
+		{
+			"path": "pages/personal/personal",
+			"style": {
+				"navigationBarTitleText": "个人中心",
+				"enablePullDownRefresh": true
+				// "navigationStyle":"custom"
+			}
+		}
+	],
+	"subPackages": [{
+			// 问卷
+			"root": "questionnaire",
+			"pages": [{
+					"path": "index/index",
+					"style": {
+						"navigationBarTitleText": "问卷",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "history/history",
+					"style": {
+						"navigationBarBackgroundColor": "#5494ff",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "assessmentResult/assessmentResult",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "couple/couple",
+					"style": {}
+				}
+			]
+		},
+		{
+			"root": "archivesPages",
+			"pages": [{
+					"path": "archives-history/archives-history",
+					"style": {
+						"navigationBarTitleText": "健康记录",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "illnessDetaiList/illnessDetaiList",
+					"style": {
+						"navigationBarTitleText": "相关病症",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "healthCompose/healthCompose",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+				}, {
+					"path": "DrugPlan/DrugPlan",
+					"style": {
+						"navigationBarTitleText": "方案计划详情",
+						"navigationBarBackgroundColor": "#409eff",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "RelationGraph/RelationGraph",
+					"style": {
+						"navigationBarTitleText": "健康图谱",
+						"enablePullDownRefresh": false,
+						"usingComponents": {
+							// #ifdef MP-WEIXIN
+							// "txv-video": "plugin://tencentvideo/video"
+							// #endif
+						}
+					}
+				}, {
+					"path": "addDrugRecord/addDrugRecord",
+					"style": {
+						"navigationBarTitleText": "用药记录增加",
+						"enablePullDownRefresh": false
+					}
+				}, {
+					"path": "GraphSearch/GraphSearch",
+					"style": {
+						// "navigationStyle": "custom",
+						"navigationBarTitleText": "节点搜索",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
+						"enablePullDownRefresh": false
+					}
+				}, {
+					"path": "VideoPlayer/VideoPlayer",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "DietDetail/DietDetail",
+					"style": {
+						"navigationBarTitleText": "饮食记录详情",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "DrugSelect/DrugSelect",
+					"style": {
+						"navigationBarTitleText": "药品选择",
+						"enablePullDownRefresh": true
+					}
+
+				}, {
+					"path": "report/report",
+					"style": {
+						"navigationBarTitleText": "检查报告",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "SportItemList/SportItemList",
+					"style": {
+						"navigationBarTitleText": "运动项目列表",
+						"enablePullDownRefresh": true
+					}
+
+				}
+			]
+		},
+		{
+			"root": "pregnancy",
+			"pages": [{
+					"path": "pregnant/pregnant",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnantHome",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnantDetail",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnantFoods",
+					"style": {}
+				},
+				{
+					"path": "pregnant/pregnantFoodsDetail",
+					"style": {}
+				},
+				{
+					"path": "pregnant/antenatal",
+					"style": {}
+				},
+				{
+					"path": "pregnant/symptomDetail",
+					"style": {}
+				},
+				{
+					"path": "sickness/sickness",
+					"style": {
+						"navigationBarTitleText": "疾病列表",
+						"navigationBarBackgroundColor": "#409eff",
+						"enablePullDownRefresh": false
+					}
+				}, {
+					"path": "sickness/sicknessDetail",
+					"style": {
+						"navigationBarTitleText": "疾病详情",
+						"navigationBarBackgroundColor": "#409eff",
+						"enablePullDownRefresh": false
+					}
+				}
+			]
+		},
+		{
+			"root": "personalPages",
+			"pages": [{
+					"path": "myDoctor/myDoctor",
+					"style": {
+						"navigationBarTitleText": "我的医生",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "nameCard/nameCard",
+					"style": {
+						"navigationBarTitleText": "医生名片",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "patientsInfo/patientsInfo",
+					"style": {
+						"navigationBarTitleText": "患者信息",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "chat/chatList",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "聊天列表",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "myDoctor/doctorChat",
+					"style": {
+						"navigationBarTitleText": "聊天列表",
+						"enablePullDownRefresh": false
+					}
+				}, {
+					"path": "userList/userList",
+					"style": {
+						"navigationBarTitleText": "用户管理",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
+					}
+
+				}, {
+					"path": "tagManagement/tagManagement",
+					"style": {
+						"navigationBarTitleText": "标签管理",
+						"enablePullDownRefresh": true
+					}
+
+				}, {
+					"path": "FontSizeSetting/FontSizeSetting",
+					"style": {
+						"navigationBarTitleText": "字体大小与粗细",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "chatGroup/chatGroup",
+					"style": {
+						"navigationBarTitleText": "圈子",
+						"enablePullDownRefresh": true
+					}
+
+				}, {
+					"path": "gropDetail/gropDetail",
+					"style": {
+						"navigationBarTitleText": "圈子设置",
+						"enablePullDownRefresh": true
+					}
+
+				}
+			]
+		},
+		{
+			"root": "disease",
+			"pages": [{
+				"path": "pathogen/pathogen",
+				"style": {
+					"navigationBarTitleText": "病因",
+					"enablePullDownRefresh": false
+				}
+			}, {
+				"path": "pathogen/pathogenDetail",
+				"style": {
+					"navigationBarTitleText": "病因详情",
+					"enablePullDownRefresh": false
+				}
+			}]
+		},
+		{
+			"root": "otherPages",
+			"pages": [{
+					"path": "index/index",
+					"style": {
+						"navigationBarTitleText": "工具",
+						"navigationBarBackgroundColor": "#0bc99d"
+					}
+				},
+				{
+					"path": "tool/toolOne/toolOne",
+					"style": {
+						"navigationBarTitleText": "卡路里计算"
+					}
+				},
+				{
+					"path": "tool/toolTwo/toolTwo",
+					"style": {
+						"navigationBarTitleText": "BMI计算"
+					}
+				},
+				{
+					"path": "tool/toolThree/toolThree",
+					"style": {
+						"navigationBarTitleText": "婴儿发育查询"
+					}
+				},
+				{
+					"path": "tool/toolFour/toolFour",
+					"style": {
+						"navigationBarTitleText": "食品查询"
+					}
+				},
+				{
+					"path": "tool/toolFive/toolFive",
+					"style": {
+						"navigationBarTitleText": "营养素介绍"
+					}
+				},
+				{
+					"path": "tool/toolSix/toolSix",
+					"style": {
+						"navigationBarTitleText": "运动查询"
+					}
+				},
+				{
+					"path": "foodDetail/foodDetail",
+					"style": {
+						"navigationBarTitleText": "食物详情"
+					}
+				},
+				{
+					"path": "shopDietStore/shopDietStore",
+					"style": {
+						"navigationBarTitleText": "店铺列表"
+					}
+				},
+				{
+					"path": "otherIndicator/otherIndicator",
+					"style": {
+						"navigationBarTitleText": "身体指标"
+					}
+				},
+				{
+					"path": "personalDetail/personalDetail",
+					"style": {
+						"navigationBarTitleText": "身体指标"
+					}
+				},
+				{
+					"path": "elementDetail/elementDetail",
+					"style": {
+						"navigationBarTitleText": "营养素详情"
+					}
+				},
+				{
+					"path": "symptomSelect/symptomSelect",
+					"style": {
+						"navigationBarTitleText": "症状选择",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "symptomSelect/symptomSelect2",
+					"style": {
+						"navigationBarTitleText": "症状选择",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "indicatorsDetails/dietUp/dietUp",
+					"style": {}
+				},
+				{
+					"path": "foodSelect/foodSelect",
+					"style": {}
+				},
+				{
+					"path": "record/record",
+					"style": {}
+				},
+				{
+					"path": "sportDetail/sportDetail",
+					"style": {}
+				},
+				{
+					"path": "dietSelect/dietSelect",
+					"style": {}
+				},
+				{
+					"path": "articleList/articleList",
+					"style": {}
+				},
+				{
+					"path": "articleDetail/articleDetail",
+					"style": {}
+				},
+				{
+					"path": "article/article",
+					"style": {}
+				},
+				{
+					"path": "failpage/failpage",
+					"style": {}
+				},
+				{
+					"path": "healthQuestionnaire/healthQuestionnaire",
+					"style": {}
+				},
+				{
+					"path": "indicatorsDetails/dietDetail/dietDetail",
+					"style": {}
+				},
+				{
+					"path": "healthNav/healthNav",
+					"style": {}
+				},
+				{
+					"path": "shop/shopHome",
+					"style": {}
+				},
+				{
+					"path": "shop/shopDetail",
+					"style": {}
+				},
+
+				{
+					"path": "shop/foodMaterial",
+					"style": {}
+				},
+				{
+					"path": "chooseFood/chooseFood",
+					"style": {}
+				},
+				{
+					"path": "chooseFood/myFoodList",
+					"style": {}
+				},
+				{
+					"path": "chooseFood/myFoodsInfo",
+					"style": {}
+				}
+			]
+		},
+		{
+			// 健康百科中的页面
+			"root": "pediaPages",
+			"pages": [{
+				"path": "hospitalOverview/hospitalOverview",
+				"style": {
+					"navigationBarBackgroundColor": "#0094ff",
+					"navigationBarTitleText": "医院简介",
+					"transparentTitle": "auto"
+				}
+			}, {
+				"path": "HospitalList/HospitalList",
+				"style": {
+					"navigationBarTitleText": "列表",
+					"enablePullDownRefresh": true
+				}
+
+			}]
+		},
+		{
+			"root": "publicPages",
+			"pages": [{
+					"path": "accountExec/accountExec",
+					"style": {
+						"navigationBarTitleText": "登录"
+					}
+				},
+				{
+					"path": "list/list",
+					"style": {
+						"navigationBarTitleText": "列表"
+					}
+				},
+				{
+					"path": "webviewPage/webviewPage",
+					"style": {
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "mapPage/mapPage",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationBarTitleText": "位置选择"
+					}
+				}, {
+					"path": "newForm/newForm",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+				}
+			]
+		}
+	],
+	"tabBar": {
+		"color": "#999", //文字颜色
+		"selectedColor": "#facc31", //选中时文字颜色
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [{
+				"pagePath": "pages/pedia/pedia", //页面路径
+				"iconPath": "/static/icon/baodian.png", //图标路径
+				"selectedIconPath": "static/icon/baodian_selected.png", //选中状态图标路径
+				"text": "宝典" //显示文字
+			},
+			{
+				"pagePath": "pages/archives/archives",
+				"iconPath": "/static/icon/geren.png",
+				"selectedIconPath": "static/icon/geren_selected.png",
+				"text": "个人"
+			},
+			{
+				"pagePath": "pages/store/store",
+				"iconPath": "/static/icon/shenghuo.png",
+				"selectedIconPath": "static/icon/shenghuo_selected.png",
+				"text": "生活"
+			},
+			{
+				"pagePath": "pages/personal/personal",
+				"iconPath": "/static/icon/wode.png",
+				"selectedIconPath": "static/icon/wode_selected.png",
+				"text": "我的"
+			}
+		]
+	},
+	"easycom": {
+		"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue"
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "",
+		"navigationBarBackgroundColor": "#0bc99d",
+		"backgroundColor": "#F8F8F8"
+	}
+}

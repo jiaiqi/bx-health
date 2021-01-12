@@ -476,19 +476,19 @@
 					</view>
 					<view class="content">
 						<view class="diet-item" v-for="item in recentDiet" :key="item.diet_record_no">
-							<image :src="getImagePath(item.image)" mode="aspectFill" class="image"></image>
+							<image :src="getImagePath(item.image)" mode="aspectFill" class="image" @click="changeChecked(item)"></image>
 							<view class="info">
 								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'"><text class="cuIcon-check text-bold" v-if="item.checked"></text></view>
-								<view class="food-name">{{ item.name }}</view>
+								<view class="food-name" @click="changeChecked(item)">{{ item.name }}</view>
 								<view class="food-info">
 									<view class="amount">
-										<text class="separator" @click="calc(item, 'minus')">-</text>
+										<text class="separator" @click.stop="calc(item, 'minus')">-</text>
 										<text type="number" class="input">{{ item.amount }}</text>
 										<!-- <input type="number" class="input" v-model="item.amount" /> -->
-										<text class="separator" @click="calc(item, 'add')">+</text>
+										<text class="separator" @click.stop="calc(item, 'add')">+</text>
 										<!-- <text class="number"></text> -->
 									</view>
-									<text class="text-left margin-left-xs">{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}</text>
+									<text class="text-left margin-left-xs" @click="changeChecked(item)">{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}</text>
 								</view>
 							</view>
 						</view>
@@ -921,7 +921,7 @@ export default {
 				}
 			],
 			recentDietMode: 'edit',
-			recentDiet:[],
+			recentDiet: [],
 			energyList: []
 		};
 	},
@@ -2807,8 +2807,8 @@ export default {
 			}
 			uni.setStorageSync('user_info_list', res.data.data);
 		},
-		hideModal(){
-			this.modalName = ''
+		hideModal() {
+			this.modalName = '';
 		},
 		async getUserInfo() {
 			let url = this.$api.getUserInfo;
@@ -2909,7 +2909,7 @@ export default {
 				colNames: ['*'],
 				page: {
 					pageNo: 1,
-					rownumber: 5
+					rownumber: 10
 				},
 				condition: [
 					{
@@ -2944,7 +2944,7 @@ export default {
 				e.amount = Number((e.amount + step).toFixed(1));
 			}
 			this.$set(e, 'amount', e.amount);
-		},
+		}
 	},
 	created() {
 		let symptomList = uni.getStorageSync('symptomList');
@@ -4325,10 +4325,10 @@ uni-checkbox::before {
 }
 .recent-diet {
 	padding: 20rpx;
-	min-height: 600rpx;
 	text-align: left;
 	display: flex;
 	flex-direction: column;
+	min-height: 1200rpx;
 	.title-bar {
 		width: 100%;
 		display: flex;
@@ -4337,22 +4337,21 @@ uni-checkbox::before {
 		padding: 0 0 20rpx;
 	}
 	.content {
-		flex: 1;
-		margin: 20rpx 0 40rpx;
+		margin: 0 0 20rpx;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
 	}
 	.diet-item {
-		display: inline-flex;
-		// flex-direction: column;
+		display: flex;
+		height: 180rpx;
 		width: calc(50% - 10rpx);
-		// width: calc(33% - (40rpx/3));
 		margin-right: 20rpx;
-		// height:250rpx;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		text-align: center;
 		border-radius: 10rpx;
 		overflow: hidden;
 		margin-bottom: 10rpx;
-		// min-height: 150rpx;
 		.info {
 			display: flex;
 			flex-direction: column;
@@ -4380,12 +4379,17 @@ uni-checkbox::before {
 		// }
 		.image {
 			width: 160rpx;
-			height: 140rpx;
+			height: 180rpx;
 		}
 		.food-name {
 			font-weight: bold;
 			text-align: left;
 			text-indent: 20rpx;
+			// text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow-x: scroll;
+			max-width: 180rpx;
+			flex: 1;
 		}
 		.food-info {
 			display: flex;
@@ -4426,7 +4430,7 @@ uni-checkbox::before {
 	}
 	.footer {
 		text-align: center;
-		margin-bottom: 20rpx;
+		margin-bottom: 40rpx;
 		.cu-btn {
 			min-width: 45%;
 		}

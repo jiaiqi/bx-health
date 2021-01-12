@@ -77,6 +77,8 @@ export default {
 	},
 	computed: {
 		...mapState({
+			loginUserInfo: state => state.user.loginUserInfo,
+			wxUserInfo: state => state.user.wxUserInfo,
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize
 		})
@@ -481,13 +483,6 @@ export default {
 					});
 				}
 			}
-			// if (e.no && e.name && this.currentNodeNo !== e.no) {
-
-			// 	this.currentNodeNo = e.no;
-			// 	this.currentNodes = e.name;
-			// 	this.geteChartsData();
-			// 	this.changeLinkPath(e);
-			// }
 		},
 		changeLinkPath(e) {
 			let arr = this.linkPath;
@@ -552,30 +547,6 @@ export default {
 		async getVideoInfo(vid) {
 			var that = this;
 			var urlString = 'https://vv.video.qq.com/getinfo?otype=json&appver=3.2.19.333&platform=11&defnpayver=1&vid=' + vid;
-			// wx.request({
-			// 	url: urlString,
-			// 	success: function(res) {
-			// 		var dataJson = res.data.replace(/QZOutputJson=/, '') + 'qwe';
-			// 		var dataJson1 = dataJson.replace(/;qwe/, '');
-			// 		var data = JSON.parse(dataJson1);
-			// 		var fn_pre = data.vl.vi[0].lnk;
-			// 		var host = data['vl']['vi'][0]['ul']['ui'][0]['url'];
-			// 		var streams = data['fl']['fi'];
-			// 		var seg_cnt = data['vl']['vi'][0]['cl']['fc'];
-			// 		if (parseInt(seg_cnt) == 0) {
-			// 			seg_cnt = 1;
-			// 		}
-			// 		var best_quality = streams[streams.length - 1]['name'];
-			// 		var part_format_id = streams[streams.length - 1]['id'];
-			// 		var pageArr = [];
-			// 		for (var i = 1; i < seg_cnt + 1; i++) {
-			// 			var filename = fn_pre + '.p' + (part_format_id % 10000) + '.' + i + '.mp4';
-			// 			console.log(filename);
-			// 			pageArr.push(i);
-			// 			that.requestVideoUrls(part_format_id, vid, filename, 'index' + i, host);
-			// 		}
-			// 	}
-			// });
 			let res = await uni.request({
 				url: urlString
 			});
@@ -629,10 +600,22 @@ export default {
 			}
 		}
 	},
-
-	onLoad(options) {
-		if (options.currentNodeNo) {
-			this.currentNodeNo = options.currentNodeNo;
+	onShareAppMessage() {
+		let path = '';
+		let title = '百想健康';
+		if (this.loginUserInfo && this.loginUserInfo.user_no && this.nodeDetail && this.nodeDetail.kn_no) {
+			path = `/archivesPages/RelationGraph/RelationGraph?currentNodeNo=${this.nodeDetail.kn_no}&from=share&option.invite_user_no=${this.loginUserInfo.userno}`;
+			title = `【${this.nodeDetail.node_name ? this.nodeDetail.node_name : '健康'}】知识图谱`;
+		}
+		return {
+			title: title,
+			path: path
+		};
+	},
+	onLoad(option) {
+		this.checkOptionParams(option);
+		if (option.currentNodeNo) {
+			this.currentNodeNo = option.currentNodeNo;
 		}
 		this.geteChartsData();
 	},

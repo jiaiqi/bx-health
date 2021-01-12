@@ -1368,7 +1368,38 @@ export default {
 
 			}
 		}
+		Vue.prototype.selectBasicUserInfo = async () => {
+			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_select', 'select')
+			let req = {
+				"serviceName": "srvhealth_person_info_select",
+				"colNames": ["*"],
+				"condition": [{
+					"colName": "create_user",
+					"ruleType": "eq",
+					"value": uni.getStorageSync('login_user_info').user_no
+				}],
+				"page": {
+					"pageNo": 1,
+					"rownumber": 2
+				},
+			}
+			let res = await Vue.prototype.$http.post(url, req)
+			if(res.data&&Array.isArray(res.data.data)&&res.data.data.length>0){
+				Vue.prototype.$store.commit('SET_USERINFO',res.data.data[0])
+				Vue.prototype.$store.commit('SET_USERLIST',res.data.data)
+				uni.setStorageSync('current_user_info', res.data.data[0]);
+				uni.setStorageSync('current_user', res.data.data[0].name);
+				return res.data.data[0]
+			}else{
+				return false
+			}
+		}
 		Vue.prototype.toAddPage = async () => {
+			let data =await Vue.prototype.selectBasicUserInfo()
+			if(data){
+				// 已有用户信息
+				return
+			}
 			let wxUserInfo = ''
 			if (Vue.prototype.$store && Vue.prototype.$store.state && Vue.prototype.$store.state.user) {
 				wxUserInfo = Vue.prototype.$store.state.user.wxUserInfo
@@ -1380,13 +1411,26 @@ export default {
 					"userno": uni.getStorageSync('login_user_info').user_no,
 					"name": wxUserInfo ? wxUserInfo.nickname : "",
 					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
-					"user_image": wxUserInfo ? wxUserInfo.headimgurl : "",
+					"user_image": "",
 					"sex": wxUserInfo ? (wxUserInfo.sex === 0 ? "男" : wxUserInfo.sex === 1 ? "女" : "") : "",
-					"is_main": "是"
+					"is_main": "是",
+					"font_size": "中"
 				}]
 			}]
+			try {
+				if (Vue.prototype.$store.state.app.inviterInfo.invite_user_no) {
+					req[0].data[0].invite_user_no = Vue.prototype.$store.state.app.inviterInfo.invite_user_no
+				}
+				if (Vue.prototype.$store.state.app.inviterInfo.add_url) {
+					req[0].data[0].add_url = Vue.prototype.$store.state.app.inviterInfo.add_url
+				}
+			} catch (e) {
+				//TODO handle the exception
+			}
 			let res = await Vue.prototype.$http.post(url, req)
-			if (res.data && res.data.resultCode === "SUCCESS") {} else {
+			if (res.data && res.data.resultCode === "SUCCESS") {
+				console.log("信息登记成功")
+			} else {
 				uni.showModal({
 					title: '提示',
 					content: '当前账号未登记个人信息，是否跳转到信息登记页面',
@@ -1407,6 +1451,24 @@ export default {
 									}]
 								}
 							];
+							try {
+								if (Vue.prototype.$store.state.app.inviterInfo.invite_user_no) {
+									fieldsCond.push({
+										column: 'invite_user_no',
+										display: false,
+										value: Vue.prototype.$store.state.app.inviterInfo.invite_user_no
+									})
+								}
+								if (Vue.prototype.$store.state.app.inviterInfo.add_url) {
+									fieldsCond.push({
+										column: 'add_url',
+										display: false,
+										value: Vue.prototype.$store.state.app.inviterInfo.add_url
+									})
+								}
+							} catch (e) {
+								//TODO handle the exception
+							}
 							let userInfo = uni.getStorageSync('wxUserInfo');
 							if (userInfo && userInfo.headimgurl) {
 								fieldsCond = fieldsCond.map(item => {
@@ -1474,7 +1536,7 @@ export default {
 		// 	}
 		// 	return res.data.data ? res.data.data : [];
 		// }
-		
+
 		Vue.prototype.getImagePath = (no) => {
 			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
 				return no
@@ -1488,11 +1550,11 @@ export default {
 				return false
 			}
 		}
-		
+
 		Vue.prototype.requestSuccess = (res) => {
 			return res.data.state === 'SUCCESS' && Array.isArray(res.data.data)
 		}
-		
+
 		Vue.prototype.getImageInfo = (item) => {
 			return new Promise((resolve, reject) => {
 				wx.getImageInfo({
@@ -1553,7 +1615,7 @@ export default {
 				}
 			}
 		}
-		
+
 		Vue.prototype.delNotChineseChar = (str) => {
 			// 去掉非中文字符
 			if (str) {

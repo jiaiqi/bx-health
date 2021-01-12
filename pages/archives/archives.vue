@@ -244,7 +244,7 @@
 
 <script>
 import energyListWrap from '@/static/js/element_info.js';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import dayjs from '@/static/js/dayjs.min.js';
 export default {
 	data() {
@@ -299,6 +299,9 @@ export default {
 		}
 	},
 	computed: {
+		...mapState({
+			inviterInfo: state => state.app.inviterInfo
+		}),
 		...mapGetters({
 			authSetting: 'authSetting',
 			is_login: 'isLogin',
@@ -1307,7 +1310,6 @@ export default {
 					column: 'userno',
 					display: false
 					// value: uni.getStorageSync('login_user_info').user_no,
-					// condition: [{ colName: 'user_no', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }]
 				}
 			];
 			let wxUserInfo = uni.getStorageSync('wxUserInfo');
@@ -1359,7 +1361,8 @@ export default {
 			uni.stopPullDownRefresh();
 		});
 	},
-	onLoad() {
+	onLoad(option) {
+		this.checkOptionParams(option);
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({
 			withShareTicket: true,
@@ -1387,6 +1390,12 @@ export default {
 		if (score) {
 			this.healthTotalScore = score;
 		}
+	},
+	onShareAppMessage(res) {
+		return {
+			title: `${this.userInfo.name}邀请您体验小程序`,
+			path: `/pages/archives/archives?from=share&option.invite_user_no=${this.userInfo.userno}`
+		};
 	},
 	onShow() {
 		if (this.is_login) {

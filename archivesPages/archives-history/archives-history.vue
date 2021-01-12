@@ -178,7 +178,7 @@
 									<view class="heart_rate">
 										<view class="data">
 											<text class="label cuIcon-likefill text-red margin-right-xs"></text>
-											<text class="value">{{item.heart_rate||'-'}}次/分</text>
+											<text class="value">{{ item.heart_rate || '-' }}次/分</text>
 										</view>
 									</view>
 								</view>
@@ -442,12 +442,12 @@ export default {
 		deleteItem(e) {
 			let serviceName = '';
 			let req = [];
-			let self = this
+			let self = this;
 			uni.showModal({
-				title:'提示',
-				content:'是否删除此条数据',
+				title: '提示',
+				content: '是否删除此条数据',
 				success(res) {
-					if(res.confirm){
+					if (res.confirm) {
 						switch (self.pageType) {
 							case 'weight': //体重
 								serviceName = 'srvhealth_body_fat_measurement_record_delete';
@@ -473,7 +473,7 @@ export default {
 						});
 					}
 				}
-			})
+			});
 		},
 		getFixedNum(num) {
 			if (num) {
@@ -517,8 +517,6 @@ export default {
 					url = '/otherPages/dietSelect/dietSelect?condType=' + encodeURIComponent(JSON.stringify(condType));
 					break;
 				case 'symptom':
-					// let term = { serviceName: 'srvhealth_self_symptoms_select', srvApp: 'health', key: 'name', type: 'symptom' };
-					// url = '/otherPages/symptomSelect/symptomSelect?term=' + JSON.stringify(term);
 					let fieldsCond = [
 						{ column: 'info_no', value: this.vuex_userInfo.no, condition: [{ colName: 'no', ruleType: 'eq', value: this.vuex_userInfo.no }] },
 						{ column: 'user_account', value: this.vuex_userInfo.userno }
@@ -528,8 +526,15 @@ export default {
 			}
 			this.showPopup = false;
 			if (e !== 'food' && e !== 'sport') {
-				if (e === 'pressure') {
-					e = bp;
+				if (e === 'pressure' || e === 'bp') {
+					e = 'bp';
+					url = '/otherPages/otherIndicator/otherIndicator?type=' + e;
+					if (this.historyRecord.length > 0) {
+						let data = this.historyRecord[0];
+						url = `/otherPages/otherIndicator/otherIndicator?type=${e}&systolic_pressure=${data['systolic_pressure']}&diastolic_pressure=${data['diastolic_pressure']}&heart_rate=${
+							data['heart_rate']
+						}`;
+					}
 				}
 				if (url) {
 					uni.navigateTo({
@@ -1765,13 +1770,13 @@ export default {
 							flex: 1;
 							align-items: center;
 						}
-						.heart_rate{
+						.heart_rate {
 							padding: 0 20rpx;
 							display: flex;
 							flex: 1;
 							align-items: center;
 							justify-content: flex-end;
-							.data{
+							.data {
 								font-size: 26rpx;
 								width: 140rpx;
 							}

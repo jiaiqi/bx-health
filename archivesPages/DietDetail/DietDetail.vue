@@ -10,7 +10,14 @@
 		</view>
 		<diet-info :dietInfo="dietInfo"></diet-info>
 		<element-detail ref="elementDetail" :dietInfo="dietInfo" :dietList="dietRecordList" :userInfo="userInfo"></element-detail>
-		<handler-bar :dietInfo="dietInfo" :cook-method="cook_method" @checkUnit="checkUnit" @changeCookMethod="chooseCookType" @changeDiningType="changeDiningType" @changeAmount="changeAmount"></handler-bar>
+		<handler-bar
+			:dietInfo="dietInfo"
+			:cook-method="cook_method"
+			@checkUnit="checkUnit"
+			@changeCookMethod="chooseCookType"
+			@changeDiningType="changeDiningType"
+			@changeAmount="changeAmount"
+		></handler-bar>
 		<view class="button-box">
 			<view class="btn bg-grey" @click="cancel">取消</view>
 			<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
@@ -49,7 +56,7 @@ export default {
 			food_no: '', //食物编号
 			meal_no: '', //混合食物编号
 			dietInfo: {},
-			cook_method:'',
+			cook_method: '',
 			dietRecordList: [],
 			backUrl: '',
 			dining_type: '早餐'
@@ -59,9 +66,6 @@ export default {
 		cancel() {
 			//取消
 			uni.navigateBack();
-			// uni.redirectTo({
-			// 	url: this.backUrl
-			// });
 		},
 		async addDietRecord() {
 			let self = this;
@@ -363,11 +367,11 @@ export default {
 					this.dietInfo = res.data.data[0];
 					this.dietRecordList = res.data.data;
 				}
-				if(this.dietInfo.cook_method_default){
-					this.cook_method = this.dietInfo.cook_method_default
+				if (this.dietInfo.cook_method_default) {
+					this.cook_method = this.dietInfo.cook_method_default;
 				}
-				if(this.dietInfo.diet_record_no&&this.dietInfo.cook_method){
-					this.cook_method = this.dietInfo.cook_method
+				if (this.dietInfo.diet_record_no && this.dietInfo.cook_method) {
+					this.cook_method = this.dietInfo.cook_method;
 				}
 			}
 		},
@@ -394,12 +398,11 @@ export default {
 		},
 		chooseCookType(e) {
 			// 选择食物烹调方式
-			this.cook_method = e
+			this.cook_method = e;
 		},
 		checkUnit(currentUnit) {
 			// 切换单位
 			// let currentUnit = this.unitList[index];
-			//TODO 动态改变热量
 			this.dietInfo.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
 			if (currentUnit.unit === 'g') {
 				this.dietInfo.unit_energy = currentUnit.unit_energy;
@@ -459,7 +462,30 @@ export default {
 			});
 		}
 	},
+	onShareAppMessage(res) {
+		let path = '';
+		let title = '百想健康';
+		if (this.userInfo && this.userInfo.no) {
+			let no = this.dietInfo.food_no ? this.dietInfo.food_no : this.dietInfo.diet_record_no ? this.dietInfo.diet_record_no : this.dietInfo.diet_contents_no;
+			if (no) {
+				path = `/archivesPages/DietDetail/DietDetail?chooseDate=${this.formateDate()}&no=${no}&from=share&option.invite_user_no=${this.userInfo.userno}`;
+			} else {
+				return;
+			}
+			title = `【${this.dietInfo.name}】`;
+		}
+		return {
+			title: title,
+			path: path
+		};
+	},
 	onLoad(option) {
+		// #ifdef MP-WEIXIN
+		wx.showShareMenu({
+			withShareTicket: true,
+			menus: ['shareAppMessage', 'shareTimeline']
+		});
+		// #endif
 		if (option.planNo) {
 			this.planNo = option.planNo;
 		}

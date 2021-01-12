@@ -27,6 +27,9 @@
 			<view class="unit-box">
 				<text class="label text-bold margin-right-xs">单位:</text>
 				<text class="unit">
+					{{unit}}
+				</text>
+			<!-- 	<text class="unit">
 					{{
 						dietInfo.unit_weight_g && dietInfo.unit === 'g'
 							? dietInfo.unit_weight_g + dietInfo.unit
@@ -34,7 +37,7 @@
 							? dietInfo.unit_amount + dietInfo.unit
 							: dietInfo.unit
 					}}
-				</text>
+				</text> -->
 			</view>
 		</view>
 	</view>
@@ -55,6 +58,17 @@ export default {
 		}
 	},
 	computed: {
+		unit(){
+			if(this.dietInfo){
+				if(this.dietInfo.unit){
+					if(this.dietInfo.unit==='g'&&this.dietInfo.unit_amount){
+						return this.dietInfo.unit_amount + 'g'
+					}else{
+						return this.dietInfo.unit
+					}
+				}
+			}
+		},
 		// hotNum() {
 		// 	let res = '';
 		// 	if (this.dietInfo.energy) {

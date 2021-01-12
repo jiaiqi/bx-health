@@ -24,7 +24,9 @@ const state = {
 	sickItem: "",
 	symptomArr: [],
 	doctorInfo: getItem('doctorInfo') ? getItem('doctorInfo') : {},
-	dietRecord: getItem('dietRecord') ? getItem('dietRecord') : []
+	dietRecord: getItem('dietRecord') ? getItem('dietRecord') : [],
+	pageInfo:getItem('pageInfo') ? getItem('pageInfo') : {},
+	inviterInfo:getItem('inviterInfo') ? getItem('inviterInfo') : {} //邀请人
 }
 let persistData = {}; //持久化数据
 const mutations = {
@@ -36,8 +38,7 @@ const mutations = {
 	},
 	setSrvCol: (state, data) => {
 		state.srvCol.push(data)
-		persistData['srvCol'] = state.srvCol
-		uni.setStorageSync('persistData', persistData)
+		setItem('srvCol', state.srvCol)
 	},
 	delSrvCol: (state, data) => {
 		let fils = state.srvCol.filter(item => item.service_name !== data)
@@ -75,6 +76,14 @@ const mutations = {
 	SET_DIET_RECORD: (state, record) => {
 		state.dietRecord = record
 		setItem('dietRecord', record)
+	},
+	SET_PAGE_INFO: (state, pageInfo) => {
+		state.pageInfo = pageInfo
+		setItem('pageInfo', pageInfo)
+	},
+	SET_INVITER_INFO: (state, inviterInfo) => {
+		state.inviterInfo = inviterInfo
+		setItem('inviterInfo', inviterInfo)
 	}
 }
 

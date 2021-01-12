@@ -245,6 +245,7 @@ export default {
 		}, 1000);
 	},
 	async onLoad(option) {
+		this.checkOptionParams(option)
 		if (!this.userInfo || !this.userInfo.no) {
 			const result = await wx.login();
 			let userInfo = uni.getStorageSync('current_user_info');
@@ -274,19 +275,10 @@ export default {
 		}
 	},
 	onShareAppMessage(res) {
-		if (res.from === 'button') {
-			// 来自页面内分享按钮
-			// console.log(res.target);
-			return {
-				title: `${this.userInfo.name}邀请加入${this.groupInfo.name}`
-				// imageUrl:this.groupQrCode
-			};
-		}
-
-		// return {
-		// 	title: '自定义分享标题',
-		// 	path: '/pages/test/test?id=123'
-		// };
+		return {
+			title: `${this.userInfo.name}邀请加入${this.groupInfo.name}`,
+			path:`/personalPages/groupDetail/groupDetail?from=share&option.invite_user_no=${this.userInfo.userno}`
+		};
 	}
 };
 </script>

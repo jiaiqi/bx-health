@@ -112,7 +112,7 @@
 				</view>
 				<view class="item-list">
 					<text>心率</text>
-					<slider-number v-model="inputVal.heart_rate" :max="200" :min="30" :step="0.1"></slider-number>
+					<slider-number v-model="inputVal.heart_rate" :max="200" :min="30"></slider-number>
 					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.heart_rate" /></view> -->
 				</view>
 				<view class="item-list">
@@ -670,6 +670,12 @@ export default {
 		if (option.planNo) {
 			this.planNo = option.planNo;
 		}
+		let arr = ['systolic_pressure','diastolic_pressure','heart_rate']
+		arr.forEach(key=>{
+			if(option[key]){
+				this.inputVal[key] = Number(option[key])
+			}
+		})
 		if (option && option.type) {
 			this.type = option.type;
 		}

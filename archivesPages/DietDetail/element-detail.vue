@@ -258,7 +258,9 @@ export default {
 					let ratio = 1;
 					if (diet['unit'] === 'g') {
 						if (diet.unit_amount) {
-							ratio = (diet.unit_weight_g * diet.amount) / diet.unit_amount;
+							// ratio = (diet.unit_weight_g * diet.amount) 
+							// / diet.unit_amount;
+							ratio = diet.amount;
 						} else if (diet.unit_weight_g) {
 							ratio = diet.amount;
 						}
@@ -269,7 +271,7 @@ export default {
 							ratio = diet.amount;
 						}
 					} else {
-						ratio = (diet.unit_weight_g * diet.amount) / 100;
+						ratio = (diet.unit_weight_g * diet.amount) / (diet.unit_amount?diet.unit_amount:100);
 					}
 					ele.value = ele.value + diet[ele['key']] * ratio;
 				});

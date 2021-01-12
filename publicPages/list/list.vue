@@ -655,35 +655,6 @@ export default {
 			});
 			return colVs;
 		}
-	},
-
-	onShareAppMessage(res) {
-		if (res.target.dataset.info.button_type === 'applyProc' && res.target.dataset.info.button_name === '邀请' && res.target.dataset.procno) {
-			return {
-				title: '绑定住户邀请',
-				path: '/pages/specific/shareBind/shareBind?proc_instance_no=' + res.target.dataset.procno
-			};
-		} else if (
-			res.target.dataset.info.button_type === 'customize' &&
-			(res.target.dataset.info.button_name == '邀请绑定' ||
-				res.target.dataset.info.button_name == '重新绑定' ||
-				res.target.dataset.info.button_name == '邀请绑定账号' ||
-				res.target.dataset.info.button_name == '重新绑定账号') &&
-			res.target.dataset.id
-		) {
-			return {
-				title: '绑定住户邀请',
-				path: '/pages/specific/shareBind/shareBind?dataid=' + res.target.dataset.id + '&serviceName=srvzhxq_member_update'
-			};
-		} else {
-			return {
-				title: '分享测试',
-				path: '/pages/public/proc/procDetail/procDetail?proc_instance_no=' + res.target.dataset.procno
-			};
-		}
-	},
-	onShareTimeline(res) {
-		console.log(res);
 	}
 };
 </script>
