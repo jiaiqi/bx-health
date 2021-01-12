@@ -18,7 +18,7 @@
 						</view>
 						<view class="action">
 							<text style="margin-right: 20rpx;" @click="search">搜索</text>
-							<text @click="showRecent" v-if="!this.pageDetType">历史</text>
+							<!-- <text @click="showRecent" v-if="!this.pageDetType">历史</text> -->
 						</view>
 					</view>
 				</view>
@@ -311,7 +311,7 @@ export default {
 		return {
 			planNo: null,
 			recentDiet: [],
-			recentDietMode: 'edit',
+			// recentDietMode: 'edit',
 			heightStyle: 'calc(100vh-200upx)',
 			isSeekValue: true, // 是否搜索到内容
 			chooseFoods: [],
@@ -1036,109 +1036,109 @@ export default {
 		}
 	},
 	methods: {
-		changeChecked(item) {
-			item.checked = !item.checked;
-			this.$set(item, 'checked', item.checked);
-		},
-		calc(e, type, step = 1) {
-			if (type === 'minus') {
-				if (e.amount - step > 0) {
-					e.amount = Number((e.amount - step).toFixed(1));
-				} else {
-					return;
-				}
-			} else {
-				e.amount = Number((e.amount + step).toFixed(1));
-			}
-			this.$set(e, 'amount', e.amount);
-		},
-		async insertIntoDietRecord() {
-			let url = this.getServiceUrl('health', 'srvhealth_diet_record_add', 'operate');
-			let list = this.deepClone(this.checkedRecentDiet);
-			let req = [
-				{
-					serviceName: 'srvhealth_diet_record_add',
-					colNames: ['*'],
-					data: list.map(item => {
-						delete item._userno_disp;
-						delete item.checked;
-						delete item.amountEditable;
-						item.hdate = this.selectDate;
-						item.htime = this.nowDateTime;
-						return item;
-					})
-				}
-			];
-			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS') {
-				uni.showToast({
-					title: '添加成功'
-				});
-				this.modalName = '';
-				this.getChooseFoodList();
-				// 通知健康追踪页面，饮食记录已改变，需要刷新数据
-				uni.$emit('dietUpdate');
-			}
-		},
-		selectAll(e) {
-			if (e) {
-				this.recentDiet.forEach(item => {
-					item.checked = true;
-				});
-			} else {
-				this.recentDiet.forEach(item => {
-					item.checked = !item.checked;
-				});
-			}
-		},
-		changeRecentDietMode() {
-			if (this.recentDietMode === 'edit') {
-				this.recentDietMode = 'view';
-			} else {
-				this.recentDietMode = 'edit';
-			}
-		},
-		showRecent() {
-			// 显示近期饮食弹窗。
-			this.getRecentDiet().then(data => {
-				if (Array.isArray(data) && data.length > 0) {
-					this.modalName = 'recent';
-				} else {
-					uni.showToast({
-						title: '未找到您的历史饮食记录',
-						icon: 'none'
-					});
-				}
-			});
-		},
-		async getRecentDiet() {
-			// 查找最近的饮食记录
-			let req = {
-				serviceName: 'srvhealth_diet_contents_newest_select',
-				colNames: ['*'],
-				page: {
-					pageNo: 1,
-					rownumber: 5
-				},
-				condition: [
-					{
-						colName: 'person_info_no',
-						ruleType: 'eq',
-						// value: 'PB2020121720080116'
-						value: this.vuex_userInfo.no
-					}
-				]
-			};
-			let res = await this.onRequest('select', 'srvhealth_diet_contents_newest_select', req, 'health');
-			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
-				this.recentDiet = res.data.data.map(item => {
-					item.checked = false;
-					item.amountEditable = false;
-					return item;
-				});
-				return res.data.data;
-			}
-		},
+		// changeChecked(item) {
+		// 	item.checked = !item.checked;
+		// 	this.$set(item, 'checked', item.checked);
+		// },
+		// calc(e, type, step = 1) {
+		// 	if (type === 'minus') {
+		// 		if (e.amount - step > 0) {
+		// 			e.amount = Number((e.amount - step).toFixed(1));
+		// 		} else {
+		// 			return;
+		// 		}
+		// 	} else {
+		// 		e.amount = Number((e.amount + step).toFixed(1));
+		// 	}
+		// 	this.$set(e, 'amount', e.amount);
+		// },
+		// async insertIntoDietRecord() {
+		// 	let url = this.getServiceUrl('health', 'srvhealth_diet_record_add', 'operate');
+		// 	let list = this.deepClone(this.checkedRecentDiet);
+		// 	let req = [
+		// 		{
+		// 			serviceName: 'srvhealth_diet_record_add',
+		// 			colNames: ['*'],
+		// 			data: list.map(item => {
+		// 				delete item._userno_disp;
+		// 				delete item.checked;
+		// 				delete item.amountEditable;
+		// 				item.hdate = this.selectDate;
+		// 				item.htime = this.nowDateTime;
+		// 				return item;
+		// 			})
+		// 		}
+		// 	];
+		// 	let res = await this.$http.post(url, req);
+		// 	if (res.data.state === 'SUCCESS') {
+		// 		uni.showToast({
+		// 			title: '添加成功'
+		// 		});
+		// 		this.modalName = '';
+		// 		this.getChooseFoodList();
+		// 		// 通知健康追踪页面，饮食记录已改变，需要刷新数据
+		// 		uni.$emit('dietUpdate');
+		// 	}
+		// },
+		// selectAll(e) {
+		// 	if (e) {
+		// 		this.recentDiet.forEach(item => {
+		// 			item.checked = true;
+		// 		});
+		// 	} else {
+		// 		this.recentDiet.forEach(item => {
+		// 			item.checked = !item.checked;
+		// 		});
+		// 	}
+		// },
+		// changeRecentDietMode() {
+		// 	if (this.recentDietMode === 'edit') {
+		// 		this.recentDietMode = 'view';
+		// 	} else {
+		// 		this.recentDietMode = 'edit';
+		// 	}
+		// },
+		// showRecent() {
+		// 	// 显示近期饮食弹窗。
+		// 	this.getRecentDiet().then(data => {
+		// 		if (Array.isArray(data) && data.length > 0) {
+		// 			this.modalName = 'recent';
+		// 		} else {
+		// 			uni.showToast({
+		// 				title: '未找到您的历史饮食记录',
+		// 				icon: 'none'
+		// 			});
+		// 		}
+		// 	});
+		// },
+		// async getRecentDiet() {
+		// 	// 查找最近的饮食记录
+		// 	let req = {
+		// 		serviceName: 'srvhealth_diet_contents_newest_select',
+		// 		colNames: ['*'],
+		// 		page: {
+		// 			pageNo: 1,
+		// 			rownumber: 5
+		// 		},
+		// 		condition: [
+		// 			{
+		// 				colName: 'person_info_no',
+		// 				ruleType: 'eq',
+		// 				// value: 'PB2020121720080116'
+		// 				value: this.vuex_userInfo.no
+		// 			}
+		// 		]
+		// 	};
+		// 	let res = await this.onRequest('select', 'srvhealth_diet_contents_newest_select', req, 'health');
+		// 	if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
+		// 		this.recentDiet = res.data.data.map(item => {
+		// 			item.checked = false;
+		// 			item.amountEditable = false;
+		// 			return item;
+		// 		});
+		// 		return res.data.data;
+		// 	}
+		// },
 		/*点击前往反馈页面**/
 		tofeedback() {
 			let no = null;
