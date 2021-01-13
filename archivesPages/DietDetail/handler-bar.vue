@@ -1,6 +1,6 @@
 <template>
 	<view class="handler-bar">
-		<view class="cook-type-box" v-if="dietInfo">
+		<view class="cook-type-box" v-if="dietInfo&& dietInfo.diret_type!=='mixed_food'">
 			<view class="title">烹调方式:</view>
 			<view
 				class="cook-type"
@@ -22,9 +22,7 @@
 		</view>
 		<view class="dinner-time unit-box">
 			<view class="title">单位:</view>
-			<view class="unit-item" :class="{ 'active-unit': dietInfo.unit === u.unit }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">
-				{{ u.unit_weight_g && u.unit === 'g' ? u.unit_weight_g + u.unit : u.unit_amount && u.unit === 'g' ? u.unit_amount + u.unit : u.unit }}
-			</view>
+			<view class="unit-item" :class="{ 'active-unit': dietInfo.unit === u.unit }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">{{ getUnit(u) }}</view>
 		</view>
 		<view class="amount">
 			<view class="title">数量:</view>
@@ -106,8 +104,8 @@ export default {
 			immediate: true,
 			handler(newValue, oldValue) {
 				if (!this.cook_method) {
-					this.cook_method = newValue.cook_method_default?newValue.cook_method_default:'';
-					if(this.cookMethod){
+					this.cook_method = newValue.cook_method_default ? newValue.cook_method_default : '';
+					if (this.cookMethod) {
 						this.cook_method = this.cookMethod;
 					}
 				}
@@ -121,6 +119,17 @@ export default {
 		}
 	},
 	methods: {
+		getUnit(item) {
+			if (item && item.unit && item.unit === 'g') {
+				if (item.unit_amount && item.unit_amount > 1) {
+					return item.unit_amount + 'g';
+				} else if (item.unit_weight_g && item.unit_weight_g > 1) {
+					return item.unit_weight_g + 'g';
+				}
+			} else {
+				return item.unit;
+			}
+		},
 		async getFoodUnit() {
 			// 查找当前食物的单位
 			if (!this.dietInfo.diet_record_no && !this.dietInfo.food_no && !this.dietInfo.meal_no) {
@@ -152,7 +161,7 @@ export default {
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				unitList = [...unitList, ...res.data.data];
 			}
-			
+
 			this.unitList = this.deepClone(unitList).map(item => {
 				item.label = item.unit_weight_g && item.unit === 'g' ? item.unit_weight_g + item.unit : item.unit_amount && item.unit === 'g' ? item.unit_amount + item.unit : item.unit;
 				item.value = item.label;
@@ -171,7 +180,7 @@ export default {
 					};
 				});
 			}
-			
+
 			if (this.dietInfo.cook_method) {
 				if (!this.defaultCookTypes.find(item => item.value === this.dietInfo.cook_method)) {
 					let arr = this.dietInfo.cook_method.split(',');
@@ -266,17 +275,6 @@ export default {
 		flex-wrap: wrap;
 		align-items: center;
 		.cook-type {
-			// margin: 0 10rpx;
-			// border-radius: 50rpx;
-			// padding: 4rpx 20rpx;
-			// display: flex;
-			// align-items: center;
-			// justify-content: center;
-			// margin-bottom: 5px;
-			// color: #fff;
-			// border: 1px solid #f1f1f1;
-			// background-color: #f1f1f1;
-			// color: #333;
 			box-sizing: border-box;
 			margin: 10rpx 5rpx;
 			background-color: #f8f8f8;
@@ -288,7 +286,7 @@ export default {
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			font-size: 20rpx;
+			font-size: 24rpx;
 			min-width: 80rpx;
 		}
 		.current-cook-type {
@@ -322,7 +320,7 @@ export default {
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			font-size: 20rpx;
+			font-size: 24rpx;
 			min-width: 80rpx;
 		}
 		.active-unit {

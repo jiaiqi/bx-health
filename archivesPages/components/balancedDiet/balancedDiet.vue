@@ -167,7 +167,7 @@
 			<view class="main-box symptom" v-if="!pageType || pageType === 'diet'">
 				<view class="title">
 					<view class="label">饮食</view>
-					<button class="check-history cu-btn sm  line-blue" @click="showRecent">快速添加</button>
+					<button class="check-history cu-btn sm  line-blue" @click="showRecent">从选过的食物中添加</button>
 					<view class="switch-layout">
 						<text class="cuIcon-list active-layout" v-if="dietLayout === 'grid'" @click="dietLayout = 'list'"></text>
 						<text class="cuIcon-apps active-layout" v-if="dietLayout === 'list'" @click="dietLayout = 'grid'"></text>
@@ -2866,7 +2866,6 @@ export default {
 					title: '添加成功'
 				});
 				this.modalName = '';
-				this.getChooseFoodList();
 				// 通知健康追踪页面，饮食记录已改变，需要刷新数据
 				uni.$emit('dietUpdate');
 			}
@@ -2909,7 +2908,7 @@ export default {
 				colNames: ['*'],
 				page: {
 					pageNo: 1,
-					rownumber: 10
+					rownumber: 20
 				},
 				condition: [
 					{
@@ -3348,25 +3347,25 @@ export default {
 					}
 					.row {
 						padding: 0 20rpx;
+						margin-bottom: 10rpx;
 						.readonly {
 							width: 100%;
 							display: flex;
 							min-height: 120rpx;
 							align-items: center;
+							box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+							padding-right: 20rpx;
 							&:active {
 								background-color: #f1f1f1;
 								box-shadow: 0px 0px 20px 8px #f1f1f1;
 							}
 							// box-shadow: 4px 3px 5px 0px rgba(0, 0, 0, 0.12);
 							// border-bottom: 1rpx dotted #f1f1f1;
-							.img {
+							.img.img {
 								width: 110rpx;
 								height: 110rpx;
-								padding: 1px;
 								border-radius: 10rpx;
 								overflow: hidden;
-								border: 1px solid #f1f1f1;
-								box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 							}
 							.column {
 								// flex: 1;
@@ -4328,7 +4327,7 @@ uni-checkbox::before {
 	text-align: left;
 	display: flex;
 	flex-direction: column;
-	min-height: 1200rpx;
+	height: 1200rpx;
 	.title-bar {
 		width: 100%;
 		display: flex;
@@ -4341,11 +4340,13 @@ uni-checkbox::before {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: flex-start;
+		height: 480px;
+		overflow: scroll;
 	}
 	.diet-item {
 		display: flex;
 		height: 180rpx;
-		width: calc(50% - 10rpx);
+		width: calc(50% - 15rpx);
 		margin-right: 20rpx;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		text-align: center;
@@ -4400,28 +4401,27 @@ uni-checkbox::before {
 				display: flex;
 				font-weight: normal;
 				border-radius: 4rpx;
-				height: 40rpx;
-				min-width: 40rpx;
-				line-height: 40rpx;
+				height: 50rpx;
+				line-height: 50rpx;
 				color: #333;
 				padding: 0 4rpx;
 				text-align: center;
 				// border: 1rpx solid #dcdfe6;
 				.separator {
 					display: inline-block;
-					width: 40rpx;
+					width: 50rpx;
 					background-color: #dcdfe6;
 					text-align: center;
 				}
 				.input {
 					margin: 0;
 					padding: 0;
-					height: 36rpx;
+					height: 46rpx;
 					display: inline-block;
-					line-height: 1;
 					min-height: 0;
-					min-width: 40rpx;
-					max-width: 50rpx;
+					width: 50rpx;
+					width: 50rpx;
+					line-height: 50rpx;
 					text-align: center;
 					border: 2rpx solid #dcdfe6;
 				}

@@ -614,6 +614,7 @@ export default {
 	},
 	onLoad(option) {
 		this.checkOptionParams(option);
+		this.toAddPage();
 		if (option.currentNodeNo) {
 			this.currentNodeNo = option.currentNodeNo;
 		}

@@ -20,13 +20,15 @@ const state = {
 	bx_auth_ticket: getItem('bx_auth_ticket') ? getItem('bx_auth_ticket') : "", //登录token
 	backUrl: "", //当前页面的上一级页面
 	authSetting: getItem('authSetting') ? getItem('authSetting') : {}, //微信授权信息
+	authUserInfo: getItem('authUserInfo') ? getItem('authUserInfo') : {}, //微信授权信息
 	authBoxDisplay: getItem('authBoxDisplay') ? getItem('authBoxDisplay') : '',
 	sickItem: "",
 	symptomArr: [],
 	doctorInfo: getItem('doctorInfo') ? getItem('doctorInfo') : {},
 	dietRecord: getItem('dietRecord') ? getItem('dietRecord') : [],
-	pageInfo:getItem('pageInfo') ? getItem('pageInfo') : {},
-	inviterInfo:getItem('inviterInfo') ? getItem('inviterInfo') : {} //邀请人
+	pageInfo: getItem('pageInfo') ? getItem('pageInfo') : {},
+	currentPage: '',
+	inviterInfo: getItem('inviterInfo') ? getItem('inviterInfo') : {} //邀请人
 }
 let persistData = {}; //持久化数据
 const mutations = {
@@ -54,6 +56,14 @@ const mutations = {
 				state.authBoxDisplay = true //显示授权组件
 			}
 		}
+	},
+	SET_CURRENT_PAGE: (state, url) => {
+		state.currentPage = url
+	},
+	SET_AUTH_USERINFO: (state, isAuth) => {
+		state.authUserInfo = isAuth
+		state.authBoxDisplay = !isAuth
+		setItem('authUserInfo', state.authUserInfo)
 	},
 	SET_LOGIN_STATE: (state, loginState) => {
 		state.isLogin = loginState

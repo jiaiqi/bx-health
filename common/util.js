@@ -651,6 +651,23 @@ export default {
 				if (resData.login_user_info.data) {
 					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 				}
+				// 获取用户信息
+				let infoRes = await uni.getUserInfo({
+					provider: 'weixin'
+				})
+				if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg === 'getUserInfo:ok' &&
+					infoRes[1].userInfo) {
+					Vue.prototype.$store.commit('SET_AUTH_USERINFO', true)
+				} else {
+					if (Vue.prototype.$store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
+						// 跳转到授权页面
+						Vue.prototype.$store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
+						uni.navigateTo({
+							url: '/publicPages/accountExec/accountExec'
+						})
+						return false;
+					}
+				}
 				return {
 					status: 'success',
 					response: resData
@@ -934,7 +951,6 @@ export default {
 				//TODO handle the exception
 			}
 			let userInfo = e
-
 			console.log("setWxUserInfo", userInfo)
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_basic_user_info_save', 'operate')
 			let req = [{
@@ -1369,6 +1385,15 @@ export default {
 			}
 		}
 		Vue.prototype.selectBasicUserInfo = async () => {
+			const result = await wx.login();
+			if (result.code) {
+				let res = await Vue.prototype.wxLogin({
+					code: result.code
+				});
+				if (!res) {
+					return 'fail'
+				}
+			}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_select', 'select')
 			let req = {
 				"serviceName": "srvhealth_person_info_select",
@@ -1384,19 +1409,48 @@ export default {
 				},
 			}
 			let res = await Vue.prototype.$http.post(url, req)
-			if(res.data&&Array.isArray(res.data.data)&&res.data.data.length>0){
-				Vue.prototype.$store.commit('SET_USERINFO',res.data.data[0])
-				Vue.prototype.$store.commit('SET_USERLIST',res.data.data)
+			if (res.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				Vue.prototype.$store.commit('SET_USERINFO', res.data.data[0])
+				Vue.prototype.$store.commit('SET_USERLIST', res.data.data)
 				uni.setStorageSync('current_user_info', res.data.data[0]);
 				uni.setStorageSync('current_user', res.data.data[0].name);
 				return res.data.data[0]
-			}else{
+			} else {
 				return false
 			}
 		}
+		Vue.prototype.getWxUserInfo = async (e) => {
+			// #ifdef MP-WEIXIN
+			const user = e.mp.detail;
+			if (user && user.userInfo) {
+				let rawData = {
+					nickname: user.userInfo.nickName,
+					sex: user.userInfo.gender,
+					country: user.userInfo.country,
+					province: user.userInfo.province,
+					city: user.userInfo.city,
+					headimgurl: user.userInfo.avatarUrl
+				};
+				this.setWxUserInfo(rawData);
+				this.$store.commit('SET_WX_USERINFO', rawData);
+				this.$store.commit('SET_AUTH_SETTING', {
+					type: 'userInfo',
+					value: true
+				});
+				this.$store.commit('SET_AUTH_USERINFO', true);
+				const result = await wx.login();
+				if (result.code) {
+					this.wxLogin({
+						code: result.code
+					});
+					this.initPage();
+				}
+			}
+			// #endif
+		}
 		Vue.prototype.toAddPage = async () => {
-			let data =await Vue.prototype.selectBasicUserInfo()
-			if(data){
+			let data = await Vue.prototype.selectBasicUserInfo()
+			if (data) {
 				// 已有用户信息
 				return
 			}

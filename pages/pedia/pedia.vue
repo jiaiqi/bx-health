@@ -250,6 +250,7 @@ export default {
 			if (!res.authSetting['scope.userInfo']) {
 				// 没有获取用户信息授权
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
+				this.$store.commit('SET_AUTH_USERINFO',false);
 				return;
 			} else {
 				uni.getUserInfo({
@@ -273,6 +274,7 @@ export default {
 				});
 				this.isAuthUserInfo = true;
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				this.$store.commit('SET_AUTH_USERINFO',true);
 			}
 			// #endif
 			if (!userInfo) {
@@ -368,6 +370,7 @@ export default {
 	},
 	onShow() {
 		this.initPage();
+		this.toAddPage()
 	},
 	onShareAppMessage() {
 		let path = '';

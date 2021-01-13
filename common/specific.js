@@ -36,6 +36,7 @@ export default {
 				let pageStack = getCurrentPages()
 				if(Array.isArray(pageStack)&&pageStack.length>=1){
 					let currentPage = pageStack[pageStack.length-1]
+					Vue.prototype.$store.commit('SET_CURRENT_PAGE',currentPage.route)
 					Vue.$store.commit('SET_PAGE_INFO',currentPage)
 					return {
 						currentPage:currentPage,

@@ -25,11 +25,12 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
 	data() {
 		return {
-			globalTextFontSize: 14,
-			globalLabelFontSize: 12,
+			// globalTextFontSize: 14,
+			// globalLabelFontSize: 12,
 			planNo: '',
 			serviceName: '',
 			srvType: 'add', // 表单信息 add | update  | select |list | detail
@@ -51,6 +52,12 @@ export default {
 				application: 'health'
 			}
 		};
+	},
+	computed: {
+		...mapState({
+			globalTextFontSize: state => state.app.globalTextFontSize,
+			globalLabelFontSize: state => state.app.globalLabelFontSize
+		})
 	},
 	methods: {
 		async deleteReport() {
@@ -175,8 +182,8 @@ export default {
 						}
 						this.params.defaultVal = req;
 						let data = this.deepClone(req);
-						if(this.planNo){
-							data.ps_no = this.planNo
+						if (this.planNo) {
+							data.ps_no = this.planNo;
 						}
 						req = [{ serviceName: e.service_name, data: [data] }];
 						let app = uni.getStorageSync('activeApp');
@@ -429,8 +436,8 @@ export default {
 		}
 	},
 	onShow() {
-		this.globalTextFontSize = getApp().globalData.globalTextFontSize ? getApp().globalData.globalTextFontSize : 14;
-		this.globalLabelFontSize = getApp().globalData.globalLabelFontSize ? getApp().globalData.globalLabelFontSize : 14;
+		// this.globalTextFontSize = getApp().globalData.globalTextFontSize ? getApp().globalData.globalTextFontSize : 14;
+		// this.globalLabelFontSize = getApp().globalData.globalLabelFontSize ? getApp().globalData.globalLabelFontSize : 14;
 	},
 	onLoad(option) {
 		if (option.planNo) {
@@ -459,10 +466,10 @@ export default {
 		if (option.fieldsCond) {
 			try {
 				let fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
-				if(!fieldsCond.find(item=>item.column==='ps_no')){
-					fieldsCond.push({column:'ps_no',display:false})
+				if (!fieldsCond.find(item => item.column === 'ps_no')) {
+					fieldsCond.push({ column: 'ps_no', display: false });
 				}
-				this.fieldsCond = fieldsCond
+				this.fieldsCond = fieldsCond;
 			} catch (e) {
 				console.warn(e);
 			}

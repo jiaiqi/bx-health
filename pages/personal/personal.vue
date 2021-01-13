@@ -135,7 +135,8 @@ export default {
 	computed: {
 		...mapState({
 			globalTextFontSize: state => state.app['globalTextFontSize'],
-			globalLabelFontSize: state => state.app.globalLabelFontSize
+			globalLabelFontSize: state => state.app.globalLabelFontSize,
+			authUserInfo:state=>state.app.authUserInfo
 		}),
 		...mapGetters({
 			vuex_userInfo: 'userInfo',
@@ -460,9 +461,11 @@ export default {
 			let res = await wx.getSetting();
 			if (!res.authSetting['scope.userInfo']) {
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
+				this.$store.commit('SET_AUTH_USERINFO',false);
 				// 没有获取用户信息授权
 			} else {
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				this.$store.commit('SET_AUTH_USERINFO',true);
 				uni.getUserInfo({
 					provider: 'weixin',
 					success: function(user) {
@@ -537,6 +540,7 @@ export default {
 				};
 				this.setWxUserInfo(rawData);
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				this.$store.commit('SET_AUTH_USERINFO',true);
 				const result = await wx.login();
 				if (result.code) {
 					this.wxLogin({
@@ -658,10 +662,11 @@ export default {
 			}
 		}
 	},
+	onLoad(option) {
+		this.checkOptionParams(option)
+		this.toAddPage()
+	},
 	async onShow() {
-		// this.selectBasicUserInfo().then(res=>{
-		// 	debugger
-		// })
 		if (this.vuex_userInfo && this.vuex_userInfo.hasOwnProperty('manager_type')) {
 			this.manager_type = this.vuex_userInfo.manager_type;
 		}

@@ -45,9 +45,9 @@
 					}"
 				>
 					<!-- 体重、血压、睡眠 -->
-					<view class="record-title">最新数据</view>
-					<view class="record-data">
-						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'bp'">
+					<view class="record-title" v-if="pageType !== 'weight'">最新数据</view>
+					<view class="record-data" v-if="pageType !== 'weight'">
+						<view class="last-data" v-if="isArray(historyRecord) && historyRecord.length > 0 && pageType === 'bp'">
 							<text class="digital ">
 								<text>
 									<text
@@ -73,15 +73,11 @@
 							</text>
 							<text class="unit">毫米汞柱</text>
 						</view>
-						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'weight'">
-							<text class="digital">{{ getFixedNum(historyRecord[0].weight) }}</text>
-							<text class="unit">kg</text>
-						</view>
-						<view class="last-data" v-if="historyRecord && historyRecord.length > 0 && pageType === 'sleep'">
+						<view class="last-data" v-if="isArray(historyRecord) && historyRecord.length > 0 && pageType === 'sleep'">
 							<text class="digital" v-if="historyRecord[0].sleep_time">{{ historyRecord[0].sleep_time.slice(0, 5) }}</text>
 							<text class="unit">(时长)</text>
 						</view>
-						<view class="date" v-if="historyRecord && historyRecord.length > 0">
+						<view class="date" v-if="isArray(historyRecord) && historyRecord.length > 0">
 							<text class="cuIcon-time margin-right-xs"></text>
 							{{ historyRecord[0].create_time.slice(0, 16) }}
 						</view>
@@ -90,9 +86,18 @@
 					</view>
 					<view class="bmi-box" v-if="pageType === 'weight'">
 						<view class="bmi-bar-box" v-if="bmi">
-							<view class="bmi-box-item" v-if="bmi">
-								<view class="title">BMI</view>
-								<view class="digit bmi">{{ bmi }}</view>
+							<view class="last-data">
+								<view class="bmi-box-item">
+									<view class="title">最新体重</view>
+									<view class="digit bmi" v-if="isArray(historyRecord) && historyRecord.length > 0">
+										{{ getFixedNum(historyRecord[0].weight) }}
+										<text class="unit">kg</text>
+									</view>
+								</view>
+								<view class="bmi-box-item" v-if="bmi">
+									<view class="title">BMI</view>
+									<view class="digit bmi">{{ bmi }}</view>
+								</view>
 							</view>
 							<view class="bmi-label" v-if="isArray(weightForBmi)">
 								<view class="label text-bold">BMI:</view>
@@ -122,7 +127,12 @@
 									<text v-if="item.weight && isString(item.weight)">{{ item.weight }}</text>
 								</view>
 							</view>
+							<button class="nav-button" @click="toPages(pageType)" v-if="!this.customer_no">记录数据</button>
 						</view>
+					</view>
+					<view class="data-chart" v-if="pageType === 'weight' || pageType === 'bp'">
+						<uniEcCharts class="uni-ec-charts" id="uni-ec-charts" :ec="weightChartOption" v-if="pageType === 'weight'"></uniEcCharts>
+						<uniEcCharts class="uni-ec-charts" id="uni-ec-charts" :ec="BPChartOption" v-if="pageType === 'bp'"></uniEcCharts>
 					</view>
 					<view class="history-record">
 						<view class="title">历史数据</view>
@@ -137,6 +147,7 @@
 								:data-target="'move-box-' + index"
 								@tap="deleteItem(item)"
 								v-for="(item, index) in historyRecord"
+								:key="index"
 							>
 								<image src="../static/icon/xueya.png" mode="" class="icon" v-if="pageType === 'bp'"></image>
 								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
@@ -175,7 +186,7 @@
 										<text v-if="pageType === 'weight'">kg</text>
 										<text v-if="pageType === 'sleep'">（时长）</text>
 									</view>
-									<view class="heart_rate">
+									<view class="heart_rate" v-if="item.heart_rate">
 										<view class="data">
 											<text class="label cuIcon-likefill text-red margin-right-xs"></text>
 											<text class="value">{{ item.heart_rate || '-' }}次/分</text>
@@ -191,47 +202,6 @@
 								</view>
 								<view class="move"><view class="bg-red" @click.stop="deleteItem(item)">删除</view></view>
 							</view>
-							<!-- 	<view class="list-item" v-for="(item, index) in historyRecord" :key="index">
-								<image src="../static/icon/xueya.png" mode="" class="icon" v-if="pageType === 'bp'"></image>
-								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
-								<image src="../static/icon/tizhong.png" mode="" class="icon" v-if="pageType === 'weight'"></image>
-								<view class="item">
-									<text
-										class="digital"
-										:class="{
-											'text-green': item.systolic_pressure < 120,
-											'text-yellow': item.systolic_pressure >= 120 && item.systolic_pressure < 140,
-											'text-red': item.systolic_pressure >= 140
-										}"
-										v-if="pageType === 'bp' && item && item.systolic_pressure"
-									>
-										{{ item.systolic_pressure ? getFixedNum(item.systolic_pressure) : '-' }}
-									</text>
-									<text class="digital" v-if="pageType === 'weight'">{{ item.weight ? getFixedNum(item.weight) : '-' }}</text>
-									<text class="digital" v-if="pageType === 'sleep'">{{ item.sleep_time ? item.sleep_time.slice(0, 5) : '-' }}</text>
-								</view>
-								<view class="item" v-if="pageType === 'bp' && item && item.diastolic_pressure">
-									<text class="text-gray">/</text>
-									<text
-										:class="{
-											'text-green': item.diastolic_pressure < 80,
-											'text-yellow': item.diastolic_pressure < 90 && item.diastolic_pressure >= 80,
-											'text-red': item.diastolic_pressure >= 90
-										}"
-										class="digital bp"
-									>
-										{{ item.diastolic_pressure ? getFixedNum(item.diastolic_pressure) : '-' }}
-									</text>
-								</view>
-								<view class="unit">
-									<text v-if="pageType === 'bp'">mmHg</text>
-									<text v-if="pageType === 'weight'">kg</text>
-									<text v-if="pageType === 'sleep'">（时长）</text>
-								</view>
-								<view class="item">
-									<text>{{ item.create_time.slice(0, 16) }}</text>
-								</view>
-							</view> -->
 						</view>
 					</view>
 				</view>
@@ -263,6 +233,12 @@ export default {
 	data() {
 		return {
 			modalName: null,
+			weightChartOption: {
+				option: {}
+			},
+			BPChartOption: {
+				option: {}
+			},
 			listTouchStart: 0,
 			listTouchDirection: null,
 			customer_no: '',
@@ -395,7 +371,6 @@ export default {
 
 		bmi() {
 			// 体重（kg）/身高*身高（m）
-
 			if (this.userInfo.weight && this.userInfo.height) {
 				if (Array.isArray(this.historyRecord) && this.historyRecord.length > 0) {
 					if (this.historyRecord[0].weight) {
@@ -439,6 +414,349 @@ export default {
 		}
 	},
 	methods: {
+		buildBPOption(data) {
+			data = this.deepClone(data);
+			if (Array.isArray(this.weightForBmi) && this.weightForBmi.length === 3) {
+				const yAxisData0 = data.map(item => 80); // 舒张压-正常
+				const yAxisData01 = data.map(item => 90); // 舒张压-高
+				const yAxisData02 = data.map(item => 120); // 收缩压-正常
+				const yAxisData1 = data.map(item => 140); // 收缩压-高
+				const yAxisData2 = data.map(item => item.diastolic_pressure); //舒张压
+				const yAxisData3 = data.map(item => item.systolic_pressure); //收缩压
+				const xAxisData = data.map(item => this.formateDate(item.create_time, 'MM-DD'));
+				const color = ['#40c0fd', '#4ACDBA', '#FAD650', '#F7B235'];
+				let option = {
+					backgroundColor: '#fff',
+					legend: {
+						show: true,
+						top: '5%',
+						icon: 'roundRect',
+						itemWidth: 20,
+						itemHeight: 10,
+						itemGap: 10,
+						data: [
+							{
+								name: '舒张压-正常',
+								icon: 'roundRect'
+							},
+							{
+								name: '舒张压-高',
+								icon: 'roundRect'
+							},
+							{
+								name: '收缩压-高',
+								icon: 'roundRect'
+							},
+							{
+								name: '收缩压-正常',
+								icon: 'roundRect'
+							},
+							{
+								name: '舒张压',
+								// icon:'circle',
+								icon:
+									'path://M1635.315872 398.277883a510.609754 510.609754 0 0 0-996.200768 0H0v227.443097h639.115104a510.609754 510.609754 0 0 0 996.200768 0H2274.430976v-227.443097zM1137.215488 910.024852a398.025421 398.025421 0 1 1 398.025421-398.025421A398.025421 398.025421 0 0 1 1137.215488 910.024852z'
+							},
+							{
+								name: '收缩压',
+								// icon:'circle',
+								icon:
+									'path://M1635.315872 398.277883a510.609754 510.609754 0 0 0-996.200768 0H0v227.443097h639.115104a510.609754 510.609754 0 0 0 996.200768 0H2274.430976v-227.443097zM1137.215488 910.024852a398.025421 398.025421 0 1 1 398.025421-398.025421A398.025421 398.025421 0 0 1 1137.215488 910.024852z'
+							}
+						]
+					},
+					grid: {
+						top: '30%',
+						left: '10%',
+						right: '10%',
+						bottom: '15%'
+					},
+					xAxis: {
+						type: 'category',
+						data: xAxisData,
+						axisLine: {
+							// y轴
+							show: true
+						},
+						axisTick: {
+							show: true
+						},
+						 boundaryGap: true, //false时X轴从0开始
+					},
+					yAxis: {
+						type: 'value',
+						axisLine: {
+							// y轴
+							show: true
+						},
+						axisTick: {
+							// y轴刻度线
+							show: true
+						},
+						splitLine: {
+							show: false
+						}
+					},
+					series: [
+						{
+							name: '舒张压-正常',
+							type: 'line',
+							symbol: 'none',
+							data: yAxisData0,
+							smooth: true,
+							itemStyle: {
+								normal: {
+									color: color[0],
+									borderColor: color[0]
+								}
+							}
+						},
+						{
+							name: '舒张压-高',
+							type: 'line',
+							symbol: 'none',
+							data: yAxisData01,
+							smooth: true,
+							itemStyle: {
+								normal: {
+									color: color[3],
+									borderColor: color[3]
+								}
+							}
+						},
+						{
+							name: '收缩压-高',
+							type: 'line',
+							symbol: 'none',
+							data: yAxisData1,
+							smooth: true,
+							itemStyle: {
+								normal: {
+									color: color[3],
+									borderColor: color[3]
+								}
+							}
+						},
+						{
+							name: '收缩压-正常',
+							type: 'line',
+							symbol: 'none',
+							data: yAxisData02,
+							smooth: true,
+							itemStyle: {
+								normal: {
+									color: color[0],
+									borderColor: color[0]
+								}
+							}
+						},
+						{
+							name: '舒张压',
+							type: 'line',
+							data: yAxisData2,
+							smooth: false,
+							tooltip: { trigger: 'axis' },
+							itemStyle: {
+								normal: {
+									color: color[1],
+									borderColor: color[1]
+								}
+							}
+						},
+						{
+							name: '收缩压',
+							type: 'line',
+							data: yAxisData3,
+							smooth: false,
+							tooltip: { trigger: 'axis' },
+							itemStyle: {
+								normal: {
+									color: color[2],
+									borderColor: color[2]
+								}
+							}
+						}
+					]
+				};
+				this.BPChartOption = { option };
+			}
+		},
+		buildWeightOption(data) {
+			data = this.deepClone(data);
+			if (Array.isArray(this.weightForBmi) && this.weightForBmi.length === 3) {
+				const weightRange = this.weightForBmi.map(item => item.weight.split('kg')[0]);
+				const yAxisData0 = data.map(item => weightRange[0]);
+				const yAxisData1 = data.map(item => weightRange[1] - weightRange[0]);
+				const yAxisData2 = data.map(item => weightRange[2] - weightRange[1]);
+				const yAxisData3 = data.map(item => weightRange[2] - weightRange[1]);
+				const yAxisData4 = data.map(item => item.weight);
+				const xAxisData = data.map(item => this.formateDate(item.create_time, 'MM-DD'));
+				const color = ['#40c0fd', '#4ACDBA', '#FAD650', '#F7B235'];
+				let option = {
+					backgroundColor: '#fff',
+					legend: {
+						show: true,
+						top: '5%',
+						icon: 'roundRect',
+						itemWidth: 20,
+						itemHeight: 10,
+						itemGap: 10,
+						data: [
+							{
+								name: '偏瘦',
+								icon: 'roundRect'
+							},
+							{
+								name: '正常',
+								icon: 'roundRect'
+							},
+							{
+								name: '超重',
+								icon: 'roundRect'
+							},
+							{
+								name: '肥胖',
+								icon: 'roundRect'
+							},
+							{
+								name: '体重',
+								// icon:'circle',
+								icon:
+									'path://M1635.315872 398.277883a510.609754 510.609754 0 0 0-996.200768 0H0v227.443097h639.115104a510.609754 510.609754 0 0 0 996.200768 0H2274.430976v-227.443097zM1137.215488 910.024852a398.025421 398.025421 0 1 1 398.025421-398.025421A398.025421 398.025421 0 0 1 1137.215488 910.024852z'
+							}
+						]
+					},
+					grid: {
+						top: '20%',
+						left: '10%',
+						right: '10%',
+						bottom: '15%'
+					},
+					xAxis: {
+						type: 'category',
+						data: xAxisData,
+						axisLine: {
+							// y轴
+							show: true
+						},
+						axisTick: {
+							show: true
+						},
+						boundaryGap: false
+					},
+					tooltip: {},
+					yAxis: {
+						type: 'value',
+						axisLine: {
+							// y轴
+							show: true
+						},
+						axisTick: {
+							// y轴刻度线
+							show: true
+						},
+						splitLine: {
+							show: false
+						},
+						min: yAxisData4.sort((a, b) => a - b)[0] - 20
+					},
+					series: [
+						{
+							name: '偏瘦',
+							type: 'line',
+							data: yAxisData0,
+							symbol: 'none',
+							smooth: true,
+							stack: 100,
+							itemStyle: {
+								normal: {
+									color: color[0],
+									borderColor: color[0]
+								}
+							},
+							lineStyle: {
+								color: 'rgba(0,0,0,0)'
+							},
+							areaStyle: {}
+						},
+						{
+							name: '正常',
+							type: 'line',
+							stack: 100,
+							data: yAxisData1,
+							symbol: 'none',
+							smooth: true,
+							itemStyle: {
+								normal: {
+									color: color[1],
+									borderColor: color[1]
+								}
+							},
+							lineStyle: {
+								color: 'rgba(0,0,0,0)'
+							},
+							areaStyle: {}
+						},
+						{
+							name: '超重',
+							type: 'line',
+							stack: 100,
+							data: yAxisData2,
+							symbol: 'none',
+							smooth: true,
+							areaStyle: {},
+							lineStyle: {
+								color: 'rgba(0,0,0,0)'
+							},
+							itemStyle: {
+								normal: {
+									color: color[2],
+									borderColor: color[2]
+								}
+							}
+						},
+						{
+							name: '肥胖',
+							type: 'line',
+							stack: 100,
+							data: yAxisData3,
+							symbol: 'none',
+							smooth: true,
+							areaStyle: {
+								origin: 'end'
+							},
+							lineStyle: {
+								color: 'rgba(0,0,0,0)'
+							},
+							itemStyle: {
+								normal: {
+									color: color[3],
+									borderColor: color[3]
+								}
+							}
+						},
+						{
+							name: '体重',
+							type: 'line',
+							data: yAxisData4,
+							smooth: false,
+							label: {
+								// show:true
+							},
+							legend: {
+								icon: 'circle'
+							},
+							itemStyle: {
+								normal: {
+									color: '#55aaff'
+								}
+							}
+						}
+					]
+				};
+				this.weightChartOption = { option };
+			}
+		},
 		deleteItem(e) {
 			let serviceName = '';
 			let req = [];
@@ -825,7 +1143,7 @@ export default {
 				],
 				page: {
 					pageNo: 1,
-					rownumber: 100
+					rownumber: 30
 				}
 			};
 			let res = await this.$http.post(url, req);
@@ -840,6 +1158,7 @@ export default {
 					this.weightChartData.series = series;
 					this.weightChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
 					this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
+					this.buildWeightOption(res.data.data);
 				} else if (type === 'bloodPressure') {
 					series = this.BPChartData.series;
 					series[0].data = res.data.data.map(item => {
@@ -849,15 +1168,7 @@ export default {
 					this.BPChartData.series = series;
 					this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
 					this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
-				} else if (type === 'sleep') {
-					// series = this.sleepChartData.series;
-					// series[0].data = res.data.data.map(item => {
-					// 	return Number(item.sleep_time);
-					// });
-					// // series[1].data = res.data.data.map(item => Number(item.diastolic_pressure.toFixed(1)));
-					// this.BPChartData.series = series;
-					// this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'));
-					// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压');
+					this.buildBPOption(res.data.data);
 				}
 				this.historyRecord = this.deepClone(res.data.data).reverse();
 			} else {
@@ -1584,7 +1895,7 @@ export default {
 				text-align: center;
 				padding: 20rpx 0;
 				background-color: #fff;
-				// border-radius: 20rpx 20rpx 0 0;
+				border-radius: 20rpx 20rpx 0 0;
 			}
 			.record-data {
 				background-color: #fff;
@@ -1597,7 +1908,7 @@ export default {
 				padding: 0 20rpx 40rpx;
 				flex: 1;
 				justify-content: flex-end;
-				// border-radius: 0 0 20rpx 20rpx;
+				border-radius: 0 0 20rpx 20rpx;
 				.last-data {
 					padding: 0 0 10rpx;
 					flex: 1;
@@ -1633,11 +1944,10 @@ export default {
 			.bmi-box {
 				width: 100%;
 				display: flex;
-				padding: 40rpx 20rpx 80rpx;
+				padding: 40rpx 20rpx;
 				background-color: #fff;
 				margin: 20rpx 0;
 				border-radius: 20rpx;
-				height: 410rpx;
 				.bmi-box-item {
 					flex: 1;
 					display: flex;
@@ -1668,6 +1978,16 @@ export default {
 					justify-content: center;
 					align-items: center;
 					font-weight: normal;
+					.last-data {
+						width: 100%;
+						display: flex;
+						justify-content: space-around;
+						.unit {
+							font-size: 32rpx;
+							color: #666;
+							margin-left: 5rpx;
+						}
+					}
 					.bmi-label {
 						display: flex;
 						position: relative;
@@ -1747,9 +2067,17 @@ export default {
 					}
 				}
 			}
+			.data-chart {
+				height: 400rpx;
+				margin-top: 20rpx;
+				background-color: #fff;
+				border-radius: 20rpx;
+				overflow: hidden;
+			}
 			.history-record {
 				margin-top: 20rpx;
 				background-color: #fff;
+				border-radius: 20rpx;
 				.title {
 					padding: 20rpx;
 					border-bottom: 1px solid #f1f1f1;
@@ -1786,6 +2114,7 @@ export default {
 							flex-direction: column;
 							border-radius: 10rpx;
 							overflow: hidden;
+							width: 150rpx;
 							.cu-tag {
 								margin-left: 0;
 								display: flex;

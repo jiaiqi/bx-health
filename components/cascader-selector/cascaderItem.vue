@@ -2,17 +2,19 @@
 	<view class="bx-tagbox-c">
 		<view class="bx-tagbox-c-wrap">
 			<view class="bx-item-wrap">
-				<view class="bx-item" @click="selectArea(item)" :class="item.no === currentItem.no?'choose-item':''" v-for="(item, index) in areaList" :key="index">{{ item.name ? item.name : showCol ? item[showCol] : '' }}</view>
-			</view>	
-		</view>			
+				<view class="bx-item" @click="selectArea(item)" :class="{ 'choose-item': item.no === currentItem.no }" v-for="(item, index) in areaList" :key="index">
+					{{ getLabel(item) }}
+				</view>
+			</view>
+		</view>
 		<cascaderItem v-if="currentItem.child && currentItem.child.length > 0" @selectAreaItem="selectArea2" :areaList="currentItem.child"></cascaderItem>
 	</view>
 </template>
 
 <script>
-	// #ifdef MP-WEIXIN
-	import cascaderItem from './cascaderItem.vue'
-	// #endif
+// #ifdef MP-WEIXIN
+import cascaderItem from './cascaderItem.vue';
+// #endif
 export default {
 	name: 'cascaderItem',
 	data() {
@@ -22,24 +24,23 @@ export default {
 			no: ''
 		};
 	},
-	components:{
+	components: {
 		// #ifdef MP-WEIXIN
-			cascaderItem
+		cascaderItem
 		// #endif
 	},
 	methods: {
+		getLabel(item){
+			return item.name ? item.name : this.showCol ? item[this.showCol] : ''
+		},
 		selectArea2(e) {
 			this.$emit('selectAreaItem', e);
 		},
 		selectArea(e) {
-			// if(e.is_leaf != '是'){
-				if ( this.currentNo !== e.no) {
-					this.currentItem = e;
-					// this.currentItem.isChoose = true
-				}
-				this.$emit('selectAreaItem', e);
-			// }
-			
+			if (this.currentNo !== e.no) {
+				this.currentItem = e;
+			}
+			this.$emit('selectAreaItem', e);
 		},
 		recursionArealist(oldAreaList) {
 			let self = this;
@@ -48,11 +49,7 @@ export default {
 			}
 			oldAreaList.forEach(item => {
 				if (Array.isArray(item.child)) {
-					// this.$set(item,'isChoose',false)
-					// item.isChoose = false
 					if (item.no === self.currentItem.no) {
-						// this.$set(item,'isChoose',true)
-						// item.isChoose = true
 						self.currentItem = self.deepClone(item);
 					} else {
 						self.recursionArealist(item.child);
@@ -78,25 +75,18 @@ export default {
 			handler(newval, oldval) {
 				// this.valuationChild(newval);
 				if (newval.length > 0) {
-					let rest = false
-					newval.forEach(item=>{
-						if(Array.isArray(item.child)){
-							rest = true
+					let rest = false;
+					newval.forEach(item => {
+						if (Array.isArray(item.child)) {
+							rest = true;
 						}
-					})					
-					if(rest){
+					});
+					if (rest) {
 						this.recursionArealist(newval);
-					}else{
-						this.currentItem = ""
+					} else {
+						this.currentItem = '';
 					}
-					// newval.forEach(item => {
-					// 	if (item.no === this.currentItem.no) {
-					// 		this.currentItem.child = item.child;
-					// 		// this.valuationChild(newval, item.child, item);
-					// 	}
-					// });
 				}
-				console.log('watch----', newval);
 			},
 			deep: true
 		}
@@ -116,12 +106,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-	.bx-tagbox-c-wrap{
-		margin: 20rpx;
-		padding: 20rpx;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-		border-radius: 30rpx;
-	}
+.bx-tagbox-c-wrap {
+	margin: 20rpx;
+	padding: 20rpx;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	border-radius: 30rpx;
+}
 .bx-tagbox-c {
 	// margin: 20rpx;
 	// padding: 20rpx;
@@ -164,12 +154,12 @@ export default {
 			}
 		}
 	}
-	.choose-item{
+	.choose-item {
 		background-color: #007aff;
 		color: white;
 	}
 }
-.bx-item-wrap{
+.bx-item-wrap {
 	// box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 </style>

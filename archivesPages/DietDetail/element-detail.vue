@@ -258,7 +258,7 @@ export default {
 					let ratio = 1;
 					if (diet['unit'] === 'g') {
 						if (diet.unit_amount) {
-							// ratio = (diet.unit_weight_g * diet.amount) 
+							// ratio = (diet.unit_weight_g * diet.amount)
 							// / diet.unit_amount;
 							ratio = diet.amount;
 						} else if (diet.unit_weight_g) {
@@ -271,7 +271,7 @@ export default {
 							ratio = diet.amount;
 						}
 					} else {
-						ratio = (diet.unit_weight_g * diet.amount) / (diet.unit_amount?diet.unit_amount:100);
+						ratio = (diet.unit_weight_g * diet.amount) / (diet.unit_amount ? diet.unit_amount : 100);
 					}
 					ele.value = ele.value + diet[ele['key']] * ratio;
 				});
@@ -309,12 +309,15 @@ export default {
 					case '其它食物':
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
-							let ratio = currentDiet.unit_weight_g / 100;
+							let ratio = 1;
 							if (currentDiet.unit.indexOf('g') === -1) {
 								ratio = 1;
 							}
 							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
 							let num = (val * 100) / Number(cur.EAR);
+							if (currentDiet.meal_no) {
+								num = (val * 100) / Number(cur.EAR);
+							}
 							num = parseFloat(num.toFixed(1));
 							return num;
 						});
@@ -322,17 +325,14 @@ export default {
 					case '当前食物':
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
-							let ratio = currentDiet.unit_weight_g / 100;
-							if (currentDiet.unit.indexOf('g') === -1) {
+							let ratio = 1;
+							if (currentDiet.unit === 'g' && currentDiet.unit_amount === 100) {
 								ratio = 1;
-							}
-							if (!currentDiet.unit_weight_g && currentDiet.unit_amount) {
-								ratio = currentDiet.unit_amount / 100;
 							}
 							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
 							let num = (val * 100) / Number(cur.EAR);
 							if (currentDiet.meal_no) {
-								num = (val * 10000) / Number(cur.EAR);
+								num = (val * 100) / Number(cur.EAR);
 							}
 							num = parseFloat(num.toFixed(1));
 							return num;
@@ -363,10 +363,10 @@ export default {
 					data: legendData
 				},
 				grid: {
-					left: '3%',
-					right: '4%',
+					left: '10px',
+					right: '10px',
 					bottom: '3%',
-					top: '10%',
+					top: '12%',
 					containLabel: true
 				},
 				xAxis: [
@@ -382,9 +382,7 @@ export default {
 				],
 				yAxis: [
 					{
-						max: function(value) {
-							return value.max + 20;
-						},
+						// max:(eleArr.sort((a,b)=>b.value-a.value)[0].value)*0.1 +10,
 						type: 'value',
 						axisLabel: {
 							// formatter: `{value}%`
@@ -396,10 +394,13 @@ export default {
 				],
 				series: []
 			};
+			// let maxVal = eleArr.sort((a,b)=>b.value/Number(b.EAR) -a.value/Number(a.EAR))[0]
+			// option.yAxis[0].max = (maxVal.value*100/maxVal.EAR)+10;
 			option.series = seriesData;
 			let result = {
 				option: option
 			};
+			console.log(eleArr);
 			this.chartData = result;
 		},
 		getElementLevel(ele, val) {
@@ -534,8 +535,11 @@ export default {
 		margin: 0 20rpx;
 		height: 650rpx;
 		padding: 10rpx;
-		&.chart{
-			height: 400rpx;
+		&.chart {
+			width: 100%;
+			height: 420rpx;
+			margin: 0;
+			padding: 0;
 		}
 		.ele-item {
 			.title {

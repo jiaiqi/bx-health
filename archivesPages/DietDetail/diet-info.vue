@@ -16,28 +16,17 @@
 				<text class="label margin-right-xs">升糖指数:</text>
 				<text class="heat">{{ dietInfo.gi || ' - ' }}</text>
 			</view>
-			<view class="gi" v-if="dietInfo.edible_portion">
+			<view class="gi">
 				<text class="label margin-right-xs">可食部数量:</text>
-				<text class="heat">{{ dietInfo.edible_portion || ' - ' }}/100g</text>
+				<text class="heat">{{ dietInfo.edible_portion ? dietInfo.edible_portion : ' - ' }}</text>
 			</view>
-			<view class="gi" v-if="dietInfo.moisture_content">
+			<view class="gi">
 				<text class="label margin-right-xs">水分(g):</text>
-				<text class="heat">{{ dietInfo.moisture_content || ' - ' }}g/100g</text>
+				<text class="heat">{{ dietInfo.moisture_content ? dietInfo.moisture_content + 'g/100g' : ' - ' }}</text>
 			</view>
 			<view class="unit-box">
 				<text class="label text-bold margin-right-xs">单位:</text>
-				<text class="unit">
-					{{unit}}
-				</text>
-			<!-- 	<text class="unit">
-					{{
-						dietInfo.unit_weight_g && dietInfo.unit === 'g'
-							? dietInfo.unit_weight_g + dietInfo.unit
-							: dietInfo.unit_amount && dietInfo.unit === 'g'
-							? dietInfo.unit_amount + dietInfo.unit
-							: dietInfo.unit
-					}}
-				</text> -->
+				<text class="unit">{{ unit }}</text>
 			</view>
 		</view>
 	</view>
@@ -49,52 +38,41 @@ export default {
 	data() {
 		return {
 			eleData: eleData,
-			hotNum: 0
 		};
 	},
 	filters: {
 		toFixed1: function(value) {
-			return value ? value.toFixed(1) : '';
+			return value ? value.toFixed(1) : '0';
 		}
 	},
 	computed: {
-		unit(){
+		hotNum(){
 			if(this.dietInfo){
-				if(this.dietInfo.unit){
-					if(this.dietInfo.unit==='g'&&this.dietInfo.unit_amount){
-						return this.dietInfo.unit_amount + 'g'
-					}else{
-						return this.dietInfo.unit
-					}
+				if(this.dietInfo.unit!=='g'&&this.dietInfo.unit_weight_g&&this.dietInfo.unit_amount&&this.dietInfo.unit_energy){
+					return this.dietInfo.unit_weight_g*this.dietInfo.unit_energy/this.dietInfo.unit_amount
+				}else{
+					return this.dietInfo.unit_energy
 				}
 			}
 		},
-		// hotNum() {
-		// 	let res = '';
-		// 	if (this.dietInfo.energy) {
-		// 		res = this.dietInfo.energy;
-		// 	} else if (this.dietInfo.unit_energy && this.dietInfo.unit_amount) {
-		// 		res = (this.dietInfo.unit_energy * this.dietInfo.unit_amount) / 100;
-		// 	}
-		// 	return res;
-		// }
+		unit() {
+			if (this.dietInfo && this.dietInfo.unit && this.dietInfo.unit === 'g') {
+				if (this.dietInfo.unit_amount && this.dietInfo.unit_amount > 1) {
+					return this.dietInfo.unit_amount + 'g';
+				} else if (this.dietInfo.unit_weight_g && this.dietInfo.unit_weight_g > 1) {
+					return this.dietInfo.unit_weight_g + 'g';
+				}
+			} else {
+				return this.dietInfo.unit;
+			}
+		}
 	},
 	watch: {
 		dietInfo: {
 			deep: true,
 			immediate: true,
 			handler(newValue, oldValue) {
-				let hotNum = '';
-				if (newValue.energy) {
-					hotNum = newValue.energy;
-				} else if (newValue.unit_energy && newValue.unit_amount) {
-					if (newValue.unit && newValue.unit.indexOf('g') !== -1) {
-						hotNum = (newValue.unit_energy * newValue.unit_amount) / 100;
-					} else {
-						hotNum = newValue.unit_energy * newValue.unit_amount;
-					}
-				}
-				this.hotNum = hotNum;
+			
 			}
 		}
 	},

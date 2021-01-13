@@ -16,39 +16,34 @@
 				<view class="bx-item bx-text-yellow line-end" v-if="showSelect || (lineData.length === 0 && areaList.length > 0)">请选择</view>
 			</view>
 			<view class="bx-tagbox">
-				<view v-if="showSelect">
-					<!-- <view class="bx-item" @click="selectArea(item)" v-for="(item, index) in areaList" :key="index">
-						{{ item.name ? item.name : showCol ? item[showCol] : '' }}
-					</view> -->
-					<cascaderItem :currentNo="currentNo" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem>
-					<!-- <view class="bx-item more" @click="showMore" v-if="isShowMore"><view class="content">更多</view></view> -->
-				</view>
+				<view v-if="showSelect"><cascaderItem :currentNo="currentNo" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem></view>
 			</view>
-			
 		</view>
 	</view>
 </template>
 
 <script>
-	import cascaderItem from './cascaderItem.vue'
+import cascaderItem from './cascaderItem.vue';
 export default {
 	name: 'cascader', //层叠选择器内层，ui渲染
 	data() {
 		return {
 			lineData: [],
 			area: {},
-			breadCrumbs: ''
 		};
 	},
-	components:{cascaderItem},
+	components: { cascaderItem },
 	methods: {
 		showMore() {
 			this.$emit('show-more');
 		},
 		selectArea(item) {
-			console.log(item);
-			this.$emit('tag-click', item);
-			this.lineData.push(item);
+			if(!this.lineData.find(a=>a[this.column] === item[this.column])){
+				// this.lineData.push(item);
+				this.$emit('tag-click', item);
+			}else{
+				return
+			}
 		},
 		lineClick(item, index) {
 			this.$emit('line-click', item, index);
@@ -66,9 +61,9 @@ export default {
 		areaList: {
 			deep: true,
 			handler: function(newV, oldV) {
-				console.log("watch--cas",newV)
-				if(newV.child){
-					console.log("watch--cas",newV)
+				console.log('watch--cas', newV);
+				if (newV.child) {
+					console.log('watch--cas', newV);
 				}
 				this.areaList = newV;
 				this.lineData = this.lineDataDefault;
@@ -79,8 +74,8 @@ export default {
 		this.lineData = this.lineDataDefault;
 	},
 	props: {
-		currentNo:{
-			type:String,			
+		currentNo: {
+			type: String
 		},
 		// 是否显示‘请选择’提示
 		showSelect: {
@@ -160,7 +155,7 @@ export default {
 			line-height: 80rpx;
 			position: relative;
 			display: flex;
-			
+
 			&::after {
 				// content: '';
 				// height: 20rpx;
@@ -168,17 +163,17 @@ export default {
 				// background-color: #007aff;
 				// transform: rotate(20deg);
 				// margin: 30rpx 20rpx;
-				 content: '';
-				    display: inline-block;
-				    width: 10rpx;
-				    height: 10rpx;
-				    border-top: 2px solid #656565;
-				    border-right: 2px solid #656565;
-				    transform: rotate(45deg);
-				    -webkit-transform: rotate(45deg);
-					// background-color: #007aff;
-					border-color: #007aff;
-					margin: 32rpx 20rpx;
+				content: '';
+				display: inline-block;
+				width: 10rpx;
+				height: 10rpx;
+				border-top: 2px solid #656565;
+				border-right: 2px solid #656565;
+				transform: rotate(45deg);
+				-webkit-transform: rotate(45deg);
+				// background-color: #007aff;
+				border-color: #007aff;
+				margin: 32rpx 20rpx;
 			}
 			// &::before {
 			// 	content: '⚪';
@@ -237,9 +232,8 @@ export default {
 				top: 0;
 				z-index: 8;
 				border: none;
-				
 			}
-			.tag-item{
+			.tag-item {
 				// width:0;
 				// height:0;
 				// display:block;
@@ -269,7 +263,7 @@ export default {
 			margin-right: 20upx;
 			margin-bottom: 10upx;
 			// background-color: #f1f1f1;
-			border: 1rpx solid #F1F1F1;
+			border: 1rpx solid #f1f1f1;
 			border-radius: 50rpx;
 			padding: 6rpx 25rpx;
 			text-align: center;
@@ -284,12 +278,12 @@ export default {
 				color: #f0ad4e;
 				// text-decoration: underline;
 				position: relative;
-				&::after{
+				&::after {
 					content: '';
 					width: 60rpx;
 					height: 4rpx;
 					position: absolute;
-					left:calc(50% - 30rpx);
+					left: calc(50% - 30rpx);
 					bottom: 0;
 					background-color: #f0ad4e;
 				}

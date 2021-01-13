@@ -47,7 +47,7 @@
 					<button class="confirm-btn" type="primary" lang="zh_CN" open-type="getUserInfo" @getuserinfo="saveWxUser" :withCredentials="false" :disabled="disabled">
 						微信授权用户信息
 					</button>
-					<button class="confirm-btn bg-grey text-black" type="default" @tap="navBack" :disabled="false">暂不授权</button>
+					<!-- <button class="confirm-btn bg-grey text-black" type="default" @tap="navBack" :disabled="false">暂不授权</button> -->
 				</view>
 				<!-- 			<button v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin" class="confirm-btn bg-grey text-black" type="default" @tap="navBack" :disabled="false">
 					暂不授权
@@ -480,7 +480,7 @@ export default {
 							};
 							uni.setStorageSync('wxUserInfo', rawData);
 							self.$store.commit('SET_WX_USERINFO', rawData);
-							
+							self.toAddPage()
 							rawData = JSON.stringify(rawData);
 							self.setWxUserInfo(rawData);
 							console.log(res);

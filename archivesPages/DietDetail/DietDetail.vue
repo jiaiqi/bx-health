@@ -124,6 +124,7 @@ export default {
 					if (item.meal_no) {
 						obj['mixed_food_no'] = item.meal_no;
 						obj['diret_type'] = 'mixed_food';
+						delete obj.cook_method
 						if (this.dietInfo.dish_type && this.dietInfo.dish_type.indexOf('自选') > -1) {
 							if (this.minceListChoose && this.minceListChoose.length > 0) {
 								this.minceListChoose.forEach(m => {
@@ -197,12 +198,10 @@ export default {
 				let serviceName = 'srvhealth_diet_record_add';
 				let url = this.getServiceUrl('health', serviceName, 'operate');
 				let req = [{ serviceName: serviceName, colNames: ['*'], data: arr }];
-				console.log('this.userInfo', self.userInfo);
 				if (self.userInfo && self.userInfo.sex && self.userInfo.weight && self.userInfo.birthday) {
 					let res = await self.$http.post(url, req);
 					if (res.data.state === 'SUCCESS') {
 						console.log('-------添加---', res);
-						// self.addRecodChildData(res.data.response[0].response.effect_data[0].diet_record_no);
 						// 通知健康追踪页面，饮食记录已改变，需要刷新数据
 						uni.$emit('dietUpdate');
 						uni.navigateBack({
@@ -283,12 +282,16 @@ export default {
 							amount: dietInfo.amount,
 							energy: dietInfo.energy,
 							unit_weight_g: dietInfo.unit_weight_g,
-							unit: dietInfo.unit,
-							cook_method: this.cook_method
+							unit: dietInfo.unit
+							// cook_method: this.cook_method
 						}
 					]
 				}
 			];
+			if (dietInfo.food_no) {
+				// 是食材 非混合食物 有烹调方式
+				req[0].data[0].cook_method = this.cook_method;
+			}
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				uni.$emit('dietUpdate');

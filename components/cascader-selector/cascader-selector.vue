@@ -207,19 +207,6 @@ export default {
 				this.getAreaData(condition).then(data=>{					
 					let oldAreaList = this.oldAreaList
 					this.valuationChild(oldAreaList,data,e)
-					// if(oldAreaList.length > 0){
-					// 	oldAreaList.forEach(item=>{
-					// 		if(item.no === e.no){
-					// 			this.$set(item,'child',data)
-					// 		}
-					// 	})
-					// }else{
-					// 	this.oldAreaList = data
-					// }
-					
-					// if(){
-						
-					// }
 				})
 			}
 		},
@@ -243,7 +230,6 @@ export default {
 			if (index < this.lineDataDefault.length - 1) {
 				this.lineDataDefault = this.lineDataDefault.slice(0, index + 1);
 			}
-
 			if (e && e.no) {
 				this.outputData = e;
 				this.$emit('clickLine', e);
@@ -254,7 +240,6 @@ export default {
 						value: e.no
 					}
 				];
-				console.log('parent_no', e);
 				this.parent_no = e.no;
 				this.getAreaData(condition);
 				if (e.is_leaf === '是') {

@@ -1240,6 +1240,7 @@ export default {
 			let res = await wx.getSetting();
 			if (!res.authSetting['scope.userInfo']) {
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
+				this.$store.commit('SET_AUTH_USERINFO',false);
 				// 没有获取用户信息授权
 				return;
 			} else {
@@ -1302,6 +1303,7 @@ export default {
 			});
 			this.isAuthUserInfo = true;
 			this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+			this.$store.commit('SET_AUTH_USERINFO',true);
 		},
 		toAddPages() {
 			let fieldsCond = [
@@ -1341,6 +1343,7 @@ export default {
 				this.setWxUserInfo(rawData);
 				this.$store.commit('SET_WX_USERINFO', rawData);
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				this.$store.commit('SET_AUTH_USERINFO',true);
 				const result = await wx.login();
 				if (result.code) {
 					this.wxLogin({

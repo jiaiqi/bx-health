@@ -37,7 +37,6 @@
 						<text>*</text>
 						<text>就寝时间</text>
 					</view>
-					<!-- <text>就寝时间</text> -->
 					<view class="item-list-bot"><input type="text" :value="inputVal.retire_time" /></view>
 				</view>
 				<view class="item-list" @click="openTime({ type: 'sleep', field: 'getup_time' })">
@@ -45,7 +44,6 @@
 						<text>*</text>
 						<text>起床时间</text>
 					</view>
-					<!-- <text>起床时间</text> -->
 					<view class="item-list-bot"><input type="text" :value="inputVal.getup_time" /></view>
 				</view>
 				<view class="item-list">
@@ -53,12 +51,6 @@
 					<bx-radio-group v-model="inputVal.sleepy_daytime" mode="button">
 						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in sleepy_option" :key="i" :name="item.value">{{ item.label }}</bx-radio>
 					</bx-radio-group>
-					<!-- 		<radio-group @change="sleepyRadioChange">
-						<label v-for="item in sleepy_option" :key="item.label" class="margin-right">
-							<radio :value="item.value" style="transform: scale(0.7);" />
-							<text>{{ item.label }}</text>
-						</label>
-					</radio-group> -->
 				</view>
 			</view>
 			<view v-else-if="type && type === 'heartRate'" class="item-wrap">
@@ -69,7 +61,6 @@
 				<view class="item-list">
 					<text>心率(次/分)</text>
 					<slider-number v-model="inputVal.heart_rate" :max="200" :min="50"></slider-number>
-					<!-- <view class="item-list-bot"><input type="text" value="" /></view> -->
 				</view>
 			</view>
 			<view v-else-if="type && (type === 'pressure' || type === 'bp')" class="item-wrap">
@@ -80,11 +71,9 @@
 					<bx-radio-group v-model="inputVal.posture" mode="button">
 						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in postList" :key="i" :name="item.value">{{ item.value }}</bx-radio>
 					</bx-radio-group>
-					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.systolic_pressure" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>测量位置</text>
-					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.systolic_pressure" /></view> -->
 					<bx-radio-group v-model="inputVal.measure_position" mode="button">
 						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in measureList" :key="i" :name="item.value">{{ item.value }}</bx-radio>
 					</bx-radio-group>
@@ -95,25 +84,18 @@
 						<text>*</text>
 						<text>收缩压(高压 毫米汞柱)</text>
 					</view>
-					<!-- <text>收缩压(高压 毫米汞柱)</text> -->
-					<!-- <view class="item-list-bot"> -->
-					<slider-number v-model="inputVal.systolic_pressure" :max="200" :min="50" :step="0.1"></slider-number>
-					<!-- 	<input type="text" value="" v-model="inputVal.systolic_pressure" /> -->
-					<!-- </view> -->
+					<slider-number v-model="inputVal.systolic_pressure" :max="200" :min="50"></slider-number>
 				</view>
 				<view class="item-list">
 					<view class="item-list-top">
 						<text>*</text>
 						<text>舒张压(低压 毫米汞柱)</text>
 					</view>
-					<!-- <text>舒张压(低压 毫米汞柱)</text> -->
-					<slider-number v-model="inputVal.diastolic_pressure" :max="120" :min="50" :step="0.1"></slider-number>
-					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.diastolic_pressure" /></view> -->
+					<slider-number v-model="inputVal.diastolic_pressure" :max="120" :min="50"></slider-number>
 				</view>
 				<view class="item-list">
 					<text>心率</text>
 					<slider-number v-model="inputVal.heart_rate" :max="200" :min="30"></slider-number>
-					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.heart_rate" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>说明</text>
@@ -132,17 +114,14 @@
 				<view class="item-list">
 					<text>血氧饱和度最大值(%)</text>
 					<slider-number v-model="inputVal.oxygen_saturation_max" :max="100" :min="70"></slider-number>
-					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.oxygen_saturation_max" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>血氧饱和度最小值(%)</text>
 					<slider-number v-model="inputVal.oxygen_saturation_min" :max="100" :min="70"></slider-number>
-					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.oxygen_saturation_min" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>血氧饱和度平均(%)</text>
 					<slider-number v-model="inputVal.oxygen_saturation_avg" :max="100" :min="70"></slider-number>
-					<!-- <view class="item-list-bot"><input type="text" value="" v-model="inputVal.oxygen_saturation_avg" /></view> -->
 				</view>
 				<view class="item-list">
 					<text>说明</text>

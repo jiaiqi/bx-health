@@ -16,11 +16,12 @@
 </template>
 
 <script>
+	import {mapState} from 'vuex'
 export default {
 	data() {
 		return {
-			globalTextFontSize: 14,
-			globalLabelFontSize: 12,
+			// globalTextFontSize: 14,
+			// globalLabelFontSize: 12,
 			serviceName: '',
 			srvType: 'add', // 表单信息 add | update  | select |list | detail
 			use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
@@ -33,6 +34,12 @@ export default {
 			fieldsCond: [],
 			params: {}
 		};
+	},
+	computed: {
+		...mapState({
+			globalTextFontSize:state=>state.app.globalTextFontSize,
+			globalLabelFontSize:state=>state.app.globalLabelFontSize
+		})
 	},
 	methods: {
 		toPages(type) {
@@ -353,8 +360,8 @@ export default {
 		}
 	},
 	onShow() {
-		this.globalTextFontSize = getApp().globalData.globalTextFontSize ? getApp().globalData.globalTextFontSize : 14;
-		this.globalLabelFontSize = getApp().globalData.globalLabelFontSize ? getApp().globalData.globalLabelFontSize : 14;
+		// this.globalTextFontSize = getApp().globalData.globalTextFontSize ? getApp().globalData.globalTextFontSize : 14;
+		// this.globalLabelFontSize = getApp().globalData.globalLabelFontSize ? getApp().globalData.globalLabelFontSize : 14;
 	},
 	onLoad(option) {
 		const destApp = option.destApp;

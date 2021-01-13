@@ -19,7 +19,7 @@
 					<text class="label">邀请成员</text>
 				</view>
 			</view>
-			<view class="see-all" v-if="loadmoreMemeber!=='noMore'"><uni-load-more :status="loadmoreMemeber"></uni-load-more></view>
+			<view class="see-all" v-if="loadmoreMemeber !== 'noMore'"><uni-load-more :status="loadmoreMemeber"></uni-load-more></view>
 		</view>
 		<view class="setting-item group-util" v-if="type === 'group-util'">
 			<view class="title">小工具</view>
@@ -75,7 +75,6 @@
 					></uni-qrcode>
 					<image :src="groupQrCode" mode="aspectFit" class="qr-code-image" @click="previewImage"></image>
 					<view class="action"><button class="cu-btn line-green text-green" open-type="share">分享</button></view>
-					<!-- <view class="action"><button class="cu-btn line-green text-green" @tap="showQrCodeModal(false)">取消</button></view> -->
 				</view>
 			</view>
 		</view>
@@ -111,7 +110,7 @@ export default {
 		})
 	},
 	methods: {
-		joinGroup() {
+		async joinGroup() {
 			// 加入圈子
 			let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_add', 'operate');
 			let req = [
@@ -131,22 +130,22 @@ export default {
 					]
 				}
 			];
-			this.$http.post(url, req).then(res => {
-				if (res.data.stae === 'SUCCESS') {
-					uni.showModal({
-						title: '提示',
-						content: '您已成功加入' + this.groupInfo.name,
-						showCancel: false,
-						success(res) {
-							if (res.confirm) {
-								uni.redirectTo({
-									url: '/personalPages/chatGroup/chatGroup'
-								});
-							}
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				uni.showModal({
+					title: '提示',
+					content: '您已成功加入' + this.groupInfo.name,
+					showCancel: false,
+					success(res) {
+						if (res.confirm) {
+							uni.redirectTo({
+								url: '/personalPages/chatGroup/chatGroup'
+							});
 						}
-					});
-				}
-			});
+					}
+				});
+			}
+			// });
 		},
 		makeComplete(e) {
 			this.groupQrCode = e;
@@ -245,7 +244,8 @@ export default {
 		}, 1000);
 	},
 	async onLoad(option) {
-		this.checkOptionParams(option)
+		this.checkOptionParams(option);
+		this.toAddPage();
 		if (!this.userInfo || !this.userInfo.no) {
 			const result = await wx.login();
 			let userInfo = uni.getStorageSync('current_user_info');
@@ -276,8 +276,8 @@ export default {
 	},
 	onShareAppMessage(res) {
 		return {
-			title: `${this.userInfo.name}邀请加入${this.groupInfo.name}`,
-			path:`/personalPages/groupDetail/groupDetail?from=share&option.invite_user_no=${this.userInfo.userno}`
+			title: `${this.userInfo.name}邀请你加入${this.groupInfo.name}`,
+			path: `/personalPages/gropDetail/gropDetail?gc_no=${this.groupInfo.gc_no}&type=join-detail&from=share&option.invite_user_no=${this.userInfo.userno}`
 		};
 	}
 };

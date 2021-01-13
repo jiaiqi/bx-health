@@ -3,10 +3,13 @@
 		<view class="operate" hover-class="active" @click="numberChange('minus', 0.1)" @longpress="longpressNumChange('minus', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
 			-0.1
 		</view>
-		<view class="operate" hover-class="active" @click="numberChange('minus')" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">-1</view>
+		<view class="operate" hover-class="active" @click="numberChange('minus')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">
+			-1
+		</view>
 		<slider class="uni-slider" @change="changeSlider" :step="step" :min="min" :max="max" :value="bindValue" :show-value="showValue" />
-		<!-- <input type="digit" v-model="bindValue" class="input" /> -->
-		<view class="operate" hover-class="active" @click="numberChange('add')" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">+1</view>
+		<view class="operate" hover-class="active" @click="numberChange('add')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">
+			+1
+		</view>
 		<view class="operate" hover-class="active" @click="numberChange('add', 0.1)" @longpress="longpressNumChange('add', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
 			+0.1
 		</view>
@@ -109,12 +112,15 @@ export default {
 	.operate {
 		display: inline-block;
 		text-align: center;
-		padding: 5rpx 10rpx;
+		padding: 20rpx 10rpx;
 		background-color: #f1f1f1;
 		position: relative;
 		// font-size: 20rpx;
 		margin-right: 10rpx;
-		width:80rpx;
+		width: 80rpx;
+		&.big{
+			transform: scale(1.3);
+		}
 		&.active {
 			transition: all 0.2s;
 			transform: scale(1.1);
