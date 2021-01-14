@@ -41,6 +41,27 @@ export default {
 		uniEcharts
 	},
 	computed: {
+		basicOut() {
+			//基础代谢
+			// IF(B4="男",IF(B3>=60,B2*13.4+490,IF(B3>=31,B2*11.5+830,B2*15.2+680)),IF(B3>=60,B2*10.4+600,IF(B3>=31,B2*8.6+830,B2*14.6+450)))
+			if (this.userInfo.sex === '男') {
+				if (this.age >= 60) {
+					return this.userInfo.weight * 13.4 + 490;
+				} else if (this.age >= 31 && this.age < 60) {
+					return this.userInfo.weight * 11.5 + 830;
+				} else {
+					return this.userInfo.weight * 15.2 + 600; //<31
+				}
+			} else {
+				if (this.age >= 60) {
+					return this.userInfo.weight * 10.4 + 600;
+				} else if (this.age >= 31 && this.age <= 60) {
+					return this.userInfo.weight * 8.6 + 830;
+				} else {
+					return this.userInfo.weight * 14 + 450; //<31
+				}
+			}
+		},
 		age() {
 			if (this.userInfo && this.userInfo.birthday) {
 				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
@@ -250,16 +271,26 @@ export default {
 				});
 			});
 			let foodTypes = this.deepClone(dietRecordList);
+			let energyInfo = {
+				EAR: this.basicOut,
+				UL: 0,
+				key: 'energy',
+				label: '热量',
+				name: '热量',
+				shortName: '热量',
+				value: 0
+			};
+			eleArr.unshift(energyInfo);
 			eleArr = eleArr.map(ele => {
 				dietRecordList.forEach(diet => {
 					if (diet.diet_record_no === currentDiet.diet_record_no || diet.food_no === currentDiet.food_no || diet.meal_no === currentDiet.meal_no) {
 						// diet = currentDiet;
+					} else {
+						return;
 					}
 					let ratio = 1;
 					if (diet['unit'] === 'g') {
 						if (diet.unit_amount) {
-							// ratio = (diet.unit_weight_g * diet.amount)
-							// / diet.unit_amount;
 							ratio = diet.amount;
 						} else if (diet.unit_weight_g) {
 							ratio = diet.amount;
@@ -273,7 +304,15 @@ export default {
 					} else {
 						ratio = (diet.unit_weight_g * diet.amount) / (diet.unit_amount ? diet.unit_amount : 100);
 					}
-					ele.value = ele.value + diet[ele['key']] * ratio;
+					if (ele['key'] === 'energy') {
+						if (!diet.energy && diet.unit_energy) {
+							ele.value = ele.value + diet['unit_energy'] * ratio;
+						} else {
+							ele.value = ele.value + diet[ele['key']];
+						}
+					} else {
+						ele.value = ele.value + diet[ele['key']] * ratio;
+					}
 				});
 				return ele;
 			});
@@ -314,6 +353,9 @@ export default {
 								ratio = 1;
 							}
 							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
+							if (cur.key === 'energy') {
+								val =cur.value -  currentDiet['unit_energy'] * ratio * currentDiet.amount;
+							}
 							let num = (val * 100) / Number(cur.EAR);
 							if (currentDiet.meal_no) {
 								num = (val * 100) / Number(cur.EAR);
@@ -330,6 +372,9 @@ export default {
 								ratio = 1;
 							}
 							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
+							if (cur.key === 'energy') {
+								val = currentDiet['unit_energy'] * ratio * currentDiet.amount;
+							}
 							let num = (val * 100) / Number(cur.EAR);
 							if (currentDiet.meal_no) {
 								num = (val * 100) / Number(cur.EAR);
@@ -353,12 +398,10 @@ export default {
 				title: {
 					text: ''
 				},
-				// #ifdef h5
 				tooltip: {
 					show: true,
 					trigger: 'axis'
 				},
-				// #endif
 				legend: {
 					data: legendData
 				},

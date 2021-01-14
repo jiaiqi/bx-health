@@ -28,7 +28,8 @@ const state = {
 	dietRecord: getItem('dietRecord') ? getItem('dietRecord') : [],
 	pageInfo: getItem('pageInfo') ? getItem('pageInfo') : {},
 	currentPage: '',
-	inviterInfo: getItem('inviterInfo') ? getItem('inviterInfo') : {} //邀请人
+	inviterInfo: getItem('inviterInfo') ? getItem('inviterInfo') : {} ,//邀请人
+	areRegistering:false //是否正在注册
 }
 let persistData = {}; //持久化数据
 const mutations = {
@@ -60,6 +61,9 @@ const mutations = {
 				state.authBoxDisplay = true //显示授权组件
 			}
 		}
+	},
+	SET_REGIST_STATUS:(state,status)=>{
+		state.areRegistering = status
 	},
 	SET_CURRENT_PAGE: (state, url) => {
 		state.currentPage = url

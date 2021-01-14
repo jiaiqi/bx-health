@@ -93,11 +93,6 @@ export default {
 			type: Boolean,
 			default: true
 		},
-		// 最顶层的line的文字
-		topVal: {
-			type: String,
-			default: ''
-		},
 		column: {
 			//要提交的字段
 			type: String,
@@ -154,19 +149,16 @@ export default {
 	flex-direction: column;
 	width: 100%;
 	.bx-tagline {
-		// padding-top: 20upx;
 		display: flex;
 		flex-wrap: wrap;
 		margin: 20rpx 20rpx;
 		padding: 10rpx 40rpx;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		.bx-item {
-			// padding-left: 100upx;
 			height: 80upx;
 			line-height: 80rpx;
 			position: relative;
 			display: flex;
-
 			& + .bx-item {
 				&::before {
 					content: '';

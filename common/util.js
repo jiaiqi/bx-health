@@ -1457,6 +1457,11 @@ export default {
 				// 已有用户信息
 				return
 			}
+			if(store.state.app.areRegistering){
+				// 有一个注册请求正在进行中
+				return
+			}
+			store.commit('SET_REGIST_STATUS',true)
 			let wxUserInfo = ''
 			if (store && store.state && store.state.user) {
 				wxUserInfo = store.state.user.wxUserInfo
@@ -1468,7 +1473,6 @@ export default {
 					"userno": uni.getStorageSync('login_user_info').user_no,
 					"name": wxUserInfo ? wxUserInfo.nickname : "",
 					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
-					"user_image": "",
 					"sex": wxUserInfo ? (wxUserInfo.sex === 0 ? "男" : wxUserInfo.sex === 1 ? "女" : "") : "",
 					"is_main": "是",
 					"font_size": "中"
@@ -1485,6 +1489,7 @@ export default {
 				//TODO handle the exception
 			}
 			let res = await Vue.prototype.$http.post(url, req)
+			store.commit('SET_REGIST_STATUS',false)
 			if (res.data && res.data.resultCode === "SUCCESS") {
 				console.log("信息登记成功")
 			} else {

@@ -426,9 +426,9 @@
 							</view>
 						</view>
 					</view>
-					<view class="chart-box" v-if="currentRecord && currentRecordType === 'food' && showChart">
+					<!-- 		<view class="chart-box" v-if="currentRecord && currentRecordType === 'food' && showChart">
 						<uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-echarts>
-					</view>
+					</view> -->
 					<view class="cook-type-box" v-if="currentRecord && currentRecordType === 'food'">
 						<view class="title">烹调方式:</view>
 						<view class="current-cook-type" v-if="currentRecord.cook_method" @click="showCookTypes">{{ currentRecord.cook_method }}</view>
@@ -475,7 +475,7 @@
 						</view>
 					</view>
 					<view class="content">
-						<view class="diet-item" v-for="item in recentDiet" :key="item.diet_record_no" :class="{'checked':item.checked}">
+						<view class="diet-item" v-for="(item, index) in recentDiet" :key="index" :class="{ checked: item.checked }">
 							<!-- <view class="food-name" @click="changeChecked(item)">{{ item.name }}</view> -->
 							<image :src="getImagePath(item.image)" mode="scaleToFill" class="image" @click="changeChecked(item)"></image>
 							<view class="info">
@@ -489,13 +489,13 @@
 										<text class="separator" @click.stop="calc(item, 'add')">+</text>
 										<!-- <text class="number"></text> -->
 									</view>
-									<text class="text-left margin-left-xs text-gray" style="font-weight: normal;" @click="changeChecked(item)">{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}</text>
+									<text class="text-left margin-left-xs text-gray" style="font-weight: normal;" @click="changeChecked(item)">
+										{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}
+									</text>
 								</view>
 							</view>
 						</view>
-						<view class="load-more">
-							<uni-load-more :status="loadMoreHistoryStatus" :contentText="contentText" @clickLoadMore="clickLoadMore"></uni-load-more>
-						</view>
+						<view class="load-more"><uni-load-more :status="loadMoreHistoryStatus" :contentText="contentText" @clickLoadMore="clickLoadMore"></uni-load-more></view>
 					</view>
 					<view class="footer" v-if="recentDietMode === 'edit' && checkedRecentDiet.length > 0">
 						<button class="cu-btn bg-gray margin-right" @click="hideModal">取消</button>
@@ -565,10 +565,10 @@ export default {
 					color: ['#92d050', '#f79646', '#4f81bd'],
 					title: { text: '' },
 					legend: { data: ['已选', '超标部分', 'NRV%达标线'] },
-					tooltip: {
-						show: true,
-						trigger: 'axis'
-					},
+					// tooltip: {
+					// 	show: true,
+					// 	trigger: 'axis'
+					// },
 					grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
 					xAxis: [
 						{
@@ -598,10 +598,10 @@ export default {
 					color: ['#92d050', '#f79646', '#4f81bd'],
 					title: { text: '' },
 					legend: { data: ['其他食物', '当前食物', 'NRV%达标线'] },
-					tooltip: {
-						show: true,
-						trigger: 'axis'
-					},
+					// tooltip: {
+					// 	show: true,
+					// 	trigger: 'axis'
+					// },
 					grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
 					xAxis: [
 						{
@@ -1086,12 +1086,12 @@ export default {
 	},
 	methods: {
 		clickLoadMore(e) {
-			if(e.detail.status==='more'){
-				if(this.historyPage.total>this.historyPage.pageNo*this.historyPage.rownumber){
-					this.historyPage.pageNo +=1
-					this.getRecentDiet()
-				}else{
-					this.loadMoreHistoryStatus = 'noMore'
+			if (e.detail.status === 'more') {
+				if (this.historyPage.total > this.historyPage.pageNo * this.historyPage.rownumber) {
+					this.historyPage.pageNo += 1;
+					this.getRecentDiet();
+				} else {
+					this.loadMoreHistoryStatus = 'noMore';
 				}
 			}
 		},
@@ -1132,6 +1132,16 @@ export default {
 				return item;
 			});
 			let foodTypes = this.deepClone(this.foodType);
+			let energyInfo = {
+				EAR: this.basicOut,
+				UL: 0,
+				key: 'energy',
+				label: '热量',
+				name: '热量',
+				shortName: '热量',
+				value: 0
+			};
+			eleArr.unshift(energyInfo);
 			eleArr = eleArr.map(ele => {
 				dietRecordList.forEach(diet => {
 					if (diet.id === currentDiet.id) {
@@ -1299,6 +1309,24 @@ export default {
 					eleArr.push(ele);
 				});
 			});
+			let energyData = {
+				EAR: this.basicOut,
+				UL: 0,
+				key: 'energy',
+				label: '热量',
+				name: '热量',
+				shortName: '热量',
+				value: 0
+			};
+			let dietList = this.deepClone(this.dietRecord);
+			// debugger;
+			if(Array.isArray(dietList)&&dietList.length>0){
+				dietList.forEach(item=>{
+					energyData.value += item[energyData.key]
+				})
+			}
+			eleArr.unshift(energyData);
+
 			let category = eleArr.map(item => {
 				return item.name;
 			});
@@ -1371,10 +1399,10 @@ export default {
 				legend: {
 					data: legendData
 				},
-				tooltip: {
-					show: true,
-					trigger: 'axis'
-				},
+				// tooltip: {
+				// 	show: true,
+				// 	trigger: 'axis'
+				// },
 				grid: {
 					left: '3%',
 					right: '4%',
@@ -1513,28 +1541,6 @@ export default {
 				url: url
 			});
 		},
-		// async getFoodList(diet) {
-		// 	let foodNameList = diet.map(item => item.name);
-		// 	let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
-		// 	let req = {
-		// 		serviceName: 'srvhealth_diet_contents_select',
-		// 		colNames: ['*'],
-		// 		condition: [{ colName: 'name', ruleType: 'in', value: foodNameList.toString() }]
-		// 	};
-		// 	let res = await this.$http.post(url, req);
-		// 	if (res.data.state === 'SUCCESS') {
-		// 		diet = diet.map(item => {
-		// 			let obj = null;
-		// 			res.data.data.map(food => {
-		// 				if (food.name === item.name) {
-		// 					obj = Object.assign(food, item);
-		// 				}
-		// 			});
-		// 			return obj;
-		// 		});
-		// 		return diet;
-		// 	}
-		// },
 		async buildChartData(e) {
 			let { energy, diet } = e;
 			let normalData = {
@@ -1653,7 +1659,7 @@ export default {
 				this.currentRecord.amount = Number((this.currentRecord.amount + step).toFixed(1));
 			}
 			if (this.currentRecordType === 'food') {
-				this.buildCurrenDietChartOption();
+				// this.buildCurrenDietChartOption();
 			}
 		},
 		toDetail(e, item) {
@@ -4379,7 +4385,7 @@ uni-checkbox::before {
 		align-items: flex-start;
 		height: 480px;
 		overflow: scroll;
-		.load-more{
+		.load-more {
 			width: 100%;
 		}
 	}
@@ -4394,12 +4400,12 @@ uni-checkbox::before {
 		overflow: hidden;
 		margin-bottom: 10rpx;
 		border: 5rpx solid #fff;
-		transition: all .5s ease-out;
-		&.checked{
-			border-color: #0BC99D;
-			color:#0BC99D ;
-			.checkbox{
-				background-color: #0BC99D;
+		transition: all 0.5s ease-out;
+		&.checked {
+			border-color: #0bc99d;
+			color: #0bc99d;
+			.checkbox {
+				background-color: #0bc99d;
 				color: #fff;
 			}
 		}

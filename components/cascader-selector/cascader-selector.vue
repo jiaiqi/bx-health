@@ -16,13 +16,12 @@
 			:showSelect="showSelect"
 			:column="srvInfo.column"
 			:showCol="srvInfo.showCol"
-			:topVal="topVal"
 			:isShowMore="isShowMore"
 			:lineDataDefault="lineDataDefault"
 		></cascader>
 		<view class="button-box">
-			<button class="cu-btn bg-blue" @click="emitSelectVal">{{ lineDataDefault[lineDataDefault.length - 1] ? '确 定' : '取 消' }}</button>
 			<button class="cu-btn bg-green" @click="resetData">重 置</button>
+			<button class="cu-btn bg-blue" @click="emitSelectVal">{{ lineDataDefault[lineDataDefault.length - 1] ? '确 定' : '取 消' }}</button>
 		</view>
 	</view>
 </template>
@@ -42,11 +41,11 @@ export default {
 			showSelect: true,
 			isShowMore: false, //是否显示‘更多’按钮
 			outputData: {},
-			currentClick:null,
+			currentClick: null,
 			lineDataDefault: [], //线数据默认值
 			searchKey: '', // 搜索关键词
-			oldAreaList:[],
-			current_no:''
+			oldAreaList: [],
+			current_no: ''
 		};
 	},
 	methods: {
@@ -97,10 +96,7 @@ export default {
 				});
 			}
 			this.getAreaData(condition).then(data => {
-				// if(this.searchKey){
-					this.oldAreaList = this.deepClone(data)
-				// }
-				// uni.hideLoading()
+				this.oldAreaList = this.deepClone(data);
 			});
 			this.showSelect = true;
 		},
@@ -136,9 +132,6 @@ export default {
 			};
 			const res = await this.$http.post(url, req);
 			if (res && res.data && res.data.state === 'SUCCESS') {
-				if (res.data.data.length === 0) {
-					// this.showSelect = false;
-				}
 				if (!defaultVal) {
 					const page = res.data.page;
 					that.page.pageNo = page.pageNo;
@@ -147,30 +140,27 @@ export default {
 						// 展示更多
 						that.areaList = that.areaList.concat(res.data.data);
 					} else {
-						that.areaList = res.data.data;						
+						that.areaList = res.data.data;
 					}
 					if (page.total > page.pageNo * page.rownumber) {
 						that.isShowMore = true;
 					} else {
 						that.isShowMore = false;
 					}
-					
 					return that.areaList;
 				} else {
 					const data = res.data.data;
-					// this.lineDataDefault[index] = data[0]
 					that.$set(this.lineDataDefault, index, data[0]);
 					if (index === lastListIndex) {
 						that.areaList = res.data.data;
 					}
-					// console.log('lineDataDefault',this.lineDataDefault)
 					return data;
-				}				
+				}
 			}
 		},
 		clickTag(e) {
-			this.currentClick = e
-			this.current_no = e.no
+			this.currentClick = e;
+			this.current_no = e.no;
 			if (this.srvInfo.isTree === false) {
 				this.$emit('getCascaderValue', e, 'sure');
 				this.areaList = [];
@@ -178,20 +168,16 @@ export default {
 				return;
 			}
 			if (e.no) {
-				if(this.parent_no&&e.no===this.parent_no){
-					return
+				if (this.parent_no && e.no === this.parent_no) {
+					return;
 				}
-				if(e.parent_no===null){
-					this.lineDataDefault = []
-				}else if(e.parent_no===this.outputData.parent_no){
+				if (e.parent_no === null) {
+					this.lineDataDefault = [];
+				} else if (e.parent_no === this.outputData.parent_no) {
 					// 同级
-					// this.lineDataDefault = this.lineDataDefault.slice(0,1)
-					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no),1)
-				}else if(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no)!==-1){
-					debugger
-					 this.lineDataDefault.splice(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no),this.lineDataDefault.length)
-				}else {
-					debugger
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no), 1);
+				} else if (this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no) !== -1) {
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no), this.lineDataDefault.length);
 				}
 				this.outputData = e;
 				this.$emit('clickTag', e);
@@ -212,24 +198,22 @@ export default {
 				} else {
 					this.showSelect = true;
 				}
-				this.getAreaData(condition).then(data=>{					
-					let oldAreaList = this.oldAreaList
-					this.valuationChild(oldAreaList,data,e)
-				})
+				this.getAreaData(condition).then(data => {
+					let oldAreaList = this.oldAreaList;
+					this.valuationChild(oldAreaList, data, e);
+				});
 			}
 		},
-		valuationChild(oldAreaList,child,e){
-			if(oldAreaList.length > 0){
-				oldAreaList.forEach(item=>{
-					if(item.no === e.no){
-						this.$set(item,'child',child)
+		valuationChild(oldAreaList, child, e) {
+			if (oldAreaList.length > 0) {
+				oldAreaList.forEach(item => {
+					if (item.no === e.no) {
+						this.$set(item, 'child', child);
 					}
-					if(item.child){
-						this.valuationChild(item.child,child,e)
+					if (item.child) {
+						this.valuationChild(item.child, child, e);
 					}
-				})
-			}else{
-				// this.oldAreaList = data
+				});
 			}
 		},
 		clickLine(e, index) {
@@ -239,19 +223,14 @@ export default {
 				this.lineDataDefault = this.lineDataDefault.slice(0, index + 1);
 			}
 			if (e && e.no) {
-				debugger
-				if(e.parent_no===null){
-					this.lineDataDefault = this.lineDataDefault.slice(0,1)
-				}else if(e.parent_no===this.outputData.parent_no){
+				if (e.parent_no === null) {
+					this.lineDataDefault = this.lineDataDefault.slice(0, 1);
+				} else if (e.parent_no === this.outputData.parent_no) {
 					// 同级
-					debugger
-					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no)+1,1)
-				}else if(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no)!==-1){
-					// 上级 
-					debugger
-					 this.lineDataDefault.splice(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no)+1,this.lineDataDefault.length)
-				}else {
-					debugger
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no) + 1, 1);
+				} else if (this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no) !== -1) {
+					// 父级
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no) + 1, this.lineDataDefault.length);
 				}
 				this.outputData = e;
 				this.$emit('clickLine', e);
@@ -263,15 +242,10 @@ export default {
 					}
 				];
 				this.parent_no = e.no;
-				// this.getAreaData(condition);
-				this.getAreaData(condition).then(data=>{
-					let oldAreaList = this.oldAreaList
-					this.valuationChild(oldAreaList,data,e)
-				})
-				// this.getAreaData().then(data=>{
-				// 	debugger
-				// 	// this.oldAreaList = this.deepClone(data)
-				// });
+				this.getAreaData(condition).then(data => {
+					let oldAreaList = this.oldAreaList;
+					this.valuationChild(oldAreaList, data, e);
+				});
 				if (e.is_leaf === '是') {
 					// this.showSelect = false;
 				} else {
@@ -279,8 +253,8 @@ export default {
 				}
 			} else if (!e) {
 				this.lineDataDefault = [];
-				this.getAreaData().then(data=>{
-					this.oldAreaList = this.deepClone(data)
+				this.getAreaData().then(data => {
+					this.oldAreaList = this.deepClone(data);
 				});
 				this.showSelect = true;
 			}
@@ -292,79 +266,18 @@ export default {
 				this.$emit('getCascaderValue', this.lineDataDefault[this.lineDataDefault.length - 1], 'sure');
 			} else {
 				// 取消
-				this.$emit('getCascaderValue',false);
-			}
-		},
-		setLineData() {
-			const value = this.defaultLineVal;
-			if (value) {
-				this.lineDataDefault = [];
-				let condition = [
-					{
-						colName: 'path_name',
-						ruleType: 'eq',
-						value: value
-					}
-				];
-				debugger
-				//通过path_name查询path
-				this.getAreaData(condition, false, true).then(data => {
-					if (data) {
-						console.log('lineDataDefault', data);
-						let path_no = data[0].path;
-						let arr = path_no.split('/');
-						// 将path分割为地区编号的数组
-						arr = arr.filter(item => item && item.trim());
-						arr.forEach((pathNo, index) => {
-							condition = [
-								{
-									colName: 'no',
-									ruleType: 'eq',
-									value: pathNo
-								}
-							];
-							const lastListIndex = arr.length - 1;
-							this.getAreaData(condition, false, true, index, lastListIndex).then(datas => {
-								let parent_no = datas[datas.length - 1].parent_no;
-								condition = [
-									{
-										colName: 'parent_no',
-										ruleType: 'eq',
-										value: pathNo
-									}
-								];
-								this.getAreaData(condition);
-							});
-						});
-					}
-				});
+				this.$emit('getCascaderValue', false);
 			}
 		}
 	},
 	created() {
 		if (this.srvInfo && this.srvInfo.serviceName) {
-			this.getAreaData().then(data=>{
-				this.oldAreaList = this.deepClone(data)
-			})
-		}
-		// if(this.defaultLineVal){
-		// 	this.setLineData()
-		// }
-	},
-	watch: {
-		defaultLineVal(newValue, oldValue) {
-			this.setLineData();
+			this.getAreaData().then(data => {
+				this.oldAreaList = this.deepClone(data);
+			});
 		}
 	},
 	props: {
-		topVal: {
-			type: String,
-			default: '全国'
-		},
-		defaultLineVal: {
-			type: String,
-			default: ''
-		},
 		srvInfo: {
 			type: Object,
 			default: () => {

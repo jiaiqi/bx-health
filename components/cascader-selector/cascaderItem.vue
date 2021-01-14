@@ -107,41 +107,31 @@ export default {
 
 <style lang="scss" scoped>
 .bx-tagbox-c-wrap {
-	margin: 20rpx;
+	margin: 10rpx 20rpx;
 	padding: 20rpx;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	border-radius: 30rpx;
 }
 .bx-tagbox-c {
-	// margin: 20rpx;
-	// padding: 20rpx;
-	// height: 700rpx;
 	text-align: left;
 	flex: 1;
 	overflow: scroll;
-	margin-top: 20rpx;
-	// box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	.bx-item {
 		min-width: 100upx;
-		// height: 40upx;
 		display: inline-block;
 		margin-right: 20upx;
 		margin-bottom: 10upx;
-		// background-color: #f1f1f1;
 		border: 1rpx solid #f1f1f1;
 		border-radius: 50rpx;
-		padding: 6rpx 25rpx;
+		padding: 10rpx 25rpx;
 		text-align: center;
+		transition: transform 0.5s ease-out;
 		&:active {
-			transition: all 0.5s ease-in-out;
 			transform: scale(1.1);
 		}
 		&.more {
-			// background-color: #f0ad4e;
-			// border-color:#f0ad4e ;
 			border: none;
 			color: #f0ad4e;
-			// text-decoration: underline;
 			position: relative;
 			&::after {
 				content: '';
