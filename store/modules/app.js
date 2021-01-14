@@ -32,6 +32,10 @@ const state = {
 }
 let persistData = {}; //持久化数据
 const mutations = {
+	SET_TICKET:(state,ticket)=>{
+		state.bx_auth_ticket = ticket
+		setItem('bx_auth_ticket', state.bx_auth_ticket)
+	},
 	SET_GLOBAL_TEXT_SIZE: (state, size) => {
 		state.globalTextFontSize = size
 	},

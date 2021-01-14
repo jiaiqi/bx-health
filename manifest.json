@@ -92,10 +92,11 @@
         "domain" : "wx2.100xsys.cn",
         "router" : {
             "mode" : "history",
-            "base" : "/bx-health/"
+            "base" : ""
         },
         "devServer" : {
-            "disableHostCheck" : true
+            "disableHostCheck" : true,
+            "https" : false
         },
         "template" : "",
         "optimization" : {

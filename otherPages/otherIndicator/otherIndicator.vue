@@ -652,6 +652,9 @@ export default {
 		let arr = ['systolic_pressure','diastolic_pressure','heart_rate']
 		arr.forEach(key=>{
 			if(option[key]){
+				if(key === 'heart_rate'&&Number(option[key])<30){
+					option[key] = 30
+				}
 				this.inputVal[key] = Number(option[key])
 			}
 		})

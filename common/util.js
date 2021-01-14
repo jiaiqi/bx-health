@@ -1,3 +1,4 @@
+import store from '@/store'
 export default {
 	install(Vue, options) {
 		Vue.prototype.pageTitle = '加载中…' // 可以自定义变量
@@ -641,11 +642,11 @@ export default {
 			if (res.data.resultCode === 'SUCCESS') {
 				// 登录成功
 				uni.setStorageSync('isLogin', true);
-				Vue.prototype.$store.commit('SET_LOGIN_STATE', true)
+				store.commit('SET_LOGIN_STATE', true)
 				let resData = res.data.response[0].response;
 				if (resData.login_user_info.user_no) {
 					uni.setStorageSync('login_user_info', resData.login_user_info);
-					Vue.prototype.$store.commit('SET_LOGIN_USER', resData.login_user_info)
+					store.commit('SET_LOGIN_USER', resData.login_user_info)
 				}
 				uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
 				if (resData.login_user_info.data) {
@@ -657,11 +658,11 @@ export default {
 				})
 				if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg === 'getUserInfo:ok' &&
 					infoRes[1].userInfo) {
-					Vue.prototype.$store.commit('SET_AUTH_USERINFO', true)
+					store.commit('SET_AUTH_USERINFO', true)
 				} else {
-					if (Vue.prototype.$store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
+					if (store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
 						// 跳转到授权页面
-						Vue.prototype.$store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
+						store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
 						uni.navigateTo({
 							url: '/publicPages/accountExec/accountExec'
 						})
@@ -677,7 +678,7 @@ export default {
 				uni.showToast({
 					title: res.data.resultMessage
 				});
-				Vue.prototype.$store.commit('SET_LOGIN_STATE', false)
+				store.commit('SET_LOGIN_STATE', false)
 				return false;
 			}
 		}
@@ -967,7 +968,7 @@ export default {
 				}],
 			}]
 			if (e) {
-				Vue.prototype.$store.commit('SET_WX_USERINFO', userInfo)
+				store.commit('SET_WX_USERINFO', userInfo)
 				uni.setStorageSync('wxUserInfo', userInfo)
 				let response = await this.$http.post(url, req);
 				console.log('srvfile_attachment_select', response);
@@ -1337,7 +1338,7 @@ export default {
 								uni.setStorageSync('current_user_info', item);
 								current_user_info = item
 								try {
-									Vue.prototype.$store.commit("SET_USERINFO", item)
+									store.commit("SET_USERINFO", item)
 								} catch (e) {
 									//TODO handle the exception
 								}
@@ -1347,14 +1348,14 @@ export default {
 						uni.setStorageSync('current_user_info', res.data.data[0]);
 						uni.setStorageSync('current_user', res.data.data[0].name);
 						current_user_info = res.data.data[0]
-						Vue.prototype.$store.commit("SET_USERINFO", current_user_info)
-						Vue.prototype.$store.commit("SET_USERLIST", res.data.data)
+						store.commit("SET_USERINFO", current_user_info)
+						store.commit("SET_USERLIST", res.data.data)
 					}
 					return current_user_info
 				} else if (res.data.resultCode === '0011') {
 					// 登录失效 进行静默登录
 					// #ifdef MP-WEIXIN
-					Vue.prototype.$store.commit("SET_LOGIN_STATE", false)
+					store.commit("SET_LOGIN_STATE", false)
 					const result = await wx.login();
 					if (result.code) {
 						await Vue.prototype.wxLogin({
@@ -1386,14 +1387,14 @@ export default {
 		}
 		Vue.prototype.selectBasicUserInfo = async () => {
 			const result = await wx.login();
-			if (result.code) {
+			if (result && result.code) {
 				let res = await Vue.prototype.wxLogin({
 					code: result.code
 				});
 				if (!res) {
 					return 'fail'
 				}
-			}
+			} else {}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_select', 'select')
 			let req = {
 				"serviceName": "srvhealth_person_info_select",
@@ -1410,8 +1411,10 @@ export default {
 			}
 			let res = await Vue.prototype.$http.post(url, req)
 			if (res.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				Vue.prototype.$store.commit('SET_USERINFO', res.data.data[0])
-				Vue.prototype.$store.commit('SET_USERLIST', res.data.data)
+				// store.commit('SET_USERINFO', res.data.data[0])
+				// store.commit('SET_USERLIST', res.data.data)
+				store.commit('SET_USERINFO', res.data.data[0])
+				store.commit('SET_USERLIST', res.data.data)
 				uni.setStorageSync('current_user_info', res.data.data[0]);
 				uni.setStorageSync('current_user', res.data.data[0].name);
 				return res.data.data[0]
@@ -1455,8 +1458,8 @@ export default {
 				return
 			}
 			let wxUserInfo = ''
-			if (Vue.prototype.$store && Vue.prototype.$store.state && Vue.prototype.$store.state.user) {
-				wxUserInfo = Vue.prototype.$store.state.user.wxUserInfo
+			if (store && store.state && store.state.user) {
+				wxUserInfo = store.state.user.wxUserInfo
 			}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_add', 'add')
 			let req = [{
@@ -1472,11 +1475,11 @@ export default {
 				}]
 			}]
 			try {
-				if (Vue.prototype.$store.state.app.inviterInfo.invite_user_no) {
-					req[0].data[0].invite_user_no = Vue.prototype.$store.state.app.inviterInfo.invite_user_no
+				if (store.state.app.inviterInfo.invite_user_no) {
+					req[0].data[0].invite_user_no = store.state.app.inviterInfo.invite_user_no
 				}
-				if (Vue.prototype.$store.state.app.inviterInfo.add_url) {
-					req[0].data[0].add_url = Vue.prototype.$store.state.app.inviterInfo.add_url
+				if (store.state.app.inviterInfo.add_url) {
+					req[0].data[0].add_url = store.state.app.inviterInfo.add_url
 				}
 			} catch (e) {
 				//TODO handle the exception
@@ -1485,6 +1488,18 @@ export default {
 			if (res.data && res.data.resultCode === "SUCCESS") {
 				console.log("信息登记成功")
 			} else {
+				if (res.data.resultCode === '0011') {
+					// 未登录
+					// #ifdef MP-WEIXIN
+					const result = await wx.login();
+					if (result && result.code) {
+						let res = await Vue.prototype.wxLogin({
+							code: result.code
+						});
+					}
+					// #endif
+					return
+				}
 				uni.showModal({
 					title: '提示',
 					content: '当前账号未登记个人信息，是否跳转到信息登记页面',
@@ -1506,18 +1521,18 @@ export default {
 								}
 							];
 							try {
-								if (Vue.prototype.$store.state.app.inviterInfo.invite_user_no) {
+								if (store.state.app.inviterInfo.invite_user_no) {
 									fieldsCond.push({
 										column: 'invite_user_no',
 										display: false,
-										value: Vue.prototype.$store.state.app.inviterInfo.invite_user_no
+										value: store.state.app.inviterInfo.invite_user_no
 									})
 								}
-								if (Vue.prototype.$store.state.app.inviterInfo.add_url) {
+								if (store.state.app.inviterInfo.add_url) {
 									fieldsCond.push({
 										column: 'add_url',
 										display: false,
-										value: Vue.prototype.$store.state.app.inviterInfo.add_url
+										value: store.state.app.inviterInfo.add_url
 									})
 								}
 							} catch (e) {

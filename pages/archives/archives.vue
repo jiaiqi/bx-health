@@ -2,8 +2,8 @@
 	<view class="health-archive-wrap" v-if="(is_login && authSetting && authSetting.userInfo) || (is_login && client_env === 'h5')">
 		<view class="top text-bold">
 			<view class="left">
-				<view class="avatar" @click="showUserListPopup = true"><image class="avatar" :src="getUserImage(userInfo)"></image></view>
-				<view class="user-name" @click="showUserListPopup = true">{{ userInfo.name }}</view>
+				<view class="avatar" @click="showUserListPopup = true"><image class="avatar" :src="getUserImage(vuex_userInfo)"></image></view>
+				<view class="user-name" @click="showUserListPopup = true">{{ vuex_userInfo.name }}</view>
 				<view class="switch-icon cuIcon-right" @click="showUserListPopup = true"></view>
 				<view class="tag-box" @click="showUserHealtManagePopup = true">
 					<text class="tag-item" v-for="item in selectedTags" :key="item.value">{{ item.label }}</text>
@@ -186,7 +186,7 @@
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: showAddRecord }">
-			<view class="cu-dialog " @tap.stop="">
+			<view class="cu-dialog" @tap.stop="">
 				<view class="inspect-record">
 					<view class="title">选择检查报告类型</view>
 					<view class="cu-bar search bg-white">
@@ -217,7 +217,7 @@
 		<view class="cu-modal" :class="{ show: showUserListPopup }" @tap="showUserListPopup = false">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="user-list">
-					<view class="user-item" @click="switchUser(item)" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === userInfo.name }">
+					<view class="user-item" @click="switchUser(item)" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === vuex_userInfo.name }">
 						<image class="avatar" :src="getUserImage(item)" size="60" v-if="getUserImage(item)"></image>
 						<image class="avatar" src="/static/man-profile.png" v-else></image>
 						{{ item.name }}
@@ -300,7 +300,8 @@ export default {
 	},
 	computed: {
 		...mapState({
-			inviterInfo: state => state.app.inviterInfo
+			inviterInfo: state => state.app.inviterInfo,
+			vuex_userInfo:state=>state.user.userInfo
 		}),
 		...mapGetters({
 			authSetting: 'authSetting',
@@ -353,13 +354,13 @@ export default {
 			}
 		},
 		bmi() {
-			if (this.userInfo.weight && this.userInfo.height) {
-				return Number((Number(this.userInfo.weight) / Math.pow(Number(this.userInfo.height) / 100, 2)).toFixed(1));
+			if (this.vuex_userInfo.weight && this.vuex_userInfo.height) {
+				return Number((Number(this.vuex_userInfo.weight) / Math.pow(Number(this.vuex_userInfo.height) / 100, 2)).toFixed(1));
 			}
 		},
 		age() {
-			if (this.userInfo.birthday) {
-				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
+			if (this.vuex_userInfo.birthday) {
+				let age = new Date().getFullYear() - new Date(this.vuex_userInfo.birthday).getFullYear();
 				return age;
 			}
 		},
@@ -460,7 +461,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_plan_schedule_select',
 				colNames: ['*'],
-				condition: [{ colName: 'owner_person_no', ruleType: 'eq', value: this.userInfo.no }],
+				condition: [{ colName: 'owner_person_no', ruleType: 'eq', value: this.vuex_userInfo.no }],
 				page: { pageNo: 1, rownumber: 10 }
 			};
 			let res = await this.$http.post(url, req);
@@ -535,9 +536,9 @@ export default {
 					{ column: 'specimen', value: e.item.specimen }, //标本类型
 					{ column: 'examination_type', value: e.item.examination_type }, //检查类别
 					{ column: 'jy_no', display: false, value: e.item.jy_no },
-					{ column: 'examinate_person_no', display: false, value: this.userInfo.no },
-					{ column: 'examinate_name', display: false, value: this.userInfo.name },
-					{ column: 'examinate_account', display: false, value: this.userInfo.userno },
+					{ column: 'examinate_person_no', display: false, value: this.vuex_userInfo.no },
+					{ column: 'examinate_name', display: false, value: this.vuex_userInfo.name },
+					{ column: 'examinate_account', display: false, value: this.vuex_userInfo.userno },
 					{ column: 'examinate_date', display: true, value: dayjs().format('YYYY-MM-DD') },
 					{ column: 'report_daq_survey_activity_no', display: false },
 					{ column: 'report_record', display: false },
@@ -560,9 +561,9 @@ export default {
 			} else {
 				let fieldsCond = [
 					{ column: 'jy_no', display: false },
-					{ column: 'examinate_person_no', display: false, value: this.userInfo.no },
-					{ column: 'examinate_name', display: false, value: this.userInfo.name },
-					{ column: 'examinate_account', display: false, value: this.userInfo.userno },
+					{ column: 'examinate_person_no', display: false, value: this.vuex_userInfo.no },
+					{ column: 'examinate_name', display: false, value: this.vuex_userInfo.name },
+					{ column: 'examinate_account', display: false, value: this.vuex_userInfo.userno },
 					{ column: 'examinate_date', display: true, value: dayjs().format('YYYY-MM-DD') },
 					{ column: 'report_daq_survey_activity_no', display: false },
 					{ column: 'report_record', display: false },
@@ -608,7 +609,7 @@ export default {
 				serviceName: 'srvhealth_examination_report_select',
 				colNames: ['*'],
 				page: { rownumber: 10, pageNo: 1 },
-				condition: [{ colName: 'examinate_account', ruleType: 'eq', value: this.userInfo.userno }, { colName: 'examinate_person_no', ruleType: 'eq', value: this.userInfo.no }]
+				condition: [{ colName: 'examinate_account', ruleType: 'eq', value: this.vuex_userInfo.userno }, { colName: 'examinate_person_no', ruleType: 'eq', value: this.vuex_userInfo.no }]
 			};
 			let res = await this.$http.post(url, req);
 			if (this.requestSuccess(res)) {
@@ -645,7 +646,7 @@ export default {
 				condition: [
 					{ colName: 'activity_no', ruleType: 'in', value: no },
 					{ colName: 'state', ruleType: 'eq', value: '完成' },
-					{ colName: 'user_no', ruleType: 'eq', value: this.userInfo.userno }
+					{ colName: 'user_no', ruleType: 'eq', value: this.vuex_userInfo.userno }
 				]
 			};
 			let res = await this.$http.post(url, req);
@@ -791,11 +792,11 @@ export default {
 			};
 			if (type === 'sleep') {
 				req.condition = [
-					{ colName: 'user_info_no', ruleType: 'like', value: this.userInfo.no },
+					{ colName: 'user_info_no', ruleType: 'like', value: this.vuex_userInfo.no },
 					{ colName: 'getup_time', ruleType: 'like', value: this.formateDate(new Date(), 'date').trim() }
 				];
 			} else if (type === 'bloodPressure') {
-				req.condition = [{ colName: 'create_user', ruleType: 'like', value: this.userInfo.userno }, { colName: 'name', ruleType: 'like', value: this.userInfo.name }];
+				req.condition = [{ colName: 'create_user', ruleType: 'like', value: this.vuex_userInfo.userno }, { colName: 'name', ruleType: 'like', value: this.vuex_userInfo.name }];
 			}
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
@@ -812,12 +813,12 @@ export default {
 					{
 						colName: 'userno',
 						ruleType: 'like',
-						value: this.loginUserInfo.user_no
+						value: this.vuex_userInfo.userno
 					},
 					{
 						colName: 'user_name',
 						ruleType: 'like',
-						value: this.userInfo.name
+						value: this.vuex_userInfo.name
 					},
 					{
 						colName: 'hdate',
@@ -848,12 +849,12 @@ export default {
 					{
 						colName: 'userno',
 						ruleType: 'like',
-						value: this.loginUserInfo.user_no
+						value: this.vuex_userInfo.userno
 					},
 					{
 						colName: 'user_name',
 						ruleType: 'like',
-						value: this.userInfo.name
+						value: this.vuex_userInfo.name
 					},
 					{
 						colName: 'hdate',
@@ -891,16 +892,16 @@ export default {
 								ele.UL = 0;
 							}
 							if (ele.name === '蛋白') {
-								ele.EAR = ene.val_rni ? ene.val_rni * self.userInfo.weight : ene.val_ear ? ene.val_ear * self.userInfo.weight : ele.EAR * self.userInfo.weight;
+								ele.EAR = ene.val_rni ? ene.val_rni * self.vuex_userInfo.weight : ene.val_ear ? ene.val_ear * self.vuex_userInfo.weight : ele.EAR * self.vuex_userInfo.weight;
 								ele.UL = 0;
 							}
 						} else {
 							if (ele.name === '脂肪') {
-								ele.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
+								ele.EAR = Number((self.vuex_userInfo.weight * 50 * 0.2) / 9).toFixed(2);
 								ele.UL = 0;
 							}
 							if (ele.name === '碳水') {
-								ele.EAR = self.userInfo.weight * 4;
+								ele.EAR = self.vuex_userInfo.weight * 4;
 								ele.UL = 0;
 							}
 						}
@@ -944,7 +945,7 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				let result = res.data.data.filter(item => {
-					if ((item.sex && item.sex.indexOf(self.userInfo.sex) !== -1) || !item.sex) {
+					if ((item.sex && item.sex.indexOf(self.vuex_userInfo.sex) !== -1) || !item.sex) {
 						if (item.age_start && item.age_end) {
 							return self.age >= item.age_start && self.age < item.age_end;
 						} else if (item.age_start && !item.age_end) {
@@ -968,16 +969,16 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * self.vuex_userInfo.weight : item.val_ear ? item.val_ear * self.vuex_userInfo.weight : mat.EAR * self.vuex_userInfo.weight;
 									mat.UL = 0;
 								}
 							} else {
 								if (mat.name === '脂肪') {
-									mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
+									mat.EAR = Number((self.vuex_userInfo.weight * 50 * 0.2) / 9).toFixed(2);
 									mat.UL = 0;
 								}
 								if (mat.name === '碳水') {
-									mat.EAR = self.userInfo.weight * 4;
+									mat.EAR = self.vuex_userInfo.weight * 4;
 									mat.UL = 0;
 								}
 							}
@@ -1071,11 +1072,11 @@ export default {
 				let req = [
 					{
 						serviceName: 'srvhealth_person_info_update',
-						condition: [{ colName: 'no', ruleType: 'eq', value: this.userInfo.no }],
+						condition: [{ colName: 'no', ruleType: 'eq', value: this.vuex_userInfo.no }],
 						data: [{ requirement: requirement.toString() }]
 					}
 				];
-				if (this.userInfo.no) {
+				if (this.vuex_userInfo.no) {
 					let res = await this.$http.post(url, req);
 					if (res.data.state === 'SUCCESS') {
 						return res.data;
@@ -1132,7 +1133,7 @@ export default {
 					url: '/archivesPages/archives-history/archives-history?isAll=true'
 				});
 			} else if (type === 'plan') {
-				let fieldsCond = [{ column: 'create_manager_no', display: false }, { column: 'owner_person_no', display: false, value: this.userInfo.no }];
+				let fieldsCond = [{ column: 'create_manager_no', display: false }, { column: 'owner_person_no', display: false, value: this.vuex_userInfo.no }];
 				let params = {
 					to: '/archivesPages/DrugPlan/DrugPlan', //提交后要跳转的页面
 					idCol: 'ds_no' // 跳转时携带的参数
@@ -1196,8 +1197,8 @@ export default {
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
 				}
 				this.$store.commit('SET_USERLIST', res.data.data);
-				if (this.userInfo && this.userInfo.requirement) {
-					let tags = this.userInfo.requirement.split(',');
+				if (this.vuex_userInfo && this.vuex_userInfo.requirement) {
+					let tags = this.vuex_userInfo.requirement.split(',');
 					if (Array.isArray(this.checkboxList) && this.checkboxList.length > 0) {
 						this.selectedTags = this.checkboxList.filter(item => {
 							if (tags.includes(item.value)) {
@@ -1293,9 +1294,10 @@ export default {
 					};
 					self.$store.commit('SET_WX_USERINFO', rawData);
 					console.log(self.wxUserInfo);
-					console.log(self.userInfo);
-					if (self.userInfo && self.userInfo.no && !self.userInfo.profile_url) {
-						self.updateUserProfile(rawData.headimgurl, self.userInfo.no).then(_ => {
+					console.log(self.vuex_userInfo);
+					if (self.vuex_userInfo && self.vuex_userInfo.no && !self.vuex_userInfo.profile_url) {
+						self.updateUserProfile(rawData.headimgurl, self.vuex_userInfo.no).then(_ => {
+							let userInfo = self.userInfo
 							self.userInfo.profile_url = self.wxUserInfo.headimgurl;
 						});
 					}

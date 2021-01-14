@@ -1,12 +1,12 @@
 <template>
 	<view class="cascader-wrap">
-		<view class="cu-bar search bg-white">
+		<!-- <view class="cu-bar search bg-white">
 			<view class="search-form round">
 				<text class="cuIcon-search"></text>
 				<input @confirm="searchWithKey" v-model="searchKey" :adjust-position="false" type="text" placeholder="根据关键词进行搜索" confirm-type="search" />
 			</view>
 			<view class="action"><button class="cu-btn bg-green shadow-blur round" @click="searchWithKey">搜索</button></view>
-		</view>
+		</view> -->
 		<cascader
 			@tag-click="clickTag"
 			:areaList="oldAreaList"
@@ -21,8 +21,8 @@
 			:lineDataDefault="lineDataDefault"
 		></cascader>
 		<view class="button-box">
-			<button type="primary" class="cu-btn bg-blue" @click="emitSelectVal">{{ lineDataDefault[lineDataDefault.length - 1] ? '确 定' : '取 消' }}</button>
-			<button type="primary" class="cu-btn bg-blue" @click="resetData">重 置</button>
+			<button class="cu-btn bg-blue" @click="emitSelectVal">{{ lineDataDefault[lineDataDefault.length - 1] ? '确 定' : '取 消' }}</button>
+			<button class="cu-btn bg-green" @click="resetData">重 置</button>
 		</view>
 	</view>
 </template>
@@ -137,7 +137,7 @@ export default {
 			const res = await this.$http.post(url, req);
 			if (res && res.data && res.data.state === 'SUCCESS') {
 				if (res.data.data.length === 0) {
-					this.showSelect = false;
+					// this.showSelect = false;
 				}
 				if (!defaultVal) {
 					const page = res.data.page;
@@ -169,7 +169,6 @@ export default {
 			}
 		},
 		clickTag(e) {
-			console.log('click-tag', e);
 			this.currentClick = e
 			this.current_no = e.no
 			if (this.srvInfo.isTree === false) {
@@ -179,14 +178,23 @@ export default {
 				return;
 			}
 			if (e.no) {
+				if(this.parent_no&&e.no===this.parent_no){
+					return
+				}
+				if(e.parent_no===null){
+					this.lineDataDefault = []
+				}else if(e.parent_no===this.outputData.parent_no){
+					// 同级
+					// this.lineDataDefault = this.lineDataDefault.slice(0,1)
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no),1)
+				}else if(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no)!==-1){
+					debugger
+					 this.lineDataDefault.splice(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no),this.lineDataDefault.length)
+				}else {
+					debugger
+				}
 				this.outputData = e;
 				this.$emit('clickTag', e);
-				if (this.srvInfo.isTree === false) {
-					this.$emit('getCascaderValue', this.lineDataDefault[this.lineDataDefault.length - 1], 'sure');
-					this.areaList = [];
-					this.showSelect = false;
-					return;
-				}
 				this.page.pageNo = 1;
 				let condition = [
 					{
@@ -200,7 +208,7 @@ export default {
 				this.parent_no = e.no;
 				console.log('parent_no', e);
 				if (e.is_leaf === '是') {
-					this.showSelect = false;
+					// this.showSelect = false;
 				} else {
 					this.showSelect = true;
 				}
@@ -231,6 +239,20 @@ export default {
 				this.lineDataDefault = this.lineDataDefault.slice(0, index + 1);
 			}
 			if (e && e.no) {
+				debugger
+				if(e.parent_no===null){
+					this.lineDataDefault = this.lineDataDefault.slice(0,1)
+				}else if(e.parent_no===this.outputData.parent_no){
+					// 同级
+					debugger
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no)+1,1)
+				}else if(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no)!==-1){
+					// 上级 
+					debugger
+					 this.lineDataDefault.splice(this.lineDataDefault.findIndex(item=>item.parent_no===e.parent_no)+1,this.lineDataDefault.length)
+				}else {
+					debugger
+				}
 				this.outputData = e;
 				this.$emit('clickLine', e);
 				let condition = [
@@ -241,9 +263,17 @@ export default {
 					}
 				];
 				this.parent_no = e.no;
-				this.getAreaData(condition);
+				// this.getAreaData(condition);
+				this.getAreaData(condition).then(data=>{
+					let oldAreaList = this.oldAreaList
+					this.valuationChild(oldAreaList,data,e)
+				})
+				// this.getAreaData().then(data=>{
+				// 	debugger
+				// 	// this.oldAreaList = this.deepClone(data)
+				// });
 				if (e.is_leaf === '是') {
-					this.showSelect = false;
+					// this.showSelect = false;
 				} else {
 					this.showSelect = true;
 				}
@@ -255,6 +285,7 @@ export default {
 				this.showSelect = true;
 			}
 		},
+
 		emitSelectVal() {
 			if (this.lineDataDefault[this.lineDataDefault.length - 1]) {
 				// 确定
@@ -275,6 +306,7 @@ export default {
 						value: value
 					}
 				];
+				debugger
 				//通过path_name查询path
 				this.getAreaData(condition, false, true).then(data => {
 					if (data) {

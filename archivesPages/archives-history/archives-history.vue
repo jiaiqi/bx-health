@@ -87,6 +87,7 @@
 					<view class="bmi-box" v-if="pageType === 'weight'">
 						<view class="bmi-bar-box" v-if="bmi">
 							<view class="last-data">
+								<view class="text-gray create-time" v-if="isArray(historyRecord) && historyRecord.length > 0">{{ historyRecord[0].create_time }}</view>
 								<view class="bmi-box-item">
 									<view class="title">最新体重</view>
 									<view class="digit bmi" v-if="isArray(historyRecord) && historyRecord.length > 0">
@@ -424,32 +425,36 @@ export default {
 				const yAxisData2 = data.map(item => item.diastolic_pressure); //舒张压
 				const yAxisData3 = data.map(item => item.systolic_pressure); //收缩压
 				const xAxisData = data.map(item => this.formateDate(item.create_time, 'MM-DD'));
-				const color = ['#40c0fd', '#4ACDBA', '#FAD650', '#F7B235'];
+				let max = data.map(item => item.systolic_pressure).sort((a, b) => b - a)[0] + 2;
+				let min = data.map(item => item.diastolic_pressure).sort((a, b) => a - b)[0] - 2;
+				const color = ['#40c0fd', '#9900FF', '#FAD650', '#F7B235'];
 				let option = {
 					backgroundColor: '#fff',
 					legend: {
 						show: true,
 						top: '5%',
-						icon: 'roundRect',
+						// icon: 'roundRect',
+						icon:
+							'path://M1635.315872 398.277883a510.609754 510.609754 0 0 0-996.200768 0H0v227.443097h639.115104a510.609754 510.609754 0 0 0 996.200768 0H2274.430976v-227.443097zM1137.215488 910.024852a398.025421 398.025421 0 1 1 398.025421-398.025421A398.025421 398.025421 0 0 1 1137.215488 910.024852z',
 						itemWidth: 20,
 						itemHeight: 10,
 						itemGap: 10,
 						data: [
 							{
 								name: '舒张压-正常',
-								icon: 'roundRect'
+								icon: 'path://M0 1024V0h3072v1024H0z m4096 0V0h3072v1024H4096z m8192 0V0h3072v1024h-3072z m-4096 0V0h3072v1024H8192z'
 							},
 							{
 								name: '舒张压-高',
-								icon: 'roundRect'
+								icon: 'path://M0 1024V0h3072v1024H0z m4096 0V0h3072v1024H4096z m8192 0V0h3072v1024h-3072z m-4096 0V0h3072v1024H8192z'
 							},
 							{
 								name: '收缩压-高',
-								icon: 'roundRect'
+								icon: 'path://M0 1024V0h3072v1024H0z m4096 0V0h3072v1024H4096z m8192 0V0h3072v1024h-3072z m-4096 0V0h3072v1024H8192z'
 							},
 							{
 								name: '收缩压-正常',
-								icon: 'roundRect'
+								icon: 'path://M0 1024V0h3072v1024H0z m4096 0V0h3072v1024H4096z m8192 0V0h3072v1024h-3072z m-4096 0V0h3072v1024H8192z'
 							},
 							{
 								name: '舒张压',
@@ -481,7 +486,7 @@ export default {
 						axisTick: {
 							show: true
 						},
-						 boundaryGap: true, //false时X轴从0开始
+						boundaryGap: true //false时X轴从0开始
 					},
 					yAxis: {
 						type: 'value',
@@ -495,7 +500,9 @@ export default {
 						},
 						splitLine: {
 							show: false
-						}
+						},
+						max: max,
+						min: min
 					},
 					series: [
 						{
@@ -504,6 +511,10 @@ export default {
 							symbol: 'none',
 							data: yAxisData0,
 							smooth: true,
+							lineStyle: {
+								type: 'dashed',
+								width: 1
+							},
 							itemStyle: {
 								normal: {
 									color: color[0],
@@ -517,6 +528,10 @@ export default {
 							symbol: 'none',
 							data: yAxisData01,
 							smooth: true,
+							lineStyle: {
+								width: 1,
+								type: 'dashed'
+							},
 							itemStyle: {
 								normal: {
 									color: color[3],
@@ -530,6 +545,10 @@ export default {
 							symbol: 'none',
 							data: yAxisData1,
 							smooth: true,
+							lineStyle: {
+								type: 'dashed',
+								width: 1
+							},
 							itemStyle: {
 								normal: {
 									color: color[3],
@@ -543,6 +562,10 @@ export default {
 							symbol: 'none',
 							data: yAxisData02,
 							smooth: true,
+							lineStyle: {
+								type: 'dashed',
+								width: 1
+							},
 							itemStyle: {
 								normal: {
 									color: color[0],
@@ -554,6 +577,7 @@ export default {
 							name: '舒张压',
 							type: 'line',
 							data: yAxisData2,
+							symbol: 'none',
 							smooth: false,
 							tooltip: { trigger: 'axis' },
 							itemStyle: {
@@ -567,6 +591,7 @@ export default {
 							name: '收缩压',
 							type: 'line',
 							data: yAxisData3,
+							symbol: 'none',
 							smooth: false,
 							tooltip: { trigger: 'axis' },
 							itemStyle: {
@@ -590,8 +615,19 @@ export default {
 				const yAxisData2 = data.map(item => weightRange[2] - weightRange[1]);
 				const yAxisData3 = data.map(item => weightRange[2] - weightRange[1]);
 				const yAxisData4 = data.map(item => item.weight);
+				let min = data.map(item => item.weight).sort((a, b) => a - b)[0] - 2;
+				let max = data.map(item => item.weight).sort((a, b) => b - a)[0] + 2;
 				const xAxisData = data.map(item => this.formateDate(item.create_time, 'MM-DD'));
 				const color = ['#40c0fd', '#4ACDBA', '#FAD650', '#F7B235'];
+				const hexToRgba = (hex, opacity) => {
+					let rgbaColor = '';
+					let reg = /^#[\da-f]{6}$/i;
+					if (reg.test(hex)) {
+						rgbaColor = `rgba(${parseInt('0x' + hex.slice(1, 3))},${parseInt('0x' + hex.slice(3, 5))},${parseInt('0x' + hex.slice(5, 7))},${opacity})`;
+					}
+					return rgbaColor;
+				};
+
 				let option = {
 					backgroundColor: '#fff',
 					legend: {
@@ -620,7 +656,6 @@ export default {
 							},
 							{
 								name: '体重',
-								// icon:'circle',
 								icon:
 									'path://M1635.315872 398.277883a510.609754 510.609754 0 0 0-996.200768 0H0v227.443097h639.115104a510.609754 510.609754 0 0 0 996.200768 0H2274.430976v-227.443097zM1137.215488 910.024852a398.025421 398.025421 0 1 1 398.025421-398.025421A398.025421 398.025421 0 0 1 1137.215488 910.024852z'
 							}
@@ -658,7 +693,8 @@ export default {
 						splitLine: {
 							show: false
 						},
-						min: yAxisData4.sort((a, b) => a - b)[0] - 20
+						min: min,
+						max: max
 					},
 					series: [
 						{
@@ -670,8 +706,8 @@ export default {
 							stack: 100,
 							itemStyle: {
 								normal: {
-									color: color[0],
-									borderColor: color[0]
+									color: hexToRgba(color[0], 0)
+									// borderColor: color[0]
 								}
 							},
 							lineStyle: {
@@ -688,8 +724,8 @@ export default {
 							smooth: true,
 							itemStyle: {
 								normal: {
-									color: color[1],
-									borderColor: color[1]
+									color: hexToRgba(color[1], 0.7)
+									// borderColor: color[1]
 								}
 							},
 							lineStyle: {
@@ -710,8 +746,8 @@ export default {
 							},
 							itemStyle: {
 								normal: {
-									color: color[2],
-									borderColor: color[2]
+									color: hexToRgba(color[2], 0.7)
+									// borderColor: color[2]
 								}
 							}
 						},
@@ -730,8 +766,8 @@ export default {
 							},
 							itemStyle: {
 								normal: {
-									color: color[3],
-									borderColor: color[3]
+									color: hexToRgba(color[3], 0.7)
+									// borderColor: color[3]
 								}
 							}
 						},
@@ -740,6 +776,7 @@ export default {
 							type: 'line',
 							data: yAxisData4,
 							smooth: false,
+							symbol: 'none',
 							label: {
 								// show:true
 							},
@@ -787,6 +824,7 @@ export default {
 									title: '删除成功'
 								});
 								self.initPage();
+								self.getChartData();
 							}
 						});
 					}
@@ -1981,7 +2019,11 @@ export default {
 					.last-data {
 						width: 100%;
 						display: flex;
+						flex-wrap: wrap;
 						justify-content: space-around;
+						.create-time {
+							width: 100%;
+						}
 						.unit {
 							font-size: 32rpx;
 							color: #666;

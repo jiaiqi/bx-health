@@ -13,7 +13,7 @@
 				>
 					<view class="content tag-item">{{ item.name ? item.name : showCol ? item[showCol] : '' }}</view>
 				</view>
-				<view class="bx-item bx-text-yellow line-end" v-if="showSelect || (lineData.length === 0 && areaList.length > 0)">请选择</view>
+				<view class="bx-item bx-text-yellow line-end" v-if="isShowSelect">请选择</view>
 			</view>
 			<view class="bx-tagbox">
 				<view v-if="showSelect"><cascaderItem :currentNo="currentNo" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem></view>
@@ -29,8 +29,19 @@ export default {
 	data() {
 		return {
 			lineData: [],
-			area: {},
+			area: {}
 		};
+	},
+	computed: {
+		isShowSelect() {
+			let result = false;
+			if (this.showSelect && this.lineDataDefault.length > 0 && this.lineDataDefault[this.lineDataDefault.length - 1].is_leaf !== '是') {
+				result = true;
+			} else if (this.lineDataDefault.length === 0 && this.areaList.length > 0) {
+				result = true;
+			}
+			return result;
+		}
 	},
 	components: { cascaderItem },
 	methods: {
@@ -38,11 +49,11 @@ export default {
 			this.$emit('show-more');
 		},
 		selectArea(item) {
-			if(!this.lineData.find(a=>a[this.column] === item[this.column])){
+			if (!this.lineData.find(a => a[this.column] === item[this.column])) {
 				// this.lineData.push(item);
 				this.$emit('tag-click', item);
-			}else{
-				return
+			} else {
+				return;
 			}
 		},
 		lineClick(item, index) {
@@ -156,53 +167,19 @@ export default {
 			position: relative;
 			display: flex;
 
-			&::after {
-				// content: '';
-				// height: 20rpx;
-				// width: 4rpx;
-				// background-color: #007aff;
-				// transform: rotate(20deg);
-				// margin: 30rpx 20rpx;
-				content: '';
-				display: inline-block;
-				width: 10rpx;
-				height: 10rpx;
-				border-top: 2px solid #656565;
-				border-right: 2px solid #656565;
-				transform: rotate(45deg);
-				-webkit-transform: rotate(45deg);
-				// background-color: #007aff;
-				border-color: #007aff;
-				margin: 32rpx 20rpx;
+			& + .bx-item {
+				&::before {
+					content: '';
+					display: inline-block;
+					width: 10rpx;
+					height: 10rpx;
+					border-top: 2px solid #656565;
+					border-right: 2px solid #656565;
+					transform: rotate(45deg);
+					border-color: #007aff;
+					margin: 32rpx 20rpx;
+				}
 			}
-			// &::before {
-			// 	content: '⚪';
-			// 	display: block;
-			// 	position: absolute;
-			// 	font-size: 20upx;
-			// 	top: 0px;
-			// 	z-index: 9;
-			// 	background-color: #ffffff;
-			// 	width: 25px;
-			// 	height: 25px;
-			// 	text-align: center;
-			// 	border: none;
-			// 	line-height: 25px;
-			// 	left: 18px;
-			// 	transform: scale(0.5);
-			// }
-			// &::after {
-			// 	content: '';
-			// 	display: block;
-			// 	position: absolute;
-			// 	width: 0.5px;
-			// 	background-color: #ddd;
-			// 	left: 30px;
-			// 	height: 80upx;
-			// 	top: 0;
-			// 	z-index: 8;
-			// }
-
 			.tag-item {
 				text-align: left;
 				font-size: 32rpx;

@@ -1,7 +1,7 @@
 <template>
 	<view class="symptoomSelectWrap">
 		<view class="symptopm-tops">
-			<cu-custom bgColor="bg-gradual-green" :isBack="!serBtn">
+			<cu-custom bgColor="bg-blue" :isBack="!serBtn">
 				<block slot="backText" v-if="!serBtn">返回</block>
 				<block slot="content">病症选择</block>
 			</cu-custom>
@@ -46,7 +46,6 @@
 		</view>
 
 		<view class="symptom-bot-wrap">
-			
 			<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[0].children.length > 0 && !isSearch">
 				<view v-if="symptomList[0].is_show && items.is_leaf === '否'" :key="index" v-for="(items, index) in symptomList[0].children" class="wrapCont">
 					<view v-if="items.is_leaf === '否' && items.children.length > 0" class="wrapCont_row">
@@ -58,7 +57,6 @@
 								</view>
 							</view>
 						</view>
-						
 						<view class="wrapCont-main">
 							<view v-if="Array.isArray(illnes.children) && illnes.children.length > 0" v-for="(illnes,n) in items.children" :key="n" class="wrapCont_row_item_wrap" :class="(Array.isArray(illnes.children) && illnes.children.length > 0)?'':'no_wrapCont_row_item_wrap'">
 								<view   class="wrapCont_row_item_wrap-t">
@@ -84,27 +82,12 @@
 			</view>
 			<view class="boxbtn"><view class="btns" @click="lookobj">完成</view></view>
 		</view>
-		<view class="symptom_from">
-			<!-- <u-popup v-model="show" width="85%" border-radius="14" mode="center">
-				<view class="select">请完善</view>
-				<view class="contentpop">
-					<view class="contentpop_title">发烧症状</view>
-					<scroll-view scroll-y="true" style="height: 540rpx;">
-						<view class="contentpop_cen_bot">
-							<view class="sym-check"><sym-from @checkedItemChange="checkedItemChange" :fromTypeData="fromTypeData"></sym-from></view>
-						</view>
-					</scroll-view>
-				</view>
-				<view class="contYes">
-					<view class="btn concel" @tap="confirm">提交</view>
-					<view class="btn" @tap="cancel">取消</view>
-				</view>
-			</u-popup> -->
-		</view>
-		
 		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }">
 			<view class="cu-dialog">
-				<view class="tree-selector"><cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="srvInfo"></cascader-selector></view>
+				<view class="tree-selector">
+					<!-- <dataPicker @getCascaderValue="getCascaderValue" :srvInfo="srvInfo"></dataPicker> -->
+					<cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="srvInfo"></cascader-selector>
+				</view>
 			</view>
 		</view>
 		
@@ -125,11 +108,13 @@
 import Thetable from '../components/Thetable/Thetable.vue';
 import symFrom from '../components/bx-sym-from/bx-sym-from.vue';
 import cascaderSelector from '@/components/cascader-selector/cascader-selector.vue'
+import dataPicker from '@/components/cascader/cascaderSelector.vue'
 export default {
 	components: {
 		Thetable,
 		symFrom,
-		cascaderSelector
+		cascaderSelector,
+		dataPicker
 	},
 	data() {
 		return {

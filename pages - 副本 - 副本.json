@@ -204,83 +204,83 @@
 		// 		}
 		// 	]
 		// },
-		// {
-		// 	"root": "personalPages",
-		// 	"pages": [{
-		// 			"path": "myDoctor/myDoctor",
-		// 			"style": {
-		// 				"navigationBarTitleText": "我的医生",
-		// 				"enablePullDownRefresh": true
-		// 			}
-		// 		},
-		// 		{
-		// 			"path": "nameCard/nameCard",
-		// 			"style": {
-		// 				"navigationBarTitleText": "医生名片",
-		// 				"enablePullDownRefresh": false
-		// 			}
-		// 		},
-		// 		{
-		// 			"path": "patientsInfo/patientsInfo",
-		// 			"style": {
-		// 				"navigationBarTitleText": "患者信息",
-		// 				"enablePullDownRefresh": false,
-		// 				"navigationStyle": "custom"
-		// 			}
-		// 		},
-		// 		{
-		// 			"path": "chat/chatList",
-		// 			"style": {
-		// 				"navigationStyle": "custom",
-		// 				"navigationBarTitleText": "聊天列表",
-		// 				"enablePullDownRefresh": false
-		// 			}
-		// 		},
-		// 		{
-		// 			"path": "myDoctor/doctorChat",
-		// 			"style": {
-		// 				"navigationBarTitleText": "聊天列表",
-		// 				"enablePullDownRefresh": false
-		// 			}
-		// 		}, {
-		// 			"path": "userList/userList",
-		// 			"style": {
-		// 				"navigationBarTitleText": "用户管理",
-		// 				"enablePullDownRefresh": false,
-		// 				"navigationStyle": "custom"
-		// 			}
+		{
+			"root": "personalPages",
+			"pages": [{
+					"path": "myDoctor/myDoctor",
+					"style": {
+						"navigationBarTitleText": "我的医生",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "nameCard/nameCard",
+					"style": {
+						"navigationBarTitleText": "医生名片",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "patientsInfo/patientsInfo",
+					"style": {
+						"navigationBarTitleText": "患者信息",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "chat/chatList",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "聊天列表",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "myDoctor/doctorChat",
+					"style": {
+						"navigationBarTitleText": "聊天列表",
+						"enablePullDownRefresh": false
+					}
+				}, {
+					"path": "userList/userList",
+					"style": {
+						"navigationBarTitleText": "用户管理",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
+					}
 
-		// 		}, {
-		// 			"path": "tagManagement/tagManagement",
-		// 			"style": {
-		// 				"navigationBarTitleText": "标签管理",
-		// 				"enablePullDownRefresh": true
-		// 			}
+				}, {
+					"path": "tagManagement/tagManagement",
+					"style": {
+						"navigationBarTitleText": "标签管理",
+						"enablePullDownRefresh": true
+					}
 
-		// 		}, {
-		// 			"path": "FontSizeSetting/FontSizeSetting",
-		// 			"style": {
-		// 				"navigationBarTitleText": "字体大小与粗细",
-		// 				"enablePullDownRefresh": false
-		// 			}
+				}, {
+					"path": "FontSizeSetting/FontSizeSetting",
+					"style": {
+						"navigationBarTitleText": "字体大小与粗细",
+						"enablePullDownRefresh": false
+					}
 
-		// 		}, {
-		// 			"path": "chatGroup/chatGroup",
-		// 			"style": {
-		// 				"navigationBarTitleText": "圈子",
-		// 				"enablePullDownRefresh": true
-		// 			}
+				}, {
+					"path": "chatGroup/chatGroup",
+					"style": {
+						"navigationBarTitleText": "圈子",
+						"enablePullDownRefresh": true
+					}
 
-		// 		}, {
-		// 			"path": "gropDetail/gropDetail",
-		// 			"style": {
-		// 				"navigationBarTitleText": "圈子设置",
-		// 				"enablePullDownRefresh": true
-		// 			}
+				}, {
+					"path": "gropDetail/gropDetail",
+					"style": {
+						"navigationBarTitleText": "圈子设置",
+						"enablePullDownRefresh": true
+					}
 
-		// 		}
-		// 	]
-		// },
+				}
+			]
+		},
 		// {
 		// 	"root": "disease",
 		// 	"pages": [{

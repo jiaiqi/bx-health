@@ -1,7 +1,8 @@
 <template>
 	<view class="test">
-		<a-form v-if="colsV2Data && colsV2Data._fieldInfo" :fields="colsV2Data._fieldInfo" :pageType="srvType" :formType="use_type">
-			<!-- 	<a-form-item v-for="field in colsV2Data._fieldInfo" :key="field.id" :field="field" :pageType="srvType">
+		<dataPicker @getCascaderValue="getCascaderValue" :srvInfo="srvInfo"></dataPicker>
+		<!-- <a-form v-if="colsV2Data && colsV2Data._fieldInfo" :fields="colsV2Data._fieldInfo" :pageType="srvType" :formType="use_type"> -->
+		<!-- 	<a-form-item v-for="field in colsV2Data._fieldInfo" :key="field.id" :field="field" :pageType="srvType">
 				<view class="form-item-detail" v-if="srvType === 'detail'">
 					<view class="form-item_image" v-if="pageFormType === 'detail' && fieldData.type === 'images'">
 						<image
@@ -19,27 +20,56 @@
 					<view class="form-item_normal-text" v-else>{{ field.value }}</view>
 				</view>
 			</a-form-item> -->
-		</a-form>
+		<!-- </a-form> -->
 	</view>
 </template>
 
 <script>
-/**
- *
- */
+import dataPicker from '@/components/cascader/cascaderSelector.vue';
 export default {
+	components: {
+		dataPicker
+	},
 	data() {
 		return {
 			serviceName: 'srvhealth_person_info_add',
 			srvType: 'add', // 表单信息 add | update  | select |list | detail
 			use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
 			colsV2Data: {
-				_fieldInfo:[]
+				_fieldInfo: []
 			},
-			condition: []
+			showTreeSelector: true,
+			chooseArr: [],
+			condition: [],
+			srvInfo: {
+				column: 'no',
+				showCol: 'name',
+				isTree: true,
+				serviceName: 'srvhealth_self_symptoms_select',
+				appNo: 'health'
+			}
 		};
 	},
 	methods: {
+		getCascaderValue(e) {
+			console.log('e------', e);
+			this.showTreeSelector = false;
+			e.is_checked = true;
+			let chooseArr = this.chooseArr;
+			if (chooseArr.length == 0) {
+				chooseArr.push(e);
+			} else {
+				let isHas = false;
+				chooseArr.forEach(it => {
+					if (it.id === e.id) {
+						isHas = true;
+					}
+				});
+				if (!isHas) {
+					chooseArr.push(e);
+				}
+			}
+		},
 		async getFieldsModel(srv) {
 			let app = uni.getStorageSync('activeApp');
 			let serviceName = this.getServiceName(srv);

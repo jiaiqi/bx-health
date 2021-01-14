@@ -1,25 +1,26 @@
+import store from '@/store'
 export default {
 	install(Vue, options) {
-		Vue.prototype.onshareParams = (userInfo)=>{
+		Vue.prototype.onshareParams = (userInfo) => {
 			let path = '';
 			let title = '百想健康'
 			if (userInfo && userInfo.no) {
 				title = `${userInfo.name}邀请你体验【百想健康】小程序`
 				let pageInfo = Vue.prototype.getShareParams()
-				if(pageInfo&&pageInfo.add_url){
+				if (pageInfo && pageInfo.add_url) {
 					path = `/${pageInfo.add_url}?from=share&option.invite_user_no=${userInfo.userno}`;
 				}
 			}
 			return {
-				title:title,
+				title: title,
 				path: path
 			};
-		} 
-		
-		Vue.prototype.checkOptionParams = (option) =>{
+		}
+
+		Vue.prototype.checkOptionParams = (option) => {
 			// option中如果有邀请信息 则存储到vuex
 			if (option.from === 'share' && option.invite_user_no) {
-				Vue.prototype.$store.commit('SET_INVITER_INFO', {
+				store.commit('SET_INVITER_INFO', {
 					add_url: Vue.prototype.getShareParams().add_url,
 					invite_user_no: option.invite_user_no
 				});
@@ -28,25 +29,25 @@ export default {
 		Vue.prototype.getShareParams = () => {
 			let userInfo = ''
 			try {
-				userInfo = Vue.prototype.$store.state.user.userInfo
+				userInfo = store.state.user.userInfo
 			} catch (e) {
 				//TODO handle the exception
 			}
 			if (userInfo) {
 				let pageStack = getCurrentPages()
-				if(Array.isArray(pageStack)&&pageStack.length>=1){
-					let currentPage = pageStack[pageStack.length-1]
-					Vue.prototype.$store.commit('SET_CURRENT_PAGE',currentPage.route)
-					Vue.$store.commit('SET_PAGE_INFO',currentPage)
+				if (Array.isArray(pageStack) && pageStack.length >= 1) {
+					let currentPage = pageStack[pageStack.length - 1]
+					store.commit('SET_CURRENT_PAGE', currentPage.route)
+					Vue.$store.commit('SET_PAGE_INFO', currentPage)
 					return {
-						currentPage:currentPage,
-						add_url:currentPage.route?currentPage.route:'未知页面',
-						invite_user_no:userInfo.no?userInfo.no:'未知邀请人'
+						currentPage: currentPage,
+						add_url: currentPage.route ? currentPage.route : '未知页面',
+						invite_user_no: userInfo.no ? userInfo.no : '未知邀请人'
 					}
 				}
 			}
 		}
-		
+
 		Vue.prototype.getFoodsDetail = async (dietRecord) => {
 			// 根据饮食记录得到食物编号查找食物详细数据
 			if (Array.isArray(dietRecord) && dietRecord.length > 0) {

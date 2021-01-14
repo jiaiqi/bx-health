@@ -167,7 +167,7 @@
 			<view class="main-box symptom" v-if="!pageType || pageType === 'diet'">
 				<view class="title">
 					<view class="label">饮食</view>
-					<button class="check-history cu-btn sm  line-blue" @click="showRecent">从选过的食物中添加</button>
+					<button class="check-history cu-btn sm bg-blue" @click="showRecent">从选过的食物中添加</button>
 					<view class="switch-layout">
 						<text class="cuIcon-list active-layout" v-if="dietLayout === 'grid'" @click="dietLayout = 'list'"></text>
 						<text class="cuIcon-apps active-layout" v-if="dietLayout === 'list'" @click="dietLayout = 'grid'"></text>
@@ -475,8 +475,9 @@
 						</view>
 					</view>
 					<view class="content">
-						<view class="diet-item" v-for="item in recentDiet" :key="item.diet_record_no">
-							<image :src="getImagePath(item.image)" mode="aspectFill" class="image" @click="changeChecked(item)"></image>
+						<view class="diet-item" v-for="item in recentDiet" :key="item.diet_record_no" :class="{'checked':item.checked}">
+							<!-- <view class="food-name" @click="changeChecked(item)">{{ item.name }}</view> -->
+							<image :src="getImagePath(item.image)" mode="scaleToFill" class="image" @click="changeChecked(item)"></image>
 							<view class="info">
 								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'"><text class="cuIcon-check text-bold" v-if="item.checked"></text></view>
 								<view class="food-name" @click="changeChecked(item)">{{ item.name }}</view>
@@ -488,9 +489,12 @@
 										<text class="separator" @click.stop="calc(item, 'add')">+</text>
 										<!-- <text class="number"></text> -->
 									</view>
-									<text class="text-left margin-left-xs" @click="changeChecked(item)">{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}</text>
+									<text class="text-left margin-left-xs text-gray" style="font-weight: normal;" @click="changeChecked(item)">{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}</text>
 								</view>
 							</view>
+						</view>
+						<view class="load-more">
+							<uni-load-more :status="loadMoreHistoryStatus" :contentText="contentText" @clickLoadMore="clickLoadMore"></uni-load-more>
 						</view>
 					</view>
 					<view class="footer" v-if="recentDietMode === 'edit' && checkedRecentDiet.length > 0">
@@ -538,6 +542,17 @@ export default {
 	},
 	data() {
 		return {
+			loadMoreHistoryStatus: 'more', //可选值：more（loading前）、loading（loading中）、noMore（没有更多了）
+			contentText: {
+				contentdown: '点击加载更多',
+				contentrefresh: '正在加载...',
+				contentnomore: '没有更多数据了'
+			},
+			historyPage: {
+				total: 0,
+				rownumber: 20,
+				pageNo: 1
+			},
 			showChart: true,
 			isShowCookType: false,
 			cook_method: '',
@@ -1070,6 +1085,16 @@ export default {
 		}
 	},
 	methods: {
+		clickLoadMore(e) {
+			if(e.detail.status==='more'){
+				if(this.historyPage.total>this.historyPage.pageNo*this.historyPage.rownumber){
+					this.historyPage.pageNo +=1
+					this.getRecentDiet()
+				}else{
+					this.loadMoreHistoryStatus = 'noMore'
+				}
+			}
+		},
 		hideRecordDetailModal() {
 			this.showEditModal = false;
 			this.currentRecord = {};
@@ -2903,12 +2928,13 @@ export default {
 		},
 		async getRecentDiet() {
 			// 查找最近的饮食记录
+			this.loadMoreHistoryStatus = 'loading';
 			let req = {
 				serviceName: 'srvhealth_diet_contents_newest_select',
 				colNames: ['*'],
 				page: {
-					pageNo: 1,
-					rownumber: 20
+					pageNo: this.historyPage.pageNo,
+					rownumber: this.historyPage.rownumber
 				},
 				condition: [
 					{
@@ -2920,11 +2946,22 @@ export default {
 			};
 			let res = await this.onRequest('select', 'srvhealth_diet_contents_newest_select', req, 'health');
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
-				this.recentDiet = res.data.data.map(item => {
+				let data = res.data.data.map(item => {
 					item.checked = false;
 					item.amountEditable = false;
 					return item;
 				});
+				if (this.historyPage.pageNo === 1) {
+					this.recentDiet = data;
+				} else {
+					this.recentDiet = [...this.recentDiet, ...data];
+				}
+				this.historyPage.total = res.data.page.total;
+				if (res.data.page.total > res.data.page.rownumber * res.data.page.pageNo) {
+					this.loadMoreHistoryStatus = 'more';
+				} else {
+					this.loadMoreHistoryStatus = 'noMore';
+				}
 				return res.data.data;
 			}
 		},
@@ -4342,10 +4379,13 @@ uni-checkbox::before {
 		align-items: flex-start;
 		height: 480px;
 		overflow: scroll;
+		.load-more{
+			width: 100%;
+		}
 	}
 	.diet-item {
 		display: flex;
-		height: 180rpx;
+		flex-direction: column;
 		width: calc(50% - 15rpx);
 		margin-right: 20rpx;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
@@ -4353,6 +4393,16 @@ uni-checkbox::before {
 		border-radius: 10rpx;
 		overflow: hidden;
 		margin-bottom: 10rpx;
+		border: 5rpx solid #fff;
+		transition: all .5s ease-out;
+		&.checked{
+			border-color: #0BC99D;
+			color:#0BC99D ;
+			.checkbox{
+				background-color: #0BC99D;
+				color: #fff;
+			}
+		}
 		.info {
 			display: flex;
 			flex-direction: column;
@@ -4362,7 +4412,6 @@ uni-checkbox::before {
 		}
 		.checkbox {
 			position: absolute;
-			// top:calc(50% - 20rpx);
 			bottom: 5rpx;
 			right: 5rpx;
 			background-color: #fff;
@@ -4375,22 +4424,19 @@ uni-checkbox::before {
 		&:nth-child(2n) {
 			margin-right: 0;
 		}
-		// &:nth-child(3n+1){
-		// 	margin-right: 0;
-		// }
 		.image {
-			width: 160rpx;
+			// width: 160rpx;
+			width: 100%;
 			height: 180rpx;
+			background-color: #fff;
 		}
 		.food-name {
 			font-weight: bold;
 			text-align: left;
 			text-indent: 20rpx;
-			// text-overflow: ellipsis;
 			white-space: nowrap;
-			overflow-x: scroll;
-			max-width: 180rpx;
 			flex: 1;
+			font-size: 32rpx;
 		}
 		.food-info {
 			display: flex;
@@ -4403,17 +4449,19 @@ uni-checkbox::before {
 				border-radius: 4rpx;
 				height: 50rpx;
 				line-height: 50rpx;
-				color: #333;
 				padding: 0 4rpx;
 				text-align: center;
 				// border: 1rpx solid #dcdfe6;
 				.separator {
+					color: #333;
 					display: inline-block;
 					width: 50rpx;
 					background-color: #dcdfe6;
 					text-align: center;
+					flex: 1;
 				}
 				.input {
+					flex: 1;
 					margin: 0;
 					padding: 0;
 					height: 46rpx;
@@ -4424,6 +4472,7 @@ uni-checkbox::before {
 					line-height: 50rpx;
 					text-align: center;
 					border: 2rpx solid #dcdfe6;
+					font-weight: bold;
 				}
 			}
 		}
