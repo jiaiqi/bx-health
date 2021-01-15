@@ -485,6 +485,7 @@ export default {
 				if (currentUserInfo) {
 					this.$store.commit('SET_USERINFO', currentUserInfo);
 					this.userInfo = currentUserInfo;
+					this.checkSubscribeStatus();
 				} else if (currentUserInfo === 0) {
 					// 没有创建用户
 					uni.getUserInfo({
@@ -714,9 +715,11 @@ export default {
 		this.initPage();
 	},
 	onShareAppMessage() {
+		let path = `/pages/personal/personal?from=share&invite_user_no=${this.vuex_userInfo.userno}`
+		this.saveSharerInfo(this.vuex_userInfo,path)
 		return {
 			title: `${this.vuex_userInfo.name}邀请您体验小程序`,
-			path: `/pages/personal/personal?from=share&option.invite_user_no=${this.vuex_userInfo.userno}`
+			path: path
 		};
 	},
 	async created() {

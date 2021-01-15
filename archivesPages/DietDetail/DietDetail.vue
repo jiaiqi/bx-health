@@ -471,11 +471,12 @@ export default {
 		if (this.userInfo && this.userInfo.no) {
 			let no = this.dietInfo.food_no ? this.dietInfo.food_no : this.dietInfo.diet_record_no ? this.dietInfo.diet_record_no : this.dietInfo.diet_contents_no;
 			if (no) {
-				path = `/archivesPages/DietDetail/DietDetail?chooseDate=${this.formateDate()}&no=${no}&from=share&option.invite_user_no=${this.userInfo.userno}`;
+				path = `/archivesPages/DietDetail/DietDetail?chooseDate=${this.formateDate()}&no=${no}&from=share&invite_user_no=${this.userInfo.userno}`;
 			} else {
 				return;
 			}
 			title = `【${this.dietInfo.name}】`;
+			this.saveSharerInfo(this.userInfo,path)
 		}
 		return {
 			title: title,

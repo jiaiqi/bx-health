@@ -275,9 +275,11 @@ export default {
 		}
 	},
 	onShareAppMessage(res) {
+		let path = `/personalPages/gropDetail/gropDetail?gc_no=${this.groupInfo.gc_no}&type=join-detail&from=share&invite_user_no=${this.userInfo.userno}`
+		this.saveSharerInfo(this.userInfo,path)
 		return {
 			title: `${this.userInfo.name}邀请你加入${this.groupInfo.name}`,
-			path: `/personalPages/gropDetail/gropDetail?gc_no=${this.groupInfo.gc_no}&type=join-detail&from=share&option.invite_user_no=${this.userInfo.userno}`
+			path: path
 		};
 	}
 };

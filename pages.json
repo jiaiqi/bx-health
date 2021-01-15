@@ -29,14 +29,6 @@
 				"enablePullDownRefresh": true
 				// "navigationStyle":"custom"
 			}
-		},
-		{
-			"path": "pages/testPage/testPage",
-			"style": {
-				"navigationBarTitleText": "个人中心",
-				"enablePullDownRefresh": true
-				// "navigationStyle":"custom"
-			}
 		}
 	],
 	"subPackages": [{

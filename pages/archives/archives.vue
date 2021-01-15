@@ -301,7 +301,7 @@ export default {
 	computed: {
 		...mapState({
 			inviterInfo: state => state.app.inviterInfo,
-			vuex_userInfo:state=>state.user.userInfo
+			vuex_userInfo: state => state.user.userInfo
 		}),
 		...mapGetters({
 			authSetting: 'authSetting',
@@ -609,7 +609,10 @@ export default {
 				serviceName: 'srvhealth_examination_report_select',
 				colNames: ['*'],
 				page: { rownumber: 10, pageNo: 1 },
-				condition: [{ colName: 'examinate_account', ruleType: 'eq', value: this.vuex_userInfo.userno }, { colName: 'examinate_person_no', ruleType: 'eq', value: this.vuex_userInfo.no }]
+				condition: [
+					{ colName: 'examinate_account', ruleType: 'eq', value: this.vuex_userInfo.userno },
+					{ colName: 'examinate_person_no', ruleType: 'eq', value: this.vuex_userInfo.no }
+				]
 			};
 			let res = await this.$http.post(url, req);
 			if (this.requestSuccess(res)) {
@@ -1182,6 +1185,7 @@ export default {
 								}
 							}
 							this.$store.commit('SET_USERINFO', item);
+							this.checkSubscribeStatus();
 						}
 					});
 				} else {
@@ -1195,6 +1199,7 @@ export default {
 						}
 					}
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
+					this.checkSubscribeStatus();
 				}
 				this.$store.commit('SET_USERLIST', res.data.data);
 				if (this.vuex_userInfo && this.vuex_userInfo.requirement) {
@@ -1241,7 +1246,7 @@ export default {
 			let res = await wx.getSetting();
 			if (!res.authSetting['scope.userInfo']) {
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
-				this.$store.commit('SET_AUTH_USERINFO',false);
+				this.$store.commit('SET_AUTH_USERINFO', false);
 				// 没有获取用户信息授权
 				return;
 			} else {
@@ -1297,7 +1302,7 @@ export default {
 					console.log(self.vuex_userInfo);
 					if (self.vuex_userInfo && self.vuex_userInfo.no && !self.vuex_userInfo.profile_url) {
 						self.updateUserProfile(rawData.headimgurl, self.vuex_userInfo.no).then(_ => {
-							let userInfo = self.userInfo
+							let userInfo = self.userInfo;
 							self.userInfo.profile_url = self.wxUserInfo.headimgurl;
 						});
 					}
@@ -1305,7 +1310,7 @@ export default {
 			});
 			this.isAuthUserInfo = true;
 			this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
-			this.$store.commit('SET_AUTH_USERINFO',true);
+			this.$store.commit('SET_AUTH_USERINFO', true);
 		},
 		toAddPages() {
 			let fieldsCond = [
@@ -1345,7 +1350,7 @@ export default {
 				this.setWxUserInfo(rawData);
 				this.$store.commit('SET_WX_USERINFO', rawData);
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
-				this.$store.commit('SET_AUTH_USERINFO',true);
+				this.$store.commit('SET_AUTH_USERINFO', true);
 				const result = await wx.login();
 				if (result.code) {
 					this.wxLogin({
@@ -1397,9 +1402,11 @@ export default {
 		}
 	},
 	onShareAppMessage(res) {
+		let path = `/pages/archives/archives?from=share&invite_user_no=${this.userInfo.userno}`;
+		this.saveSharerInfo(this.userInfo, path);
 		return {
 			title: `${this.userInfo.name}邀请您体验小程序`,
-			path: `/pages/archives/archives?from=share&option.invite_user_no=${this.userInfo.userno}`
+			path: path
 		};
 	},
 	onShow() {

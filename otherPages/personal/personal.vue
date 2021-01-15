@@ -92,6 +92,7 @@ export default {
 			if (Array.isArray(currentUser) && currentUser.length > 0) {
 				this.currentUser = currentUser[0];
 				this.$store.commit('SET_USERINFO', currentUser[0]);
+				this.checkSubscribeStatus();
 			}
 		}
 	}

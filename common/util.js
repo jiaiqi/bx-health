@@ -1,4 +1,6 @@
 import store from '@/store'
+import api from '@/common/api.js'
+import _http from '@/common/http.js'
 export default {
 	install(Vue, options) {
 		Vue.prototype.pageTitle = '加载中…' // 可以自定义变量
@@ -77,7 +79,7 @@ export default {
 					req.order[0]['orderType'] = 'asc'
 					let url = Vue.prototype.getServiceUrl(appName, "srvsys_service_columnex_v2_select", "select", url)
 					url = url + "?colsel_v2=" + serviceName
-					const response = await this.$http.post(url, req)
+					const response = await _http.post(url, req)
 					if (response.data.data) {
 						console.log('=====2', response.data.data)
 						response.data.data.use_type = pageType
@@ -87,13 +89,10 @@ export default {
 						// 第一次拿到，缓存
 						let pageconfig = Vue.prototype.getPageConfig(response.data.data, pageType)
 						self.$store.dispatch('setSrvCol', pageconfig)
-						// self.$store.dispatch('app/setSrvCol', pageconfig)
 						return pageconfig
 					}
 				} else {
 					console.log('=====3', nCols)
-					// let pageconfig = Vue.prototype.getPageConfig(nCols[0],pageType)
-					// return pageconfig
 					return nCols[0]
 				}
 			} else {
@@ -102,18 +101,15 @@ export default {
 		}
 		/**
 		 * @param {String} v2res  V2 请求原始数据
-		 * 
 		 */
 		Vue.prototype.getPageConfig = function(v2res, useType) {
 			let pageConfigs = v2res || false
 			if (pageConfigs) {
 				pageConfigs["_fieldInfo"] = Vue.prototype.getFieldInfo(v2res.srv_cols, useType)
-				// pageConfigs["_fieldInfo"] = Vue.prototype.arraySort(pageConfigs["_fieldInfo"], "seq")
 				if (useType === 'list') {
 					pageConfigs["_buttonInfo"] = Vue.prototype.getButtonInfo(v2res.gridButton)
 				}
 				if (useType === 'treelist') {
-					// pageConfigs["_buttonInfo"] = Vue.prototype.getButtonInfo(v2res.gridButton)
 					pageConfigs["_rowButtons"] = Vue.prototype.getButtonInfo(v2res.rowButton, useType)
 					pageConfigs["_handerButtons"] = Vue.prototype.getButtonInfo(v2res.gridButton, useType)
 				} else if (useType === 'update' || useType === 'add' || useType === 'detail') {
@@ -248,14 +244,6 @@ export default {
 						"serviceName": "srvsso_user_select",
 						"key_disp_col": "user_disp"
 					}
-					// fieldInfo.srvInfo = {
-					// 	"key_disp_col": "user_disp",
-					// 	serviceName: 'srvsso_user_select',
-					// 	appNo: 'sso',
-					// 	isTree: false,
-					// 	column: 'user_no',
-					// 	showCol: 'real_name', //要展示的字段
-					// }
 				} else if (fieldInfo.type === 'id_card') {
 					fieldInfo.type = 'idCardPicture'
 					fieldInfo.buttons = [{
@@ -350,11 +338,6 @@ export default {
 					default:
 						break;
 				}
-
-				// if( item.button_type === "submit"){
-				// 	buttonInfo.ontap = Vue.prototype.onRequest
-				// }
-
 			})
 			return cols
 		}
@@ -382,7 +365,6 @@ export default {
 						if (datas[i][id] === aDatas[j][pd]) {
 							child.push(aDatas[j])
 							aDatas.slice(j, 1)
-							// console.log("slice==="+j,aDatas,aDatas[j],j)
 						}
 					}
 					if (child.length > 0) {
@@ -390,12 +372,10 @@ export default {
 					} else {
 						datas[i]["_childNode"] = child
 					}
-					// console.log("datas[i]._childNode" + i,datas)
 				}
 				return datas
 			}
 			to1Data = reform(to2Data, pidcol, idcol, to1Data)
-			// console.log("_childNode",e,to1Data)
 			return to1Data
 		}
 		/**
@@ -414,7 +394,7 @@ export default {
 
 			}
 			let url = Vue.prototype.getServiceUrl(app || uni.getStorageSync("activeApp"), srv, optionType)
-			return self.$http.post(url, req)
+			return _http.post(url, req)
 		}
 
 		// -------------------公共方法-------------------------------
@@ -426,12 +406,12 @@ export default {
 		 */
 		Vue.prototype.getServiceUrl = function(app, srv, srvType, url) {
 				// 获取转换URL app, srv, srvType, url
-				let singleApp = this.$api.singleApp
+				let singleApp = api.singleApp
 
-				let urlVal = url || this.$api.srvHost
+				let urlVal = url || api.srvHost
 				let appVal = app
 				if (singleApp) {
-					appVal = this.$api.appName
+					appVal = api.appName
 
 				} else {
 					appVal = uni.getStorageSync('activeApp')
@@ -630,15 +610,15 @@ export default {
 			if (!code) {
 				return
 			}
-			let url = this.$api.verifyLogin.url;
+			let url = api.verifyLogin.url;
 			let req = [{
 				data: [{
 					code: code,
-					app_no: this.$api.appNo.wxmp
+					app_no: api.appNo.wxmp
 				}],
 				serviceName: 'srvwx_app_login_verify'
 			}];
-			let res = await this.$http.post(url, req);
+			let res = await _http.post(url, req);
 			if (res.data.resultCode === 'SUCCESS') {
 				// 登录成功
 				uni.setStorageSync('isLogin', true);
@@ -658,7 +638,21 @@ export default {
 				})
 				if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg === 'getUserInfo:ok' &&
 					infoRes[1].userInfo) {
+					let rawData = {
+						nickname: infoRes[1].userInfo.nickName,
+						sex: infoRes[1].userInfo.gender,
+						country: infoRes[1].userInfo.country,
+						province: infoRes[1].userInfo.province,
+						city: infoRes[1].userInfo.city,
+						headimgurl: infoRes[1].userInfo.avatarUrl
+					};
+					store.commit('SET_WX_USERINFO', rawData);
 					store.commit('SET_AUTH_USERINFO', true)
+					await Vue.prototype.setWxUserInfo(rawData)
+					return {
+						status: 'success',
+						response: resData
+					};
 				} else {
 					if (store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
 						// 跳转到授权页面
@@ -666,13 +660,9 @@ export default {
 						uni.navigateTo({
 							url: '/publicPages/accountExec/accountExec'
 						})
-						return false;
 					}
+					return false;
 				}
-				return {
-					status: 'success',
-					response: resData
-				};
 			} else {
 				// 登录失败，显示提示信息
 				uni.showToast({
@@ -751,7 +741,6 @@ export default {
 
 			let inputTemp = function() {
 				let a = {
-
 					type: "", //input textarea pics  radio checkbox picker-date（picker-dateTime| String| 日期加时间| | picker-date| String| 日期| | picker-time| String| 时间|） picker-city text  infinitePics
 					title: "名称", //
 					inputType: "", // text number
@@ -774,7 +763,6 @@ export default {
 						if (item.item_type_attr.hasOwnProperty("view_model")) {
 							if (item.item_type_attr.view_model === "单行") {
 								inputData.type = "input"
-
 								return inputData
 							} else if (item.item_type_attr.view_model === "多行") {
 								inputData.type = "textarea"
@@ -921,7 +909,7 @@ export default {
 				}, ]
 			}
 			if (e) {
-				let response = await this.$http.post(url, req);
+				let response = await _http.post(url, req);
 				console.log('srvfile_attachment_select', response);
 				if (response.data.state === 'SUCCESS' && response.data.data.length > 0) {
 					return response.data.data
@@ -957,7 +945,7 @@ export default {
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
 				"data": [{
-					"app_no": Vue.prototype.$api && Vue.prototype.$api.appNo && Vue.prototype.$api.appNo.wxmp ? Vue.prototype.$api
+					"app_no": api && api.appNo && api.appNo.wxmp ? api
 						.appNo.wxmp : "APPNO20200107181133",
 					"nickname": userInfo.nickname,
 					"sex": userInfo.sex,
@@ -970,10 +958,9 @@ export default {
 			if (e) {
 				store.commit('SET_WX_USERINFO', userInfo)
 				uni.setStorageSync('wxUserInfo', userInfo)
-				let response = await this.$http.post(url, req);
-				console.log('srvfile_attachment_select', response);
+				let response = await _http.post(url, req);
 				if (response.data.state === 'SUCCESS' && Array.isArray(response.data.data) && response.data.data.length > 0) {
-					return response.data.data
+					return response.data
 				}
 			}
 		}
@@ -1154,11 +1141,7 @@ export default {
 										}]
 										Vue.prototype.onRequest("delete", params.serviceName, req).then((res) => {
 											if (res.data.state === "SUCCESS") {
-
 												resolve(res.data)
-												// uni.showToast({
-												// 	title:e.button.button_name
-												// })
 											} else {
 												reject(res.data)
 											}
@@ -1329,7 +1312,7 @@ export default {
 				}]
 			};
 			if (user_no) {
-				const res = await Vue.prototype.$http.post(url, req);
+				const res = await _http.post(url, req);
 				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 					let current_user_info = null
 					if (uni.getStorageSync('current_user_info')) {
@@ -1338,7 +1321,9 @@ export default {
 								uni.setStorageSync('current_user_info', item);
 								current_user_info = item
 								try {
+
 									store.commit("SET_USERINFO", item)
+									Vue.prototype.checkSubscribeStatus()
 								} catch (e) {
 									//TODO handle the exception
 								}
@@ -1348,8 +1333,10 @@ export default {
 						uni.setStorageSync('current_user_info', res.data.data[0]);
 						uni.setStorageSync('current_user', res.data.data[0].name);
 						current_user_info = res.data.data[0]
+
 						store.commit("SET_USERINFO", current_user_info)
 						store.commit("SET_USERLIST", res.data.data)
+						Vue.prototype.checkSubscribeStatus()
 					}
 					return current_user_info
 				} else if (res.data.resultCode === '0011') {
@@ -1394,7 +1381,7 @@ export default {
 				if (!res) {
 					return 'fail'
 				}
-			} else {}
+			}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_select', 'select')
 			let req = {
 				"serviceName": "srvhealth_person_info_select",
@@ -1409,14 +1396,13 @@ export default {
 					"rownumber": 2
 				},
 			}
-			let res = await Vue.prototype.$http.post(url, req)
+			let res = await _http.post(url, req)
 			if (res.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				// store.commit('SET_USERINFO', res.data.data[0])
-				// store.commit('SET_USERLIST', res.data.data)
 				store.commit('SET_USERINFO', res.data.data[0])
 				store.commit('SET_USERLIST', res.data.data)
 				uni.setStorageSync('current_user_info', res.data.data[0]);
 				uni.setStorageSync('current_user', res.data.data[0].name);
+				Vue.prototype.checkSubscribeStatus()
 				return res.data.data[0]
 			} else {
 				return false
@@ -1435,18 +1421,18 @@ export default {
 					headimgurl: user.userInfo.avatarUrl
 				};
 				this.setWxUserInfo(rawData);
-				this.$store.commit('SET_WX_USERINFO', rawData);
-				this.$store.commit('SET_AUTH_SETTING', {
+				store.commit('SET_WX_USERINFO', rawData);
+				store.commit('SET_AUTH_SETTING', {
 					type: 'userInfo',
 					value: true
 				});
-				this.$store.commit('SET_AUTH_USERINFO', true);
+				store.commit('SET_AUTH_USERINFO', true);
 				const result = await wx.login();
 				if (result.code) {
 					this.wxLogin({
 						code: result.code
 					});
-					this.initPage();
+					// this.initPage();
 				}
 			}
 			// #endif
@@ -1457,14 +1443,18 @@ export default {
 				// 已有用户信息
 				return
 			}
-			if(store.state.app.areRegistering){
+			if (store.state.app.areRegistering) {
 				// 有一个注册请求正在进行中
 				return
 			}
-			store.commit('SET_REGIST_STATUS',true)
+			store.commit('SET_REGIST_STATUS', true)
 			let wxUserInfo = ''
 			if (store && store.state && store.state.user) {
 				wxUserInfo = store.state.user.wxUserInfo
+			}
+			if ((wxUserInfo && !wxUserInfo.nickname) || !wxUserInfo) {
+				// 未授权获取用户信息
+				debugger
 			}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_add', 'add')
 			let req = [{
@@ -1479,20 +1469,27 @@ export default {
 				}]
 			}]
 			try {
-				if (store.state.app.inviterInfo.invite_user_no) {
-					req[0].data[0].invite_user_no = store.state.app.inviterInfo.invite_user_no
+				let inviterInfo = store.state.app.inviterInfo
+				debugger
+				if (inviterInfo.invite_user_no) {
+					req[0].data[0].invite_user_no = inviterInfo.invite_user_no
 				}
-				if (store.state.app.inviterInfo.add_url) {
-					req[0].data[0].add_url = store.state.app.inviterInfo.add_url
+				if (inviterInfo.add_url) {
+					req[0].data[0].add_url = inviterInfo.add_url
 				}
 			} catch (e) {
-				//TODO handle the exception
+				debugger
 			}
-			let res = await Vue.prototype.$http.post(url, req)
-			store.commit('SET_REGIST_STATUS',false)
+			let res = await _http.post(url, req)
+			debugger
+			store.commit('SET_REGIST_STATUS', false)
 			if (res.data && res.data.resultCode === "SUCCESS") {
 				console.log("信息登记成功")
 			} else {
+				uni.showModal({
+					title: '提示',
+					content: JSON.stringify(res.data)
+				})
 				if (res.data.resultCode === '0011') {
 					// 未登录
 					// #ifdef MP-WEIXIN
@@ -1505,6 +1502,7 @@ export default {
 					// #endif
 					return
 				}
+				return
 				uni.showModal({
 					title: '提示',
 					content: '当前账号未登记个人信息，是否跳转到信息登记页面',
@@ -1567,49 +1565,6 @@ export default {
 				});
 			}
 		}
-		// Vue.prototype.getFoodsDetail = async (dietRecord) => {
-		// 	// 根据饮食记录得到食物编号查找食物详细数据
-		// 	if (Array.isArray(dietRecord) && dietRecord.length > 0) {
-		// 		let mixDietList = dietRecord.filter(item => item.diret_type === 'mixed_food');
-		// 		let basicDietList = dietRecord.filter(item => item.diret_type === 'diet_contents');
-		// 		let condition1 = [{
-		// 			colName: 'meal_no',
-		// 			ruleType: 'in',
-		// 			value: mixDietList.map(item => item.mixed_food_no).toString()
-		// 		}];
-		// 		let condition2 = [{
-		// 			colName: 'food_no',
-		// 			ruleType: 'in',
-		// 			value: basicDietList.map(item => item.diet_contents_no).toString()
-		// 		}];
-		// 		let mix = await Vue.prototype.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
-		// 		let basic = await Vue.prototype.getFoodType(condition2);
-		// 		let foodType = [...mix, ...basic];
-		// 		return foodType;
-		// 	}
-		// }
-		// Vue.prototype.getFoodType = async (cond, serv) => {
-		// 	// 食物类型
-		// 	let serviceName = 'srvhealth_diet_contents_select';
-		// 	if (serv) {
-		// 		serviceName = serv;
-		// 	}
-		// 	let url = Vue.prototype.getServiceUrl('health', serviceName, 'select');
-		// 	let req = {
-		// 		serviceName: serviceName,
-		// 		colNames: ['*'],
-		// 		condition: [],
-		// 		order: []
-		// 	};
-		// 	if (cond) {
-		// 		req.condition = cond;
-		// 	}
-		// 	let res = await Vue.prototype.$http.post(url, req);
-		// 	if (res.data.state === 'SUCCESS' && res.data.data.length > 0 && !serv) {
-		// 		console.log(res.data.data);
-		// 	}
-		// 	return res.data.data ? res.data.data : [];
-		// }
 
 		Vue.prototype.getImagePath = (no) => {
 			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
@@ -1618,7 +1573,7 @@ export default {
 				if (no.indexOf('&bx_auth_ticket') !== -1) {
 					no = no.split('&bx_auth_ticket')[0]
 				}
-				return Vue.prototype.$api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
+				return api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
 					'&thumbnailType=fwsu_100';
 			} else {
 				return false
@@ -1647,27 +1602,6 @@ export default {
 				})
 			})
 		}
-		// Vue.prototype.updateUserProfile = async (profile_url, user_no) => {
-		// 	const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
-		// 	const req = [{
-		// 		serviceName: 'srvhealth_person_info_update',
-		// 		condition: [{
-		// 			colName: 'no',
-		// 			ruleType: 'eq',
-		// 			value: user_no
-		// 		}],
-		// 		data: [{
-		// 			profile_url: profile_url
-		// 		}]
-		// 	}];
-		// 	let res = await Vue.prototype.$http.post(url, req);
-		// 	if (res.data.state === 'SUCCESS') {
-		// 		uni.showToast({
-		// 			title: '头像更新成功！'
-		// 		});
-		// 		return true
-		// 	}
-		// }
 
 		Vue.prototype.sliceDigitNumber = (num, length) => {
 			// 将数字分为整数部分和小数部分

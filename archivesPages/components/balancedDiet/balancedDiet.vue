@@ -2726,6 +2726,7 @@ export default {
 				this.getDietAllRecord();
 				this.getDietRecord(this.selectDate);
 				this.getSportsRecord(this.selectDate);
+				this.checkSubscribeStatus();
 			}
 			this.showUserList = false;
 		},

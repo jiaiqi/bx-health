@@ -1789,6 +1789,7 @@ export default {
 				} else {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
+									this.checkSubscribeStatus()
 				}
 				this.$store.commit('SET_USERLIST', res.data.data);
 				uni.setStorageSync('user_info_list', res.data.data);

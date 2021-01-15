@@ -33,6 +33,12 @@
 					<swiper-item v-for="(item, index) in pageItem.carousel" :key="index"><image :src="item.picUrl" mode="scaleToFill"></image></swiper-item>
 				</swiper>
 			</view>
+			<!-- #ifdef MP-WEIXIN -->
+			<view class="official-account" v-if="!subscsribeStatus && index === 0">
+				<official-account></official-account>
+				<view class="text">关注公众号，获取更多服务</view>
+			</view>
+			<!-- #endif -->
 			<view class="page-menu" v-if="pageItem.div_type === 'buttons'">
 				<view class="title">{{ pageItem.item_name }}</view>
 				<view
@@ -58,15 +64,8 @@
 					</swiper-item>
 				</swiper>
 			</view>
-			<view class="page-list" v-if="pageItem.div_type === 'tablist'"></view>
 		</view>
-		<!-- #ifdef MP-WEIXIN -->
-		<!-- <view class="cu-modal" :class="{ show: modalName==='showOfficialAccount' }" @click="hideModal"> -->
-		<!-- <view class="cu-dialog" @click.stop=""> -->
-		<official-account></official-account>
-		<!-- </view> -->
-		<!-- </view> -->
-		<!-- #endif -->
+		<button class="contact-button" open-type="contact"><text class="cuIcon-servicefill text-blue icon"></text></button>
 	</view>
 </template>
 
@@ -83,6 +82,7 @@ export default {
 	},
 	computed: {
 		...mapState({
+			subscsribeStatus: state => state.app.subscsribeStatus,
 			loginUserInfo: state => state.user.loginUserInfo,
 			userInfo: state => state.user.userInfo,
 			globalTextFontSize: state => state.app['globalTextFontSize'],
@@ -90,6 +90,24 @@ export default {
 		})
 	},
 	methods: {
+		async toPay() {
+			this.getPayParams().then(res => {
+				debugger;
+				wx.requestPayment({
+					timeStamp: res.timeStamp.toString(),
+					nonceStr: res.nonceStr,
+					package: res.package,
+					signType: 'MD5',
+					paySign: res.paySign,
+					success(res) {
+						debugger;
+					},
+					fail(res) {
+						debugger;
+					}
+				});
+			});
+		},
 		hideModal() {
 			this.modalName = '';
 		},
@@ -250,7 +268,7 @@ export default {
 			if (!res.authSetting['scope.userInfo']) {
 				// 没有获取用户信息授权
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
-				this.$store.commit('SET_AUTH_USERINFO',false);
+				this.$store.commit('SET_AUTH_USERINFO', false);
 				return;
 			} else {
 				uni.getUserInfo({
@@ -274,7 +292,7 @@ export default {
 				});
 				this.isAuthUserInfo = true;
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
-				this.$store.commit('SET_AUTH_USERINFO',true);
+				this.$store.commit('SET_AUTH_USERINFO', true);
 			}
 			// #endif
 			if (!userInfo) {
@@ -346,6 +364,7 @@ export default {
 					}
 				}
 				uni.setStorageSync('user_info_list', res.data.data);
+				this.checkSubscribeStatus();
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {
 				// 登录失效 进行静默登录
@@ -370,24 +389,25 @@ export default {
 	},
 	onShow() {
 		this.initPage();
-		this.toAddPage()
+		this.toAddPage();
 	},
 	onShareAppMessage() {
 		let path = '';
-		let title = '百想健康'
+		let title = '百想健康';
 		if (this.userInfo && this.userInfo.no) {
-			path = `/pages/pedia/pedia?from=share&option.invite_user_no=${this.userInfo.userno}`;
-			title = `${this.userInfo.name}邀请你体验【百想健康】小程序`
+			path = `/pages/pedia/pedia?from=share&invite_user_no=${this.userInfo.userno}`;
+			title = `${this.userInfo.name}邀请你体验【百想健康】小程序`;
 		} else if (this.loginUserInfo && this.loginUserInfo.user_no) {
-			path = `/pages/pedia/pedia?from=share&option.invite_user_no=${this.loginUserInfo.user_no}`;
+			path = `/pages/pedia/pedia?from=share&invite_user_no=${this.loginUserInfo.user_no}`;
 		}
 		return {
-			title:title,
+			title: title,
 			path: path
 		};
 	},
 	onLoad(option) {
-		this.checkOptionParams(option)
+		debugger;
+		this.checkOptionParams(option);
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({
 			withShareTicket: true,
@@ -471,6 +491,36 @@ export default {
 			font-weight: 700;
 			margin-bottom: 10rpx;
 		}
+	}
+}
+.official-account {
+	margin: 20rpx 0;
+	background-color: #fff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	.text {
+		padding: 10rpx 20rpx;
+		color: #777;
+		font-size: 24rpx;
+	}
+}
+.contact-button{
+	position: fixed;
+	bottom: 70rpx;
+	right: 50rpx;
+	border-radius: 100%;
+	width: 100rpx;
+	height: 100rpx;
+	display: flex;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	background-color: #fff;
+	border: none;
+	justify-content: center;
+	align-items: center;
+	padding: 0;
+	font-size: 24rpx;
+	.icon{
+		font-size: 70rpx;
 	}
 }
 </style>

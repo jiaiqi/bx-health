@@ -78,6 +78,7 @@ export default {
 	computed: {
 		...mapState({
 			loginUserInfo: state => state.user.loginUserInfo,
+			userInfo:state=>state.user.userInfo,
 			wxUserInfo: state => state.user.wxUserInfo,
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize
@@ -603,10 +604,11 @@ export default {
 	onShareAppMessage() {
 		let path = '';
 		let title = '百想健康';
-		if (this.loginUserInfo && this.loginUserInfo.user_no && this.nodeDetail && this.nodeDetail.kn_no) {
-			path = `/archivesPages/RelationGraph/RelationGraph?currentNodeNo=${this.nodeDetail.kn_no}&from=share&option.invite_user_no=${this.loginUserInfo.userno}`;
+		if (this.userInfo && this.userInfo.userno && this.nodeDetail && this.nodeDetail.kn_no) {
+			path = `/archivesPages/RelationGraph/RelationGraph?currentNodeNo=${this.nodeDetail.kn_no}&from=share&invite_user_no=${this.loginUserInfo.userno}`;
 			title = `【${this.nodeDetail.node_name ? this.nodeDetail.node_name : '健康'}】知识图谱`;
 		}
+		this.saveSharerInfo(this.userInfo,path)
 		return {
 			title: title,
 			path: path

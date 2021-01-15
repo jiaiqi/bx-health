@@ -28,12 +28,15 @@ const state = {
 	dietRecord: getItem('dietRecord') ? getItem('dietRecord') : [],
 	pageInfo: getItem('pageInfo') ? getItem('pageInfo') : {},
 	currentPage: '',
-	inviterInfo: getItem('inviterInfo') ? getItem('inviterInfo') : {} ,//邀请人
-	areRegistering:false //是否正在注册
+	inviterInfo: getItem('inviterInfo') ? getItem('inviterInfo') : {}, //邀请人
+	areRegistering: false, //是否正在注册
+	payParams: {}, //支付相关参数
+	prePayInfo: {}, //预支付信息
+	subscsribeStatus: true, //是否关注公众号
 }
 let persistData = {}; //持久化数据
 const mutations = {
-	SET_TICKET:(state,ticket)=>{
+	SET_TICKET: (state, ticket) => {
 		state.bx_auth_ticket = ticket
 		setItem('bx_auth_ticket', state.bx_auth_ticket)
 	},
@@ -62,7 +65,7 @@ const mutations = {
 			}
 		}
 	},
-	SET_REGIST_STATUS:(state,status)=>{
+	SET_REGIST_STATUS: (state, status) => {
 		state.areRegistering = status
 	},
 	SET_CURRENT_PAGE: (state, url) => {
@@ -102,6 +105,18 @@ const mutations = {
 	SET_INVITER_INFO: (state, inviterInfo) => {
 		state.inviterInfo = inviterInfo
 		setItem('inviterInfo', inviterInfo)
+	},
+	SET_PAY_PARAMS: (state, payParams) => {
+		state.payParams = payParams
+		setItem('payParams', payParams)
+	},
+	SET_PREPAY_INFO: (state, prePayInfo) => {
+		state.prePayInfo = prePayInfo
+		setItem('prePayInfo', prePayInfo)
+	},
+	SET_SUBSCRIBE_STATUS: (state, subscsribeStatus) => {
+		state.subscsribeStatus = subscsribeStatus
+		setItem('subscsribeStatus', subscsribeStatus)
 	}
 }
 

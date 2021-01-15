@@ -18,8 +18,6 @@ let remoteAddress = {
 	// homePath:"/pages/home/home", // 首页路径， 配置完整路径
 	homePath: "/pages/pedia/pedia", // 首页路径，配置完整路径
 }
-
-
 let ENV = {
 	backEndAddress: "https://login.100xsys.cn", //后台管理系统地址
 	frontEndAddress: remoteAddress.frontEndAddress, //前端线上地址
