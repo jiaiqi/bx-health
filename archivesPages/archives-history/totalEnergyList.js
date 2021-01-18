@@ -1,4 +1,4 @@
-let data = [{
+export default [{
 		title: '有机大分子',
 		units: 'g/d',
 		matterList: [{
@@ -209,5 +209,3 @@ let data = [{
 		]
 	}
 ]
-
-export default data

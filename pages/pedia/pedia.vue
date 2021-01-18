@@ -36,7 +36,7 @@
 			<!-- #ifdef MP-WEIXIN -->
 			<view class="official-account" v-if="!subscsribeStatus && index === 0">
 				<official-account></official-account>
-				<view class="text">关注公众号，获取更多服务</view>
+				<view class="text" @click="openOfficialImage">关注公众号，获取更多服务</view>
 			</view>
 			<!-- #endif -->
 			<view class="page-menu" v-if="pageItem.div_type === 'buttons'">
@@ -65,7 +65,25 @@
 				</swiper>
 			</view>
 		</view>
-		<button class="contact-button" open-type="contact"><text class="cuIcon-servicefill text-blue icon"></text></button>
+		<button class="contact-button" @click="toFeedBack"><text class="cuIcon-servicefill text-blue icon"></text></button>
+		<!-- <button class="contact-button" open-type="contact"><text class="cuIcon-servicefill text-blue icon"></text></button> -->
+		<view class="cu-modal" :class="modalName === 'feedback' ? 'show' : ''">
+			<view class="cu-dialog">
+				<view class="cu-bar bg-white justify-end">
+					<view class="content">请选择跳转页面</view>
+					<view class="action" @tap="hideModal"><text class="cuIcon-close text-red"></text></view>
+				</view>
+				<view class="padding-xl button-box">
+					<button class="cu-btn bg-blue" open-type="contact">客服</button>
+					<button class="cu-btn bg-green" @click="toPages('feedback')">意见反馈</button>
+				</view>
+				<!-- 	<view class="cu-bar bg-white justify-center">
+					<view class="action">
+						<button class="cu-btn line-green text-green" @tap="hideModal">取消</button>
+					</view>
+				</view> -->
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -90,9 +108,27 @@ export default {
 		})
 	},
 	methods: {
+		toFeedBack() {
+			// 跳转到反馈页面
+			this.modalName = 'feedback';
+			// uni.navigateTo({
+			// 	url:'/publicPages/chat/chat'
+			// })
+		},
+		toPages(type) {
+			if (type === 'feedback') {
+				let fieldsCond = [
+					// { column: 'info_no', value: this.vuex_userInfo.no, condition: [{ colName: 'no', ruleType: 'eq', value: this.vuex_userInfo.no }] },
+					// { column: 'user_account', value: this.vuex_userInfo.userno }
+				];
+				let url = '/publicPages/newForm/newForm?serviceName=srvhealth_suggest_record_add&type=add&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond));
+				uni.navigateTo({
+					url: url
+				});
+			}
+		},
 		async toPay() {
 			this.getPayParams().then(res => {
-				debugger;
 				wx.requestPayment({
 					timeStamp: res.timeStamp.toString(),
 					nonceStr: res.nonceStr,
@@ -382,6 +418,11 @@ export default {
 				// 没有角色 提示跳转到创建角色页面
 				// self.toAddPage();
 			}
+		},
+		openOfficialImage() {
+			// uni.previewImage({
+			// 	urls: ['/static/bx100x.png']
+			// });
 		}
 	},
 	created() {
@@ -400,13 +441,13 @@ export default {
 		} else if (this.loginUserInfo && this.loginUserInfo.user_no) {
 			path = `/pages/pedia/pedia?from=share&invite_user_no=${this.loginUserInfo.user_no}`;
 		}
+		this.saveSharerInfo(this.userInfo, path);
 		return {
 			title: title,
 			path: path
 		};
 	},
 	onLoad(option) {
-		debugger;
 		this.checkOptionParams(option);
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({
@@ -503,7 +544,7 @@ export default {
 		font-size: 24rpx;
 	}
 }
-.contact-button{
+.contact-button {
 	position: fixed;
 	bottom: 70rpx;
 	right: 50rpx;
@@ -519,8 +560,15 @@ export default {
 	align-items: center;
 	padding: 0;
 	font-size: 24rpx;
-	.icon{
+	.icon {
 		font-size: 70rpx;
+	}
+}
+.button-box {
+	display: flex;
+	justify-content: space-around;
+	.cu-btn {
+		width: 45%;
 	}
 }
 </style>

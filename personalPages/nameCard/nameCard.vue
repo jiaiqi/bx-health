@@ -9,6 +9,7 @@
 			</view>
 			<view class="qr-code" v-if="userInfo && userInfo.no">
 				<uni-qrcode
+					class="qrcode-canvas"
 					cid="qrcodeCanvas"
 					:text="'https://wx2.100xsys.cn/mpwx/' + userInfo.no"
 					:size="size"
@@ -16,9 +17,11 @@
 					makeOnLoad
 					@makeComplete="qrcodeCanvasComplete"
 				></uni-qrcode>
+				<image :src="qrcodePath" class="qr-code-image" mode="aspectFit" v-if="qrcodePath"></image>
 			</view>
 			<view class="tips">扫描上方二维码关注当前医生</view>
 		</view>
+		<view class="button-box"><button type="primary" class="cu-btn bg-blue" open-type="share">分享名片</button></view>
 	</view>
 </template>
 
@@ -30,7 +33,9 @@ export default {
 		return {
 			userInfo: {},
 			doctoreInfo: {},
-			size: uni.upx2px(550)
+
+			size: uni.upx2px(550),
+			qrcodePath: ''
 		};
 	},
 	computed: {
@@ -60,8 +65,23 @@ export default {
 			}
 		},
 		qrcodeCanvasComplete(e) {
-			console.log('qrcodeCanvasComplete', e);
+			this.qrcodePath = e;
 		}
+	},
+	onShareAppMessage() {
+		let path = '';
+		let title = '百想健康';
+		let q = encodeURIComponent(`https://wx2.100xsys.cn/mpwx/${this.userInfo.no}`);
+		if (this.userInfo && this.userInfo.no) {
+			path = `/personalPages/myDoctor/myDoctor?from=share&invite_user_no=${this.userInfo.userno}&q=${q}`;
+			title = `${this.userInfo.name}邀请你体验【百想健康】小程序`;
+		}
+		this.saveSharerInfo(this.userInfo, path);
+		return {
+			imageUrl: this.qrcodePath,
+			title: title,
+			path: path
+		};
 	},
 	async onLoad() {
 		let userInfo = uni.getStorageSync('current_user_info');
@@ -89,6 +109,14 @@ export default {
 	padding-top: 10vh;
 	display: flex;
 	height: auto;
+	display: flex;
+	flex-direction: column;
+	.button-box {
+		margin-top: 20rpx;
+		.cu-btn {
+			width: 45%;
+		}
+	}
 	.card {
 		width: 100%;
 		background-color: #fff;
@@ -118,6 +146,14 @@ export default {
 			width: 550rpx;
 			height: 550rpx;
 			margin: 50rpx auto;
+			.qrcode-canvas {
+				position: fixed;
+				top: -999999px;
+			}
+			.qr-code-image {
+				width: 550rpx;
+				height: 550rpx;
+			}
 		}
 		.tips {
 			text-align: center;

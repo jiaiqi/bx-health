@@ -152,7 +152,7 @@ export default {
 		hideModal() {
 			this.showModal = false;
 		},
-		async getDoctorAllRecod(userNo) {
+		async getDoctorAllRecod(userNo,docNO) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
@@ -180,6 +180,13 @@ export default {
 					}
 				]
 			};
+			if(Array.isArray(docNO)){
+				req.condition.push({
+					colName:'sender_person_no',
+					ruleType:'in',
+					value:docNO.toString()
+				})
+			}
 			let res = await this.$http.post(url, req);
 			return res.data.data.length;
 		},
@@ -195,18 +202,13 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
-				// this.doctorList = res.data.data;
-				this.doctorList = res.data.data;
 				let noList = res.data.data.map(item => item.usera_no);
 				let noStr = noList.toString();
 				let count_num = 0;
-				// this.doctorList.forEach(item => {
 				this.getDoctorRecod(noStr, '医生').then(length => {
 					count_num += length;
 					this.doctor_message = count_num;
-					console.log('-----------------length---', count_num);
 				});
-				// });
 			}
 		},
 		async getUserDoctorInfo(customer_no) {
@@ -234,14 +236,10 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
-				// this.doctorList = res.data.data;
 				let arr = res.data.data.map(items => items.userb_no).toString();
 				this.getDoctorRecod(arr, '患者').then(l => {
 					this.hzMessage = l;
 				});
-				// let noList = res.data.data.map(item => item.customer_name);
-
-				// console.log('查询----', doctorList, res.data.data);
 			}
 		},
 		toPages(e) {
@@ -378,25 +376,6 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			return res.data.data.length;
-		},
-		async getDoctorInfoMessage(no, isSelf) {
-			// 查找医生信息
-			let url = this.getServiceUrl('health', 'srvhealth_person_relation_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_person_relation_select',
-				colNames: ['*'],
-				condition: [{ colName: 'userb_person_no', ruleType: 'in', value: no }],
-				page: { pageNo: 1, rownumber: 10 }
-			};
-			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				if (isSelf === true) {
-					this.doctorList = res.data.data;
-				}
-				return res.data.data[0];
-			} else {
-				return false;
-			}
 		},
 		async getDoctorInfo() {
 			// 查找医生信息

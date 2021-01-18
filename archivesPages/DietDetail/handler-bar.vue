@@ -87,7 +87,7 @@ export default {
 					type: 'other'
 				}
 			],
-			oldDefaultCOokTypes: []
+			oldDefaultCookTypes: []
 		};
 	},
 	props: {
@@ -198,8 +198,8 @@ export default {
 					}
 				}
 			}
-			if (this.oldDefaultCOokTypes.length === 0) {
-				this.oldDefaultCOokTypes = this.deepClone(this.defaultCookTypes);
+			if (this.oldDefaultCookTypes.length === 0) {
+				this.oldDefaultCookTypes = this.deepClone(this.defaultCookTypes);
 			}
 			let colVs = await this.getServiceV2('srvhealth_diet_contents_select', 'list', 'list', 'health');
 			let colData = colVs.srv_cols;
@@ -218,20 +218,30 @@ export default {
 			} else {
 				this.cook_method = this.cookMethod;
 			}
-			let defaultCookTypes = this.deepClone(this.oldDefaultCOokTypes);
+			if(!this.defaultCookTypes.find(item=>item.value ===this.cook_method)){
+				this.defaultCookTypes.push({
+					label: this.cook_method,
+					value: this.cook_method,
+					checked: true
+				})
+			}
+			let defaultCookTypes = this.deepClone(this.oldDefaultCookTypes);
 			let typeArr = defaultCookTypes.map(item => item.value);
 			if (this.dietInfo.cook_method_default) {
 				let index = this.defaultCookTypes.findIndex(
-					item => item.value !== this.dietInfo.cook_method && !typeArr.includes(item.value) && this.dietInfo.cook_method_default.indexOf(item.value) === -1
+					item => item.value !== this.cook_method && !typeArr.includes(item.value) && this.dietInfo.cook_method_default.indexOf(item.value) === -1
 				);
-				if (index !== -1) {
+				if (index !== -1&&index!==undefined) {
 					this.defaultCookTypes.splice(index, 1);
 				}
 			} else {
-				let index = this.defaultCookTypes.findIndex(item => item.value !== this.dietInfo.cook_method && !typeArr.includes(item.value));
-				this.defaultCookTypes.splice(index, 1);
+				let index = this.defaultCookTypes.findIndex(item => item.value !== this.cook_method && !typeArr.includes(item.value));
+				if (index !== -1&&index!==undefined) {
+					this.defaultCookTypes.splice(index, 1);
+				}
 			}
-			if (!this.defaultCookTypes.find(item => item.value === this.dietInfo.cook_method)) {
+			
+			if (!this.defaultCookTypes.find(item => item.value === this.cook_method)) {
 				let arr = this.dietInfo.cook_method.split(',');
 				if (arr.length > 0) {
 					arr.forEach(item => {

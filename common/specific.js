@@ -67,6 +67,7 @@ export default {
 				userInfo = store.state.user.userInfo
 			}
 			let pageInfo = Vue.prototype.getShareParams()
+			debugger
 			if (pageInfo && pageInfo.add_url) {
 				share_url = pageInfo.add_url
 			}
@@ -135,13 +136,11 @@ export default {
 				}]
 			}]
 			let res = await _http.post(url, req)
-			debugger
 			if (res.data.state === 'SUCCESS') {
 				if (Array.isArray(res.data.response) && res.data.response.length > 0) {
 					let info = res.data.response[0]
 					if (info.response) {
 						info = info.response
-						debugger
 						store.commit('SET_PREPAY_INFO'.info)
 						return info
 					}
@@ -190,7 +189,7 @@ export default {
 					store.commit('SET_CURRENT_PAGE', currentPage.route)
 					// store.commit('SET_PAGE_INFO', currentPage)
 					return {
-						add_url: currentPage.route ? currentPage.route : '未知页面',
+						add_url: currentPage.$page.fullPath ? currentPage.$page.fullPath : '未知页面',
 						invite_user_no: userInfo.no ? userInfo.no : '未知邀请人'
 					}
 				}

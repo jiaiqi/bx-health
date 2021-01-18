@@ -85,12 +85,12 @@
 					</view>
 				</picker>
 			</view>
+
 			<view class="form-item-content_value textarea" v-else-if="fieldData.type === 'textarea'">
-			<!-- <view class="form-item-content_value picker" v-else-if="fieldData.type === 'textarea'" @click="showModal('TextArea')"> -->
-				<!-- <text class="place-holder" v-if="!fieldData.value">点击输入</text> -->
-				<!-- <view class="value" v-else-if="modalName !== 'TextArea'">{{ fieldData.value | html2text }}</view> -->
-				<!-- <textarea v-model="fieldData.value"/> -->
 				<textarea class="textarea" style="width: 100%;" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
+			</view>
+			<view class="voice" v-else-if="fieldData.type === 'voice'">
+				<button class="bg-white cu-btn" @click="showModal('voice')">{{ fieldData.value ? '点击查看录音' : '点击添加录音' }}</button>
 			</view>
 			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'RichText'" @click="showModal('RichEditor')">
 				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
@@ -148,9 +148,7 @@
 		<view class="cu-modal" :class="{ show: modalName === 'TextArea' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop="">
 				<textarea class="textarea" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
-				<view class="button-box">
-					<view class="cu-btn button bg-cyan" @click="saveRichText({ isSave: true, type: 'textarea' })">确定</view>
-				</view>
+				<view class="button-box"><view class="cu-btn button bg-cyan" @click="saveRichText({ isSave: true, type: 'textarea' })">确定</view></view>
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'TreeSelector' }" @tap="hideModal">
@@ -184,10 +182,36 @@
 				</view>
 			</view>
 		</view>
+		<view class="cu-modal" :class="{ show: modalName === 'voice' }" @tap="hideModal">
+			<view class="cu-dialog" @tap.stop="">
+				<view class="voice-modal">
+					<view class="voice-list">
+						<audio :src="item" controls v-for="item in voiceUrl" :key="item"></audio>
+						<view class="voice-item cu-btn" v-for="item in voiceUrls" @click="playVoice(item.url)">{{ item.time }}</view>
+					</view>
+					<view class="loading">
+						<view class="spinner">
+							<view class="rect1" :class="{ rect: onRecord }"></view>
+							<view class="rect2" :class="{ rect: onRecord }"></view>
+							<view class="rect3" :class="{ rect: onRecord }"></view>
+							<view class="rect4" :class="{ rect: onRecord }"></view>
+							<view class="rect5" :class="{ rect: onRecord }"></view>
+						</view>
+					</view>
+					<view class="button-box">
+						<button class="cu-btn bg-blue" @click="startRecord"><text class="cuIcon-playfill">开始录音</text></button>
+						<button class="cu-btn bg-red" @click="stopRecord"><text class="cuIcon-stop">停止录音</text></button>
+					</view>
+				</view>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
+let recorderManager = null;
+let innerAudioContext = null;
+
 export default {
 	name: 'aFormItem',
 	filters: {
@@ -256,11 +280,11 @@ export default {
 		}
 	},
 	computed: {
-		uploadUrl(){
-			return this.$api.upload
+		uploadUrl() {
+			return this.$api.upload;
 		},
-		deleteUrl(){
-			return this.$api.deleteFile
+		deleteUrl() {
+			return this.$api.deleteFile;
 		},
 		label_width() {
 			let result = '';
@@ -320,7 +344,20 @@ export default {
 				msg: '不能为空!'
 			},
 			longpressTimer: null,
-			modalName: '' //当前显示的modal
+			modalName: '', //当前显示的modal
+			//录音相关参数
+			// RECORDER: null,
+			RECORDER: uni.getRecorderManager(),
+			voicePath: [],
+			voiceUrl: [],
+			voiceUrls: [],
+			voiceText: '按住 说话',
+			//播放语音相关参数
+			// AUDIO: null,
+			AUDIO: uni.createInnerAudioContext(),
+			playMsgid: null,
+			VoiceTimer: null,
+			onRecord: false //正在录音
 		};
 	},
 	watch: {
@@ -423,7 +460,7 @@ export default {
 			this.modalName = name;
 			this.$nextTick(function() {
 				if (name === 'TextArea') {
-					this.focusTextArea = true;
+					// this.focusTextArea = true;
 				}
 			});
 		},
@@ -472,10 +509,10 @@ export default {
 			}
 		},
 		getImagesInfo(e) {
-			let res = e.allImages[0]
-			try{
+			let res = e.allImages[0];
+			try {
 				res = JSON.parse(e.allImages[0]);
-			}catch(e){
+			} catch (e) {
 				//TODO handle the exception
 			}
 			this.fieldData.value = res.file_no;
@@ -714,6 +751,84 @@ export default {
 			this.getValid();
 			this.$emit('on-value-change', this.fieldData);
 		},
+		//录音开始UI效果
+		recordBegin(e) {
+			this.onRecord = true;
+		},
+		// 录音被打断
+		voiceCancel() {
+			this.RECORDER.stop(); //录音结束
+		},
+		// 录音开始
+		startRecord(e) {
+			this.onRecord = true;
+			this.RECORDER.start({ format: 'mp3' }); //录音开始,
+		},
+		// 停止录音
+		stopRecord() {
+			this.onRecord = false;
+			this.RECORDER.stop(); //录音结束
+		},
+		playVoice(voicePath) {
+			console.log('播放录音');
+			if (voicePath) {
+				innerAudioContext.src = voicePath;
+				innerAudioContext.play();
+			}
+		},
+		saveRecord(res) {
+			this.voicePath.push(res.tempFilePath);
+			console.log(this.deepClone(this.voicePath));
+			this.uploadFile(res.tempFilePath);
+		},
+		async uploadFile(tempFilePath) {
+			let self = this;
+			console.log(this.uploadFormData);
+			this.uploadFormData['app_no'] = this.fieldData.srvInfo && this.fieldData.srvInfo.appNo ? this.fieldData.srvInfo.appNo : uni.getStorageSync('activeApp');
+			this.uploadFormData['columns'] = this.fieldData.column;
+			if (this.fieldData.value !== '' && this.fieldData.value !== null && this.fieldData.value !== undefined) {
+				this.uploadFormData['file_no'] = this.fieldData.value;
+			}
+			this.uploadFormData['table_name'] = this.fieldData._colDatas.table_name;
+			let res = await uni.uploadFile({
+				filePath: tempFilePath,
+				url: self.$api.upload,
+				header: {
+					bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+				},
+				formData: self.uploadFormData,
+				name: 'file'
+			});
+			if (Array.isArray(res) && res.length === 2 && typeof res[1].data === 'string') {
+				res = JSON.parse(res[1].data);
+				this.voiceUrl.push(self.$api.getFilePath + res.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket'));
+				this.voiceurls.push({
+					url: self.$api.getFilePath + res.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket'),
+					time: res.create_time
+				});
+				self.fieldData.value = res.file_no;
+			}
+			// uni.uploadFile({
+			// 	filePath: tempFilePath,
+			// 	url: self.$api.upload,
+			// 	header: {
+			// 		bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+			// 	},
+			// 	formData: self.uploadFormData,
+			// 	name: 'file',
+			// 	success: res => {
+			// 		// 上传完成后处理
+			// 		if (typeof res.data === 'string') {
+			// 			res.data = JSON.parse(res.data);
+			// 		}
+			// 		self.fieldData.value = res.data.file_no;
+			// 		self.getImageUrl(res.data.file_no).then(data => {
+			// 			debugger;
+			// 		});
+			// 		uni.hideLoading();
+			// 	}
+			// });
+		},
 		getValid() {
 			if (this.fieldData.isRequire && this.fieldData.value) {
 				if (this.fieldData.hasOwnProperty('_validators') && this.fieldData._validators.hasOwnProperty('isType') && typeof this.fieldData._validators.isType === 'function') {
@@ -735,9 +850,24 @@ export default {
 			return this.valid;
 		}
 	},
+	onReady() {
+		let self = this;
+		//语音自然播放结束
+		if (this.fieldData.type === 'voice') {
+			// innerAudioContext = uni.createInnerAudioContext();
+			// innerAudioContext.autoplay = true;
+			// self.AUDIO.onEnded(res => {
+			// 	self.playMsgid = null;
+			// });
+			//录音结束事件
+			this.RECORDER.onStop(e => {
+				self.saveRecord(e);
+			});
+		}
+	},
 	created() {
 		let self = this;
-		if (this.fieldData.type === 'images') {
+		if (this.fieldData.type === 'images' || this.fieldData.type === 'voice') {
 			this.uploadFormData = {
 				serviceName: 'srv_bxfile_service',
 				interfaceName: 'add',
@@ -745,7 +875,7 @@ export default {
 				table_name: '',
 				columns: ''
 			};
-			this.uploadFormData['app_no'] = this.fieldData.srvInfo.appNo;
+			this.uploadFormData['app_no'] = this.fieldData.srvInfo && this.fieldData.srvInfo.appNo ? this.fieldData.srvInfo.appNo : uni.getStorageSync('activeApp');
 			this.uploadFormData['columns'] = this.fieldData.column;
 			if (this.fieldData.value !== '' && this.fieldData.value !== null && this.fieldData.value !== undefined) {
 				this.uploadFormData['file_no'] = this.fieldData.value;
@@ -780,6 +910,61 @@ export default {
 
 <style lang="scss" scoped>
 .cu-dialog {
+	.voice-modal {
+		padding: 20rpx;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		min-height: 500rpx;
+		.loading {
+			//loading动画
+			display: flex;
+			justify-content: center;
+			@keyframes stretchdelay {
+				0%,
+				40%,
+				100% {
+					transform: scaleY(0.6);
+				}
+				20% {
+					transform: scaleY(1);
+				}
+			}
+			.spinner {
+				margin: 20upx 0;
+				width: 60upx;
+				height: 100upx;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				.rect {
+					background-color: #f06c7a;
+					height: 50upx;
+					width: 6upx;
+					border-radius: 6upx;
+					animation: stretchdelay 1.2s infinite ease-in-out;
+				}
+				.rect2 {
+					animation-delay: -1.1s;
+				}
+				.rect3 {
+					animation-delay: -1s;
+				}
+				.rect4 {
+					animation-delay: -0.9s;
+				}
+				.rect5 {
+					animation-delay: -0.8s;
+				}
+			}
+		}
+		.cu-btn {
+			& + .cu-btn {
+				margin-left: 20rpx;
+			}
+		}
+	}
 	&.bottom-modal {
 		padding: 0 0 50rpx;
 	}
@@ -787,7 +972,7 @@ export default {
 	.form-item-content_value {
 		// width: 100%;
 		padding: 20rpx;
-		&.textarea{
+		&.textarea {
 			border: 1rpx solid #f1f1f1;
 		}
 	}

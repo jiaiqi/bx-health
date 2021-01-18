@@ -37,7 +37,7 @@ import eleData from './data.js';
 export default {
 	data() {
 		return {
-			eleData: eleData,
+			eleData: eleData
 		};
 	},
 	filters: {
@@ -46,13 +46,9 @@ export default {
 		}
 	},
 	computed: {
-		hotNum(){
-			if(this.dietInfo){
-				if(this.dietInfo.unit!=='g'&&this.dietInfo.unit_weight_g&&this.dietInfo.unit_amount&&this.dietInfo.unit_energy){
-					return this.dietInfo.unit_weight_g*this.dietInfo.unit_energy/this.dietInfo.unit_amount
-				}else{
-					return this.dietInfo.unit_energy
-				}
+		hotNum() {
+			if (this.dietInfo) {
+				return this.dietInfo.unit_energy;
 			}
 		},
 		unit() {
@@ -71,9 +67,7 @@ export default {
 		dietInfo: {
 			deep: true,
 			immediate: true,
-			handler(newValue, oldValue) {
-			
-			}
+			handler(newValue, oldValue) {}
 		}
 	},
 	props: {

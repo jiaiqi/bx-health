@@ -89,8 +89,9 @@ export default {
 					console.log('条码内容：' + res.result);
 					if (res.result && res.result.indexOf('PB') !== -1) {
 						// 进行绑定
-						if (res.result.indexOf('https://wx2.100xsys.cn/mpwc/') !== -1) {
-							let result = res.result.split('https://wx2.100xsys.cn/mpwc/')[1];
+						debugger
+						if (res.result.indexOf('https://wx2.100xsys.cn/mpwx/') !== -1) {
+							let result = res.result.split('https://wx2.100xsys.cn/mpwx/')[1];
 							self.qrcodeParams = result;
 							self.toBindDoctor(result);
 						} else {
@@ -257,8 +258,8 @@ export default {
 			this.getBindDoctor().then(_ => {
 				if (options.q) {
 					let text = decodeURIComponent(options.q);
-					if (text.indexOf('https://wx2.100xsys.cn/mpwc/') !== -1) {
-						let result = text.split('https://wx2.100xsys.cn/mpwc/')[1];
+					if (text.indexOf('https://wx2.100xsys.cn/mpwx/') !== -1) {
+						let result = text.split('https://wx2.100xsys.cn/mpwx/')[1];
 						self.qrcodeParams = result;
 						self.toBindDoctor(result);
 					}

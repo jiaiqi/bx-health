@@ -124,7 +124,7 @@ export default {
 					if (item.meal_no) {
 						obj['mixed_food_no'] = item.meal_no;
 						obj['diret_type'] = 'mixed_food';
-						delete obj.cook_method
+						delete obj.cook_method;
 						if (this.dietInfo.dish_type && this.dietInfo.dish_type.indexOf('自选') > -1) {
 							if (this.minceListChoose && this.minceListChoose.length > 0) {
 								this.minceListChoose.forEach(m => {
@@ -406,12 +406,14 @@ export default {
 		checkUnit(currentUnit) {
 			// 切换单位
 			// let currentUnit = this.unitList[index];
-			this.dietInfo.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
+			// debugger
 			if (currentUnit.unit === 'g') {
 				this.dietInfo.unit_energy = currentUnit.unit_energy;
 			} else {
-				this.dietInfo.unit_energy = (currentUnit.amount * this.dietInfo.unit_energy) / this.dietInfo.unit_weight_g;
+				debugger;
+				this.dietInfo.unit_energy = (currentUnit.amount * this.dietInfo.unit_energy) / (this.dietInfo.unit_weight_g >= 100 ? this.dietInfo.unit_weight_g : 100);
 			}
+			this.dietInfo.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
 			this.dietInfo.unit = currentUnit.unit;
 			this.dietInfo.energy = this.dietInfo.unit_energy * this.dietInfo.amount;
 			setTimeout(() => {
@@ -476,7 +478,7 @@ export default {
 				return;
 			}
 			title = `【${this.dietInfo.name}】`;
-			this.saveSharerInfo(this.userInfo,path)
+			this.saveSharerInfo(this.userInfo, path);
 		}
 		return {
 			title: title,

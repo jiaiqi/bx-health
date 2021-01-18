@@ -5,7 +5,6 @@
 			'--chart-height': chartHeight
 		}"
 	>
-		<!-- <cu-custom class="nav-chat-top" bgColor="#0bc99d" :isBack="true"><block slot="backText">返回</block><block slot="content">交流</block></cu-custom> -->
 		<view class="person-chat-top" @click.stop="closeBottomPoup" :style="{ height: heightStyle }" :class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
 			<audio v-if="currentChat.id" class="audio" @ended="playEnd" :action="audioAction" id="myMp3" style="height: 0;opacity: 0;" :src="currentChat.voice_url" controls />
 			<scroll-view @scroll="chatScroll" scroll-y="true" :style="{ height: heightStyle }" :scroll-into-view="chatTextBottom">

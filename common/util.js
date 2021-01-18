@@ -902,11 +902,7 @@ export default {
 					"colName": "file_no",
 					"value": e,
 					"ruleType": "eq",
-				}, {
-					"colName": "is_delete",
-					"value": "1",
-					"ruleType": "eq",
-				}, ]
+				}]
 			}
 			if (e) {
 				let response = await _http.post(url, req);
@@ -915,7 +911,6 @@ export default {
 					return response.data.data
 				}
 			}
-			// http://srvms.100xsys.cn/file/select/srvfile_attachment_select?srvfile_attachment_select
 		}
 		Vue.prototype.getDayDate = function(e) {
 			if (e) {
@@ -1454,7 +1449,6 @@ export default {
 			}
 			if ((wxUserInfo && !wxUserInfo.nickname) || !wxUserInfo) {
 				// 未授权获取用户信息
-				debugger
 			}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_add', 'add')
 			let req = [{
@@ -1470,7 +1464,6 @@ export default {
 			}]
 			try {
 				let inviterInfo = store.state.app.inviterInfo
-				debugger
 				if (inviterInfo.invite_user_no) {
 					req[0].data[0].invite_user_no = inviterInfo.invite_user_no
 				}
@@ -1481,7 +1474,6 @@ export default {
 				debugger
 			}
 			let res = await _http.post(url, req)
-			debugger
 			store.commit('SET_REGIST_STATUS', false)
 			if (res.data && res.data.resultCode === "SUCCESS") {
 				console.log("信息登记成功")

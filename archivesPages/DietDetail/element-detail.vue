@@ -350,11 +350,16 @@ export default {
 							let cur = this.deepClone(ele);
 							let ratio = 1;
 							if (currentDiet.unit.indexOf('g') === -1) {
-								ratio = 1;
+								if (currentDiet.unit_amount === 100) {
+									ratio = 1;
+								}
+								// if (currentDiet.unit_weight_g >= 100) {
+								// 	ratio = currentDiet.unit_weight_g / 100;
+								// }
 							}
 							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
 							if (cur.key === 'energy') {
-								val =cur.value -  currentDiet['unit_energy'] * ratio * currentDiet.amount;
+								val = cur.value - currentDiet['unit_energy'] * ratio * currentDiet.amount;
 							}
 							let num = (val * 100) / Number(cur.EAR);
 							if (currentDiet.meal_no) {
@@ -368,8 +373,14 @@ export default {
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
 							let ratio = 1;
-							if (currentDiet.unit === 'g' && currentDiet.unit_amount === 100) {
+							if (currentDiet.unit.indexOf('g')!==-1) {
 								ratio = 1;
+								if (currentDiet.unit_amount === 100) {
+									ratio = 1;
+								}
+								// if (currentDiet.unit_weight_g >= 100) {
+								// 	ratio = currentDiet.unit_weight_g / 100;
+								// }
 							}
 							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
 							if (cur.key === 'energy') {
