@@ -2,7 +2,7 @@
 	<view class="drug-plan">
 		<view class="total-title"><view class="child-service-title"></view></view>
 		<view class="main-table" @click="toPages('update')">
-			<view class="table-item" v-for="item in fields" :key="item.column" :class="{ 'wrap-row': ['take_times_each_week', 'remark'].includes(item.column) }">
+			<view class="table-item" v-for="item in fields" :key="item.column" :class="{ 'wrap-row': ['take_times_each_week', 'remark'].includes(item.column) && item.value }">
 				<view class="label">
 					<text class="text">{{ item.label }}</text>
 				</view>
@@ -48,7 +48,7 @@
 			</view>
 			<view class="child-service-item">
 				<view class="child-service-title">
-					<text class="title-text">{{ planDetail.play_srv || '' }}记录</text>
+					<text class="title-text">{{ planDetail.play_srv && planDetail.play_srv.indexOf('药') ? '用药' : planDetail.play_srv || '' }}记录</text>
 					<view class="center-action">
 						<text class="cuIcon-back operate" @click="changeDate('-')"></text>
 						<text @click="toPages('open-calendar')">
@@ -492,10 +492,7 @@ export default {
 												success(res) {
 													if (res.confirm) {
 														// 跳转到药品添加页面
-														let fieldsCond = [
-															{ column: 'medicine_barcode', value: res.result }, 
-															{ column: 'audit_status', value: '待审核', display: false },
-														];
+														let fieldsCond = [{ column: 'medicine_barcode', value: res.result }, { column: 'audit_status', value: '待审核', display: false }];
 														uni.navigateTo({
 															url: '/publicPages/newForm/newForm?serviceName=srvhealth_medicine_info_add&type=add&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
 														});
@@ -663,72 +660,58 @@ export default {
 			}
 			this.colsV2Data = colVs;
 			if (!colVs) {
-				// this.getPlanDetail(this.planNo);
 				return;
 			}
 			if (Array.isArray(colVs.child_service)) {
 				let childServiceData = [];
 				for (let item of colVs.child_service) {
-					const url = this.getServiceUrl(this.appName, item.service_name, 'select');
-					let req = {
-						serviceName: item.service_name,
-						colNames: ['*'],
-						condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }]
-					};
-					let res = await this.$http.post(url, req);
-					if (res.data.data) {
-						if (item.service_view_name.indexOf(this.planDetail.play_srv) !== -1) {
+					if (
+						(item.service_view_name.indexOf(this.planDetail.play_srv) !== -1 || this.planDetail.play_srv.indexOf('药') !== -1) &&
+						item.service_name === 'srvhealth_drug_schedule_detail_list_select'
+					) {
+						const url = this.getServiceUrl(this.appName, item.service_name, 'select');
+						let req = {
+							serviceName: item.service_name,
+							colNames: ['*'],
+							condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }]
+						};
+						let res = await this.$http.post(url, req);
+						if (res.data.data) {
 							childServiceData.push({
 								colVs: item,
 								data: res.data.data
 							});
+							this.childServiceData = childServiceData;
 							this.drugList = res.data.data;
 						}
 					}
 				}
-				this.childServiceData = childServiceData;
 			}
-			switch (this.type) {
-				case 'add':
-					if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs._fieldInfo && Array.isArray(colVs._fieldInfo)) {
-						let arr = [];
-						this.defaultCondition.forEach(cond => {
-							colVs._fieldInfo.forEach(field => {
-								if (cond.colName === field.column) {
-									field['value'] = cond['value'];
-									field['disabled'] = true;
-								}
-							});
-						});
-					}
-					break;
-				case 'update':
-				case 'detail':
-					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
-					let hideColumns = [
-						'play_srv',
-						'create_manager_no',
-						'manager_user_no',
-						'owner_user_profile_url',
-						'owner_user_no',
-						'owner_person_no',
-						'ds_no',
-						'create_time',
-						'create_user',
-						'create_user_disp',
-						'modify_user',
-						'modify_user_disp',
-						'modify_time',
-						'person_no',
-						'end_date'
-					];
-					this.fields = fields.filter(item => {
-						return !hideColumns.includes(item.column);
-					});
-					break;
-				default:
-					break;
-			}
+			// if(Array.isArray(this.childServiceData)){
+
+			// }
+			let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
+			let hideColumns = [
+				'play_srv',
+				'create_manager_no',
+				'manager_user_no',
+				'owner_user_profile_url',
+				'owner_user_no',
+				'owner_person_no',
+				'ds_no',
+				'create_time',
+				'create_user',
+				'create_user_disp',
+				'modify_user',
+				'modify_user_disp',
+				'modify_time',
+				'person_no',
+				'end_date',
+				'sdr_no'
+			];
+			this.fields = fields.filter(item => {
+				return !hideColumns.includes(item.column);
+			});
 			this.info.currentDate = this.nowDate;
 			this.getDrugRecord(this.planNo, this.nowDate);
 		},
@@ -788,9 +771,7 @@ export default {
 						}
 					];
 				}
-				return;
-			}
-			if (this.planDetail.play_srv === '测体重') {
+			} else if (this.planDetail.play_srv === '测体重') {
 				url = this.getServiceUrl('health', 'srvhealth_body_fat_measurement_record_select', 'select');
 				req.serviceName = 'srvhealth_body_fat_measurement_record_select';
 				req.condition = [{ colName: 'ps_no', ruleType: 'eq', value: no }];
@@ -813,9 +794,7 @@ export default {
 						}
 					];
 				}
-				return;
-			}
-			if (this.planDetail.play_srv === '测血糖') {
+			} else if (this.planDetail.play_srv === '测血糖') {
 				url = this.getServiceUrl('health', 'srvhealth_blood_glucose_measurement_record_select', 'select');
 				req.serviceName = 'srvhealth_blood_glucose_measurement_record_select';
 				req.condition = [{ colName: 'ps_no', ruleType: 'eq', value: no }];
@@ -838,9 +817,7 @@ export default {
 						}
 					];
 				}
-				return;
-			}
-			if (['检查', '就医', '治疗'].includes(this.planDetail.play_srv)) {
+			} else if (['检查', '就医', '治疗'].includes(this.planDetail.play_srv)) {
 				url = this.getServiceUrl('health', 'srvhealth_examination_report_select', 'select');
 				req.serviceName = 'srvhealth_examination_report_select';
 				req.condition = [{ colName: 'ps_no', ruleType: 'eq', value: no }];
@@ -863,9 +840,7 @@ export default {
 						}
 					];
 				}
-				return;
-			}
-			if (this.planDetail.play_srv === '饮食') {
+			} else if (this.planDetail.play_srv === '饮食') {
 				url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
 				req.serviceName = 'srvhealth_diet_record_select';
 				req.condition = [{ colName: 'ps_no', ruleType: 'eq', value: no }];
@@ -888,114 +863,114 @@ export default {
 						}
 					];
 				}
-				return;
-			}
-			let res = await this.$http.post(url, req);
-			setTimeout(() => {
-				this.showCalender = true;
-			}, 2000);
-			if (Array.isArray(res.data.data)) {
-				if (res.data.data.length == 0) {
-					this.drugRecord = [];
-					return;
-				}
-				let dateArr = [];
-				let DrugRecordDetailList = await this.getDrugRecordDetail();
-				if (!DrugRecordDetailList) {
-					return;
-				}
-				res.data.data.forEach(item => {
-					if (item.take_date && !dateArr.includes(item.take_date)) {
-						dateArr.push(item.take_date);
+			} else {
+				let res = await this.$http.post(url, req);
+				setTimeout(() => {
+					this.showCalender = true;
+				}, 2000);
+				if (Array.isArray(res.data.data)) {
+					if (res.data.data.length == 0) {
+						this.drugRecord = [];
+						return;
 					}
-				});
-				let recordList = dateArr.map(date => {
-					let record = {
-						date: date,
-						data: []
-					};
+					let dateArr = [];
+					let DrugRecordDetailList = await this.getDrugRecordDetail();
+					if (!DrugRecordDetailList) {
+						return;
+					}
 					res.data.data.forEach(item => {
-						item.detail = [];
-						if (Array.isArray(DrugRecordDetailList) && DrugRecordDetailList.length > 0) {
-							DrugRecordDetailList.forEach(detail => {
-								if (detail.dsr_no === item.dsr_no) {
-									item.detail.push(detail);
-									if (item.take_date === this.nowDate) {
-										let hasExist = this.todayRecord.find(record => record.take_time === item.take_time);
-										if (!hasExist) {
-											this.todayRecord.push(item);
-										}
-									}
-								}
-							});
-						}
-						let drugList = this.deepClone(this.drugList);
-						item.drugList = drugList.map(d => {
-							d.hasTook = false;
-							if (Array.isArray(item.detail) && item.detail.length > 0) {
-								item.detail.forEach(drug => {
-									if (d.s_code === drug.s_code) {
-										d.hasTook = true; //已服用
-									}
-								});
-							}
-							return d;
-						});
-						if (this.planDetail.play_srv === '运动' && date === item.take_date) {
-							if (Array.isArray(DrugRecordDetailList) && DrugRecordDetailList.length > 0) {
-								DrugRecordDetailList.forEach(detail => {
-									detail.date = detail.hdate;
-									detail.take_date = detail.hdate;
-									detail.hasTook = true; //已服用
-									detail.take_time = detail.htime;
-									record.data.push(detail);
-								});
-							}
-						} else {
-							if (date === item.take_date) {
-								record.data.push(item);
-							}
+						if (item.take_date && !dateArr.includes(item.take_date)) {
+							dateArr.push(item.take_date);
 						}
 					});
-					return record;
-				});
-				if (Array.isArray(recordList) && recordList.length > 0) {
-					this.info.selected = recordList.reduce((pre, cur) => {
-						console.log(this.planDetail);
-						let info = {
-							date: cur.date,
-							info: '',
-							status: 'primary'
+					let recordList = dateArr.map(date => {
+						let record = {
+							date: date,
+							data: []
 						};
-						if (Array.isArray(cur.data) && cur.data.length > 0) {
-							cur.data.forEach(detail => {
-								if (Array.isArray(detail.drugList)) {
-									if (detail.drugList.length === this.drugList.length) {
-										info.status = 'success';
-										info.info = '正常';
-									} else if (detail.drugList.length > 0 && detail.drugList.length < this.drugList.length) {
-										info.status = 'warning';
-										info.info = '缺少';
-									} else if (detail.drugList.length == 0) {
-										info.status = 'error';
-										info.info = '未进行';
+						res.data.data.forEach(item => {
+							item.detail = [];
+							if (Array.isArray(DrugRecordDetailList) && DrugRecordDetailList.length > 0) {
+								DrugRecordDetailList.forEach(detail => {
+									if (detail.dsr_no === item.dsr_no) {
+										item.detail.push(detail);
+										if (item.take_date === this.nowDate) {
+											let hasExist = this.todayRecord.find(record => record.take_time === item.take_time);
+											if (!hasExist) {
+												this.todayRecord.push(item);
+											}
+										}
 									}
+								});
+							}
+							let drugList = this.deepClone(this.drugList);
+							item.drugList = drugList.map(d => {
+								d.hasTook = false;
+								if (Array.isArray(item.detail) && item.detail.length > 0) {
+									item.detail.forEach(drug => {
+										if (d.s_code === drug.s_code) {
+											d.hasTook = true; //已服用
+										}
+									});
 								}
+								return d;
 							});
-						}
-						pre.push(info);
-						return pre;
-					}, []);
+							if (this.planDetail.play_srv === '运动' && date === item.take_date) {
+								if (Array.isArray(DrugRecordDetailList) && DrugRecordDetailList.length > 0) {
+									DrugRecordDetailList.forEach(detail => {
+										detail.date = detail.hdate;
+										detail.take_date = detail.hdate;
+										detail.hasTook = true; //已服用
+										detail.take_time = detail.htime;
+										record.data.push(detail);
+									});
+								}
+							} else {
+								if (date === item.take_date) {
+									record.data.push(item);
+								}
+							}
+						});
+						return record;
+					});
+					if (Array.isArray(recordList) && recordList.length > 0) {
+						this.info.selected = recordList.reduce((pre, cur) => {
+							console.log(this.planDetail);
+							let info = {
+								date: cur.date,
+								info: '',
+								status: 'primary'
+							};
+							if (Array.isArray(cur.data) && cur.data.length > 0) {
+								cur.data.forEach(detail => {
+									if (Array.isArray(detail.drugList)) {
+										if (detail.drugList.length === this.drugList.length) {
+											info.status = 'success';
+											info.info = '正常';
+										} else if (detail.drugList.length > 0 && detail.drugList.length < this.drugList.length) {
+											info.status = 'warning';
+											info.info = '缺少';
+										} else if (detail.drugList.length == 0) {
+											info.status = 'error';
+											info.info = '未进行';
+										}
+									}
+								});
+							}
+							pre.push(info);
+							return pre;
+						}, []);
+					}
+					this.drugRecord = recordList.filter(item => {
+						return item.date.indexOf(date) !== -1;
+					});
+					if (this.drugRecord.length === 0) {
+						this.noRecord = true;
+					} else {
+						this.noRecord = false;
+					}
+					return recordList;
 				}
-				this.drugRecord = recordList.filter(item => {
-					return item.date.indexOf(date) !== -1;
-				});
-				if (this.drugRecord.length === 0) {
-					this.noRecord = true;
-				} else {
-					this.noRecord = false;
-				}
-				return recordList;
 			}
 		},
 		buildTodayCase() {
@@ -1088,9 +1063,9 @@ export default {
 		}
 	},
 	onShow() {
-		if (this.planNo) {
-			this.getFieldsV2(this.serviceName);
-		}
+		// if (this.planNo) {
+		// 	this.getFieldsV2(this.serviceName);
+		// }
 	},
 	created() {
 		let self = this;
@@ -1108,7 +1083,7 @@ export default {
 			this.planNo = options.ds_no;
 			this.getFieldsV2(this.serviceName);
 		}
-		if (options.play_srv == '用药' || options.play_srv == '运动') {
+		if (options.play_srv == '用药' || options.play_srv == '大夫开药' || options.play_srv == '运动') {
 			this.childServiceData = [
 				{
 					colVs: {
@@ -1182,12 +1157,14 @@ export default {
 			// border: 1px solid #f1f1f1;
 			margin-left: -1px;
 			margin-top: -1px;
+			align-items: center;
 			&.wrap-row {
 				// flex-direction: column;
 				grid-column-end: 3;
 				grid-column-start: 1;
 				.label {
-					flex: 0.5;
+					// flex: 0.5;
+					margin-right: 20rpx;
 				}
 				.value {
 					margin: 10rpx 0;
@@ -1204,7 +1181,8 @@ export default {
 				border-bottom-right-radius: 10rpx;
 			}
 			.label {
-				flex: 0.8;
+				// flex: 0.8;
+				margin-right: 20rpx;
 				display: flex;
 				align-items: center;
 				.text {

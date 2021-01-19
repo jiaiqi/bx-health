@@ -353,18 +353,19 @@ export default {
 								if (currentDiet.unit_amount === 100) {
 									ratio = 1;
 								}
-								// if (currentDiet.unit_weight_g >= 100) {
-								// 	ratio = currentDiet.unit_weight_g / 100;
-								// }
+								if (currentDiet.unit_amount === 100 && currentDiet.unit_weight_g && currentDiet.unit_weight_g > 1) {
+									ratio = currentDiet.unit_weight_g / currentDiet.unit_amount;
+								}
+							} else {
+								if (currentDiet.unit_weight_g > 1) {
+									ratio = currentDiet.unit_weight_g / 100;
+								}
 							}
 							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
 							if (cur.key === 'energy') {
-								val = cur.value - currentDiet['unit_energy'] * ratio * currentDiet.amount;
+								val = cur.value - currentDiet['unit_energy'];
 							}
 							let num = (val * 100) / Number(cur.EAR);
-							if (currentDiet.meal_no) {
-								num = (val * 100) / Number(cur.EAR);
-							}
 							num = parseFloat(num.toFixed(1));
 							return num;
 						});
@@ -373,23 +374,14 @@ export default {
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
 							let ratio = 1;
-							if (currentDiet.unit.indexOf('g')!==-1) {
-								ratio = 1;
-								if (currentDiet.unit_amount === 100) {
-									ratio = 1;
-								}
-								// if (currentDiet.unit_weight_g >= 100) {
-								// 	ratio = currentDiet.unit_weight_g / 100;
-								// }
+							if (currentDiet.unit.indexOf('g') !== -1 && currentDiet.unit_weight_g > 1) {
+								ratio = currentDiet.unit_weight_g / 100;
 							}
 							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
 							if (cur.key === 'energy') {
-								val = currentDiet['unit_energy'] * ratio * currentDiet.amount;
+								val = currentDiet['unit_energy'];
 							}
 							let num = (val * 100) / Number(cur.EAR);
-							if (currentDiet.meal_no) {
-								num = (val * 100) / Number(cur.EAR);
-							}
 							num = parseFloat(num.toFixed(1));
 							return num;
 						});

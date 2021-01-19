@@ -73,6 +73,7 @@
 				<view v-else @click="openModal(fieldData.type)">
 					<text class="place-holder" v-if="!fieldData.value">请选择</text>
 					<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">{{ fieldData.value.toString() }}</view>
+					<view class="value hidden" v-else-if="fieldData.value">{{ fieldData.value }}</view>
 					<text class="value hidden" v-else>{{ fkFieldLabel ? fkFieldLabel : '' }}</text>
 				</view>
 			</view>
@@ -87,7 +88,10 @@
 			</view>
 
 			<view class="form-item-content_value textarea" v-else-if="fieldData.type === 'textarea'">
-				<textarea class="textarea" style="width: 100%;" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
+				<textarea class="textarea" style="width: 100%;min-height: 50px;" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
+			</view>
+			<view class="form-item-content_value location" v-else-if="fieldData.type === 'addr'||fieldData.type === 'location'">
+				{{fieldData.value}}
 			</view>
 			<view class="voice" v-else-if="fieldData.type === 'voice'">
 				<button class="bg-white cu-btn" @click="showModal('voice')">{{ fieldData.value ? '点击查看录音' : '点击添加录音' }}</button>
@@ -140,7 +144,7 @@
 				:limit="fieldData.fileNum"
 			></robby-image-upload>
 		</view>
-		<view class="icon-area"><text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.fieldType === 'location'"></text></view>
+		<view class="icon-area"><text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.type === 'location' || fieldData.type === 'addr'"></text></view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
 		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'RichEditor' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop=""><jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor" /></view>
@@ -187,7 +191,7 @@
 				<view class="voice-modal">
 					<view class="voice-list">
 						<audio :src="item" controls v-for="item in voiceUrl" :key="item"></audio>
-						<view class="voice-item cu-btn" v-for="item in voiceUrls" @click="playVoice(item.url)">{{ item.time }}</view>
+						<!-- <view class="voice-item cu-btn" v-for="item in voiceUrls" @click="playVoice(item.url)">{{ item.time }}</view> -->
 					</view>
 					<view class="loading">
 						<view class="spinner">
@@ -454,7 +458,34 @@ export default {
 			});
 		},
 		getLocation() {
-			this.$emit('getLocation');
+			// this.$emit('getLocation');
+			let self = this;
+			uni.chooseLocation({
+				success: function(res) {
+					console.log('位置名称：' + res.name);
+					console.log('详细地址：' + res.address);
+					console.log('纬度：' + res.latitude);
+					console.log('经度：' + res.longitude);
+					self.$emit('chooseLocation', res);
+					self.fieldData.value = res.address;
+					self.onInput();
+					self.getDefVal();
+				}
+			});
+			// uni.getLocation({
+			// 	type: 'gcj02', //返回可以用于uni.openLocation的经纬度
+			// 	success: function(res) {
+			// 		const latitude = res.latitude;
+			// 		const longitude = res.longitude;
+			// 		uni.openLocation({
+			// 			latitude: latitude,
+			// 			longitude: longitude,
+			// 			success: function(e) {
+			// 				console.log('success',e);
+			// 			}
+			// 		});
+			// 	}
+			// });
 		},
 		showModal(name) {
 			this.modalName = name;
@@ -802,32 +833,12 @@ export default {
 			if (Array.isArray(res) && res.length === 2 && typeof res[1].data === 'string') {
 				res = JSON.parse(res[1].data);
 				this.voiceUrl.push(self.$api.getFilePath + res.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket'));
-				this.voiceurls.push({
+				this.voiceUrls.push({
 					url: self.$api.getFilePath + res.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket'),
 					time: res.create_time
 				});
 				self.fieldData.value = res.file_no;
 			}
-			// uni.uploadFile({
-			// 	filePath: tempFilePath,
-			// 	url: self.$api.upload,
-			// 	header: {
-			// 		bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
-			// 	},
-			// 	formData: self.uploadFormData,
-			// 	name: 'file',
-			// 	success: res => {
-			// 		// 上传完成后处理
-			// 		if (typeof res.data === 'string') {
-			// 			res.data = JSON.parse(res.data);
-			// 		}
-			// 		self.fieldData.value = res.data.file_no;
-			// 		self.getImageUrl(res.data.file_no).then(data => {
-			// 			debugger;
-			// 		});
-			// 		uni.hideLoading();
-			// 	}
-			// });
 		},
 		getValid() {
 			if (this.fieldData.isRequire && this.fieldData.value) {
@@ -896,6 +907,15 @@ export default {
 		});
 		if (self.fieldData && self.fieldData.type === 'Selector') {
 			let cond = null;
+			if (this.fieldData.value && this.fieldData.option_list_v2.refed_col) {
+				cond = [
+					{
+						colName: this.fieldData.option_list_v2.refed_col,
+						value: this.fieldData.value,
+						ruleType: 'like'
+					}
+				];
+			}
 			self.getSelectorData(cond).then(_ => {
 				if (self.fieldData.value) {
 					self.fkFieldLabel = self.selectorData.find(item => item.value === self.fieldData.value)
@@ -1062,6 +1082,7 @@ export default {
 		padding-left: 20rpx;
 		color: #000;
 		font-size: var(--global-text-font-size);
+		overflow: hidden;
 		&.label-top {
 			padding: 0 20rpx 20rpx;
 			.form-item-content_value.checkbox-group {
@@ -1079,6 +1100,9 @@ export default {
 			&.image {
 				width: 200rpx;
 				height: 200rpx;
+			}
+			&.text {
+				overflow: scroll;
 			}
 		}
 		.form-item-content_value {

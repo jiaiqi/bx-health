@@ -250,6 +250,8 @@ export default {
 						name: '拍照',
 						type: 'car_no'
 					}]
+				} else if (fieldInfo.type === 'addr') {
+					fieldInfo.type = 'location'
 				} else {
 					fieldInfo.type = item.col_type
 				}
@@ -1164,6 +1166,7 @@ export default {
 		 */
 		Vue.prototype.onButtonToUrl = function(e) {
 			console.log("onButtonToUrl", e)
+			debugger
 			let btn, row, condition, defaultVal
 			if (e && Vue.prototype.iObject(e)) {
 				btn = e.button
@@ -1172,7 +1175,6 @@ export default {
 						case "edit":
 							if (e.hasOwnProperty("row")) {
 								row = e.row
-
 								let params = {
 									"type": "update",
 									"condition": [{
@@ -1184,8 +1186,17 @@ export default {
 									"defaultVal": row
 								}
 								console.log("点击了【有效】的公共编辑按钮", row)
+								let fieldsCond = [{
+									column: 'id',
+									value: row.id,
+									display: false
+								}]
+								let url =
+									`/publicPages/newForm/newForm?type=update&serviceName=${btn.service_name}&fieldsCond=${encodeURIComponent(
+									JSON.stringify(fieldsCond)
+								)}`;
 								uni.navigateTo({
-									url: "/pages/public/formPage/formPage?params=" + JSON.stringify(params)
+									url: url
 								})
 							} else {
 								console.log("点击了【无效】的公共编辑按钮")
@@ -1219,6 +1230,18 @@ export default {
 							break;
 						case "detail":
 							return new Promise((resolve, reject) => {
+								let fieldsCond = [{
+									column: 'id',
+									value: e.row.id,
+									display: false
+								}]
+								let url =
+									`/publicPages/newForm/newForm?type=detail&serviceName=${btn.service_name}&fieldsCond=${encodeURIComponent(
+									JSON.stringify(fieldsCond)
+								)}`;
+								uni.navigateTo({
+									url: url
+								})
 								resolve(e)
 							})
 							break;
@@ -1243,11 +1266,20 @@ export default {
 									"serviceName": btn.service_name,
 									"defaultVal": row
 								}
-								console.log("点击了【有效】的公共编辑按钮", row)
-							} else {
-								console.log("点击了【无效】的公共编辑按钮")
 							}
 							return new Promise((resolve, reject) => {
+								let fieldsCond = [{
+									column: 'id',
+									value: row.id,
+									display: false
+								}]
+								let url =
+									`/publicPages/newForm/newForm?type=detail&serviceName=${btn.service_name}&fieldsCond=${encodeURIComponent(
+									JSON.stringify(fieldsCond)
+								)}`;
+								uni.navigateTo({
+									url: url
+								})
 								resolve(e)
 							})
 							//代码块
@@ -1328,7 +1360,6 @@ export default {
 						uni.setStorageSync('current_user_info', res.data.data[0]);
 						uni.setStorageSync('current_user', res.data.data[0].name);
 						current_user_info = res.data.data[0]
-
 						store.commit("SET_USERINFO", current_user_info)
 						store.commit("SET_USERLIST", res.data.data)
 						Vue.prototype.checkSubscribeStatus()
@@ -1449,113 +1480,133 @@ export default {
 			}
 			if ((wxUserInfo && !wxUserInfo.nickname) || !wxUserInfo) {
 				// 未授权获取用户信息
+				store.commit('SET_AUTH_USERINFO', false)
 			}
-			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_add', 'add')
-			let req = [{
-				"serviceName": "srvhealth_person_info_add",
-				"data": [{
-					"userno": uni.getStorageSync('login_user_info').user_no,
-					"name": wxUserInfo ? wxUserInfo.nickname : "",
-					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
-					"sex": wxUserInfo ? (wxUserInfo.sex === 0 ? "男" : wxUserInfo.sex === 1 ? "女" : "") : "",
-					"is_main": "是",
-					"font_size": "中"
-				}]
-			}]
-			try {
-				let inviterInfo = store.state.app.inviterInfo
-				if (inviterInfo.invite_user_no) {
-					req[0].data[0].invite_user_no = inviterInfo.invite_user_no
-				}
-				if (inviterInfo.add_url) {
-					req[0].data[0].add_url = inviterInfo.add_url
-				}
-			} catch (e) {
-				debugger
-			}
-			let res = await _http.post(url, req)
-			store.commit('SET_REGIST_STATUS', false)
-			if (res.data && res.data.resultCode === "SUCCESS") {
-				console.log("信息登记成功")
-			} else {
-				uni.showModal({
-					title: '提示',
-					content: JSON.stringify(res.data)
-				})
-				if (res.data.resultCode === '0011') {
-					// 未登录
-					// #ifdef MP-WEIXIN
-					const result = await wx.login();
-					if (result && result.code) {
-						let res = await Vue.prototype.wxLogin({
-							code: result.code
-						});
-					}
-					// #endif
-					return
-				}
-				return
-				uni.showModal({
-					title: '提示',
-					content: '当前账号未登记个人信息，是否跳转到信息登记页面',
-					success(res) {
-						if (res.confirm) {
-							let fieldsCond = [{
-									column: 'profile_url',
-									display: false
-								},
-								{
-									column: 'userno',
+			debugger
+			// let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_add', 'add')
+			// let req = [{
+			// 	"serviceName": "srvhealth_person_info_add",
+			// 	"data": [{
+			// 		"userno": uni.getStorageSync('login_user_info').user_no,
+			// 		"name": wxUserInfo ? wxUserInfo.nickname : "",
+			// 		"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
+			// 		"sex": wxUserInfo ? (wxUserInfo.sex === 0 ? "男" : wxUserInfo.sex === 1 ? "女" : "") : "",
+			// 		"is_main": "是",
+			// 		"font_size": "中"
+			// 	}]
+			// }]
+			// try {
+			// 	let inviterInfo = store.state.app.inviterInfo
+			// 	if (inviterInfo.invite_user_no) {
+			// 		req[0].data[0].invite_user_no = inviterInfo.invite_user_no
+			// 	}
+			// 	if (inviterInfo.add_url) {
+			// 		req[0].data[0].add_url = inviterInfo.add_url
+			// 	}
+			// } catch (e) {
+			// 	debugger
+			// }
+			// let res = await _http.post(url, req)
+			// store.commit('SET_REGIST_STATUS', false)
+			// if (res.data && res.data.resultCode === "SUCCESS") {
+			// 	console.log("信息登记成功")
+			// } else {
+			// uni.showModal({
+			// 	title: '提示',
+			// 	content: JSON.stringify(res.data)
+			// })
+			// if (res.data.resultCode === '0011') {
+			// 	// 未登录
+			// 	// #ifdef MP-WEIXIN
+			// 	const result = await wx.login();
+			// 	if (result && result.code) {
+			// 		let res = await Vue.prototype.wxLogin({
+			// 			code: result.code
+			// 		});
+			// 	}
+			// 	// #endif
+			// 	return
+			// }
+			// return
+			uni.showModal({
+				title: '提示',
+				content: '当前账号未登记个人信息，是否跳转到信息登记页面',
+				success(res) {
+					if (res.confirm) {
+						let fieldsCond = [{
+								column: 'profile_url',
+								display: false,
+								value: wxUserInfo.headimgurl
+							},
+							{
+								column: 'manager_type',
+								display: false,
+							},
+							{
+								column: 'font_size',
+								display: false,
+								value: "中"
+							},
+							{
+								column: 'sex',
+								display: wxUserInfo.sex ? false : true,
+								value: wxUserInfo.sex === 0 ? "男" : "女"
+							},
+							{
+								column: 'userno',
+								display: false,
+								value: uni.getStorageSync('login_user_info').user_no,
+								condition: [{
+									colName: 'user_no',
+									ruleType: 'eq',
+									value: uni.getStorageSync('login_user_info').user_no
+								}]
+							}
+						];
+						try {
+							if (store.state.app.inviterInfo.invite_user_no) {
+								fieldsCond.push({
+									column: 'invite_user_no',
 									display: false,
-									value: uni.getStorageSync('login_user_info').user_no,
-									condition: [{
-										colName: 'user_no',
-										ruleType: 'eq',
-										value: uni.getStorageSync('login_user_info').user_no
-									}]
-								}
-							];
-							try {
-								if (store.state.app.inviterInfo.invite_user_no) {
-									fieldsCond.push({
-										column: 'invite_user_no',
-										display: false,
-										value: store.state.app.inviterInfo.invite_user_no
-									})
-								}
-								if (store.state.app.inviterInfo.add_url) {
-									fieldsCond.push({
-										column: 'add_url',
-										display: false,
-										value: store.state.app.inviterInfo.add_url
-									})
-								}
-							} catch (e) {
-								//TODO handle the exception
+									value: store.state.app.inviterInfo.invite_user_no
+								})
 							}
-							let userInfo = uni.getStorageSync('wxUserInfo');
-							if (userInfo && userInfo.headimgurl) {
-								fieldsCond = fieldsCond.map(item => {
-									if (item.column === 'profile_url') {
-										item.value = userInfo.headimgurl;
-									}
-									return item;
-								});
+							if (store.state.app.inviterInfo.add_url) {
+								fieldsCond.push({
+									column: 'add_url',
+									display: false,
+									value: store.state.app.inviterInfo.add_url
+								})
 							}
-							uni.setStorageSync('activeApp', 'health');
-							uni.navigateTo({
-								url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' +
-									decodeURIComponent(
-										JSON.stringify(fieldsCond))
-							});
-						} else {
-							uni.switchTab({
-								url: '/pages/pedia/pedia'
-							})
+						} catch (e) {
+							//TODO handle the exception
 						}
+						let userInfo = uni.getStorageSync('wxUserInfo');
+						if (userInfo && userInfo.headimgurl) {
+							fieldsCond = fieldsCond.map(item => {
+								if (item.column === 'profile_url') {
+									item.value = userInfo.headimgurl;
+								}
+								return item;
+							});
+						}
+						uni.setStorageSync('activeApp', 'health');
+						let url = '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_add&type=add&fieldsCond=' +
+							decodeURIComponent(JSON.stringify(fieldsCond))
+						uni.navigateTo({
+							url: url,
+							success() {
+								store.commit('SET_REGIST_STATUS', false)
+							}
+						});
+					} else {
+						uni.switchTab({
+							url: '/pages/pedia/pedia'
+						})
 					}
-				});
-			}
+				}
+			});
+			// }
 		}
 
 		Vue.prototype.getImagePath = (no) => {

@@ -225,6 +225,7 @@ export default {
 			let page = this.pageInfo;
 			this.pageInfo.pageNo = pullScroll.page;
 			console.log(pullScroll.page);
+			debugger
 			if (this.current_tit.type === 'shop') {
 				this.getShopList();
 			} else if (this.current_tit.type === 'myShop') {
@@ -310,13 +311,13 @@ export default {
 			this.current_tit = item;
 			this.sortIndex = i;
 			this.onRefresh();
+			
 			console.log('点击顶部切换===》', item);
 		},
 		/*跳转至商铺详情*/
 		toShopDetail(item) {
-			console.log('---------',item);
 			uni.navigateTo({
-				url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.row_no
+				url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.store_no
 			});
 		},
 		/* 获取商户列表**/
@@ -391,11 +392,11 @@ export default {
 						ruleType: 'eq',
 						value: uni.getStorageSync('login_user_info').user_no
 					},
-					{
-						colName: 'type',
-						ruleType: 'eq',
-						value: '饭馆'
-					}
+					// {
+					// 	colName: 'type',
+					// 	ruleType: 'eq',
+					// 	value: '饭馆'
+					// }
 				],
 				order: [],
 				page: self.pageInfo

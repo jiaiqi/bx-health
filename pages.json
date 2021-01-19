@@ -510,15 +510,14 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
+				},
+				{
+					"path": "chat/chat",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
 				}
-				// ,
-				// {
-				// 	"path": "chat/chat",
-				// 	"style": {
-				// 		"navigationBarTitleText": "",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// }
 			]
 		}
 	],

@@ -40,8 +40,15 @@
 
 <script>
 import bxList from '../components/bx-list/bx-list.vue';
+import { mapState } from 'vuex';
 export default {
 	components: { bxList },
+	computed: {
+		...mapState({
+			doctorInfo: state => state.user.userInfo,
+			patientInfo: state => state.user.patientInfo
+		})
+	},
 	data() {
 		return {
 			serviceName: '',
@@ -117,32 +124,6 @@ export default {
 		// #endif
 		if (option.hasOwnProperty('showAdd')) {
 			this.queryOption = option;
-		}
-		if (query.serviceName == 'srvzhxq_clgl_select') {
-			let users = null;
-			this.getUserInfo().then(u => {
-				console.log('u------', u);
-				users = u;
-				let cond = [
-					{
-						colName: 'lybm',
-						ruleType: 'eq',
-						value: u.lybm
-					},
-					{
-						colName: 'dybm',
-						ruleType: 'eq',
-						value: u.dybm
-					},
-					{
-						colName: 'fwbm',
-						ruleType: 'eq',
-						value: u.fwbm
-					}
-				];
-				this.condition = [...this.condition, ...cond];
-				console.log('users=====', this.condition);
-			});
 		}
 		if (query.viewTemp) {
 			// let viewTemp = this.getDecodeUrl(option.viewTemp);
@@ -244,7 +225,6 @@ export default {
 						value: '有效'
 					}
 				]
-				// order: [{ colName: 'seq', orderType: 'asc' }] ,
 			};
 			let ress = await this.$http.post(urls, reqs);
 			return ress.data.data[0];
@@ -268,54 +248,55 @@ export default {
 			} else {
 				this.publicButton.map(item => {
 					if (item.button_type === 'add') {
-						const params = {
-							type: 'add',
-							condition: [],
-							serviceName: item.service_name,
-							service_view_name: item.service_view_name
-						};
-						uni.navigateTo({
-							url: '../formPage/formPage?serviceName=' + item.service_name + '&type=add&cond=' + decodeURIComponent(JSON.stringify(this.condition))
-						});
-					} else if (item.button_type === 'customize') {
-						if (item.button_name === '住户录入') {
-							let queryParams = this.queryParams;
-							let condition = this.condition;
-							let user_no = '';
-							let params = {
-								type: 'add',
-								serviceName: item.service_name,
-								defaultVal: queryParams.defaultVal,
-								eventOrigin: item
-							};
-
-							params.cond = [
-								{
-									colName: 'fwbm',
-									ruleType: 'condition',
-									value: [
-										{
-											colName: 'dybm',
-											ruleType: 'eq',
-											value: 'dybm'
-										},
-										{
-											colName: 'lybm',
-											ruleType: 'eq',
-											value: 'lybm'
-										}
-									]
-								}
-							];
-							if (this.queryOption && this.queryOption.form === 'house') {
-								params.cond = [];
-							}
-							uni.navigateTo({
-								url: '/pages/public/formPage/formPage?params=' + JSON.stringify(params)
+						let fieldsCond = [];
+						if (Array.isArray(this.condition)) {
+							fieldsCond = this.condition.map(item => {
+								return {
+									column: item.colName,
+									value: item.value,
+									display: false
+								};
 							});
 						}
-
-						// url: '../formPage/formPage?serviceName=' + item.service_name + '&type=add&cond=' + decodeURIComponent(JSON.stringify(this.condition))
+						debugger;
+						if (item.service_name.indexOf('health_plan_schedule') !== -1) {
+							if (fieldsCond.find(item => item.column === 'sdr_no')) {
+								fieldsCond.push({
+									column: 'play_srv',
+									value: '大夫开药',
+									display: false
+								});
+							}
+							if (this.patientInfo && this.patientInfo.no) {
+								fieldsCond.push({
+									column: 'owner_person_no',
+									value: this.patientInfo.no,
+									display: false
+								});
+							}
+							if (this.doctorInfo && this.doctorInfo.no) {
+								fieldsCond.push({
+									column: 'create_manager_no',
+									value: this.doctorInfo.no,
+									display: false
+								});
+							}
+						} else if (item.service_name === 'srvhealth_drug_schedule_doctor_detail_list_add') {
+							let ds_no = this.condition.find(item => item.colName === 'ds_no');
+							if (ds_no && ds_no.value) {
+								let url = `/archivesPages/DrugSelect/DrugSelect?ds_no=${ds_no.value}&type=大夫开药&service_name=${item.service_name}`;
+								uni.navigateTo({
+									url: url
+								});
+							}
+							return;
+						}
+						let url = `/publicPages/newForm/newForm?type=add&serviceName=${item.service_name.replace('_select', '_add')}&fieldsCond=${encodeURIComponent(
+							JSON.stringify(fieldsCond)
+						)}`;
+						uni.navigateTo({
+							url: url
+						});
 					}
 				});
 			}
@@ -394,7 +375,6 @@ export default {
 							type: buttonInfo.servcie_type,
 							serviceName: buttonInfo.operate_service,
 							defaultVal: {}
-							// eventOrigin: buttonInfo
 						};
 						uni.navigateTo({
 							url:
@@ -415,7 +395,7 @@ export default {
 			if (this.pageType === 'proc') {
 				if (data.button && data.button.button_type === 'edit' && data.row.proc_instance_no) {
 					uni.navigateTo({
-						url: '/pages/public/proc/procDetail/procDetail?proc_instance_no=' + data.row.proc_instance_no
+						url: '/publicPages/procDetail/procDetail?proc_instance_no=' + data.row.proc_instance_no
 					});
 				}
 			} else {
@@ -490,87 +470,6 @@ export default {
 								defaultVal: res.row,
 								eventOrigin: res.button
 							};
-							//
-							if ((data.button.main_table = 'bxzhxq_member' && data.button.operate_service === 'srvzhxq_syrk_select')) {
-								params.cond = [
-									{
-										colName: 'fwbm',
-										ruleType: 'condition',
-										value: [
-											{
-												colName: 'dybm',
-												ruleType: 'eq',
-												value: 'dybm'
-											},
-											{
-												colName: 'lybm',
-												ruleType: 'eq',
-												value: 'lybm'
-											}
-										]
-									}
-								];
-							}
-							// uni.navigateTo({
-							// 	url: '/pages/public/formPage/formPage?params=' + JSON.stringify(params)
-							// });
-							if (data.button.button_name === '绑定房屋') {
-								if (data.row.person_no) {
-									let urls = this.getServiceUrl('zhxq', 'srvzhxq_syrk_select', 'select');
-									let reqs = {
-										serviceName: 'srvzhxq_syrk_select',
-										colNames: ['*'],
-										condition: [
-											{
-												colName: 'is_fuzeren',
-												ruleType: 'eq',
-												value: '是'
-											},
-											{
-												colName: 'openid',
-												ruleType: 'eq',
-												value: uni.getStorageSync('login_user_info').user_no
-											},
-											{
-												colName: 'status',
-												ruleType: 'eq',
-												value: '有效'
-											}
-										],
-										order: [{ colName: 'create_time', orderType: 'asc' }]
-									};
-									this.$http.post(urls, reqs).then(rData => {
-										if (rData.data.data.length > 0) {
-											uni.navigateTo({
-												url: `/pages/public/list/list?serviceName=srvzhxq_syrk_select&pageType=list&params=${JSON.stringify(
-													params
-												)}&viewTemp={"title":"_fwbm_disp","img":"zp","tip":"xm","footer":"gmsfhm"}&navigationBarTitle=房屋信息&showRowButton=true&cond=[{"colName":"person_no","ruleType":"like","value":"${
-													data.row.person_no
-												}"},{"colName":"proc_status","ruleType":"eq","value":"完成"},{ "colName": "status", "ruleType": "eq", "value": "有效" }]`
-											});
-										} else {
-											uni.showToast({
-												title: '非房屋负责人不可进行此操作',
-												duration: 1000,
-												icon: 'none'
-											});
-										}
-									});
-								} else {
-									uni.navigateTo({
-										url: `/pages/public/list/list?serviceName=srvzhxq_syrk_select&pageType=list&navigationBarTitle=房屋信息&params=${JSON.stringify(
-											params
-										)}&viewTemp={"title":"_fwbm_disp","img":"zp","tip":"xm","footer":"gmsfhm"}&showRowButton=true&cond=[{"colName":"openid","ruleType":"like","value":"${
-											data.row.openid
-										}"},{"colName":"proc_status","ruleType":"eq","value":"完成"},{ "colName": "status", "ruleType": "eq", "value": "有效" }]`
-									});
-								}
-							} else {
-								uni.navigateTo({
-									url:
-										'/pages/public/list/list?serviceName=srvzhxq_syrk_select&pageType=list&viewTemp={"title":"_fwbm_disp","tip":"fwyt","footer":"rylx"}&cond=[{"colName":"is_fuzeren","ruleType":"like","value":"是"},{"colName":"openid","ruleType":"like","value":"user_no"}]'
-								});
-							}
 						}
 					} else if (data.button.servcie_type === 'add') {
 						let params = {
@@ -579,26 +478,6 @@ export default {
 							defaultVal: res.row,
 							eventOrigin: res.button
 						};
-						if ((data.button.main_table = 'bxzhxq_member' && data.button.operate_service === 'srvzhxq_syrk_add')) {
-							params.cond = [
-								{
-									colName: 'fwbm',
-									ruleType: 'condition',
-									value: [
-										{
-											colName: 'dybm',
-											ruleType: 'eq',
-											value: 'dybm'
-										},
-										{
-											colName: 'lybm',
-											ruleType: 'eq',
-											value: 'lybm'
-										}
-									]
-								}
-							];
-						}
 						uni.navigateTo({
 							url: '/pages/public/formPage/formPage?params=' + JSON.stringify(params)
 						});

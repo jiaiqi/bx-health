@@ -12,12 +12,17 @@
 				{{ btn.button_name }}
 			</button>
 		</view>
+		<child-table :child-service="childService" v-if="childService.length > 0" @toChildServiceList="toChildServiceList"></child-table>
 	</view>
 </template>
 
 <script>
-	import {mapState} from 'vuex'
+import { mapState } from 'vuex';
+import ChildTable from './child-table.vue';
 export default {
+	components: {
+		ChildTable
+	},
 	data() {
 		return {
 			// globalTextFontSize: 14,
@@ -36,12 +41,104 @@ export default {
 		};
 	},
 	computed: {
+		childService() {
+			if (this.colsV2Data && Array.isArray(this.colsV2Data.child_service)) {
+				return this.colsV2Data.child_service;
+			} else {
+				return [];
+			}
+		},
 		...mapState({
-			globalTextFontSize:state=>state.app.globalTextFontSize,
-			globalLabelFontSize:state=>state.app.globalLabelFontSize
+			globalTextFontSize: state => state.app.globalTextFontSize,
+			globalLabelFontSize: state => state.app.globalLabelFontSize
 		})
 	},
 	methods: {
+		toChildServiceList(e) {
+			let data = this.deepClone(e);
+			let formData = this.params.defaultVal;
+			let condition = [{ colName: e.foreign_key.column_name, ruleType: 'eq', value: formData[e.foreign_key.referenced_column_name] }];
+			if (e.foreign_key && e.foreign_key.referenced_column_name && formData[e.foreign_key.referenced_column_name]) {
+				if (e.foreign_key.more_config && e.foreign_key.more_config.targetType) {
+					let targetType = e.foreign_key.more_config.targetType;
+					if (targetType === 'list') {
+						uni.navigateTo({
+							url: '/publicPages/list/list?pageType=list&serviceName=' + e.service_name + '&cond=' + JSON.stringify(condition)
+						});
+					} else if (targetType === 'detail') {
+						if (e.childData && e.childData.data && e.childData.data.length > 0) {
+							let fieldsCond = [];
+							if (e.foreign_key && e.foreign_key.referenced_column_name && e.foreign_key.column_name) {
+								fieldsCond.push({
+									column: id,
+									value: e.childData.data[0].id,
+									display: false
+								});
+							}
+							let url = `/publicPages/newForm/newForm?type=update&serviceName=${e.service_name}&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`;
+							uni.navigateTo({
+								url: url
+							});
+						} else {
+							uni.showModal({
+								title: '提示',
+								content: '暂无数据，是否添加数据',
+								success(res) {
+									if (res.confirm) {
+										// referenced_column_name //被引用的字段
+										// column //子表字段
+										let fieldsCond = [];
+										if (e.foreign_key && e.foreign_key.referenced_column_name && e.foreign_key.column_name) {
+											fieldsCond.push({
+												column: e.foreign_key.referenced_column_name,
+												value: formData[e.foreign_key.column_name]
+											});
+										}
+										let url = `/publicPages/newForm/newForm?type=add&serviceName=${e.service_name.replace('_select', '_add')}&fieldsCond=${encodeURIComponent(
+											JSON.stringify(fieldsCond)
+										)}`;
+										uni.navigateTo({
+											url: url
+										});
+									}
+								}
+							});
+						}
+					}
+				} else {
+					let viewTemp = {};
+					if (e.service_name === 'srvhealth_plan_schedule_select') {
+						// 方案计划
+						viewTemp = {
+							title: 'ds_name',
+							tip: 'play_srv',
+							footer: 'start_date'
+						};
+					}
+					if (e.service_name === 'srvhealth_drug_schedule_doctor_detail_list_select') {
+						// 方案计划
+						viewTemp = {
+							title: 'general_name',
+							tip: 'take_times',
+							footer: 'remind_time'
+						};
+					}
+					uni.navigateTo({
+						url:
+							'/publicPages/list/list?pageType=list&serviceName=' +
+							e.service_name +
+							'&cond=' +
+							JSON.stringify(condition) +
+							'&viewTemp=' +
+							encodeURIComponent(JSON.stringify(viewTemp))
+					});
+				}
+			} else {
+				uni.navigateTo({
+					url: '/publicPages/list/list?pageType=list&serviceName=' + e.service_name + '&cond=' + JSON.stringify(condition)
+				});
+			}
+		},
 		toPages(type) {
 			this.srvType = type;
 			if (this.params.to && this.params.idCol && this.params.submitData && this.params.submitData[this.params.idCol]) {
@@ -56,14 +153,14 @@ export default {
 		},
 		async onButton(e) {
 			let self = this;
-			if(!this.isOnButton){
-				this.isOnButton=true
-			}else{
+			if (!this.isOnButton) {
+				this.isOnButton = true;
+			} else {
 				uni.showToast({
-					title:'正在处理中，请勿重复操作',
-					icon:'none'
-				})
-				return
+					title: '正在处理中，请勿重复操作',
+					icon: 'none'
+				});
+				return;
 			}
 			let req = this.$refs.bxForm.getFieldModel();
 			for (let key in req) {
@@ -78,7 +175,7 @@ export default {
 				case 'edit':
 					if (e.page_type === '详情' && this.use_type === 'detail') {
 						this.toPages('update');
-						this.isOnButton = false
+						this.isOnButton = false;
 					} else {
 						if (req) {
 							req = [{ serviceName: e.service_name, data: [req], condition: this.condition }];
@@ -115,7 +212,7 @@ export default {
 									}
 								});
 							}
-							this.isOnButton = false
+							this.isOnButton = false;
 						}
 					}
 					break;
@@ -153,12 +250,12 @@ export default {
 								}
 							});
 						}
-						this.isOnButton = false
+						this.isOnButton = false;
 					}
 					break;
 				case 'reset':
 					this.$refs.bxForm.onReset();
-					this.isOnButton = false
+					this.isOnButton = false;
 					break;
 				case 'customize':
 					if (e.application && e.operate_service) {
@@ -189,7 +286,7 @@ export default {
 								icon: 'none'
 							});
 						}
-						this.isOnButton = false
+						this.isOnButton = false;
 					}
 					break;
 				default:
@@ -197,7 +294,7 @@ export default {
 						title: e.button_name,
 						icon: false
 					});
-					this.isOnButton = false
+					this.isOnButton = false;
 					break;
 			}
 		},
@@ -241,7 +338,7 @@ export default {
 					.map(item => {
 						return {
 							colName: item.column,
-							ruleType: 'in',
+							ruleType: 'like',
 							value: item.value
 						};
 					});
@@ -251,7 +348,7 @@ export default {
 					serviceName: serviceName,
 					colNames: ['*'],
 					condition: condition,
-					page: { pageNo: 1, rownumber: 10 }
+					page: { pageNo: 1, rownumber: 2 }
 				};
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS') {
@@ -268,13 +365,6 @@ export default {
 			let defaultVal = null;
 			this.colsV2Data = colVs;
 			colVs = this.deepClone(colVs);
-			// if(Array.isArray(colVs._fieldInfo)){
-			// 	colVs._fieldInfo = colVs._fieldInfo.map(field=>{
-			// 		if(field.type==='digit'||field.type==='number'){
-			// 		}
-			// 		return field
-			// 	})
-			// }
 			if (colVs.service_view_name) {
 				uni.setNavigationBarTitle({
 					title: colVs.service_view_name

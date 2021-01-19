@@ -410,7 +410,6 @@ export default {
 			if (currentUnit.unit === 'g') {
 				this.dietInfo.unit_energy = currentUnit.unit_energy;
 			} else {
-				debugger;
 				this.dietInfo.unit_energy = (currentUnit.amount * this.dietInfo.unit_energy) / (this.dietInfo.unit_weight_g >= 100 ? this.dietInfo.unit_weight_g : 100);
 			}
 			this.dietInfo.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;

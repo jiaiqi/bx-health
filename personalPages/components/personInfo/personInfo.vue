@@ -13,10 +13,8 @@
 							<text class="username">{{ userInfo.name }}</text>
 							<view @click="toChatPage" class="content-right">
 								<text style="z-index: 1;" class="text" v-if="unreadMessage != 0">{{ unreadMessage }}</text>
-								<!-- <image class="image" src="../../static/chat.png" mode="aspectFit"></image> -->
 							</view>
 						</view>
-
 						<view class="other-info">
 							<view class="info-item">
 								<text class="label">性别:</text>
@@ -34,10 +32,7 @@
 					</view>
 				</view>
 				<view class="profile-box">
-					<view class="title">
-						<view class="text">关注</view>
-						<!-- <view class="icon"><text class="cuIcon-right"></text></view> -->
-					</view>
+					<view class="title"><view class="text">关注</view></view>
 					<view class="requirement-box">
 						<view class="require-item" v-for="item in requirement" :key="item">{{ item }}</view>
 					</view>
@@ -51,10 +46,37 @@
 					<text class="cuIcon-tag"></text>
 					<text class="see-histroy">添加标签</text>
 				</view>
-				<!-- <view class="icon"><text class="cuIcon-right"></text></view> -->
 			</view>
 			<view class="requirement-box">
 				<view class="require-item" v-for="item in tagList" :key="item.id">{{ item.label_name }}</view>
+			</view>
+		</view>
+		<view class="health-archive-item health-score">
+			<view class="subtitle">
+				<text class="title-text">接诊记录</text>
+				<view class="title-action" @click="navPages('reception')">
+					<text class="cuIcon-time"></text>
+					<text class="see-histroy">查看历史</text>
+				</view>
+			</view>
+			<view class="content disease-risk">
+				<view class="disease-item record" v-for="item in receptionRecord" @click="navPages('receptionDetail', item)" :key="item.id">{{ formateDate(item.create_time) }}</view>
+				<view class="disease-item record" @click="navPages('addReception')"><text class="cuIcon-add" style="font-size: 30px;"></text></view>
+			</view>
+		</view>
+		<view class="health-archive-item health-score">
+			<view class="subtitle">
+				<text class="title-text">开药记录</text>
+				<view class="title-action" @click="navPages('prescribeRecord')">
+					<text class="cuIcon-time"></text>
+					<text class="see-histroy">查看历史</text>
+				</view>
+			</view>
+			<view class="content disease-risk">
+				<!-- 	<view class="disease-item record" v-for="item in receptionRecord" :key="item.id">
+					{{formateDate(item.create_time)}}
+				</view> -->
+				<view class="disease-item record" @click="navPages('toPrescribe')"><text class="cuIcon-add" style="font-size: 30px;"></text></view>
 			</view>
 		</view>
 		<view class="health-archive-item health-score">
@@ -99,7 +121,7 @@
 			</view>
 		</view>
 		<view class="health-archive-item-wrap">
-			<view class="health-archive-item ">
+			<!-- <view class="health-archive-item ">
 				<view class="subtitle">
 					<text class="title-text">咨询记录</text>
 					<view class=""></view>
@@ -114,7 +136,7 @@
 						</text>
 					</view>
 				</view>
-			</view>
+			</view> -->
 			<view class="health-archive-item ">
 				<view class="subtitle">
 					<text class="title-text">检查报告</text>
@@ -125,7 +147,6 @@
 						<view class="title">{{ item.name }}</view>
 						<view class="date">{{ item.end_time.slice(0, 10) }}</view>
 					</view>
-					<!-- <view v-if="inspectReportRecord&&inspectReportRecord.length>6" @click="toChatList" class="disease-item record"><text class="date">更多<text class="cuIcon-right margin-left-xs"></text></text></view> -->
 				</view>
 			</view>
 			<view class="health-archive-item">
@@ -176,7 +197,8 @@ export default {
 			inspectReportRecord: [],
 			totalInspectReportRecord: [],
 			tagList: [],
-			unreadMessage: 0
+			unreadMessage: 0,
+			receptionRecord: [] //接诊记录
 		};
 	},
 	props: {
@@ -271,7 +293,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_user_label_set_select',
 				colNames: ['*'],
-				condition: [{ colName: 'dp_no', ruleType: 'eq', value:this.dp_no}]
+				condition: [{ colName: 'dp_no', ruleType: 'eq', value: this.dp_no }]
 			};
 			this.$http.post(url, req).then(res => {
 				if (res.data.state === 'SUCCESS') {
@@ -350,7 +372,7 @@ export default {
 			// 	url: '/personalPages/chat/chatList'
 			// });
 		},
-		navPages(type = 'history') {
+		navPages(type = 'history', item = {}) {
 			if (type === 'history') {
 				uni.navigateTo({
 					url: '/archivesPages/archives-history/archives-history?isAll=true&customer_no=' + this.customer_no
@@ -362,6 +384,48 @@ export default {
 					url: `/personalPages/tagManagement/tagManagement?manager_no=${this.managerInfo.no}&customer_no=${this.userInfo.no}`
 					// url: '/publicPages/newForm/newForm?serviceName=srvhealth_user_label_set_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
 				});
+			}
+			if (type === 'addReception') {
+				let fieldsCond = [
+					{ column: 'user_info_no', display: false, value: this.userInfo.no },
+					{ column: 'user_no', display: false, value: this.userInfo.userno },
+					{ column: 'name', display: false, value: this.userInfo.name },
+					{ column: 'store_no', condition: [{ colName: 'type', ruleType: 'in', value: '诊所,医院' }] }
+				];
+				let url = '/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
+				uni.navigateTo({
+					url: url
+				});
+			}
+			if (type === 'receptionDetail') {
+				let fieldsCond = [
+					{ column: 'sdr_no', display: false, value: item.sdr_no },
+					{ column: 'store_no', display: false },
+					{ column: 'user_info_no', display: false },
+					{ column: 'user_no', display: false },
+					{ column: 'create_time', display: false },
+					{ column: 'create_user_disp', display: false }
+				];
+				let url = '/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_select&type=detail&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
+				uni.navigateTo({
+					url: url
+				});
+			}
+			if (type === 'toPrescribe') {
+				// 开药
+			}
+		},
+		async getReceptionRecord() {
+			// 查找接诊记录
+			let url = this.getServiceUrl('health', 'srvhealth_see_doctor_record_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_see_doctor_record_select',
+				colNames: ['*'],
+				condition: [{ colName: 'user_info_no', ruleType: 'eq', value: this.customer_no }]
+			};
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
+				this.receptionRecord = res.data.data;
 			}
 		},
 		async getUserInfo(customer_no) {
@@ -378,6 +442,8 @@ export default {
 				uni.$emit('userInfos', res.data.data[0]);
 				this.selectInspectionReport();
 				this.getTagList();
+				this.getReceptionRecord();
+				this.$store.commit('SET_PATIENT_INFO',this.userInfo)
 				return res.data.data[0];
 			} else {
 				uni.showToast({
@@ -389,26 +455,24 @@ export default {
 	},
 	mounted() {
 		uni.$on('userInfos', e => {
-			console.log('----------', e);
 			this.getMessageInfo(e.userno);
 		});
 		uni.$on('updateSuccess', () => {
 			this.getMessageInfo(this.userInfo.userno);
 		});
-		uni.$on('tagsUpdate',(e)=>{
+		uni.$on('tagsUpdate', e => {
 			this.getTagList();
-		})
+		});
 		if (this.customer_no) {
 			this.getUserInfo(this.customer_no);
 		}
-	},
-	onLoad(option) {
-		this.getMessageInfo();
-		if (option.customer_no) {
-			this.customer_no = option.customer_no;
-		}
-	},
-	onShow() {}
+	}
+	// onLoad(option) {
+	// 	this.getMessageInfo();
+	// 	if (option.customer_no) {
+	// 		this.customer_no = option.customer_no;
+	// 	}
+	// },
 };
 </script>
 
@@ -761,6 +825,10 @@ export default {
 					box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 					padding: 10rpx;
 					flex-direction: column;
+					&.center {
+						justify-content: center;
+						align-items: center;
+					}
 					.title {
 						text-align: left;
 					}

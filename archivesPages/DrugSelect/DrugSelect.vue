@@ -9,39 +9,27 @@
 		</view>
 		<view class="drug-list">
 			<view class="drug-item" v-for="item in drugList" @click="toAdd(item)">
-				<text v-if="dataType === '用药'">{{ item.medicine_name }}</text>
+				<text v-if="dataType === '用药' || dataType === '大夫开药'">{{ item.medicine_name }}</text>
 				<text v-if="dataType === '运动'">{{ item.name }}</text>
 			</view>
 		</view>
 		<uni-load-more :status="more"></uni-load-more>
 		<view class="cu-modal" :class="{ show: showModal }">
-			<view class="cu-dialog">
-				<drug-info :planNo="ds_no" type="add" :drugDetail="drugDetail" @hideModal="hideModal" @addSuccess="addSuccess"></drug-info>
-				<!-- 		<view class="sport-info" v-if="drugDetail.sport_no">
-					<view class="info-item">
-						<view class="label">
-						 名称：
-						</view>
-						<view class="value">
-							{{drugDetail.name}}
-						</view>
-					</view>
-				</view> -->
-			</view>
+			<view class="cu-dialog"><drug-info :planNo="ds_no" type="add" :service-name="serviceName" :drugDetail="drugDetail" @hideModal="hideModal" @addSuccess="addSuccess"></drug-info></view>
 		</view>
 	</view>
 </template>
 
 <script>
 import DrugInfo from '../components/DrugInfo/DrugInfo.vue';
-import {mapState} from 'vuex'
+import { mapState } from 'vuex';
 export default {
 	components: {
 		DrugInfo
 	},
 	computed: {
 		...mapState({
-			userInfo:state=>state.user.userInfo
+			userInfo: state => state.user.userInfo
 		})
 	},
 	data() {
@@ -56,7 +44,8 @@ export default {
 			ds_no: '',
 			more: 'more', //more,loading,noMore
 			drugDetail: {},
-			dataType: ''
+			dataType: '',
+			serviceName: ''
 		};
 	},
 	watch: {
@@ -69,6 +58,9 @@ export default {
 			this.ds_no = option.ds_no;
 			if (option.type) {
 				this.dataType = option.type;
+			}
+			if (option.service_name) {
+				this.serviceName = option.service_name;
 			}
 			uni.startPullDownRefresh();
 		} else {

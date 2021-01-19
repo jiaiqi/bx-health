@@ -167,7 +167,10 @@
 			<view class="main-box symptom" v-if="!pageType || pageType === 'diet'">
 				<view class="title">
 					<view class="label">饮食</view>
-					<button class="check-history cu-btn sm bg-blue" @click="showRecent">从选过的食物中添加</button>
+					<button class="check-history cu-btn sm round" @click="showRecent">
+						<text class="cuIcon-add margin-right-xs"></text>
+						从历史
+					</button>
 					<view class="switch-layout">
 						<text class="cuIcon-list active-layout" v-if="dietLayout === 'grid'" @click="dietLayout = 'list'"></text>
 						<text class="cuIcon-apps active-layout" v-if="dietLayout === 'list'" @click="dietLayout = 'grid'"></text>
@@ -1320,10 +1323,10 @@ export default {
 			};
 			let dietList = this.deepClone(this.dietRecord);
 			// debugger;
-			if(Array.isArray(dietList)&&dietList.length>0){
-				dietList.forEach(item=>{
-					energyData.value += item[energyData.key]
-				})
+			if (Array.isArray(dietList) && dietList.length > 0) {
+				dietList.forEach(item => {
+					energyData.value += item[energyData.key];
+				});
 			}
 			eleArr.unshift(energyData);
 
@@ -3260,6 +3263,7 @@ export default {
 		width: 100%;
 		border-top: 3px solid #f1f1f1;
 		padding: 10rpx 0;
+
 		&.symptom {
 			background-color: #fff;
 			margin: 20rpx 0;
@@ -3270,6 +3274,10 @@ export default {
 				box-shadow: none;
 				padding: 10rpx 0;
 				background-color: #f1f1f1;
+			}
+			.check-history {
+				background-color: #0bc99d;
+				color: #fff;
 			}
 			.title {
 				padding: 10rpx;

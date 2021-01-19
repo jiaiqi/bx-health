@@ -103,13 +103,15 @@ export default {
 		let current_user = uni.getStorageSync('current_user_info');
 		if (userList && current_user) {
 			this.currentUser = current_user;
-			this.getDoctorInfo().then(res => {
-				if (res && res.dt_no) {
-					this.doctorInfo = res;
-				}
-				this.buildSearchArg(res);
-				this.buildMenuAgList();
-			});
+			// this.getDoctorInfo().then(res => {
+			// 	if (res && res.dt_no) {
+			// 		this.doctorInfo = res;
+			// 	}
+			// 	this.buildSearchArg(res);
+			// 	this.buildMenuAgList();
+			// });
+			this.buildSearchArg();
+			this.buildMenuAgList();
 		}
 	},
 	mounted() {

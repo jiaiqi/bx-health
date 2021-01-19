@@ -1,15 +1,15 @@
 <template>
 	<view class="doctor-wrap">
-		<view class="util-bar">
-			<view class="util-item " @click="toPages('group-member')" v-if="groupInfo && groupInfo.gc_no">
+		<view class="util-bar" v-if="groupInfo && groupInfo.gc_no">
+			<view class="util-item " @click="toPages('group-member')">
 				<view class="icon"><text class="cuIcon-friend "></text></view>
 				<text class="label">成员</text>
 			</view>
-			<view class="util-item " @click="toPages('group-util')" v-if="groupInfo && groupInfo.gc_no">
+			<view class="util-item " @click="toPages('group-util')">
 				<view class="icon"><text class="cuIcon-repair "></text></view>
 				<text class="label">小工具</text>
 			</view>
-			<view class="util-item" @click="toPages('group-detail')" v-if="groupInfo && groupInfo.gc_no">
+			<view class="util-item" @click="toPages('group-detail')">
 				<view class="icon border"><text class="cuIcon-more"></text></view>
 				<text class="label">更多</text>
 			</view>

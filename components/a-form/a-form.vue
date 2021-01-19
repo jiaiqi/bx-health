@@ -6,6 +6,7 @@
 			:optionMode="optionMode"
 			@on-value-change="onValChange"
 			@on-value-blur="onValBlur"
+			@chooseLocation="chooseLocation"
 			v-for="field in allField"
 			:key="field.id"
 			:field="field"
@@ -180,6 +181,18 @@ export default {
 				this.fieldModel[e.column] = e.value;
 				this.$emit('value-blur', e, this.fieldModel);
 			}
+		},
+		chooseLocation(e) {
+			debugger
+			this.allField = this.allField.map(item => {
+				if (item.column === 'latitude' && e.latitude) {
+					item.value = e.latitude;
+				}
+				if (item.column === 'longitude' && e.longitude) {
+					item.value = e.longitude;
+				}
+				return item;
+			});
 		},
 		getAllField() {},
 		onReset() {

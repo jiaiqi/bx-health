@@ -104,6 +104,13 @@
             "treeShaking" : {
                 "enable" : true
             }
+        },
+        "sdkConfigs" : {
+            "maps" : {
+                "qqmap" : {
+                    "key" : "MHABZ-CHOKF-YBFJZ-JJYCQ-OSI75-YABF4"
+                }
+            }
         }
     },
     "mp-qq" : {
