@@ -2,11 +2,11 @@
 	<view class="shop-wrap">
 		<!-- 头部 -->
 		<view class="header">
-			<image class="header-bg" src="/otherPages/static/img/banner.jpg" mode=""></image>
+			<image class="header-bg" src="@/otherPages/static/img/banner.jpg" mode=""></image>
 			<!-- <view :class="showStoreBox ? 'header-bg-gray' : 'header-bg-black'"></view> -->
 			<view class="header-top-Placeholder"></view>
 			<view class="container storeInfo hx-shadow">
-				<image class="storeAvatar hx-shadow" src="/otherPages/static/img/3.png" mode=""></image>
+				<image class="storeAvatar hx-shadow" src="@/otherPages/static/img/3.png" mode=""></image>
 				<view v-if="restAurn" class="hx-txt-18 hx-color-black hx-txt-weigth hx-mb-15 ">{{ restAurn.name }}</view>
 				<view class="hx-txt-14 hx-color-black ">店家说明,本店放心吃，地方名才</view>
 				<!-- <view class="">
@@ -25,7 +25,7 @@
 				</view>
 				<view @click="changeTypes" class="shop-main-sort-right">
 					<image v-if="changeType === 'doubleRow'" src="/otherPages/static/img/changelist.png" mode=""></image>
-					<image v-else="changeType === 'singleRow'" src="/otherPages/static/img/changelist1.png" mode=""></image>
+					<image v-else-if="changeType === 'singleRow'" src="/otherPages/static/img/changelist1.png" mode=""></image>
 				</view>
 			</view>
 			<!-- <sPullScroll

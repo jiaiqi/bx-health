@@ -1,6 +1,5 @@
 export default {
   install (Vue, options) {
-    Vue.prototype.pageTitle = '加载中…'   // 可以自定义变量
     Vue.prototype.getQueryString = function (name) {
       var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i')
       var r = window.location.search.substr(1).match(reg)

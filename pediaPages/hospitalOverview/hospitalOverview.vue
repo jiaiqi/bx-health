@@ -125,11 +125,8 @@ export default {
 			});
 		},
 		getCurrentLocation() {
-			// longitude=108.935485&latitude=34.219329
 			let latitude = 34.219329;
-			// let latitude = this.hospitalData.pointX;
 			let longitude = 108.935485;
-			// let longitude = this.hospitalData.pointY;
 			uni.openLocation({
 				latitude: latitude,
 				longitude: longitude,

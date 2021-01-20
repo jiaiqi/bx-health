@@ -127,9 +127,7 @@ export default {
 				e.value = Number(e.value);
 			}
 			this.fieldModel[e.column] = e.value;
-
 			const fieldModel = this.deepClone(this.fieldModel);
-
 			this.allField = this.allField.map((item, index) => {
 				item.display = item.isShowExp && item.isShowExp.length > 0 ? this.colItemShowExps(item, this.fieldModel) : item.display === false ? false : true;
 				if (item.column === e.column) {
@@ -160,21 +158,8 @@ export default {
 					}
 					return item;
 				});
-				// this.allField.forEach(item => {
-				// });
 			}
 			this.$emit('value-blur', this.fieldModel);
-			// this.more_config.col_relation.forEach(col_relation => {
-			// 	// if (col_relation.watch_col.includes(e.column)) {
-			// 	//当前字段是监控字段
-			// 	if (col_relation.watch_col.some(item => e.column === item)) {
-			// 		//当前改变值的字段存在于watch_col中
-			// 		let colArr = this.allField.filter(field => col_relation.watch_col.includes(field.column));
-			// 		if (colArr.every(item => item.value)) {
-			// 			self.setRelationColumnValue(self.allField, colArr, col_relation);
-			// 		}
-			// 	}
-			// });
 		},
 		onValBlur(e) {
 			if (e.hasOwnProperty('value')) {
@@ -183,7 +168,6 @@ export default {
 			}
 		},
 		chooseLocation(e) {
-			debugger
 			this.allField = this.allField.map(item => {
 				if (item.column === 'latitude' && e.latitude) {
 					item.value = e.latitude;
@@ -193,6 +177,7 @@ export default {
 				}
 				return item;
 			});
+			debugger
 		},
 		getAllField() {},
 		onReset() {

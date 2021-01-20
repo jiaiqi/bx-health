@@ -4,17 +4,14 @@
 
 <script>
 //引入测试数据
-import sPullScroll from '@/components/s-pull-scroll';
 import shopStore from '@/components/shopStore/shopStore.vue';
 export default {
-	components: { sPullScroll, shopStore },
+	components: { shopStore },
 	data() {
 		return {
 			isLogin: false, //是否已经登录
 			MPPR: 0,
 			searchVal: '', //搜索内容
-			heightStyle: 'calc(100vh-620upx)',
-			GDHEAD: 0,
 			pageInfo: {
 				total: 0,
 				rownumber: 8,
@@ -63,22 +60,12 @@ export default {
 			}
 		} else {
 			self.isLogin = true;
-			// this.onRefresh()
-			// this.getShopList();
-			// self.$refs.store.getShopList();
-			// self.$refs.store.onRefresh()
 		}
 	},
-	onLoad() {
-		// this.shopList = testData.storeList[0].goods;
-		// console.log('--------', this.shopList);
-	},
 	onShow() {
-		// console.log('onshow', this.isLogin);
 		if (this.isLogin) {
 			this.$refs.store.getShopList();
 			this.$refs.store.onRefresh();
-			// this.getMyShopList()
 		}
 	},
 	methods: {

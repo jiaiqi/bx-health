@@ -1070,7 +1070,8 @@ export default {
 	created() {
 		let self = this;
 		uni.$on('selectDrug', e => {
-			(e.dosage_unit = '片'), (e.take_times = '3次');
+			e.dosage_unit = '片';
+			e.take_times = '3次';
 			self.drugDetail = e;
 			self.modalName = 'drugDetail';
 		});

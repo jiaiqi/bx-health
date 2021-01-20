@@ -53,7 +53,7 @@
 		</view>
 		<view class="health-archive-item health-score">
 			<view class="subtitle">
-				<text class="title-text">接诊记录</text>
+				<text class="title-text">就诊记录</text>
 				<view class="title-action" @click="navPages('reception')">
 					<text class="cuIcon-time"></text>
 					<text class="see-histroy">查看历史</text>
@@ -64,7 +64,7 @@
 				<view class="disease-item record" @click="navPages('addReception')"><text class="cuIcon-add" style="font-size: 30px;"></text></view>
 			</view>
 		</view>
-		<view class="health-archive-item health-score">
+<!-- 		<view class="health-archive-item health-score">
 			<view class="subtitle">
 				<text class="title-text">开药记录</text>
 				<view class="title-action" @click="navPages('prescribeRecord')">
@@ -73,12 +73,9 @@
 				</view>
 			</view>
 			<view class="content disease-risk">
-				<!-- 	<view class="disease-item record" v-for="item in receptionRecord" :key="item.id">
-					{{formateDate(item.create_time)}}
-				</view> -->
 				<view class="disease-item record" @click="navPages('toPrescribe')"><text class="cuIcon-add" style="font-size: 30px;"></text></view>
 			</view>
-		</view>
+		</view> -->
 		<view class="health-archive-item health-score">
 			<view class="subtitle">
 				<text class="title-text">近日健康指数</text>

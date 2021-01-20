@@ -24,7 +24,8 @@ const state = {
 	authBoxDisplay: getItem('authBoxDisplay') ? getItem('authBoxDisplay') : '',
 	sickItem: "",
 	symptomArr: [],
-	doctorInfo: getItem('doctorInfo') ? getItem('doctorInfo') : {},
+	doctorInfo: {},
+	hospitalInfo: {},
 	dietRecord: getItem('dietRecord') ? getItem('dietRecord') : [],
 	pageInfo: getItem('pageInfo') ? getItem('pageInfo') : {},
 	currentPage: '',
@@ -33,6 +34,7 @@ const state = {
 	payParams: {}, //支付相关参数
 	prePayInfo: {}, //预支付信息
 	subscsribeStatus: true, //是否关注公众号
+	shareType: '', //分享页面的类型 seeDoctor-邀请就诊登记
 }
 let persistData = {}; //持久化数据
 const mutations = {
@@ -92,7 +94,11 @@ const mutations = {
 	},
 	SET_DOCTOR_INFO: (state, info) => {
 		state.doctorInfo = info
-		setItem('doctorInfo', info)
+		// setItem('doctorInfo', info)
+	},
+	SET_HOSPITAL_INFO: (state, info) => {
+		state.hospitalInfo = info
+		// setItem('doctorInfo', info)
 	},
 	SET_DIET_RECORD: (state, record) => {
 		state.dietRecord = record
@@ -117,6 +123,9 @@ const mutations = {
 	SET_SUBSCRIBE_STATUS: (state, subscsribeStatus) => {
 		state.subscsribeStatus = subscsribeStatus
 		setItem('subscsribeStatus', subscsribeStatus)
+	},
+	SET_SHARE_TYPE: (state, shareType) => {
+		state.shareType = shareType
 	}
 }
 

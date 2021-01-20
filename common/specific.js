@@ -13,15 +13,6 @@ export default {
 			let req = {
 				"serviceName": "srvwx_app_user_select",
 				"colNames": ["*"],
-				// "condition": [{
-				// 	"colName": "app_no",
-				// 	"ruleType": "like",
-				// 	"value": "APPNO20200107181133"
-				// }, {
-				// 	"colName": "unionid",
-				// 	"ruleType": "like",
-				// 	"value": userInfo.userno
-				// }],
 				"page": {
 					"pageNo": 1,
 					"rownumber": 5
@@ -165,6 +156,19 @@ export default {
 
 		Vue.prototype.checkOptionParams = (option) => {
 			// option中如果有邀请信息 则存储到vuex
+			if (option.share_type) {
+				store.commit('SET_SHARE_TYPE', option.share_type)
+			}
+			if (option.doctor_no && option.store_no) {
+				store.commit('SET_DOCTOR_INFO', {
+					no: option.doctor_no,
+					store_no: option.store_no
+				})
+				store.commit('SET_HOSPITAL_INFO', {
+					no: option.store_no,
+					doctor_no: option.doctor_no,
+				})
+			}
 			if (option.from === 'share' && option.invite_user_no) {
 				let pageInfo = Vue.prototype.getShareParams()
 				if (pageInfo && pageInfo.add_url) {

@@ -1,12 +1,17 @@
 <template>
-	<view class="form-item" v-if="fieldData.display" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid }">
+	<view
+		class="form-item"
+		v-if="fieldData.display"
+		:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'flex-column': labelPosition === 'top' || label_width === '100%' }"
+	>
 		<label
 			:for="fieldData.column"
 			class="form-item-label"
 			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }"
 			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
 		>
-			<text class="text-red is-required">{{ fieldData.isRequire ? '*' : '' }}</text>
+			<text class="cuIcon-titles text-cyan"></text>
+			<text class="text-red is-required" v-if="fieldData.isRequire">{{ fieldData.isRequire ? '*' : '' }}</text>
 			<text class="label" :for="fieldData.column">{{ fieldData.label }}</text>
 		</label>
 		<view class="form-item-content" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }">
@@ -88,11 +93,9 @@
 			</view>
 
 			<view class="form-item-content_value textarea" v-else-if="fieldData.type === 'textarea'">
-				<textarea class="textarea" style="width: 100%;min-height: 50px;" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
+				<textarea class="textarea-content" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
 			</view>
-			<view class="form-item-content_value location" v-else-if="fieldData.type === 'addr'||fieldData.type === 'location'">
-				{{fieldData.value}}
-			</view>
+			<view class="form-item-content_value location" v-else-if="fieldData.type === 'addr' || fieldData.type === 'location'">{{ fieldData.value }}</view>
 			<view class="voice" v-else-if="fieldData.type === 'voice'">
 				<button class="bg-white cu-btn" @click="showModal('voice')">{{ fieldData.value ? '点击查看录音' : '点击添加录音' }}</button>
 			</view>
@@ -144,7 +147,7 @@
 				:limit="fieldData.fileNum"
 			></robby-image-upload>
 		</view>
-		<view class="icon-area"><text class="cuIcon-locationfill text-blue" @click="getLocation" v-if="fieldData.type === 'location' || fieldData.type === 'addr'"></text></view>
+		<view class="icon-area" v-if="fieldData.type === 'location' || fieldData.type === 'addr'"><text class="cuIcon-locationfill text-blue" @click="getLocation"></text></view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
 		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'RichEditor' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop=""><jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor" /></view>
@@ -299,6 +302,9 @@ export default {
 				this.pageType !== 'detail' &&
 				((this.setOptionList.length < 15 && this.fieldData.type === 'Set') || (this.selectorData.length < 5 && this.fieldData.type === 'Selector'))
 			) {
+				result = '100%';
+			}
+			if (this.fieldData.type === 'textarea' || this.fieldData.type === 'images') {
 				result = '100%';
 			}
 			return result;
@@ -472,20 +478,6 @@ export default {
 					self.getDefVal();
 				}
 			});
-			// uni.getLocation({
-			// 	type: 'gcj02', //返回可以用于uni.openLocation的经纬度
-			// 	success: function(res) {
-			// 		const latitude = res.latitude;
-			// 		const longitude = res.longitude;
-			// 		uni.openLocation({
-			// 			latitude: latitude,
-			// 			longitude: longitude,
-			// 			success: function(e) {
-			// 				console.log('success',e);
-			// 			}
-			// 		});
-			// 	}
-			// });
 		},
 		showModal(name) {
 			this.modalName = name;
@@ -992,9 +984,6 @@ export default {
 	.form-item-content_value {
 		// width: 100%;
 		padding: 20rpx;
-		&.textarea {
-			border: 1rpx solid #f1f1f1;
-		}
 	}
 	.dialog-button {
 		display: flex;
@@ -1006,8 +995,6 @@ export default {
 	}
 	.textarea {
 		width: 100%;
-		// width: calc(100% - 40rpx);
-		border: 1rpx solid #ccc;
 		border-radius: 10rpx;
 		margin: 20rpx auto;
 		padding: 20rpx;
@@ -1015,7 +1002,7 @@ export default {
 		text-align: left;
 		text-indent: 40rpx;
 		color: #000000;
-		border: 1rpx solid #ccc;
+		background-color: #f1f1f1;
 	}
 }
 .form-item {
@@ -1029,6 +1016,12 @@ export default {
 	&.form-detail {
 		min-height: 80rpx;
 		align-items: center;
+	}
+	&.flex-column {
+		flex-direction: column;
+		.form-item-content {
+			width: calc(100% - 40rpx);
+		}
 	}
 	.valid_msg {
 		width: 100%;
@@ -1057,13 +1050,16 @@ export default {
 		color: #666;
 		font-size: var(--global-label-font-size);
 		white-space: normal;
-		line-height: 1.8;
+		align-items: center;
+		.cuIcon-titles {
+			transform: scale(0.8);
+		}
 		&.form-detail {
 			padding: 0 10rpx;
 		}
 		&.label-top {
 			width: 100%;
-			padding: 10rpx 10rpx 0;
+			padding: 10rpx 10rpx;
 		}
 		.is-required {
 			display: inline-flex;
@@ -1113,6 +1109,13 @@ export default {
 			font: inherit;
 			display: flex;
 			flex: 1;
+			.textarea-content {
+				width: 100%;
+				background-color: #f1f1f1;
+				border-radius: 10rpx;
+				min-height: 150rpx;
+				padding: 20rpx;
+			}
 			&.slider {
 				display: flex;
 				height: 80rpx;
@@ -1177,8 +1180,7 @@ export default {
 		display: inline-flex;
 		align-content: center;
 		text-align: left;
-		margin-right: 20rpx;
-		padding: 20rpx 0;
+		padding: 20rpx;
 		font-size: 40rpx;
 	}
 	.tree-selector {

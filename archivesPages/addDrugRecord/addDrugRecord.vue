@@ -520,6 +520,7 @@ export default {
 						let res = await this.$http.post(url, req);
 						if (res.data.state === 'SUCCESS') {
 							this.addDrugItem(res.data.response[0].response.effect_data[0]);
+							uni.$emit('addDrug')
 							uni.showModal({
 								title: '提示',
 								content: '添加成功',

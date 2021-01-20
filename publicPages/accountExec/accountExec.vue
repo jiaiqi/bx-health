@@ -339,6 +339,10 @@ export default {
 					// 登录成功，返回上一页面
 					uni.$emit('loginStatusChange', true);
 					self.$store.commit('SET_LOGIN_STATE', true);
+					if (this.$store.state.app.shareType === 'seeDoctor') {
+						this.toAddPage();
+						return;
+					}
 					let num = getCurrentPages();
 					if (Array.isArray(num) && num.length === 1) {
 						if (self.$api.homePath.indexOf('/pages/') !== -1) {
@@ -480,7 +484,7 @@ export default {
 							};
 							uni.setStorageSync('wxUserInfo', rawData);
 							self.$store.commit('SET_WX_USERINFO', rawData);
-							self.toAddPage()
+							self.toAddPage();
 							rawData = JSON.stringify(rawData);
 							self.setWxUserInfo(rawData);
 							console.log(res);

@@ -49,6 +49,9 @@ export default {
 			}
 		},
 		...mapState({
+			shareType: state => state.app.shareType,
+			userInfo: state => state.user.userInfo,
+			doctorInfo: state => state.app.doctorInfo,
 			globalTextFontSize: state => state.app.globalTextFontSize,
 			globalLabelFontSize: state => state.app.globalLabelFontSize
 		})
@@ -164,9 +167,6 @@ export default {
 			}
 			let req = this.$refs.bxForm.getFieldModel();
 			for (let key in req) {
-				// if (!req[key]) {
-				// 	delete req[key];
-				// }
 				if (Array.isArray(req[key])) {
 					req[key] = req[key].toString();
 				}
@@ -205,10 +205,27 @@ export default {
 								}
 								uni.showModal({
 									title: '提示',
-									content: res.data.resultMessage + '，即将跳转到详情页面',
+									content: `${res.data.resultMessage}${self.shareType && self.shareType === 'seeDoctor' ? ' 即将跳转到就诊信息登记页面' : ' 即将跳转到详情页面'}`,
 									showCancel: false,
 									success(res) {
-										self.toPages('detail');
+										if (self.shareType && self.shareType === 'seeDoctor') {
+											// 通过邀请就诊登记链接进入 跳转到就诊信息登记页面
+											let fieldsCond = [{ column: 'user_info_no', display: false }, { column: 'user_no', display: false }];
+											if (self.doctorInfo && self.doctorInfo.no) {
+												fieldsCond.push({ column: 'doctor_no', display: false, value: self.doctorInfo.no }, { column: 'doctor_name', display: false, value: self.doctorInfo.name });
+												if (self.doctorInfo.store_no) {
+													fieldsCond.push({ column: 'store_no', display: false, value: self.doctorInfo.store_no });
+												}
+											}
+											let path =
+												'/publicPages/newForm/newForm?share_type=seeDoctor&serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' +
+												encodeURIComponent(JSON.stringify(fieldsCond));
+											uni.redirectTo({
+												url: path
+											});
+										} else {
+											self.toPages('detail');
+										}
 									}
 								});
 							}
@@ -245,7 +262,18 @@ export default {
 								showCancel: false,
 								success(res) {
 									if (res.confirm) {
-										self.toPages('detail');
+										if (self.shareType && self.shareType === 'seeDoctor') {
+											// 通过邀请就诊登记链接进入
+											if (self.serviceName === 'srvhealth_see_doctor_record_add') {
+												// 登记成功 跳转到医生信息页面
+												// TODO 医生信息页面
+												uni.redirectTo({
+													url: `/personalPages/myDoctor/myDoctor`
+												});
+											}
+										} else {
+											self.toPages('detail');
+										}
 									}
 								}
 							});
@@ -440,20 +468,12 @@ export default {
 						return field;
 					});
 					break;
-				// case 'detail':
-				// 	defaultVal = await this.getDefaultVal();
-				// 	this.fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
-				// 	break;
-				// default:
-				// 	break;
 			}
 		}
 	},
-	onShow() {
-		// this.globalTextFontSize = getApp().globalData.globalTextFontSize ? getApp().globalData.globalTextFontSize : 14;
-		// this.globalLabelFontSize = getApp().globalData.globalLabelFontSize ? getApp().globalData.globalLabelFontSize : 14;
-	},
-	onLoad(option) {
+	async onLoad(option) {
+		await this.toAddPage();
+		this.checkOptionParams(option);
 		const destApp = option.destApp;
 		if (destApp) {
 			uni.setStorageSync('activeApp', destApp);
@@ -479,7 +499,19 @@ export default {
 		}
 		if (option.fieldsCond) {
 			try {
-				this.fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
+				let fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
+				if (Array.isArray(fieldsCond) && fieldsCond.length > 0) {
+					this.fieldsCond = fieldsCond.map(item => {
+						if (item.column === 'user_info_no' && this.userInfo.no && !item.value) {
+							item.value = this.userInfo.no;
+						}
+						if (item.column === 'user_no' && this.userInfo.userno && !item.value) {
+							item.value = this.userInfo.userno;
+						}
+						return item;
+					});
+				}
+				// this.fieldsCond = fieldsCond.ma
 			} catch (e) {
 				//TODO handle the exception
 				console.warn(e);

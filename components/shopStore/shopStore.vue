@@ -18,8 +18,6 @@
 			<view class="ctn">
 				<view class="hx-search-box">
 					<text class="cuIcon-search" style="color: #666;font-size: 22;"></text>
-					<!-- <uni-icons type="search" size="22" color="#666666" /> -->
-					<!-- <text>输入搜索关键词</text> -->
 					<input @input="goSearch" v-model="searchVal" type="text" placeholder="输入搜索关键词" value="" />
 				</view>
 			</view>
@@ -225,7 +223,6 @@ export default {
 			let page = this.pageInfo;
 			this.pageInfo.pageNo = pullScroll.page;
 			console.log(pullScroll.page);
-			debugger
 			if (this.current_tit.type === 'shop') {
 				this.getShopList();
 			} else if (this.current_tit.type === 'myShop') {
@@ -311,14 +308,19 @@ export default {
 			this.current_tit = item;
 			this.sortIndex = i;
 			this.onRefresh();
-			
 			console.log('点击顶部切换===》', item);
 		},
 		/*跳转至商铺详情*/
 		toShopDetail(item) {
-			uni.navigateTo({
-				url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.store_no
-			});
+			if (['诊所', '医院'].includes(item.type)) {
+				uni.navigateTo({
+					url:'/pediaPages/ClinicDetail/ClinicDetail?store_no='+item.store_no
+				})
+			} else {
+				uni.navigateTo({
+					url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.store_no
+				});
+			}
 		},
 		/* 获取商户列表**/
 		async getShopList(type = null, search_val) {
@@ -327,11 +329,13 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_store_mgmt_select',
 				colNames: ['*'],
-				condition: [{
-					colName:"type",
-					ruleType:'eq',
-					value:'饭馆'
-				}],
+				condition: [
+					{
+						colName: 'type',
+						ruleType: 'eq',
+						value: '饭馆'
+					}
+				],
 				order: [],
 				page: self.pageInfo
 			};
@@ -391,7 +395,7 @@ export default {
 						colName: 'create_user',
 						ruleType: 'eq',
 						value: uni.getStorageSync('login_user_info').user_no
-					},
+					}
 					// {
 					// 	colName: 'type',
 					// 	ruleType: 'eq',

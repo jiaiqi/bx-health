@@ -142,7 +142,7 @@ export default {
 					pre += cur.create_time;
 					return pre;
 				}, 0);
-				return amount
+				return amount;
 			}
 		},
 		async getDoctorRecod(userNo) {
@@ -179,13 +179,13 @@ export default {
 			}
 		}
 	},
-	onShow:async function() {
+	onShow: async function() {
 		let userNo = uni.getStorageSync('current_user_info');
 		if (userNo.userno) {
-			let groupUnread = await this.selectMyGroup()
+			let groupUnread = await this.selectMyGroup();
 			this.getDoctorRecod(userNo.userno).then(length => {
-				if(groupUnread){
-					length += groupUnread
+				if (groupUnread) {
+					length += groupUnread;
 				}
 				if (!length && length !== 0) {
 					length = 0;

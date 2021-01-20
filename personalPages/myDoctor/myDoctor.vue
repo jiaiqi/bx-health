@@ -5,7 +5,7 @@
 			<text class="text">扫码关注</text>
 		</view>
 		<view class="docter-list">
-			<view class="doctor-item" v-for="item in doctorList" :key="item.id">
+			<view class="doctor-item" v-for="item in doctorList" :key="item.id" @click="seeDoctor(item)">
 				<view class="profile"><image class="image" :src="usera_profile_url(item)" mode="aspectFill"></image></view>
 				<view class="content">
 					<view class="content-left">
@@ -37,6 +37,28 @@ export default {
 		});
 	},
 	methods: {
+		seeDoctor(e) {
+			uni.showModal({
+				title: '提示',
+				content: '是否进行就诊信息登记',
+				success(res) {
+					if (res.confirm) {
+						let fieldsCond = [
+							{ column: 'doctor_no', display: false, value: e.no },
+							{ column: 'doctor_name', display: false, value: e.name },
+							{ column: 'user_info_no', display: false,value:this.userInfo.userno },
+							{ column: 'user_no', display: false ,value:this.userInfo.no},
+							{ column: 'store_no', condition: [{ colName: 'type', ruleType: 'in', value: '诊所,医院' }] }
+						];
+						let path =
+							'/publicPages/newForm/newForm?share_type=seeDoctor&serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond));
+						uni.navigateTo({
+							url: path
+						});
+					}
+				}
+			});
+		},
 		usera_profile_url(item) {
 			return item.usera_image ? this.getImagePath(item.usera_image) : item.usera_profile_url ? this.getImagePath(item.usera_profile_url) : '/static/man-profile.png';
 		},
@@ -89,7 +111,7 @@ export default {
 					console.log('条码内容：' + res.result);
 					if (res.result && res.result.indexOf('PB') !== -1) {
 						// 进行绑定
-						debugger
+						debugger;
 						if (res.result.indexOf('https://wx2.100xsys.cn/mpwx/') !== -1) {
 							let result = res.result.split('https://wx2.100xsys.cn/mpwx/')[1];
 							self.qrcodeParams = result;
