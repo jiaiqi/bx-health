@@ -485,7 +485,7 @@ export default {
 	margin: 0 auto;
 	.avatar-box {
 		position: relative;
-		height: 500rpx;
+		height: 530rpx;
 		.bg-view {
 			width: 100%;
 			height: 400rpx;
@@ -615,7 +615,7 @@ export default {
 		border-radius: 20rpx;
 		&.tags {
 			width: calc(100% - 40rpx);
-			margin: 20rpx 20rpx 10rpx;
+			margin: 20rpx 20rpx 0;
 		}
 		.title {
 			width: 100%;

@@ -262,9 +262,9 @@ export default {
 			}
 			let res = await Vue.prototype.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				uni.showToast({
-					title: '头像更新成功！'
-				});
+				// uni.showToast({
+				// 	title: '头像更新成功！'
+				// });
 				return true
 			}
 		}

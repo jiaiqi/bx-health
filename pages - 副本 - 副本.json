@@ -91,7 +91,6 @@
 		// 				"navigationBarBackgroundColor": "#409eff",
 		// 				"enablePullDownRefresh": false
 		// 			}
-
 		// 		}, {
 		// 			"path": "RelationGraph/RelationGraph",
 		// 			"style": {
@@ -124,35 +123,30 @@
 		// 				"navigationBarTitleText": "",
 		// 				"enablePullDownRefresh": false
 		// 			}
-
 		// 		}, {
 		// 			"path": "DietDetail/DietDetail",
 		// 			"style": {
 		// 				"navigationBarTitleText": "饮食记录详情",
 		// 				"enablePullDownRefresh": false
 		// 			}
-
 		// 		}, {
 		// 			"path": "DrugSelect/DrugSelect",
 		// 			"style": {
 		// 				"navigationBarTitleText": "药品选择",
 		// 				"enablePullDownRefresh": true
 		// 			}
-
 		// 		}, {
 		// 			"path": "report/report",
 		// 			"style": {
 		// 				"navigationBarTitleText": "检查报告",
 		// 				"enablePullDownRefresh": false
 		// 			}
-
 		// 		}, {
 		// 			"path": "SportItemList/SportItemList",
 		// 			"style": {
 		// 				"navigationBarTitleText": "运动项目列表",
 		// 				"enablePullDownRefresh": true
 		// 			}
-
 		// 		}
 		// 	]
 		// },
@@ -286,6 +280,13 @@
 
 				}, {
 					"path": "StoreDetail/StoreDetail",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "DoctorDetail/DoctorDetail",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
@@ -536,7 +537,9 @@
 				{
 					"path": "chat/chat",
 					"style": {
-						"navigationBarTitleText": "",
+						"navigationBarTitleText": "聊天室",
+						"navigationBarTextStyle": "black",
+						"navigationBarBackgroundColor": "#fff",
 						"enablePullDownRefresh": false
 					}
 				}
@@ -597,9 +600,9 @@
 				"query": "from=share&invite_user_no=jiaqi&q="
 			},
 			{
-				"name":"诊所详情",
-				"path":"personalPages/StoreDetail/StoreDetail",
-				"query":"from=share&invite_user_no=jiaqi&store_no=ST202101191842170001&doctor_no=jiaqi&share_type=bindOrganization"
+				"name": "诊所详情",
+				"path": "personalPages/StoreDetail/StoreDetail",
+				"query": "from=share&invite_user_no=jiaqi&store_no=ST202101191842170001&doctor_no=jiaqi&share_type=bindOrganization"
 			},
 			{
 				"name": "登记就诊信息", //模式名称  

@@ -1,6 +1,7 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="hospital-wrap">
+		<view class="bg-view" :style="{ 'background-image': `url(${topBgImg ? topBgImg : 'https://tse1-mm.cn.bing.net/th/id/OIP.pX_K8kY1FWrj9h_2YRlqBwHaEB?pid=Api&rs=1'})` }"></view>
 		<view class="hospital-top">
 			<view class="left">
 				<view class="top">
@@ -47,12 +48,10 @@
 						<view class="action" @tap="hideModal"><text class="cuIcon-close text-red"></text></view>
 					</view>
 					<view class="padding-xl">
-						<button class="cu-btn store-item bg-cyan" v-for="item in doctorStoreList" @tap="toPages('seeDoctor',item)">{{ item.name }}</button>
+						<button class="cu-btn store-item bg-cyan" v-for="item in doctorStoreList" @tap="toPages('seeDoctor', item)">{{ item.name }}</button>
 					</view>
 					<view class="cu-bar bg-white justify-center">
-						<view class="action">
-							<button class="cu-btn line-blue text-blue" @tap="hideModal">取消</button>
-						</view>
+						<view class="action"><button class="cu-btn line-blue text-blue" @tap="hideModal">取消</button></view>
 					</view>
 				</view>
 			</view>
@@ -96,7 +95,7 @@ export default {
 		hideModal() {
 			this.modalName = '';
 		},
-		toPages(type,data) {
+		toPages(type, data) {
 			let url = '';
 			switch (type) {
 				case 'seeDoctor':
@@ -131,11 +130,11 @@ export default {
 					if (this.doctorStoreList.length > 1) {
 						// 医生所在诊所数量>1 先选择诊所
 						this.modalName = 'sotre-list';
-						if(data){
+						if (data) {
 							filedsCond.push({
 								column: 'store_no',
 								display: false,
-								value:data.store_no
+								value: data.store_no
 							});
 							url = '/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(filedsCond));
 						}
@@ -154,14 +153,13 @@ export default {
 						}
 						url = '/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(filedsCond));
 					}
-					// fieldsCond=
-					// " //启动参数，在页面的onLoad函数里面得到  '
 					break;
 				case 'toContant':
 					url = `/personalPages/myDoctor/doctorChat?no=${this.doctorInfo.no}&doctor=${encodeURIComponent(JSON.stringify(this.relationInfo))}`;
 					break;
 			}
 			if (url) {
+				this.hideModal();
 				uni.navigateTo({
 					url: url
 				});
@@ -267,7 +265,18 @@ export default {
 <style scoped lang="scss">
 .hospital-wrap {
 	border-top: 1rpx solid #f1f1f1;
-	background-color: #f9f9f9;
+	position: relative;
+	.bg-view {
+		width: 100%;
+		height: 300rpx;
+		background-size: 100% 400rpx;
+		background-repeat: no-repeat;
+		filter: blur(20rpx);
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 0;
+	}
 	.hospital-top {
 		// border-radius: 20rpx;
 		background-color: #fff;
@@ -278,6 +287,7 @@ export default {
 		margin: 0rpx 10rpx 20rpx;
 		margin-top: 40px;
 		position: relative;
+
 		.introduce {
 			color: #666;
 		}
@@ -382,6 +392,7 @@ export default {
 		}
 		.cu-btn {
 			border-radius: 50%;
+			margin-bottom: 5px;
 			width: 100rpx;
 			height: 100rpx;
 			font-size: 30px;
@@ -394,11 +405,20 @@ export default {
 		}
 	}
 }
-.store-item {
-	padding: 10rpx 20rpx;
-	border-radius: 0;
-	&+.store-item{
-		margin-left: 20rpx;
+.padding-xl {
+	display: flex;
+	flex-wrap: wrap;
+	.store-item {
+		padding: 10rpx 20rpx;
+		border-radius: 0;
+		width: calc(50% - 10rpx);
+		& + .store-item {
+			margin-left: 20rpx;
+			margin-bottom: 5px;
+		}
+		& + .store-item:nth-child(2n + 1) {
+			margin-left: 0;
+		}
 	}
 }
 </style>

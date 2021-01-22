@@ -310,6 +310,7 @@ export default {
 						switch (item.div_type) {
 							case 'carousel':
 								pageitem['picUrl'] = this.$api.downloadFile + pageitem.carousel_image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+								// pageitem['picUrl'] = this.getImagePath(pageitem.carousel_image) ;
 								break;
 							case 'buttons':
 								break;

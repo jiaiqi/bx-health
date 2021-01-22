@@ -7,9 +7,9 @@
 			</uni-view>
 		</uni-view>
 		<view class="store-list">
-			<view class="list-item" v-for="item in storeList" @click="toStoreDetail(item)">
-				<image :src="getImagePath(item.image)" mode="aspectFit" class="image"></image>
-				<view class="content">
+			<view class="list-item" v-for="item in storeList">
+				<image @click="toStoreDetail(item)" :src="getImagePath(item.image)" mode="aspectFit" class="image"></image>
+				<view class="content" @click="toStoreDetail(item)">
 					<view class="store-name">{{ item.name }}</view>
 					<view class="user-info">
 						<text class="label">职业：</text>

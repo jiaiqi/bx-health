@@ -90,7 +90,6 @@
 						"navigationBarBackgroundColor": "#409eff",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "RelationGraph/RelationGraph",
 					"style": {
@@ -123,35 +122,30 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "DietDetail/DietDetail",
 					"style": {
 						"navigationBarTitleText": "饮食记录详情",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "DrugSelect/DrugSelect",
 					"style": {
 						"navigationBarTitleText": "药品选择",
 						"enablePullDownRefresh": true
 					}
-
 				}, {
 					"path": "report/report",
 					"style": {
 						"navigationBarTitleText": "检查报告",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "SportItemList/SportItemList",
 					"style": {
 						"navigationBarTitleText": "运动项目列表",
 						"enablePullDownRefresh": true
 					}
-
 				}
 			]
 		},
@@ -290,17 +284,15 @@
 						"enablePullDownRefresh": false
 					}
 
+				}, {
+					"path": "DoctorDetail/DoctorDetail",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+
 				}
-			    ,{
-                    "path" : "DoctorDetail/DoctorDetail",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "disease",

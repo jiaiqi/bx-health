@@ -707,7 +707,8 @@ export default {
 				'modify_time',
 				'person_no',
 				'end_date',
-				'sdr_no'
+				'sdr_no',
+				'store_no'
 			];
 			this.fields = fields.filter(item => {
 				return !hideColumns.includes(item.column);

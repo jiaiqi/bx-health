@@ -1,6 +1,10 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="hospital-wrap">
+		<view
+			class="bg-view"
+			:style="{ 'background-image': `url(${topBgImg ? topBgImg : 'https://tse1-mm.cn.bing.net/th/id/OIP.pX_K8kY1FWrj9h_2YRlqBwHaEB?pid=Api&rs=1'})` }"
+		></view>
 		<view class="hospital-top">
 			<view class="left">
 				<view class="top">
@@ -259,6 +263,17 @@ export default {
 .hospital-wrap {
 	border-top: 1rpx solid #f1f1f1;
 	background-color: #f9f9f9;
+	.bg-view {
+		width: 100%;
+		height: 200rpx;
+		background-size: 100% 400rpx;
+		background-repeat: no-repeat;
+		filter: blur(20rpx);
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 0;
+	}
 	.hospital-top {
 		// border-radius: 20rpx;
 		background-color: #fff;
