@@ -5,9 +5,6 @@
 				<view class="left">
 					<view class="top">
 						<view class="name">{{ storeInfo.name }}</view>
-						<!-- <view class="tags">
-							<text class="tag" v-for="item in hospitalInfo.tag" :key="item">{{ item }}</text>
-						</view> -->
 					</view>
 					<view class="bottom">
 						<view class="address" @click="getCurrentLocation">
@@ -191,7 +188,6 @@ export default {
 
 <style scoped lang="scss">
 .hospital-wrap {
-	padding-top: 80rpx;
 	border-top: 1rpx solid #f1f1f1;
 	background-color: #f9f9f9;
 	.hospital-top {
@@ -202,6 +198,7 @@ export default {
 		display: flex;
 		align-items: center;
 		margin: 0rpx 10rpx 20rpx;
+		margin-top: 40px;
 		position: relative;
 		.left {
 			display: flex;

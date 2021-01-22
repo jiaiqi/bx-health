@@ -2,7 +2,7 @@
 	<view class="drug-plan">
 		<view class="total-title"><view class="child-service-title"></view></view>
 		<view class="main-table" @click="toPages('update')">
-			<view class="table-item" v-for="item in fields" :key="item.column" :class="{ 'wrap-row': ['take_times_each_week', 'remark'].includes(item.column) && item.value }">
+			<view class="table-item" v-for="item in fields" :key="item.column" :class="{ 'wrap-row': ['take_times_each_week', 'remark'].includes(item.column) && item.value&&item.value.length>10 }">
 				<view class="label">
 					<text class="text">{{ item.label }}</text>
 				</view>

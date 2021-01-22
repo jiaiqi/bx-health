@@ -49,6 +49,7 @@ export default {
 			}
 		},
 		...mapState({
+			inviterInfo: state => state.app.inviterInfo,
 			shareType: state => state.app.shareType,
 			userInfo: state => state.user.userInfo,
 			doctorInfo: state => state.app.doctorInfo,
@@ -267,6 +268,7 @@ export default {
 											if (self.serviceName === 'srvhealth_see_doctor_record_add') {
 												// 登记成功 跳转到医生信息页面
 												// TODO 医生信息页面
+												console.log(self.doctorInfo);
 												uni.redirectTo({
 													url: `/personalPages/myDoctor/myDoctor`
 												});
@@ -469,6 +471,70 @@ export default {
 					});
 					break;
 			}
+		},
+
+		async getStoreUserInfo(no) {
+			let url = this.getServiceUrl('health', 'srvhealth_store_user_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_store_user_select',
+				colNames: ['*'],
+				condition: [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }, { colName: 'store_no', ruleType: 'eq', value: no }]
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				this.storeUserInfo = res.data.data[0];
+				return res.data.data;
+			}
+		},
+		async getStoreInfo(no) {
+			let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_store_mgmt_select',
+				colNames: ['*'],
+				condition: [{ colName: 'store_no', ruleType: 'eq', value: no }]
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				this.storeInfo = res.data.data[0];
+				return res.data.data;
+			}
+		},
+		async addToStore(store_no, invite_no, storeInfo = {}) {
+			// 添加用户到单位
+			let url = this.getServiceUrl('health', 'srvhealth_store_user_add', 'operate');
+			let req = [
+				{
+					serviceName: 'srvhealth_store_user_add',
+					condition: [],
+					data: [
+						{
+							name: storeInfo.name,
+							person_no: this.userInfo.no,
+							type: storeInfo.type,
+							user_account: this.userInfo.userno,
+							user_role: '用户',
+							add_url: this.inviterInfo.add_url,
+							invite_user_no: this.inviterInfo.invite_user_no,
+							store_no: store_no
+						}
+					]
+				}
+			];
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				uni.showModal({
+					title: '提示',
+					content: `您已成功加入【${storeInfo.name}】`,
+					success(res) {
+						if (res.confirm) {
+							// 跳转到店铺详情
+							// uni.navigateTo({
+							// 	url: '/pediaPages/ClinicDetail/ClinicDetail?store_no=' + store_no
+							// });
+						}
+					}
+				});
+			}
 		}
 	},
 	async onLoad(option) {
@@ -501,12 +567,41 @@ export default {
 			try {
 				let fieldsCond = JSON.parse(decodeURIComponent(option.fieldsCond));
 				if (Array.isArray(fieldsCond) && fieldsCond.length > 0) {
+					if (option.serviceName === 'srvhealth_see_doctor_record_add') {
+						if (this.doctorInfo && this.doctorInfo.no) {
+							this.getStoreUserInfo(this.doctorInfo.store_no).then(res => {
+								this.getStoreInfo(this.doctorInfo.store_no).then(data => {
+									if (!Array.isArray(res) || res.length === 0) {
+										// 当前用户不在此诊所中 则添加当前用户到此诊所中
+										if (Array.isArray(data) && data.length > 0) {
+											this.addToStore(option.store_no, option.invite_user_no, data[0]);
+										} else {
+											this.addToStore(option.store_no, option.invite_user_no);
+										}
+									}
+								});
+							});
+							fieldsCond.push({
+								column: 'doctor_no',
+								value: this.doctorInfo.no,
+								display: false
+							});
+							fieldsCond.push({
+								column: 'doctor_name',
+								display: false
+							});
+						}
+					}
 					this.fieldsCond = fieldsCond.map(item => {
 						if (item.column === 'user_info_no' && this.userInfo.no && !item.value) {
 							item.value = this.userInfo.no;
 						}
 						if (item.column === 'user_no' && this.userInfo.userno && !item.value) {
 							item.value = this.userInfo.userno;
+						}
+						if (item.column === 'store_no' && this.doctorInfo.store_no && !item.value) {
+							item.value = this.doctorInfo.store_no;
+							item.display = false;
 						}
 						return item;
 					});

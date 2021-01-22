@@ -28,20 +28,29 @@
 		<view class="container-cen">
 			<view class="container-cen-top">
 				<view class="container-cen-top-list bg-white" @click="toPages('doctor')">
-					<text class="cuIcon-service " style="font-size: 70rpx;"></text>
-					<text>我的医生</text>
+					<text class="cuIcon-service" style="font-size: 30px;"></text>
+					<text class="label">我的医生</text>
 					<view v-if="doctor_message != 0" class="message-tag">{{ doctor_message }}</view>
 				</view>
 				<view class="container-cen-top-list bg-white" @click="toPages('userList')">
-					<text class="cuIcon-comment " style="font-size: 70rpx;"></text>
-					<text>我的用户</text>
+					<text class="cuIcon-comment" style="font-size: 30px;"></text>
+					<text class="label">我的用户</text>
 					<view v-if="hzMessage != 0" class="message-tag">{{ hzMessage }}</view>
 				</view>
 				<view class="container-cen-top-list bg-white" @click="toPages('group')">
-					<text class="cuIcon-group " style="font-size: 70rpx;"></text>
-					<text>圈子</text>
+					<text class="cuIcon-group" style="font-size: 30px;"></text>
+					<text class="label">圈子</text>
 					<view v-if="groupMsgUnreadAmount != 0" class="message-tag">{{ groupMsgUnreadAmount }}</view>
 				</view>
+				<view class="container-cen-top-list bg-white" @click="toPages('mineStore')">
+					<text class="cuIcon-home" style="font-size: 30px;"></text>
+					<text class="label">我的单位</text>
+					<!-- <view v-if="groupMsgUnreadAmount != 0" class="message-tag">{{ groupMsgUnreadAmount }}</view> -->
+				</view>
+		<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('group')">
+					<text class="cuIcon-edit" style="font-size: 30px;"></text>
+					<text class="label">方案计划</text>
+				</view> -->
 				<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('pinggu')">
 					<text class="cuIcon-addressbook " style="font-size: 70rpx;"></text>
 					<text>家庭成员</text>
@@ -136,7 +145,7 @@ export default {
 		...mapState({
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize,
-			authUserInfo:state=>state.app.authUserInfo
+			authUserInfo: state => state.app.authUserInfo
 		}),
 		...mapGetters({
 			vuex_userInfo: 'userInfo',
@@ -152,7 +161,7 @@ export default {
 		hideModal() {
 			this.showModal = false;
 		},
-		async getDoctorAllRecod(userNo,docNO) {
+		async getDoctorAllRecod(userNo, docNO) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
@@ -180,12 +189,12 @@ export default {
 					}
 				]
 			};
-			if(Array.isArray(docNO)){
+			if (Array.isArray(docNO)) {
 				req.condition.push({
-					colName:'sender_person_no',
-					ruleType:'in',
-					value:docNO.toString()
-				})
+					colName: 'sender_person_no',
+					ruleType: 'in',
+					value: docNO.toString()
+				});
 			}
 			let res = await this.$http.post(url, req);
 			return res.data.data.length;
@@ -277,6 +286,11 @@ export default {
 					break;
 				case 'beDoctor':
 					this.showModal = true;
+					break;
+				case 'mineStore':
+					uni.navigateTo({
+						url:'/personalPages/StoreList/StoreList'
+					})
 					break;
 				case 'userList':
 					if (this.manager_type) {
@@ -440,11 +454,11 @@ export default {
 			let res = await wx.getSetting();
 			if (!res.authSetting['scope.userInfo']) {
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
-				this.$store.commit('SET_AUTH_USERINFO',false);
+				this.$store.commit('SET_AUTH_USERINFO', false);
 				// 没有获取用户信息授权
 			} else {
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
-				this.$store.commit('SET_AUTH_USERINFO',true);
+				this.$store.commit('SET_AUTH_USERINFO', true);
 				uni.getUserInfo({
 					provider: 'weixin',
 					success: function(user) {
@@ -520,7 +534,7 @@ export default {
 				};
 				this.setWxUserInfo(rawData);
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
-				this.$store.commit('SET_AUTH_USERINFO',true);
+				this.$store.commit('SET_AUTH_USERINFO', true);
 				const result = await wx.login();
 				if (result.code) {
 					this.wxLogin({
@@ -643,8 +657,8 @@ export default {
 		}
 	},
 	onLoad(option) {
-		this.checkOptionParams(option)
-		this.toAddPage()
+		this.checkOptionParams(option);
+		this.toAddPage();
 	},
 	async onShow() {
 		if (this.vuex_userInfo && this.vuex_userInfo.hasOwnProperty('manager_type')) {
@@ -694,8 +708,8 @@ export default {
 		this.initPage();
 	},
 	onShareAppMessage() {
-		let path = `/pages/personal/personal?from=share&invite_user_no=${this.vuex_userInfo.userno}`
-		this.saveSharerInfo(this.vuex_userInfo,path)
+		let path = `/pages/personal/personal?from=share&invite_user_no=${this.vuex_userInfo.userno}`;
+		this.saveSharerInfo(this.vuex_userInfo, path);
 		return {
 			title: `${this.vuex_userInfo.name}邀请您体验小程序`,
 			path: path
@@ -719,13 +733,15 @@ export default {
 	background-color: #fff;
 }
 .container-top {
-	width: 100%;
-	height: 300rpx;
-	padding-top: 10rpx;
+	width: 150%;
+	left: -25%;
+	height: 400rpx;
+	padding:0 25% ;
+	padding-top: 35px;
 	background-color: #0bc99d;
 	display: flex;
 	position: relative;
-	align-items: center;
+	border-radius: 0 0 50% 50%;
 	.bg-view {
 		width: 100%;
 		height: 300rpx;
@@ -785,29 +801,35 @@ export default {
 }
 .container-cen {
 	width: 100%;
-	height: calc(100vh - 350upx);
 	background-color: white;
-	border-top-left-radius: 50upx;
-	border-top-right-radius: 50upx;
 	position: relative;
-	top: -40upx;
+	padding-top: 95px;
 	.container-cen-top {
+		width: calc(100% - 40rpx);
 		display: flex;
-		justify-content: space-around;
-		padding-top: 20upx;
-		margin: 0 20rpx;
-
+		margin: 0 10px;
+		flex-wrap: wrap;
+		position: absolute;
+		top: -80px;
+		background-color: #fff;
+		border-radius: 10px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		.container-cen-top-list {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			position: relative;
-			// border: 1rpx dotted #f1f1f1;
 			border-radius: 50rpx;
-			padding: 20rpx;
-			flex: 1;
+			padding: 10px;
+			width: calc(33% - 40rpx / 3);
 			& + .container-cen-top-list {
-				margin-left: 20rpx;
+				margin-left: 10px;
+			}
+			& + .container-cen-top-list:nth-child(3n + 1) {
+				margin-left: 0;
+			}
+			.label{
+				padding: 2px 0;
 			}
 			image {
 				width: 80upx;
@@ -830,7 +852,10 @@ export default {
 		}
 	}
 	.container-bot {
-		margin-top: 40upx;
+		margin: 0px 10px 0;
+		overflow: hidden;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		border-radius: 10px;
 		.content {
 			font-size: var(--global-text-font-size);
 		}

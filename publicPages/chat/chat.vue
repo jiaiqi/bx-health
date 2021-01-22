@@ -11,7 +11,7 @@
 				upper-threshold="50"
 			>
 				<!-- 加载历史数据waitingUI -->
-		<!-- 		<view class="loading">
+				<view class="loading">
 					<view class="spinner">
 						<view class="rect1"></view>
 						<view class="rect2"></view>
@@ -19,9 +19,12 @@
 						<view class="rect4"></view>
 						<view class="rect5"></view>
 					</view>
-				</view> -->
+				</view>
 				<view class="row" v-for="(row, index) in msgList" :key="index" :id="'msg' + row.msg.id">
 					<!-- 系统消息 -->
+					<block>
+						<view class="send-time" v-if="showSendTime(row, index)">{{ formateDate(row.create_time, false) }}</view>
+					</block>
 					<block v-if="row.type == 'system'">
 						<view class="system">
 							<!-- 文字消息 -->
@@ -78,17 +81,18 @@
 		</view>
 		<!-- 抽屉栏 -->
 		<view class="popup-layer" :class="popupLayerClass" @touchmove.stop.prevent="discard">
-			<!-- 更多功能 相册-拍照-红包 -->
+			<!-- 更多功能 相册-拍照-位置-语音 -->
 			<view class="more-layer" :class="{ hidden: hideMore }">
 				<view class="list">
 					<view class="box" @tap="chooseImage"><view class="icon tupian2"></view></view>
 					<view class="box" @tap="camera"><view class="icon paizhao"></view></view>
-					<!-- <view class="box" @tap="handRedEnvelopes"><view class="icon hongbao"></view></view> -->
-					<!-- <view class="box" @tap="yuyintonghua"><image style="font-size:16px;width: 32px; height: 32px;" src="/static/img/more/yuyintonghua.png"></image></view> -->
-					<view class="box" @tap="weizhi"><image style="font-size:16px;width: 32px; height: 32px;" src="/static/img/more/weizhi.png"></image></view>
-					<!-- <view class="box" @tap="yuyinshuru"><image style="font-size:16px;width: 32px; height: 32px;" src="/static/img/more/yuyinshuru.png"></image></view> -->
-					<!-- <view class="box" @tap="meShouchang"><image style="font-size:16px;width: 32px; height: 32px;" src="/static/img/more/me-shouchang.png"></image></view> -->
-					<view class="box" @tap="userinfo"><image style="font-size:16px;width: 32px; height: 32px;" src="/static/img/more/userinfo.png"></image></view>
+					<view class="box" @tap="handRedEnvelopes"><view class="icon hongbao"></view></view>
+					<!-- <view class="box" @tap="yuyintonghua"><image style="font-size:16px;width: 32px; height: 32px;" src="../../static/img/more/yuyintonghua.png"></image></view> -->
+					<!-- <view class="box" @tap="weizhi"><image style="font-size:16px;width: 32px; height: 32px;" src="../../static/img/more/weizhi.png"></image></view> -->
+					<!-- <view class="box" @tap="yuyinshuru"><image style="font-size:16px;width: 32px; height: 32px;" src="../../static/img/more/yuyinshuru.png"></image></view> -->
+					<!-- <view class="box" @tap="handRedEnvelopes">
+						<image style="font-size:16px;width: 32px; height: 28px;" src="../../static/img/more/文件.png"></image>
+					</view> -->
 				</view>
 			</view>
 		</view>
@@ -97,6 +101,9 @@
 			<!-- H5下不能录音，输入栏布局改动一下 -->
 			<!-- #ifndef H5 -->
 			<view class="voice"><view class="icon" :class="isVoice ? 'jianpan' : 'yuyin'" @tap="switchVoice"></view></view>
+			<!-- #endif -->
+			<!-- #ifdef H5 -->
+			<view class="more" @tap="showMore"><view class="icon add"></view></view>
 			<!-- #endif -->
 			<view class="textbox">
 				<view
@@ -111,10 +118,13 @@
 				</view>
 				<view class="text-mode" :class="isVoice ? 'hidden' : ''">
 					<view class="box"><textarea auto-height="true" v-model="textMsg" @focus="textareaFocus" /></view>
+					<view class="em" @tap="chooseEmoji"><view class="icon biaoqing"></view></view>
 				</view>
 			</view>
+			<!-- #ifndef H5 -->
 			<view class="more" @tap="showMore"><view class="icon add"></view></view>
-			<view class="send" :class="isVoice || !textMsg ? 'hidden' : ''" @tap="sendText"><view class="btn">发送</view></view>
+			<!-- #endif -->
+			<view class="send" :class="isVoice ? 'hidden' : ''" @tap="sendText"><view class="btn">发送</view></view>
 		</view>
 		<!-- 录音UI效果 -->
 		<view class="record" :class="recording ? '' : 'hidden'">
@@ -125,11 +135,39 @@
 	</view>
 </template>
 <script>
+import { mapState } from 'vuex';
 export default {
+	computed: {
+		...mapState({
+			userInfo: state => state.user.userInfo
+		})
+	},
 	data() {
 		return {
+			msgPage: {
+				rownumber: 20,
+				total: 0,
+				pageNo: 1
+			},
+			groupInfo: {
+				create_time: '2021-01-07 17:22:18',
+				modify_user_disp: null,
+				modify_user: null,
+				create_user_disp: '可苦可乐/okMrXs-zyQb_v-wkKRC4ClS8dviA',
+				modify_time: '2021-01-07 17:22:18',
+				icon: '20210107172215427100',
+				name: '科学减脂',
+				create_user: 'okMrXs-zyQb_v-wkKRC4ClS8dviA',
+				id: 4,
+				gc_no: 'GC202101071722180004',
+				group_role: '用户',
+				latest_sign_in_time: '2021-01-21 18:26:56',
+				pg_no: 'PG202101211815580024',
+				lastChatState: '未读',
+				lastChatTime: '2021-01-21 18:20:56',
+				lastChatText: '123'
+			},
 			//文字消息
-			// dotsCurrent:1,
 			textMsg: '',
 			//消息列表
 			isHistoryLoading: false,
@@ -139,7 +177,6 @@ export default {
 			msgList: [],
 			msgImgList: [],
 			myuid: 0,
-
 			//录音相关参数
 			// #ifndef H5
 			//H5不能录音
@@ -160,11 +197,29 @@ export default {
 			// 抽屉参数
 			popupLayerClass: '',
 			// more参数
-			hideMore: true
+			hideMore: true,
+			//表情定义
+			hideEmoji: true,
+			emojiList: [{}],
+			emojiPath: '',
+			//红包相关参数
+			windowsState: '',
+			redenvelopeData: {
+				rid: null, //红包ID
+				from: null,
+				face: null,
+				blessing: null,
+				money: null
+			}
 		};
 	},
 	onLoad(option) {
-		this.getMsgList();
+		if (option.group_no) {
+			this.getGroupInfo(option.group_no).then(info => {
+				this.getInitMsgList();
+			});
+		}
+		// this.getMsgList();
 		//语音自然播放结束
 		this.AUDIO.onEnded(res => {
 			this.playMsgid = null;
@@ -185,12 +240,55 @@ export default {
 		this.scrollTop = 9999999;
 	},
 	methods: {
-		// moveend(e){
-		//    console.log(e.detail)
-		//    if(e.detail.current===4){
-		// 		this.dotsCurrent=Object.assign(this.dotsCurrent,1)
-		// 	}
-		// },
+		async getPersonGroupInfo() {
+			let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_person_group_circle_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'gc_no',
+						ruleType: 'eq',
+						value: no
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+		},
+		async getGroupInfo(no) {
+			// 查找圈子信息
+			let url = this.getServiceUrl('health', 'srvhealth_group_circle_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_group_circle_select',
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'gc_no',
+						ruleType: 'eq',
+						value: no
+					}
+				],
+				page: { pageNo: 1, rownumber: 10 }
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				this.groupInfo = res.data.data[0];
+				if (this.groupInfo.name) {
+					uni.setNavigationBarTitle({
+						title: this.groupInfo.name
+					});
+				}
+				return res.data.data[0];
+			}
+		},
+		showSendTime(item, index) {
+			// 此条消息记录上方是否显示发送时间 上一条消息和当前消息发送时间不在同一分钟 则显示
+			if (index === 0) {
+				return true;
+			} else if (index >= 1) {
+				return this.formateDate(item.create_time, 'normal') !== this.formateDate(this.msgList[index - 1].create_time, 'normal');
+			}
+		},
 		// 接受消息(筛选处理)
 		screenMsg(msg) {
 			//从长连接处转发给这个方法，进行筛选处理
@@ -235,7 +333,6 @@ export default {
 
 		//触发滑动到顶部(加载历史信息记录)
 		loadHistory(e) {
-			debugger;
 			if (this.isHistoryLoading) {
 				return;
 			}
@@ -266,10 +363,126 @@ export default {
 				this.isHistoryLoading = false;
 			}, 1000);
 		},
+		async getInitMsgList() {
+			// 初次进入页面加载消息
+			if (!this.groupInfo.gc_no) {
+				return;
+			}
+			if (this.userInfo && this.userInfo.no) {
+				this.myuid = this.userInfo.no;
+			}
+			let req = {
+				serviceName: 'srvhealth_consultation_chat_record_select',
+				colNames: ['*'],
+				condition: [{ colName: 'rcv_group_no', ruleType: 'eq', value: this.groupInfo.gc_no }],
+				order: [{ colName: 'create_time', orderType: 'desc' }],
+				page: { rownumber: this.msgPage.rownumber, pageNo: this.msgPage.pageNo }
+			};
+			let res = await this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health');
+			if (res.success) {
+				let list = res.data.map(item => {
+					let type = '';
+					switch (item.msg_content_type) {
+						case '文本':
+							type = 'text';
+							break;
+						case '链接':
+							type = 'link';
+							break;
+						case '图片':
+							type = 'img';
+							break;
+						case '语音':
+							type = 'voice';
+							break;
+						case '文件':
+							type = 'file';
+							break;
+						case '视频':
+							type = 'video';
+							break;
+						case '位置':
+							type = 'location';
+							break;
+					}
+					return {
+						type: 'user',
+						create_time: item.create_time,
+						msg: {
+							id: item.id,
+							type: type,
+							content: {
+								text: item.msg_content,
+								url: type === 'img' ? this.getImagePath(item.image) : ''
+							},
+							userinfo: {
+								uid: item.sender_person_no,
+								username: item.sender_name,
+								face: this.getImagePath(item.sender_profile_url) ? this.getImagePath(item.sender_profile_url) : '/static/man-profile.png'
+							}
+						}
+					};
+				});
+				// 获取消息中的图片,并处理显示尺寸
+				for (let i = 0; i < list.length; i++) {
+					if (list[i].type == 'user' && list[i].msg.type == 'img') {
+						let picInfo = await this.getImageInfo({ url: list[i].msg.content.url });
+						picInfo.url = picInfo.src;
+						list[i].msg.content = this.setPicSize(picInfo);
+						this.msgImgList.push(list[i].msg.content.url);
+					}
+				}
+				this.msgList = list.reverse();
+				// 滚动到底部
+				this.$nextTick(function() {
+					//进入页面滚动到底部
+					this.scrollTop = 9999;
+					this.$nextTick(function() {
+						this.scrollAnimation = true;
+					});
+				});
+			}
+		},
 		// 加载初始页面消息
 		getMsgList() {
 			// 消息列表
-			let list = [];
+			let list = [
+				{ type: 'system', msg: { id: 0, type: 'text', content: { text: '欢迎进入聊天室' } } },
+				{
+					type: 'user',
+					msg: { id: 1, type: 'text', time: '12:56', userinfo: { uid: 0, username: '大黑哥', face: '/static/img/face.jpg' }, content: { text: '为什么温度会相差那么大？' } }
+				},
+				{
+					type: 'user',
+					msg: {
+						id: 2,
+						type: 'text',
+						time: '12:57',
+						userinfo: { uid: 1, username: '售后客服008', face: '/static/img/im/face/face_2.jpg' },
+						content: { text: '这个是有偏差的，两个温度相差十几二十度是很正常的，如果相差五十度，那即是质量问题了。' }
+					}
+				},
+				{
+					type: 'user',
+					msg: {
+						id: 3,
+						type: 'voice',
+						time: '12:59',
+						userinfo: { uid: 1, username: '售后客服008', face: '/static/img/im/face/face_2.jpg' },
+						content: { url: '/static/voice/1.mp3', length: '00:06' }
+					}
+				},
+				{
+					type: 'user',
+					msg: {
+						id: 4,
+						type: 'voice',
+						time: '13:05',
+						userinfo: { uid: 0, username: '大黑哥', face: '/static/img/face.jpg' },
+						content: { url: '/static/voice/2.mp3', length: '00:06' }
+					}
+				}
+			];
 			// 获取消息中的图片,并处理显示尺寸
 			for (let i = 0; i < list.length; i++) {
 				if (list[i].type == 'user' && list[i].msg.type == 'img') {
@@ -303,6 +516,7 @@ export default {
 		//更多功能(点击+弹出)
 		showMore() {
 			this.isVoice = false;
+			this.hideEmoji = true;
 			if (this.hideMore) {
 				this.hideMore = false;
 				this.openDrawer();
@@ -319,6 +533,7 @@ export default {
 			this.popupLayerClass = '';
 			setTimeout(() => {
 				this.hideMore = true;
+				this.hideEmoji = true;
 			}, 150);
 		},
 		// 选择图片发送
@@ -357,7 +572,6 @@ export default {
 				}
 			});
 		},
-
 		//获取焦点，如果不是选表情ing,则关闭抽屉
 		textareaFocus() {
 			if (this.popupLayerClass == 'showLayer' && this.hideMore == false) {
@@ -366,40 +580,113 @@ export default {
 		},
 		// 发送文字消息
 		sendText() {
-			// uni.showToast({
-			// 	title: '发送文本消息',
-			// 	icon: 'none'
-			// });
+			uni.showToast({
+				title: '发送文本消息',
+				icon: 'none'
+			});
 			this.hideDrawer(); //隐藏抽屉
 			if (!this.textMsg) {
 				return;
 			}
-			var msg = { text: this.textMsg };
+			let content = this.replaceEmoji(this.textMsg);
+			let msg = { text: content };
 			this.sendMsg(msg, 'text');
 			this.textMsg = ''; //清空输入框
 		},
+		//替换表情符号为图片
+		replaceEmoji(str) {
+			// 正则表达式匹配内容
+			let replacedStr = str.replace(/\[([^(\]|\[)]*)\]/g, (item, index) => {
+				// console.log("item: " + item);
+				for (let i = 0; i < this.emojiList.length; i++) {
+					let row = this.emojiList[i];
+					for (let j = 0; j < row.length; j++) {
+						let EM = row[j];
+						if (EM.alt == item) {
+							//在线表情路径，图文混排必须使用网络路径，请上传一份表情到你的服务器后再替换此路径
+							//比如你上传服务器后，你的100.gif路径为https://www.xxx.com/emoji/100.gif 则替换onlinePath填写为https://www.xxx.com/emoji/
+							// let onlinePath = 'https://s2.ax1x.com/2019/04/12/'
+							// let imgstr = '<image src="'+onlinePath+this.onlineEmoji[EM.url]+'">';
 
+							let onlinePath = this.emojiPath;
+							let imgstr = '<img style="width:24px;height:24px;" src="' + onlinePath + EM.url + '">';
+							// console.log("imgstr: " + imgstr);
+							return imgstr;
+						}
+					}
+				}
+			});
+			return '<div style="align-items: center;word-wrap:break-word;">' + replacedStr + '</div>';
+		},
+		// 发送消息
+		async sendMessage() {
+			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
+			let req = [
+				{
+					serviceName: 'srvhealth_consultation_chat_record_add',
+					colNames: ['*'],
+					data: [
+						// {
+						// 	sender_account: this.userInfo.userno,
+						// 	sender_name: this.userInfo.name,
+						// 	sender_profile_url: this.userInfo.profile_url,
+						// 	sender_user_image: this.userInfo.user_image,
+						// 	receiver_account:  this.userInfo.userno,
+						// 	receiver_person_no: this.userInfo.no,
+						// 	sender_person_no: this.userInfo.no,
+						// 	msg_content_type: !this.isSendLink ? '文本' : '链接',
+						// 	identity: this.pageType ? '患者' : '医生'
+						// }
+					]
+				}
+			];
+			// if (this.pageType === 'groupChat') {
+			// 群组聊天
+			req[0].data[0] = {
+				sender_account: this.userInfo.userno,
+				sender_name: this.userInfo.name,
+				sender_profile_url: this.userInfo.profile_url,
+				sender_user_image: this.userInfo.user_image,
+				sender_group_role: this.groupInfo.group_role,
+				rcv_group_no: this.groupInfo.gc_no,
+				receiver_account: this.groupInfo.gc_no,
+				receiver_person_no: this.groupInfo.gc_no,
+				sender_person_no: this.userInfo.no,
+				msg_content_type: '文本',
+				identity: this.groupInfo.group_role
+			};
+			// }
+			// if (!this.isSendLink) {
+			req[0].data[0].msg_content = this.textMsg;
+			// } else {
+			// 	req[0].data[0].msg_link = this.chooseRecod;
+			// }
+			let res = await this.$http.post(url, req);
+			if (res.data.state === 'SUCCESS') {
+				this.$emit('completeSendMessage', req[0].data[0]);
+				this.getInitMsgList();
+			}
+		},
 		// 发送消息
 		sendMsg(content, type) {
 			//实际应用中，此处应该提交长连接，模板仅做本地处理。
 			var nowDate = new Date();
-			let lastid = 0;
-			if(Array.isArray(this.msgList)&&this.msgList.length>0){
-				this.msgList[this.msgList.length - 1].msg.id
-			}
+			let lastid = this.msgList[this.msgList.length - 1].msg.id;
 			lastid++;
 			let msg = {
 				type: 'user',
+				create_time: this.formateDate('', 'full'),
 				msg: {
-					// id: lastid,
-					time: nowDate.getHours() + ':' + nowDate.getMinutes(),
+					id: lastid,
+					// time: nowDate.getHours() + ':' + nowDate.getMinutes(),
 					type: type,
-					userinfo: { uid: 0, username: '大黑哥', face: '/static/img/face.jpg' },
+					userinfo: { uid: this.userInfo.no, username: this.userInfo.name, face: this.getImagePath(this.userInfo.profile_url) },
 					content: content
 				}
 			};
 			// 发送消息
 			this.screenMsg(msg);
+			this.sendMessage();
 			// // 定时器模拟对方回复,三秒
 			// setTimeout(() => {
 			// 	lastid = this.msgList[this.msgList.length - 1].msg.id;
@@ -440,11 +727,65 @@ export default {
 		addSystemTextMsg(msg) {
 			this.msgList.push(msg);
 		},
+		// 添加系统红包消息到列表
+		addSystemRedEnvelopeMsg(msg) {
+			this.msgList.push(msg);
+		},
+		// 打开红包
+		openRedEnvelope(msg, index) {
+			let rid = msg.content.rid;
+			uni.showLoading({
+				title: '加载中...'
+			});
+			// console.log("index: " + index);
+			//模拟请求服务器效果
+			setTimeout(() => {
+				//加载数据
+				if (rid == 0) {
+					this.redenvelopeData = {
+						rid: 0, //红包ID
+						from: '大黑哥',
+						face: '/static/img/im/face/face.jpg',
+						blessing: '恭喜发财，大吉大利',
+						money: '已领完'
+					};
+				} else {
+					this.redenvelopeData = {
+						rid: 1, //红包ID
+						from: '售后客服008',
+						face: '/static/img/im/face/face_2.jpg',
+						blessing: '恭喜发财',
+						money: '0.01'
+					};
+					if (!msg.content.isReceived) {
+						// {type:"system",msg:{id:8,type:"redEnvelope",content:{text:"你领取了售后客服008的红包"}}},
+						this.sendSystemMsg({ text: '你领取了' + (msg.userinfo.uid == this.myuid ? '自己' : msg.userinfo.username) + '的红包' }, 'redEnvelope');
+						// console.log("this.msgList[index]: " + JSON.stringify(this.msgList[index]));
+						this.msgList[index].msg.content.isReceived = true;
+					}
+				}
+				uni.hideLoading();
+				this.windowsState = 'show';
+			}, 200);
+		},
+		// 关闭红包弹窗
+		closeRedEnvelope() {
+			this.windowsState = 'hide';
+			setTimeout(() => {
+				this.windowsState = '';
+			}, 200);
+		},
 		sendSystemMsg(content, type) {
 			let lastid = this.msgList[this.msgList.length - 1].msg.id;
 			lastid++;
 			let row = { type: 'system', msg: { id: lastid, type: type, content: content } };
 			this.screenMsg(row);
+		},
+		//领取详情
+		toDetails(rid) {
+			uni.navigateTo({
+				url: 'HM-details/HM-details?rid=' + rid
+			});
 		},
 		// 预览图片
 		showPic(msg) {
@@ -544,6 +885,6 @@ export default {
 	}
 };
 </script>
-<style lang="scss">
-// @import '@/static/HM-chat/css/style.scss';
+<style lang="scss" scoped>
+@import './style.scss';
 </style>

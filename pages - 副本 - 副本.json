@@ -7,13 +7,13 @@
 				"navigationBarBackgroundColor": "#0bc99d"
 			}
 		},
-		// {
-		// 	"path": "pages/store/store",
-		// 	"style": {
-		// 		"navigationBarTitleText": "健康生活",
-		// 		"navigationBarBackgroundColor": "#0bc99d"
-		// 	}
-		// },
+		{
+			"path": "pages/store/store",
+			"style": {
+				"navigationBarTitleText": "健康生活",
+				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		},
 		{
 			"path": "pages/archives/archives",
 			"style": {
@@ -208,14 +208,14 @@
 			"pages": [{
 					"path": "myDoctor/myDoctor",
 					"style": {
-						"navigationBarTitleText": "我的医生",
+						"navigationBarTitleText": "我的管理者",
 						"enablePullDownRefresh": true
 					}
 				},
 				{
 					"path": "nameCard/nameCard",
 					"style": {
-						"navigationBarTitleText": "医生名片",
+						"navigationBarTitleText": "二维码名片",
 						"enablePullDownRefresh": false
 					}
 				},
@@ -275,6 +275,20 @@
 					"style": {
 						"navigationBarTitleText": "圈子设置",
 						"enablePullDownRefresh": true
+					}
+
+				}, {
+					"path": "StoreList/StoreList",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "StoreDetail/StoreDetail",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
 					}
 
 				}
@@ -467,8 +481,7 @@
 				"path": "hospitalOverview/hospitalOverview",
 				"style": {
 					"navigationBarBackgroundColor": "#0094ff",
-					"navigationBarTitleText": "医院简介",
-					"transparentTitle": "auto"
+					"navigationBarTitleText": "医院简介"
 				}
 			}, {
 				"path": "HospitalList/HospitalList",
@@ -519,7 +532,8 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-				}, {
+				},
+				{
 					"path": "chat/chat",
 					"style": {
 						"navigationBarTitleText": "",
@@ -546,12 +560,12 @@
 				"selectedIconPath": "static/icon/geren_selected.png",
 				"text": "个人"
 			},
-			// {
-			// 	"pagePath": "pages/store/store",
-			// 	"iconPath": "/static/icon/shenghuo.png",
-			// 	"selectedIconPath": "static/icon/shenghuo_selected.png",
-			// 	"text": "生活"
-			// },
+			{
+				"pagePath": "pages/store/store",
+				"iconPath": "/static/icon/shenghuo.png",
+				"selectedIconPath": "static/icon/shenghuo_selected.png",
+				"text": "生活"
+			},
 			{
 				"pagePath": "pages/personal/personal",
 				"iconPath": "/static/icon/wode.png",
@@ -579,13 +593,18 @@
 			},
 			{
 				"name": "我的医生",
-				"path": "/personalPages/myDoctor/myDoctor",
+				"path": "personalPages/myDoctor/myDoctor",
 				"query": "from=share&invite_user_no=jiaqi&q="
+			},
+			{
+				"name":"诊所详情",
+				"path":"personalPages/StoreDetail/StoreDetail",
+				"query":"from=share&invite_user_no=jiaqi&store_no=ST202101191842170001&doctor_no=jiaqi&share_type=bindOrganization"
 			},
 			{
 				"name": "登记就诊信息", //模式名称  
 				"path": "publicPages/newForm/newForm", //启动页面，必选  
-				"query": "store_no=ST202101191842170001&doctor_no=PB2020092209440043&share_type=seeDoctor&serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=%5B%7B%22column%22%3A%22user_info_no%22%2C%22display%22%3Afalse%7D%2C%7B%22column%22%3A%22user_no%22%2C%22display%22%3Afalse%7D%2C%7B%22column%22%3A%22store_no%22%2C%22condition%22%3A%5B%7B%22colName%22%3A%22type%22%2C%22ruleType%22%3A%22in%22%2C%22value%22%3A%22%E8%AF%8A%E6%89%80%2C%E5%8C%BB%E9%99%A2%22%7D%5D%7D%5D" //启动参数，在页面的onLoad函数里面得到  
+				"query": "from=share&invite_user_no=jiaqi&store_no=ST202101191842170001&doctor_no=PB2020092209440043&share_type=seeDoctor&serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=%5B%7B%22column%22%3A%22user_info_no%22%2C%22display%22%3Afalse%7D%2C%7B%22column%22%3A%22user_no%22%2C%22display%22%3Afalse%7D%2C%7B%22column%22%3A%22store_no%22%2C%22condition%22%3A%5B%7B%22colName%22%3A%22type%22%2C%22ruleType%22%3A%22in%22%2C%22value%22%3A%22%E8%AF%8A%E6%89%80%2C%E5%8C%BB%E9%99%A2%22%7D%5D%7D%5D" //启动参数，在页面的onLoad函数里面得到  
 			}
 		]
 	}

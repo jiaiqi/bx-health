@@ -398,6 +398,35 @@ export default {
 			let url = Vue.prototype.getServiceUrl(app || uni.getStorageSync("activeApp"), srv, optionType)
 			return _http.post(url, req)
 		}
+		/**
+		 * 普通请求方法封装2
+		 * @param {String} optionType -操作类型(select||operate||add...)
+		 * @param {String} srv -服务名 serviceName
+		 * @param {Object} req -请求参数
+		 * @param {String} app 
+		 */
+		Vue.prototype.$fetch = async function(optionType, srv, req, app) {
+			let self = this
+			let reqType = optionType
+			if (optionType === "add" || optionType === "update") {
+				reqType = optionType
+			} else if (optionType === "select") {
+
+			}
+			let url = Vue.prototype.getServiceUrl(app || uni.getStorageSync("activeApp"), srv, optionType)
+			let res = await _http.post(url, req)
+			if (res.data.state === 'SUCCESS') {
+				return {
+					success: true,
+					data: res.data.data
+				}
+			} else {
+				return {
+					success: false,
+					data: res.data
+				}
+			}
+		}
 
 		// -------------------公共方法-------------------------------
 		/**
@@ -518,7 +547,6 @@ export default {
 			});
 		}
 		Vue.prototype.formateTime = (date, returnNull, formate) => {
-			console.log(date)
 			// TODO 上午下午 昨天前天 
 			if (!date) {
 				if (returnNull) {
@@ -540,7 +568,6 @@ export default {
 		}
 
 		Vue.prototype.formateDate = function(date, type = 'date') {
-			console.log(date)
 			if (!date) {
 				date = new Date()
 			} else {
@@ -1479,9 +1506,7 @@ export default {
 					rownumber: 10
 				}
 			};
-			debugger
 			let res = await _http.post(url, req);
-			debugger
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				return res.data.data[0];
 			} else {
@@ -1524,10 +1549,10 @@ export default {
 					return false
 				}
 			} else {
-				uni.showModal({
-					title: '提示',
-					content: JSON.stringify(docInfo)
-				});
+				// uni.showModal({
+				// 	title: '提示',
+				// 	content: JSON.stringify(docInfo)
+				// });
 				return false
 			}
 		}
@@ -1557,6 +1582,7 @@ export default {
 			let req = [{
 				"serviceName": "srvhealth_person_info_add",
 				"data": [{
+					"nick_name": wxUserInfo ? wxUserInfo.nickname : "",
 					"userno": uni.getStorageSync('login_user_info').user_no,
 					"name": wxUserInfo ? wxUserInfo.nickname : "",
 					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
@@ -1748,6 +1774,8 @@ export default {
 							name: item.name,
 							src: res.path,
 							height: res.height,
+							h:res.height,
+							w:res.width,
 							width: res.width
 						})
 					},

@@ -108,12 +108,38 @@ export default {
 		})
 	},
 	methods: {
+		async getStoreUserInfo() {
+			let url = this.getServiceUrl('health', 'srvhealth_store_user_select', 'select');
+			let req = {
+				serviceName: 'srvhealth_store_user_select',
+				colNames: ['*'],
+				condition: [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				this.$store.commit('SET_STORE_LIST', res.data.data);
+				if (res.data.data.length > 1) {
+					// 多个店铺 跳转到店铺列表
+				} else {
+					// 只有一个店铺 跳转到店铺详情页
+					this.$store.commit('SET_HOSPITAL_INFO', res.data.data[0]);
+					if (['大夫', '管理员', '工作人员', '药房人员', '客服'].includes(res.data.data[0].user_role.split(','))) {
+						// 不是用户 跳转到商铺管理页面
+						uni.navigateTo({
+							url: '/pediaPages/ClinicDetail/ClinicDetail?store_no=' + res.data.data[0].store_no
+						});
+					} else {
+						uni.navigateTo({
+							url: '/pediaPages/ClinicDetail/ClinicDetail?store_no=' + res.data.data[0].store_no
+						});
+					}
+				}
+				return this.storeUserInfo;
+			}
+		},
 		toFeedBack() {
 			// 跳转到反馈页面
 			this.modalName = 'feedback';
-			// uni.navigateTo({
-			// 	url:'/publicPages/chat/chat'
-			// })
 		},
 		toPages(type) {
 			if (type === 'feedback') {
@@ -319,10 +345,8 @@ export default {
 							headimgurl: user.userInfo.avatarUrl
 						};
 						self.$store.commit('SET_WX_USERINFO', rawData);
-						console.log(self.wxUserInfo);
-						console.log(self.userInfo);
-						if (self.userInfo && self.userInfo.no && !self.userInfo.profile_url) {
-							self.updateUserProfile(rawData.headimgurl, self.userInfo.no);
+						if (self.userInfo && self.userInfo.no && rawData.headimgurl !== self.userInfo.profile_url) {
+							self.updateUserProfile(rawData.headimgurl, self.userInfo.no, user.userInfo.nickName);
 						}
 					}
 				});

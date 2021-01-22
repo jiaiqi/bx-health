@@ -5,8 +5,8 @@
 			<text class="text">扫码关注</text>
 		</view>
 		<view class="docter-list">
-			<view class="doctor-item" v-for="item in doctorList" :key="item.id" @click="seeDoctor(item)">
-				<view class="profile"><image class="image" :src="usera_profile_url(item)" mode="aspectFill"></image></view>
+			<view class="doctor-item" v-for="item in doctorList" :key="item.id">
+				<view class="profile"  @click="toDoctorDetail(item)"><image class="image" :src="usera_profile_url(item)" mode="aspectFill"></image></view>
 				<view class="content">
 					<view class="content-left">
 						<text class="doctor-name">{{ item.usera_name }}</text>
@@ -37,6 +37,11 @@ export default {
 		});
 	},
 	methods: {
+		toDoctorDetail(e) {
+			uni.navigateTo({
+				url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + e.usera_person_no
+			});
+		},
 		seeDoctor(e) {
 			uni.showModal({
 				title: '提示',
@@ -46,8 +51,8 @@ export default {
 						let fieldsCond = [
 							{ column: 'doctor_no', display: false, value: e.no },
 							{ column: 'doctor_name', display: false, value: e.name },
-							{ column: 'user_info_no', display: false,value:this.userInfo.userno },
-							{ column: 'user_no', display: false ,value:this.userInfo.no},
+							{ column: 'user_info_no', display: false, value: this.userInfo.userno },
+							{ column: 'user_no', display: false, value: this.userInfo.no },
 							{ column: 'store_no', condition: [{ colName: 'type', ruleType: 'in', value: '诊所,医院' }] }
 						];
 						let path =

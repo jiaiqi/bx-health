@@ -26,6 +26,7 @@ const state = {
 	symptomArr: [],
 	doctorInfo: {},
 	hospitalInfo: {},
+	storeList: [], //当前账号所在单位机构的列表
 	dietRecord: getItem('dietRecord') ? getItem('dietRecord') : [],
 	pageInfo: getItem('pageInfo') ? getItem('pageInfo') : {},
 	currentPage: '',
@@ -98,6 +99,10 @@ const mutations = {
 	},
 	SET_HOSPITAL_INFO: (state, info) => {
 		state.hospitalInfo = info
+		// setItem('doctorInfo', info)
+	},
+	SET_STORE_LIST: (state, list) => {
+		state.storeList = list
 		// setItem('doctorInfo', info)
 	},
 	SET_DIET_RECORD: (state, record) => {

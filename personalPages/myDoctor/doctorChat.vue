@@ -87,6 +87,7 @@ export default {
 		}
 	},
 	onLoad(option) {
+		debugger
 		if (option.no) {
 			this.no = option.no;
 		}

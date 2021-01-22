@@ -1300,8 +1300,8 @@ export default {
 					self.$store.commit('SET_WX_USERINFO', rawData);
 					console.log(self.wxUserInfo);
 					console.log(self.vuex_userInfo);
-					if (self.vuex_userInfo && self.vuex_userInfo.no && !self.vuex_userInfo.profile_url) {
-						self.updateUserProfile(rawData.headimgurl, self.vuex_userInfo.no).then(_ => {
+					if (self.vuex_userInfo && self.vuex_userInfo.no && rawData.headimgurl!==self.vuex_userInfo.profile_url) {
+						self.updateUserProfile(rawData.headimgurl, self.vuex_userInfo.no, user.userInfo.nickName).then(_ => {
 							let userInfo = self.userInfo;
 							self.userInfo.profile_url = self.wxUserInfo.headimgurl;
 						});

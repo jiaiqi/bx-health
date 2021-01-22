@@ -118,7 +118,7 @@ export default {
 	onShareAppMessage(e) {
 		let path = '';
 		let title = '百想健康';
-		if (e.target && e.target.data && e.target.data.type === 'seeDoctor') {
+		if (e.target && e.target.dataset && e.target.dataset.type === 'seeDoctor') {
 			let fieldsCond = [
 				{ column: 'doctor_no', display: false, value: this.userInfo.no },
 				{ column: 'doctor_name', display: false, value: this.userInfo.name },
@@ -127,11 +127,11 @@ export default {
 				{ column: 'store_no', value: this.hospitalNo, display: false }
 			];
 			path =
-				`/publicPages/newForm/newForm?store_no=${this.hospitalNo}&doctor_no=${
+				`/publicPages/newForm/newForm?invite_user_no=${this.userInfo.userno}&store_no=${this.hospitalNo}&doctor_no=${
 					this.userInfo.no
 				}&share_type=seeDoctor&serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=` + encodeURIComponent(JSON.stringify(fieldsCond));
 			title = `${this.userInfo.name}邀请您登记就诊信息`;
-		} else if (e.target && e.target.data && e.target.data.type === 'bindDoctor') {
+		} else if (e.target && e.target.dataset && e.target.dataset.type === 'bindDoctor') {
 			let q = encodeURIComponent(`https://wx2.100xsys.cn/mpwx/${this.userInfo.no}`);
 			if (this.userInfo && this.userInfo.no) {
 				path = `/personalPages/myDoctor/myDoctor?from=share&invite_user_no=${this.userInfo.userno}&q=${q}`;

@@ -191,9 +191,8 @@ export default {
 				if (Array.isArray(pageStack) && pageStack.length >= 1) {
 					let currentPage = pageStack[pageStack.length - 1]
 					store.commit('SET_CURRENT_PAGE', currentPage.route)
-					// store.commit('SET_PAGE_INFO', currentPage)
 					return {
-						add_url: currentPage.$page.fullPath ? currentPage.$page.fullPath : '未知页面',
+						add_url: currentPage.$page.fullPath ? currentPage.$page.fullPath.slice(0, 400) : '未知页面',
 						invite_user_no: userInfo.no ? userInfo.no : '未知邀请人'
 					}
 				}
@@ -243,9 +242,9 @@ export default {
 			}
 			return res.data.data ? res.data.data : [];
 		}
-
-		Vue.prototype.updateUserProfile = async (profile_url, user_no) => {
+		Vue.prototype.updateUserProfile = async (profile_url, user_no, nickname) => {
 			// 更新用户微信头像
+			// 若传了昵称则同时更新用户昵称
 			const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
 			const req = [{
 				serviceName: 'srvhealth_person_info_update',
@@ -258,6 +257,9 @@ export default {
 					profile_url: profile_url
 				}]
 			}];
+			if (nickname) {
+				req[0].data[0].nick_name = nickname
+			}
 			let res = await Vue.prototype.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				uni.showToast({

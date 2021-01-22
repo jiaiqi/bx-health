@@ -1144,6 +1144,7 @@ export default {
 				}
 			}
 			&.picker {
+				margin-right: 20px;
 				.uni-picker {
 					width: 100%;
 					.picker-content {
