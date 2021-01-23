@@ -380,7 +380,6 @@ export default {
 						title: '删除成功'
 					});
 					if (this.planNo) {
-						// this.getFieldsV2(this.serviceName);
 						this.getDrugRecord(this.planNo, this.nowDate);
 					}
 				}

@@ -19,7 +19,7 @@ const state = {
 	isLogin: getItem('isLogin') ? getItem('isLogin') : false, //登录状态
 	bx_auth_ticket: getItem('bx_auth_ticket') ? getItem('bx_auth_ticket') : "", //登录token
 	backUrl: "", //当前页面的上一级页面
-	authSetting: getItem('authSetting') ? getItem('authSetting') : {}, //微信授权信息
+	authSetting: {}, //微信授权信息
 	authUserInfo: getItem('authUserInfo') ? getItem('authUserInfo') : {}, //微信授权信息
 	authBoxDisplay: getItem('authBoxDisplay') ? getItem('authBoxDisplay') : '',
 	sickItem: "",
@@ -36,9 +36,15 @@ const state = {
 	prePayInfo: {}, //预支付信息
 	subscsribeStatus: true, //是否关注公众号
 	shareType: '', //分享页面的类型 seeDoctor-邀请就诊登记
+	xhrNum: 0, //正在发送的请求的数量
+	xhrTimestamp: 0
 }
 let persistData = {}; //持久化数据
 const mutations = {
+	SET_XHR_NUM: (state, num) => {
+		state.xhrNum = num
+		state.xhrTimestamp = new Date().getTime()
+	},
 	SET_TICKET: (state, ticket) => {
 		state.bx_auth_ticket = ticket
 		setItem('bx_auth_ticket', state.bx_auth_ticket)
@@ -60,7 +66,7 @@ const mutations = {
 	SET_AUTH_SETTING: (state, data) => {
 		if (data.type) {
 			state.authSetting[data.type] = data.value
-			setItem('authSetting', state.authSetting)
+			// setItem('authSetting', state.authSetting)
 			if (data.value === true) {
 				state.authBoxDisplay = false // 不显示授权组件
 			} else if (data.value === false) {
@@ -107,11 +113,11 @@ const mutations = {
 	},
 	SET_DIET_RECORD: (state, record) => {
 		state.dietRecord = record
-		setItem('dietRecord', record)
+		// setItem('dietRecord', record)
 	},
 	SET_PAGE_INFO: (state, pageInfo) => {
 		state.pageInfo = pageInfo
-		setItem('pageInfo', pageInfo)
+		// setItem('pageInfo', pageInfo)
 	},
 	SET_INVITER_INFO: (state, inviterInfo) => {
 		state.inviterInfo = inviterInfo

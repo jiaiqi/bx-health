@@ -71,13 +71,12 @@
 					<text class="see-histroy">添加</text>
 				</view>
 			</view>
-			<view class="content todo-list">
-				<view class="todo-item" v-for="(item, index) in todoList" :key="index" @click="clickTodoItem(item, index)">
-					<!-- <view class="todo-item-content" :class="{ checked: item.checked }"> -->
+			<view class="empty-data" v-if="!isLoadPlan&&planList.length===0"><view class="cu-load" :class="'loading'"></view></view>
+			<view class="content todo-list" v-if="planList.length>0">
+				<view class="todo-item" v-for="(item, index) in planList" :key="index" @click="clickTodoItem(item, index)">
 					<view class="type">{{ item.play_srv }}</view>
 					<view class="title">{{ item.ds_name }}</view>
 					<view class="cycle">{{ getCycle(item) }}</view>
-					<!-- </view> -->
 				</view>
 			</view>
 		</view>
@@ -152,7 +151,6 @@
 				<view class="report-item" v-for="item in inspectReportRecord" :key="item.id" @click="toRecord(item)">
 					<view class="images"><image class="image" src="../../static/xuehzi.png" mode="aspectFill"></image></view>
 					<view class="title">{{ item.name || '' }}</view>
-					<!-- <view class="title">{{ item.name + item.examination_type }}</view> -->
 					<view class="date">{{ item.create_time.slice(0, 10) }}</view>
 				</view>
 				<view class="empty-data" v-if="inspectReportRecord.length === 0 || !inspectReportRecord">
@@ -260,10 +258,10 @@ export default {
 			selectedTags: [],
 			checkedList: [],
 			energyListWrap: energyListWrap,
-			dietScore: 0,
-			sportScore: 0,
-			sleepScore: 0,
-			BPScore: 0,
+			dietScore: false,
+			sportScore: false,
+			sleepScore: false,
+			BPScore: false,
 			inspectReportRecord: [],
 			isLoad: false,
 			showAddRecord: false,
@@ -284,7 +282,8 @@ export default {
 				showExp: true,
 				value: ''
 			},
-			todoList: [],
+			planList: [],
+			isLoadPlan:false,
 			dietAdvice: '',
 			showAdvice: false
 		};
@@ -456,7 +455,7 @@ export default {
 				}
 			}
 		},
-		async getToDoList() {
+		async getplanList() {
 			let url = this.getServiceUrl('health', 'srvhealth_plan_schedule_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_plan_schedule_select',
@@ -464,9 +463,11 @@ export default {
 				condition: [{ colName: 'owner_person_no', ruleType: 'eq', value: this.vuex_userInfo.no }],
 				page: { pageNo: 1, rownumber: 10 }
 			};
+			this.isLoadPlan = false
 			let res = await this.$http.post(url, req);
+			this.isLoadPlan = true
 			if (Array.isArray(res.data.data)) {
-				this.todoList = res.data.data
+				this.planList = res.data.data
 					.map(item => {
 						if (!item.play_srv) {
 							item.play_srv = '用药';
@@ -620,22 +621,6 @@ export default {
 				this.isLoad = true;
 				if (Array.isArray(res.data.data)) {
 					this.inspectReportRecord = res.data.data;
-					// let no = list.map(item => item.report_daq_survey_activity_no).toString();
-					// let result = await this.getQuestRecord(no);
-					// if (result) {
-					// 	this.inspectReportRecord = list.map(record => {
-					// 		result.forEach(item => {
-					// 			if (record.report_daq_survey_activity_no === item.activity_no) {
-					// 				record.activity_no = item.activity_no;
-					// 				record.fill_batch_no = item.fill_batch_no;
-					// 				record.end_time = item.end_time;
-					// 			} else {
-					// 				record.end_time = record.create_time;
-					// 			}
-					// 		});
-					// 		return record;
-					// 	});
-					// }
 				}
 			} else {
 				this.isLoad = true;
@@ -774,7 +759,7 @@ export default {
 			let serviceObj = {
 				weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
 				bloodPressure: 'srvhealth_blood_pressure_record_select', // 血压
-				sleep: 'srvhealth_sleep_record_select' // 血压
+				sleep: 'srvhealth_sleep_record_select' //
 			};
 			let serviceName = serviceObj[type];
 			let url = this.getServiceUrl('health', serviceName, 'select');
@@ -804,6 +789,8 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				return res.data.data[0];
+			} else {
+				return false;
 			}
 		},
 		async getSportRecord() {
@@ -1185,7 +1172,9 @@ export default {
 								}
 							}
 							this.$store.commit('SET_USERINFO', item);
-							this.checkSubscribeStatus();
+							if (!this.$store.state.app.subscsribeStatus) {
+								this.checkSubscribeStatus();
+							}
 						}
 					});
 				} else {
@@ -1274,14 +1263,31 @@ export default {
 			}
 			if (userInfo) {
 				this.loginUserInfo = userInfo;
-				await this.getCheckboxList();
-				await this.selectUserList();
-				this.dietScore = await this.calcDietScore();
-				this.sportScore = await this.calcSportScore();
-				this.sleepScore = await this.calcSleepScore();
-				this.BPScore = await this.calcBPScore();
-				this.selectInspectionReport();
-				this.getToDoList();
+				this.getplanList();
+				if (!Array.isArray(this.checkboxList) || this.checkboxList.length === 0) {
+					await this.getCheckboxList();
+				}
+				if (!this.vuex_userInfo) {
+					await this.selectUserList();
+				}
+				if (!this.dietScore && this.dietScore !== 0) {
+					this.dietScore = await this.calcDietScore();
+				}
+				if (!this.sportScore) {
+					this.sportScore = await this.calcSportScore();
+				}
+				if (!this.sleepScore) {
+					this.sleepScore = await this.calcSleepScore();
+				}
+				if (!this.BPScore) {
+					this.BPScore = await this.calcBPScore();
+				}
+				// this.sportScore = await this.calcSportScore();
+				// this.sleepScore = await this.calcSleepScore();
+				// this.BPScore = await this.calcBPScore();
+				if (!this.isLoad) {
+					this.selectInspectionReport();
+				}
 			}
 		},
 		updateUserInfo() {
@@ -1300,7 +1306,7 @@ export default {
 					self.$store.commit('SET_WX_USERINFO', rawData);
 					console.log(self.wxUserInfo);
 					console.log(self.vuex_userInfo);
-					if (self.vuex_userInfo && self.vuex_userInfo.no && rawData.headimgurl!==self.vuex_userInfo.profile_url) {
+					if (self.vuex_userInfo && self.vuex_userInfo.no && rawData.headimgurl !== self.vuex_userInfo.profile_url) {
 						self.updateUserProfile(rawData.headimgurl, self.vuex_userInfo.no, user.userInfo.nickName).then(_ => {
 							let userInfo = self.userInfo;
 							self.userInfo.profile_url = self.wxUserInfo.headimgurl;
@@ -1364,7 +1370,7 @@ export default {
 	},
 
 	onTabItemTap(e) {
-		this.initPage();
+		// this.initPage();
 	},
 	onPullDownRefresh() {
 		this.initPage().then(_ => {
@@ -1379,9 +1385,9 @@ export default {
 			menus: ['shareAppMessage', 'shareTimeline']
 		});
 		// #endif
-		if (this.is_login && this.authSetting['userInfo']) {
-			this.initPage();
-		}
+		// if (this.is_login && this.authSetting['userInfo']) {
+		// 	this.initPage();
+		// }
 		uni.$on('healthTotalScoreChanged', result => {
 			if (result) {
 				if (parseInt(result !== parseFloat(result))) {
@@ -1753,12 +1759,6 @@ export default {
 				height: auto;
 				justify-content: flex-start;
 				flex-wrap: wrap;
-				.empty-data {
-					width: 100%;
-					text-align: center;
-					font-weight: normal;
-					color: #999;
-				}
 				.report-item {
 					width: calc(25% - 30rpx / 4);
 					min-height: 200rpx;
@@ -1871,12 +1871,14 @@ export default {
 		}
 	}
 }
+.empty-data {
+	width: 100%;
+	text-align: center;
+	font-weight: normal;
+	color: #999;
+}
 .health-item {
-	// min-height: 150rpx;
-	// display: flex;
 	padding: 50rpx 30rpx;
-	// display: flex;
-	// flex-direction: column;
 	.tips {
 		color: #999;
 		padding: 20rpx 0;

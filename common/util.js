@@ -1374,9 +1374,10 @@ export default {
 								uni.setStorageSync('current_user_info', item);
 								current_user_info = item
 								try {
-
 									store.commit("SET_USERINFO", item)
-									Vue.prototype.checkSubscribeStatus()
+									if (!store.state.app.subscsribeStatus) {
+										Vue.prototype.checkSubscribeStatus()
+									}
 								} catch (e) {
 									//TODO handle the exception
 								}
@@ -1388,7 +1389,9 @@ export default {
 						current_user_info = res.data.data[0]
 						store.commit("SET_USERINFO", current_user_info)
 						store.commit("SET_USERLIST", res.data.data)
-						Vue.prototype.checkSubscribeStatus()
+						if (!store.state.app.subscsribeStatus) {
+							Vue.prototype.checkSubscribeStatus()
+						}
 					}
 					return current_user_info
 				} else if (res.data.resultCode === '0011') {
@@ -1425,6 +1428,9 @@ export default {
 			}
 		}
 		Vue.prototype.selectBasicUserInfo = async () => {
+			if (store.state.user.userInfo) {
+				return store.state.user.userInfo
+			}
 			const result = await wx.login();
 			if (result && result.code) {
 				let res = await Vue.prototype.wxLogin({
@@ -1454,7 +1460,9 @@ export default {
 				store.commit('SET_USERLIST', res.data.data)
 				uni.setStorageSync('current_user_info', res.data.data[0]);
 				uni.setStorageSync('current_user', res.data.data[0].name);
-				Vue.prototype.checkSubscribeStatus()
+				if (!store.state.app.subscsribeStatus) {
+					Vue.prototype.checkSubscribeStatus()
+				}
 				return res.data.data[0]
 			} else {
 				return false
@@ -1549,10 +1557,6 @@ export default {
 					return false
 				}
 			} else {
-				// uni.showModal({
-				// 	title: '提示',
-				// 	content: JSON.stringify(docInfo)
-				// });
 				return false
 			}
 		}
@@ -1747,6 +1751,18 @@ export default {
 			}
 		}
 
+		Vue.prototype.getVideoPath = (no) => {
+			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
+				return no
+			} else if (no) {
+				if (no.indexOf('&bx_auth_ticket') !== -1) {
+					no = no.split('&bx_auth_ticket')[0]
+				}
+				return api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+			} else {
+				return false
+			}
+		}
 		Vue.prototype.getImagePath = (no) => {
 			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
 				return no
@@ -1764,7 +1780,22 @@ export default {
 		Vue.prototype.requestSuccess = (res) => {
 			return res.data.state === 'SUCCESS' && Array.isArray(res.data.data)
 		}
-
+		Vue.prototype.getVideoInfo = (url) => {
+			return new Promise((resolve, reject) => {
+				// #ifdef MP-WEIXIN
+				uni.getVideoInfo({
+					src: url,
+					success(res) {
+						debugger
+						resolve(res)
+					},
+					fail(error) {
+						reject(error)
+					}
+				})
+				// #endif
+			})
+		}
 		Vue.prototype.getImageInfo = (item) => {
 			return new Promise((resolve, reject) => {
 				wx.getImageInfo({
@@ -1774,8 +1805,8 @@ export default {
 							name: item.name,
 							src: res.path,
 							height: res.height,
-							h:res.height,
-							w:res.width,
+							h: res.height,
+							w: res.width,
 							width: res.width
 						})
 					},

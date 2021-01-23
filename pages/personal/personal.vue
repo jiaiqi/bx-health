@@ -47,7 +47,7 @@
 					<text class="label">我的单位</text>
 					<!-- <view v-if="groupMsgUnreadAmount != 0" class="message-tag">{{ groupMsgUnreadAmount }}</view> -->
 				</view>
-		<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('group')">
+				<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('group')">
 					<text class="cuIcon-edit" style="font-size: 30px;"></text>
 					<text class="label">方案计划</text>
 				</view> -->
@@ -289,19 +289,17 @@ export default {
 					break;
 				case 'mineStore':
 					uni.navigateTo({
-						url:'/personalPages/StoreList/StoreList'
-					})
+						url: '/personalPages/StoreList/StoreList'
+					});
 					break;
 				case 'userList':
 					if (this.manager_type) {
-						this.getDoctorInfo().then(res => {
-							if (res) {
-								this.$store.commit('SET_DOCTOR_INFO', res);
-								uni.navigateTo({
-									url: '/personalPages/userList/userList'
-								});
-							}
+						// this.getDoctorInfo().then(res => {
+						this.$store.commit('SET_DOCTOR_INFO', this.userInfo);
+						uni.navigateTo({
+							url: '/personalPages/userList/userList'
 						});
+						// });
 					} else {
 						uni.showModal({
 							title: '提示',
@@ -478,7 +476,9 @@ export default {
 				if (currentUserInfo) {
 					this.$store.commit('SET_USERINFO', currentUserInfo);
 					this.userInfo = currentUserInfo;
-					this.checkSubscribeStatus();
+					if (!this.$store.state.app.subscsribeStatus) {
+						this.checkSubscribeStatus();
+					}
 				} else if (currentUserInfo === 0) {
 					// 没有创建用户
 					uni.getUserInfo({
@@ -517,8 +517,6 @@ export default {
 				});
 				// #endif
 			}
-			// let wxUserInfo = uni.getStorageSync('wxUserInfo');
-			// this.wxUserInfo = wxUserInfo;
 		},
 		async getuserinfo(e) {
 			// #ifdef MP-WEIXIN
@@ -646,7 +644,7 @@ export default {
 				req.relation_condition = relationCondition;
 			}
 			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				let amount = res.data.data.reduce((pre, cur) => {
 					pre += cur.create_time;
 					return pre;
@@ -700,12 +698,13 @@ export default {
 		});
 	},
 	onPullDownRefresh() {
+		this.selectMyGroup();
 		this.initPage().then(_ => {
 			uni.stopPullDownRefresh();
 		});
 	},
 	onTabItemTap() {
-		this.initPage();
+		// this.initPage();
 	},
 	onShareAppMessage() {
 		let path = `/pages/personal/personal?from=share&invite_user_no=${this.vuex_userInfo.userno}`;
@@ -736,7 +735,7 @@ export default {
 	width: 150%;
 	left: -25%;
 	height: 400rpx;
-	padding:0 25% ;
+	padding: 0 25%;
 	padding-top: 35px;
 	background-color: #0bc99d;
 	display: flex;
@@ -828,7 +827,7 @@ export default {
 			& + .container-cen-top-list:nth-child(3n + 1) {
 				margin-left: 0;
 			}
-			.label{
+			.label {
 				padding: 2px 0;
 			}
 			image {

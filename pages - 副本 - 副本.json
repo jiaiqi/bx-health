@@ -117,13 +117,15 @@
 		// 				"navigationBarTextStyle": "black",
 		// 				"enablePullDownRefresh": false
 		// 			}
-		// 		}, {
+		// 		},
+		// 		{
 		// 			"path": "VideoPlayer/VideoPlayer",
 		// 			"style": {
 		// 				"navigationBarTitleText": "",
 		// 				"enablePullDownRefresh": false
 		// 			}
-		// 		}, {
+		// 		}, 
+		// 		{
 		// 			"path": "DietDetail/DietDetail",
 		// 			"style": {
 		// 				"navigationBarTitleText": "饮食记录详情",
@@ -253,7 +255,7 @@
 				}, {
 					"path": "FontSizeSetting/FontSizeSetting",
 					"style": {
-						"navigationBarTitleText": "字体大小与粗细",
+						"navigationBarTitleText": "字体大小",
 						"enablePullDownRefresh": false
 					}
 
@@ -490,7 +492,6 @@
 					"navigationBarTitleText": "列表",
 					"enablePullDownRefresh": true
 				}
-
 			}, {
 				"path": "ClinicDetail/ClinicDetail",
 				"style": {
@@ -498,7 +499,6 @@
 					"navigationBarTextStyle": "black",
 					"enablePullDownRefresh": false
 				}
-
 			}]
 		},
 		{

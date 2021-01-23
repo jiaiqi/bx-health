@@ -1,10 +1,7 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="hospital-wrap">
-		<view
-			class="bg-view"
-			:style="{ 'background-image': `url(${topBgImg ? topBgImg : 'https://tse1-mm.cn.bing.net/th/id/OIP.pX_K8kY1FWrj9h_2YRlqBwHaEB?pid=Api&rs=1'})` }"
-		></view>
+		<view class="bg-view" :style="{ 'background-image': `url(${topBgImg ? topBgImg : 'https://tse1-mm.cn.bing.net/th/id/OIP.pX_K8kY1FWrj9h_2YRlqBwHaEB?pid=Api&rs=1'})` }"></view>
 		<view class="hospital-top">
 			<view class="left">
 				<view class="top">
@@ -29,7 +26,7 @@
 			</view>
 			<view class="content">
 				<view class="professor-box">
-					<view class="professor-item" v-for="item in customerList" :key="item.docCode">
+					<view class="professor-item" v-for="item in customerList" :key="item.docCode" @click="toPages('custom',item)">
 						<image class="img" :src="getImagePath(item.profile_url)" mode="aspectFit"></image>
 						<view class="doc-info">
 							<view class="top">
@@ -49,16 +46,16 @@
 				<view class="professor-box">
 					<view class="record-detail " v-for="item in seeDoctorRecord" :key="item.docCode">
 						<view class="record-item">
-							<view class="label">患者姓名</view>
+							<view class="label">姓名:</view>
 							<view class="value text-bold">{{ item.name }}</view>
 						</view>
 						<view class="record-item">
-							<view class="label">大夫姓名</view>
+							<view class="label">大夫:</view>
 							<view class="value text-bold">{{ item.doctor_name }}</view>
 						</view>
 						<view class="record-item">
-							<view class="label">就诊日期</view>
-							<view class="value text-gray">{{ formateDate(item.time )}}</view>
+							<!-- <view class="label">就诊日期</view> -->
+							<view class="value text-gray">{{ formateDate(item.time) }}</view>
 						</view>
 					</view>
 				</view>
@@ -71,7 +68,7 @@
 			</view>
 			<view class="content">
 				<view class="professor-box">
-					<view class="professor-item" v-for="item in staffList" :key="item.docCode">
+					<view class="professor-item" v-for="item in staffList" :key="item.docCode" @click="toPages('staff',item)">
 						<image class="img" :src="getImagePath(item.profile_url)" mode="aspectFit"></image>
 						<view class="doc-info">
 							<view class="top">
@@ -135,6 +132,36 @@ export default {
 		})
 	},
 	methods: {
+		toPages(type,data){
+			debugger
+			if(type==='custom'){
+				// 患者详情
+				uni.navigateTo({
+					url:`/personalPages/patientsInfo/patientsInfo?customer_no=${data.person_no}&store_no=${data.store_no}`
+				})
+			}else if(type==='staff'){
+				// 员工详情
+				uni.navigateTo({
+					url:'/personalPages/DoctorDetail/DoctorDetail?doctor_no='+data.person_no
+				})
+			}
+		},
+		getCurrentLocation() {
+			let latitude = 34.219329;
+			let longitude = 108.935485;
+			uni.openLocation({
+				latitude: this.storeInfo.latitude ? Number(this.storeInfo.latitude) : latitude,
+				longitude: this.storeInfo.longitude ? Number(this.storeInfo.longitude) : longitude,
+				name: this.storeInfo.name,
+				address: this.storeInfo.address,
+				success: function() {
+					console.log('success');
+				},
+				fail(err) {
+					console.log('err',err);
+				}
+			});
+		},
 		async getSeeDoctorRecord() {
 			// 就诊记录
 			let url = this.getServiceUrl('health', 'srvhealth_see_doctor_record_select', 'select');
@@ -433,25 +460,29 @@ export default {
 				display: flex;
 				flex-wrap: wrap;
 				.record-detail {
-					width: 100%;
+					box-shadow: 4px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+					width: calc(33% - 40rpx/3);
 					display: flex;
 					flex-wrap: wrap;
+					justify-content: flex-start;
+					align-items: center;
 					margin-bottom: 10rpx;
-					padding-bottom: 10rpx;
-					border-top: 1rpx dashed #f1f1f1;
-					border-bottom: 1rpx dashed #f1f1f1;
-					&+.record-detail{
-						border-top: none;
+					margin-right: 10rpx;
+					margin-left: 10rpx;
+					&:nth-child(3n){
+						margin-right: 0;
+						margin-left: 0;
 					}
+					padding: 10rpx;
 					.record-item {
-						min-width: 50%;
+						width: 100%;
 						display: flex;
 						padding: 5rpx 0;
 						align-items: center;
-						.label{
-							padding:0 20rpx;
+						.label {
 							font-size: 12px;
 							color: #888;
+							margin-right: 5px;
 						}
 					}
 				}

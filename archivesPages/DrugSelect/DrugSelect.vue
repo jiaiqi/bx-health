@@ -15,7 +15,9 @@
 		</view>
 		<uni-load-more :status="more"></uni-load-more>
 		<view class="cu-modal" :class="{ show: showModal }">
-			<view class="cu-dialog"><drug-info :planNo="ds_no" type="add" :service-name="serviceName" :drugDetail="drugDetail" @hideModal="hideModal" @addSuccess="addSuccess"></drug-info></view>
+			<view class="cu-dialog">
+				<drug-info :planNo="ds_no" type="add" :service-name="serviceName" :drugDetail="drugDetail" @hideModal="hideModal" @addSuccess="addSuccess"></drug-info>
+			</view>
 		</view>
 	</view>
 </template>
@@ -69,6 +71,8 @@ export default {
 	},
 	methods: {
 		addSuccess() {
+			debugger;
+			uni.$emit('addDrug');
 			this.hideModal();
 			uni.navigateBack();
 		},

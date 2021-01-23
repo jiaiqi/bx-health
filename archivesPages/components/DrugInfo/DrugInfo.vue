@@ -483,18 +483,21 @@ export default {
 			}
 			this.$http.post(url, req).then(res => {
 				if (res.data.state === 'SUCCESS') {
-					if (this.type === 'add')
+					if (this.type === 'add'){
 						uni.showModal({
-							title: '提示',
-							content: '添加成功',
-							showCancel: false,
-							success(res) {
-								if (res.confirm) {
-									uni.navigateBack();
+								title: '提示',
+								content: '添加成功',
+								showCancel: false,
+								success(res) {
+									if (res.confirm) {
+										uni.navigateBack();
+									}
 								}
-							}
-						});
-					this.$emit('updateSuccess');
+							});
+						this.$emit('addSuccess');
+					}else{
+						this.$emit('updateSuccess');
+					}
 				} else {
 					uni.showToast({
 						title: res.data.resultMessage

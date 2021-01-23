@@ -4,6 +4,7 @@ import api from '@/common/api.js'
 // let fly = new flyio
 import request from '@/common/utils/request.js'
 const fly = request({})
+import store from '@/store/index.js'
 let FormateDate = function(date) {
 	let o = {
 		'yy': date.getFullYear(),
@@ -23,16 +24,19 @@ let FormateDate = function(date) {
 };
 let ignoreServiceName = (url) => {
 	let ignoreUrlList = [
-		"srvsys_service_columnex_v2_select",
-		"srvfile_attachment_select",
-		"srvdaq_page_item_buttons_select",
-		"srvdaq_record_reply_select",
-		"srvhealth_diet_record_select",
-		"srvhealth_diet_contents_select",
-		"srvhealth_mixed_food_nutrition_contents_select",
-		"srvhealth_nutrient_values_recommended_select",
-		"srvhealth_body_activity_record_select",
-		"srvhealth_sleep_record_select"
+		// "srvsys_service_columnex_v2_select",
+		// "srvfile_attachment_select",
+		// "srvdaq_page_item_buttons_select",
+		// "srvdaq_record_reply_select",
+		// "srvhealth_diet_record_select",
+		// "srvhealth_diet_contents_select",
+		// "srvhealth_mixed_food_nutrition_contents_select",
+		// "srvhealth_nutrient_values_recommended_select",
+		// "srvhealth_body_activity_record_select",
+		// "srvhealth_sleep_record_select",
+		// "srvhealth_person_relation_select",
+		// "srvhealth_consultation_chat_record_select",
+		// "srvwx_app_user_select" //检测是否关注公众号
 	]
 	let result = true
 	ignoreUrlList.forEach(srv => {
@@ -66,11 +70,16 @@ fly.interceptors.request.use(async (request) => {
 		}
 	}
 	if (request.url && ignoreServiceName(request.url)) {
-		uni.showLoading({
-			// mask: true
-			title: '加载中...'
-		})
+		console.log(store.state.app.xhrNum,store.state.app.xhrTimestamp - new Date().getTime(),'11111111')
+		if (store.state.app.xhrNum === 0 && new Date().getTime() - store.state.app.xhrTimestamp > 1000) {
+			uni.showLoading({
+				mask: true,
+				title: '加载中...'
+			})
+		}
 	}
+	store.commit('SET_XHR_NUM', store.state.app.xhrNum + 1)
+	console.log(store.state.app.xhrNum)
 	// 如果是浏览器运行的记录 请求的页面path和参数
 	if (uni.getStorageSync('client_env') === 'wxh5' || uni.getStorageSync('client_env') === 'web') {
 		request.headers["requrl"] = window.location.pathname + window.location.search
@@ -102,11 +111,16 @@ fly.interceptors.request.use(async (request) => {
 		request.USERlOGIN = "normal"
 		return request
 	}
+
 })
 //添加响应拦截器，响应拦截器会在then/catch处理之前执行
 fly.interceptors.response.use(
 	(res) => {
-		uni.hideLoading()
+		store.commit('SET_XHR_NUM', store.state.app.xhrNum - 1)
+		console.log(store.state.app.xhrNum)
+		if (store.state.app.xhrNum === 0) {
+			uni.hideLoading()
+		}
 		//只将请求结果的data字段返回
 		if (res.data.resultCode === "0011") { //未登录
 			// || (res.request.headers.USERlOGIN && res.request.headers.USERlOGIN ==="noneLogin")

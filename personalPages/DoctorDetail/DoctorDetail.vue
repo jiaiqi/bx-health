@@ -184,7 +184,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_store_user_select',
 				colNames: ['*'],
-				condition: [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]
+				condition: [{ colName: 'person_no', ruleType: 'eq', value: this.doctorInfo.no }]
 			};
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data)) {

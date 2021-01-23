@@ -2729,7 +2729,9 @@ export default {
 				this.getDietAllRecord();
 				this.getDietRecord(this.selectDate);
 				this.getSportsRecord(this.selectDate);
-				this.checkSubscribeStatus();
+				if(!this.$store.state.app.subscsribeStatus){
+					this.checkSubscribeStatus();
+				}
 			}
 			this.showUserList = false;
 		},

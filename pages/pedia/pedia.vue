@@ -257,6 +257,7 @@ export default {
 			if (res.data.state === 'SUCCESS') {
 				// return res.data.data;
 				this.pageItemList.length = [];
+				// this.getPageDetail(res.data.data)
 				for (let index in res.data.data) {
 					let result = await this.getItemDetail(res.data.data[index]);
 					switch (res.data.data[index].div_type) {
@@ -284,6 +285,30 @@ export default {
 				}
 				return res.data.data;
 			}
+		},
+		async getPageDetail(list) {
+			let req = [];
+			for (let item of list) {
+				let obj = {
+					colNames: ['*'],
+					condition: [{colName: 'item_no', ruleType: 'in', value: item.item_no }],
+					serviceName: ''
+				}
+				switch (item.div_type) {
+					case 'buttons':
+						obj.serviceName = 'srvdaq_page_item_buttons_select';
+						break;
+					case 'carousel':
+						obj.serviceName = 'srvdaq_page_item_carousel_select';
+						break;
+				}
+				if(obj.serviceName&&item.item_no){
+					req.push(obj)
+				}
+			}
+			let url =  this.getServiceUrl('daq', 'select', 'multi')
+			let res = await this.$http.post(url, req);
+			// debugger
 		},
 		async getItemDetail(item) {
 			// 获取页面项详情
@@ -375,7 +400,9 @@ export default {
 			if (userInfo && userInfo.user_no) {
 				// this.loginUserInfo = userInfo;
 				this.$store.commit('SET_LOGIN_USER', userInfo);
-				await this.selectUserList(userInfo);
+				if(!this.userInfo||!this.userInfo.no){
+					await this.selectUserList(userInfo);
+				}
 			}
 		},
 		// 查找当前帐号建立的用户列表
@@ -425,7 +452,9 @@ export default {
 					}
 				}
 				uni.setStorageSync('user_info_list', res.data.data);
-				this.checkSubscribeStatus();
+				if(!this.subscsribeStatus){
+					this.checkSubscribeStatus();
+				}
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {
 				// 登录失效 进行静默登录

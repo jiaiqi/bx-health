@@ -30,7 +30,8 @@
 			}
 		}
 	],
-	"subPackages": [{
+	"subPackages": [
+		{
 			// 问卷
 			"root": "questionnaire",
 			"pages": [{
@@ -116,13 +117,15 @@
 						"navigationBarTextStyle": "black",
 						"enablePullDownRefresh": false
 					}
-				}, {
+				},
+				{
 					"path": "VideoPlayer/VideoPlayer",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-				}, {
+				}, 
+				{
 					"path": "DietDetail/DietDetail",
 					"style": {
 						"navigationBarTitleText": "饮食记录详情",
@@ -248,49 +251,42 @@
 						"navigationBarTitleText": "标签管理",
 						"enablePullDownRefresh": true
 					}
-
 				}, {
 					"path": "FontSizeSetting/FontSizeSetting",
 					"style": {
-						"navigationBarTitleText": "字体大小与粗细",
+						"navigationBarTitleText": "字体大小",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "chatGroup/chatGroup",
 					"style": {
 						"navigationBarTitleText": "圈子",
 						"enablePullDownRefresh": true
 					}
-
 				}, {
 					"path": "gropDetail/gropDetail",
 					"style": {
 						"navigationBarTitleText": "圈子设置",
 						"enablePullDownRefresh": true
 					}
-
 				}, {
 					"path": "StoreList/StoreList",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "StoreDetail/StoreDetail",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "DoctorDetail/DoctorDetail",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}
 			]
 		},
@@ -489,7 +485,6 @@
 					"navigationBarTitleText": "列表",
 					"enablePullDownRefresh": true
 				}
-
 			}, {
 				"path": "ClinicDetail/ClinicDetail",
 				"style": {
@@ -497,7 +492,6 @@
 					"navigationBarTextStyle": "black",
 					"enablePullDownRefresh": false
 				}
-
 			}]
 		},
 		{

@@ -48,6 +48,10 @@
 								<view v-if="row.msg.type == 'img'" class="bubble img" @tap="showPic(row.msg)">
 									<image :src="row.msg.content.url" :style="{ width: row.msg.content.w + 'px', height: row.msg.content.h + 'px' }"></image>
 								</view>
+								<!-- 视频消息 -->
+								<view v-if="row.msg.type == 'video'" class="bubble img" @tap="showPic(row.msg)">
+									<video :src="row.msg.content.url" :style="{ width: row.msg.content.w + 'px', height: row.msg.content.h + 'px' }"></video>
+								</view>
 							</view>
 							<!-- 右-头像 -->
 							<view class="right"><image :src="row.msg.userinfo.face"></image></view>
@@ -72,6 +76,10 @@
 								<!-- 图片消息 -->
 								<view v-if="row.msg.type == 'img'" class="bubble img" @tap="showPic(row.msg)">
 									<image :src="row.msg.content.url" :style="{ width: row.msg.content.w + 'px', height: row.msg.content.h + 'px' }"></image>
+								</view>
+								<!-- 视频消息 -->
+								<view v-if="row.msg.type == 'video'" class="bubble img">
+									<video :src="row.msg.content.url" :style="{ width: row.msg.content.w + 'px', height: row.msg.content.h + 'px' }"></video>
 								</view>
 							</view>
 						</view>
@@ -413,7 +421,7 @@ export default {
 							type: type,
 							content: {
 								text: item.msg_content,
-								url: type === 'img' ? this.getImagePath(item.image) : ''
+								url: type === 'img' ? this.getImagePath(item.image) : type === 'video' ? this.getVideoPath(item.video) : ''
 							},
 							userinfo: {
 								uid: item.sender_person_no,
@@ -425,11 +433,18 @@ export default {
 				});
 				// 获取消息中的图片,并处理显示尺寸
 				for (let i = 0; i < list.length; i++) {
-					if (list[i].type == 'user' && list[i].msg.type == 'img') {
-						let picInfo = await this.getImageInfo({ url: list[i].msg.content.url });
-						picInfo.url = picInfo.src;
-						list[i].msg.content = this.setPicSize(picInfo);
-						this.msgImgList.push(list[i].msg.content.url);
+					if (list[i].type == 'user') {
+						if (list[i].msg.type == 'img') {
+							let picInfo = await this.getImageInfo({ url: list[i].msg.content.url });
+							picInfo.url = picInfo.src;
+							list[i].msg.content = this.setPicSize(picInfo);
+							this.msgImgList.push(list[i].msg.content.url);
+						} else if (list[i].msg.type == 'video') {
+							// let picInfo = await this.getVideoInfo(list[i].msg.content.url);
+							// picInfo.url = picInfo.src;
+							// list[i].msg.content = this.setPicSize(picInfo);
+							// this.msgImgList.push(list[i].msg.content.url);
+						}
 					}
 				}
 				this.msgList = list.reverse();
@@ -619,7 +634,7 @@ export default {
 			return '<div style="align-items: center;word-wrap:break-word;">' + replacedStr + '</div>';
 		},
 		// 发送消息
-		async sendMessage() {
+		async sendMessage(msg) {
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
 			let req = [
 				{
@@ -661,11 +676,47 @@ export default {
 			// } else {
 			// 	req[0].data[0].msg_link = this.chooseRecod;
 			// }
+			if (msg && msg.msg && msg.msg.type === 'voice') {
+				let url = msg.msg.content.url;
+				if (url) {
+					let result = await this.toUploadFile(url);
+				} else {
+					return;
+				}
+			}
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
 				this.$emit('completeSendMessage', req[0].data[0]);
 				this.getInitMsgList();
 			}
+		},
+		 toUploadFile(filePath) {
+			let self = this;
+			let reqHeader = {
+				bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
+			};
+			let formData = {
+				serviceName: 'srv_bxfile_service',
+				interfaceName: 'add',
+				app_no: 'health',
+				table_name: '',
+				columns: 'msg_link'
+			};
+			return new Promise((resolve,reject)=>{
+				uni.uploadFile({
+					url: self.$api.upload,
+					header: reqHeader,
+					formData: formData,
+					filePath: filePath,
+					name: 'file',
+					success: e => {
+						if (e.statusCode === 200) {
+							debugger
+						}
+					}
+				});
+			})
+			
 		},
 		// 发送消息
 		sendMsg(content, type) {
@@ -686,7 +737,8 @@ export default {
 			};
 			// 发送消息
 			this.screenMsg(msg);
-			this.sendMessage();
+			debugger;
+			this.sendMessage(msg);
 			// // 定时器模拟对方回复,三秒
 			// setTimeout(() => {
 			// 	lastid = this.msgList[this.msgList.length - 1].msg.id;
@@ -727,65 +779,11 @@ export default {
 		addSystemTextMsg(msg) {
 			this.msgList.push(msg);
 		},
-		// 添加系统红包消息到列表
-		addSystemRedEnvelopeMsg(msg) {
-			this.msgList.push(msg);
-		},
-		// 打开红包
-		openRedEnvelope(msg, index) {
-			let rid = msg.content.rid;
-			uni.showLoading({
-				title: '加载中...'
-			});
-			// console.log("index: " + index);
-			//模拟请求服务器效果
-			setTimeout(() => {
-				//加载数据
-				if (rid == 0) {
-					this.redenvelopeData = {
-						rid: 0, //红包ID
-						from: '大黑哥',
-						face: '/static/img/im/face/face.jpg',
-						blessing: '恭喜发财，大吉大利',
-						money: '已领完'
-					};
-				} else {
-					this.redenvelopeData = {
-						rid: 1, //红包ID
-						from: '售后客服008',
-						face: '/static/img/im/face/face_2.jpg',
-						blessing: '恭喜发财',
-						money: '0.01'
-					};
-					if (!msg.content.isReceived) {
-						// {type:"system",msg:{id:8,type:"redEnvelope",content:{text:"你领取了售后客服008的红包"}}},
-						this.sendSystemMsg({ text: '你领取了' + (msg.userinfo.uid == this.myuid ? '自己' : msg.userinfo.username) + '的红包' }, 'redEnvelope');
-						// console.log("this.msgList[index]: " + JSON.stringify(this.msgList[index]));
-						this.msgList[index].msg.content.isReceived = true;
-					}
-				}
-				uni.hideLoading();
-				this.windowsState = 'show';
-			}, 200);
-		},
-		// 关闭红包弹窗
-		closeRedEnvelope() {
-			this.windowsState = 'hide';
-			setTimeout(() => {
-				this.windowsState = '';
-			}, 200);
-		},
 		sendSystemMsg(content, type) {
 			let lastid = this.msgList[this.msgList.length - 1].msg.id;
 			lastid++;
 			let row = { type: 'system', msg: { id: lastid, type: type, content: content } };
 			this.screenMsg(row);
-		},
-		//领取详情
-		toDetails(rid) {
-			uni.navigateTo({
-				url: 'HM-details/HM-details?rid=' + rid
-			});
 		},
 		// 预览图片
 		showPic(msg) {

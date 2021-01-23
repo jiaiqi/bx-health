@@ -95,7 +95,9 @@
 			<view class="form-item-content_value textarea" v-else-if="fieldData.type === 'textarea'">
 				<textarea class="textarea-content" auto-height v-model="fieldData.value" :placeholder="'请输入'"></textarea>
 			</view>
-			<view class="form-item-content_value location" v-else-if="fieldData.type === 'addr' || fieldData.type === 'location'">{{ fieldData.value }}</view>
+			<view class="form-item-content_value location" v-else-if="fieldData.type === 'addr' || fieldData.type === 'location'" @click="getLocation">
+				{{ fieldData.value || '点击选择地理位置' }}
+			</view>
 			<view class="voice" v-else-if="fieldData.type === 'voice'">
 				<button class="bg-white cu-btn" @click="showModal('voice')">{{ fieldData.value ? '点击查看录音' : '点击添加录音' }}</button>
 			</view>
@@ -465,6 +467,9 @@ export default {
 		},
 		getLocation() {
 			// this.$emit('getLocation');
+			if(this.pageType==='detail'){
+				return
+			}
 			let self = this;
 			uni.chooseLocation({
 				success: function(res) {

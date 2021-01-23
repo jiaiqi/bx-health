@@ -7,7 +7,7 @@
 		</view>
 		<view class="group-list" v-if="TabCur === 0">
 			<view class="group-item" v-for="item in groupList" :key="item.gc_no" @click="toChat(item)">
-				<view class="icon"><image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit" class="image"></image></view>
+				<view class="icon" @click.stop="toChat2(item)"><image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit" class="image"></image></view>
 				<view class="content">
 					<view class="top">
 						<view class="name">{{ item.name }}</view>
@@ -154,6 +154,12 @@ export default {
 					url: url
 				});
 			}
+		},
+		toChat2(item) {
+			//跳转到群组聊天页面
+			uni.navigateTo({
+				url: `/publicPages/chat/chat?no=${this.vuex_userInfo.no}&group_no=${item.gc_no}`
+			});
 		},
 		toChat(item) {
 			//跳转到群组聊天页面
@@ -344,10 +350,9 @@ export default {
 	display: flex;
 	.tab-item {
 		padding: 30rpx;
-		transition: all 0.5s ease-in;
+		font-size: 36rpx;
 		&.active-tab {
 			font-weight: bold;
-			font-size: 36rpx;
 			position: relative;
 			&::after {
 				content: '';

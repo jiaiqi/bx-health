@@ -1,11 +1,15 @@
 <template>
 	<view class="store-list-wrap">
-		<uni-view class="cu-bar bg-white">
-			<uni-view class="action sub-title">
-				<uni-text class="text-xl text-bold text-green"><span>我的单位</span></uni-text>
-				<uni-text class="bg-green"><span></span></uni-text>
-			</uni-view>
-		</uni-view>
+		<view class="cu-bar bg-white">
+			<view class="action sub-title">
+				<text class="text-xl text-bold text-green"><span>我的单位</span></text>
+				<text class="bg-green"><span></span></text>
+			</view>
+			<button class="action add-unit cu-btn" @click="createUnit">
+				<text class="cuIcon-add"></text>
+				<text>创建单位</text>
+			</button>
+		</view>
 		<view class="store-list">
 			<view class="list-item" v-for="item in storeList">
 				<image @click="toStoreDetail(item)" :src="getImagePath(item.image)" mode="aspectFit" class="image"></image>
@@ -38,6 +42,39 @@ export default {
 		})
 	},
 	methods: {
+		createUnit() {
+			let fieldsCond = [
+				{
+					column: 'address',
+					fieldType: 'location'
+				},
+				{
+					column: 'audit_status',
+					display: false,
+					value: '待审核'
+				},
+				{
+					column: 'grade',
+					display: false,
+					value: '0'
+				},
+				{
+					column: 'longitude',
+					display: false
+				},
+				{
+					column: 'latitude',
+					display: false
+				},
+				{
+					column: 'sale_num',
+					display: false
+				}
+			];
+			uni.navigateTo({
+				url: '/publicPages/newForm/newForm?serviceName=srvhealth_store_mgmt_add&type=add&fieldsCond=' + JSON.stringify(fieldsCond)
+			});
+		},
 		toStoreDetail(e) {
 			if (e.store_no) {
 				uni.navigateTo({
@@ -99,6 +136,14 @@ export default {
 .store-list-wrap {
 	background-color: #fff;
 	min-height: 100vh;
+	.add-unit {
+		border-radius: 20rpx;
+		font-size: 14px;
+		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+		padding: 10rpx 20rpx;
+		background-color: #fff;
+		color: #007aff;
+	}
 	.store-list {
 		padding: 0 20rpx;
 		.list-item {
