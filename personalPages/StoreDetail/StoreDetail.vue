@@ -26,11 +26,11 @@
 			</view>
 			<view class="content">
 				<view class="professor-box">
-					<view class="professor-item" v-for="item in customerList" :key="item.docCode" @click="toPages('custom',item)">
-						<image class="img" :src="getImagePath(item.profile_url)" mode="aspectFit"></image>
+					<view class="professor-item" v-for="custom in customerList"  :data-item="custom" @click="toNav(custom, 'custom', $event)">
+						<image class="img" :src="getImagePath(custom.profile_url)" mode="aspectFit"></image>
 						<view class="doc-info">
 							<view class="top">
-								<text class="doc-name">{{ item.nick_name }}</text>
+								<text class="doc-name">{{ custom.nick_name }}</text>
 							</view>
 						</view>
 					</view>
@@ -47,11 +47,11 @@
 					<view class="record-detail " v-for="item in seeDoctorRecord" :key="item.docCode">
 						<view class="record-item">
 							<view class="label">姓名:</view>
-							<view class="value text-bold">{{ item.name }}</view>
+							<view class="value text-bold">{{ item.name||'' }}</view>
 						</view>
 						<view class="record-item">
 							<view class="label">大夫:</view>
-							<view class="value text-bold">{{ item.doctor_name }}</view>
+							<view class="value text-bold">{{ item.doctor_name||'' }}</view>
 						</view>
 						<view class="record-item">
 							<!-- <view class="label">就诊日期</view> -->
@@ -68,18 +68,31 @@
 			</view>
 			<view class="content">
 				<view class="professor-box">
-					<view class="professor-item" v-for="item in staffList" :key="item.docCode" @click="toPages('staff',item)">
-						<image class="img" :src="getImagePath(item.profile_url)" mode="aspectFit"></image>
+					<view class="professor-item" v-for="staff in staffList"  :data-item="staff" @click="toNav(staff, 'staff', $event)">
+						<image class="img" :src="getImagePath(staff.profile_url)" mode="aspectFit"></image>
 						<view class="doc-info">
 							<view class="top">
-								<text class="doc-name">{{ item.nick_name }}</text>
-								<view class="titleDn">{{ item.titleDn }}</view>
+								<text class="doc-name">{{ staff.nick_name }}</text>
+								<view class="titleDn">{{ staff.titleDn }}</view>
 							</view>
 							<view class="center">
-								<view class="depart-name">{{ item.user_role }}</view>
+								<view class="depart-name">{{ staff.user_role }}</view>
 							</view>
 						</view>
 					</view>
+				</view>
+			</view>
+		</view>
+		<view class="cu-modal" :class="{ show: modalName === 'staffDetail' }">
+			<view class="cu-dialog">
+				<view class="cu-bar bg-white justify-end">
+					<view class="content">请选择下一步操作</view>
+					<view class="action" @tap="hideModal"><text class="cuIcon-close text-red"></text></view>
+				</view>
+				<view class="padding-xl bg-white">
+					<bx-radio-group class="form-item-content_value radio-group" mode="button" @change="radioChange">
+						<bx-radio class="radio" color="#2979ff" v-for="item in ['查看员工信息', '员工管理']" :key="item" :name="item">{{ item }}</bx-radio>
+					</bx-radio-group>
 				</view>
 			</view>
 		</view>
@@ -91,10 +104,12 @@ import { mapState } from 'vuex';
 export default {
 	data() {
 		return {
+			modalName: '',
 			storeInfo: {},
 			storeUserInfo: {},
 			storeUserList: [],
-			seeDoctorRecord: []
+			seeDoctorRecord: [],
+			curStaff: {}
 		};
 	},
 	computed: {
@@ -132,18 +147,62 @@ export default {
 		})
 	},
 	methods: {
-		toPages(type,data){
-			debugger
-			if(type==='custom'){
+		hideModal() {
+			this.modalName = '';
+		},
+		radioChange(e) {
+			if (e === '查看员工信息') {
+				uni.navigateTo({
+					url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + this.curStaff.person_no
+				});
+			} else if (e === '员工管理') {
+				let fieldsCond = [
+					{
+						column: 'store_no',
+						display: false,
+						value: this.curStaff.store_no
+					},
+					{
+						column: 'name',
+						display: false,
+						value: this.curStaff.name
+					},
+					{
+						column: 'type',
+						display: false,
+						value: this.curStaff.type
+					},
+					{
+						column: 'nick_name',
+						display: false,
+						value: this.curStaff.nick_name
+					},
+					{
+						column: 'user_account',
+						display: false,
+						value: this.curStaff.user_account
+					},
+					{
+						column: 'sex',
+						display: false,
+						value: this.curStaff.sex
+					}
+				];
+				uni.navigateTo({
+					url: '/publicPages/newForm/newForm?serviceName=srvhealth_store_user_update&type=update&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
+				});
+			}
+		},
+		toNav(data, type, event) {
+			if (type === 'custom') {
 				// 患者详情
 				uni.navigateTo({
-					url:`/personalPages/patientsInfo/patientsInfo?customer_no=${data.person_no}&store_no=${data.store_no}`
-				})
-			}else if(type==='staff'){
-				// 员工详情
-				uni.navigateTo({
-					url:'/personalPages/DoctorDetail/DoctorDetail?doctor_no='+data.person_no
-				})
+					url: `/personalPages/patientsInfo/patientsInfo?customer_no=${data.person_no}&store_no=${data.store_no}`
+				});
+			} else if (type === 'staff') {
+				// 点击员工头像 -  弹出弹框提示选择跳转到员工信息页面还是员工管理页面
+				this.modalName = 'staffDetail';
+				this.curStaff = data;
 			}
 		},
 		getCurrentLocation() {
@@ -158,7 +217,7 @@ export default {
 					console.log('success');
 				},
 				fail(err) {
-					console.log('err',err);
+					console.log('err', err);
 				}
 			});
 		},
@@ -461,7 +520,7 @@ export default {
 				flex-wrap: wrap;
 				.record-detail {
 					box-shadow: 4px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-					width: calc(33% - 40rpx/3);
+					width: calc(33% - 40rpx / 3);
 					display: flex;
 					flex-wrap: wrap;
 					justify-content: flex-start;
@@ -469,7 +528,7 @@ export default {
 					margin-bottom: 10rpx;
 					margin-right: 10rpx;
 					margin-left: 10rpx;
-					&:nth-child(3n){
+					&:nth-child(3n) {
 						margin-right: 0;
 						margin-left: 0;
 					}

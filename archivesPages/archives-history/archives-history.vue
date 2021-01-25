@@ -1,7 +1,6 @@
 <template>
 	<view class="history-wrap">
 		<cu-custom :isBack="true" @onBack="onBack">
-			<!-- <block slot="backText">返回</block> -->
 			<block slot="content">{{ pageName ? pageName : '健康记录' }}</block>
 		</cu-custom>
 		<view class="history-chart" v-if="isAllPages">
@@ -146,7 +145,7 @@
 								@touchmove="ListTouchMove"
 								@touchend="ListTouchEnd"
 								:data-target="'move-box-' + index"
-								@tap="deleteItem(item)"
+								@tap="updateItem(item)"
 								v-for="(item, index) in historyRecord"
 								:key="index"
 							>
@@ -794,6 +793,11 @@ export default {
 				this.weightChartOption = { option };
 			}
 		},
+		updateItem(e) {
+			uni.navigateTo({
+				url: '/otherPages/otherIndicator/otherIndicator?type=' + this.pageType + '&submitType=update&formId=' + e.id
+			});
+		},
 		deleteItem(e) {
 			let serviceName = '';
 			let req = [];
@@ -1211,6 +1215,18 @@ export default {
 				this.historyRecord = this.deepClone(res.data.data).reverse();
 			} else {
 				this.historyRecord = [];
+				if (type === 'weight' && this.vuex_userInfo && this.vuex_userInfo.weight) {
+					this.historyRecord = [
+						{
+							create_time: this.vuex_userInfo.modify_time ? this.vuex_userInfo.modify_time : this.vuex_userInfo.create_time,
+							create_user_disp: this.vuex_userInfo.create_user_disp,
+							modify_time: this.vuex_userInfo.modify_time,
+							weight: this.vuex_userInfo.weight,
+							name: this.vuex_userInfo.name,
+							create_user: this.vuex_userInfo.create_user
+						}
+					];
+				}
 			}
 		},
 		async getDietSportRecordList() {
@@ -1789,7 +1805,7 @@ export default {
 				} else {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
-					if(!this.$store.state.app.subscsribeStatus){
+					if (!this.$store.state.app.subscsribeStatus) {
 						this.checkSubscribeStatus();
 					}
 				}
@@ -1839,6 +1855,10 @@ export default {
 		this.initPage();
 	},
 	onLoad(option) {
+		uni.$on('deleteItem', () => {
+			this.initPage();
+			this.getChartData();
+		});
 		if (option.isAll) {
 			this.isAllPages = true;
 		}
@@ -2159,7 +2179,7 @@ export default {
 							flex-direction: column;
 							border-radius: 10rpx;
 							overflow: hidden;
-							width: 150rpx;
+							// width: 150rpx;
 							.cu-tag {
 								margin-left: 0;
 								display: flex;

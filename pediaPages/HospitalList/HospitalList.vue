@@ -25,7 +25,7 @@ export default {
 			layout: 'list',
 			classifyList: [],
 			serviceName: 'srvhealth_store_mgmt_select',
-			condition: [{ colName: 'type', ruleType: 'like', value: '诊所医院' }],
+			condition: [{ colName: 'type', ruleType: 'in', value: '诊所,医院,体检中心,药店' }],
 			page: {
 				total: 0,
 				rownumber: 20,

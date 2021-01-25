@@ -306,7 +306,7 @@ export default {
 			) {
 				result = '100%';
 			}
-			if (this.fieldData.type === 'textarea' || this.fieldData.type === 'images') {
+			if ((this.fieldData.type === 'textarea' || this.fieldData.type === 'images')&&this.fieldData.value) {
 				result = '100%';
 			}
 			return result;

@@ -22,6 +22,7 @@
 				</view>
 				<view class="action">
 					<button class="cu-btn sm line-green round" open-type="share" data-type="bindOrganization" :data-data="item"><text class="cuIcon-forward"></text></button>
+					<button class="cu-btn bg-blue sm" @click.stop="toDetail(item)">工作台</button>
 				</view>
 			</view>
 		</view>
@@ -73,6 +74,18 @@ export default {
 			];
 			uni.navigateTo({
 				url: '/publicPages/newForm/newForm?serviceName=srvhealth_store_mgmt_add&type=add&fieldsCond=' + JSON.stringify(fieldsCond)
+			});
+		},
+		toDetail(e) {
+			let fieldsCond = [
+				{
+					column: 'store_no',
+					display: false,
+					value: e.store_no
+				}
+			];
+			uni.navigateTo({
+				url: '/publicPages/newForm/newForm?serviceName=srvhealth_store_mgmt_select&type=detail&fieldsCond=' + JSON.stringify(fieldsCond)
 			});
 		},
 		toStoreDetail(e) {
@@ -179,6 +192,11 @@ export default {
 			}
 			.action {
 				padding: 10rpx;
+				display: flex;
+				flex-direction: column;
+				.cu-btn{
+					margin-bottom: 10rpx;
+				}
 			}
 		}
 	}

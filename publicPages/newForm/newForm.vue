@@ -12,7 +12,7 @@
 				{{ btn.button_name }}
 			</button>
 		</view>
-		<child-table :child-service="childService" v-if="childService.length > 0" @toChildServiceList="toChildServiceList"></child-table>
+		<child-table :formData="defaultVal" :child-service="childService" v-if="childService.length > 0" @toChildServiceList="toChildServiceList"></child-table>
 	</view>
 </template>
 
@@ -25,8 +25,6 @@ export default {
 	},
 	data() {
 		return {
-			// globalTextFontSize: 14,
-			// globalLabelFontSize: 12,
 			serviceName: '',
 			srvType: 'add', // 表单信息 add | update  | select |list | detail
 			use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
@@ -37,12 +35,14 @@ export default {
 			fields: [],
 			condition: [],
 			fieldsCond: [],
-			params: {}
+			params: {},
+			defaultVal: null,
+			showChildService: true
 		};
 	},
 	computed: {
 		childService() {
-			if (this.colsV2Data && Array.isArray(this.colsV2Data.child_service)) {
+			if (this.showChildService!=='false'&&this.showChildService!==false && this.colsV2Data && Array.isArray(this.colsV2Data.child_service)) {
 				return this.colsV2Data.child_service;
 			} else {
 				return [];
@@ -155,6 +155,48 @@ export default {
 				});
 			}
 		},
+		async selectServiceNo() {
+			if (!this.userInfo || !this.userInfo.no) {
+				return;
+			}
+			let serviceName = 'srvhealth_service_record_select';
+			let url = this.getServiceUrl('health', serviceName, 'select');
+			let req = {
+				serviceName: serviceName,
+				colNames: ['*'],
+				condition: [
+					{
+						colName: 'user_info_no',
+						ruleType: 'eq',
+						value: this.userInfo.no
+					}
+				]
+			};
+			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				return res.data.data[0];
+			}
+		},
+		async updateWeight(weight) {
+			let serviceLog = await this.selectServiceNo();
+			const serviceName = 'srvhealth_body_fat_measurement_record_add';
+			let url = this.getServiceUrl('health', serviceName, 'operate');
+			let req = [
+				{
+					serviceName: serviceName,
+					data: [
+						{
+							service_no: serviceLog.no,
+							name: serviceLog.name,
+							weight: weight
+						}
+					]
+				}
+			];
+			if (weight) {
+				this.$http.post(url, req);
+			}
+		},
 		async onButton(e) {
 			let self = this;
 			if (!this.isOnButton) {
@@ -179,6 +221,9 @@ export default {
 						this.isOnButton = false;
 					} else {
 						if (req) {
+							if (e.service_name === 'srvhealth_person_info_update' && req.weight) {
+								this.updateWeight(req.weight);
+							}
 							req = [{ serviceName: e.service_name, data: [req], condition: this.condition }];
 							if (self.params.defaultVal && self.params.defaultVal.id) {
 								req[0].condition = [{ colName: 'id', ruleType: 'eq', value: self.params.defaultVal.id }];
@@ -193,7 +238,7 @@ export default {
 								return;
 							}
 							let res = await this.onRequest('update', e.service_name, req);
-							console.log('res:' + e.service_name, res);
+
 							if (res.data.state === 'SUCCESS') {
 								if (
 									Array.isArray(res.data.response) &&
@@ -384,6 +429,7 @@ export default {
 				if (res.data.state === 'SUCCESS') {
 					if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 						this.params.defaultVal = res.data.data[0];
+						this.defaultVal = res.data.data[0];
 						return res.data.data[0];
 					}
 				}
@@ -391,8 +437,9 @@ export default {
 		},
 		async getFieldsV2() {
 			let app = uni.getStorageSync('activeApp');
+			this.getDefaultVal();
 			let colVs = await this.getServiceV2(this.serviceName, this.srvType, this.use_type, app);
-			let defaultVal = null;
+			let defaultVal = this.defaultVal;
 			this.colsV2Data = colVs;
 			colVs = this.deepClone(colVs);
 			if (colVs.service_view_name) {
@@ -403,8 +450,11 @@ export default {
 			switch (colVs.use_type) {
 				case 'update':
 				case 'detail':
-					defaultVal = await this.getDefaultVal();
+					defaultVal = this.defaultVal && this.defaultVal.id ? this.defaultVal : await this.getDefaultVal();
 					let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
+					if (!fields) {
+						return;
+					}
 					this.fields = fields.map(field => {
 						if (field.type === 'Set' && Array.isArray(field.option_list_v2)) {
 							field.option_list_v2 = field.option_list_v2.map(item => {
@@ -544,6 +594,9 @@ export default {
 		if (destApp) {
 			uni.setStorageSync('activeApp', destApp);
 		}
+		if (option.showChildService) {
+			this.showChildService = option.showChildService;
+		}
 		if (option.params) {
 			this.params = JSON.parse(decodeURIComponent(option.params));
 		}
@@ -593,15 +646,17 @@ export default {
 						}
 					}
 					this.fieldsCond = fieldsCond.map(item => {
-						if (item.column === 'user_info_no' && this.userInfo.no && !item.value) {
-							item.value = this.userInfo.no;
-						}
-						if (item.column === 'user_no' && this.userInfo.userno && !item.value) {
-							item.value = this.userInfo.userno;
-						}
-						if (item.column === 'store_no' && this.doctorInfo.store_no && !item.value) {
-							item.value = this.doctorInfo.store_no;
-							item.display = false;
+						if (option.serviceName.indexOf('srvhealth_see_doctor') === -1) {
+							if (item.column === 'user_info_no' && this.userInfo.no && !item.value) {
+								item.value = this.userInfo.no;
+							}
+							if (item.column === 'user_no' && this.userInfo.userno && !item.value) {
+								item.value = this.userInfo.userno;
+							}
+							if (item.column === 'store_no' && this.doctorInfo.store_no && !item.value) {
+								item.value = this.doctorInfo.store_no;
+								item.display = false;
+							}
 						}
 						return item;
 					});

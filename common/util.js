@@ -605,6 +605,8 @@ export default {
 				return o.HH + ':' + o.mm + ':' + o.ss
 			} else if (type === 'normal') {
 				return o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm;
+			} else if (type === 'h') {
+				return o.HH;
 			} else {
 				return o.yy + '-' + o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm + ':' + o.ss;
 			}

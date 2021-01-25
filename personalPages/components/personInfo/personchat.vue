@@ -1081,7 +1081,11 @@ export default {
 			}
 			let res = await this.$http.post(url, req);
 			console.log('发送成功', res);
-			this.$emit('completeSendMessage', req[0].data[0]);
+			if(Array.isArray(res.data.response)&&res.data.response.length>0&&res.data.response[0].response&&Array.isArray(res.data.response[0].response.effect_data)&&res.data.response[0].response.effect_data[0].id){
+				this.$emit('completeSendMessage', res.data.response[0].response.effect_data[0]);
+			}else{
+				this.$emit('completeSendMessage', req[0].data[0]);
+			}
 			this.isAll = false;
 			this.pageInfo.pageNo = 1;
 			this.getMessageInfo();
@@ -1138,7 +1142,11 @@ export default {
 			console.log('res========>', req);
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				this.$emit('completeSendMessage', req[0].data[0]);
+				if(Array.isArray(res.data.response)&&res.data.response.length>0&&res.data.response[0].response&&Array.isArray(res.data.response[0].response.effect_data)&&res.data.response[0].response.effect_data[0].id){
+					this.$emit('completeSendMessage', res.data.response[0].response.effect_data[0]);
+				}else{
+					this.$emit('completeSendMessage', req[0].data[0]);
+				}
 				console.log('发送成功');
 				this.isAll = false;
 				this.pageInfo.pageNo = 1;

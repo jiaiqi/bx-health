@@ -23,11 +23,16 @@
 					<view class="item-list-top">
 						<text>*</text>
 						<text>体重(千克)</text>
+						<text>{{ inputVal.weight }}kg</text>
 					</view>
 					<slider-number v-model="inputVal.weight" :max="200" :min="0" :step="0.1"></slider-number>
 				</view>
 				<view class="item-list">
-					<text>体脂率(%)</text>
+					<view class="item-list-top">
+						<text></text>
+						<text>体脂率(%)</text>
+						<text>{{ inputVal.body_fat_rate }}%</text>
+					</view>
 					<slider-number v-model="inputVal.body_fat_rate" :max="50" :min="5" :step="0.1"></slider-number>
 				</view>
 			</view>
@@ -39,7 +44,7 @@
 					</view>
 					<view class="item-list-bot"><input type="text" :value="inputVal.retire_time" /></view>
 				</view>
-				<view class="item-list" @click="openTime({ type: 'sleep', field: 'getup_time' })">
+					<view class="item-list" @click="openTime({ type: 'sleep', field: 'getup_time' })">
 					<view class="item-list-top">
 						<text>*</text>
 						<text>起床时间</text>
@@ -47,10 +52,33 @@
 					<view class="item-list-bot"><input type="text" :value="inputVal.getup_time" /></view>
 				</view>
 				<view class="item-list">
+					<text>睡眠过程记录</text>
+					<bx-checkbox-group v-model="inputVal.sleep_event" mode="button">
+						<bx-checkbox v-model="item.checked" class="checkbox" color="#2979ff" v-for="(item, i) in sleepEventOption" :key="item.value" :name="item.value">
+							{{ item.label }}
+						</bx-checkbox>
+					</bx-checkbox-group>
+				</view>
+				<view class="item-list">
+					<text>醒后状态</text>
+					<bx-checkbox-group v-model="inputVal.wake_up_status" mode="button">
+						<bx-checkbox v-model="item.checked" class="checkbox" color="#2979ff" v-for="(item, i) in wakeUpStatusOption" :key="item.value" :name="item.value">
+							{{ item.label }}
+						</bx-checkbox>
+					</bx-checkbox-group>
+				</view>
+				<view class="item-list">
 					<text>白天犯困情况</text>
 					<bx-radio-group v-model="inputVal.sleepy_daytime" mode="button">
-						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in sleepy_option" :key="i" :name="item.value">{{ item.label }}</bx-radio>
+						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in sleepy_option" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
 					</bx-radio-group>
+				</view>
+				<view class="item-list">
+					<view class="item-list-top">
+						<text></text>
+						<text>起夜次数</text>
+					</view>
+					<view class="item-list-bot"><input type="number" :value="inputVal.urinate_times" /></view>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'heartRate'" class="item-wrap">
@@ -83,6 +111,7 @@
 					<view class="item-list-top">
 						<text>*</text>
 						<text>收缩压(高压 毫米汞柱)</text>
+						<text>{{ inputVal.systolic_pressure }}</text>
 					</view>
 					<slider-number v-model="inputVal.systolic_pressure" :max="200" :min="50"></slider-number>
 				</view>
@@ -90,11 +119,16 @@
 					<view class="item-list-top">
 						<text>*</text>
 						<text>舒张压(低压 毫米汞柱)</text>
+						<text>{{ inputVal.diastolic_pressure }}</text>
 					</view>
 					<slider-number v-model="inputVal.diastolic_pressure" :max="120" :min="50"></slider-number>
 				</view>
 				<view class="item-list">
-					<text>心率</text>
+					<view class="item-list-top">
+						<text></text>
+						<text>心率</text>
+						<text>{{ inputVal.heart_rate }}</text>
+					</view>
 					<slider-number v-model="inputVal.heart_rate" :max="200" :min="30"></slider-number>
 				</view>
 				<view class="item-list">
@@ -149,7 +183,22 @@
 		<view class="other-bot">
 			<button class="cu-btn lg btn" :class="{ disabled: !canSave }" @click="submitRecord" v-if="!isSubmit">保存</button>
 			<button class="cu-btn lg btn" @click="back" v-if="isSubmit">返回</button>
+			<button class="cu-btn sm round bg-red margin-left-xs" @click="deleteItem" v-if="submitType === 'update'"><text class="cuIcon-delete"></text></button>
 		</view>
+		<bz-date-picker
+			v-model="popupStatus"
+			title="请选择时间"
+			:defaultTime="formateDate('','full')"
+			minuteStep="10"
+			days="7"
+			minHour="6"
+			maxHour="22"
+			minMinute="0"
+			maxMinute="59"
+			@confirm="handleDatePickerConfirm"
+			@cancel="handleDatePickerCancel"
+			@close="handleDatePickerClose"
+		></bz-date-picker>
 		<mx-date-picker
 			style="z-index: 1290;"
 			:format="dateFormat"
@@ -177,6 +226,10 @@ export default {
 	data() {
 		return {
 			planNo: '', //关联方按计划编码
+			submitType: '', // update/add
+			formId: '', //update时的id
+			curItem: {},
+			popupStatus:false,
 			inputVal: {
 				// top_title:'',
 				weight: 50,
@@ -197,9 +250,45 @@ export default {
 				retire_time: '', //睡眠 - 就寝时间
 				getup_time: '', //睡眠 - 起床时间
 				sleepy_daytime: '', //睡眠 - 犯困情况
+				sleep_event: '', //睡眠过程记录
+				urinate_times: 0, //起夜次数
+				wake_up_status: '', //醒后状态
 				posture: '坐位', //血压 - 姿势
 				measure_position: '右上臂' // 血压 - 测量位置
 			},
+			wakeUpStatusOption: [
+				{
+					label: '无恢复感',
+					value: '无恢复感',
+					checked: false
+				},
+				{
+					label: '头晕',
+					value: '头晕',
+					checked: false
+				},
+				{
+					label: '头疼',
+					value: '头疼',
+					checked: false
+				},
+				{
+					label: '憋气感',
+					value: '憋气感',
+					checked: false
+				},
+				{
+					label: '口干',
+					value: '口干',
+					checked: false
+				},
+				{
+					label: '咽喉异物感',
+					value: '咽喉异物感',
+					checked: false
+				}
+			],
+			sleepEventOption: [{ label: '多梦', value: '多梦', checked: false }, { label: '出汗', value: '出汗', checked: false }],
 			sleepy_option: [{ label: '从不', value: '从不' }, { label: '很少', value: '很少' }, { label: '经常', value: '经常' }, { label: '严重', value: '严重' }],
 			showSelect: false,
 			glucose_time_option: [{ label: '空腹', value: '空腹' }, { label: '餐后2小时', value: '餐后2小时' }, { label: '其他', value: '其他' }],
@@ -222,68 +311,68 @@ export default {
 				{
 					value: '右上臂',
 					label: '右上臂',
-					checked:false
+					checked: false
 				},
 				{
 					value: '左上臂',
 					label: '左上臂',
-					checked:false
+					checked: false
 				},
 				{
 					value: '右手腕',
 					label: '右手腕',
-					checked:false
+					checked: false
 				},
 				{
 					value: '左手腕',
 					label: '左手腕',
-					checked:false
+					checked: false
 				}
 			],
 			postList: [
 				{
 					value: '坐位',
 					label: '坐位',
-					checked:false
+					checked: false
 				},
 				{
 					value: '躺卧位',
 					label: '躺卧位',
-					checked:false
+					checked: false
 				},
 				{
 					value: '站立位',
 					label: '站立位',
-					checked:false
+					checked: false
 				}
 			],
 			list: [
 				{
 					value: '穿鞋',
 					label: '穿鞋',
-					checked:false
+					checked: false
 				},
 				{
 					value: '穿外套外衣',
 					label: '穿外套外衣',
-				checked:false
+					checked: false
 				},
 				{
 					value: '穿轻薄内衣',
 					label: '穿轻薄内衣',
-					checked:false
+					checked: false
 				}
 			],
 			DigList: [
 				{
 					value: '空腹',
 					label: '空腹',
-					checked:false
+					checked: false
 				},
 				{
 					value: '排空大小便',
 					label: '排空大小便',
-					checked:false
+					checked: false
 				}
 			]
 		};
@@ -316,6 +405,7 @@ export default {
 					result = result = this.inputVal.systolic_pressure && this.inputVal.diastolic_pressure ? true : false;
 					break;
 			}
+			// if()
 			return result;
 		},
 		topTitle() {
@@ -327,14 +417,6 @@ export default {
 				case 'sleep':
 					str = '每天最少保证睡眠时间在7小时左右并且不要熬夜哦,可以有效地缓解疲劳';
 					break;
-				// case 'heartRate':
-				// 	break;
-				// case 'oxygen':
-				// 	result =
-				// 		this.inputVal.start_time && this.inputVal.end_time && this.inputVal.oxygen_saturation_max && this.inputVal.oxygen_saturation_min && this.inputVal.oxygen_saturation_avg
-				// 			? true
-				// 			: false;
-				// 	break;
 				case 'glucose':
 					str = '如果您是以为内最近感染、发热、呕吐、腹泻、外伤等疾病性就诊，抽血化验“顺带”发现血糖高，那么，这个“高血糖”尚不能作为糖尿病的依据。您应当在病好后再次化验血糖';
 					break;
@@ -349,41 +431,66 @@ export default {
 		getLastWeightData() {
 			// 查找上一次的体重体脂数据
 			let serviceName = 'srvhealth_body_fat_measurement_record_select';
+			if (this.type === 'bp' || this.type === 'pressure') {
+				serviceName = 'srvhealth_blood_pressure_record_select';
+			} else if (this.type === 'sleep') {
+				serviceName = 'srvhealth_sleep_record_select';
+			}
 			let url = this.getServiceUrl('health', serviceName, 'select');
 			let req = {
-				serviceName: 'srvhealth_body_fat_measurement_record_select',
+				serviceName: serviceName,
 				colNames: ['*'],
 				condition: [{ colName: 'service_no', ruleType: 'eq', value: this.serviceLog.no }],
 				order: [{ colName: 'create_time', orderType: 'desc' }],
 				page: { pageNo: 1, rownumber: 2 }
 			};
+			if (this.formId) {
+				req.condition.push({ colName: 'id', ruleType: 'eq', value: this.formId });
+			}
 			this.$http.post(url, req).then(res => {
 				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 					let info = res.data.data[0];
+					if (this.submitType === 'update') {
+						this.curItem = info;
+					}
 					if (info.wearing) {
 						this.inputVal.wearing = info.wearing;
-						this.list = this.list.map(item=>{
-							if(info.wearing.indexOf(item.value)!==-1){
-								item.checked = true
+						this.list = this.list.map(item => {
+							if (info.wearing.indexOf(item.value) !== -1) {
+								item.checked = true;
 							}
-							return item
-						})
-					}
-					if (info.body_fat_rate) {
-						this.inputVal.body_fat_rate = info.body_fat_rate;
+							return item;
+						});
 					}
 					if (info.alimentary_canal) {
 						this.inputVal.alimentary_canal = info.alimentary_canal;
-						this.DigList = this.DigList.map(item=>{
-							if(info.alimentary_canal.indexOf(item.value)!==-1){
-								item.checked = true
+						this.DigList = this.DigList.map(item => {
+							if (info.alimentary_canal.indexOf(item.value) !== -1) {
+								item.checked = true;
 							}
-							return item
-						})
+							return item;
+						});
 					}
-					if (info.weight) {
-						this.inputVal.weight = info.weight;
-					}
+					// if (info.weight) {
+					// 	this.inputVal.weight = info.weight;
+					// }
+					let keys = [
+						'heart_rate',
+						'measure_position',
+						'posture',
+						'diastolic_pressure',
+						'systolic_pressure',
+						'retire_time',
+						'getup_time',
+						'sleepy_daytime',
+						'weight',
+						'body_fat_rate'
+					];
+					Object.keys(info).forEach(key => {
+						if (keys.includes(key)) {
+							this.inputVal[key] = info[key];
+						}
+					});
 				}
 			});
 		},
@@ -425,6 +532,9 @@ export default {
 							this.getLastWeightData();
 							break;
 						default:
+							if (this.submitType === 'update' && this.formId) {
+								this.getLastWeightData();
+							}
 							break;
 					}
 				} else {
@@ -432,6 +542,53 @@ export default {
 					await this.addServiceLog();
 				}
 			}
+		},
+		deleteItem() {
+			let e = this.curItem;
+			if (!e.id) {
+				return;
+			}
+			let serviceName = '';
+			let req = [];
+			let self = this;
+			uni.showModal({
+				title: '提示',
+				content: '是否删除此条数据',
+				success(res) {
+					if (res.confirm) {
+						switch (self.type) {
+							case 'weight': //体重
+								serviceName = 'srvhealth_body_fat_measurement_record_delete';
+								req = [{ serviceName: 'srvhealth_body_fat_measurement_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+								break;
+							case 'sleep': //睡眠
+								serviceName = 'srvhealth_sleep_record_delete';
+								req = [{ serviceName: 'srvhealth_sleep_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+								break;
+							case 'bp': //血压
+								serviceName = 'srvhealth_blood_pressure_record_delete';
+								req = [{ serviceName: 'srvhealth_blood_pressure_record_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+								break;
+						}
+						let url = self.getServiceUrl('health', serviceName, 'operate');
+						self.$http.post(url, req).then(res => {
+							if (res.data.state === 'SUCCESS') {
+								uni.$emit('deleteItem');
+								uni.showModal({
+									title: '提示',
+									content: '删除成功',
+									showCancel: false,
+									success(e) {
+										if (e.confirm) {
+											uni.navigateBack();
+										}
+									}
+								});
+							}
+						});
+					}
+				}
+			});
 		},
 		second2Time(second) {
 			if (!second) {
@@ -473,16 +630,18 @@ export default {
 				});
 				return;
 			}
-
 			let serviceName = '';
 			let req = [];
 			let verify = false;
 			switch (this.type) {
 				case 'weight':
 					serviceName = 'srvhealth_body_fat_measurement_record_add';
+					if (this.submitType === 'update' && this.formId) {
+						serviceName = 'srvhealth_body_fat_measurement_record_update';
+					}
 					req = [
 						{
-							serviceName: 'srvhealth_body_fat_measurement_record_add',
+							serviceName: serviceName,
 							data: [
 								{
 									ps_no: this.planNo,
@@ -501,6 +660,9 @@ export default {
 					let sleep_time = (new Date(this.inputVal.getup_time) - new Date(this.inputVal.retire_time)) / 1000; // 秒数
 					sleep_time = this.second2Time(sleep_time);
 					serviceName = 'srvhealth_sleep_record_add';
+					if (this.submitType === 'update' && this.formId) {
+						serviceName = 'srvhealth_sleep_record_update';
+					}
 					req = [
 						{
 							serviceName: serviceName,
@@ -512,19 +674,22 @@ export default {
 									retire_time: this.inputVal.retire_time,
 									getup_time: this.inputVal.getup_time,
 									sleepy_daytime: this.inputVal.sleepy_daytime,
+									sleep_event: this.inputVal.sleep_event.toString(),
+									urinate_times: this.inputVal.urinate_times,
+									wake_up_status: this.inputVal.wake_up_status.toString(),
 									sleep_time: sleep_time
 								}
 							]
 						}
 					];
 					break;
-				case 'heartRate':
-					serviceName = '';
-					break;
 				case 'bp':
 				case 'pressure':
 					// 血压
 					serviceName = 'srvhealth_blood_pressure_record_add';
+					if (this.submitType === 'update' && this.formId) {
+						serviceName = 'srvhealth_blood_pressure_record_update';
+					}
 					req = [
 						{
 							serviceName: serviceName,
@@ -585,6 +750,9 @@ export default {
 					];
 					break;
 			}
+			if (this.submitType === 'update' && this.formId) {
+				req[0].condition = [{ colName: 'id', ruleType: 'eq', value: this.formId }];
+			}
 			let url = this.getServiceUrl('health', serviceName, 'operate');
 			if (serviceName) {
 				let res = await this.$http.post(url, req);
@@ -622,6 +790,7 @@ export default {
 			});
 		},
 		openTime(e) {
+			// this.popupStatus = true
 			this.showTimePicker = true;
 			if (e.type && e.field) {
 				this.dateTimeField = e.field;
@@ -629,6 +798,9 @@ export default {
 		},
 		back() {
 			uni.navigateBack();
+		},
+		selectTimeEvent(e) {
+			debugger;
 		},
 		onSelected(e) {
 			//时间选择器
@@ -643,21 +815,36 @@ export default {
 					this.inputVal[this.dateTimeField] = e.value;
 				}
 			}
+		},
+		handleDatePickerConfirm(e){
+			debugger
+		},
+		handleDatePickerCancel(e){
+			debugger
+		},
+		handleDatePickerClose(e){
+			debugger
 		}
 	},
 	onLoad(option) {
 		if (option.planNo) {
 			this.planNo = option.planNo;
 		}
-		let arr = ['systolic_pressure','diastolic_pressure','heart_rate']
-		arr.forEach(key=>{
-			if(option[key]){
-				if(key === 'heart_rate'&&Number(option[key])<30){
-					option[key] = 30
-				}
-				this.inputVal[key] = Number(option[key])
+		if (option.submitType) {
+			this.submitType = option.submitType;
+			if (option.formId) {
+				this.formId = option.formId;
 			}
-		})
+		}
+		let arr = ['systolic_pressure', 'diastolic_pressure', 'heart_rate'];
+		arr.forEach(key => {
+			if (option[key]) {
+				if (key === 'heart_rate' && Number(option[key]) < 30) {
+					option[key] = 30;
+				}
+				this.inputVal[key] = Number(option[key]);
+			}
+		});
 		if (option && option.type) {
 			this.type = option.type;
 		}
@@ -752,6 +939,16 @@ export default {
 	.other-bot {
 		display: flex;
 		justify-content: center;
+		align-items: center;
+		position: relative;
+		.round {
+			border-radius: 50%;
+			height: 60rpx;
+			width: 60rpx;
+			font-size: 36rpx;
+			position: absolute;
+			right: 30rpx;
+		}
 		.btn {
 			width: 70%;
 			height: 70upx;

@@ -6,7 +6,7 @@
 		<view class="operate" hover-class="active" @click="numberChange('minus')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">
 			-1
 		</view>
-		<slider class="uni-slider" @change="changeSlider" :step="step" :min="min" :max="max" :value="bindValue" :show-value="showValue" />
+		<slider class="uni-slider"  @changing="changeSlider" :step="step" :min="min" :max="max" :value="bindValue" :show-value="showValue" />
 		<view class="operate" hover-class="active" @click="numberChange('add')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">
 			+1
 		</view>

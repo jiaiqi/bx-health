@@ -335,9 +335,6 @@ export default {
 			}
 		});
 	}
-	// created() {
-	// 	this.selectMyGroup();
-	// }
 };
 </script>
 

@@ -346,7 +346,7 @@ export default {
 							}
 						];
 						uni.navigateTo({
-							url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_select&type=detail&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
+							url: '/publicPages/newForm/newForm?showChildService=false&serviceName=srvhealth_person_info_select&type=detail&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
 						});
 					}
 					break;

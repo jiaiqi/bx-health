@@ -1,8 +1,13 @@
 <template>
 	<view class="child-service-box">
 		<!-- <view class="normal-title">子表</view> -->
-		<view class="child-service-item" v-for="item in childService" @click="toChildServiceList(item)">
-			<view class="child-service-title">{{ item.foreign_key && item.foreign_key.section_name ? item.foreign_key.section_name : item.service_view_name }}</view>
+		<view class="child-service-item" v-for="item in list" @click="toChildServiceList(item)">
+			<view class="child-service-title">
+				<view class="cu-tag badge" v-if="item.total !== 0">
+					<block>{{ item.total > 99 ? '99+' : item.total }}</block>
+				</view>
+				<view class="label">{{ item.foreign_key && item.foreign_key.section_name ? item.foreign_key.section_name : item.service_view_name }}</view>
+			</view>
 		</view>
 	</view>
 </template>
@@ -13,12 +18,89 @@ export default {
 		childService: {
 			type: Array
 		},
+		formData: {
+			type: Object
+		}
+	},
+	mounted() {
+		this.getChildServiceList();
+	},
+	data() {
+		return {
+			list: []
+		};
+	},
+	watch: {
+		childService: {
+			deep: true,
+			immediate: true,
+			handler(newValue, oldValue) {
+				if (Array.isArray(newValue) && newValue.length > 0) {
+					this.list = this.deepClone(newValue);
+				}
+			}
+		}
 	},
 	methods: {
 		toChildServiceList(item) {
-			this.$emit('toChildServiceList',item)
+			this.$emit('toChildServiceList', item);
+		},
+		getChildServiceList() {
+			let formData = this.formData;
+			let req = [
+				{
+					colNames: ['*'],
+					condition: [],
+					page: {
+						pageNo: 1,
+						rownumber: 10
+					},
+					serviceName: 'srvhealth_chinese_medicine_disease_select'
+				},
+				{
+					colNames: ['*'],
+					condition: [],
+					page: {
+						pageNo: 1,
+						rownumber: 10
+					},
+					serviceName: 'srvhealth_see_doctor_record_select'
+				}
+			];
+			let url = this.getServiceUrl('health', 'select', 'multi');
+			if (this.childService.length > 0) {
+				req = this.childService.map(item => {
+					let obj = {
+						colNames: ['*'],
+						condition: [{ colName: item.foreign_key.column_name, ruleType: 'eq', value: formData[item.foreign_key.referenced_column_name] }],
+						serviceName: item.service_name,
+						page: {
+							pageNo: 1,
+							rownumber: 1
+						}
+					};
+					return obj;
+				});
+				this.$http.post(url, req).then(res => {
+					this.list = this.list.map((item, index) => {
+						if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+							res.data.data.forEach((data, dIndex) => {
+								if (index === dIndex) {
+									if(data.page){
+										item.total = data.page.total;
+									}else{
+										item.total = 0;
+									}
+									this.$set(item, 'total', data.page.total);
+								}
+							});
+						}
+						return item;
+					});
+				});
+			}
 		}
-	},
+	}
 };
 </script>
 

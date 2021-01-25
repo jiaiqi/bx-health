@@ -39,7 +39,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="profile-box tags">
+		<view class="profile-box tags" v-if="!this.storeNo">
 			<view class="title">
 				<view class="text">标签</view>
 				<view class="title-action" @click="navPages('addTag')">
@@ -64,18 +64,6 @@
 				<view class="disease-item record" @click="navPages('addReception')"><text class="cuIcon-add" style="font-size: 30px;"></text></view>
 			</view>
 		</view>
-<!-- 		<view class="health-archive-item health-score">
-			<view class="subtitle">
-				<text class="title-text">开药记录</text>
-				<view class="title-action" @click="navPages('prescribeRecord')">
-					<text class="cuIcon-time"></text>
-					<text class="see-histroy">查看历史</text>
-				</view>
-			</view>
-			<view class="content disease-risk">
-				<view class="disease-item record" @click="navPages('toPrescribe')"><text class="cuIcon-add" style="font-size: 30px;"></text></view>
-			</view>
-		</view> -->
 		<view class="health-archive-item health-score">
 			<view class="subtitle">
 				<text class="title-text">近日健康指数</text>
@@ -118,22 +106,6 @@
 			</view>
 		</view>
 		<view class="health-archive-item-wrap">
-			<!-- <view class="health-archive-item ">
-				<view class="subtitle">
-					<text class="title-text">咨询记录</text>
-					<view class=""></view>
-				</view>
-				<view class="content disease-risk">
-					<view class="disease-item record"><text class="date">2020-11-13</text></view>
-					<view class="disease-item record"><text class="date">2020-10-19</text></view>
-					<view @click="toChatList" class="disease-item record">
-						<text class="date">
-							更多
-							<text class="cuIcon-right margin-left-xs"></text>
-						</text>
-					</view>
-				</view>
-			</view> -->
 			<view class="health-archive-item ">
 				<view class="subtitle">
 					<text class="title-text">检查报告</text>
@@ -200,12 +172,13 @@ export default {
 	},
 	props: {
 		customer_no: {
-			type: String,
-			default: ''
+			type: String
 		},
 		dp_no: {
-			type: String,
-			default: ''
+			type: String
+		},
+		storeNo: {
+			type: String
 		}
 	},
 	computed: {
@@ -363,13 +336,8 @@ export default {
 				});
 			}
 		},
-		/*点击前往聊天列表**/
-		toChatList() {
-			// uni.navigateTo({
-			// 	url: '/personalPages/chat/chatList'
-			// });
-		},
 		navPages(type = 'history', item = {}) {
+			debugger
 			if (type === 'history') {
 				uni.navigateTo({
 					url: '/archivesPages/archives-history/archives-history?isAll=true&customer_no=' + this.customer_no
@@ -403,6 +371,9 @@ export default {
 					{ column: 'create_time', display: false },
 					{ column: 'create_user_disp', display: false }
 				];
+				if(this.storeNo){
+					fieldsCond[1].value = this.storeNo
+				}
 				let url = '/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_select&type=detail&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
 				uni.navigateTo({
 					url: url
@@ -420,6 +391,9 @@ export default {
 				colNames: ['*'],
 				condition: [{ colName: 'user_info_no', ruleType: 'eq', value: this.customer_no }]
 			};
+			if(this.storeNo){
+				req.condition.push({ colName: 'store_no', ruleType: 'eq', value:this.storeNo })
+			}
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
 				this.receptionRecord = res.data.data;
@@ -440,7 +414,7 @@ export default {
 				this.selectInspectionReport();
 				this.getTagList();
 				this.getReceptionRecord();
-				this.$store.commit('SET_PATIENT_INFO',this.userInfo)
+				this.$store.commit('SET_PATIENT_INFO', this.userInfo);
 				return res.data.data[0];
 			} else {
 				uni.showToast({

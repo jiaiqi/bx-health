@@ -48,14 +48,14 @@ export default {
 		}
 	},
 	methods: {
-		updateLastLookTime() {
+		updateLastLookTime(e) {
 			if (this.groupInfo && this.groupInfo.pg_no) {
 				let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_update', 'operate');
 				let req = [
 					{
 						serviceName: 'srvhealth_person_group_circle_update',
 						condition: [{ colName: 'pg_no', ruleType: 'eq', value: this.groupInfo.pg_no }],
-						data: [{ latest_sign_in_time: this.formateDate('', 'DateTime') }]
+						data: [{ latest_sign_in_time: e && e.create_time ? e.create_time : this.formateDate('', 'DateTime') }]
 					}
 				];
 				this.$http.post(url, req);
@@ -63,7 +63,8 @@ export default {
 		},
 		completeSendMessage(e) {
 			// 发送完一条消息后的回调
-			this.updateLastLookTime();
+			// debugger;
+			this.updateLastLookTime(e);
 		},
 		async selectGroupMember() {
 			// 查询圈子成员
@@ -87,7 +88,7 @@ export default {
 		}
 	},
 	onLoad(option) {
-		debugger
+		debugger;
 		if (option.no) {
 			this.no = option.no;
 		}
@@ -112,7 +113,7 @@ export default {
 		}
 	},
 	beforeDestroy() {
-		this.updateLastLookTime();
+		// this.updateLastLookTime();
 	},
 	onPullDownRefresh() {
 		// 下拉
