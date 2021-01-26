@@ -643,6 +643,8 @@ export default {
 				]
 			};
 			const res = await this.$http.post(url, req);
+			debugger
+			this.$store.commit('SET_USERLIST', res.data.data);
 			console.log('userInfo=====>', res.data.data);
 		},
 		clickChatLink(item) {

@@ -127,7 +127,7 @@ export default {
 		}
 		if (query.viewTemp) {
 			// let viewTemp = this.getDecodeUrl(option.viewTemp);
-			this.viewTemp = JSON.parse(query.viewTemp);
+			this.viewTemp = JSON.parse(decodeURIComponent(query.viewTemp));
 			if (this.viewTemp.title) {
 				this.keyColumn = this.viewTemp.title;
 			}
@@ -258,7 +258,6 @@ export default {
 								};
 							});
 						}
-						debugger;
 						if (item.service_name.indexOf('health_plan_schedule') !== -1) {
 							if (fieldsCond.find(item => item.column === 'sdr_no')) {
 								fieldsCond.push({

@@ -1370,6 +1370,8 @@ export default {
 				const res = await _http.post(url, req);
 				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 					let current_user_info = null
+					debugger
+					store.commit('SET_USERLIST', res.data.data);
 					if (uni.getStorageSync('current_user_info')) {
 						res.data.data.forEach(item => {
 							if (item.no === uni.getStorageSync('current_user_info').no) {
@@ -1430,7 +1432,7 @@ export default {
 			}
 		}
 		Vue.prototype.selectBasicUserInfo = async () => {
-			if (store.state.user.userInfo) {
+			if (store.state.user.userInfo && (store.state.user.userInfo.userno || store.state.user.userInfo.user_no)) {
 				return store.state.user.userInfo
 			}
 			const result = await wx.login();
@@ -1446,6 +1448,10 @@ export default {
 			let req = {
 				"serviceName": "srvhealth_person_info_select",
 				"colNames": ["*"],
+				order: [{
+					colName: 'create_time',
+					orderType: 'asc'
+				}],
 				"condition": [{
 					"colName": "create_user",
 					"ruleType": "eq",
@@ -1775,7 +1781,7 @@ export default {
 				return api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
 					'&thumbnailType=fwsu_100';
 			} else {
-				return false
+				return ''
 			}
 		}
 
@@ -1788,7 +1794,6 @@ export default {
 				uni.getVideoInfo({
 					src: url,
 					success(res) {
-						debugger
 						resolve(res)
 					},
 					fail(error) {

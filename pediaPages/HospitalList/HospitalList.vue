@@ -1,13 +1,18 @@
 <template>
 	<view class="page-wrap">
 		<view class="filter-box" v-if="classifyList.length > 0"></view>
-		<view class="layout-switch text-green">
+<!-- 		<view class="layout-switch text-green">
 			<text class="cuIcon-cascades" v-if="layout === 'list'" @click="switchLayout('grid')"></text>
 			<text class="cuIcon-list" v-if="layout === 'grid'" @click="switchLayout('list')"></text>
-		</view>
+		</view> -->
 		<view class="list-box" :class="{ grid: layout === 'grid', list: layout === 'list' }">
-			<view class="list-item" v-for="(item, index) in list" :key="index" @click="toItemDetail">
-				<view class="profile"><image class="image" :src="getImagePath(item[fieldMap.image])" mode="aspectFit"></image></view>
+			<view class="list-item" v-for="(item, index) in list" :key="index" @click="toItemDetail(item)">
+				<view class="profile">
+					<image class="image" v-if="getImagePath(item[fieldMap.image])" :src="getImagePath(item[fieldMap.image])" mode="aspectFill"></image>
+					<view class="image" v-else-if="item[fieldMap.label]">
+						{{item[fieldMap.label].slice(0,1) }}
+					</view>
+				</view>
 				<view class="content">
 					<view class="label">{{ item[fieldMap.label] || '' }}</view>
 				</view>
@@ -42,9 +47,9 @@ export default {
 		switchLayout(e) {
 			this.layout = e;
 		},
-		toItemDetail() {
+		toItemDetail(e) {
 			uni.navigateTo({
-				url: '/pediaPages/hospitalOverview/hospitalOverview'
+				url: `/pediaPages/hospitalOverview/hospitalOverview?store_no=${e.store_no}`
 			});
 		},
 		async getList() {
@@ -146,12 +151,11 @@ export default {
 	.list-box {
 		display: flex;
 		flex-wrap: wrap;
-
 		.list-item {
 			width: calc(25% - 60rpx / 4);
 			margin-bottom: 20rpx;
 			margin-right: 20rpx;
-			min-height: 220rpx;
+			min-height: 200rpx;
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
@@ -164,12 +168,18 @@ export default {
 			}
 			.profile {
 				width: 100%;
-				height: 150rpx;
+				height: 200rpx;
 				overflow: hidden;
 				border-bottom: #f1f1f1 1rpx solid;
 				.image {
 					width: 100%;
 					height: 200rpx;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					font-family: '楷体';
+					font-size: 50px;
+					border-right: 1rpx dotted #f1f1f1;
 				}
 			}
 			.content {

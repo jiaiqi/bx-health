@@ -7,7 +7,7 @@
 			</view>
 			<input class="input tag-item" type="text" placeholder="添加标签" v-model="curTag" @confirm="createTag" />
 		</view>
-		<view class="button-box"><button class="cu-btn bg-blue" type="primary" v-if="curTag" @click="createTag({detail:{value:curTag}})">添加</button></view>
+		<view class="button-box" v-if="curTag"><button class="cu-btn bg-blue" type="primary" @click="createTag({ detail: { value: curTag } })">添加</button></view>
 		<view class="tag-list" v-if="curTag">
 			<!-- <view class="title">所有标签</view> -->
 			<view class="tag-item" @click="insertTag(item)" :class="{ checked: curTags.find(tag => tag.label_no === item.label_no) }" v-for="item in keyTags" :key="item.label_no">
@@ -35,13 +35,18 @@ export default {
 			curTagsCopy: [],
 			activeTagNo: '',
 			manager_no: '',
-			customer_no: ''
+			customer_no: '',
+			dp_no: ''
 		};
 	},
 	computed: {
 		keyTags() {
+			if (!this.curTag) {
+				return;
+			}
 			let tags = this.deepClone(this.tagList);
-			return tags.filter(item => item.label_name.indexOf(this.curTag) !== -1);
+			let keyTags = tags.filter(item => item.label_name.toLocaleLowerCase().indexOf(this.curTag.toLocaleLowerCase()) !== -1);
+			return keyTags;
 		},
 		...mapState({
 			globalTextFontSize: state => state.app['globalTextFontSize'],
@@ -64,7 +69,7 @@ export default {
 			// 给该用户添加标签(临时)
 			if (!this.curTags.find(item => item.label_no === tag.label_no)) {
 				this.curTags.push(tag);
-				this.curTag = ''
+				this.curTag = '';
 			} else {
 				if (this.curTags.find(item => item.label_no === tag.label_no).label_no === this.activeTagNo) {
 					this.activeTagNo = '';
@@ -74,7 +79,7 @@ export default {
 		},
 		saveUserTag() {
 			// 给该用户添加标签
-			if (!this.doctorInfo || !this.doctorInfo.row_no) {
+			if ((!this.doctorInfo || !this.doctorInfo.row_no) && !this.dp_no) {
 				return;
 			}
 			let url = this.getServiceUrl('health', 'srvhealth_user_label_set_add', 'operate');
@@ -92,7 +97,7 @@ export default {
 					return !self.curTagsCopy.find(tag => tag.label_no === item.label_no);
 				})
 				.map(tag => {
-					return { dp_no: this.doctorInfo.row_no, manager_no: this.manager_no, customer_no: this.customer_no, label_no: tag.label_no, label_name: tag.label_name };
+					return { dp_no: this.dp_no, manager_no: this.manager_no, customer_no: this.customer_no, label_no: tag.label_no, label_name: tag.label_name };
 				});
 			if (!Array.isArray(req[0].data) || req[0].data.length === 0) {
 				uni.showToast({
@@ -155,7 +160,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_user_label_set_select',
 				colNames: ['*'],
-				condition: [{ colName: 'dp_no', ruleType: 'eq', value: this.doctorInfo.row_no }]
+				condition: [{ colName: 'dp_no', ruleType: 'eq', value: this.dp_no }]
 			};
 			this.$http.post(url, req).then(res => {
 				if (Array.isArray(res.data.data)) {
@@ -179,6 +184,9 @@ export default {
 		}
 	},
 	onLoad(option) {
+		if (option.dp_no) {
+			this.dp_no = option.dp_no;
+		}
 		if (option.manager_no && option.customer_no) {
 			this.manager_no = option.manager_no;
 			this.customer_no = option.customer_no;

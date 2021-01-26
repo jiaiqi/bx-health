@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import api from '@/common/api.js'
-// import flyio from '@/common/wx.js' // 引入flyio
-// let fly = new flyio
 import request from '@/common/utils/request.js'
-const fly = request({})
+const fly = request({
+	timeout: 6 * 1000
+})
 import store from '@/store/index.js'
 let FormateDate = function(date) {
 	let o = {
@@ -70,7 +70,7 @@ fly.interceptors.request.use(async (request) => {
 		}
 	}
 	if (request.url && ignoreServiceName(request.url)) {
-		console.log(store.state.app.xhrNum,store.state.app.xhrTimestamp - new Date().getTime(),'11111111')
+		console.log(store.state.app.xhrNum, store.state.app.xhrTimestamp - new Date().getTime(), '11111111')
 		if (store.state.app.xhrNum === 0 && new Date().getTime() - store.state.app.xhrTimestamp > 1000) {
 			uni.showLoading({
 				mask: true,
@@ -123,13 +123,11 @@ fly.interceptors.response.use(
 		}
 		//只将请求结果的data字段返回
 		if (res.data.resultCode === "0011") { //未登录
-			// || (res.request.headers.USERlOGIN && res.request.headers.USERlOGIN ==="noneLogin")
 			uni.setStorageSync('isLogin', false)
 			uni.setStorageSync('stophttp', true)
 			if (Vue.prototype.$store && Vue.prototype.$store.commit) {
 				Vue.prototype.$store.commit('SET_LOGIN_STATE', false)
 			}
-			// uni.setStorageSync('backUrl',window.location.pathname + window.location.search)
 			// 后端返回 无效登录时，需要进行的跳转处理
 			if (uni.getStorageSync("isLogin")) {
 				// 登录状态记录 为 true 时暂时不处理
@@ -194,6 +192,7 @@ fly.interceptors.response.use(
 		return res
 	},
 	(err) => {
+		uni.hideLoading()
 		//发生网络错误后会走到这里
 		if (err.status === 429) {
 			// too many request

@@ -26,7 +26,7 @@
 			</view>
 			<view class="content">
 				<view class="professor-box">
-					<view class="professor-item" v-for="custom in customerList"  :data-item="custom" @click="toNav(custom, 'custom', $event)">
+					<view class="professor-item" v-for="custom in customerList" :data-item="custom" @click="toNav(custom, 'custom', $event)">
 						<image class="img" :src="getImagePath(custom.profile_url)" mode="aspectFit"></image>
 						<view class="doc-info">
 							<view class="top">
@@ -47,11 +47,11 @@
 					<view class="record-detail " v-for="item in seeDoctorRecord" :key="item.docCode">
 						<view class="record-item">
 							<view class="label">姓名:</view>
-							<view class="value text-bold">{{ item.name||'' }}</view>
+							<view class="value text-bold">{{ item.name || '' }}</view>
 						</view>
 						<view class="record-item">
 							<view class="label">大夫:</view>
-							<view class="value text-bold">{{ item.doctor_name||'' }}</view>
+							<view class="value text-bold">{{ item.doctor_name || '' }}</view>
 						</view>
 						<view class="record-item">
 							<!-- <view class="label">就诊日期</view> -->
@@ -68,7 +68,7 @@
 			</view>
 			<view class="content">
 				<view class="professor-box">
-					<view class="professor-item" v-for="staff in staffList"  :data-item="staff" @click="toNav(staff, 'staff', $event)">
+					<view class="professor-item" v-for="staff in staffList" :data-item="staff" @click="toNav(staff, 'staff', $event)">
 						<image class="img" :src="getImagePath(staff.profile_url)" mode="aspectFit"></image>
 						<view class="doc-info">
 							<view class="top">
@@ -153,7 +153,7 @@ export default {
 		radioChange(e) {
 			if (e === '查看员工信息') {
 				uni.navigateTo({
-					url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + this.curStaff.person_no
+					url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + this.curStaff.person_no + '&store_no=' + this.curStaff.store_no
 				});
 			} else if (e === '员工管理') {
 				let fieldsCond = [

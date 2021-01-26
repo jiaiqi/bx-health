@@ -492,7 +492,16 @@
 					"navigationBarTextStyle": "black",
 					"enablePullDownRefresh": false
 				}
-			}]
+			}    ,{
+                    "path" : "AboutMiniProgram/AboutMiniProgram",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "关于小程序",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "publicPages",

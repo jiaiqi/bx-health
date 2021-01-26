@@ -3,8 +3,8 @@
 		<!-- <view class="normal-title">子表</view> -->
 		<view class="child-service-item" v-for="item in list" @click="toChildServiceList(item)">
 			<view class="child-service-title">
-				<view class="cu-tag badge" v-if="item.total !== 0">
-					<block>{{ item.total > 99 ? '99+' : item.total }}</block>
+				<view class="cu-tag badge" v-if="item.total">
+					<block>{{ item.total > 99 ? '99+' : item.total || 0 }}</block>
 				</view>
 				<view class="label">{{ item.foreign_key && item.foreign_key.section_name ? item.foreign_key.section_name : item.service_view_name }}</view>
 			</view>
@@ -86,9 +86,9 @@ export default {
 						if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 							res.data.data.forEach((data, dIndex) => {
 								if (index === dIndex) {
-									if(data.page){
+									if (data.page) {
 										item.total = data.page.total;
-									}else{
+									} else {
 										item.total = 0;
 									}
 									this.$set(item, 'total', data.page.total);

@@ -81,7 +81,7 @@ export default {
 	},
 	computed: {
 		selectedDrug() {
-			if (this.addType === 'sport'||this.addType === 'sport'==='运动') {
+			if (this.addType === 'sport') {
 				return this.drugList.find(item=>item.checked);
 			}
 		},

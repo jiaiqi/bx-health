@@ -337,7 +337,7 @@ export default {
 			}
 		},
 		navPages(type = 'history', item = {}) {
-			debugger
+			debugger;
 			if (type === 'history') {
 				uni.navigateTo({
 					url: '/archivesPages/archives-history/archives-history?isAll=true&customer_no=' + this.customer_no
@@ -346,8 +346,7 @@ export default {
 			if (type === 'addTag') {
 				let fieldsCond = [{ column: 'manager_no', display: false, value: this.managerInfo.no }, { column: 'customer_no', display: false, value: this.userInfo.no }];
 				uni.navigateTo({
-					url: `/personalPages/tagManagement/tagManagement?manager_no=${this.managerInfo.no}&customer_no=${this.userInfo.no}`
-					// url: '/publicPages/newForm/newForm?serviceName=srvhealth_user_label_set_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond))
+					url: `/personalPages/tagManagement/tagManagement?manager_no=${this.managerInfo.no}&customer_no=${this.userInfo.no}&dp_no=${this.dp_no}`
 				});
 			}
 			if (type === 'addReception') {
@@ -355,8 +354,13 @@ export default {
 					{ column: 'user_info_no', display: false, value: this.userInfo.no },
 					{ column: 'user_no', display: false, value: this.userInfo.userno },
 					{ column: 'name', display: false, value: this.userInfo.name },
-					{ column: 'store_no', condition: [{ colName: 'type', ruleType: 'in', value: '诊所,医院' }] }
+					{ column: 'time',  value: this.formateDate() }
 				];
+				if (this.storeNo) {
+					fieldsCond.push({ column: 'store_no', value: this.storeNo, display: false });
+				} else {
+					fieldsCond.push({ column: 'store_no', condition: [{ colName: 'type', ruleType: 'in', value: '诊所,医院' }] });
+				}
 				let url = '/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
 				uni.navigateTo({
 					url: url
@@ -371,8 +375,8 @@ export default {
 					{ column: 'create_time', display: false },
 					{ column: 'create_user_disp', display: false }
 				];
-				if(this.storeNo){
-					fieldsCond[1].value = this.storeNo
+				if (this.storeNo) {
+					fieldsCond[1].value = this.storeNo;
 				}
 				let url = '/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_select&type=detail&fieldsCond=' + decodeURIComponent(JSON.stringify(fieldsCond));
 				uni.navigateTo({
@@ -391,8 +395,8 @@ export default {
 				colNames: ['*'],
 				condition: [{ colName: 'user_info_no', ruleType: 'eq', value: this.customer_no }]
 			};
-			if(this.storeNo){
-				req.condition.push({ colName: 'store_no', ruleType: 'eq', value:this.storeNo })
+			if (this.storeNo) {
+				req.condition.push({ colName: 'store_no', ruleType: 'eq', value: this.storeNo });
 			}
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
@@ -677,7 +681,6 @@ export default {
 			align-items: center;
 			width: 100%;
 			overflow: hidden;
-			// flex-direction: column;
 			flex: 1;
 			.uni-ec-charts {
 				width: 400rpx;

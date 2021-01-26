@@ -193,7 +193,6 @@ export default {
 			}
 		}
 	},
-	created() {},
 	watch: {
 		fields: {
 			deep: true,
@@ -217,5 +216,3 @@ export default {
 	}
 };
 </script>
-
-<style lang="scss"></style>

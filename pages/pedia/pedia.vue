@@ -412,7 +412,7 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
 				colNames: ['*'],
-				condition: [{ colName: 'userno', ruleType: 'eq', value: userInfo.user_no }],
+				condition: [{ colName: 'create_user', ruleType: 'eq', value: userInfo.user_no }],
 				order: [
 					{
 						colName: 'create_time',
@@ -423,6 +423,8 @@ export default {
 			const res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				// 有数据
+				debugger
+				this.$store.commit('SET_USERLIST', res.data.data);
 				if (uni.getStorageSync('current_user')) {
 					res.data.data.forEach(item => {
 						if (item.name === uni.getStorageSync('current_user')) {
@@ -434,7 +436,6 @@ export default {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					uni.setStorageSync('current_user', res.data.data[0].name);
 				}
-				this.$store.commit('SET_USERLIST', res.data.data);
 				if (this.userInfo && this.userInfo.font_size) {
 					switch (this.userInfo.font_size) {
 						case '小':

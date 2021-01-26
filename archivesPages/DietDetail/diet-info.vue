@@ -3,14 +3,19 @@
 		<view class="img"><image mode="aspectFit" class="img" :src="getImagePath(dietInfo.image)" v-if="dietInfo && dietInfo.image"></image></view>
 		<view class="info" v-if="dietInfo">
 			<view class="name">
-				<view class="title">{{ dietInfo.name }}</view>
-				<view class="weight">
-					<text class="label margin-right-xs">热量:</text>
-					<text class="heat">
-						{{ hotNum | toFixed1 }}
-						<text class="unit">千卡</text>
-					</text>
+				<view class="title">
+					<text>{{ dietInfo.name }}</text>
+					<text class="hot">({{ hotNum | toFixed1 }}千卡)</text>
 				</view>
+				<!-- 	<view class="">
+					<text class="label">膳食纤维:</text>
+						{{ dietInfo.dietary_fiber || ' - ' }}g
+					</text>
+				</view> -->
+			</view>
+			<view class="gi">
+				<text class="label margin-right-xs">膳食纤维:</text>
+				<text class="heat">{{ dietInfo.dietary_fiber || ' - ' }}</text>
 			</view>
 			<view class="gi">
 				<text class="label margin-right-xs">升糖指数:</text>
@@ -105,6 +110,10 @@ export default {
 			display: flex;
 			flex-wrap: wrap;
 			justify-content: space-between;
+			.hot {
+				font-size: 24rpx;
+				font-weight: normal;
+			}
 		}
 		.element {
 			color: #8dc63f;

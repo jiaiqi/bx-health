@@ -12,7 +12,7 @@
 		</view>
 		<view class="store-list">
 			<view class="list-item" v-for="item in storeList">
-				<image @click="toStoreDetail(item)" :src="getImagePath(item.image)" mode="aspectFit" class="image"></image>
+				<image @click="toStoreDetail(item)" :src="getImagePath(item.image)" mode="aspectFill" class="image"></image>
 				<view class="content" @click="toStoreDetail(item)">
 					<view class="store-name">{{ item.name }}</view>
 					<view class="user-info">
@@ -22,7 +22,7 @@
 				</view>
 				<view class="action">
 					<button class="cu-btn sm line-green round" open-type="share" data-type="bindOrganization" :data-data="item"><text class="cuIcon-forward"></text></button>
-					<button class="cu-btn bg-blue sm" @click.stop="toDetail(item)">工作台</button>
+					<button class="cu-btn bg-blue sm" @click.stop="toDetail(item)">设置</button>
 				</view>
 			</view>
 		</view>
@@ -82,6 +82,26 @@ export default {
 					column: 'store_no',
 					display: false,
 					value: e.store_no
+				},
+				{
+					column: 'sale_num',
+					display: false
+				},
+				{
+					column: 'grade',
+					display: false
+				},
+				{
+					column: 'audit_status',
+					display: false
+				},
+				{
+					column: 'create_time',
+					display: false
+				},
+				{
+					column: 'create_user_disp',
+					display: false
 				}
 			];
 			uni.navigateTo({
@@ -112,31 +132,31 @@ export default {
 			}
 		}
 	},
-	onShareAppMessage(e) {
-		let path = '';
-		let title = '百想健康';
-		let imageUrl = '';
-		if (e.target && e.target.dataset && e.target.dataset.type === 'bindOrganization') {
-			// 邀请加入组织机构
-			if (e.target.dataset.data && e.target.dataset.data.id) {
-				let data = e.target.dataset.data;
-				path = `/personalPages/StoreDetail/StoreDetail?from=share&invite_user_no=${this.userInfo.userno}&store_no=${data.store_no}&doctor_no=${
-					this.userInfo.no
-				}&share_type=bindOrganization`;
-				title = `${this.userInfo.name}邀请您加入【${data.name}】`;
-				imageUrl = this.getImagePath(data.image);
-			}
-		} else {
-			if (this.userInfo.name) {
-				title = this.userInfo.name + '邀请您体验百想健康小程序';
-			}
-		}
-		return {
-			imageUrl: imageUrl,
-			title: title,
-			path: path
-		};
-	},
+	// onShareAppMessage(e) {
+	// 	let path = '';
+	// 	let title = '百想健康';
+	// 	let imageUrl = '';
+	// 	if (e.target && e.target.dataset && e.target.dataset.type === 'bindOrganization') {
+	// 		// 邀请加入组织机构
+	// 		if (e.target.dataset.data && e.target.dataset.data.id) {
+	// 			let data = e.target.dataset.data;
+	// 			path = `/personalPages/StoreDetail/StoreDetail?from=share&invite_user_no=${this.userInfo.userno}&store_no=${data.store_no}&doctor_no=${
+	// 				this.userInfo.no
+	// 			}&share_type=bindOrganization`;
+	// 			title = `${this.userInfo.name}邀请您加入【${data.name}】`;
+	// 			imageUrl = this.getImagePath(data.image);
+	// 		}
+	// 	} else {
+	// 		if (this.userInfo.name) {
+	// 			title = this.userInfo.name + '邀请您体验百想健康小程序';
+	// 		}
+	// 	}
+	// 	return {
+	// 		imageUrl: imageUrl,
+	// 		title: title,
+	// 		path: path
+	// 	};
+	// },
 	onLoad() {
 		if (this.userInfo && this.userInfo.no) {
 			this.selectMineStore();

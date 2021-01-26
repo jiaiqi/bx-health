@@ -71,8 +71,8 @@
 					<text class="see-histroy">添加</text>
 				</view>
 			</view>
-			<view class="empty-data" v-if="!isLoadPlan&&planList.length===0"><view class="cu-load" :class="'loading'"></view></view>
-			<view class="content todo-list" v-if="planList.length>0">
+			<view class="empty-data" v-if="!isLoadPlan && planList.length === 0"><view class="cu-load" :class="'loading'"></view></view>
+			<view class="content todo-list" v-if="planList.length > 0">
 				<view class="todo-item" v-for="(item, index) in planList" :key="index" @click="clickTodoItem(item, index)">
 					<view class="type">{{ item.play_srv }}</view>
 					<view class="title">{{ item.ds_name }}</view>
@@ -215,7 +215,7 @@
 		<view class="cu-modal" :class="{ show: showUserListPopup }" @tap="showUserListPopup = false">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="user-list">
-					<view class="user-item" @click="switchUser(item)" v-for="item in userList" :key="item.id" :class="{ 'text-blue': item.name === vuex_userInfo.name }">
+					<view class="user-item" @click="switchUser(item)" v-for="item in vuex_userList" :key="item.id" :class="{ 'text-blue': item.name === vuex_userInfo.name }">
 						<image class="avatar" :src="getUserImage(item)" size="60" v-if="getUserImage(item)"></image>
 						<image class="avatar" src="/static/man-profile.png" v-else></image>
 						{{ item.name }}
@@ -283,7 +283,7 @@ export default {
 				value: ''
 			},
 			planList: [],
-			isLoadPlan:false,
+			isLoadPlan: false,
 			dietAdvice: '',
 			showAdvice: false
 		};
@@ -300,7 +300,8 @@ export default {
 	computed: {
 		...mapState({
 			inviterInfo: state => state.app.inviterInfo,
-			vuex_userInfo: state => state.user.userInfo
+			vuex_userInfo: state => state.user.userInfo,
+			vuex_userList: state => state.user.userList
 		}),
 		...mapGetters({
 			authSetting: 'authSetting',
@@ -441,6 +442,7 @@ export default {
 		},
 		switchUser(item) {
 			this.userInfo = item;
+			this.$store.commit('SET_USERINFO',item)
 			uni.setStorageSync('current_user_info', item);
 			uni.setStorageSync('current_user', item.name);
 			this.showUserListPopup = false;
@@ -463,9 +465,9 @@ export default {
 				condition: [{ colName: 'owner_person_no', ruleType: 'eq', value: this.vuex_userInfo.no }],
 				page: { pageNo: 1, rownumber: 10 }
 			};
-			this.isLoadPlan = false
+			this.isLoadPlan = false;
 			let res = await this.$http.post(url, req);
-			this.isLoadPlan = true
+			this.isLoadPlan = true;
 			if (Array.isArray(res.data.data)) {
 				this.planList = res.data.data
 					.map(item => {
@@ -989,12 +991,17 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (res.data.resultCode === 'SUCCESS' && Array.isArray(res.data.data.srv_cols)) {
 				let { srv_cols } = res.data.data;
-				let requirement = null;
 				if (Array.isArray(srv_cols) && srv_cols.length > 0) {
+					console.log(this.vuex_userInfo);
+					let requirement = this.vuex_userInfo.requirement.split(',');
+					console.log(requirement);
 					srv_cols.forEach(item => {
 						if (item.columns === 'requirement') {
 							this.checkboxList = item.option_list_v2.map(item => {
 								item['checked'] = false;
+								if (Array.isArray(requirement) && requirement.includes(item.value) && !this.selectedTags.find(s => s.value === item.value)) {
+									this.selectedTags.push(item);
+								}
 								return item;
 							});
 						}
@@ -1158,6 +1165,8 @@ export default {
 			const res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				// 有数据
+				debugger
+				this.$store.commit('SET_USERLIST', res.data.data);
 				if (uni.getStorageSync('current_user')) {
 					res.data.data.forEach(item => {
 						if (item.name === uni.getStorageSync('current_user')) {
@@ -1190,7 +1199,6 @@ export default {
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
 					this.checkSubscribeStatus();
 				}
-				this.$store.commit('SET_USERLIST', res.data.data);
 				if (this.vuex_userInfo && this.vuex_userInfo.requirement) {
 					let tags = this.vuex_userInfo.requirement.split(',');
 					if (Array.isArray(this.checkboxList) && this.checkboxList.length > 0) {
@@ -1321,6 +1329,7 @@ export default {
 		toAddPages() {
 			let fieldsCond = [
 				{ column: 'profile_url', display: false },
+				{ column: 'manager_type', display: false },
 				{
 					column: 'userno',
 					display: false

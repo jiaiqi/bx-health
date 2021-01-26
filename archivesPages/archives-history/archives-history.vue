@@ -1809,7 +1809,6 @@ export default {
 						this.checkSubscribeStatus();
 					}
 				}
-				this.$store.commit('SET_USERLIST', res.data.data);
 				uni.setStorageSync('user_info_list', res.data.data);
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {

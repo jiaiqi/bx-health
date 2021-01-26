@@ -8,14 +8,15 @@
 					<view class="name">{{ doctorInfo.name }}</view>
 				</view>
 				<view class="bottom">
-					<view class="introduce">
-						副主任医师，毕业于xx大学医学院，美国Mayo Clinic
+					<view class="introduce" v-if="doctorStoreList.length === 1&&doctorStoreList[0].staff_introduction">
+						{{ doctorStoreList[0].staff_introduction }}
+						<!-- 	副主任医师，毕业于xx大学医学院，美国Mayo Clinic
 						从事博士后研究1年。擅长肝脏肿瘤及胆道结石微创外科治疗。中国医师协会腹腔镜肝切除推广与发展专家委员会委员，陕西省分会腹腔镜外科学会青年委员会副主任委员。长期参与肝脏肿瘤和胆管结石的临床及基础研究，积累了丰富的经验。主持省级科研基金一项，参与多项国家及省级科研基金课题研究
+					 -->
 					</view>
-					<!-- 	<view class="address" @click="getCurrentLocation">
-						<text class="detail">{{ storeInfo.address || '' }}</text>
-						<text class="cuIcon-locationfill text-blue margin-left-xs"></text>
-					</view> -->
+					<view class="introduce" v-else>
+						暂无介绍
+					</view>
 				</view>
 			</view>
 			<view class="right">
@@ -65,6 +66,7 @@ export default {
 	data() {
 		return {
 			doctorInfo: {},
+			storeNo: '',
 			relationInfo: {},
 			storeInfo: {},
 			calenderSelected: [
@@ -186,6 +188,13 @@ export default {
 				colNames: ['*'],
 				condition: [{ colName: 'person_no', ruleType: 'eq', value: this.doctorInfo.no }]
 			};
+			if (this.storeNo) {
+				req.condition.push({
+					colName: 'store_no',
+					ruleType: 'eq',
+					value: this.storeNo
+				});
+			}
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data)) {
 				this.doctorStoreList = res.data.data;
@@ -228,197 +237,16 @@ export default {
 	onLoad(option) {
 		this.checkOptionParams(option);
 		this.toAddPage();
+		if (option.store_no) {
+			this.storeNo = option.store_no;
+		}
 		if (option.doctor_no) {
 			this.getDoctorInfo(option.doctor_no);
 		}
-		// if (option.share_type === 'bindOrganization') {
-		// 	// 绑定诊所
-		// 	if (option.store_no && option.invite_user_no) {
-		// 		this.getStoreUserInfo(option.store_no).then(res => {
-		// 			this.getStoreInfo(option.store_no).then(data => {
-		// 				if (Array.isArray(res) && res.length == 1) {
-		// 					// 跳转到店铺详情
-		// 					uni.redirectTo({
-		// 						url: '/pediaPages/StoreList/StoreList?from=liststore_no=' + res[0].store_no
-		// 					});
-		// 				} else if (Array.isArray(res) && res.length > 1) {
-		// 					// 跳转到店铺列表
-		// 					uni.redirectTo({
-		// 						url: '/personalPages/StoreList/StoreList'
-		// 					});
-		// 				} else {
-		// 					// 当前用户不在此诊所中 则添加当前用户到此诊所中
-		// 					this.addToStore(option.store_no, option.invite_user_no);
-		// 				}
-		// 			});
-		// 		});
-		// 	}
-		// } else if (option.store_no && option.from === 'list') {
-		// 	// 从我的店铺列表中跳转
-		// 	this.getStoreInfo(option.store_no);
-		// 	this.getStoreUserInfo(option.store_no);
-		// }
 	}
 };
 </script>
 
 <style scoped lang="scss">
-.hospital-wrap {
-	border-top: 1rpx solid #f1f1f1;
-	position: relative;
-	.bg-view {
-		width: 100%;
-		height: 300rpx;
-		background-size: 100% 400rpx;
-		background-repeat: no-repeat;
-		filter: blur(20rpx);
-		position: absolute;
-		top: 0;
-		left: 0;
-		z-index: 0;
-	}
-	.hospital-top {
-		// border-radius: 20rpx;
-		background-color: #fff;
-		padding: 50rpx 28rpx;
-		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-		display: flex;
-		align-items: center;
-		margin: 0rpx 10rpx 20rpx;
-		margin-top: 40px;
-		position: relative;
-
-		.introduce {
-			color: #666;
-		}
-		.left {
-			display: flex;
-			flex-direction: column;
-			flex: 1;
-			position: relative;
-			&::after {
-				position: absolute;
-				right: 0;
-				top: 10%;
-				height: 80%;
-				content: '';
-				width: 1px;
-				// background-color: #dfdada;
-			}
-			.top {
-				display: flex;
-				.name {
-					font-size: 32rpx;
-					font-weight: 800;
-					color: #333;
-				}
-				.tags {
-					display: flex;
-					.tag {
-						display: inline-block;
-						margin-left: 10rpx;
-						padding: 5rpx 10rpx;
-						background-color: #0ea8ff;
-						color: #fff;
-						border-radius: 10rpx;
-					}
-				}
-			}
-			.bottom {
-				padding-top: 10rpx;
-				.address {
-					color: #bbb;
-					display: flex;
-					.cuIcon-locationfill {
-						width: 80rpx;
-						display: flex;
-						align-items: flex-start;
-						justify-content: center;
-					}
-					.detail {
-						width: 90%;
-						overflow: scroll;
-					}
-				}
-			}
-		}
-		.right {
-			margin-left: 20rpx;
-			width: 100rpx;
-			height: 100rpx;
-			font-size: 70rpx;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			color: #0ea8ff;
-			border-radius: 10rpx;
-			overflow: hidden;
-			position: absolute;
-			right: 20px;
-			top: -50rpx;
-			border: 4rpx solid #fff;
-			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-			// transform: rotate(10deg);
-		}
-	}
-	.introduction {
-		// 简介
-		background-color: #fff;
-		padding: 20rpx;
-		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-		margin-bottom: 20rpx;
-		&.news .title {
-			border-bottom: 1rpx solid #ccc;
-		}
-
-		.title {
-			font-size: 28rpx;
-			font-weight: 700;
-			padding: 10rpx 0;
-			color: rgb(48, 49, 51);
-		}
-	}
-	.button-area {
-		background-color: #fff;
-		padding: 20rpx;
-		display: flex;
-		justify-content: center;
-		.button-item + .button-item {
-			margin-left: 100rpx;
-		}
-		.button-label {
-			padding: 10rpx 0;
-			font-size: 12px;
-		}
-		.cu-btn {
-			border-radius: 50%;
-			margin-bottom: 5px;
-			width: 100rpx;
-			height: 100rpx;
-			font-size: 30px;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			& + .cu-btn {
-				margin-left: 20rpx;
-			}
-		}
-	}
-}
-.padding-xl {
-	display: flex;
-	flex-wrap: wrap;
-	.store-item {
-		padding: 10rpx 20rpx;
-		border-radius: 0;
-		width: calc(50% - 10rpx);
-		& + .store-item {
-			margin-left: 20rpx;
-			margin-bottom: 5px;
-		}
-		& + .store-item:nth-child(2n + 1) {
-			margin-left: 0;
-		}
-	}
-}
+@import './style.scss';
 </style>

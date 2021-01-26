@@ -12,7 +12,7 @@
 				{{ btn.button_name }}
 			</button>
 		</view>
-		<child-table :formData="defaultVal" :child-service="childService" v-if="childService.length > 0" @toChildServiceList="toChildServiceList"></child-table>
+		<child-table :formData="defaultVal" :child-service="childService" v-if="defaultVal && childService.length > 0" @toChildServiceList="toChildServiceList"></child-table>
 	</view>
 </template>
 
@@ -42,7 +42,7 @@ export default {
 	},
 	computed: {
 		childService() {
-			if (this.showChildService!=='false'&&this.showChildService!==false && this.colsV2Data && Array.isArray(this.colsV2Data.child_service)) {
+			if (this.showChildService !== 'false' && this.showChildService !== false && this.colsV2Data && Array.isArray(this.colsV2Data.child_service)) {
 				return this.colsV2Data.child_service;
 			} else {
 				return [];
@@ -110,6 +110,7 @@ export default {
 						}
 					}
 				} else {
+					debugger;
 					let viewTemp = {};
 					if (e.service_name === 'srvhealth_plan_schedule_select') {
 						// 方案计划
@@ -117,6 +118,38 @@ export default {
 							title: 'ds_name',
 							tip: 'play_srv',
 							footer: 'start_date'
+						};
+					}
+					if (e.service_name === 'srvhealth_see_doctor_record_select') {
+						// 就诊列表
+						viewTemp = {
+							title: 'name',
+							footer: 'chief_complaint'
+						};
+					}
+					if (e.service_name === 'srvhealth_store_user_select') {
+						// 用户列表
+						viewTemp = {
+							img: 'profile_url',
+							title: 'person_name',
+							tip: 'sex',
+							footer: 'user_role'
+						};
+					}
+					if (e.service_name === 'srvhealth_store_dept_select') {
+						// 部门列表
+						viewTemp = {
+							img: 'photo',
+							title: 'introduction',
+							tip: 'sex'
+						};
+					}
+					if (e.service_name === 'srvhealth_drugstore_inventory_select') {
+						// 药品库存
+						viewTemp = {
+							img: 'med_packing_pic',
+							title: 'medicine_name',
+							tip: 'type_tree_no'
 						};
 					}
 					if (e.service_name === 'srvhealth_drug_schedule_doctor_detail_list_select') {
@@ -437,7 +470,6 @@ export default {
 		},
 		async getFieldsV2() {
 			let app = uni.getStorageSync('activeApp');
-			this.getDefaultVal();
 			let colVs = await this.getServiceV2(this.serviceName, this.srvType, this.use_type, app);
 			let defaultVal = this.defaultVal;
 			this.colsV2Data = colVs;
@@ -622,14 +654,21 @@ export default {
 				if (Array.isArray(fieldsCond) && fieldsCond.length > 0) {
 					if (option.serviceName === 'srvhealth_see_doctor_record_add') {
 						if (this.doctorInfo && this.doctorInfo.no) {
+							console.log(this.doctorInfo);
 							this.getStoreUserInfo(this.doctorInfo.store_no).then(res => {
 								this.getStoreInfo(this.doctorInfo.store_no).then(data => {
 									if (!Array.isArray(res) || res.length === 0) {
 										// 当前用户不在此诊所中 则添加当前用户到此诊所中
-										if (Array.isArray(data) && data.length > 0) {
-											this.addToStore(option.store_no, option.invite_user_no, data[0]);
+										if (option.store_no && option.invite_user_no) {
+											if (Array.isArray(data) && data.length > 0) {
+												this.addToStore(option.store_no, option.invite_user_no, data[0]);
+											} else {
+												this.addToStore(option.store_no, option.invite_user_no);
+											}
 										} else {
-											this.addToStore(option.store_no, option.invite_user_no);
+											if (this.doctorInfo.store_no) {
+												this.addToStore(this.doctorInfo.store_no);
+											}
 										}
 									}
 								});
@@ -667,6 +706,7 @@ export default {
 				console.warn(e);
 			}
 		}
+		this.getDefaultVal();
 		this.getFieldsV2();
 	}
 };

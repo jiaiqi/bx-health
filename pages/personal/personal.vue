@@ -83,6 +83,12 @@
 							<text class="text-grey">字体设置</text>
 						</view>
 					</view>
+					<view class="cu-item arrow" @click="toPages('about')">
+						<view class="content">
+							<text class="cuIcon-global"></text>
+							<text class="text-grey">关于小程序</text>
+						</view>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -264,6 +270,11 @@ export default {
 
 			let self = this;
 			switch (e) {
+				case 'about':
+					uni.navigateTo({
+						url: '/pediaPages/AboutMiniProgram/AboutMiniProgram'
+					});
+					break;
 				case 'group':
 					uni.navigateTo({
 						url: '/personalPages/chatGroup/chatGroup'
@@ -315,6 +326,18 @@ export default {
 				case 'updateInfo':
 					if (this.vuex_userInfo.no) {
 						let fieldsCond = [
+							{
+								column: 'invite_user_no',
+								display: false
+							},
+							{
+								column: 'add_url',
+								display: false
+							},
+							{
+								column: 'manager_type',
+								display: false
+							},
 							{
 								column: 'no',
 								value: this.vuex_userInfo.no,

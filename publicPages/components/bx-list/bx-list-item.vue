@@ -288,9 +288,10 @@ export default {
 			immediate: true,
 			handler(newValue, oldValue) {
 				if (newValue[this.viewTemp.img]) {
-					this.getPicture(newValue[this.viewTemp.img]).then(url => {
-						this.goodsData.img = url;
-					});
+					this.goodsData.img= this.getImagePath(newValue[this.viewTemp.img])
+					// this.getPicture(newValue[this.viewTemp.img]).then(url => {
+					// 	this.goodsData.img = url;
+					// });
 				}
 				if (newValue[this.viewTemp.title]) {
 					this.goodsData.title = newValue[this.viewTemp.title];
