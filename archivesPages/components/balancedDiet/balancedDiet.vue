@@ -303,7 +303,7 @@
 						</view>
 					</view>
 					<view v-if="currentRecord && currentRecordType === 'food'" class="view-tabs">
-						<view class="view-tab" :class="{ 'active-tab': showChart }" @click="showChartView(true)">NRV%占比</view>
+						<view class="view-tab" :class="{ 'active-tab': showChart }" @click="showChartView(true)">推荐摄入量</view>
 						<view class="view-tab" :class="{ 'active-tab': !showChart }" @click="showChartView(false)">营养素含量</view>
 					</view>
 					<view class="element-detail-box" v-if="currentRecord && currentRecordType === 'food' && !showChart">
@@ -567,7 +567,7 @@ export default {
 				option: {
 					color: ['#92d050', '#f79646', '#4f81bd'],
 					title: { text: '' },
-					legend: { data: ['已选', '超标部分', 'NRV%达标线'] },
+					legend: { data: ['已选', '超标部分', '推荐摄入量'] },
 					// tooltip: {
 					// 	show: true,
 					// 	trigger: 'axis'
@@ -592,7 +592,7 @@ export default {
 					series: [
 						{ name: '已选', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
 						{ name: '超标部分', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
-						{ name: 'NRV%达标线', data: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100], type: 'line', stack: false }
+						{ name: '推荐摄入量', data: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100], type: 'line', stack: false }
 					]
 				}
 			},
@@ -600,7 +600,7 @@ export default {
 				option: {
 					color: ['#92d050', '#f79646', '#4f81bd'],
 					title: { text: '' },
-					legend: { data: ['其他食物', '当前食物', 'NRV%达标线'] },
+					legend: { data: ['其他食物', '当前食物', '推荐摄入量'] },
 					// tooltip: {
 					// 	show: true,
 					// 	trigger: 'axis'
@@ -625,7 +625,7 @@ export default {
 					series: [
 						{ name: '其他食物', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
 						{ name: '当前食物', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'bar', stack: '营养素' },
-						{ name: 'NRV%达标线', data: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100], type: 'line', stack: false }
+						{ name: '推荐摄入量', data: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100], type: 'line', stack: false }
 					]
 				}
 			},
@@ -1207,7 +1207,7 @@ export default {
 			let category = eleArr.map(item => {
 				return item.name;
 			});
-			let legendData = ['其它食物', '当前食物', 'NRV%达标线'];
+			let legendData = ['其它食物', '当前食物', '推荐摄入量'];
 			let seriesData = legendData.map(le => {
 				let obj = {
 					name: le,
@@ -1241,7 +1241,7 @@ export default {
 							return num;
 						});
 						break;
-					case 'NRV%达标线':
+					case '推荐摄入量':
 						obj.type = 'line';
 						obj.stack = false;
 						obj.data = eleArr.map(item => {
@@ -1333,7 +1333,7 @@ export default {
 			let category = eleArr.map(item => {
 				return item.name;
 			});
-			let legendData = ['已选', '超标部分', 'NRV%达标线'];
+			let legendData = ['已选', '超标部分', '推荐摄入量'];
 			let seriesData = legendData.map(le => {
 				let obj = {
 					name: le,
@@ -1383,7 +1383,7 @@ export default {
 							return num;
 						});
 						break;
-					case 'NRV%达标线':
+					case '推荐摄入量':
 						obj.type = 'line';
 						obj.stack = false;
 						obj.data = eleArr.map(item => {
@@ -2729,9 +2729,6 @@ export default {
 				this.getDietAllRecord();
 				this.getDietRecord(this.selectDate);
 				this.getSportsRecord(this.selectDate);
-				if(!this.$store.state.app.subscsribeStatus){
-					this.checkSubscribeStatus();
-				}
 			}
 			this.showUserList = false;
 		},

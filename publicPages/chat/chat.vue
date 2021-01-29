@@ -92,9 +92,38 @@
 			<!-- 更多功能 相册-拍照-位置-语音 -->
 			<view class="more-layer" :class="{ hidden: hideMore }">
 				<view class="list">
-					<view class="box" @tap="chooseImage"><view class="icon tupian2"></view></view>
-					<view class="box" @tap="camera"><view class="icon paizhao"></view></view>
-					<view class="box" @tap="handRedEnvelopes"><view class="icon hongbao"></view></view>
+					<!--问卷 -->
+					<view class="box" @tap="chooseImage">
+						<view class="u-icon cuIcon-text"></view>
+						<view class="label">问卷</view>
+					</view>
+					<!-- 饮食记录 -->
+					<view class="box" @tap="chooseImage">
+						<view class="u-icon cuIcon-babyfill"></view>
+						<view class="label">饮食记录</view>
+					</view>
+					<!--图片 -->
+					<view class="box" @tap="chooseImage">
+						<view class="u-icon cuIcon-picfill"></view>
+						<view class="label">图片</view>
+					</view>
+					<!-- 视频 -->
+					<view class="box" @tap="camera">
+						<view class="u-icon cuIcon-recordfill"></view>
+						<view class="label">视频</view>
+					</view>
+					<!-- 定位 -->
+					<view class="box" @tap="camera">
+						<view class="u-icon cuIcon-locationfill"></view>
+						<view class="label">位置</view>
+					</view>
+					<!-- 微信聊天文件 -->
+					<view class="box" @tap="camera">
+						<view class="u-icon cuIcon-file"></view>
+						<view class="label">文件</view>
+					</view>
+
+					<!-- <view class="box" @tap="handRedEnvelopes"><view class="icon hongbao"></view></view> -->
 					<!-- <view class="box" @tap="yuyintonghua"><image style="font-size:16px;width: 32px; height: 32px;" src="../../static/img/more/yuyintonghua.png"></image></view> -->
 					<!-- <view class="box" @tap="weizhi"><image style="font-size:16px;width: 32px; height: 32px;" src="../../static/img/more/weizhi.png"></image></view> -->
 					<!-- <view class="box" @tap="yuyinshuru"><image style="font-size:16px;width: 32px; height: 32px;" src="../../static/img/more/yuyinshuru.png"></image></view> -->
@@ -110,9 +139,6 @@
 			<!-- #ifndef H5 -->
 			<view class="voice"><view class="icon" :class="isVoice ? 'jianpan' : 'yuyin'" @tap="switchVoice"></view></view>
 			<!-- #endif -->
-			<!-- #ifdef H5 -->
-			<view class="more" @tap="showMore"><view class="icon add"></view></view>
-			<!-- #endif -->
 			<view class="textbox">
 				<view
 					class="voice-mode"
@@ -126,13 +152,10 @@
 				</view>
 				<view class="text-mode" :class="isVoice ? 'hidden' : ''">
 					<view class="box"><textarea auto-height="true" v-model="textMsg" @focus="textareaFocus" /></view>
-					<view class="em" @tap="chooseEmoji"><view class="icon biaoqing"></view></view>
 				</view>
 			</view>
-			<!-- #ifndef H5 -->
-			<view class="more" @tap="showMore"><view class="icon add"></view></view>
-			<!-- #endif -->
-			<view class="send" :class="isVoice ? 'hidden' : ''" @tap="sendText"><view class="btn">发送</view></view>
+			<view class="more" @tap="showMore" v-if="!textMsg"><view class="icon add"></view></view>
+			<view class="send" :class="isVoice || !textMsg ? 'hidden' : ''" @tap="sendText"><view class="btn">发送</view></view>
 		</view>
 		<!-- 录音UI效果 -->
 		<view class="record" :class="recording ? '' : 'hidden'">
@@ -248,20 +271,35 @@ export default {
 		this.scrollTop = 9999999;
 	},
 	methods: {
-		async getPersonGroupInfo() {
+		updateLastLookTime(e) {
+			if (this.groupInfo && this.groupInfo.pg_no && e && e.create_time) {
+				let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_update', 'operate');
+				let req = [
+					{
+						serviceName: 'srvhealth_person_group_circle_update',
+						condition: [{ colName: 'pg_no', ruleType: 'eq', value: this.groupInfo.pg_no }],
+						data: [{ latest_sign_in_time: e.create_time }]
+					}
+				];
+				this.$http.post(url, req);
+			}
+		},
+		getPersonGroupInfo(no) {
 			let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_person_group_circle_select',
 				colNames: ['*'],
-				condition: [
-					{
-						colName: 'gc_no',
-						ruleType: 'eq',
-						value: no
-					}
-				]
+				condition: [{ colName: 'gc_no', ruleType: 'eq', value: no }, { colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]
 			};
-			let res = await this.$http.post(url, req);
+			this.$http.post(url, req).then(res => {
+				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+					this.groupInfo.pg_no = res.data.data[0].pg_no;
+					this.groupInfo.group_role = res.data.data[0].group_role;
+					this.groupInfo.profile_url = res.data.data[0].profile_url;
+					this.groupInfo.user_image = res.data.data[0].user_image;
+					this.groupInfo.latest_sign_in_time = res.data.data[0].latest_sign_in_time;
+				}
+			});
 		},
 		async getGroupInfo(no) {
 			// 查找圈子信息
@@ -281,6 +319,7 @@ export default {
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.groupInfo = res.data.data[0];
+				this.getPersonGroupInfo(no);
 				if (this.groupInfo.name) {
 					uni.setNavigationBarTitle({
 						title: this.groupInfo.name
@@ -388,6 +427,10 @@ export default {
 			};
 			let res = await this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health');
 			if (res.success) {
+				if (Array.isArray(res.data) && res.data.length > 0) {
+					// 更新最后阅读时间
+					this.updateLastLookTime(res.data[0]);
+				}
 				let list = res.data.map(item => {
 					let type = '';
 					switch (item.msg_content_type) {
@@ -690,7 +733,7 @@ export default {
 				this.getInitMsgList();
 			}
 		},
-		 toUploadFile(filePath) {
+		toUploadFile(filePath) {
 			let self = this;
 			let reqHeader = {
 				bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
@@ -702,7 +745,7 @@ export default {
 				table_name: '',
 				columns: 'msg_link'
 			};
-			return new Promise((resolve,reject)=>{
+			return new Promise((resolve, reject) => {
 				uni.uploadFile({
 					url: self.$api.upload,
 					header: reqHeader,
@@ -711,12 +754,11 @@ export default {
 					name: 'file',
 					success: e => {
 						if (e.statusCode === 200) {
-							debugger
+							debugger;
 						}
 					}
 				});
-			})
-			
+			});
 		},
 		// 发送消息
 		sendMsg(content, type) {

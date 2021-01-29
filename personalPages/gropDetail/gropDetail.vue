@@ -78,7 +78,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="join-button" v-if="type === 'join-detail' && userInfo && userInfo.no"><button class="cu-btn bg-blue button" @click="joinGroup">加入圈子</button></view>
+		<view class="join-button" v-if="!joined && userInfo && userInfo.no"><button class="cu-btn bg-blue button" @click="joinGroup">加入圈子</button></view>
 	</view>
 </template>
 
@@ -90,6 +90,7 @@ export default {
 	data() {
 		return {
 			gc_no: '',
+			joined: true, //当前登录用户是否已加入此圈子
 			type: 'group-detail',
 			qrCodeSize: uni.upx2px(500),
 			groupInfo: {},
@@ -101,7 +102,8 @@ export default {
 				pageNo: 1
 			},
 			showQrCode: false,
-			groupQrCode: ''
+			groupQrCode: '',
+			from: ''
 		};
 	},
 	computed: {
@@ -110,6 +112,23 @@ export default {
 		})
 	},
 	methods: {
+		async selectPersonInGroup() {
+			// 查找当前登录用户有没有在此圈子用户列表中
+			let req = {
+				condition: [{ colName: 'gc_no', ruleType: 'eq', value: this.gc_no }, { colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]
+			};
+			let res = await this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health');
+			if (Array.isArray(res.data) && res.data.length > 0) {
+				this.joined = true;
+				if (this.from === 'store-detail') {
+					uni.redirectTo({
+						url: '/personalPages/chatGroup/chatGroup'
+					});
+				}
+			} else {
+				this.joined = false;
+			}
+		},
 		async joinGroup() {
 			// 加入圈子
 			let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_add', 'operate');
@@ -125,6 +144,7 @@ export default {
 							profile_url: this.userInfo.profile_url,
 							user_image: this.userInfo.user_image,
 							gc_no: this.gc_no,
+							attend_status: '正常',
 							group_role: '用户'
 						}
 					]
@@ -256,9 +276,13 @@ export default {
 				await this.selectBasicUserList();
 			}
 		}
+		if (option.from) {
+			this.from = option.from;
+		}
 		if (option.gc_no && option.type) {
 			this.gc_no = option.gc_no;
 			this.type = option.type;
+			this.selectPersonInGroup();
 			this.selectGroupInfo();
 			if (this.type === 'group-member') {
 				this.selectGroupMember();
@@ -275,8 +299,8 @@ export default {
 		}
 	},
 	onShareAppMessage(res) {
-		let path = `/personalPages/gropDetail/gropDetail?gc_no=${this.groupInfo.gc_no}&type=join-detail&from=share&invite_user_no=${this.userInfo.userno}`
-		this.saveSharerInfo(this.userInfo,path)
+		let path = `/personalPages/gropDetail/gropDetail?gc_no=${this.groupInfo.gc_no}&type=join-detail&from=share&invite_user_no=${this.userInfo.userno}`;
+		this.saveSharerInfo(this.userInfo, path);
 		return {
 			title: `${this.userInfo.name}邀请你加入${this.groupInfo.name}`,
 			path: path

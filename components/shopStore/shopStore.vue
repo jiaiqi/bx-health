@@ -314,7 +314,7 @@ export default {
 		toShopDetail(item) {
 			if (['诊所', '医院'].includes(item.type)) {
 				uni.navigateTo({
-					url:'/pediaPages/ClinicDetail/ClinicDetail?store_no='+item.store_no
+					url:'/pediaPages/hospitalOverview/hospitalOverview?store_no='+item.store_no
 				})
 			} else {
 				uni.navigateTo({

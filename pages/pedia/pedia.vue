@@ -35,8 +35,13 @@
 			</view>
 			<!-- #ifdef MP-WEIXIN -->
 			<view class="official-account" v-if="!subscsribeStatus && index === 0">
+				<!-- #ifdef  MP-WEIXIN -->
 				<official-account></official-account>
-				<view class="text" @click="openOfficialImage">关注公众号，获取更多服务</view>
+				<!-- #endif -->
+				<view class="text text-yellow" @click="openOfficialImage">
+					<text class="cuIcon-noticefill  margin-right-xs"></text>
+					关注百想助理公众号，健康通知不错过
+				</view>
 			</view>
 			<!-- #endif -->
 			<view class="page-menu" v-if="pageItem.div_type === 'buttons'">
@@ -95,11 +100,13 @@ export default {
 		return {
 			pageItemList: [], // 页面项
 			code: '', // 微信登录用
-			modalName: 'showOfficialAccount'
+			modalName: '',
+			isAuthUserInfo: false
 		};
 	},
 	computed: {
 		...mapState({
+			authUserInfo: state => state.app.authUserInfo,
 			subscsribeStatus: state => state.app.subscsribeStatus,
 			loginUserInfo: state => state.user.loginUserInfo,
 			userInfo: state => state.user.userInfo,
@@ -126,11 +133,11 @@ export default {
 					if (['大夫', '管理员', '工作人员', '药房人员', '客服'].includes(res.data.data[0].user_role.split(','))) {
 						// 不是用户 跳转到商铺管理页面
 						uni.navigateTo({
-							url: '/pediaPages/ClinicDetail/ClinicDetail?store_no=' + res.data.data[0].store_no
+							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res.data.data[0].store_no
 						});
 					} else {
 						uni.navigateTo({
-							url: '/pediaPages/ClinicDetail/ClinicDetail?store_no=' + res.data.data[0].store_no
+							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res.data.data[0].store_no
 						});
 					}
 				}
@@ -291,9 +298,9 @@ export default {
 			for (let item of list) {
 				let obj = {
 					colNames: ['*'],
-					condition: [{colName: 'item_no', ruleType: 'in', value: item.item_no }],
+					condition: [{ colName: 'item_no', ruleType: 'in', value: item.item_no }],
 					serviceName: ''
-				}
+				};
 				switch (item.div_type) {
 					case 'buttons':
 						obj.serviceName = 'srvdaq_page_item_buttons_select';
@@ -302,11 +309,11 @@ export default {
 						obj.serviceName = 'srvdaq_page_item_carousel_select';
 						break;
 				}
-				if(obj.serviceName&&item.item_no){
-					req.push(obj)
+				if (obj.serviceName && item.item_no) {
+					req.push(obj);
 				}
 			}
-			let url =  this.getServiceUrl('daq', 'select', 'multi')
+			let url = this.getServiceUrl('daq', 'select', 'multi');
 			let res = await this.$http.post(url, req);
 			// debugger
 		},
@@ -400,7 +407,7 @@ export default {
 			if (userInfo && userInfo.user_no) {
 				// this.loginUserInfo = userInfo;
 				this.$store.commit('SET_LOGIN_USER', userInfo);
-				if(!this.userInfo||!this.userInfo.no){
+				if (!this.userInfo || !this.userInfo.no) {
 					await this.selectUserList(userInfo);
 				}
 			}
@@ -423,7 +430,7 @@ export default {
 			const res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				// 有数据
-				debugger
+				debugger;
 				this.$store.commit('SET_USERLIST', res.data.data);
 				if (uni.getStorageSync('current_user')) {
 					res.data.data.forEach(item => {
@@ -453,9 +460,6 @@ export default {
 					}
 				}
 				uni.setStorageSync('user_info_list', res.data.data);
-				if(!this.subscsribeStatus){
-					this.checkSubscribeStatus();
-				}
 				return res.data.data;
 			} else if (res.data.resultCode === '0011') {
 				// 登录失效 进行静默登录
@@ -475,17 +479,26 @@ export default {
 			}
 		},
 		openOfficialImage() {
+			uni.navigateTo({
+				url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent('https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ')
+			});
 			// uni.previewImage({
 			// 	urls: ['/static/bx100x.png']
 			// });
 		}
 	},
 	created() {
+		this.toAddPage();
 		this.getPageItem();
 	},
-	onShow() {
-		this.initPage();
-		this.toAddPage();
+	onShow(option) {
+		if(!this.authUserInfo){
+			uni.navigateTo({
+				url:'/publicPages/accountExec/accountExec'
+			})
+		}else{
+			this.initPage();
+		}
 	},
 	onShareAppMessage() {
 		let path = '';
@@ -589,16 +602,6 @@ export default {
 		}
 	}
 }
-.official-account {
-	margin: 20rpx 0;
-	background-color: #fff;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-	.text {
-		padding: 10rpx 20rpx;
-		color: #777;
-		font-size: 24rpx;
-	}
-}
 .contact-button {
 	position: fixed;
 	bottom: 70rpx;
@@ -624,6 +627,20 @@ export default {
 	justify-content: space-around;
 	.cu-btn {
 		width: 45%;
+	}
+}
+.official-account {
+	margin: 20rpx 0;
+	border-radius: 10rpx;
+	overflow: hidden;
+	background-color: #fff;
+	padding: 10rpx 0;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	padding-left: 20rpx;
+	.text {
+		display: flex;
+		align-items: center;
+		font-size: 24rpx;
 	}
 }
 </style>

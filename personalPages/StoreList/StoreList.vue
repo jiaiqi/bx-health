@@ -132,31 +132,34 @@ export default {
 			}
 		}
 	},
-	// onShareAppMessage(e) {
-	// 	let path = '';
-	// 	let title = '百想健康';
-	// 	let imageUrl = '';
-	// 	if (e.target && e.target.dataset && e.target.dataset.type === 'bindOrganization') {
-	// 		// 邀请加入组织机构
-	// 		if (e.target.dataset.data && e.target.dataset.data.id) {
-	// 			let data = e.target.dataset.data;
-	// 			path = `/personalPages/StoreDetail/StoreDetail?from=share&invite_user_no=${this.userInfo.userno}&store_no=${data.store_no}&doctor_no=${
-	// 				this.userInfo.no
-	// 			}&share_type=bindOrganization`;
-	// 			title = `${this.userInfo.name}邀请您加入【${data.name}】`;
-	// 			imageUrl = this.getImagePath(data.image);
-	// 		}
-	// 	} else {
-	// 		if (this.userInfo.name) {
-	// 			title = this.userInfo.name + '邀请您体验百想健康小程序';
-	// 		}
-	// 	}
-	// 	return {
-	// 		imageUrl: imageUrl,
-	// 		title: title,
-	// 		path: path
-	// 	};
-	// },
+	onShareAppMessage(e) {
+		let path = '';
+		let title = '百想健康';
+		let imageUrl = '';
+		if (e.target && e.target.dataset && e.target.dataset.type === 'bindOrganization') {
+			// 邀请加入组织机构
+			if (e.target.dataset.data && e.target.dataset.data.id) {
+				let data = e.target.dataset.data;
+				// path = `/personalPages/StoreDetail/StoreDetail?from=share&invite_user_no=${this.userInfo.userno}&store_no=${data.store_no}&doctor_no=${
+				// 	this.userInfo.no
+				// }&share_type=bindOrganization`;
+				path = `/pediaPages/hospitalOverview/hospitalOverview?store_no=${data.store_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
+					this.userInfo.no
+				}&share_type=bindOrganization`;
+				title = `${this.userInfo.name}邀请您加入【${data.name}】`;
+				imageUrl = this.getImagePath(data.image);
+			}
+		} else {
+			if (this.userInfo.name) {
+				title = this.userInfo.name + '邀请您体验百想健康小程序';
+			}
+		}
+		return {
+			imageUrl: imageUrl,
+			title: title,
+			path: path
+		};
+	},
 	onLoad() {
 		if (this.userInfo && this.userInfo.no) {
 			this.selectMineStore();
@@ -214,7 +217,7 @@ export default {
 				padding: 10rpx;
 				display: flex;
 				flex-direction: column;
-				.cu-btn{
+				.cu-btn {
 					margin-bottom: 10rpx;
 				}
 			}

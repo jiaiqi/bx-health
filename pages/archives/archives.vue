@@ -442,7 +442,7 @@ export default {
 		},
 		switchUser(item) {
 			this.userInfo = item;
-			this.$store.commit('SET_USERINFO',item)
+			this.$store.commit('SET_USERINFO', item);
 			uni.setStorageSync('current_user_info', item);
 			uni.setStorageSync('current_user', item.name);
 			this.showUserListPopup = false;
@@ -993,19 +993,21 @@ export default {
 				let { srv_cols } = res.data.data;
 				if (Array.isArray(srv_cols) && srv_cols.length > 0) {
 					console.log(this.vuex_userInfo);
-					let requirement = this.vuex_userInfo.requirement.split(',');
-					console.log(requirement);
-					srv_cols.forEach(item => {
-						if (item.columns === 'requirement') {
-							this.checkboxList = item.option_list_v2.map(item => {
-								item['checked'] = false;
-								if (Array.isArray(requirement) && requirement.includes(item.value) && !this.selectedTags.find(s => s.value === item.value)) {
-									this.selectedTags.push(item);
-								}
-								return item;
-							});
-						}
-					});
+					if (this.vuex_userInfo && this.vuex_userInfo.requirement) {
+						let requirement = this.vuex_userInfo.requirement.split(',');
+						console.log(requirement);
+						srv_cols.forEach(item => {
+							if (item.columns === 'requirement') {
+								this.checkboxList = item.option_list_v2.map(item => {
+									item['checked'] = false;
+									if (Array.isArray(requirement) && requirement.includes(item.value) && !this.selectedTags.find(s => s.value === item.value)) {
+										this.selectedTags.push(item);
+									}
+									return item;
+								});
+							}
+						});
+					}
 				}
 			}
 		},
@@ -1165,7 +1167,7 @@ export default {
 			const res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				// 有数据
-				debugger
+				debugger;
 				this.$store.commit('SET_USERLIST', res.data.data);
 				if (uni.getStorageSync('current_user')) {
 					res.data.data.forEach(item => {
@@ -1181,9 +1183,6 @@ export default {
 								}
 							}
 							this.$store.commit('SET_USERINFO', item);
-							if (!this.$store.state.app.subscsribeStatus) {
-								this.checkSubscribeStatus();
-							}
 						}
 					});
 				} else {
@@ -1197,7 +1196,6 @@ export default {
 						}
 					}
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
-					this.checkSubscribeStatus();
 				}
 				if (this.vuex_userInfo && this.vuex_userInfo.requirement) {
 					let tags = this.vuex_userInfo.requirement.split(',');

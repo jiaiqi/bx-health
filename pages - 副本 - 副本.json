@@ -124,7 +124,7 @@
 		// 				"navigationBarTitleText": "",
 		// 				"enablePullDownRefresh": false
 		// 			}
-		// 		}, 
+		// 		},
 		// 		{
 		// 			"path": "DietDetail/DietDetail",
 		// 			"style": {
@@ -234,6 +234,8 @@
 				{
 					"path": "myDoctor/doctorChat",
 					"style": {
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"navigationBarTitleText": "聊天列表",
 						"enablePullDownRefresh": false
 					}
@@ -251,49 +253,42 @@
 						"navigationBarTitleText": "标签管理",
 						"enablePullDownRefresh": true
 					}
-
 				}, {
 					"path": "FontSizeSetting/FontSizeSetting",
 					"style": {
 						"navigationBarTitleText": "字体大小",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "chatGroup/chatGroup",
 					"style": {
 						"navigationBarTitleText": "圈子",
 						"enablePullDownRefresh": true
 					}
-
 				}, {
 					"path": "gropDetail/gropDetail",
 					"style": {
 						"navigationBarTitleText": "圈子设置",
 						"enablePullDownRefresh": true
 					}
-
 				}, {
 					"path": "StoreList/StoreList",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "StoreDetail/StoreDetail",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "DoctorDetail/DoctorDetail",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}
 			]
 		},
@@ -499,6 +494,20 @@
 					"navigationBarTextStyle": "black",
 					"enablePullDownRefresh": false
 				}
+			}, {
+				"path": "AboutMiniProgram/AboutMiniProgram",
+				"style": {
+					"navigationBarTitleText": "关于小程序",
+					"enablePullDownRefresh": false
+				}
+
+			}, {
+				"path": "department/department",
+				"style": {
+					"navigationBarTitleText": "科室介绍",
+					"enablePullDownRefresh": false
+				}
+
 			}]
 		},
 		{
@@ -542,6 +551,13 @@
 						"navigationBarBackgroundColor": "#fff",
 						"enablePullDownRefresh": false
 					}
+				}, {
+					"path": "article/article",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+
 				}
 			]
 		}
@@ -608,6 +624,16 @@
 				"name": "登记就诊信息", //模式名称  
 				"path": "publicPages/newForm/newForm", //启动页面，必选  
 				"query": "from=share&invite_user_no=jiaqi&store_no=ST202101191842170001&doctor_no=PB2020092209440043&share_type=seeDoctor&serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=%5B%7B%22column%22%3A%22user_info_no%22%2C%22display%22%3Afalse%7D%2C%7B%22column%22%3A%22user_no%22%2C%22display%22%3Afalse%7D%2C%7B%22column%22%3A%22store_no%22%2C%22condition%22%3A%5B%7B%22colName%22%3A%22type%22%2C%22ruleType%22%3A%22in%22%2C%22value%22%3A%22%E8%AF%8A%E6%89%80%2C%E5%8C%BB%E9%99%A2%22%7D%5D%7D%5D" //启动参数，在页面的onLoad函数里面得到  
+			},
+			{
+				"name": "食物详情分享", //模式名称  
+				"path": "archivesPages/DietDetail/DietDetail", //启动页面，必选  
+				"query": "from=share&invite_user_no=jiaqi&q=https://wx2.100xsys.cn/shareFood/FD202012141544420255/2021-01-27" //启动参数，在页面的onLoad函数里面得到  
+			},
+			{
+				"name": "聊天页面",
+				"path": "personalPages/myDoctor/doctorChat",
+				"query": "no=PB2020092209440043&groupInfo=%7B%22store_no%22%3Anull%2C%22icon%22%3A%2220210107172215427100%22%2C%22name%22%3A%22%E7%A7%91%E5%AD%A6%E5%87%8F%E8%84%82%22%2C%22id%22%3A4%2C%22gc_no%22%3A%22GC202101071722180004%22%2C%22attend_approve%22%3A%22%E5%90%A6%22%2C%22group_role%22%3A%22%E7%94%A8%E6%88%B7%22%2C%22latest_sign_in_time%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22pg_no%22%3A%22PG202101211816220025%22%2C%22lastChatState%22%3A%22%E6%9C%AA%E8%AF%BB%22%2C%22lastChatTime%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22lastChatText%22%3A%22%5B%E5%9B%BE%E7%89%87%5D%22%7D"
 			}
 		]
 	}

@@ -22,6 +22,10 @@
 			<view class="btn bg-grey" @click="cancel">取消</view>
 			<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
 		</view>
+		<view class="qr-code" v-if="qrCodeText">
+			<uni-qrcode cid="qrcodeCanvas" :text="qrCodeText" :size="codeSize" class="qrcode-canvas" foregroundColor="#333" makeOnLoad @makeComplete="qrcodeCanvasComplete"></uni-qrcode>
+			<image :src="qrcodePath" class="qr-code-image" mode="aspectFit" v-if="qrcodePath" @click="toPreviewImage(qrcodePath)"></image>
+		</view>
 	</view>
 </template>
 
@@ -30,12 +34,14 @@ import DietInfo from './diet-info.vue';
 import elementDetail from './element-detail.vue';
 import HandlerBar from './handler-bar.vue';
 import energyListWrap from './data.js';
+import UniQrcode from '../components/uni-qrcode/uni-qrcode';
 import { mapState } from 'vuex';
 export default {
 	components: {
 		DietInfo,
 		elementDetail,
-		HandlerBar
+		HandlerBar,
+		UniQrcode
 	},
 	computed: {
 		...mapState({
@@ -43,10 +49,17 @@ export default {
 			wxUserInfo: state => state.user['wxUserInfo'],
 			userInfo: state => state.user['userInfo'],
 			dietRecord: state => state.app['dietRecord']
-		})
+		}),
+		qrCodeText() {
+			if (this.chooseDate && this.food_no) {
+				return 'https://wx2.100xsys.cn/shareFood/' + this.food_no + '/' + this.chooseDate;
+			}
+		}
 	},
 	data() {
 		return {
+			codeSize: uni.upx2px(550),
+			qrcodePath: '', //图片url
 			planNo: '', //计划编号
 			chartData: {
 				option: {}
@@ -63,6 +76,9 @@ export default {
 		};
 	},
 	methods: {
+		qrcodeCanvasComplete(e) {
+			this.qrcodePath = e;
+		},
 		cancel() {
 			//取消
 			uni.navigateBack();
@@ -485,6 +501,8 @@ export default {
 		};
 	},
 	onLoad(option) {
+		this.toAddPage();
+		let self = this;
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({
 			withShareTicket: true,
@@ -493,6 +511,18 @@ export default {
 		// #endif
 		if (option.planNo) {
 			this.planNo = option.planNo;
+		}
+		if (option.q) {
+			let text = decodeURIComponent(option.q);
+			if (text.indexOf('https://wx2.100xsys.cn/shareFood/') !== -1) {
+				let result = text.split('https://wx2.100xsys.cn/shareFood/')[1];
+				if (result.split('/').length >= 2) {
+					self.food_no = result.split('/')[0];
+					self.chooseDate = result.split('/')[1];
+					option.chooseDate = self.chooseDate;
+					option.no = self.food_no;
+				}
+			}
 		}
 		if (option.chooseDate && option.no) {
 			this.chooseDate = option.chooseDate;
@@ -519,9 +549,11 @@ export default {
 <style lang="scss">
 .current-diet-detail {
 	width: 100vw;
-	height: 100vh;
+	min-height: 100vh;
 	// overflow-x: hidden;
-	background-color: #f9f9f9;
+	overflow: hidden;
+	background-color: #fff;
+
 	.title-bar {
 		display: flex;
 		justify-content: center;
@@ -560,7 +592,7 @@ export default {
 		}
 	}
 	.button-box {
-		padding: 30rpx 20rpx 60rpx;
+		padding: 30rpx 20rpx;
 		color: #999;
 		border-top: 1px solid #f1f1f1;
 		display: flex;
@@ -579,6 +611,20 @@ export default {
 				margin-right: 0rpx;
 			}
 		}
+	}
+}
+.qr-code {
+	background-color: #fff;
+	width: 200rpx;
+	height: 200rpx;
+	margin: 0 auto 100rpx;
+	.qrcode-canvas {
+		position: fixed;
+		top: -999999px;
+	}
+	.qr-code-image {
+		width: 200rpx;
+		height: 200rpx;
 	}
 }
 </style>

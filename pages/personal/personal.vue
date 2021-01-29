@@ -6,17 +6,18 @@
 			'--global-label-font-size': globalLabelFontSize + 'px'
 		}"
 	>
-		<view class="container-top" @click="toPages('updateInfo')">
+		<view class="container-top">
 			<view class="top-left">
 				<image
+					@click="toPages('updateInfo')"
 					v-if="((authSetting && authSetting.userInfo) || client_env === 'h5') && (vuex_userInfo.user_image || vuex_userInfo.profile_url)"
 					class="image"
 					:src="getImagePath(vuex_userInfo.user_image) ? getImagePath(vuex_userInfo.user_image) : getImagePath(vuex_userInfo.profile_url)"
 				></image>
-				<image class="image" src="../../static/man-profile.png" v-else></image>
+				<image  @click="toPages('updateInfo')" class="image" src="../../static/man-profile.png" v-else></image>
 			</view>
 			<view class="top-right" v-if="vuex_userInfo && vuex_userInfo.name && ((authSetting && authSetting.userInfo) || client_env === 'h5')">
-				<view class="top-right-name">{{ vuex_userInfo.name }}</view>
+				<view class="top-right-name"  @click="toPages('updateInfo')">{{ vuex_userInfo.name }}</view>
 			</view>
 			<view class="top-right" v-if="(!authSetting || !authSetting.userInfo) && client_env === 'wxmp'">
 				<view class="top-right-name">游客</view>
@@ -27,24 +28,24 @@
 		</view>
 		<view class="container-cen">
 			<view class="container-cen-top">
-				<view class="container-cen-top-list bg-white" @click="toPages('doctor')">
-					<text class="cuIcon-service" style="font-size: 30px;"></text>
-					<text class="label">我的医生</text>
+				<view class="container-cen-top-list bg-white">
+					<text @click="toPages('doctor')" class="cuIcon-friendfavor" style="font-size: 30px;"></text>
+					<text @click="toPages('doctor')" class="label">医生</text>
 					<view v-if="doctor_message != 0" class="message-tag">{{ doctor_message }}</view>
 				</view>
-				<view class="container-cen-top-list bg-white" @click="toPages('userList')">
-					<text class="cuIcon-comment" style="font-size: 30px;"></text>
-					<text class="label">我的用户</text>
+				<view class="container-cen-top-list bg-white">
+					<text @click="toPages('userList')" class="cuIcon-peoplelist" style="font-size: 30px;"></text>
+					<text @click="toPages('userList')" class="label">用户</text>
 					<view v-if="hzMessage != 0" class="message-tag">{{ hzMessage }}</view>
 				</view>
-				<view class="container-cen-top-list bg-white" @click="toPages('group')">
-					<text class="cuIcon-group" style="font-size: 30px;"></text>
-					<text class="label">圈子</text>
+				<view class="container-cen-top-list bg-white">
+					<text @click="toPages('group')" class="cuIcon-link" style="font-size: 30px;"></text>
+					<text @click="toPages('group')" class="label">圈子</text>
 					<view v-if="groupMsgUnreadAmount != 0" class="message-tag">{{ groupMsgUnreadAmount }}</view>
 				</view>
-				<view class="container-cen-top-list bg-white" @click="toPages('mineStore')">
-					<text class="cuIcon-home" style="font-size: 30px;"></text>
-					<text class="label">我的单位</text>
+				<view class="container-cen-top-list bg-white">
+					<text @click="toPages('mineStore')" class="cuIcon-home" style="font-size: 30px;"></text>
+					<text @click="toPages('mineStore')" class="label">单位</text>
 					<!-- <view v-if="groupMsgUnreadAmount != 0" class="message-tag">{{ groupMsgUnreadAmount }}</view> -->
 				</view>
 				<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('group')">
@@ -83,6 +84,14 @@
 							<text class="text-grey">字体设置</text>
 						</view>
 					</view>
+					<view class="cu-item arrow" @click="openOfficialImage">
+						<view class="content">
+							<text class="cuIcon-attentionfavor"></text>
+							<text class="text-grey">消息提醒设置</text>
+						</view>
+						<view class="text-green" v-if="subscsribeStatus">已设置</view>
+						<view class="text-orange" v-else>待设置</view>
+					</view>
 					<view class="cu-item arrow" @click="toPages('about')">
 						<view class="content">
 							<text class="cuIcon-global"></text>
@@ -92,6 +101,13 @@
 				</view>
 			</view>
 		</view>
+		<!-- 		<view class="official-account" v-if="!subscsribeStatus">
+			<official-account></official-account>
+			<view class="text" @click="openOfficialImage">
+				<text class="cuIcon-likefill text-red"></text>
+				关注公众号，获取更多服务
+			</view>
+		</view> -->
 		<view class="cu-modal" :class="{ show: showModal }" v-if="!manager_type">
 			<view class="cu-dialog">
 				<view class="padding-sm">
@@ -149,6 +165,7 @@ export default {
 	},
 	computed: {
 		...mapState({
+			subscsribeStatus: state => state.app.subscsribeStatus,
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize,
 			authUserInfo: state => state.app.authUserInfo
@@ -164,6 +181,14 @@ export default {
 		})
 	},
 	methods: {
+		changeSwitch(e) {
+			this.openOfficialImage();
+		},
+		openOfficialImage() {
+			uni.navigateTo({
+				url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent('https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ')
+			});
+		},
 		hideModal() {
 			this.showModal = false;
 		},
@@ -272,7 +297,11 @@ export default {
 			switch (e) {
 				case 'about':
 					uni.navigateTo({
-						url: '/pediaPages/AboutMiniProgram/AboutMiniProgram'
+						url: '/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=CT2021012719370101'
+						// url:
+						// 	'/publicPages/webviewPage/webviewPage?webUrl=' +
+						// 	encodeURIComponent('https://wx2.100xsys.cn/pages/specific/article/article?serviceName=srvdaq_cms_content_select&content_no=CT2021012719370101')
+						// url: '/pediaPages/AboutMiniProgram/AboutMiniProgram'
 					});
 					break;
 				case 'group':
@@ -356,6 +385,10 @@ export default {
 								display: false
 							},
 							{
+								column: 'add_store_no',
+								display: false
+							},
+							{
 								column: 'create_time',
 								display: false
 							},
@@ -369,7 +402,9 @@ export default {
 							}
 						];
 						uni.navigateTo({
-							url: '/publicPages/newForm/newForm?showChildService=false&serviceName=srvhealth_person_info_select&type=detail&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
+							url:
+								'/publicPages/newForm/newForm?showChildService=false&serviceName=srvhealth_person_info_select&type=detail&fieldsCond=' +
+								encodeURIComponent(JSON.stringify(fieldsCond))
 						});
 					}
 					break;
@@ -499,9 +534,6 @@ export default {
 				if (currentUserInfo) {
 					this.$store.commit('SET_USERINFO', currentUserInfo);
 					this.userInfo = currentUserInfo;
-					if (!this.$store.state.app.subscsribeStatus) {
-						this.checkSubscribeStatus();
-					}
 				} else if (currentUserInfo === 0) {
 					// 没有创建用户
 					uni.getUserInfo({
@@ -685,7 +717,8 @@ export default {
 		if (this.vuex_userInfo && this.vuex_userInfo.hasOwnProperty('manager_type')) {
 			this.manager_type = this.vuex_userInfo.manager_type;
 		}
-		this.userInfo = uni.getStorageSync('current_user_info');
+		this.checkSubscribeStatus();
+		this.userInfo = this.vuex_userInfo && this.vuex_userInfo.no ? this.vuex_userInfo : uni.getStorageSync('current_user_info');
 		let amount = await this.selectMyGroup();
 		this.getDoctorAllRecod(this.userInfo.userno).then(r => {
 			if (amount) {
@@ -749,7 +782,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .container {
-	height: calc(100vh - var(--window-top) - var(--window-bottom));
+	min-height: calc(100vh - var(--window-top) - var(--window-bottom));
 	font-size: var(--global-text-font-size);
 	overflow: hidden;
 	background-color: #fff;
@@ -757,13 +790,14 @@ export default {
 .container-top {
 	width: 150%;
 	left: -25%;
-	height: 400rpx;
+	height: 150px;
 	padding: 0 25%;
-	padding-top: 35px;
+	padding-top: 20px;
 	background-color: #0bc99d;
 	display: flex;
 	position: relative;
 	border-radius: 0 0 50% 50%;
+	margin-bottom: 10px;
 	.bg-view {
 		width: 100%;
 		height: 300rpx;
@@ -825,14 +859,14 @@ export default {
 	width: 100%;
 	background-color: white;
 	position: relative;
-	padding-top: 95px;
+	padding-top: 30px;
 	.container-cen-top {
 		width: calc(100% - 40rpx);
 		display: flex;
 		margin: 0 10px;
 		flex-wrap: wrap;
 		position: absolute;
-		top: -80px;
+		top: -60px;
 		background-color: #fff;
 		border-radius: 10px;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
@@ -842,14 +876,16 @@ export default {
 			align-items: center;
 			position: relative;
 			border-radius: 50rpx;
-			padding: 10px;
-			width: calc(33% - 40rpx / 3);
-			& + .container-cen-top-list {
-				margin-left: 10px;
-			}
-			& + .container-cen-top-list:nth-child(3n + 1) {
-				margin-left: 0;
-			}
+			margin: 10px;
+			flex: 1;
+			// width: calc(25% - 60rpx / 4);
+			// width: calc(33% - 40rpx / 3);
+			// & + .container-cen-top-list {
+			// 	margin-left: 10px;
+			// }
+			// & + .container-cen-top-list:nth-child(3n + 1) {
+			// 	margin-left: 0;
+			// }
 			.label {
 				padding: 2px 0;
 			}
@@ -881,6 +917,24 @@ export default {
 		.content {
 			font-size: var(--global-text-font-size);
 		}
+	}
+}
+.official-account {
+	margin: 20rpx;
+	border-radius: 10rpx;
+	overflow: hidden;
+	background-color: #fff;
+	padding: 10rpx 0;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	.text {
+		display: flex;
+		width: 100%;
+		justify-content: center;
+		align-items: center;
+		padding: 10rpx 40rpx;
+		color: #0bc99d;
+		font-weight: bold;
+		font-size: 24rpx;
 	}
 }
 </style>

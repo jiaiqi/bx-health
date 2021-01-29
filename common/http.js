@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import api from '@/common/api.js'
 import request from '@/common/utils/request.js'
+import store from '@/store/index.js'
+
 const fly = request({
 	timeout: 6 * 1000
 })
-import store from '@/store/index.js'
 let FormateDate = function(date) {
 	let o = {
 		'yy': date.getFullYear(),
@@ -85,7 +86,10 @@ fly.interceptors.request.use(async (request) => {
 		request.headers["requrl"] = window.location.pathname + window.location.search
 		console.log("requrl", window.location.pathname + window.location.search, window.location)
 	}
-	const bxAuthTicket = uni.getStorageSync("bx_auth_ticket")
+	let bxAuthTicket = uni.getStorageSync("bx_auth_ticket")
+	if(store.state.app.bx_auth_ticket){
+		bxAuthTicket = store.state.app.bx_auth_ticket
+	}
 	// console.log('api.onTicket', api.onTicket, api.ticket, bxAuthTicket)
 	if (api.onTicket) {
 		request.headers["bx_auth_ticket"] = api.ticket

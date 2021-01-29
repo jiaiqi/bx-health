@@ -140,7 +140,7 @@ export default {
 					break;
 				case "update":
 					cols = cols.filter((item, index) => {
-						if (item.in_update === 1) {
+						if (item.in_update === 1 || item.in_update === 2) {
 							return item
 						}
 					})
@@ -148,7 +148,7 @@ export default {
 				case "detail":
 					cols = cols.filter((item, index) => {
 						// if (item.in_detail !== 0) {
-						if (item.in_detail === 1) {
+						if (item.in_detail === 1 || item.in_update === 2) {
 							return item
 						}
 					})
@@ -406,6 +406,18 @@ export default {
 		 * @param {String} app 
 		 */
 		Vue.prototype.$fetch = async function(optionType, srv, req, app) {
+			if (!req.colNames) {
+				req.colNames = ['*']
+			}
+			if (!req.serviceName) {
+				req.serviceName = srv
+			}
+			if (!req.page) {
+				req.page = {
+					pageNo: 1,
+					rownumber: 10
+				}
+			}
 			let self = this
 			let reqType = optionType
 			if (optionType === "add" || optionType === "update") {
@@ -416,9 +428,24 @@ export default {
 			let url = Vue.prototype.getServiceUrl(app || uni.getStorageSync("activeApp"), srv, optionType)
 			let res = await _http.post(url, req)
 			if (res.data.state === 'SUCCESS') {
-				return {
-					success: true,
-					data: res.data.data
+				if (optionType === "select") {
+					return {
+						success: true,
+						data: res.data.data
+					}
+				} else {
+					if (
+						Array.isArray(res.data.response) &&
+						res.data.response.length > 0 &&
+						res.data.response[0].response &&
+						Array.isArray(res.data.response[0].response.effect_data) &&
+						res.data.response[0].response.effect_data.length > 0
+					) {
+						return {
+							success: true,
+							data: res.data.response[0].response.effect_data
+						}
+					}
 				}
 			} else {
 				return {
@@ -538,7 +565,27 @@ export default {
 			})
 			return newObj
 		}
-
+		Vue.prototype.toPreviewImage = (urls) => {
+			if (!urls) {
+				return;
+			}
+			if (typeof urls === 'string') {
+				urls = [urls];
+			}
+			urls = urls.map(url => {
+				//若图片地址携带压缩图参数则预览时去掉此参数
+				return url.replace(/&thumbnailType=fwsu_100/gi, '');
+			});
+			uni.previewImage({
+				urls: urls,
+				longPressActions: {
+					itemList: ['发送给朋友', '保存图片', '收藏'],
+					success: function(data) {
+						console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
+					}
+				}
+			});
+		}
 		Vue.prototype.toPreviousPage = function() {
 			uni.navigateBack({
 				animationDuration: 2000,
@@ -660,6 +707,7 @@ export default {
 					store.commit('SET_LOGIN_USER', resData.login_user_info)
 				}
 				uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
+				store.commit('SET_TICKET', resData.bx_auth_ticket)
 				if (resData.login_user_info.data) {
 					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 				}
@@ -688,7 +736,12 @@ export default {
 					if (store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
 						// 跳转到授权页面
 						store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
-						uni.navigateTo({
+						let pageStack = getCurrentPages()
+						if (Array.isArray(pageStack) && pageStack.length >= 1) {
+							let currentPage = pageStack[pageStack.length - 1]
+							store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
+						}
+						uni.redirectTo({
 							url: '/publicPages/accountExec/accountExec'
 						})
 					}
@@ -958,6 +1011,9 @@ export default {
 			}
 		}
 		Vue.prototype.setWxUserInfo = async function(e) {
+			if (store.state.user.hasSaveUserInfo) {
+				return true
+			}
 			try {
 				if (typeof e === 'string') {
 					e = JSON.parse(e)
@@ -971,8 +1027,7 @@ export default {
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
 				"data": [{
-					"app_no": api && api.appNo && api.appNo.wxmp ? api
-						.appNo.wxmp : "APPNO20200107181133",
+					"app_no": "APPNO20201124160702",
 					"nickname": userInfo.nickname,
 					"sex": userInfo.sex,
 					"country": userInfo.country,
@@ -986,6 +1041,7 @@ export default {
 				uni.setStorageSync('wxUserInfo', userInfo)
 				let response = await _http.post(url, req);
 				if (response.data.state === 'SUCCESS' && Array.isArray(response.data.data) && response.data.data.length > 0) {
+					store.commit('SET_SAVE_USER_STATUS', true)
 					return response.data
 				}
 			}
@@ -1353,6 +1409,13 @@ export default {
 		Vue.prototype.selectBasicUserList = async () => {
 			const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 			const user_no = uni.getStorageSync('login_user_info').user_no
+			try {
+				if (store.state.user.loginUserInfo) {
+					user_no = store.state.user.loginUserInfo.user_no
+				}
+			} catch (e) {
+				//TODO handle the exception
+			}
 			let req = {
 				serviceName: 'srvhealth_person_info_select',
 				colNames: ['*'],
@@ -1370,7 +1433,6 @@ export default {
 				const res = await _http.post(url, req);
 				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 					let current_user_info = null
-					debugger
 					store.commit('SET_USERLIST', res.data.data);
 					if (uni.getStorageSync('current_user_info')) {
 						res.data.data.forEach(item => {
@@ -1379,9 +1441,6 @@ export default {
 								current_user_info = item
 								try {
 									store.commit("SET_USERINFO", item)
-									if (!store.state.app.subscsribeStatus) {
-										Vue.prototype.checkSubscribeStatus()
-									}
 								} catch (e) {
 									//TODO handle the exception
 								}
@@ -1393,9 +1452,6 @@ export default {
 						current_user_info = res.data.data[0]
 						store.commit("SET_USERINFO", current_user_info)
 						store.commit("SET_USERLIST", res.data.data)
-						if (!store.state.app.subscsribeStatus) {
-							Vue.prototype.checkSubscribeStatus()
-						}
 					}
 					return current_user_info
 				} else if (res.data.resultCode === '0011') {
@@ -1433,16 +1489,28 @@ export default {
 		}
 		Vue.prototype.selectBasicUserInfo = async () => {
 			if (store.state.user.userInfo && (store.state.user.userInfo.userno || store.state.user.userInfo.user_no)) {
+				if (store.state.user.userInfo.add_store_no) {
+					let pageInfo = Vue.prototype.getShareParams()
+					if(pageInfo.add_url.indexOf('/pediaPages/hospitalOverview/hospital')===-1){
+						uni.switchTab({
+							url: '/pages/store/store',
+							success() {
+								uni.navigateTo({
+									url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store.state.user.userInfo.add_store_no
+								})
+							}
+						})
+					}
+				}
 				return store.state.user.userInfo
 			}
-			const result = await wx.login();
-			if (result && result.code) {
-				let res = await Vue.prototype.wxLogin({
-					code: result.code
-				});
-				if (!res) {
-					return 'fail'
+			const user_no = uni.getStorageSync('login_user_info').user_no
+			try {
+				if (store.state.user.loginUserInfo) {
+					user_no = store.state.user.loginUserInfo.user_no
 				}
+			} catch (e) {
+				//TODO handle the exception
 			}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_select', 'select')
 			let req = {
@@ -1455,7 +1523,7 @@ export default {
 				"condition": [{
 					"colName": "create_user",
 					"ruleType": "eq",
-					"value": uni.getStorageSync('login_user_info').user_no
+					"value": user_no
 				}],
 				"page": {
 					"pageNo": 1,
@@ -1468,10 +1536,21 @@ export default {
 				store.commit('SET_USERLIST', res.data.data)
 				uni.setStorageSync('current_user_info', res.data.data[0]);
 				uni.setStorageSync('current_user', res.data.data[0].name);
-				if (!store.state.app.subscsribeStatus) {
-					Vue.prototype.checkSubscribeStatus()
+				if (res.data.data[0].add_store_no) {
+					let pageInfo = Vue.prototype.getShareParams()
+					if(pageInfo.add_url.indexOf('/pediaPages/hospitalOverview/hospital')===-1&&!store.state.app.homePath){
+						store.commit('SET_HOME_PATH',pageInfo.add_url)
+						uni.switchTab({
+							url: '/pages/store/store',
+							success() {
+								uni.navigateTo({
+									url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res.data.data[0].add_store_no
+								})
+							}
+						})
+					}
 				}
-				return res.data.data[0]
+				return true
 			} else {
 				return false
 			}
@@ -1569,9 +1648,22 @@ export default {
 			}
 		}
 		Vue.prototype.toAddPage = async () => {
+			// 获取用户信息
+			const result = await wx.login();
+			if (result && result.code) {
+				let res = await Vue.prototype.wxLogin({
+					code: result.code
+				});
+				if (!res) {
+					return 'fail'
+				}
+			}
 			let data = await Vue.prototype.selectBasicUserInfo()
 			if (data) {
 				// 已有用户信息
+				if (!store.state.app.subscsribeStatus) {
+					Vue.prototype.checkSubscribeStatus()
+				}
 				if (store.state.app.doctorInfo && store.state.app.doctorInfo.no) {
 					let result = await Vue.prototype.bindDoctorInfo(store.state.app.doctorInfo.no)
 				}
@@ -1590,12 +1682,22 @@ export default {
 				// 未授权获取用户信息
 				store.commit('SET_AUTH_USERINFO', false)
 			}
+			let login_user_info = uni.getStorageSync('login_user_info')
+			let user_no = uni.getStorageSync('login_user_info').user_no
+			try {
+				if (store.state.user.loginUserInfo) {
+					login_user_info = store.state.user.loginUserInfo
+					user_no = store.state.user.loginUserInfo.user_no
+				}
+			} catch (e) {
+				//TODO handle the exception
+			}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_add', 'add')
 			let req = [{
 				"serviceName": "srvhealth_person_info_add",
 				"data": [{
 					"nick_name": wxUserInfo ? wxUserInfo.nickname : "",
-					"userno": uni.getStorageSync('login_user_info').user_no,
+					"userno": user_no,
 					"name": wxUserInfo ? wxUserInfo.nickname : "",
 					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
 					"sex": wxUserInfo ? (wxUserInfo.sex === 0 ? "男" : wxUserInfo.sex === 1 ? "女" : "") : "",
@@ -1611,13 +1713,26 @@ export default {
 				if (inviterInfo.add_url) {
 					req[0].data[0].add_url = inviterInfo.add_url
 				}
-			} catch (e) {
-				debugger
+				if (inviterInfo.add_store_no) {
+					req[0].data[0].add_store_no = inviterInfo.add_store_no
+				}
+			} catch (e) {}
+			if (store.state.user.userInfo && store.state.user.userInfo.no) {
+				return
 			}
 			let res = await _http.post(url, req)
 			store.commit('SET_REGIST_STATUS', false)
 			if (res.data && res.data.resultCode === "SUCCESS") {
 				console.log("信息登记成功")
+				if (
+					Array.isArray(res.data.response) &&
+					res.data.response.length > 0 &&
+					res.data.response[0].response &&
+					Array.isArray(res.data.response[0].response.effect_data) &&
+					res.data.response[0].response.effect_data.length > 0
+				) {
+					store.commit('SET_USERINFO', res.data.response[0].response.effect_data[0])
+				}
 				if (store.state.app.doctorInfo && store.state.app.doctorInfo.no) {
 					let result = await Vue.prototype.bindDoctorInfo(store.state.app.doctorInfo.no)
 				}
@@ -1660,6 +1775,10 @@ export default {
 						});
 					}
 				}
+				if (!store.state.app.subscsribeStatus) {
+					Vue.prototype.checkSubscribeStatus()
+				}
+				return
 			} else {
 				uni.showModal({
 					title: '提示',

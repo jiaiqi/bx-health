@@ -1,7 +1,7 @@
 <template>
 	<view class="diet-visual">
 		<view v-if="dietInfo" class="view-tabs">
-			<view class="view-tab" :class="{ 'active-tab': showChart }" @click="switchTab(true)">NRV%占比</view>
+			<view class="view-tab" :class="{ 'active-tab': showChart }" @click="switchTab(true)">推荐摄入占比</view>
 			<view class="view-tab" :class="{ 'active-tab': !showChart }" @click="switchTab(false)">营养素含量</view>
 		</view>
 		<view class="crowd-list" v-if="(dietInfo.food_no || dietInfo.meal_no) && !dietInfo.diet_record_no">
@@ -328,9 +328,9 @@ export default {
 			let category = eleArr.map(item => {
 				return item.name;
 			});
-			let legendData = ['其它食物', '当前食物', 'NRV%达标线'];
+			let legendData = ['其它食物', '当前食物', '%推荐摄入量'];
 			if ((currentDiet.food_no || currentDiet.meal_no) && !currentDiet.diet_record_no) {
-				legendData = ['当前食物', 'NRV%达标线'];
+				legendData = ['当前食物', '%推荐摄入量'];
 			}
 			let seriesData = legendData.map(le => {
 				let obj = {
@@ -386,7 +386,7 @@ export default {
 							return num;
 						});
 						break;
-					case 'NRV%达标线':
+					case '%推荐摄入量':
 						obj.type = 'line';
 						obj.stack = false;
 						obj.data = eleArr.map(item => {

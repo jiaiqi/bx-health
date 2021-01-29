@@ -14,7 +14,8 @@ const state = {
 	wxUserInfo: getItem('wxUserInfo') ? getItem('wxUserInfo') : {}, //微信用户信息
 	userInfo: getItem('userInfo') ? getItem('userInfo') : {}, // 当前用户基础信息
 	userList: getItem('userList') ? getItem('userList') : {}, // 当前登录账号下的用户列表
-	patientInfo: getItem('patientInfo') ? getItem('patientInfo') : {}
+	patientInfo: getItem('patientInfo') ? getItem('patientInfo') : {},
+	hasSaveUserInfo: false
 }
 
 const mutations = {
@@ -37,6 +38,9 @@ const mutations = {
 	SET_PATIENT_INFO: (state, patientInfo) => {
 		state.patientInfo = patientInfo
 		setItem('patientInfo', patientInfo)
+	},
+	SET_SAVE_USER_STATUS: (state, hasSaveUserInfo) => {
+		state.hasSaveUserInfo = hasSaveUserInfo
 	}
 }
 

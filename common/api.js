@@ -23,6 +23,7 @@ let ENV = {
 	frontEndAddress: remoteAddress.frontEndAddress, //前端线上地址
 	appNo: {
 		wxmp: 'APPNO20201124160702', // 百想健康
+		// wxmp: 'APPNO20201124160702', // 百想健康
 		// wxmp: 'APPNO20200214122021', // 百想软件ai平台
 		// wxmp: 'APPNO20200731153421' //生活能力评估
 

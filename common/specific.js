@@ -58,7 +58,6 @@ export default {
 				userInfo = store.state.user.userInfo
 			}
 			let pageInfo = Vue.prototype.getShareParams()
-			debugger
 			if (pageInfo && pageInfo.add_url) {
 				share_url = pageInfo.add_url
 			}
@@ -162,10 +161,11 @@ export default {
 			if (option.doctor_no && option.store_no) {
 				store.commit('SET_DOCTOR_INFO', {
 					no: option.doctor_no,
+					doctor_no: option.doctor_no,
 					store_no: option.store_no
 				})
 				store.commit('SET_HOSPITAL_INFO', {
-					no: option.store_no,
+					store_no: option.store_no,
 					doctor_no: option.doctor_no,
 				})
 			}
@@ -173,6 +173,13 @@ export default {
 				let pageInfo = Vue.prototype.getShareParams()
 				if (pageInfo && pageInfo.add_url) {
 					store.commit('SET_INVITER_INFO', {
+						add_url: pageInfo.add_url,
+						invite_user_no: option.invite_user_no
+					});
+				}
+				if (pageInfo && pageInfo.add_url && option.store_no) {
+					store.commit('SET_INVITER_INFO', {
+						add_store_no: option.store_no,
 						add_url: pageInfo.add_url,
 						invite_user_no: option.invite_user_no
 					});

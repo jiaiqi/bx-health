@@ -8,7 +8,7 @@
 	>
 		<a-form v-if="colsV2Data && isArray(fields)" :fields="fields" :pageType="srvType" :formType="use_type" ref="bxForm" @value-blur="valueChange"></a-form>
 		<view class="button-box">
-			<button class="cu-btn bg-blue" type="primary" v-if="isArray(fields) && fields.length > 0" v-for="btn in colsV2Data._formButtons" :key="btn.id" @click="onButton(btn)">
+			<button class="cu-btn bg-blue" type="primary" v-if="isArray(fields) && fields.length > 0" v-for="btn in colsV2Data._formButtons" @click="onButton(btn)">
 				{{ btn.button_name }}
 			</button>
 		</view>
@@ -232,6 +232,9 @@ export default {
 		},
 		async onButton(e) {
 			let self = this;
+			if (!e) {
+				return;
+			}
 			if (!this.isOnButton) {
 				this.isOnButton = true;
 			} else {
@@ -334,6 +337,11 @@ export default {
 								res.data.response[0].response.effect_data.length > 0
 							) {
 								this.params.submitData = res.data.response[0].response.effect_data[0];
+								if (e.service_name === 'srvhealth_store_mgmt_add') {
+									// 创建店铺成功，自动为其创建圈子,并为新创建的圈子添加管理员（群成员）
+									self.createGroupCircle(this.params.submitData);
+									self.addPersonToStore(this.params.submitData);
+								}
 							}
 							uni.showModal({
 								title: '提示',
@@ -405,6 +413,60 @@ export default {
 					this.isOnButton = false;
 					break;
 			}
+		},
+		createGroupCircle(e) {
+			let req = [{ serviceName: 'srvhealth_group_circle_add', data: [{ name: `【${e.name}】`, store_no: e.store_no }] }];
+			this.$fetch('operate', 'srvhealth_group_circle_add', req, 'health').then(res => {
+				if (Array.isArray(res.data) && res.data.length > 0) {
+					this.addPersonToGroup(res.data[0]);
+				}
+			});
+		},
+		addPersonToStore(e) {
+			// 创建店铺后将当前用户以管理员身份加入到店铺用户列表
+			let req = [
+				{
+					serviceName: 'srvhealth_store_user_add',
+					condition: [],
+					data: [
+						{
+							store_no: e.store_no,
+							name: e.name,
+							type: e.type,
+							person_no: this.userInfo.no,
+							person_name: this.userInfo.name,
+							user_account: this.userInfo.userInfo,
+							nick_name: this.userInfo.nick_name,
+							profile_url: this.userInfo.profile_url,
+							user_image: this.userInfo.user_image,
+							sex: this.userInfo.sex,
+							user_role: '管理员'
+						}
+					]
+				}
+			];
+			this.$fetch('operate', 'srvhealth_store_user_add', req, 'health');
+		},
+		addPersonToGroup(e) {
+			// 创建了店铺关联的圈子后将创建人以管理员身份加入到这个圈子
+			let req = [
+				{
+					serviceName: 'srvhealth_person_group_circle_add',
+					condition: [],
+					data: [
+						{
+							person_no: this.userInfo.no,
+							user_no: this.userInfo.userno,
+							name: this.userInfo.name,
+							profile_url: this.userInfo.profile_url,
+							user_image: this.userInfo.user_image,
+							gc_no: e.gc_no,
+							group_role: '管理员'
+						}
+					]
+				}
+			];
+			this.$fetch('operate', 'srvhealth_person_group_circle_add', req, 'health');
 		},
 		valueChange(e) {
 			this.fields = this.fields.map(item => {

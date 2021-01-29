@@ -23,7 +23,7 @@
 					<view class="item-list-top">
 						<text>*</text>
 						<text>体重(千克)</text>
-						<text>{{ inputVal.weight }}kg</text>
+						<text class="margin-left-xs">{{ inputVal.weight }}kg</text>
 					</view>
 					<slider-number v-model="inputVal.weight" :max="200" :min="0" :step="0.1"></slider-number>
 				</view>
@@ -31,25 +31,62 @@
 					<view class="item-list-top">
 						<text></text>
 						<text>体脂率(%)</text>
-						<text>{{ inputVal.body_fat_rate }}%</text>
+						<text class="margin-left-xs">{{ inputVal.body_fat_rate }}%</text>
 					</view>
 					<slider-number v-model="inputVal.body_fat_rate" :max="50" :min="5" :step="0.1"></slider-number>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'sleep'" class="item-wrap">
-				<view class="item-list" @click="openTime({ type: 'sleep', field: 'retire_time' })">
+				<view class="item-list">
+					<!-- <view class="item-list" @click="openTime({ type: 'sleep', field: 'retire_time' })"> -->
 					<view class="item-list-top">
-						<text>*</text>
-						<text>就寝时间</text>
+						<view class="label">
+							<text>*</text>
+							<text>就寝时间:</text>
+						</view>
+						<view class="value" v-if="inputVal.retire_time">
+							<!-- <text class="date">{{ inputVal.retire_time.split(' ')[0] }}</text> -->
+							<!-- <text class="time">{{ inputVal.retire_time.split(' ')[1] }}</text> -->
+							<picker mode="date" :value="inputVal.retire_time.split(' ')[0]" @change="DateChange($event, 'retire_time')">
+								<view class="picker">{{ inputVal.retire_time.split(' ')[0] }}</view>
+							</picker>
+							<view class="margin-right"></view>
+							<picker mode="time" :value="inputVal.retire_time.split(' ')[1]" @change="TimeChange($event, 'retire_time')">
+								<view class="picker">{{ inputVal.retire_time.split(' ')[1] }}</view>
+							</picker>
+						</view>
 					</view>
-					<view class="item-list-bot"><input type="text" :value="inputVal.retire_time" /></view>
+					<view class="number-change">
+						<button class="operate cu-btn" @click="changeTime('retire_time', -60)">-1小时</button>
+						<button class="operate cu-btn margin-right" @click="changeTime('retire_time', -10)">-10分钟</button>
+						<button class="operate cu-btn" @click="changeTime('retire_time', 10)">+10分钟</button>
+						<button class="operate cu-btn" @click="changeTime('retire_time', 60)">+1小时</button>
+					</view>
 				</view>
-					<view class="item-list" @click="openTime({ type: 'sleep', field: 'getup_time' })">
+				<view class="item-list">
+					<!-- <view class="item-list" @click="openTime({ type: 'sleep', field: 'getup_time' })"> -->
 					<view class="item-list-top">
-						<text>*</text>
-						<text>起床时间</text>
+						<view class="label">
+							<text>*</text>
+							<text>起床时间:</text>
+						</view>
+						<view class="value" v-if="inputVal.getup_time">
+							<picker mode="date" :value="inputVal.getup_time.split(' ')[0]" start="2021-01-01" end="2030-09-01" @change="DateChange($event, 'getup_time')">
+								<view class="picker">{{ inputVal.getup_time.split(' ')[0] }}</view>
+							</picker>
+							<view class="margin-right"></view>
+							<picker mode="time" :value="inputVal.getup_time.split(' ')[1]" start="07:00" end="23:00" @change="TimeChange($event, 'getup_time')">
+								<view class="picker">{{ inputVal.getup_time.split(' ')[1] }}</view>
+							</picker>
+							<!-- <view class="time-display">{{ inputVal.getup_time }}</view> -->
+						</view>
 					</view>
-					<view class="item-list-bot"><input type="text" :value="inputVal.getup_time" /></view>
+					<view class="number-change">
+						<button class="operate cu-btn" @click="changeTime('getup_time', -60)">-1小时</button>
+						<button class="operate cu-btn margin-right" @click="changeTime('getup_time', -10)">-10分钟</button>
+						<button class="operate cu-btn" @click="changeTime('getup_time', 10)">+10分钟</button>
+						<button class="operate cu-btn" @click="changeTime('getup_time', 60)">+1小时</button>
+					</view>
 				</view>
 				<view class="item-list">
 					<text>睡眠过程记录</text>
@@ -76,9 +113,11 @@
 				<view class="item-list">
 					<view class="item-list-top">
 						<text></text>
-						<text>起夜次数</text>
+						<text>起夜次数:</text>
+						<text class="margin-left">{{ inputVal.urinate_times }}</text>
 					</view>
-					<view class="item-list-bot"><input type="number" :value="inputVal.urinate_times" /></view>
+					<slider-number v-model="inputVal.urinate_times" :max="10" :min="0"></slider-number>
+					<!-- <view class="item-list-bot"><input type="number" :value="inputVal.urinate_times" /></view> -->
 				</view>
 			</view>
 			<view v-else-if="type && type === 'heartRate'" class="item-wrap">
@@ -111,7 +150,7 @@
 					<view class="item-list-top">
 						<text>*</text>
 						<text>收缩压(高压 毫米汞柱)</text>
-						<text>{{ inputVal.systolic_pressure }}</text>
+						<text class="margin-left-xs">{{ inputVal.systolic_pressure }}</text>
 					</view>
 					<slider-number v-model="inputVal.systolic_pressure" :max="200" :min="50"></slider-number>
 				</view>
@@ -119,7 +158,7 @@
 					<view class="item-list-top">
 						<text>*</text>
 						<text>舒张压(低压 毫米汞柱)</text>
-						<text>{{ inputVal.diastolic_pressure }}</text>
+						<text class="margin-left-xs">{{ inputVal.diastolic_pressure }}</text>
 					</view>
 					<slider-number v-model="inputVal.diastolic_pressure" :max="120" :min="50"></slider-number>
 				</view>
@@ -127,7 +166,7 @@
 					<view class="item-list-top">
 						<text></text>
 						<text>心率</text>
-						<text>{{ inputVal.heart_rate }}</text>
+						<text class="margin-left-xs">{{ inputVal.heart_rate }}</text>
 					</view>
 					<slider-number v-model="inputVal.heart_rate" :max="200" :min="30"></slider-number>
 				</view>
@@ -188,8 +227,8 @@
 		<bz-date-picker
 			v-model="popupStatus"
 			title="请选择时间"
-			:defaultTime="formateDate('','full')"
-			minuteStep="10"
+			:defaultTime="formateDate('', 'full')"
+			:minuteStep="10"
 			days="7"
 			minHour="6"
 			maxHour="22"
@@ -220,6 +259,7 @@
 import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
 import bxRadio from '@/components/bx-radio/bx-radio.vue';
 import bxRadioGroup from '@/components/bx-radio-group/bx-radio-group.vue';
+import dayjs from '@/static/js/dayjs.min.js';
 export default {
 	name: 'otherIndicator',
 	components: { MxDatePicker, bxRadio, bxRadioGroup },
@@ -229,7 +269,7 @@ export default {
 			submitType: '', // update/add
 			formId: '', //update时的id
 			curItem: {},
-			popupStatus:false,
+			popupStatus: false,
 			inputVal: {
 				// top_title:'',
 				weight: 50,
@@ -816,14 +856,35 @@ export default {
 				}
 			}
 		},
-		handleDatePickerConfirm(e){
-			debugger
+		handleDatePickerConfirm(e) {
+			debugger;
 		},
-		handleDatePickerCancel(e){
-			debugger
+		handleDatePickerCancel(e) {
+			debugger;
 		},
-		handleDatePickerClose(e){
-			debugger
+		handleDatePickerClose(e) {
+			debugger;
+		},
+		TimeChange(e, type) {
+			// this.time = e.detail.value
+			debugger;
+			let val = this.inputVal[type];
+			this.inputVal[type] = val.split(' ')[0] + ' ' + e.detail.value;
+		},
+		DateChange(e, type) {
+			// this.date = e.detail.value
+			debugger;
+			let val = this.inputVal[type];
+			this.inputVal[type] = e.detail.value + ' ' + val.split(' ')[1];
+		},
+		changeTime(type, value) {
+			this.$set(
+				this.inputVal,
+				type,
+				dayjs(this.inputVal[type])
+					.add(value, 'm')
+					.format('YYYY-MM-DD HH:mm')
+			);
 		}
 	},
 	onLoad(option) {
@@ -847,6 +908,21 @@ export default {
 		});
 		if (option && option.type) {
 			this.type = option.type;
+			if (option.type === 'sleep') {
+				// 初始化值
+				this.inputVal.retire_time =
+					dayjs()
+						.subtract(1, 'day')
+						.format('YYYY-MM-DD') + ' 23:00'; //睡眠 - 就寝时间
+				this.inputVal.getup_time = ''; //睡眠 - 起床时间
+				if (Number(dayjs().format('HH')) > 7) {
+					// 当前时间晚于早上七点 默认值为七点
+					this.inputVal.getup_time = dayjs().format('YYYY-MM-DD') + ' 07:00';
+				} else {
+					// 当前时间早于早上七点 默认值为当前时间
+					this.inputVal.getup_time = dayjs().format('YYYY-MM-DD HH:mm');
+				}
+			}
 		}
 		let user_info_list = uni.getStorageSync('user_info_list');
 		let name = uni.getStorageSync('current_user');
@@ -894,20 +970,50 @@ export default {
 			width: calc(100% - 40rpx);
 			margin: 0 auto;
 			.item-list {
-				// border-bottom: 1px solid #cfcfcf;
 				display: flex;
 				flex-direction: column;
-				margin-top: 30upx;
+				margin-top: 10px;
 				text {
 					color: #5e5e5e;
 					margin-bottom: 10upx;
 					font-weight: 700;
 				}
+				.number-change {
+					display: flex;
+					padding: 20rpx;
+					justify-content: center;
+					.operate {
+						padding: 2px 10px;
+						background-color: #dff5f5;
+						color: #0BC99D;
+						& + .operate {
+							margin-left: 10rpx;
+						}
+					}
+					.value {
+						flex: 1;
+						border: 1rpx solid #f1f1f1;
+						margin: 0 20rpx;
+						border-radius: 10rpx;
+						overflow: hidden;
+					}
+				}
 				.item-list-top {
+					display: flex;
+					align-items: center;
 					text {
 						&:first-child {
 							color: red;
 							margin-right: 8rpx;
+						}
+					}
+					.value {
+						flex: 1;
+						font-weight: bold;
+						margin-left: 20px;
+						display: flex;
+						color: #0BC99D;
+						.picker{
 						}
 					}
 				}
@@ -941,6 +1047,7 @@ export default {
 		justify-content: center;
 		align-items: center;
 		position: relative;
+		margin: 20px 0;
 		.round {
 			border-radius: 50%;
 			height: 60rpx;

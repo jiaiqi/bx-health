@@ -10,7 +10,7 @@
 					<!-- #ifdef H5 -->
 					欢迎回来！
 					<!-- #endif -->
-					<text v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin">请授权微信登录</text>
+					<!-- <text v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin">请授权微信登录</text> -->
 				</view>
 				<view class="input-content" v-if="client_env === 'web' || client_env === 'app' || isShowUserLogin">
 					<view class="input-item">
@@ -42,25 +42,49 @@
 				<button v-if="(client_env === 'web' || client_env === 'app' || client_env === 'wxh5') && isShowUserLogin" class="confirm-btn bg-gradual-orange text-green" @click="toBack">
 					暂不，继续使用
 				</button>
-				<view class="wx-login" v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin">
-					<view class="tips">请完成微信授权以继续使用</view>
+				<!-- 		<view class="wx-login" v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin">
+					<view class="tips">个人信息保护指引</view>
 					<button class="confirm-btn" type="primary" lang="zh_CN" open-type="getUserInfo" @getuserinfo="saveWxUser" :withCredentials="false" :disabled="disabled">
-						微信授权用户信息
+						同意并授权访问用户信息
 					</button>
-					<!-- <button class="confirm-btn bg-grey text-black" type="default" @tap="navBack" :disabled="false">暂不授权</button> -->
-				</view>
-				<!-- 			<button v-if="(client_env === 'wxh5' || client_env === 'wxmp') && !isShowUserLogin" class="confirm-btn bg-grey text-black" type="default" @tap="navBack" :disabled="false">
-					暂不授权
-				</button> -->
+				</view> -->
 			</view>
 		</view>
+		<!-- #ifdef MP-WEIXIN -->
+		<view class="cu-modal show">
+			<view class="cu-dialog">
+				<view class="auth-explain">
+					<view class="title">隐私保护说明</view>
+					<view class="content">1. 我们会遵循用户协议与隐私政策手机、使用信息，但不会仅因同意本隐私政策而采取强制捆绑的方式收集信息。</view>
+					<view class="content">2. 为保障服务所必须，我们需要访问您的微信昵称、性别等基本信息。</view>
+					<view class="content">3. 为了记录您的活动与体能训练记录，我们需要访问您的微信运动数据。</view>
+					<view class="tip">
+						您可以查看完整版
+						<text class="text-cyan" @click="toArticle('CT2021012816330102')">用户协议</text>
+						和
+						<text class="text-cyan" @click="toArticle('CT2021012816470103')">隐私政策</text>
+					</view>
+					<view class="button-box">
+						<button type="primary" class="cu-btn bg-cyan" lang="zh_CN" open-type="getUserInfo" @getuserinfo="saveWxUser" :withCredentials="false">同意</button>
+						<button class="cu-btn bg-white text-grey" @click="disagree">不同意</button>
+					</view>
+				</view>
+			</view>
+		</view>
+		<!-- #endif -->
 	</view>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
 	// 账号授权页面
 	name: 'AccountExec',
+	computed: {
+		...mapState({
+			previousPageUrl: state => state.app.previousPageUrl
+		})
+	},
 	data() {
 		return {
 			code: '',
@@ -104,7 +128,7 @@ export default {
 					});
 				}
 			} else {
-				if (self.$api.homePath === '/pages/home/home') {
+				if (self.$api.homePath === '/pages/pedia/pedia') {
 					uni.switchTab({
 						url: self.$api.homePath
 					});
@@ -142,6 +166,17 @@ export default {
 		// #endif
 	},
 	methods: {
+		toArticle(no) {
+			uni.navigateTo({
+				url: `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=${no}`
+			});
+		},
+		disagree() {
+			uni.showToast({
+				title: '您需要同意用户协议和隐私政策才能继续使用百想健康小程序',
+				icon: 'none'
+			});
+		},
 		toBack() {
 			if (uni.getStorageSync('isLogin')) {
 				if (uni.getStorageSync('backUrl')) {
@@ -345,33 +380,58 @@ export default {
 					}
 					let num = getCurrentPages();
 					if (Array.isArray(num) && num.length === 1) {
-						if (self.$api.homePath.indexOf('/pages/') !== -1) {
-							uni.switchTab({
-								url: self.$api.homePath
-							});
-						} else {
+						if (self.previousPageUrl && self.previousPageUrl.indexOf('/accountExec') == -1) {
+							//
 							uni.redirectTo({
-								url: self.$api.homePath
+								url: self.previousPageUrl,
+								fail() {
+									uni.switchTab({
+										url:self.previousPageUrl,
+										fail(e) {
+											uni.showModal({
+												title:'提示',
+												content:e
+											})
+										}
+									});
+								}
 							});
+						}else{
+							if (self.$api.homePath.indexOf('/pages/') !== -1) {
+								uni.switchTab({
+									url: self.$api.homePath
+								});
+							} else {
+								uni.redirectTo({
+									url: self.$api.homePath
+								});
+							}
 						}
 					} else {
-						uni.navigateBack({
-							animationDuration: 500,
-							fail: function(err) {
-								if (err.errMsg && err.errMsg.indexOf('cannot navigate back at first page') !== -1) {
-									// 当前页面在页面栈中为第一页
-									if (self.$api.homePath.indexOf('/pages/') !== -1) {
-										uni.switchTab({
-											url: self.$api.homePath
-										});
-									} else {
-										uni.redirectTo({
-											url: self.$api.homePath
-										});
+						if (self.previousPageUrl && self.previousPageUrl.indexOf('/account') == -1) {
+							//
+							uni.redirectTo({
+								url: self.previousPageUrl
+							});
+						} else {
+							uni.navigateBack({
+								animationDuration: 500,
+								fail: function(err) {
+									if (err.errMsg && err.errMsg.indexOf('cannot navigate back at first page') !== -1) {
+										// 当前页面在页面栈中为第一页
+										if (self.$api.homePath.indexOf('/pages/') !== -1) {
+											uni.switchTab({
+												url: self.$api.homePath
+											});
+										} else {
+											uni.redirectTo({
+												url: self.$api.homePath
+											});
+										}
 									}
 								}
-							}
-						});
+							});
+						}
 					}
 				}
 				// #endif
@@ -473,6 +533,8 @@ export default {
 				success: function() {
 					wx.getUserInfo({
 						success: function(res) {
+							self.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+							self.$store.commit('SET_AUTH_USERINFO', true);
 							uni.setStorageSync('wxuserinfo', res.userInfo);
 							let rawData = {
 								nickname: res.userInfo.nickName,
@@ -484,7 +546,6 @@ export default {
 							};
 							uni.setStorageSync('wxUserInfo', rawData);
 							self.$store.commit('SET_WX_USERINFO', rawData);
-							self.toAddPage();
 							rawData = JSON.stringify(rawData);
 							self.setWxUserInfo(rawData);
 							console.log(res);
@@ -690,21 +751,6 @@ export default {
 		text-align: center;
 		padding: 20upx 5%;
 	}
-	.button-box {
-		margin-top: 50upx;
-		height: 200upx;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-around;
-		align-items: center;
-		.buttons {
-			width: 70%;
-			height: 70upx;
-			line-height: 70upx;
-			border-radius: 0upx;
-			font-size: 30upx;
-		}
-	}
 }
 </style>
 <style lang="scss">
@@ -724,6 +770,7 @@ page {
 	z-index: 90;
 	background: #fff;
 	padding-bottom: 40upx;
+	text-align: center;
 }
 .back-btn {
 	position: absolute;
@@ -776,7 +823,6 @@ page {
 }
 .welcome {
 	position: relative;
-	left: 50upx;
 	top: -90upx;
 	font-size: 46upx;
 	color: #555;
@@ -793,7 +839,7 @@ page {
 	padding: 0 30upx;
 	background: #f8f6fc;
 	height: 120upx;
-
+	text-align: left;
 	border-radius: 4px;
 	margin-bottom: 50upx;
 	&:last-child {
@@ -819,17 +865,38 @@ page {
 	}
 }
 .confirm-btn {
-	width: 630upx;
-	height: 76upx;
-	line-height: 76upx;
-	border-radius: 50px;
-	margin-top: 70upx;
+	min-width: 300px;
+	display: inline-block;
+	border-radius: 10px;
+	margin: 30px auto 0;
+	padding: 0;
+	text-align: center;
 	background-color: #02d199;
 	/* background: $uni-color-primary; */
 	color: #fff;
 	/* font-size: $font-lg; */
-	&:after {
-		border-radius: 100px;
+}
+.auth-explain {
+	padding: 30rpx;
+	background-color: #fff;
+	.title {
+		font-weight: bold;
+		text-align: center;
+		margin-bottom: 20px;
+	}
+	.content {
+		text-align: left;
+		margin-bottom: 10px;
+	}
+	.tip {
+		font-size: 14px;
+		margin: 40px 0 20px;
+	}
+	.button-box {
+		height: 100px;
+		.cu-btn {
+			width: 75%;
+		}
 	}
 }
 </style>

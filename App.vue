@@ -1,11 +1,19 @@
 <script>
 import Vue from 'vue';
+import store from '@/store/index.js'
+import {mapState} from 'vuex'
 export default {
 	globalData: {
 		globalTextFontSize: 18,
 		globalLabelFontSize: 16
 	},
-	onLaunch() {
+	computed: {
+		...mapState({
+			authUserInfo:state=>state.app.authUserInfo
+		})
+	},
+	onLaunch(options) {
+		 console.log("launch",options)  
 		// #ifdef MP-WEIXIN
 		uni.onMemoryWarning(function() {
 			uni.showModal({
@@ -179,7 +187,8 @@ export default {
 			}
 		}
 	},
-	onShow: async function() {
+	onShow: async function(options) {
+		console.log("onShow",options)
 		let userNo = uni.getStorageSync('current_user_info');
 		if (userNo.userno) {
 			let groupUnread = await this.selectMyGroup();

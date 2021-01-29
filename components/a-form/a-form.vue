@@ -168,18 +168,19 @@ export default {
 			}
 		},
 		chooseLocation(e) {
-			this.allField = this.allField.map(item => {
+			this.allField = this.allField.map((item, index) => {
 				if (item.column === 'latitude' && e.latitude) {
 					item.value = e.latitude;
 				}
 				if (item.column === 'longitude' && e.longitude) {
 					item.value = e.longitude;
 				}
+				this.fieldModel[item.column] = item.value;
+				this.$set(this.allField, index, item);
 				return item;
 			});
-			debugger
+			this.$emit('value-blur', this.fieldModel);
 		},
-		getAllField() {},
 		onReset() {
 			if (Array.isArray(this.oldField) && this.oldField.length > 0) {
 				this.allField = this.oldField.map((item, index) => {

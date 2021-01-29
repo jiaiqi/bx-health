@@ -1,6 +1,7 @@
 page {
 	background-color: #e5e5e5;
-	min-height: 100vh;
+	min-height:calc( 100vh - var(--window-top) - var(--window-bottom));
+	// min-height: 100%;
 }
 
 @font-face {
@@ -104,17 +105,22 @@ page {
 			display: flex;
 			flex-wrap: wrap;
 			.box {
-				width: 18vw;
-				height: 18vw;
-				border-radius: 20upx;
-				background-color: #fff;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				// margin: 0 3vw 2vw 3vw;
-				margin: 5vw 3vw 5vw 4vw;
-				.icon {
-					font-size: 70upx;
+				.u-icon{
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					font-size: 70rpx;
+					width: 18vw;
+					height: 18vw;
+					border-radius: 20upx;
+					background-color: #fff;
+					// margin: 0 3vw 2vw 3vw;
+					margin: 5vw 3vw 10rpx 4vw;
+					display: flex;
+					flex-direction: column;
+				}
+				.label{
+					text-align: center;
 				}
 			}
 		}
@@ -123,8 +129,8 @@ page {
 .input-box {
 	width: 100%;
 	min-height: 100upx;
-	padding: 0 1%;
-	background-color: #f2f2f2;
+	padding: 0 20rpx;
+	background-color: #f1f1f1;
 	display: flex;
 	position: fixed;
 	z-index: 20;
@@ -142,6 +148,7 @@ page {
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		font-size: 70rpx;
 	}
 
 	.send {
@@ -150,17 +157,16 @@ page {
 		margin-left: 20upx;
 		/* #endif */
 		flex-shrink: 0;
-		width: 100upx;
 		height: 100upx;
 		display: flex;
 		align-items: center;
 		.btn {
-			width: 90upx;
+			padding: 0 30rpx;
 			height: 56upx;
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			background: linear-gradient(to right, #f09b37, #eb632c);
+			background: linear-gradient(to right, #12bffe, #10ace5);
 			color: #fff;
 			border-radius: 6upx;
 			font-size: 24upx;
@@ -293,7 +299,6 @@ page {
 .content {
 	width: 100%;
 	.msg-list {
-		width: 96%;
 		padding: 0 2%;
 		position: absolute;
 		top: 0;
@@ -320,7 +325,7 @@ page {
 				align-items: center;
 				justify-content: space-between;
 				view {
-					background-color: #f06c7a;
+					background-color: #12b7f5;
 					height: 50upx;
 					width: 6upx;
 					border-radius: 6upx;
@@ -342,7 +347,7 @@ page {
 		}
 		.row {
 			.send-time{
-				padding: 10rpx 0 0;
+				padding: 20rpx 0 10rpx;
 				text-align: center;
 				color: #777;
 			}
@@ -466,7 +471,7 @@ page {
 					align-items: center;
 					justify-content: flex-end;
 					.bubble {
-						background-color: #f06c7a;
+						background-color: #12b7f5;
 						color: #fff;
 
 						&.voice {

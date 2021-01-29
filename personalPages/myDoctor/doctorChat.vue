@@ -17,7 +17,7 @@
 		<person-chat
 			:customer_no="no"
 			ref="chat"
-			@completeSendMessage="completeSendMessage"
+			@load-msg-complete="loadMsgComplete"
 			:top-height="topHeight"
 			:doctor_no="doctor_no"
 			:group-info="groupInfo"
@@ -61,11 +61,14 @@ export default {
 				this.$http.post(url, req);
 			}
 		},
-		completeSendMessage(e) {
-			// 发送完一条消息后的回调
-			// debugger;
+		loadMsgComplete(e) {
 			this.updateLastLookTime(e);
 		},
+		// completeSendMessage(e) {
+		// 	// 发送完一条消息后的回调
+		// 	// debugger;
+		// 	this.updateLastLookTime(e);
+		// },
 		async selectGroupMember() {
 			// 查询圈子成员
 			// srvhealth_person_group_circle_select
@@ -88,7 +91,6 @@ export default {
 		}
 	},
 	onLoad(option) {
-		debugger;
 		if (option.no) {
 			this.no = option.no;
 		}
@@ -126,19 +128,32 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+page {
+	min-height: calc(100vh - var(--window-top) - var(--window-bottom));
+}
 .doctor-wrap {
 	overflow: hidden;
+	padding-top: 60px;
+	position: relative;
+	width: 100%;
 	.menu {
 		padding: 0 40rpx;
 		font-size: 36rpx;
 	}
 	.util-bar {
 		display: flex;
-		background-color: #fff;
+		background-color: #fafafa;
 		justify-content: center;
 		border-radius: 0 0 20rpx 20rpx;
 		overflow: hidden;
 		padding: 20rpx;
+		position: fixed;
+		top: 0;
+		/* #ifdef H5 */
+		top: 44px;
+		/* #endif */
+		width: 100%;
+		z-index: 2;
 		.util-item {
 			// width: 25%;
 			flex: 1;

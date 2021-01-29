@@ -2,12 +2,19 @@
 	<view
 		class="person-chat-wrap"
 		:style="{
-			'--chart-height': chartHeight
+			'--chart-height': chartHeight,
+			'--global-text-font-size': globalTextFontSize + 'px',
+			'--global-label-font-size': globalLabelFontSize + 'px',
+			height: chartHeight, 'padding-bottom': '10px'
 		}"
 	>
-		<view class="person-chat-top" @click.stop="closeBottomPoup" :style="{ height: heightStyle }" :class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
+		<view
+			class="person-chat-top"
+			@click.stop="closeBottomPoup"
+			:class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'"
+		>
 			<audio v-if="currentChat.id" class="audio" @ended="playEnd" :action="audioAction" id="myMp3" style="height: 0;opacity: 0;" :src="currentChat.voice_url" controls />
-			<scroll-view @scroll="chatScroll" scroll-y="true" :style="{ height: heightStyle }" :scroll-into-view="chatTextBottom">
+			<scroll-view @scroll="chatScroll" scroll-y="true" :scroll-into-view="chatTextBottom">
 				<view
 					:id="`person-chat-item${item.id}`"
 					v-for="(item, index) in recordList"
@@ -30,7 +37,7 @@
 							<image :src="getSenderProfile(item) ? getSenderProfile(item) : '/static/man-profile.png'" mode="aspectFit" v-if="groupInfo && groupInfo.gc_no"></image>
 						</view>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
-							<image :src="item.img_url" mode=""></image>
+							<image :src="item.img_url" :style="{ width: item.imgWidth + 'px', height: item.imgHeight + 'px' }"></image>
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
@@ -97,7 +104,7 @@
 						</view>
 						<text class="unread" v-if="item.msg_state === '未读' && (!groupInfo || !groupInfo.gc_no)">{{ item.msg_state }}</text>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
-							<image :src="item.img_url" mode=""></image>
+							<image :src="item.img_url" :style="{ width: item.imgWidth + 'px', height: item.imgHeight + 'px' }"></image>
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
@@ -181,11 +188,13 @@
 				<view class="text">{{ voiceIconText }}</view>
 			</view>
 		</view>
-		<view class="person-chat-bot">
+		<view class="person-chat-bot" :class="{ showLayer: !isFeed && isSendLink }">
 			<view class="person-chat-bot-top">
 				<view class="person-chat-left">
-					<image @click="changeVoice('keyword')" v-if="currentVoiceType === 'voice'" src="../../static/voice.png" mode=""></image>
-					<image @click="changeVoice('voice')" v-if="currentVoiceType === 'keyword'" src="../../static/keyboard.png" mode=""></image>
+					<text class="image-icon cuIcon-sound" @click="changeVoice('keyword')" v-if="currentVoiceType === 'voice'"></text>
+					<text class="image-icon cuIcon-keyboard" @click="changeVoice('voice')" v-if="currentVoiceType === 'keyword'"></text>
+					<!-- <image class="image-icon" @click="changeVoice('keyword')" v-if="currentVoiceType === 'voice'" src="../../static/voice.png" mode=""></image> -->
+					<!-- <image class="image-icon" @click="changeVoice('voice')" v-if="currentVoiceType === 'keyword'" src="../../static/keyboard.png" mode=""></image> -->
 					<text
 						v-if="currentVoiceType === 'keyword'"
 						class="voice_title"
@@ -197,16 +206,16 @@
 					>
 						{{ voiceTitle }}
 					</text>
-					<input v-else v-model="chatText" type="text"  @focus="onInput" @confirm="sendMessage" confirm-type="send"/>
+					<input v-else v-model="chatText" class="send-text" type="text" @focus="onInput" @confirm="sendMessage" confirm-type="send" />
 				</view>
-				<view class="person-chat-rig">
+				<view class="person-chat-rig" :class="{ 'is-feed': isFeed }">
 					<view class="person-chat-rig-add-wrap">
-						<view @click="openLink" v-if="!isFeed" class="person-chat-rig-add"><text class="lg text-gray" :class="'cuIcon-add'"></text></view>
+						<view @click="openLink" v-if="!isFeed" class="person-chat-rig-add"><text class="cuIcon-roundadd"></text></view>
 					</view>
 					<text class="send" @click="sendMessage" v-if="isFeed">发送</text>
 				</view>
 			</view>
-			<view v-if="!isFeed && isSendLink" class="person-chat-bot-bot">
+			<view class="person-chat-bot-bot">
 				<view class="person-chat-bot-bot-item-w">
 					<view @click="openMenuPoup('question')" class="person-chat-bot-bot-item">
 						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/question.png" mode=""></image></view>
@@ -258,6 +267,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import robbyImageUpload from '@/components/robby-image-upload/robby-image-upload.vue';
 export default {
 	name: 'personchat',
@@ -283,11 +293,15 @@ export default {
 		}
 	},
 	computed: {
+		...mapState({
+			globalTextFontSize: state => state.app['globalTextFontSize'],
+			globalLabelFontSize: state => state.app.globalLabelFontSize
+		}),
 		chartHeight() {
 			if (this.topHeight) {
-				return 'calc(100vh - 45px - ' + this.topHeight + 'px - var(--window-top) - var(--window-bottom))';
+				return `calc(100vh - 60px - ${this.topHeight}px - var(--window-top) - var(--window-bottom))`;
 			} else {
-				return 'calc(100vh - 45px - var(--window-top) - var(--window-bottom))';
+				return 'calc(100vh - 60px - var(--window-top) - var(--window-bottom))';
 			}
 		},
 		isFeed() {
@@ -354,6 +368,19 @@ export default {
 	},
 
 	methods: {
+		//处理图片尺寸，如果不处理宽高，新进入页面加载图片时候会闪
+		setPicSize(content) {
+			// 让图片最长边等于设置的最大长度，短边等比例缩小，图片控件真实改变，区别于aspectFit方式。
+			let maxW = uni.upx2px(350); //350是定义消息图片最大宽度
+			let maxH = uni.upx2px(350); //350是定义消息图片最大高度
+			if (content.w > maxW || content.h > maxH) {
+				let scale = content.w / content.h;
+				content.w = scale > 1 ? maxW : maxH * scale;
+				content.h = scale > 1 ? maxW / scale : maxH;
+			}
+			return content;
+		},
+
 		getCovers(item) {
 			return [
 				{
@@ -393,15 +420,15 @@ export default {
 		closeBottomPoup() {
 			this.$nextTick(() => {
 				if (this.topHeight) {
-					this.heightStyle = `calc(100vh - 50px - ${this.topHeight}px);`;
+					this.heightStyle = `calc(100vh - 50px - var(--window-top) - var(--window-bottom) - var(--chart-height) - ${this.topHeight}px);`;
 				} else {
-					this.heightStyle = 'calc(100vh - 50px);';
+					this.heightStyle = 'calc(100vh - 50px - var(--window-top) - var(--chart-height) - var(--window-bottom) );';
 				}
 			});
 			this.isSendLink = false;
 		},
-		onInput(e){
-			this.isSendLink = false
+		onInput(e) {
+			this.isSendLink = false;
 		},
 		openMap(item) {
 			// 打开地图
@@ -643,7 +670,7 @@ export default {
 				]
 			};
 			const res = await this.$http.post(url, req);
-			debugger
+			debugger;
 			this.$store.commit('SET_USERLIST', res.data.data);
 			console.log('userInfo=====>', res.data.data);
 		},
@@ -824,20 +851,13 @@ export default {
 		},
 		confirmPoup() {
 			this.showBottom = false;
-			// url:`/questionnaire/index/index?formType=form&activity_no=${item.no}&status=进行中`
 			let url = '';
 			if (this.currentSendType == 'question') {
 				url = `/questionnaire/index/index?formType=form&activity_no=${this.checkRadioValue}&status=进行中`;
 			} else if (this.currentSendType == 'bite') {
-				// url = `/archivesPages/archives-history/archives-history?pageType=${e}`;
 				url = `/archivesPages/archives-history/archives-history?pageType=diet&chatChoseTime=` + this.checkRadioValue;
 			}
 			this.chooseRecod = url;
-			// this.chatText = url
-			// let linkData = {
-			// 	name:,
-			// 	url:url
-			// }
 			this.sendMessageInfo();
 			console.log('------url', url);
 		},
@@ -885,11 +905,6 @@ export default {
 						serviceName: serviceName,
 						colNames: ['*'],
 						condition: [
-							// {
-							// 	colName:'user_no',
-							// 	ruleType:'eq',
-							// 	value:uni.getStorageSync('login_user_info').user_no
-							// },
 							{
 								colName: 'status',
 								ruleType: 'eq',
@@ -943,15 +958,15 @@ export default {
 			this.isSendLink = !this.isSendLink;
 			if (!this.isSendLink) {
 				if (this.topHeight) {
-					this.heightStyle = `calc(100vh - 50px - ${this.topHeight}px);`;
+					this.heightStyle = `calc(100vh -  var(--window-top) - var(--window-bottom) - 50px - ${this.topHeight}px);`;
 				} else {
-					this.heightStyle = 'calc(100vh - 50px);';
+					this.heightStyle = 'calc(100vh - 50px) - var(--window-top) - var(--window-bottom);';
 				}
 			} else {
 				if (this.topHeight) {
-					this.heightStyle = `calc(100vh - 240px - ${this.topHeight}px);`;
+					this.heightStyle = `calc(100vh - 240px - var(--window-top) - var(--window-bottom) - ${this.topHeight}px);`;
 				} else {
-					this.heightStyle = 'calc(100vh - 240px);';
+					this.heightStyle = 'calc(100vh - 240px - var(--window-top) - var(--window-bottom));';
 				}
 			}
 		},
@@ -966,9 +981,9 @@ export default {
 			this.isSendLink = false;
 			this.heightStyle = 'calc(100vh - 50px)';
 			if (this.topHeight) {
-				this.heightStyle = `calc(100vh - 50px - ${this.topHeight}px);`;
+				this.heightStyle = `calc(100vh - 50px - var(--window-top) - var(--window-bottom) - ${this.topHeight}px);`;
 			} else {
-				this.heightStyle = 'calc(100vh - 50px);';
+				this.heightStyle = 'calc(100vh - 50px - var(--window-top) - var(--window-bottom));';
 			}
 			// this.heightStyle = 'calc(100vh - 100px)'
 		},
@@ -1083,9 +1098,15 @@ export default {
 			}
 			let res = await this.$http.post(url, req);
 			console.log('发送成功', res);
-			if(Array.isArray(res.data.response)&&res.data.response.length>0&&res.data.response[0].response&&Array.isArray(res.data.response[0].response.effect_data)&&res.data.response[0].response.effect_data[0].id){
+			if (
+				Array.isArray(res.data.response) &&
+				res.data.response.length > 0 &&
+				res.data.response[0].response &&
+				Array.isArray(res.data.response[0].response.effect_data) &&
+				res.data.response[0].response.effect_data[0].id
+			) {
 				this.$emit('completeSendMessage', res.data.response[0].response.effect_data[0]);
-			}else{
+			} else {
 				this.$emit('completeSendMessage', req[0].data[0]);
 			}
 			this.isAll = false;
@@ -1144,9 +1165,15 @@ export default {
 			console.log('res========>', req);
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				if(Array.isArray(res.data.response)&&res.data.response.length>0&&res.data.response[0].response&&Array.isArray(res.data.response[0].response.effect_data)&&res.data.response[0].response.effect_data[0].id){
+				if (
+					Array.isArray(res.data.response) &&
+					res.data.response.length > 0 &&
+					res.data.response[0].response &&
+					Array.isArray(res.data.response[0].response.effect_data) &&
+					res.data.response[0].response.effect_data[0].id
+				) {
 					this.$emit('completeSendMessage', res.data.response[0].response.effect_data[0]);
-				}else{
+				} else {
 					this.$emit('completeSendMessage', req[0].data[0]);
 				}
 				console.log('发送成功');
@@ -1272,6 +1299,11 @@ export default {
 			}
 			req.relation_condition.data = conditionData;
 			let res = await this.$http.post(url, req);
+			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+				this.$emit('load-msg-complete', res.data.data[0]);
+			} else {
+				this.$emit('load-msg-complete', res.data.data);
+			}
 			let resData = res.data.data;
 			this.pageInfo.total = res.data.page.total;
 			if (this.pageInfo.pageNo == 1 && type !== 'update') {
@@ -1295,6 +1327,15 @@ export default {
 					if (item.image) {
 						let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 						this.$set(item, 'img_url', url);
+						this.getImageInfo({ url: url }).then(picInfo => {
+							if (picInfo.w && picInfo.h) {
+								let res = this.setPicSize(picInfo);
+								if (res.w && res.h) {
+									this.$set(item, 'imgWidth', res.w);
+									this.$set(item, 'imgHeight', res.h);
+								}
+							}
+						});
 					}
 					if (item.attachment) {
 						this.getFileNo(item.attachment).then(obj => {
@@ -1353,6 +1394,7 @@ export default {
 					if (this.recordList.length > 0) {
 						this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
 					}
+
 					this.updateMessageInfo();
 				}
 			}
@@ -1448,9 +1490,9 @@ export default {
 		setTimeout(() => {
 			this.$nextTick(() => {
 				if (this.topHeight) {
-					this.heightStyle = `calc(100vh - 50px - ${this.topHeight}px);`;
+					this.heightStyle = `calc(100vh - 50px - var(--window-top) - var(--window-bottom) - ${this.topHeight}px);`;
 				} else {
-					this.heightStyle = 'calc(100vh - 50px);';
+					this.heightStyle = 'calc(100vh - 50px - var(--window-top) - var(--window-bottom));';
 				}
 			});
 		}, 500);
@@ -1488,10 +1530,9 @@ export default {
 
 <style lang="scss" scoped>
 .person-chat-wrap {
-	// padding-top: 120rpx;
-	height: var(--chart-height);
-	// height: calc(100vh - 210rpx - var(--window-top) - var(--window-bottom));
 	background-color: #eeeeee;
+	overflow: hidden;
+	width: 100%;
 	.nav-chat-top {
 		background-color: rgb(11, 201, 157) !important;
 		color: white;
@@ -1504,6 +1545,7 @@ export default {
 		max-height: var(--chart-height);
 		overflow-y: scroll;
 		// margin: 10rpx;
+		padding-bottom: 60px;
 		.person-chat-item {
 			// display: flex;
 			// margin-right: 20rpx;
@@ -1554,11 +1596,14 @@ export default {
 				}
 				.person-chat-item-right {
 					min-width: 16%;
+					max-width: 60%;
 					background: #fff;
 					border-radius: 10rpx;
-					padding: 10rpx;
-					font-weight: 700;
-					font-size: 12px;
+					padding: 5px 10px;
+					line-height: 1.5;
+					letter-spacing: 1px;
+					font-family: '微软雅黑', 'Courier New', Courier, monospace;
+					font-size: var(--global-text-font-size);
 					position: relative;
 					display: flex;
 					align-items: center;
@@ -1637,8 +1682,8 @@ export default {
 						top: 15px;
 					}
 					image {
-						width: 130rpx;
-						height: 130rpx;
+						min-width: 130rpx;
+						min-height: 130rpx;
 						border-radius: 5px;
 					}
 					// image{
@@ -1709,13 +1754,15 @@ export default {
 				}
 				.person-chat-item-right {
 					min-width: 40%;
-					max-width: 75%;
+					max-width: 60%;
 					word-wrap: break-word;
-					background: #07c062;
+					// background: #12b7f5;
+					background-color: #12b7f5;
+					color: #fff;
 					border-radius: 5px;
-					padding: 5px;
-					font-weight: 700;
-					font-size: 12px;
+					letter-spacing: 1px;
+					padding: 5px 10px;
+					font-size: var(--global-text-font-size);
 					position: relative;
 					display: flex;
 					align-items: center;
@@ -1755,7 +1802,8 @@ export default {
 						height: 0;
 						border-top: 5px solid transparent;
 						border-bottom: 5px solid transparent;
-						border-left: 8px solid #07c062;
+						border-left: 8px solid #12b7f5;
+						// border-left: 8px solid #12b7f5;
 						position: absolute;
 						right: -8px;
 						top: 15px;
@@ -1845,7 +1893,7 @@ export default {
 			// 		background-color: #eeeeee;
 			// 		text{
 			// 			width: 100%;
-			// 			background-color: #07c062;
+			// 			background-color: #12b7f5;
 			// 		}
 			// 	}
 			// }
@@ -1858,74 +1906,72 @@ export default {
 		// max-height: calc(100vh - 180rpx);
 	}
 	.person-chat-bot {
-		// background-color: #f7f7f7;
-		// box-shadow: 0px 1px 4px rgba(26, 26, 26, 0.2);
 		position: fixed;
 		bottom: 0;
 		width: 100%;
-		// display: flex;
-		// padding: 10rpx 20rpx;
-		// align-items: center;
+		top: calc(100% - 60px);
+		transition: all 0.15s linear;
+		&.showLayer {
+			top: 100%;
+			transform: translate3d(0, -250px, 0);
+		}
 		.person-chat-bot-top {
 			background-color: #f7f7f7;
 			box-shadow: 0px 1px 4px rgba(26, 26, 26, 0.2);
 			width: 100%;
 			display: flex;
-			padding: 10rpx 20rpx;
+			padding: 10px 10px 15px;
 			align-items: center;
 			.person-chat-left {
-				width: 85%;
+				width: calc(100% - 150rpx);
 				display: flex;
 				align-items: center;
+				flex: 1;
 				// margin-right: 30rpx;
-				image {
+				.image-icon {
 					width: 50rpx;
 					height: 50rpx;
+					font-size: 50rpx;
 					margin-right: 10rpx;
 				}
-				input {
-					width: 90%;
-					padding: 2px 10rpx;
-					background: #fff;
+				.send-text {
 					height: 70rpx;
+					padding: 2px 10rpx;
+					transition: all 0.5s ease-out;
+					flex: 1;
+					width: 100%;
+					background: #fff;
 					border-radius: 10rpx;
-					font-size: 24rpx;
+					font-size: var(--global-text-font-size);
 				}
-				text {
-					width: 90%;
-					padding: 2px 10rpx;
-					background: #fff;
-					height: 70rpx;
-					border-radius: 10rpx;
-					font-size: 24rpx;
-					text-align: center;
-					line-height: 80rpx;
-					font-size: 28rpx;
+				.is-feed {
+					width: 85%;
 				}
 			}
 			.person-chat-rig {
-				width: 15%;
-				text-align: center;
+				text-align: right;
+				display: flex;
+				justify-content: flex-end;
+				margin-left: 20rpx;
 				.person-chat-rig-add-wrap {
 					.person-chat-rig-add {
 						margin: 0 auto;
-						border: 1px solid #ccc;
 						width: 50rpx;
 						height: 50rpx;
 						display: flex;
 						align-items: center;
 						justify-content: center;
 						border-radius: 30rpx;
-						font-size: 40rpx;
+						font-size: 60rpx;
 					}
 				}
-
 				.send {
-					background-color: #07c062;
-					padding: 10rpx 20rpx;
+					background-color: #12b7f5;
+					padding: 15rpx 40rpx;
 					color: #fff;
 					border-radius: 10rpx;
 					margin-left: 10rpx;
+					transition: all 0.5s ease-in;
 				}
 			}
 		}
@@ -1940,6 +1986,7 @@ export default {
 					flex-direction: column;
 					align-items: center;
 					margin: 20rpx;
+					width: calc(25% - 20px);
 					.person-chat-bot-bot-item-top {
 						padding: 5px;
 						background: #fff;
@@ -1978,7 +2025,7 @@ export default {
 	flex-direction: row;
 	align-items: center;
 	.voice_icon_right-wrap {
-		background-color: #07c062;
+		background-color: #12b7f5;
 		padding: 16rpx 16rpx 16rpx 80rpx;
 		border-radius: 8rpx;
 		position: relative;
@@ -1990,7 +2037,7 @@ export default {
 			height: 0;
 			border-top: 5px solid transparent;
 			border-bottom: 5px solid transparent;
-			border-left: 8px solid #07c062;
+			border-left: 8px solid #12b7f5;
 			position: absolute;
 			border-radius: 1px;
 			right: -7px;
@@ -2073,6 +2120,7 @@ export default {
 	height: 80rpx;
 	line-height: 80rpx;
 	border-radius: 12rpx;
+	flex: 1;
 }
 .documents-wrap {
 	.documents-item {

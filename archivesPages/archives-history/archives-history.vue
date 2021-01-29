@@ -223,7 +223,7 @@
 import uniEcCharts from '@/components/uni-ec-canvas/uni-echart.vue';
 import energyListWrap from './totalEnergyList.js';
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet';
-import dayjs from '../static/dayjs/dayjs.min.js';
+import  dayjs  from '../static/dayjs/dayjs.min.js';
 import { mapState } from 'vuex';
 export default {
 	components: {
@@ -705,7 +705,7 @@ export default {
 							stack: 100,
 							itemStyle: {
 								normal: {
-									color: hexToRgba(color[0], 0)
+									color: hexToRgba(color[0],0.7)
 									// borderColor: color[0]
 								}
 							},
@@ -1805,9 +1805,6 @@ export default {
 				} else {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
-					if (!this.$store.state.app.subscsribeStatus) {
-						this.checkSubscribeStatus();
-					}
 				}
 				uni.setStorageSync('user_info_list', res.data.data);
 				return res.data.data;

@@ -1,18 +1,18 @@
 <template>
 	<view class="slider-number">
-		<view class="operate" hover-class="active" @click="numberChange('minus', 0.1)" @longpress="longpressNumChange('minus', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
+		<button class="operate cu-btn" hover-class="active" @click="numberChange('minus', 0.1)" @longpress="longpressNumChange('minus', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
 			-0.1
-		</view>
-		<view class="operate" hover-class="active" @click="numberChange('minus')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">
+		</button>
+		<button class="operate cu-btn" hover-class="active" @click="numberChange('minus')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">
 			-1
-		</view>
+		</button>
 		<slider class="uni-slider"  @changing="changeSlider" :step="step" :min="min" :max="max" :value="bindValue" :show-value="showValue" />
-		<view class="operate" hover-class="active" @click="numberChange('add')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">
+		<button class="operate cu-btn" hover-class="active" @click="numberChange('add')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">
 			+1
-		</view>
-		<view class="operate" hover-class="active" @click="numberChange('add', 0.1)" @longpress="longpressNumChange('add', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
+		</button>
+		<button class="operate cu-btn" hover-class="active" @click="numberChange('add', 0.1)" @longpress="longpressNumChange('add', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
 			+0.1
-		</view>
+		</button>
 	</view>
 </template>
 
@@ -119,7 +119,7 @@ export default {
 		margin-right: 10rpx;
 		width: 80rpx;
 		&.big{
-			transform: scale(1.3);
+			// transform: scale(1.1);
 		}
 		&.active {
 			transition: all 0.2s;

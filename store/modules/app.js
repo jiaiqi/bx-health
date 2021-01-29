@@ -13,6 +13,7 @@ env = 'h5'
 
 const state = {
 	env: env,
+	homePath:'',//默认主页
 	globalTextFontSize: 16,
 	globalLabelFontSize: 16,
 	srvCol: [], // 组件共享的srv_col
@@ -34,13 +35,17 @@ const state = {
 	areRegistering: false, //是否正在注册
 	payParams: {}, //支付相关参数
 	prePayInfo: {}, //预支付信息
-	subscsribeStatus: true, //是否关注公众号
-	shareType: '', //分享页面的类型 seeDoctor-邀请就诊登记
+	subscsribeStatus: false, //是否关注公众号
+	shareType: '', //分享页面的类型 seeDoctor-邀请就诊登记 bindOrganization-邀请成为诊所用户
 	xhrNum: 0, //正在发送的请求的数量
-	xhrTimestamp: 0
+	xhrTimestamp: 0,
+	previousPageUrl:"",
 }
 let persistData = {}; //持久化数据
 const mutations = {
+	SET_HOME_PATH:(state,path)=>{
+		state.homePath = path
+	}
 	SET_XHR_NUM: (state, num) => {
 		state.xhrNum = num
 		state.xhrTimestamp = new Date().getTime()
@@ -137,6 +142,9 @@ const mutations = {
 	},
 	SET_SHARE_TYPE: (state, shareType) => {
 		state.shareType = shareType
+	},
+	SET_PRE_PAGE_URL:(state,previousPageUrl)=>{
+		state.previousPageUrl= previousPageUrl
 	}
 }
 
