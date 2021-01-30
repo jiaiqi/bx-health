@@ -6,7 +6,8 @@
 		</view>
 		<view class="crowd-list" v-if="(dietInfo.food_no || dietInfo.meal_no) && !dietInfo.diet_record_no">
 			<view class="crowd-item" :class="{ 'active-crowd': currentCrowd === item.type }" v-for="item in crowdList" :key="item.type" @click="changeCrowd(item)">
-				{{ item.name }}({{ item.weight }}kg)
+				<text v-if="item.weight">{{ item.name }}({{ item.weight }}kg)</text>
+				<text v-else>我的(待完善信息)</text>
 			</view>
 		</view>
 		<view class="visual-detail chart" v-if="showChart"><uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="chartData" /></view>
@@ -94,9 +95,9 @@ export default {
 				{
 					name: '我的',
 					type: 'mine',
-					sex: null,
-					age: null,
-					weight: null
+					sex: '',
+					age: '',
+					weight: ''
 				}
 			]
 		};
@@ -115,20 +116,23 @@ export default {
 		// 	type: Object
 		// }
 	},
-	mounted() {
-		if (this.userInfo.no && this.userInfo.sex && this.userInfo.weight) {
-			this.crowdList[2].sex = this.userInfo.sex;
-			this.crowdList[2].age = this.age;
-			this.crowdList[2].weight = this.userInfo.weight;
-			this.currentCrowd = 'mine';
-		}
-	},
 	watch: {
+		userInfo: {
+			deep: true,
+			immediate: true,
+			handler(newValue, oldValue) {
+				if (newValue && newValue.sex && newValue.weight) {
+					this.crowdList[2].sex = this.userInfo.sex;
+					this.crowdList[2].age = this.age;
+					this.crowdList[2].weight = this.userInfo.weight;
+					this.currentCrowd = 'mine';
+				}
+			}
+		},
 		dietInfo: {
 			handler(newValue, oldValue) {
 				if (newValue && (newValue.diet_record_no || newValue.food_no || newValue.meal_no)) {
 					this.switchTab(true);
-					// this.buildChartOption();
 				}
 			}
 		}
@@ -136,13 +140,19 @@ export default {
 	methods: {
 		changeCrowd(item) {
 			// 切换人群
+			let self = this
 			if (item.type === 'mine' && (!item.age || !item.sex)) {
 				uni.showModal({
 					title: '提示',
-					content: '当前没有进行登记年龄、性别和体重，是否去登记?',
+					content: '当前没有进行登记年龄、性别或体重，是否去登记?',
 					success: function(res) {
 						if (res.confirm) {
-							uni.navigateTo({
+							let pageStack = getCurrentPages()
+							if (Array.isArray(pageStack) && pageStack.length >= 1) {
+								let currentPage = pageStack[pageStack.length - 1]
+								self.$store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
+							}
+							uni.redirectTo({
 								url: '/otherPages/chooseFood/myFoodsInfo'
 							});
 						} else if (res.cancel) {
@@ -179,18 +189,10 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			let weight =
-				this.crowdList.find(item => item.type === this.currentCrowd) && this.crowdList.find(item => item.type === this.currentCrowd).weight
-					? this.crowdList.find(item => item.type === this.currentCrowd).weight
-					: self.userInfo.weight;
-			let age =
-				this.crowdList.find(item => item.type === this.currentCrowd) && this.crowdList.find(item => item.type === this.currentCrowd).age
-					? this.crowdList.find(item => item.type === this.currentCrowd).age
-					: self.age;
-			let sex =
-				this.crowdList.find(item => item.type === this.currentCrowd) && this.crowdList.find(item => item.type === this.currentCrowd).sex
-					? this.crowdList.find(item => item.type === this.currentCrowd).sex
-					: self.userInfo.sex;
+			let weight = self.currentCrowd === 'man' ? 65 : self.currentCrowd === 'woman' ? 55 : self.userInfo.weight;
+			let age = self.currentCrowd === 'man' || self.currentCrowd === 'woman' ? 18 : self.age;
+			let sex = self.currentCrowd === 'man' ? '男' : self.currentCrowd === 'woman' ? '女' : self.userInfo.sex;
+			debugger;
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				let result = res.data.data.filter(item => {
 					if ((item.sex && item.sex.indexOf(sex) !== -1) || !item.sex) {
@@ -245,6 +247,7 @@ export default {
 			let dietRecordList = this.deepClone(this.dietList);
 			let energyList = this.deepClone(this.eleData);
 			let eleArr = [];
+			let weight = this.currentCrowd === 'man' ? 65 : this.currentCrowd === 'woman' ? 55 : this.userInfo.weight;
 			energyList.forEach(item => {
 				item.matterList.forEach(ele => {
 					// ele.UL = item.val_ul ? item.val_ul : ele.UL;
@@ -258,12 +261,13 @@ export default {
 					// 	ele.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : ele.EAR * self.userInfo.weight;
 					// 	ele.UL = 0;
 					// }
+
 					if (ele.name === '脂肪') {
-						ele.EAR = Number((this.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
+						ele.EAR = Number((weight * 50 * 0.2) / 9).toFixed(2);
 						ele.UL = 0;
 					}
 					if (ele.name === '碳水') {
-						ele.EAR = this.userInfo.weight * 4;
+						ele.EAR = weight * 4;
 						ele.UL = 0;
 					}
 					ele.value = 0;
@@ -371,13 +375,18 @@ export default {
 						});
 						break;
 					case '当前食物':
+						debugger;
 						obj.data = eleArr.map(ele => {
+							debugger;
 							let cur = this.deepClone(ele);
 							let ratio = 1;
 							if (currentDiet.unit.indexOf('g') !== -1 && currentDiet.unit_weight_g > 1) {
 								ratio = currentDiet.unit_weight_g / 100;
 							}
 							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
+							if (!currentDiet[cur.key]) {
+								val = 0;
+							}
 							if (cur.key === 'energy') {
 								val = currentDiet['unit_energy'];
 							}

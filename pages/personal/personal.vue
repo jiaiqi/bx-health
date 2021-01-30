@@ -10,16 +10,16 @@
 			<view class="top-left">
 				<image
 					@click="toPages('updateInfo')"
-					v-if="((authSetting && authSetting.userInfo) || client_env === 'h5') && (vuex_userInfo.user_image || vuex_userInfo.profile_url)"
+					v-if="(authUserInfo || client_env === 'h5') && (vuex_userInfo.user_image || vuex_userInfo.profile_url)"
 					class="image"
 					:src="getImagePath(vuex_userInfo.user_image) ? getImagePath(vuex_userInfo.user_image) : getImagePath(vuex_userInfo.profile_url)"
 				></image>
-				<image  @click="toPages('updateInfo')" class="image" src="../../static/man-profile.png" v-else></image>
+				<image @click="toPages('updateInfo')" class="image" src="../../static/man-profile.png" v-else></image>
 			</view>
-			<view class="top-right" v-if="vuex_userInfo && vuex_userInfo.name && ((authSetting && authSetting.userInfo) || client_env === 'h5')">
-				<view class="top-right-name"  @click="toPages('updateInfo')">{{ vuex_userInfo.name }}</view>
+			<view class="top-right" v-if="vuex_userInfo && vuex_userInfo.name && (authUserInfo || client_env === 'h5')">
+				<view class="top-right-name" @click="toPages('updateInfo')">{{ vuex_userInfo.name }}</view>
 			</view>
-			<view class="top-right" v-if="(!authSetting || !authSetting.userInfo) && client_env === 'wxmp'">
+			<view class="top-right" v-if="!authUserInfo && client_env === 'wxmp'">
 				<view class="top-right-name">游客</view>
 				<view class="top-right-name">
 					<button class="cu-btn bg-green margin-top-xs auth-button" type="primary" open-type="getUserInfo" @getuserinfo="getuserinfo">授权微信登录</button>
@@ -46,16 +46,7 @@
 				<view class="container-cen-top-list bg-white">
 					<text @click="toPages('mineStore')" class="cuIcon-home" style="font-size: 30px;"></text>
 					<text @click="toPages('mineStore')" class="label">单位</text>
-					<!-- <view v-if="groupMsgUnreadAmount != 0" class="message-tag">{{ groupMsgUnreadAmount }}</view> -->
 				</view>
-				<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('group')">
-					<text class="cuIcon-edit" style="font-size: 30px;"></text>
-					<text class="label">方案计划</text>
-				</view> -->
-				<!-- 		<view class="container-cen-top-list bg-white" @click="toPages('pinggu')">
-					<text class="cuIcon-addressbook " style="font-size: 70rpx;"></text>
-					<text>家庭成员</text>
-				</view> -->
 			</view>
 			<view class="container-bot">
 				<view class="cu-list menu sm-border">
@@ -98,16 +89,15 @@
 							<text class="text-grey">关于小程序</text>
 						</view>
 					</view>
+					<view class="cu-item arrow" @click="toPages('bxoa')" v-if="isAdminUser">
+						<view class="content">
+							<text class="cuIcon-forward"></text>
+							<text class="text-grey">测试</text>
+						</view>
+					</view>
 				</view>
 			</view>
 		</view>
-		<!-- 		<view class="official-account" v-if="!subscsribeStatus">
-			<official-account></official-account>
-			<view class="text" @click="openOfficialImage">
-				<text class="cuIcon-likefill text-red"></text>
-				关注公众号，获取更多服务
-			</view>
-		</view> -->
 		<view class="cu-modal" :class="{ show: showModal }" v-if="!manager_type">
 			<view class="cu-dialog">
 				<view class="padding-sm">
@@ -164,7 +154,13 @@ export default {
 		};
 	},
 	computed: {
+		isAdminUser() {
+			if (this.loginUserInfo && this.loginUserInfo.user_type === '内部用户') {
+				return true;
+			}
+		},
 		...mapState({
+			loginUserInfo: state => state.user.loginUserInfo,
 			subscsribeStatus: state => state.app.subscsribeStatus,
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize,
@@ -284,7 +280,7 @@ export default {
 		},
 		toPages(e) {
 			// #ifdef MP-WEIXIN
-			if (!this.authSetting || !this.authSetting.userInfo) {
+			if (!this.authUserInfo) {
 				uni.showToast({
 					title: '请先授权微信登录后再进行操作',
 					icon: 'none'
@@ -298,10 +294,6 @@ export default {
 				case 'about':
 					uni.navigateTo({
 						url: '/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=CT2021012719370101'
-						// url:
-						// 	'/publicPages/webviewPage/webviewPage?webUrl=' +
-						// 	encodeURIComponent('https://wx2.100xsys.cn/pages/specific/article/article?serviceName=srvdaq_cms_content_select&content_no=CT2021012719370101')
-						// url: '/pediaPages/AboutMiniProgram/AboutMiniProgram'
 					});
 					break;
 				case 'group':
@@ -408,6 +400,17 @@ export default {
 						});
 					}
 					break;
+				case 'bxoa':
+					// #ifdef MP-WEIXIN
+					uni.navigateToMiniProgram({
+						appId: 'wxec4343871c957260',
+						// envVersion: 'trial', //体验版
+						extraData: {
+							from: 'bx-health'
+						}
+					});
+					// #endif
+					break;
 			}
 		},
 		async getDoctorRecod(userNo, type) {
@@ -466,7 +469,7 @@ export default {
 		},
 		toPersonDetail(type) {
 			// #ifdef MP-WEIXIN
-			if (!this.authSetting || !this.authSetting.userInfo) {
+			if (!this.authUserInfo) {
 				uni.showToast({
 					title: '请先授权微信登录后再进行操作',
 					icon: 'none'
@@ -494,6 +497,7 @@ export default {
 				uni.showToast({
 					title: '申请成功'
 				});
+				this.toAddPage();
 			} else {
 				uni.showModal({
 					title: '提示',
@@ -501,77 +505,6 @@ export default {
 				});
 			}
 			this.hideModal();
-			this.initPage();
-			// });
-		},
-		async initPage() {
-			let self = this;
-			// #ifdef MP-WEIXIN
-			let res = await wx.getSetting();
-			if (!res.authSetting['scope.userInfo']) {
-				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
-				this.$store.commit('SET_AUTH_USERINFO', false);
-				// 没有获取用户信息授权
-			} else {
-				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
-				this.$store.commit('SET_AUTH_USERINFO', true);
-				uni.getUserInfo({
-					provider: 'weixin',
-					success: function(user) {
-						let rawData = {
-							nickname: user.userInfo.nickName,
-							sex: user.userInfo.gender,
-							country: user.userInfo.country,
-							province: user.userInfo.province,
-							city: user.userInfo.city,
-							headimgurl: user.userInfo.avatarUrl
-						};
-						self.$store.commit('SET_WX_USERINFO', rawData);
-						self.wxUserInfo = rawData;
-					}
-				});
-				let currentUserInfo = await this.selectBasicUserList();
-				if (currentUserInfo) {
-					this.$store.commit('SET_USERINFO', currentUserInfo);
-					this.userInfo = currentUserInfo;
-				} else if (currentUserInfo === 0) {
-					// 没有创建用户
-					uni.getUserInfo({
-						provider: 'weixin',
-						success: function(user) {
-							let rawData = {
-								nickname: user.userInfo.nickName,
-								sex: user.userInfo.gender,
-								country: user.userInfo.country,
-								province: user.userInfo.province,
-								city: user.userInfo.city,
-								headimgurl: user.userInfo.avatarUrl
-							};
-							self.$store.commit('SET_WX_USERINFO', rawData);
-							self.wxUserInfo = rawData;
-							self.toAddPage(rawData).then(_ => {
-								self.initPage();
-							});
-						}
-					});
-				}
-			}
-			// #endif
-			if (!this.is_login) {
-				// 未登录 h5跳转到登录页,小程序端进行静默登录
-				// #ifdef MP-WEIXIN
-				const result = await wx.login();
-				if (result.code) {
-					await this.wxLogin({ code: result.code });
-					await this.initPage();
-				}
-				// #endif
-				// #ifdef H5
-				uni.navigateTo({
-					url: '/publicPages/accountExec/accountExec'
-				});
-				// #endif
-			}
 		},
 		async getuserinfo(e) {
 			// #ifdef MP-WEIXIN
@@ -585,16 +518,9 @@ export default {
 					city: user.userInfo.city,
 					headimgurl: user.userInfo.avatarUrl
 				};
-				this.setWxUserInfo(rawData);
+				this.toAddPage();
 				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
 				this.$store.commit('SET_AUTH_USERINFO', true);
-				const result = await wx.login();
-				if (result.code) {
-					this.wxLogin({
-						code: result.code
-					});
-					this.initPage();
-				}
 			}
 			// #endif
 		},
@@ -717,7 +643,6 @@ export default {
 		if (this.vuex_userInfo && this.vuex_userInfo.hasOwnProperty('manager_type')) {
 			this.manager_type = this.vuex_userInfo.manager_type;
 		}
-		this.checkSubscribeStatus();
 		this.userInfo = this.vuex_userInfo && this.vuex_userInfo.no ? this.vuex_userInfo : uni.getStorageSync('current_user_info');
 		let amount = await this.selectMyGroup();
 		this.getDoctorAllRecod(this.userInfo.userno).then(r => {
@@ -755,13 +680,11 @@ export default {
 	},
 	onPullDownRefresh() {
 		this.selectMyGroup();
-		this.initPage().then(_ => {
+		setTimeout(() => {
 			uni.stopPullDownRefresh();
-		});
+		}, 500);
 	},
-	onTabItemTap() {
-		// this.initPage();
-	},
+	onTabItemTap() {},
 	onShareAppMessage() {
 		let path = `/pages/personal/personal?from=share&invite_user_no=${this.vuex_userInfo.userno}`;
 		this.saveSharerInfo(this.vuex_userInfo, path);

@@ -267,7 +267,6 @@
 						<view class="diet-item" @click="toPages('sport')"><text class="cuIcon-add add-icon"></text></view>
 					</view>
 				</view>
-				<!-- </u-read-more> -->
 			</view>
 			<view class="main-box symptom" v-if="!pageType || pageType === 'symptom'">
 				<view class="title">症状</view>
@@ -302,148 +301,6 @@
 							<text class="unit">{{ currentRecord.unit }}</text>
 						</view>
 					</view>
-					<view v-if="currentRecord && currentRecordType === 'food'" class="view-tabs">
-						<view class="view-tab" :class="{ 'active-tab': showChart }" @click="showChartView(true)">推荐摄入量</view>
-						<view class="view-tab" :class="{ 'active-tab': !showChart }" @click="showChartView(false)">营养素含量</view>
-					</view>
-					<view class="element-detail-box" v-if="currentRecord && currentRecordType === 'food' && !showChart">
-						<view class="title">产能营养素</view>
-						<view class="content">
-							<view class="ele-item">
-								<text class="label">蛋白质</text>
-								<text class="value">{{ currentRecord.protein ? Number(currentRecord.protein).toFixed(1) : '' }}</text>
-								<text
-									:class="{
-										'text-red': getElementLevel('protein', currentRecord.protein) === '低',
-										'text-orange': getElementLevel('protein', currentRecord.protein) === '中',
-										'text-green': getElementLevel('protein', currentRecord.protein) === '高'
-									}"
-								>
-									({{ getElementLevel('protein', currentRecord.protein) }})
-								</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">碳水化合物</text>
-								<text class="value">{{ currentRecord.carbohydrate ? currentRecord.carbohydrate.toFixed(1) : '' }}</text>
-								<text
-									:class="{
-										'text-red': getElementLevel('carbohydrate', currentRecord.carbohydrate) === '低',
-										'text-orange': getElementLevel('carbohydrate', currentRecord.carbohydrate) === '中',
-										'text-green': getElementLevel('carbohydrate', currentRecord.carbohydrate) === '高'
-									}"
-								>
-									({{ getElementLevel('carbohydrate', currentRecord.carbohydrate) }})
-								</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">脂肪</text>
-								<text class="value">{{ currentRecord.axunge ? currentRecord.axunge.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('axunge', currentRecord.axunge) }})</text>
-							</view>
-						</view>
-						<view class="title">脂溶性维生素</view>
-						<view class="content">
-							<view class="ele-item">
-								<text class="label">VA</text>
-								<text class="value">{{ currentRecord.vitamin_a ? currentRecord.vitamin_a.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('vitamin_a', currentRecord.vitamin_a) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">VE</text>
-								<text class="value">{{ currentRecord.vitamin_e ? currentRecord.vitamin_e.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('vitamin_e', currentRecord.vitamin_e) }})</text>
-							</view>
-						</view>
-						<view class="title">水溶性维生素</view>
-						<view class="content">
-							<view class="ele-item">
-								<text class="label">VB1</text>
-								<text class="value">{{ currentRecord.vitamin_b1 ? currentRecord.vitamin_b1.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('vitamin_b1', currentRecord.vitamin_b1) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">VB2</text>
-								<text class="value">{{ currentRecord.vitamin_b2 ? currentRecord.vitamin_b2.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('vitamin_b2', currentRecord.vitamin_b2) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">VB3</text>
-								<text class="value">{{ currentRecord.vitamin_b3 ? currentRecord.vitamin_b3.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('vitamin_b3', currentRecord.vitamin_b3) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">VC</text>
-								<text class="value">{{ currentRecord.vitamin_c ? currentRecord.vitamin_c.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('vitamin_c', currentRecord.vitamin_c) }})</text>
-							</view>
-						</view>
-						<view class="title">常量矿物质</view>
-						<view class="content">
-							<view class="ele-item">
-								<text class="label">钙</text>
-								<text class="value">{{ currentRecord.element_ca ? currentRecord.element_ca.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('element_ca', currentRecord.element_ca) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">镁</text>
-								<text class="value">{{ currentRecord.element_mg ? currentRecord.element_mg.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('element_mg', currentRecord.element_mg) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">磷</text>
-								<text class="value">{{ currentRecord.element_p ? currentRecord.element_p.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('element_p', currentRecord.element_p) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">钾</text>
-								<text class="value">{{ currentRecord.element_k ? currentRecord.element_k.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('element_k', currentRecord.element_k) }})</text>
-							</view>
-						</view>
-						<view class="title">微量元素</view>
-						<view class="content">
-							<view class="ele-item">
-								<text class="label">铁</text>
-								<text class="value">{{ currentRecord.element_fe ? currentRecord.element_fe.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('element_fe', currentRecord.element_fe) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">锌</text>
-								<text class="value">{{ currentRecord.element_zn ? currentRecord.element_zn.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('element_zn', currentRecord.element_zn) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">硒</text>
-								<text class="value">{{ currentRecord.element_se ? currentRecord.element_se.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('element_se', currentRecord.element_se) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">铜</text>
-								<text class="value">{{ currentRecord.element_cu ? currentRecord.element_cu.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('element_cu', currentRecord.element_cu) }})</text>
-							</view>
-							<view class="ele-item">
-								<text class="label">锰</text>
-								<text class="value">{{ currentRecord.element_mn ? currentRecord.element_mn.toFixed(1) : '' }}</text>
-								<text class="text-red">({{ getElementLevel('element_mn', currentRecord.element_mn) }})</text>
-							</view>
-						</view>
-					</view>
-					<!-- 		<view class="chart-box" v-if="currentRecord && currentRecordType === 'food' && showChart">
-						<uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-echarts>
-					</view> -->
-					<view class="cook-type-box" v-if="currentRecord && currentRecordType === 'food'">
-						<view class="title">烹调方式:</view>
-						<view class="current-cook-type" v-if="currentRecord.cook_method" @click="showCookTypes">{{ currentRecord.cook_method }}</view>
-						<text class="" v-if="!currentRecord.cook_method" @click="showCookTypes">(点击选择烹调方式)</text>
-						<text class="lg text-gray cuIcon-right" v-if="cookTypes.length > 0"></text>
-					</view>
-					<view class="unit-box" v-if="currentRecordType === 'food'">
-						<view class="title">单位:</view>
-						<view class="unit-item" :class="{ 'active-unit': currentUnitIndex === index }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">
-							{{ u.unit_weight_g && u.unit === 'g' ? u.unit_weight_g + u.unit : u.unit }}
-						</view>
-					</view>
 					<view class="amount">
 						<view class="title">数量:</view>
 						<view class="number-box">
@@ -472,14 +329,12 @@
 					<view class="title-bar ">
 						<text class="title">近期饮食记录</text>
 						<view class="action">
-							<!-- <text class="cu-btn sm text-blue" @click="changeRecentDietMode">{{ recentDietMode === 'edit' ? '完成' : '编辑' }}</text> -->
 							<text class="cu-btn sm text-blue margin-right-xs" @click="selectAll(true)">全选</text>
 							<text class="cu-btn sm text-blue" @click="selectAll(false)">反选</text>
 						</view>
 					</view>
 					<view class="content">
 						<view class="diet-item" v-for="(item, index) in recentDiet" :key="index" :class="{ checked: item.checked }">
-							<!-- <view class="food-name" @click="changeChecked(item)">{{ item.name }}</view> -->
 							<image :src="getImagePath(item.image)" mode="scaleToFill" class="image" @click="changeChecked(item)"></image>
 							<view class="info">
 								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'"><text class="cuIcon-check text-bold" v-if="item.checked"></text></view>
@@ -488,9 +343,7 @@
 									<view class="amount">
 										<text class="separator" @click.stop="calc(item, 'minus')">-</text>
 										<text type="number" class="input">{{ item.amount }}</text>
-										<!-- <input type="number" class="input" v-model="item.amount" /> -->
 										<text class="separator" @click.stop="calc(item, 'add')">+</text>
-										<!-- <text class="number"></text> -->
 									</view>
 									<text class="text-left margin-left-xs text-gray" style="font-weight: normal;" @click="changeChecked(item)">
 										{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}
@@ -507,28 +360,6 @@
 				</view>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal" :class="isShowCookType ? 'show' : ''">
-			<view class="cu-dialog">
-				<view class="cu-bar bg-white cook-top"><text>常见烹调方式</text></view>
-				<view class="cooktype-wrap" v-if="currentRecord">
-					<bx-radio-group v-model="cook_method" mode="button">
-						<bx-radio v-for="item in cookTypes" :key="item.value" :name="item.value">{{ item.label }}</bx-radio>
-					</bx-radio-group>
-					<view class="button-box">
-						<button class="cu-btn button" @tap="isShowCookType = false">取消</button>
-						<button
-							class="cu-btn button"
-							@tap="
-								isShowCookType = false;
-								currentRecord.cook_method = cook_method;
-							"
-						>
-							确定
-						</button>
-					</view>
-				</view>
-			</view>
-		</view>
 	</view>
 </template>
 
@@ -536,6 +367,7 @@
 import bxDateStamp from '@/archivesPages/components/bx-date-stamp/bx-date-stamp.vue';
 import xflSelect from '@/archivesPages/components/xfl-select/xfl-select.vue';
 import uniEcharts from '@/components/uni-ec-canvas/uni-echart.vue';
+import {mapState} from 'vuex'
 let self;
 export default {
 	components: {
@@ -568,10 +400,6 @@ export default {
 					color: ['#92d050', '#f79646', '#4f81bd'],
 					title: { text: '' },
 					legend: { data: ['已选', '超标部分', '推荐摄入量'] },
-					// tooltip: {
-					// 	show: true,
-					// 	trigger: 'axis'
-					// },
 					grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
 					xAxis: [
 						{
@@ -601,10 +429,6 @@ export default {
 					color: ['#92d050', '#f79646', '#4f81bd'],
 					title: { text: '' },
 					legend: { data: ['其他食物', '当前食物', '推荐摄入量'] },
-					// tooltip: {
-					// 	show: true,
-					// 	trigger: 'axis'
-					// },
 					grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
 					xAxis: [
 						{
@@ -642,7 +466,6 @@ export default {
 			},
 			modalName: '',
 			showTimeSignPicker: false,
-			userInfo: { name: '' },
 			showPopup: false, // 添加弹窗
 			foodListDisplay: false,
 			sportListDisplay: false,
@@ -964,6 +787,9 @@ export default {
 		}
 	},
 	computed: {
+		...mapState({
+			userInfo:state=>state.user.userInfo
+		}),
 		bx_auth_ticket() {
 			return uni.getStorageSync('bx_auth_ticket');
 		},
@@ -1105,10 +931,6 @@ export default {
 				option: {}
 			};
 		},
-		showCookTypes() {
-			this.isShowCookType = true;
-			console.log(this.cookTypes);
-		},
 		changePageType(e) {
 			if (this.pageType && this.pageType !== e) {
 				this.$emit('changePageType', e);
@@ -1164,144 +986,6 @@ export default {
 			});
 			console.log(eleArr);
 			return eleArr;
-		},
-		async buildCurrenDietChartOption() {
-			let currentDiet = this.deepClone(this.currentRecord);
-			// let dietRecordList = this.deepClone(this.dietRecord);
-			let serviceName = '';
-			let condition = [{}];
-			if (currentDiet.diret_type === 'diet_contents') {
-				// 食材
-				serviceName = 'srvhealth_diet_contents_select';
-				condition[0] = {
-					colName: 'food_no',
-					ruleType: 'eq',
-					value: currentDiet.diet_contents_no
-				};
-			} else if (currentDiet.diret_type === 'mixed_food') {
-				// 混合食物
-				serviceName = 'srvhealth_mixed_food_nutrition_contents_select';
-				condition[0] = {
-					colName: 'meal_no',
-					ruleType: 'eq',
-					value: currentDiet.mixed_food_no
-				};
-			}
-			// let foodType = [];
-			let foodInfo = await this.getFoodType(condition, serviceName);
-			if (Array.isArray(foodInfo) && foodInfo.length > 0) {
-				foodInfo = foodInfo[0];
-			} else {
-				// 没查到食物记录对应的食物信息
-				return;
-			}
-			currentDiet = { ...foodInfo, ...currentDiet };
-			let currentRecord = this.deepClone(currentDiet);
-			Object.keys(currentRecord).forEach(key => {
-				if (typeof currentRecord[key] === 'string' && Number(currentRecord[key]) - currentRecord[key] === 0 && key !== 'image') {
-					currentRecord[key] = Number(currentRecord[key]);
-				}
-			});
-			this.currentRecord = currentRecord;
-			let eleArr = this.getEnergyListValue();
-			let category = eleArr.map(item => {
-				return item.name;
-			});
-			let legendData = ['其它食物', '当前食物', '推荐摄入量'];
-			let seriesData = legendData.map(le => {
-				let obj = {
-					name: le,
-					data: []
-				};
-				obj.type = 'bar';
-				obj.stack = '营养素';
-				let data = eleArr.map(item => {
-					let num = (item.value * 100) / Number(item.EAR);
-					num = parseFloat(num.toFixed(1));
-					return num;
-				});
-				switch (le) {
-					case '其它食物':
-						obj.data = eleArr.map(ele => {
-							let cur = this.deepClone(ele);
-							let ratio = currentDiet.unit_weight_g / 100;
-							let val = cur.value - currentDiet[cur.key] * ratio * currentDiet.amount;
-							let num = (val * 100) / Number(cur.EAR);
-							num = parseFloat(num.toFixed(1));
-							return num;
-						});
-						break;
-					case '当前食物':
-						obj.data = eleArr.map(ele => {
-							let cur = this.deepClone(ele);
-							let ratio = currentDiet.unit_weight_g / 100;
-							let val = currentDiet[cur.key] * ratio * currentDiet.amount;
-							let num = (val * 100) / Number(cur.EAR);
-							num = parseFloat(num.toFixed(1));
-							return num;
-						});
-						break;
-					case '推荐摄入量':
-						obj.type = 'line';
-						obj.stack = false;
-						obj.data = eleArr.map(item => {
-							return 100;
-						});
-						break;
-				}
-				return obj;
-			});
-			let option = {
-				color: ['#92d050', '#f79646', '#4f81bd'],
-				// color: ['#92d050', '#00b050', '#f79646', '#4f81bd'],
-				title: {
-					text: ''
-				},
-				// #ifdef h5
-				tooltip: {
-					show: true,
-					trigger: 'axis'
-				},
-				// #endif
-				legend: {
-					data: legendData
-				},
-				grid: {
-					left: '3%',
-					right: '4%',
-					bottom: '3%',
-					top: '10%',
-					containLabel: true
-				},
-				xAxis: [
-					{
-						type: 'category',
-						data: category,
-						axisLabel: {
-							rotate: 70,
-							interval: 0,
-							fontSize: 10
-						}
-					}
-				],
-				yAxis: [
-					{
-						max: function(value) {
-							return value.max + 20;
-						},
-						type: 'value',
-						axisLabel: {
-							formatter: `{value}%`
-						}
-					}
-				],
-				series: []
-			};
-			option.series = seriesData;
-			let result = {
-				option: option
-			};
-			this.currentDietChartData = result;
 		},
 		buildNutrientsChartOption(energyListWrap) {
 			// 构建echarts需要的数据格式
@@ -1402,10 +1086,6 @@ export default {
 				legend: {
 					data: legendData
 				},
-				// tooltip: {
-				// 	show: true,
-				// 	trigger: 'axis'
-				// },
 				grid: {
 					left: '3%',
 					right: '4%',
@@ -1444,31 +1124,6 @@ export default {
 			this.nutrientsChartOption = result;
 			return result;
 		},
-
-		chooseCookType(e) {
-			// 选择食物烹调方式
-			this.currentRecord.cook_method = e.value;
-			this.isShowCookType = false;
-		},
-		checkUnit(item, index) {
-			// 切换单位
-			this.currentUnitIndex = index;
-			let currentUnit = this.unitList[index];
-			//TODO 动态改变热量
-			this.currentRecord.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
-			this.currentRecord.unit = item.unit;
-			this.currentRecord.energy = (this.currentRecord.unit_weight_g * this.currentRecord.unit_energy) / this.currentRecord.unit_amount;
-			this.buildCurrenDietChartOption();
-		},
-		async getCookTypes() {
-			let colVs = await this.getServiceV2('srvhealth_diet_contents_select', 'list', 'list', 'health');
-			let colData = colVs.srv_cols;
-			colData.forEach(item => {
-				if (item.columns === 'cook_method') {
-					this.cookTypes = item.option_list_v2;
-				}
-			});
-		},
 		async getFoodUnit(item) {
 			// 查找当前食物的单位
 			let url = this.getServiceUrl('health', 'srvhealth_food_unit_amount_estimate_select', 'select');
@@ -1492,8 +1147,6 @@ export default {
 			}
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				unitList = [...unitList, ...res.data.data];
-			} else {
-				// unitList = [item];
 			}
 			this.unitList = unitList;
 			return unitList;
@@ -1661,9 +1314,6 @@ export default {
 			} else {
 				this.currentRecord.amount = Number((this.currentRecord.amount + step).toFixed(1));
 			}
-			if (this.currentRecordType === 'food') {
-				// this.buildCurrenDietChartOption();
-			}
 		},
 		toDetail(e, item) {
 			if (!item) {
@@ -1692,7 +1342,6 @@ export default {
 		},
 		async getDietAllRecord() {
 			//饮食记录
-			this.getCookTypes();
 			let url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_diet_record_select',
@@ -2296,14 +1945,17 @@ export default {
 					}
 				]
 			};
+			let weight = self.userInfo.weight ? self.userInfo.weight : 55;
+			let age = self.age ? self.age : 18;
+			let sex = self.userInfo.sex ? self.userInfo.sex : '女';
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				let result = res.data.data.filter(item => {
-					if ((item.sex && item.sex.indexOf(self.userInfo.sex) !== -1) || !item.sex) {
+					if ((item.sex && item.sex.indexOf(sex) !== -1) || !item.sex) {
 						if (item.age_start && item.age_end) {
-							return self.age >= item.age_start && self.age < item.age_end;
+							return age >= item.age_start && age < item.age_end;
 						} else if (item.age_start && !item.age_end) {
-							return self.age >= item.age_start;
+							return age >= item.age_start;
 						} else if (!item.age_start && !item.age_end) {
 							return true;
 						} else {
@@ -2323,16 +1975,16 @@ export default {
 									mat.UL = 0;
 								}
 								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni ? item.val_rni * self.userInfo.weight : item.val_ear ? item.val_ear * self.userInfo.weight : mat.EAR * self.userInfo.weight;
+									mat.EAR = item.val_rni ? item.val_rni * weight : item.val_ear ? item.val_ear * weight : mat.EAR * weight;
 									mat.UL = 0;
 								}
 							} else {
 								if (mat.name === '脂肪') {
-									mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
+									mat.EAR = Number((weight * 50 * 0.2) / 9).toFixed(2);
 									mat.UL = 0;
 								}
 								if (mat.name === '碳水') {
-									mat.EAR = self.userInfo.weight * 4;
+									mat.EAR = weight * 4;
 									mat.UL = 0;
 								}
 							}
@@ -2367,22 +2019,6 @@ export default {
 				this.foodType = [...mix, ...basic];
 				return this.foodType;
 			}
-			// let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
-			// let req = {
-			// 	serviceName: 'srvhealth_diet_contents_select',
-			// 	colNames: ['*'],
-			// 	condition: [
-			// 		{
-			// 			colName: 'name',
-			// 			ruleType: 'in',
-			// 			value: str
-			// 		}
-			// 	]
-			// };
-
-			// let res = await this.$http.post(url, req);
-			// console.log('res-------', res.data.data);
-			// return res.data.data;
 		},
 
 		async buildDietData() {
@@ -2647,7 +2283,6 @@ export default {
 			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
 				console.log(res.data.data);
 				this.sportsRecord = res.data.data.map(item => {
-					// item.energy = item.energy * this.userInfo.weight
 					return item;
 				});
 				let sportOut = 0;
@@ -2694,44 +2329,6 @@ export default {
 				}
 			});
 		},
-		clickUserMenu(e) {
-			console.log(e);
-			if (e === 'regulate') {
-				let viewTemp = {
-					title: 'name',
-					tip: 'sex',
-					img: 'pic',
-					footer: 'job'
-				};
-				let cond = [
-					{
-						colName: 'userno',
-						ruleType: 'eq',
-						value: 'user_no'
-					}
-				];
-				uni.navigateTo({
-					url:
-						'/publicPages/list/list?serviceName=srvhealth_person_info_select&navigationBarTitle=我的车辆&pageType=list&type=skip&viewTemp=' +
-						decodeURIComponent(JSON.stringify(viewTemp)) +
-						'&cond=' +
-						decodeURIComponent(JSON.stringify(cond))
-				});
-			} else if (e === 'health') {
-				uni.navigateTo({
-					url: '/pages/balancedDiet/balancedDiet'
-				});
-			} else {
-				uni.setStorageSync('current_user_info', e);
-				this.$store.commit('SET_USERINFO', e);
-				this.userInfo = e;
-				uni.setStorageSync('current_user', e.name);
-				this.getDietAllRecord();
-				this.getDietRecord(this.selectDate);
-				this.getSportsRecord(this.selectDate);
-			}
-			this.showUserList = false;
-		},
 		clickSportRecordItem(item) {
 			this.showEditModal = true;
 			this.currentRecord = this.deepClone(item);
@@ -2741,17 +2338,6 @@ export default {
 			uni.navigateTo({
 				url: `/archivesPages/DietDetail/DietDetail?chooseDate=${this.selectDate}&no=${item.diet_record_no}`
 			});
-			// let unitList = await this.getFoodUnit(item);
-			// unitList.forEach((unit, index) => {
-			// 	console.log(item, unit);
-			// 	if (item.unit === unit.unit) {
-			// 		this.currentUnitIndex = index;
-			// 	}
-			// });
-			// this.showEditModal = true;
-			// this.currentRecord = this.deepClone(item);
-			// this.currentRecordType = 'food';
-			// this.buildCurrenDietChartOption();
 		},
 		clickSportBox() {
 			this.sportListDisplay = !this.sportListDisplay;
@@ -3031,19 +2617,6 @@ export default {
 			this.formData.userno = userInfo.user_no;
 			this.loginUserInfo = userInfo;
 			this.getBaseInfo();
-			this.getCurrUserInfo().then(_ => {
-				if (uni.getStorageSync('current_user_info')) {
-					this.userInfo = uni.getStorageSync('current_user_info');
-					uni.setStorageSync('current_user', this.userInfo.name);
-				} else {
-					let userList = uni.getStorageSync('user_info_list');
-					if (Array.isArray(userList) && userList.length > 0) {
-						this.userInfo = userList[0];
-						uni.setStorageSync('current_user_info', userList[0]);
-					}
-				}
-				this.getDietAllRecord();
-			});
 		} else {
 			alert('未发现登录用户信息');
 		}

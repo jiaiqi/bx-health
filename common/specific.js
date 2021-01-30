@@ -1,54 +1,16 @@
 import store from '@/store'
 import api from '@/common/api.js'
 import _http from '@/common/http.js'
-
+import {
+	checkIsAttention,
+	wxVerifyLogin
+} from '@/common/api/login.js'
 export default {
 	install(Vue, options) {
+		Vue.prototype.wxVerifyLogin = wxVerifyLogin
 		Vue.prototype.checkSubscribeStatus = async (userInfo) => {
 			// 检查是否关注过公众号
-			if (!userInfo) {
-				userInfo = store.state.user.userInfo
-			}
-			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_app_user_select', 'select');
-			let req = {
-				"serviceName": "srvwx_app_user_select",
-				"colNames": ["*"],
-				"page": {
-					"pageNo": 1,
-					"rownumber": 5
-				}
-			}
-			req.relation_condition = {
-				"relation": "AND",
-				"data": [{
-						"colName": "app_no",
-						"ruleType": "like",
-						"value": "APPNO20200107181133"
-					},
-					{
-						"relation": "OR",
-						"data": [{
-								"colName": "unionid",
-								"value": userInfo.userno,
-								"ruleType": "eq"
-							},
-							{
-								"colName": "user_no",
-								"value": userInfo.userno,
-								"ruleType": "eq"
-							},
-						]
-					}
-				]
-			}
-			let res = await _http.post(url, req)
-			let result = true
-			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0 && res.data.data[0].subscribe ===
-				'关注') {
-				result = true
-			} else {
-				result = false
-			}
+			let result = await checkIsAttention()
 			store.commit('SET_SUBSCRIBE_STATUS', result)
 			return result
 		}

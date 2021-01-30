@@ -29,7 +29,10 @@
 			<view class="number-box">
 				<text @click="changeAmount('minus', 0.1)" class="symbol" :class="{ disabled: dietInfo.amount - 0.1 <= 0 }">-0.1</text>
 				<text @click="changeAmount('minus')" class="symbol" :class="{ disabled: dietInfo.amount - 1 <= 0 }">-1</text>
-				<input class="input" v-model.number="dietInfo.amount" type="number" />
+				<!-- <input class="input" v-model.number="dietInfo.amount" type="digit" /> -->
+				<view class="input">
+					{{dietInfo.amount||''}}
+				</view>
 				<text @click="changeAmount('plus')" class="symbol">+1</text>
 				<text @click="changeAmount('plus', 0.1)" class="symbol">+0.1</text>
 			</view>
@@ -347,13 +350,13 @@ export default {
 			display: flex;
 			justify-content: center;
 			color: #009688;
-
 			.title {
 				margin-right: 20rpx;
 			}
 			.input {
 				width: 120rpx;
 				height: 70rpx;
+				line-height: 70rpx;
 				color: rgb(50, 50, 51);
 				font-size: 14px;
 				background: rgb(242, 243, 245);

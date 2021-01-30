@@ -4,7 +4,7 @@ import request from '@/common/utils/request.js'
 import store from '@/store/index.js'
 
 const fly = request({
-	timeout: 6 * 1000
+	timeout: 20 * 1000
 })
 let FormateDate = function(date) {
 	let o = {

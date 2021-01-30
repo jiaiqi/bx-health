@@ -355,63 +355,6 @@ export default {
 				}
 			}
 		},
-		async initPage() {
-			let self = this;
-			let userInfo = uni.getStorageSync('login_user_info');
-			// #ifdef MP-WEIXIN
-			let res = await wx.getSetting();
-			if (!res.authSetting['scope.userInfo']) {
-				// 没有获取用户信息授权
-				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
-				this.$store.commit('SET_AUTH_USERINFO', false);
-				return;
-			} else {
-				uni.getUserInfo({
-					provider: 'weixin',
-					success: function(user) {
-						let rawData = {
-							nickname: user.userInfo.nickName,
-							sex: user.userInfo.gender,
-							country: user.userInfo.country,
-							province: user.userInfo.province,
-							city: user.userInfo.city,
-							headimgurl: user.userInfo.avatarUrl
-						};
-						self.$store.commit('SET_WX_USERINFO', rawData);
-						if (self.userInfo && self.userInfo.no && rawData.headimgurl !== self.userInfo.profile_url) {
-							self.updateUserProfile(rawData.headimgurl, self.userInfo.no, user.userInfo.nickName);
-						}
-					}
-				});
-				this.isAuthUserInfo = true;
-				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
-				this.$store.commit('SET_AUTH_USERINFO', true);
-			}
-			// #endif
-			if (!userInfo) {
-				// 未登录 h5跳转到登录页,小程序端进行静默登录
-				// #ifdef MP-WEIXIN
-				const result = await wx.login();
-				if (result.code) {
-					this.code = result.code;
-					await this.wxLogin({ code: result.code });
-					await this.initPage();
-				}
-				// #endif
-				// #ifdef H5
-				uni.navigateTo({
-					url: '/publicPages/accountExec/accountExec'
-				});
-				// #endif
-			}
-			if (userInfo && userInfo.user_no) {
-				// this.loginUserInfo = userInfo;
-				this.$store.commit('SET_LOGIN_USER', userInfo);
-				if (!this.userInfo || !this.userInfo.no) {
-					await this.selectUserList(userInfo);
-				}
-			}
-		},
 		// 查找当前帐号建立的用户列表
 		async selectUserList(userInfo) {
 			let self = this;
@@ -430,7 +373,6 @@ export default {
 			const res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				// 有数据
-				debugger;
 				this.$store.commit('SET_USERLIST', res.data.data);
 				if (uni.getStorageSync('current_user')) {
 					res.data.data.forEach(item => {
@@ -465,40 +407,40 @@ export default {
 				// 登录失效 进行静默登录
 				this.$store.commit('SET_LOGIN_STATE', false);
 				uni.setStorageSync('isLogin', false);
-				// #ifdef MP-WEIXIN
-				const result = await wx.login();
-				if (result.code) {
-					this.code = result.code;
-					await this.wxLogin({ code: result.code });
-					await this.initPage();
-				}
-				// #endif
+				self.toAddPage();
 			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 				// 没有角色 提示跳转到创建角色页面
-				// self.toAddPage();
+				self.toAddPage();
 			}
 		},
 		openOfficialImage() {
 			uni.navigateTo({
 				url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent('https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ')
 			});
-			// uni.previewImage({
-			// 	urls: ['/static/bx100x.png']
-			// });
 		}
 	},
 	created() {
-		this.toAddPage();
-		this.getPageItem();
+		this.toAddPage().then(res => {
+			if(res){
+				this.getPageItem();
+			}
+		});
 	},
 	onShow(option) {
-		if(!this.authUserInfo){
-			uni.navigateTo({
-				url:'/publicPages/accountExec/accountExec'
-			})
-		}else{
-			this.initPage();
+		// #ifdef MP-WEIXIN
+		if (!this.authUserInfo||typeof this.authUserInfo ==='object') {
+			debugger
+			this.$store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
+			let pageStack = getCurrentPages()
+			if (Array.isArray(pageStack) && pageStack.length >= 1) {
+				let currentPage = pageStack[pageStack.length - 1]
+				this.$store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
+			}
+			uni.reLaunch({
+				url: '/publicPages/accountExec/accountExec'
+			});
 		}
+		// #endif
 	},
 	onShareAppMessage() {
 		let path = '';

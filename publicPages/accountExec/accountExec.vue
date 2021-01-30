@@ -66,7 +66,8 @@
 					</view>
 					<view class="button-box">
 						<button type="primary" class="cu-btn bg-cyan" lang="zh_CN" open-type="getUserInfo" @getuserinfo="saveWxUser" :withCredentials="false">同意</button>
-						<button class="cu-btn bg-white text-grey" @click="disagree">不同意</button>
+						<!-- <button class="cu-btn bg-white text-grey" @click="disagree">不同意</button> -->
+						<navigator class="cu-btn bg-grey" open-type="exit" target="miniProgram" @click="disagree">不同意(退出小程序)</navigator>
 					</view>
 				</view>
 			</view>
@@ -308,69 +309,18 @@ export default {
 				this.code = result.code;
 			}
 		},
-		async wxLogin(obj = {}) {
-			// 使用code向后端发送登录请求
-			let that = this;
-			let { code, user } = obj;
-			let rawData = {
-				nickname: user.userInfo.nickName,
-				sex: user.userInfo.gender,
-				country: user.userInfo.country,
-				province: user.userInfo.province,
-				city: user.userInfo.city,
-				headimgurl: user.userInfo.avatarUrl
-			};
-			uni.setStorageSync('wxUserInfo', rawData);
-			let url = this.$api.verifyLogin.url;
-			let req = [
-				{
-					data: [
-						{
-							code: code,
-							app_no: this.$api.appNo.wxmp
-						}
-					],
-					serviceName: 'srvwx_app_login_verify'
-				}
-			];
-			let res = await this.$http.post(url, req);
-			if (res.data.resultCode === 'SUCCESS') {
-				// 登录成功
-				let resData = res.data.response[0].response;
-				if (resData.login_user_info.user_no) {
-					uni.setStorageSync('login_user_info', resData.login_user_info);
-					console.log('resData.login_user_info', resData.login_user_info);
-				}
-				uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
-				// 保存用户微信信息
-				this.setWxUserInfo(rawData);
-				if (resData.login_user_info.data) {
-					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
-				}
-				uni.setStorageSync('isLogin', true);
-				return {
-					status: 'success',
-					response: resData
-				};
-			} else {
-				// 登录失败，显示提示信息
-				uni.showToast({
-					title: res.data.resultMessage
-				});
-				return false;
-			}
-		},
+
 		async saveWxUser(e) {
 			// 静默登录(验证登录)
 			const self = this;
 			const isWeixinClient = this.isWeixinClient();
-			self.getUserInfo();
+			// self.getUserInfo();
 			if (isWeixinClient) {
 				const url = this.getServiceUrl('wx', 'srvwx_app_login_verify', 'operate');
 				// #ifdef MP-WEIXIN
 				const user = e.mp.detail;
-				const result = await this.wxLogin({ code: this.code, user: user });
-				if (result.status === 'success') {
+				const result = await self.wxVerifyLogin();
+				if (result) {
 					// 登录成功，返回上一页面
 					uni.$emit('loginStatusChange', true);
 					self.$store.commit('SET_LOGIN_STATE', true);
@@ -382,21 +332,21 @@ export default {
 					if (Array.isArray(num) && num.length === 1) {
 						if (self.previousPageUrl && self.previousPageUrl.indexOf('/accountExec') == -1) {
 							//
-							uni.redirectTo({
+							uni.reLaunch({
 								url: self.previousPageUrl,
 								fail() {
 									uni.switchTab({
-										url:self.previousPageUrl,
+										url: self.previousPageUrl,
 										fail(e) {
 											uni.showModal({
-												title:'提示',
-												content:e
-											})
+												title: '提示',
+												content: e
+											});
 										}
 									});
 								}
 							});
-						}else{
+						} else {
 							if (self.$api.homePath.indexOf('/pages/') !== -1) {
 								uni.switchTab({
 									url: self.$api.homePath
@@ -896,6 +846,7 @@ page {
 		height: 100px;
 		.cu-btn {
 			width: 75%;
+			border-radius: 5px;
 		}
 	}
 }

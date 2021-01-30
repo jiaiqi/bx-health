@@ -114,6 +114,7 @@
 				</view>
 			</view>
 		</view>
+		<view class="bottom-layer" v-if="onlyCurrentPage === true"><button class="cu-btn bg-cyan" @click="toStorePage">体验完整小程序</button></view>
 	</view>
 </template>
 
@@ -145,6 +146,16 @@ export default {
 			userInfo: state => state.user.userInfo,
 			inviterInfo: state => state.app.inviterInfo
 		}),
+		onlyCurrentPage() {
+			let pageStack = getCurrentPages();
+			if (Array.isArray(pageStack) && pageStack.length >= 1) {
+				let currentPage = pageStack[pageStack.length - 1];
+				this.$store.commit('SET_CURRENT_PAGE', currentPage.route);
+				return false;
+			} else if (Array.isArray(pageStack) && pageStack.length === 1) {
+				return true;
+			}
+		},
 		introduction() {
 			if (this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction.length > 50) {
 				return this.storeInfo.introduction.slice(0, 50) + '...';
@@ -152,6 +163,11 @@ export default {
 		}
 	},
 	methods: {
+		toStorePage() {
+			uni.switchTab({
+				url: '/pages/store/store'
+			});
+		},
 		async selectPersonInGroup(group_no) {
 			// 查找当前登录用户有没有在此圈子用户列表中
 			let req = {
@@ -324,6 +340,7 @@ export default {
 		}&share_type=bindOrganization`;
 		let title = `${this.userInfo.name}邀请您加入【${this.storeInfo.name}】`;
 		let imageUrl = this.getImagePath(this.storeInfo.image);
+		this.saveSharerInfo(this.userInfo, path);
 		return {
 			imageUrl: imageUrl,
 			title: title,
@@ -331,10 +348,12 @@ export default {
 		};
 	},
 	async onLoad(option) {
+		// #ifdef MP-WEIXIN
 		wx.showShareMenu({
 			withShareTicket: true,
 			menus: ['shareAppMessage', 'shareTimeline']
 		});
+		// #endif
 		this.checkOptionParams(option);
 		this.toAddPage().then(res => {
 			if (res === 'fail') {
@@ -466,7 +485,7 @@ export default {
 				padding: 20rpx 0;
 				border-bottom: 1rpx dotted #f1f1f1;
 				align-items: center;
-		
+
 				.title-text {
 					width: 70%;
 					overflow: hidden;
@@ -572,5 +591,15 @@ export default {
 			}
 		}
 	}
+}
+.bottom-layer {
+	position: fixed;
+	bottom: 0;
+	width: 100vw;
+	height: 50px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba($color: #000000, $alpha: 0.7);
 }
 </style>

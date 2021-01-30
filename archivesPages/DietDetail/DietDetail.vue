@@ -85,6 +85,7 @@ export default {
 		},
 		async addDietRecord() {
 			let self = this;
+			debugger
 			this.dietRecordList = [this.dietInfo];
 			if (this.dietRecordList.length > 0) {
 				let arr = [];
@@ -132,6 +133,9 @@ export default {
 					};
 					if (item.meal_no) {
 						obj.energy = item.unit_amount * item.unit_energy;
+						if(obj.unit==='g'){
+							obj.energy = item.unit_energy;
+						}
 					}
 					if (this.planNo) {
 						obj.ps_no = this.planNo;

@@ -30,7 +30,7 @@
 				<text class="heat">{{ dietInfo.moisture_content ? dietInfo.moisture_content + 'g/100g' : ' - ' }}</text>
 			</view>
 			<view class="unit-box">
-				<text class="label text-bold margin-right-xs">单位:</text>
+				<text class="label  margin-right-xs">单位:</text>
 				<text class="unit">{{ unit }}</text>
 			</view>
 		</view>

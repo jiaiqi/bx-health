@@ -140,9 +140,6 @@ export default {
 			// 邀请加入组织机构
 			if (e.target.dataset.data && e.target.dataset.data.id) {
 				let data = e.target.dataset.data;
-				// path = `/personalPages/StoreDetail/StoreDetail?from=share&invite_user_no=${this.userInfo.userno}&store_no=${data.store_no}&doctor_no=${
-				// 	this.userInfo.no
-				// }&share_type=bindOrganization`;
 				path = `/pediaPages/hospitalOverview/hospitalOverview?store_no=${data.store_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
 					this.userInfo.no
 				}&share_type=bindOrganization`;
@@ -154,6 +151,7 @@ export default {
 				title = this.userInfo.name + '邀请您体验百想健康小程序';
 			}
 		}
+		this.saveSharerInfo(this.userInfo, path);
 		return {
 			imageUrl: imageUrl,
 			title: title,

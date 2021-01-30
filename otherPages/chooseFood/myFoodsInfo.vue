@@ -8,10 +8,10 @@
 						<text class="label">出生日期</text>
 					</label>
 					<view class="form-item-content_value picker">
-						<picker class="uni-picker" :mode="pickerMode" :value="info.bir" @change="bindTimeChange">
+						<picker class="uni-picker" :mode="pickerMode" :value="info.birthday" @change="bindTimeChange">
 							<view class="picker-content">
-								<view class="place-holder" v-if="!info.bir">请选择</view>
-								<view class="value" v-else>{{ info.bir }}</view>
+								<view class="place-holder" v-if="!info.birthday">请选择</view>
+								<view class="value" v-else>{{ info.birthday }}</view>
 								<text class="cuIcon-calendar"></text>
 							</view>
 						</picker>
@@ -35,68 +35,33 @@
 						<text class="label">体重</text>
 					</label>
 					<view class="form-item-content_value slider">
-						<input class="form-item-content_value" type="number" :placeholder="'请输入'" max="400" min="0" v-model.number="info.weight" />
+						<input class="form-item-content_value" type="digit" placeholder="请输入体重" max="400" min="0" v-model.number="info.weight" />
 					</view>
 				</view>
 			</view>
-			<!-- <view class="info-item-top">
-					<text>出生日期：</text>
-				</view>
-				<view class="info-item-bot">
-					<input
-						@blur="onInputBlur"
-						@input="onInputChange"
-						v-model="info.bir"
-						disabled
-						class="date-input"
-						@click.stop="toggleData"
-						:placeholder="'请选择出生日期'"
-						style="width: 100%;"
-						name="input"
-					/>
-				</view>
-			</view>
-			<view class="info-item">
-				<view class="info-item-top">
-					<text>性别：</text>
-				</view>
-				<view class="info-item-bot-radio">
-					<radio-group class="block" @change="RadioChange">
-						<radio :class="radio=='男'?'checked':''" :checked="radio=='男'?true:false" value="男">男</radio>
-						<radio :class="radio=='女'?'checked':''" :checked="radio=='女'?true:false" value="女">女</radio>
-					</radio-group>
-				</view>
-			</view>
-			<view class="info-item">
-				<view class="info-item-top">
-					<text>体重(kg)：</text>
-				</view>
-				<view class="info-item-bot">
-					<input v-model="info.weight" type="text" value="" />
-				</view>
-			</view> -->
 		</view>
 		<view class="info-bot">
 			<uni-view class="button-box">
 				<view @click="submitData" class="cancel">提交</view>
 				<view @click="cancel" class="cancel">取消</view>
-				<!-- <uni-button class="cu-btn bg-blue" type="primary">提交</uni-button>
-				<uni-button @click="cancel" class="cu-btn bg-blue" type="primary">取消</uni-button> -->
 			</uni-view>
-			<!-- <uni-button @click="submitData" class="cu-btn bg-blue">提交</uni-button>
-			<uni-button class="cu-btn bg-blue">取消</uni-button> -->
 		</view>
 	</view>
 </template>
 
 <script>
-// import wPicker from '@/components/w-picker/w-picker.vue';
+import { mapState } from 'vuex';
 export default {
 	name: 'myFoodsInfo',
+	computed: {
+		...mapState({
+			userInfo: state => state.user.userInfo
+		})
+	},
 	data() {
 		return {
 			info: {
-				bir: '',
+				birthday: '',
 				sex: '',
 				weight: ''
 			},
@@ -106,9 +71,19 @@ export default {
 			sexOption: ['男', '女']
 		};
 	},
-	// components:{
-	// 	wPicker
-	// },
+	created() {
+		if (this.userInfo) {
+			if (this.userInfo.sex) {
+				this.info.sex = this.userInfo.sex;
+			}
+			if (this.userInfo.weigth) {
+				this.info.weigth = this.userInfo.weigth;
+			}
+			if (this.userInfo.birthday) {
+				this.info.birthday = this.userInfo.birthday;
+			}
+		}
+	},
 	methods: {
 		numberChange(type) {
 			let step = 0.5;
@@ -121,44 +96,36 @@ export default {
 					this.fieldData.value = this.fieldData.value - step;
 				}
 			}
-			// if (this.fieldData.type === 'number' || this.fieldData.type === 'digit') {
-			// 	let step = this.fieldData.type === 'number' ? 1 : this.fieldData.type === 'digit' ? 0.5 : 0;
-			// 	if (!this.fieldData.value) {
-			// 		this.fieldData.value = this.fieldData.min ? this.fieldData.min : 0;
-			// 	}
-			// 	if (this.fieldData.max) {
-
-			// 	}
-			// }
 		},
 		bindTimeChange(e) {
-			this.info.bir = e.detail.value;
+			this.info.birthday = e.detail.value;
 			console.log('出生日期', e);
 		},
 		radioChange(e) {
 			console.log('性别', e);
 		},
 		DateChange(e) {
-			this.info.bir = e.detail.value;
+			this.info.birthday = e.detail.value;
 		},
 		RadioChange(e) {
 			this.radio = e.detail.value;
 			this.info.sex = e.detail.value;
 		},
-
-		toggleData() {
-			this.$refs.Date.show();
-		},
 		onConfirm(e) {
-			this.info.bir = e.result;
+			this.info.birthday = e.result;
 		},
 		cancel() {
-			uni.navigateBack({
-				delta: 1
-			});
+			uni.redirectTo({
+				url:this.$store.state.app.previousPageUrl,
+				fail() {
+					uni.navigateBack({
+						delta: 1
+					});
+				}
+			})
 		},
 		async submitData() {
-			if (!this.info.bir || !this.info.weight || !this.info.sex) {
+			if (!this.info.birthday || !this.info.weight || !this.info.sex) {
 				uni.showToast({
 					title: '请完善信息',
 					icon: 'none'
@@ -180,7 +147,7 @@ export default {
 					],
 					data: [
 						{
-							birthday: this.info.bir,
+							birthday: this.info.birthday,
 							weight: this.info.weight,
 							sex: this.info.sex
 						}
@@ -194,14 +161,13 @@ export default {
 					icon: 'none'
 				});
 				let user = uni.getStorageSync('current_user_info');
-				user.birthday = this.info.bir;
+				user.birthday = this.info.birthday;
 				user.weight = this.info.weight;
 				user.sex = this.info.sex;
 				uni.setStorageSync('current_user_info', user);
+				this.$store.commit('SET_USERINFO', user);
 				setTimeout(() => {
-					uni.navigateBack({
-						delta: 1
-					});
+					this.cancel()
 				}, 1000);
 			}
 		}
@@ -210,20 +176,20 @@ export default {
 </script>
 
 <style scoped lang="scss">
-	.button-box{
-		width: 100%;
-		display: flex;
-		justify-content: space-around;
-		display: flex;
-		.cancel{
-			width: 45%;
-			background-color: #007aff;
-			color: #FFFFFF;
-			text-align: center;
-			padding: 8rpx 10rpx;
-			border-radius: 8rpx;
-		}
+.button-box {
+	width: 100%;
+	display: flex;
+	justify-content: space-around;
+	display: flex;
+	.cancel {
+		width: 45%;
+		background-color: #007aff;
+		color: #ffffff;
+		text-align: center;
+		padding: 8rpx 10rpx;
+		border-radius: 8rpx;
 	}
+}
 .form-item {
 	display: flex;
 	flex-wrap: wrap;
