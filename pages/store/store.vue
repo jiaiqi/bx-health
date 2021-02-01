@@ -408,52 +408,7 @@ page {
 .store-r-b-my {
 	margin-top: 30upx;
 }
-.search-box {
-	position: sticky;
-	top: 0;
-	z-index: 2;
-	background: linear-gradient(100deg, #ffeb3b, #ffc107);
-	// padding-top: var(--status-bar-height);
-	// margin-top: calc(var(--status-bar-height) * -1);
-	.ctn {
-		border-top-left-radius: 50upx;
-		border-top-right-radius: 50upx;
-		background: #f8f8f8;
-		padding: 15px 15px 12px;
 
-		.hx-search-box {
-			border-radius: 40px;
-			padding: 0 15px;
-			height: 34px;
-			display: flex;
-			align-items: center;
-			line-height: 44rpx;
-			background-color: #eeeeee;
-			flex: 1;
-			color: #888888;
-			font-size: 14px;
-			input {
-				padding: 0 10rpx;
-				font-size: 28rpx;
-				height: 68rpx;
-				width: 100%;
-			}
-		}
-	}
-}
-.QZBG {
-	background: #ffffff;
-	box-shadow: 0 1px 6px #ccc;
-	.navbar {
-		// height: var(--status-bar-height);
-	}
-	.ctn {
-		background: #ffffff;
-		/* #ifdef MP */
-		padding-top: 0px;
-		/* #endif */
-	}
-}
 .hot-box {
 	display: flex;
 	flex-direction: row;
