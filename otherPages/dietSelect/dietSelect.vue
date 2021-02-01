@@ -17,8 +17,13 @@
 							/>
 						</view>
 						<view class="action">
-							<text style="margin-right: 20rpx;" @click="search">搜索</text>
+							<!-- <text style="margin-right: 20rpx;" @click="search">搜索</text> -->
 							<!-- <text @click="showRecent" v-if="!this.pageDetType">历史</text> -->
+							<text @click="showModal('filter')" :class="{ 'text-cyan text-bold': filterVal && filterVal.indexOf('全部') === -1 }">
+								<text>筛选</text>
+								<text class="cuIcon-filter"></text>
+								<text v-if="filterVal && filterVal.indexOf('全部') === -1" style="font-size: 12px;">({{filterVal}})</text>
+							</text>
 						</view>
 					</view>
 				</view>
@@ -217,47 +222,26 @@
 			@confirm="onSelected"
 			@cancel="onSelected"
 		/>
-		<!-- <flyInCart ref="inCart" :cartBasketRect="cartBasketRect"></flyInCart> -->
 		<jumpBall :backgroundImage="currFood.imgurl" :start.sync="num" :element.sync="element" @msg="jbMsg" />
 		<view class="public-button-box add-button">
 			<view @click="openCar" class="lg text-gray cuIcon-cart add-button-wrap">
 				<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>
 			</view>
 		</view>
-	<!-- 	<view class="cu-modal bottom-modal" @tap="hideModal" :class="{ show: modalName === 'recent' }">
-			<view class="cu-dialog" @tap.stop="" style="height: auto;max-height: 90vh;overflow: scroll;">
-				<view class="recent-diet">
-					<view class="title-bar ">
-						<text class="title">近期饮食记录</text>
-						<view class="action">
-							<text class="cu-btn sm text-blue margin-right-xs" @click="selectAll(true)">全选</text>
-							<text class="cu-btn sm text-blue" @click="selectAll(false)">反选</text>
+		<view class="cu-modal drawer-modal justify-start" :class="{ show: modalName === 'filter' }" @click="hideModal">
+			<view class="cu-dialog" @click.stop="">
+				<view class="filter-box">
+					<view class="filter-item-box" v-for="item in filterOption">
+						<view class="label">{{ item.label }}</view>
+						<view class="child-data">
+							<bx-radio-group class="radio-group" mode="button" v-model="filterVal" @change="changeFilter($event, item.label)">
+								<bx-radio class="radio" v-for="child in item.data" :name="child.value">{{ child.label }}</bx-radio>
+							</bx-radio-group>
 						</view>
-					</view>
-					<view class="content">
-						<view class="diet-item" v-for="item in recentDiet" :key="item.diet_record_no">
-							<image :src="getImagePath(item.image)" mode="aspectFill" class="image"></image>
-							<view class="info">
-								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'"><text class="cuIcon-check text-bold" v-if="item.checked"></text></view>
-								<view class="food-name">{{ item.name }}</view>
-								<view class="food-info">
-									<view class="amount">
-										<text class="separator" @click="calc(item, 'minus')">-</text>
-										<text type="number" class="input">{{ item.amount }}</text>
-										<text class="separator" @click="calc(item, 'add')">+</text>
-									</view>
-									<text class="text-left margin-left-xs">{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}</text>
-								</view>
-							</view>
-						</view>
-					</view>
-					<view class="footer" v-if="recentDietMode === 'edit' && checkedRecentDiet.length > 0">
-						<button class="cu-btn bg-gray margin-right" @click="hideModal">取消</button>
-						<button class="cu-btn bg-cyan " @click="insertIntoDietRecord">添加到今日饮食记录</button>
 					</view>
 				</view>
 			</view>
-		</view> -->
+		</view>
 	</view>
 </template>
 
@@ -308,8 +292,107 @@ export default {
 		return {
 			planNo: null,
 			recentDiet: [],
+			filterVal: '',
 			// recentDietMode: 'edit',
 			heightStyle: 'calc(100vh-200upx)',
+			filterOption: [
+				{
+					label: '食材',
+					data: [
+						{
+							label: '全部',
+							value: '全部1',
+							checked: false
+						},
+						{
+							label: '蔬菜',
+							value: '蔬菜',
+							checked: false
+						},
+						{
+							label: '水果干果',
+							value: '水果干果',
+							checked: false
+						},
+
+						{
+							label: '菌藻类',
+							value: '菌藻类',
+							checked: false
+						},
+						{
+							label: '坚果',
+							value: '坚果',
+							checked: false
+						},
+						{
+							label: '谷薯类',
+							value: '谷薯类',
+							checked: false
+						},
+						{
+							label: '蛋奶类',
+							value: '蛋奶类',
+							checked: false
+						},
+						{
+							label: '畜禽肉',
+							value: '畜禽肉',
+							checked: false
+						},
+						{
+							label: '水产品',
+							value: '水产品',
+							checked: false
+						},
+						{
+							label: '调味品',
+							value: '调味品',
+							checked: false
+						},
+						{
+							label: '饮品',
+							value: '饮品',
+							checked: false
+						},
+						{
+							label: '糕点类',
+							value: '糕点类',
+							checked: false
+						},
+						{
+							label: '其他',
+							value: '其他',
+							checked: false
+						}
+					]
+				},
+				{
+					label: '食物',
+					data: [
+						{
+							label: '全部',
+							value: '全部2',
+							checked: true
+						},
+						{
+							label: '公共饭菜',
+							value: '公共',
+							checked: false
+						},
+						{
+							label: '饭馆饭菜',
+							value: '饭馆',
+							checked: false
+						},
+						{
+							label: '我的饭菜',
+							value: '我的',
+							checked: false
+						}
+					]
+				}
+			],
 			isSeekValue: true, // 是否搜索到内容
 			chooseFoods: [],
 			value1: 1.0,
@@ -317,7 +400,7 @@ export default {
 			current: 0,
 			isLoad: false,
 			currIndex: '',
-			topNum: 450,
+			topNum: 280,
 			colData: [],
 			currFoodLabel: {},
 			listTouchStart: 0,
@@ -450,7 +533,6 @@ export default {
 						{
 							title: '谷薯类',
 							type: 'fltd_typess',
-
 							items: [
 								{
 									value: 1,
@@ -465,7 +547,6 @@ export default {
 						{
 							title: '蔬菜',
 							type: 'bxlxss',
-
 							items: [{ name: 'VA', value: 'value1' }]
 						}
 					]
@@ -712,94 +793,94 @@ export default {
 		this.searchArg = query;
 		if (query.type === 'food') {
 			let menuData = [
-				{
-					classify_name: '分类',
-					type: 'food',
-					children: [
-						{
-							title: '食材',
-							value: 'matter',
-							choose: true
-						},
-						{
-							title: '食物',
-							value: 'foods',
-							choose: false
-						}
-					]
-				},
-				{
-					classify_name: '子类',
-					type: 'subclass',
-					children: [
-						{
-							title: '全部',
-							value: '全部',
-							choose: true
-						},
-						{
-							title: '蔬菜',
-							value: '蔬菜',
-							choose: false
-						},
-						{
-							title: '水果干果',
-							value: '水果干果',
-							choose: false
-						},
+				// {
+				// 	classify_name: '分类',
+				// 	type: 'food',
+				// 	children: [
+				// 		{
+				// 			title: '食材',
+				// 			value: 'matter',
+				// 			choose: true
+				// 		},
+				// 		{
+				// 			title: '食物',
+				// 			value: 'foods',
+				// 			choose: false
+				// 		}
+				// 	]
+				// },
+				// {
+				// 	classify_name: '子类',
+				// 	type: 'subclass',
+				// 	children: [
+				// 		{
+				// 			title: '全部',
+				// 			value: '全部',
+				// 			choose: true
+				// 		},
+				// 		{
+				// 			title: '蔬菜',
+				// 			value: '蔬菜',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '水果干果',
+				// 			value: '水果干果',
+				// 			choose: false
+				// 		},
 
-						{
-							title: '菌藻类',
-							value: '菌藻类',
-							choose: false
-						},
-						{
-							title: '坚果',
-							value: '坚果',
-							choose: false
-						},
-						{
-							title: '谷薯类',
-							value: '谷薯类',
-							choose: false
-						},
-						{
-							title: '蛋奶类',
-							value: '蛋奶类',
-							choose: false
-						},
-						{
-							title: '畜禽肉',
-							value: '畜禽肉',
-							choose: false
-						},
-						{
-							title: '水产品',
-							value: '水产品',
-							choose: false
-						},
-						{
-							title: '调味品',
-							value: '调味品',
-							choose: false
-						},
-						{
-							title: '饮品',
-							value: '饮品',
-							choose: false
-						},
-						{
-							title: '糕点类',
-							value: '糕点类',
-							choose: false
-						},
-						{
-							title: '其他',
-							value: '其他',
-							choose: false
-						}
-					]
-				},
+				// 		{
+				// 			title: '菌藻类',
+				// 			value: '菌藻类',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '坚果',
+				// 			value: '坚果',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '谷薯类',
+				// 			value: '谷薯类',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '蛋奶类',
+				// 			value: '蛋奶类',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '畜禽肉',
+				// 			value: '畜禽肉',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '水产品',
+				// 			value: '水产品',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '调味品',
+				// 			value: '调味品',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '饮品',
+				// 			value: '饮品',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '糕点类',
+				// 			value: '糕点类',
+				// 			choose: false
+				// 		},
+				// 		{
+				// 			title: '其他',
+				// 			value: '其他',
+				// 			choose: false
+				// 		}
+				// 	]
+				// },
 				{
 					classify_name: '宏量成分',
 					type: 'capacity',
@@ -1019,13 +1100,13 @@ export default {
 			this.childChooseArrLength = newValue.length;
 			if (newValue.length > 0) {
 				if (this.pageType == 'food') {
-					this.topNum = 500;
+					this.topNum = 280;
 				} else if (this.pageType == 'sport') {
 					this.topNum = 240;
 				}
 			} else {
 				if (this.pageType == 'food') {
-					this.topNum = 430;
+					this.topNum = 280;
 				} else if (this.pageType == 'sport') {
 					this.topNum = 180;
 				}
@@ -1033,109 +1114,37 @@ export default {
 		}
 	},
 	methods: {
-		// changeChecked(item) {
-		// 	item.checked = !item.checked;
-		// 	this.$set(item, 'checked', item.checked);
-		// },
-		// calc(e, type, step = 1) {
-		// 	if (type === 'minus') {
-		// 		if (e.amount - step > 0) {
-		// 			e.amount = Number((e.amount - step).toFixed(1));
-		// 		} else {
-		// 			return;
-		// 		}
-		// 	} else {
-		// 		e.amount = Number((e.amount + step).toFixed(1));
-		// 	}
-		// 	this.$set(e, 'amount', e.amount);
-		// },
-		// async insertIntoDietRecord() {
-		// 	let url = this.getServiceUrl('health', 'srvhealth_diet_record_add', 'operate');
-		// 	let list = this.deepClone(this.checkedRecentDiet);
-		// 	let req = [
-		// 		{
-		// 			serviceName: 'srvhealth_diet_record_add',
-		// 			colNames: ['*'],
-		// 			data: list.map(item => {
-		// 				delete item._userno_disp;
-		// 				delete item.checked;
-		// 				delete item.amountEditable;
-		// 				item.hdate = this.selectDate;
-		// 				item.htime = this.nowDateTime;
-		// 				return item;
-		// 			})
-		// 		}
-		// 	];
-		// 	let res = await this.$http.post(url, req);
-		// 	if (res.data.state === 'SUCCESS') {
-		// 		uni.showToast({
-		// 			title: '添加成功'
-		// 		});
-		// 		this.modalName = '';
-		// 		this.getChooseFoodList();
-		// 		// 通知健康追踪页面，饮食记录已改变，需要刷新数据
-		// 		uni.$emit('dietUpdate');
-		// 	}
-		// },
-		// selectAll(e) {
-		// 	if (e) {
-		// 		this.recentDiet.forEach(item => {
-		// 			item.checked = true;
-		// 		});
-		// 	} else {
-		// 		this.recentDiet.forEach(item => {
-		// 			item.checked = !item.checked;
-		// 		});
-		// 	}
-		// },
-		// changeRecentDietMode() {
-		// 	if (this.recentDietMode === 'edit') {
-		// 		this.recentDietMode = 'view';
-		// 	} else {
-		// 		this.recentDietMode = 'edit';
-		// 	}
-		// },
-		// showRecent() {
-		// 	// 显示近期饮食弹窗。
-		// 	this.getRecentDiet().then(data => {
-		// 		if (Array.isArray(data) && data.length > 0) {
-		// 			this.modalName = 'recent';
-		// 		} else {
-		// 			uni.showToast({
-		// 				title: '未找到您的历史饮食记录',
-		// 				icon: 'none'
-		// 			});
-		// 		}
-		// 	});
-		// },
-		// async getRecentDiet() {
-		// 	// 查找最近的饮食记录
-		// 	let req = {
-		// 		serviceName: 'srvhealth_diet_contents_newest_select',
-		// 		colNames: ['*'],
-		// 		page: {
-		// 			pageNo: 1,
-		// 			rownumber: 5
-		// 		},
-		// 		condition: [
-		// 			{
-		// 				colName: 'person_info_no',
-		// 				ruleType: 'eq',
-		// 				// value: 'PB2020121720080116'
-		// 				value: this.vuex_userInfo.no
-		// 			}
-		// 		]
-		// 	};
-		// 	let res = await this.onRequest('select', 'srvhealth_diet_contents_newest_select', req, 'health');
-		// 	if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
-		// 		this.recentDiet = res.data.data.map(item => {
-		// 			item.checked = false;
-		// 			item.amountEditable = false;
-		// 			return item;
-		// 		});
-		// 		return res.data.data;
-		// 	}
-		// },
+		changeFilter(val, type) {
+			let cond = null;
+			if (type === '食材') {
+				this.searchArg.serviceName = 'srvhealth_diet_contents_select';
+				if (val !== '全部1') {
+					cond = {
+						colName: 'classify',
+						ruleType: 'eq',
+						value: val
+					};
+				}
+			} else if (type === '食物') {
+				if (val !== '全部2') {
+					cond = {
+						colName: 'owner',
+						ruleType: 'eq',
+						value: val
+					};
+				}
+				this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select';
+				if (val === '饭馆') {
+					uni.navigateTo({
+						url: '/otherPages/shopDietStore/shopDietStore'
+					});
+				}
+			}
+			this.condObj = cond;
+			this.classifyCond = cond;
+			this.getFoodsList(null, cond);
+			this.hideModal();
+		},
 		/*点击前往反馈页面**/
 		tofeedback() {
 			let no = null;
@@ -1268,9 +1277,6 @@ export default {
 		/* 顶部菜单点击**/
 		chooseMenu(parent, child) {
 			if (child.value === '饭馆') {
-				// uni.switchTab({
-				// 	url:'/pages/store/store'
-				// })
 				uni.navigateTo({
 					url: '/otherPages/shopDietStore/shopDietStore'
 				});
@@ -1278,11 +1284,6 @@ export default {
 				console.log(parent, child, 'parent,childparent,child');
 				this.pageInfo.pageNo = 1;
 				if (parent.type === 'subclass') {
-					// if(child.value !== '全部'){
-					// 	child.choose = !child.choose
-					// }else{
-					// 	child.choose = true
-					// }
 				} else if (child.value != '不限' && child.value != 'default') {
 					child.current_num += 1;
 					if (child.current_num == 5) {
@@ -1432,12 +1433,12 @@ export default {
 						];
 						this.searchArg.serviceName = 'srvhealth_diet_contents_select';
 					}
-					this.menuAgList = this.menuAgList.map(c => {
-						if (c.type === 'subclass') {
-							c.children = foodsArr;
-						}
-						return c;
-					});
+					// this.menuAgList = this.menuAgList.map(c => {
+					// 	if (c.type === 'subclass') {
+					// 		c.children = foodsArr;
+					// 	}
+					// 	return c;
+					// });
 					this.condObj = null;
 					this.classifyCond = null;
 					console.log('this.menuAgList-----', this.menuAgList);
@@ -1483,9 +1484,7 @@ export default {
 						this.childChooseArr.push(child);
 					}
 					let childChooseArr = this.childChooseArr;
-					// else if(child.current_num === 3){
-					// 	child.current_num = 0
-					// }
+
 					if (childChooseArr.length === 1) {
 						if (child.current_num === 3) {
 							childChooseArr.forEach((del, index) => {
@@ -1554,19 +1553,6 @@ export default {
 								});
 							}
 						}
-						// if(par.type == 'capacity'){
-						// 	par.children.forEach(alone=>{
-						// 		alone.choose = false
-						// 		alone.current_num = 0
-						// 		par.children[0].choose = true
-						// 		this.childChooseArr.forEach((c,i)=>{
-						// 			if(alone.value === c.value){
-						// 				this.childChooseArr.splice(i,1)
-						// 			}
-						// 		})
-						// 	})
-
-						// }
 					});
 
 					let condOrder = {
@@ -1613,7 +1599,7 @@ export default {
 										}
 									];
 								}
-								// cond.data.push(obj)
+
 								condOrder.data = [...condOrder.data, ...obj];
 							});
 						}
@@ -2064,6 +2050,9 @@ export default {
 			console.log('点击购物车');
 			this.showCarModal = true;
 		},
+		showModal(e) {
+			this.modalName = e;
+		},
 		confirms() {
 			this.$set(this.currFood, 'heatNum', this.heatNum);
 			this.$set(this.currFood, 'amount', this.choiceNum);
@@ -2232,12 +2221,12 @@ export default {
 			this.currFood.hdate = this.selectDate;
 			this.heatNum = this.currFood.unit_energy;
 			if (this.pageType === 'food') {
-				let curFood = this.deepClone(this.currFood)
+				let curFood = this.deepClone(this.currFood);
 				let food = encodeURIComponent(JSON.stringify(this.currFood));
 				if (!this.isShowMyList) {
-					let no =curFood.food_no?curFood.food_no:curFood.meal_no?curFood.meal_no:''
+					let no = curFood.food_no ? curFood.food_no : curFood.meal_no ? curFood.meal_no : '';
 					let url = `/archivesPages/DietDetail/DietDetail?chooseDate=${this.nowDate}`;
-					if(no){
+					if (no) {
 						url += `&no=${no}`;
 					}
 					if (this.planNo) {
@@ -2585,9 +2574,24 @@ export default {
 	border-bottom-left-radius: 20rpx;
 	border-bottom-right-radius: 20rpx;
 }
+.drawer-modal .cu-dialog {
+	width: 280px;
+	.filter-box {
+		width: 100%;
+		padding: 20rpx;
+		.filter-item-box {
+			margin-bottom: 20px;
+			.label {
+				text-align: left;
+				padding: 20rpx;
+				color: #777;
+			}
+		}
+	}
+}
 .bottom-modal {
 	.cu-dialog {
-		height: 100vh;
+		// height: 100vh;
 		.cu-bar {
 			padding: 0 50upx;
 		}

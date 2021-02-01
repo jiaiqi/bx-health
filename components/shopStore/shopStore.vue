@@ -1,20 +1,12 @@
 <template>
 	<view class="store-wrap" v-if="isLogin">
-		<view class="head-box">
-			<view class="navbar"></view>
-			<view class="container">
-				<view class="left"><!-- <view class="logo"><image src="/otherPages/static/img/logo96x96.png" mode="aspectFit"></image></view> --></view>
-				<view class="right" :style="'padding-right: ' + MPPR + 'px'">
-					<view class="address-box">
-						<i class="hxicon-locationfill"></i>
-						<i class="hxicon-right"></i>
-					</view>
-					<view class="notice"><i class="hxicon-notice"></i></view>
-				</view>
+		<view class="cu-bar justify-start bg-white">
+			<view class="action border-title margin-right" v-for="(item, index) in sortList" @click="tapTitItem(item, index)">
+				<text class="text-xl" :class="{ 'text-bold': sortIndex == index }">{{ item.tit }}</text>
+				<text class="bg-blue" style="width:1rem" v-if="sortIndex == index"></text>
 			</view>
 		</view>
-		<view class="search-box" :class="{ QZBG: GDHEAD }" :style="GDHEAD ? 'padding-right: ' + MPPR + 'px' : ''">
-			<!-- <view class="navbar" ></view> -->
+		<view class="search-box">
 			<view class="ctn">
 				<view class="hx-search-box">
 					<text class="cuIcon-search" style="color: #666;font-size: 22;"></text>
@@ -22,23 +14,32 @@
 				</view>
 			</view>
 		</view>
-		<view class="container margin-top sort-box">
-			<view class="item-box" v-for="(item, i) in sortList" :key="i">
-				<view @click="tapTitItem(item, i)" class="tit" :class="{ active: sortIndex == i }">
-					<text v-if="item.tit === '商户'">{{ item.tit }}</text>
-					<text v-if="item.tit === '我的店铺'">{{ item.tit }}</text>
+		<view class="filtrate-item-wrap">
+			<view class="filtrate-item">
+				<view style="display: flex;  flex-flow: wrap;">
+					<view @click="chooseMenu(cate)" v-for="(cate, index) in classify" :key="cate.label" :class="{ 'cate-active': currentType === cate.label }" class="filtrate-item-right">
+						<text>{{ cate.label }}</text>
+					</view>
 				</view>
 			</view>
 		</view>
-		<view class=" store-box" v-if="storeList && current_tit.type === 'shop'">
+		<view class="container margin-top sort-box">
+			<view class="item-box" v-for="(item, i) in sortList" :key="i">
+				<view @click="tapTitItem(item, i)" class="tit" :class="{ active: sortIndex == i }">
+					<text v-if="item.tit === '我的'">{{ item.tit }}</text>
+					<text v-if="item.tit === '发现'">{{ item.tit }}</text>
+				</view>
+			</view>
+		</view>
+		<view class="store-box" v-if="storeList && current_tit.type === 'find'">
 			<sPullScroll
 				ref="pullScroll"
-				:heightStyle="heightStyle"
+				heightStyle="calc(100vh-620upx)"
 				:pullDown="pullDown"
 				:pullUp="loadData"
 				:enablePullDown="true"
 				:enablePullUp="true"
-				:top="310"
+				:top="340"
 				:fixed="true"
 				:bottom="0"
 				finishText="我是有底线的..."
@@ -51,10 +52,9 @@
 						</view>
 						<view class="right">
 							<text class="tit">{{ store.name ? store.name : '' }}</text>
-							<view class="column store-r-b">
+							<view class="column store-r-b" v-if="store.type === '饭馆'">
 								<view class="store-r-b-t">
 									<text class="cuIcon-favorfill"></text>
-									<!-- <u-icon name="star-fill"></u-icon>	 -->
 									<text>{{ store.grade ? store.grade : 0 }}</text>
 								</view>
 								<view class="store-r-b-b">
@@ -70,16 +70,15 @@
 				</view>
 			</sPullScroll>
 		</view>
-
-		<view class=" store-box" v-else-if="current_tit.type === 'myShop'">
+		<view class=" store-box" v-else-if="current_tit.type === 'shop'">
 			<sPullScroll
 				ref="pullScroll"
-				:heightStyle="heightStyle"
+				heightStyle="calc(100vh-620upx)"
 				:pullDown="pullDown"
 				:pullUp="loadData"
 				:enablePullDown="true"
 				:enablePullUp="true"
-				:top="300"
+				:top="340"
 				:fixed="true"
 				:bottom="0"
 				finishText="我是有底线的..."
@@ -92,9 +91,8 @@
 						</view>
 						<view class="right">
 							<text class="tit">{{ store.name }}</text>
-							<view class="column store-r-b store-r-b-my">
+							<view class="column store-r-b store-r-b-my" v-if="store.type === '饭馆'">
 								<view class="store-r-b-t">
-									<!-- <u-icon name="star-fill"></u-icon>	 -->
 									<text class="cuIcon-favorfill"></text>
 									<text>{{ store.grade }}</text>
 								</view>
@@ -102,56 +100,63 @@
 									<text>月售{{ store.sale_num }}</text>
 								</view>
 							</view>
-							<view class="del-shop">
+							<view class="store-r-b-b">
+								<text>地址:</text>
+								<text>{{ store.address ? store.address : '暂无地址' }}</text>
+							</view>
+							<!-- 	<view class="del-shop">
 								<text @click.stop="del(store)">删除</text>
 								<text @click.stop="amend(store)">修改</text>
-							</view>
+							</view> -->
 						</view>
 					</view>
 				</view>
 			</sPullScroll>
 		</view>
-		<!-- </mescroll-body> -->
-		<!-- <view class="foot" v-if="showFoot">
-			<text>更多商家加入中，敬请期待</text>
-		</view -->
 		<view class="footzw"></view>
-		<view class="public-button-box">
-			<view @click="addShop" class="add-button">
-				<!-- <u-icon name="plus"></u-icon> -->
-				<text class="cuIcon-add"></text>
-				<!-- <text class="add-button-num"></text> -->
-			</view>
-		</view>
+		<!-- 		<view class="public-button-box">
+			<view @click="addShop" class="add-button"><text class="cuIcon-add"></text></view>
+		</view> -->
 	</view>
 </template>
 
 <script>
 //引入测试数据
+import { vuex } from 'vue';
 import sPullScroll from '@/components/s-pull-scroll';
 export default {
 	components: { sPullScroll },
 	data() {
 		return {
+			classify: [
+				{ label: '全部', value: '全部' },
+				{ label: '饭馆', value: '饭馆' },
+				{ label: '水果店', value: '水果店' },
+				{ label: '健身房', value: '健身房' },
+				{ label: '诊所', value: '诊所' },
+				{ label: '医院', value: '医院' },
+				{ label: '体检中心', value: '体检中心' },
+				{ label: '药店', value: '药店' },
+				{ label: '孕婴店', value: '孕婴店' },
+				{ label: '其他', value: '其他' }
+			],
+			currentType: '全部',
 			isLogin: false, //是否已经登录
-			MPPR: 0,
 			searchVal: '', //搜索内容
 			heightStyle: 'calc(100vh-620upx)',
-			GDHEAD: 0,
 			pageInfo: {
 				total: 0,
 				rownumber: 8,
 				pageNo: 1
 			},
 			//显示没有更多商户
-			showFoot: 0,
 			downOption: {
 				auto: false //是否在初始化后,自动执行downCallback; 默认true
 			},
 			sortIndex: 0,
-			sortList: [{ tit: '商户', type: 'shop' }, { tit: '我的店铺', type: 'myShop' }],
+			sortList: [{ tit: '我的', type: 'shop' }, { tit: '发现', type: 'find' }],
 			myStoreList: [], //当前登录人得商铺列表
-			current_tit: { tit: '商户', type: 'shop' }, //当前点击顶部分类
+			current_tit: { tit: '我的', type: 'shop' }, //当前点击顶部分类
 			storeList: [],
 			shopList: []
 		};
@@ -161,48 +166,20 @@ export default {
 		uni.$on('loginStatusChange', result => {
 			self.isLogin = result;
 		});
-		let userInfo = uni.getStorageSync('login_user_info');
-		if (!userInfo) {
-			// 未登录， 提示跳转
-			self.isLogin = false;
-			let res = await uni.showModal({
-				title: '提示',
-				content: '未登录,是否跳转到登录页面?',
-				confirmText: '去登录',
-				confirmColor: '#02D199'
-			});
-			if (Array.isArray(res) && res.length > 1) {
-				if (res[1].confirm) {
-					// 确认 跳转到登录页
-					uni.navigateTo({
-						url: '/publicPages/accountExec/accountExec'
-					});
-				} else if (res[1].cancel) {
-					// 取消 返回首页
-					uni.switchTab({
-						url: '/pages/pedia/pedia'
-					});
-				}
-			}
-		} else {
-			self.isLogin = true;
-			this.onRefresh();
-			this.getShopList();
-		}
+		self.isLogin = true;
+		this.onRefresh();
+		this.getShopList();
 	},
-	onLoad() {
-		// this.shopList = testData.storeList[0].goods;
-		// console.log('--------', this.shopList);
-	},
-	onShow() {
-		console.log('onshow', this.isLogin);
-		if (this.isLogin) {
-			this.getShopList();
-			this.onRefresh();
-			// this.getMyShopList()
-		}
-	},
+
 	methods: {
+		chooseMenu(e) {
+			if (e && e.label) {
+				this.currentType = e.label;
+			} else {
+				this.currentType = 'e.label';
+			}
+			this.onRefresh();
+		},
 		onRefresh() {
 			this.pageInfo.pageNo = 1;
 			this.$nextTick(() => {
@@ -223,26 +200,13 @@ export default {
 			let page = this.pageInfo;
 			this.pageInfo.pageNo = pullScroll.page;
 			console.log(pullScroll.page);
-			if (this.current_tit.type === 'shop') {
+			if (this.current_tit.type === 'find') {
 				this.getShopList();
-			} else if (this.current_tit.type === 'myShop') {
+			} else if (this.current_tit.type === 'shop') {
 				this.getMyShopList();
 			}
 		},
 		amend(item) {
-			// let cond = [
-			// 	{
-			// 		colName: 'id',
-			// 		ruleType: 'in',
-			// 		value: item.id
-			// 	}
-			// ];
-			// let params = {
-			// 	type: 'update',
-			// 	condition: cond,
-			// 	serviceName: 'srvhealth_restaurant_mgmt_select',
-			// 	defaultVal: item
-			// };
 			let fieldsCond = [
 				{
 					column: 'id',
@@ -296,17 +260,17 @@ export default {
 			}
 		},
 		goSearch() {
-			if (this.current_tit.type === 'shop') {
+			if (this.current_tit.type === 'find') {
 				this.getShopList('search', this.searchVal);
-			} else if (this.current_tit.type === 'myShop') {
+			} else if (this.current_tit.type === 'shop') {
 				this.getMyShopList('search', this.searchVal);
 			}
-			console.log('-=========>');
 		},
 		/* 点击顶部切换商铺和我得商铺列表**/
 		tapTitItem(item, i) {
 			this.current_tit = item;
 			this.sortIndex = i;
+			this.currentType = '全部';
 			this.onRefresh();
 			console.log('点击顶部切换===》', item);
 		},
@@ -314,8 +278,8 @@ export default {
 		toShopDetail(item) {
 			if (['诊所', '医院'].includes(item.type)) {
 				uni.navigateTo({
-					url:'/pediaPages/hospitalOverview/hospitalOverview?store_no='+item.store_no
-				})
+					url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + item.store_no
+				});
 			} else {
 				uni.navigateTo({
 					url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.store_no
@@ -330,11 +294,11 @@ export default {
 				serviceName: 'srvhealth_store_mgmt_select',
 				colNames: ['*'],
 				condition: [
-					{
-						colName: 'type',
-						ruleType: 'eq',
-						value: '饭馆'
-					}
+					// {
+					// 	colName: 'type',
+					// 	ruleType: 'eq',
+					// 	value: '饭馆'
+					// }
 				],
 				order: [],
 				page: self.pageInfo
@@ -348,6 +312,13 @@ export default {
 					}
 				];
 			}
+			if (this.currentType && this.currentType !== '全部') {
+				req.condition.push({
+					colName: 'type',
+					ruleType: 'eq',
+					value: this.currentType
+				});
+			}
 			let res = await this.$http.post(url, req);
 			if (res.data.resultCode === '0011') {
 				this.isLogin = false;
@@ -356,7 +327,6 @@ export default {
 					this.code = result.code;
 					await this.wxLogin({ code: result.code });
 					this.isLogin = true;
-					// await this.initPage();
 				}
 			} else {
 				if (self.pageInfo.pageNo === 1) {
@@ -396,11 +366,6 @@ export default {
 						ruleType: 'eq',
 						value: uni.getStorageSync('login_user_info').user_no
 					}
-					// {
-					// 	colName: 'type',
-					// 	ruleType: 'eq',
-					// 	value: '饭馆'
-					// }
 				],
 				order: [],
 				page: self.pageInfo
@@ -412,6 +377,13 @@ export default {
 					value: search_val
 				};
 				req.condition.push(obj);
+			}
+			if (this.currentType && this.currentType !== '全部') {
+				req.condition.push({
+					colName: 'type',
+					ruleType: 'eq',
+					value: this.currentType
+				});
 			}
 			let res = await this.$http.post(url, req);
 			if (self.pageInfo.pageNo === 1) {
@@ -426,7 +398,6 @@ export default {
 			} else {
 				self.$refs.pullScroll.success();
 			}
-
 			if (res.data.state === 'SUCCESS') {
 				console.log('我的商户列表-----', res.data.data);
 				res.data.data.forEach(item => {
@@ -454,6 +425,36 @@ export default {
 </script>
 
 <style lang="scss">
+.filtrate-item-wrap {
+	background-color: white;
+	.filtrate-item {
+		display: flex;
+		min-height: 100rpx;
+		align-items: center;
+		padding: 10rpx 20rpx;
+		.filtrate-item-right {
+			padding: 5rpx 20rpx;
+			background-color: #f1f1f1;
+			border-radius: 50rpx;
+			display: flex;
+			margin: 0 10rpx 10rpx 0;
+			justify-content: center;
+			border: 2rpx solid #f1f1f1;
+			transition: all 0.5s;
+			&:active {
+				transform: scale(1.2);
+			}
+		}
+		.cate-active {
+			border-color: #0bc99d;
+			color: #0bc99d;
+			background-color: rgba($color: #0bc99d, $alpha: 0.1);
+		}
+	}
+	.padding-filtrate-item {
+		padding: 30rpx 0;
+	}
+}
 .store-wrap {
 	height: 100%;
 }
@@ -487,65 +488,7 @@ page {
 .margin-top {
 	margin-top: 12px;
 }
-.head-box {
-	padding: 14px 0;
-	/* #ifdef MP */
-	padding-top: 2px;
-	/* #endif */
-	background: linear-gradient(100deg, #ffeb3b, #ffc107);
-	position: relative;
-	z-index: 3;
-	.navbar {
-		position: sticky;
-		top: 0;
-		// height: var(--status-bar-height);
-	}
 
-	.container {
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
-		height: 32px;
-		align-items: center;
-		.left {
-			.logo {
-				width: 32px;
-				height: 32px;
-				image {
-					width: 32px;
-					height: 32px;
-					border-radius: 50%;
-				}
-			}
-		}
-		.right {
-			display: flex;
-			flex-direction: column;
-			color: #333333;
-			justify-content: space-around;
-			.address-box {
-				font-size: 14px;
-				margin-right: 16px;
-				display: flex;
-				flex-direction: row;
-				align-items: center;
-				text {
-					margin-left: 2px;
-					margin-right: 4px;
-				}
-				.icon-right {
-					position: relative;
-					top: 2px;
-				}
-			}
-
-			.notice {
-				font-weight: bold;
-				font-size: 18px;
-			}
-		}
-	}
-}
 .store-r-b {
 	display: flex;
 	align-items: center;
@@ -562,24 +505,17 @@ page {
 		// margin-top: 10upx;
 	}
 }
-.store-r-b-my {
-	margin-top: 30upx;
-}
 .search-box {
 	position: sticky;
 	top: 0;
 	z-index: 2;
-	background: linear-gradient(100deg, #ffeb3b, #ffc107);
-	// padding-top: var(--status-bar-height);
-	// margin-top: calc(var(--status-bar-height) * -1);
+	background-color: #fff;
 	.ctn {
 		border-top-left-radius: 50upx;
 		border-top-right-radius: 50upx;
-		background: #f8f8f8;
-		padding: 15px 15px 12px;
-
+		padding: 5px 10px 10px;
 		.hx-search-box {
-			border-radius: 40px;
+			border-radius: 5px;
 			padding: 0 15px;
 			height: 34px;
 			display: flex;
@@ -595,96 +531,6 @@ page {
 				height: 68rpx;
 				width: 100%;
 			}
-		}
-	}
-}
-.QZBG {
-	background: #ffffff;
-	box-shadow: 0 1px 6px #ccc;
-	.navbar {
-		// height: var(--status-bar-height);
-	}
-	.ctn {
-		background: #ffffff;
-		/* #ifdef MP */
-		padding-top: 0px;
-		/* #endif */
-	}
-}
-.hot-box {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	justify-content: flex-start;
-	.item {
-		margin-right: 12px;
-		background-color: #eeeeee;
-		color: #666666;
-		font-size: 12px;
-		border-radius: 20px;
-		padding: 2px 6px;
-		margin-bottom: 8px;
-	}
-	.item:last-child {
-		margin-right: 0;
-	}
-}
-.bannerimg-box {
-	border-bottom-left-radius: 10upx;
-	border-bottom-right-radius: 10upx;
-	padding: 24rpx;
-	swiper {
-		height: 233rpx;
-		width: 699rpx;
-	}
-	.swiper-item {
-		display: flex;
-		justify-content: center;
-		align-content: center;
-		overflow: hidden;
-
-		width: 100%;
-		height: 100%;
-		image {
-			border-radius: 8px;
-			width: 100%;
-		}
-	}
-}
-
-.menu-box {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	margin-top: 12px;
-	border-radius: 8px;
-	background: #ffffff;
-	padding: 12px 8px;
-	.item-box {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		image {
-			width: 40px;
-			height: 40px;
-		}
-		.tit {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			font-size: 12px;
-			margin-top: 6px;
-			color: #333333;
-			padding: 2px 0;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
-		.active {
-			color: #ffffff;
-			background-color: #999999;
-			border-radius: 60px;
 		}
 	}
 }
@@ -705,14 +551,12 @@ page {
 			text-overflow: ellipsis;
 		}
 		.active {
-			//color: #111111;
 			font-weight: bold;
 		}
 	}
 }
 .store-box {
 	margin-top: 20px;
-
 	.item-box {
 		display: flex;
 		flex-direction: column;
@@ -779,7 +623,6 @@ page {
 			&-container {
 				margin: 12px 0 0;
 				padding-left: 82px;
-
 				white-space: nowrap;
 				.goods-box {
 					width: 80px;
@@ -854,34 +697,7 @@ page {
 		border-bottom: 0;
 	}
 }
-.foot {
-	position: relative;
-	display: flex;
-	justify-content: center;
-	margin-top: 36px;
-	margin-bottom: 50px;
-	text {
-		font-size: 14px;
-		position: relative;
-		z-index: 2;
-		height: 20px;
-		line-height: 20px;
-		background-color: #f8f8f8;
-		color: #cccccc;
-		padding: 0 12px;
-	}
-}
-.foot::before {
-	content: '';
-	z-index: 1;
-	display: block;
-	position: absolute;
-	top: 50%;
-	height: 0;
-	width: 100%;
-	transform: scaleY(0.5);
-	border-bottom: 1px solid #e4e7ed;
-}
+
 .footzw {
 	/* #ifdef H5*/
 	height: 50px;
@@ -889,13 +705,13 @@ page {
 }
 .add-button {
 	position: fixed;
-	bottom: 20upx;
+	bottom: calc(20px + var(--window-bottom));
 	left: calc(50% - 50upx);
 	width: 100upx;
 	height: 100upx;
 	border-radius: 50%;
 	background-color: rgb(246, 210, 0);
-	z-index: 100;
+	z-index: 10;
 	display: flex;
 	justify-content: center;
 	align-items: center;

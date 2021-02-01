@@ -36,7 +36,7 @@ let ignoreServiceName = (url) => {
 		// "srvhealth_body_activity_record_select",
 		// "srvhealth_sleep_record_select",
 		// "srvhealth_person_relation_select",
-		// "srvhealth_consultation_chat_record_select",
+		"srvhealth_consultation_chat_record_select"
 		// "srvwx_app_user_select" //检测是否关注公众号
 	]
 	let result = true

@@ -818,8 +818,8 @@ export default {
 			}
 			.message-tag {
 				position: absolute;
-				right: 50rpx;
-				top: 10rpx;
+				right: 10rpx;
+				top: -5px;
 				background: red;
 				color: white;
 				border-radius: 50rpx;

@@ -782,7 +782,7 @@
 	}
 	.bottom-modal {
 		.cu-dialog {
-			height: 100vh;
+			// height: 100vh;
 			.cu-bar {
 				padding: 0 50upx;
 			}

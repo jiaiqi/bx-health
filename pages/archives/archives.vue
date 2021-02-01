@@ -1691,11 +1691,19 @@ export default {
 			align-items: center;
 			font-weight: bold;
 			&.grid-layout {
-				display: grid;
-				grid-template-columns: repeat(3, calc(33.33% - 20rpx));
-				grid-row-gap: 20rpx;
-				grid-column-gap: 20rpx;
+				display: flex;
+				flex-wrap: wrap;
+				// display: grid;
+				// grid-template-columns: repeat(3, calc(33.33% - 20rpx));
+				// grid-row-gap: 20rpx;
+				// grid-column-gap: 20rpx;
 				.grid-item {
+					width: calc(33% - 20rpx/3);
+					margin-bottom: 10rpx;
+					margin-right: 10rpx;
+					&:nth-child(3n){
+						margin-right: 0;
+					}
 					display: flex;
 					// justify-content: center;
 					height: 150rpx;

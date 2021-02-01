@@ -33,9 +33,7 @@
 			<!-- detail-详情-end -->
 			<!-- form-item-start -->
 			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value" v-else-if="fieldData.type === 'radio'" @change="radioChange">
-				<bx-radio class="radio" color="#2979ff" v-for="item in fieldData.options" :disabled="fieldData.disabled ? fieldData.disabled : false" :key="item" :name="item">
-					{{ item }}
-				</bx-radio>
+				<bx-radio class="radio" color="#2979ff" v-for="item in fieldData.options" :disabled="fieldData.disabled ? fieldData.disabled : false" :name="item">{{ item }}</bx-radio>
 			</bx-radio-group>
 			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value" v-else-if="fieldData.type === 'radioFk'" @change="radioChange">
 				<bx-radio
@@ -44,7 +42,6 @@
 					color="#2979ff"
 					v-for="item in fieldData.options"
 					:disabled="fieldData.disabled ? fieldData.disabled : false"
-					:key="item.id"
 					:name="item.value"
 					:serial-char="item.serialChar"
 				>
@@ -64,12 +61,12 @@
 				v-else-if="fieldData.type === 'checkboxFk'"
 				:disabled="fieldData.disabled ? fieldData.disabled : false"
 			>
-				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options" :key="item.value" :name="item.label">{{ item.label }}</bx-checkbox>
+				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options" :name="item.label">{{ item.label }}</bx-checkbox>
 			</bx-checkbox-group>
 			<view class="form-item-content_value" v-else-if="popupFieldTypeList.includes(fieldData.type)">
 				<view v-if="(setOptionList.length < 15 && fieldData.type === 'Set') || (selectorData.length < 5 && fieldData.type === 'Selector')">
 					<bx-checkbox-group v-if="fieldData.type === 'Set'" class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
-						<bx-checkbox v-for="item in setOptionList" :key="item.label" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
+						<bx-checkbox v-for="item in setOptionList" :name="item.value" v-model="item.checked">{{ item.label }}</bx-checkbox>
 					</bx-checkbox-group>
 					<bx-radio-group v-if="fieldData.type === 'Selector'" class="form-item-content_value radio-group" v-model="fieldData.value" mode="button" @change="pickerChange">
 						<bx-radio v-for="item in selectorData" :name="item.value">{{ item.label }}</bx-radio>

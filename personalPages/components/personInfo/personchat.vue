@@ -4,17 +4,12 @@
 		:style="{
 			'--chart-height': chartHeight,
 			'--global-text-font-size': globalTextFontSize + 'px',
-			'--global-label-font-size': globalLabelFontSize + 'px',
-			height: chartHeight, 'padding-bottom': '10px'
+			'--global-label-font-size': globalLabelFontSize + 'px'
 		}"
 	>
-		<view
-			class="person-chat-top"
-			@click.stop="closeBottomPoup"
-			:class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'"
-		>
+		<view class="person-chat-top" @click.stop="closeBottomPoup" :class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
 			<audio v-if="currentChat.id" class="audio" @ended="playEnd" :action="audioAction" id="myMp3" style="height: 0;opacity: 0;" :src="currentChat.voice_url" controls />
-			<scroll-view @scroll="chatScroll" scroll-y="true" :scroll-into-view="chatTextBottom">
+			<scroll-view @scrolltoupper="loadData" @scroll="chatScroll" :scroll-y="true" :scroll-top="scrollTop" :scroll-into-view="chatTextBottom" :scroll-with-animation="scrollAnimation">
 				<view
 					:id="`person-chat-item${item.id}`"
 					v-for="(item, index) in recordList"
@@ -193,8 +188,6 @@
 				<view class="person-chat-left">
 					<text class="image-icon cuIcon-sound" @click="changeVoice('keyword')" v-if="currentVoiceType === 'voice'"></text>
 					<text class="image-icon cuIcon-keyboard" @click="changeVoice('voice')" v-if="currentVoiceType === 'keyword'"></text>
-					<!-- <image class="image-icon" @click="changeVoice('keyword')" v-if="currentVoiceType === 'voice'" src="../../static/voice.png" mode=""></image> -->
-					<!-- <image class="image-icon" @click="changeVoice('voice')" v-if="currentVoiceType === 'keyword'" src="../../static/keyboard.png" mode=""></image> -->
 					<text
 						v-if="currentVoiceType === 'keyword'"
 						class="voice_title"
@@ -295,7 +288,8 @@ export default {
 	computed: {
 		...mapState({
 			globalTextFontSize: state => state.app['globalTextFontSize'],
-			globalLabelFontSize: state => state.app.globalLabelFontSize
+			globalLabelFontSize: state => state.app.globalLabelFontSize,
+			currentUserInfo: state => state.user.userInfo
 		}),
 		chartHeight() {
 			if (this.topHeight) {
@@ -344,7 +338,8 @@ export default {
 			userInfo: '',
 			recordList: [],
 			chatTextBottom: '',
-			currentUserInfo: uni.getStorageSync('current_user_info'),
+			scrollAnimation: false,
+			scrollTop: 0,
 			recodeList: [],
 			recodeOnloadList: [],
 			chooseRecod: '', //链接
@@ -363,7 +358,8 @@ export default {
 			AudioExam: null, //正在播放音频的实例
 			isLoading: false,
 			isAll: false,
-			currentChat: {}
+			currentChat: {},
+			updateMessageTimer: null
 		};
 	},
 
@@ -457,11 +453,6 @@ export default {
 		},
 		//播放音频
 		playAudio(item) {
-			// this.Audio.src = item.msg_link;
-			console.log('------', item);
-			// this.Audio.src = item.msg_link;
-			// this.Audio.src = "https://srvms.100xsys.cn/file/download?filePath=/20201202/20201202175639960100/20201202175639960101.mp3"
-			// this.Audio.src = item.voice_url;
 			this.Audio.id = item.id;
 			//音频播放结束事件
 			console.log('this.Audio------->', this.Audio);
@@ -611,22 +602,25 @@ export default {
 		},
 		/*滚动**/
 		chatScroll(e) {
-			this.scrollNum = e.detail.scrollTop;
-			if (e.detail.scrollTop < 50 && e.detail.scrollTop != 0 && !this.isLoading && !this.isAll) {
-				this.isLoading = true;
-				this.pageInfo.pageNo += 1;
-				this.getMessageInfo().then(_ => {
-					this.isLoading = false;
-				});
-			}
+			// this.scrollNum = e.detail.scrollTop;
+			// if (e.detail.scrollTop < 50 && e.detail.scrollTop != 0 && !this.isLoading && !this.isAll) {
+			// 	this.isLoading = true;
+			// 	this.pageInfo.pageNo += 1;
+			// 	this.getMessageInfo().then(_ => {
+			// 		this.isLoading = false;
+			// 	});
+			// }
+		},
+		loadData(){
+			debugger
+			this.isLoading = true;
+			this.pageInfo.pageNo += 1;
+			this.getMessageInfo().then(_ => {
+				this.isLoading = false;
+			});
 		},
 		closeAnmition() {
 			const hasBeenSentId = this.Audio.id;
-			// this.recodeList.forEach(it=>{
-			// 	if(it.id === hasBeenSentId){
-			// 		it.anmitionPlay = false;
-			// 	}
-			// })
 			const item = this.recordList.find(it => it.id == hasBeenSentId);
 			console.log('-----------动画', item);
 			item.anmitionPlay = false;
@@ -1198,6 +1192,7 @@ export default {
 		},
 		/*查询当前登陆人和其他人聊天记录**/
 		async getMessageInfo(type = null) {
+			this.scrollAnimation = false; //关闭滑动动画
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
@@ -1310,14 +1305,11 @@ export default {
 				console.log('page为0');
 				// this.recordList = [];
 			}
-			console.log('resData----->', resData);
 			if (resData.length > 0) {
 				resData.forEach((item, i) => {
 					if (item.msg_content_type === '语音') {
 						this.$set(resData[i], 'anmitionPlay', false);
-						// item.msg_link = '20201202175639960100'
 						this.getFilePath(item.msg_link).then(obj => {
-							console.log('语音内容-----', obj, item.msg_link);
 							if (obj) {
 								let video_url = this.$api.getFilePath + obj[0].fileurl;
 								this.$set(item, 'voice_url', video_url);
@@ -1345,7 +1337,6 @@ export default {
 						});
 					}
 					if (item.msg_content_type === '视频' && item.video) {
-						// this.getFilePath(item.attachment).
 						let video_url = this.$api.downloadFile + item.video + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 						this.$set(resData[i], 'video_url', video_url);
 					}
@@ -1370,7 +1361,6 @@ export default {
 				this.$nextTick(() => {
 					if (!this.isAll) {
 						_SortJsonData = this._SortJson(resData);
-						// this.recordList.unshift(..._SortJsonData);
 						this.recordList = _SortJsonData;
 						console.log('排序============', _SortJsonData);
 					}
@@ -1382,19 +1372,22 @@ export default {
 						this.isAll = true;
 					}
 				});
-
 				this.$nextTick(() => {
-					console.log('滚动条位置');
 					if (this.recordList.length > 0 && Array.isArray(_SortJsonData) && _SortJsonData.length > 0) {
-						this.chatTextBottom = 'person-chat-item' + _SortJsonData[_SortJsonData.length - 1].id;
+					this.chatTextBottom = 'person-chat-item' + _SortJsonData[_SortJsonData.length - 1].id;
 					}
+					this.$nextTick(function() {
+						this.scrollAnimation = true; //恢复滚动动画
+					});
 				});
-				// this.getUserInfoList()
 				if (type && type === 'onLoad') {
-					if (this.recordList.length > 0) {
-						this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
-					}
-
+					this.$nextTick(function() {
+						//进入页面滚动到底部
+						this.scrollTop = 99999;
+						this.$nextTick(function() {
+							this.scrollAnimation = true;
+						});
+					});
 					this.updateMessageInfo();
 				}
 			}
@@ -1456,15 +1449,22 @@ export default {
 
 				uni.setStorageSync('current_patient', this.userInfo);
 				this.getMessageInfo('onLoad');
+				clearInterval(this.updateMessageTimer);
+				this.updateMessageTimer = setInterval(() => {
+					this.getMessageInfo('update');
+				}, 6 * 1000);
 				return res.data.data[0];
 			} else {
 				uni.setStorageSync('current_patient', '');
 				uni.showToast({
-					title: '未找到患者信息',
+					title: '未找到用户信息',
 					icon: 'none'
 				});
 			}
 		}
+	},
+	beforeDestroy() {
+		clearInterval(this.updateMessageTimer);
 	},
 	mounted() {
 		this.Recorder = uni.getRecorderManager();
@@ -1481,10 +1481,7 @@ export default {
 		this.Audio.onStop(e => {
 			this.closeAnmition();
 		});
-		if (this.customer_no) {
-			this.getRecorderManagerList();
-		}
-		if (this.groupInfo && this.groupInfo.gc_no) {
+		if (this.customer_no || (this.groupInfo && this.groupInfo.gc_no)) {
 			this.getRecorderManagerList();
 		}
 		setTimeout(() => {
@@ -1521,9 +1518,6 @@ export default {
 			console.log('----------语音播放结束----');
 			this.closeAnmition();
 		});
-		if (option.no) {
-			// this.getUserInfo(option.no);
-		}
 	}
 };
 </script>
@@ -1533,6 +1527,8 @@ export default {
 	background-color: #eeeeee;
 	overflow: hidden;
 	width: 100%;
+	height: var(--chart-height);
+	padding-bottom: 10px;
 	.nav-chat-top {
 		background-color: rgb(11, 201, 157) !important;
 		color: white;

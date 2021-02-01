@@ -335,7 +335,7 @@
 					</view>
 					<view class="content">
 						<view class="diet-item" v-for="(item, index) in recentDiet" :key="index" :class="{ checked: item.checked }">
-							<image :src="getImagePath(item.image)" mode="scaleToFill" class="image" @click="changeChecked(item)"></image>
+							<image :src="getImagePath(item.image)" mode="aspectFill" class="image" @click="changeChecked(item)"></image>
 							<view class="info">
 								<view class="checkbox" @click="changeChecked(item)" v-if="recentDietMode === 'edit'"><text class="cuIcon-check text-bold" v-if="item.checked"></text></view>
 								<view class="food-name" @click="changeChecked(item)">{{ item.name }}</view>
@@ -345,9 +345,9 @@
 										<text type="number" class="input">{{ item.amount }}</text>
 										<text class="separator" @click.stop="calc(item, 'add')">+</text>
 									</view>
-									<text class="text-left margin-left-xs text-gray" style="font-weight: normal;" @click="changeChecked(item)">
+								<!-- 	<text class="text-left margin-left-xs text-gray" style="font-weight: normal;" @click="changeChecked(item)">
 										{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}
-									</text>
+									</text> -->
 								</view>
 							</view>
 						</view>
@@ -2932,6 +2932,7 @@ export default {
 							justify-content: center;
 							align-items: center;
 							box-shadow: 6px 2px 30px #d1d9e6, inset -20px -18px 30px 0px #fff;
+							position: relative;
 							.add-icon {
 								font-size: 80rpx;
 								font-weight: bold;
@@ -3973,15 +3974,16 @@ uni-checkbox::before {
 	.diet-item {
 		display: flex;
 		flex-direction: column;
-		width: calc(50% - 15rpx);
-		margin-right: 20rpx;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		width: calc(25% - 15px/4);
+		// box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		text-align: center;
 		border-radius: 10rpx;
 		overflow: hidden;
-		margin-bottom: 10rpx;
-		border: 5rpx solid #fff;
+		margin-bottom: 5px;
+		margin-right: 5px;
+		border: 5rpx solid #f1f1f1;
 		transition: all 0.5s ease-out;
+		position: relative;
 		&.checked {
 			border-color: #0bc99d;
 			color: #0bc99d;
@@ -3995,11 +3997,11 @@ uni-checkbox::before {
 			flex-direction: column;
 			justify-content: space-between;
 			flex: 1;
-			position: relative;
+			// position: relative;
 		}
 		.checkbox {
 			position: absolute;
-			bottom: 5rpx;
+			top: 5rpx;
 			right: 5rpx;
 			background-color: #fff;
 			border: 2rpx solid #dcdfe6;
@@ -4008,22 +4010,21 @@ uni-checkbox::before {
 			width: 40rpx;
 			height: 40rpx;
 		}
-		&:nth-child(2n) {
+		&:nth-child(4n) {
 			margin-right: 0;
 		}
 		.image {
 			// width: 160rpx;
 			width: 100%;
-			height: 180rpx;
+			height: 120rpx;
 			background-color: #fff;
 		}
 		.food-name {
-			font-weight: bold;
 			text-align: left;
-			text-indent: 20rpx;
+			text-indent: 5px;
 			white-space: nowrap;
 			flex: 1;
-			font-size: 32rpx;
+			font-size: 28rpx;
 		}
 		.food-info {
 			display: flex;
