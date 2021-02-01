@@ -367,7 +367,7 @@
 import bxDateStamp from '@/archivesPages/components/bx-date-stamp/bx-date-stamp.vue';
 import xflSelect from '@/archivesPages/components/xfl-select/xfl-select.vue';
 import uniEcharts from '@/components/uni-ec-canvas/uni-echart.vue';
-import {mapState} from 'vuex'
+import { mapState } from 'vuex';
 let self;
 export default {
 	components: {
@@ -788,7 +788,7 @@ export default {
 	},
 	computed: {
 		...mapState({
-			userInfo:state=>state.user.userInfo
+			userInfo: state => state.user.userInfo
 		}),
 		bx_auth_ticket() {
 			return uni.getStorageSync('bx_auth_ticket');

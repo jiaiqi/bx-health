@@ -41,9 +41,7 @@
 			this.getSicknessFilt()
 		},
 		methods:{
-			
 			chooseFood(e){
-				// console.log("点击食物---",e)
 				this.$store.commit('SET_SICK_ITEM',e)
 				// uni.navigateTo({
 				// 	url:'/pregnancy/sickness/sicknessDetail?sick=' + encodeURIComponent(JSON.stringify(e))

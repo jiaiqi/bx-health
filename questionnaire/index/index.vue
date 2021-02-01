@@ -10,10 +10,10 @@
 		<view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
 			<view class="desc" style="text-align: justify;">
 				<view class="text-content-text text-black"><view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></view></view>
-				<view class="date-box">
+			<!-- 	<view class="date-box">
 					<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
 					<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
-				</view>
+				</view> -->
 			</view>
 		</view>
 		<view class="content form-wrap" style="box-sizing: border-box;">
@@ -286,6 +286,7 @@ export default {
 												title: '提交成功',
 												icon: 'none'
 											});
+											
 											self.formType = 'detail';
 											self.getQuestionnaireData(self.formData);
 											if (Array.isArray(res.data.response) && res.data.response.length > 0 && res.data.response[0].response && res.data.response[0].response.fill_batch_no) {
@@ -308,6 +309,17 @@ export default {
 												uni.redirectTo({
 													url: '/pages/specific/health/home/home?result=' + JSON.stringify(data)
 												});
+											}else{
+												uni.showModal({
+													title:'提示',
+													content:'您的测评信息已提交，我们将会由专业人员为您评估！',
+													showCancel:false,
+													success(res) {
+														if(res.confirm){
+															uni.navigateBack()
+														}
+													}
+												})
 											}
 										}
 									} else {

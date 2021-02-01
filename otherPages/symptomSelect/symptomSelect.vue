@@ -198,6 +198,9 @@ export default {
 		getCascaderValue(e){
 			console.log("e------",e)
 			this.showTreeSelector = false;
+			if(!e){
+				return
+			}
 			e.is_checked = true
 			let chooseArr = this.chooseArr
 			if(chooseArr.length == 0){

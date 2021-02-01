@@ -681,7 +681,8 @@ export default {
 			width: 100%;
 			overflow: hidden;
 			font-size: var(--global-text-font-size);
-			line-height: 1.5;
+			line-height: 1.7;
+			font-size: 16px;
 		}
 		.link-box {
 			margin-top: 20rpx;
