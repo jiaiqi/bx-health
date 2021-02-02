@@ -1,12 +1,5 @@
 <template>
-	<view>
-		<image
-			mode="scaleToFill"
-			class="image-lazy-view no-load"
-			ref="vref"
-			:src="item[imgColName]"
-		></image>
-	</view>
+	<view><image mode="scaleToFill" class="image-lazy-view no-load" ref="vref" :src="item[imgColName]"></image></view>
 </template>
 <script>
 export default {
@@ -88,36 +81,17 @@ export default {
 						let lazyImage = item.target;
 						let imgUrl = item.target.dataset.src;
 						if (item.isIntersecting) {
-							// item.target.childNodes[0].style.backgroundImage =  "url("+ item.target.dataset.src +")"
 							if (imgUrl) {
 								item.target.classList.remove('no-load');
 								item.target.src = imgUrl;
 								item.target.childNodes[0].style.backgroundImage = 'url(' + imgUrl + ')';
 								item.target.childNodes[1].src = imgUrl;
 							}
-
-							// observer.unobserve(lazyImage)
 						} else {
 						}
 					});
 				});
 				observer.observe(child._vnode.elm);
-
-				// let lazyImageObserver = new IntersectionObserver((entries, observer) => {
-				//     entries.forEach((entry, index) => {
-				//         // 如果元素可见
-				// 	 console.log("lazyImage",entry)
-				//         if (entry.intersectionRatio > 0) {
-				//             let lazyImage = entry.target
-				// 		console.log("lazyImage",lazyImage)
-				//             lazyImage.src = lazyImage.dataset.src
-				//             lazyImage.classList.remove("no-load")
-				//             lazyImageObserver.unobserve(lazyImage)
-				//             // this.lazyImages.splice(index, 1)
-				//         }
-				//     })
-				// })
-				// lazyImageObserver.observe(lazyImage);
 			} else {
 				self.inViewShow();
 				self._throttleFn = self.throttle(self.inViewShow);
@@ -135,7 +109,7 @@ export default {
 	}
 };
 </script>
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .image-lazy-view {
 	height: 100%;
 	width: 100% !important;

@@ -30,8 +30,7 @@
 			}
 		}
 	],
-	"subPackages": [
-		{
+	"subPackages": [{
 			// 问卷
 			"root": "questionnaire",
 			"pages": [{
@@ -453,7 +452,12 @@
 					"path": "shop/shopDetail",
 					"style": {}
 				},
-
+				{
+					"path": "shop/shopCarList",
+					"style": {
+						"navigationBarTitleText":"购物车"
+					}
+				},
 				{
 					"path": "shop/foodMaterial",
 					"style": {}
@@ -470,7 +474,16 @@
 					"path": "chooseFood/myFoodsInfo",
 					"style": {}
 				}
-			]
+			    ,{
+                    "path" : "payOrder/payOrder",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			// 健康百科中的页面
@@ -638,7 +651,7 @@
 			{
 				"name": "邀请新用户加入诊所",
 				"path": "pediaPages/hospitalOverview/hospitalOverview",
-				"query":"store_no=ST202101191842170001&from=share&invite_user_no=jiaqi&&doctor_no=jiaqi&share_type=bindOrganization"
+				"query": "store_no=ST202101191842170001&from=share&invite_user_no=jiaqi&&doctor_no=jiaqi&share_type=bindOrganization"
 			}
 		]
 	}

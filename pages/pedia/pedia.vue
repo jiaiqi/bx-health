@@ -71,6 +71,7 @@
 			</view>
 		</view>
 		<button class="contact-button" @click="toFeedBack"><text class="cuIcon-servicefill text-blue icon"></text></button>
+		<!-- <button class="cu-btn bg-blue" @click="toPay" v-if="loginUserInfo && loginUserInfo.user_type === '内部用户'">支付测试</button> -->
 		<!-- <button class="contact-button" open-type="contact"><text class="cuIcon-servicefill text-blue icon"></text></button> -->
 		<view class="cu-modal" :class="modalName === 'feedback' ? 'show' : ''">
 			<view class="cu-dialog">
@@ -161,20 +162,21 @@ export default {
 			}
 		},
 		async toPay() {
-			this.getPayParams().then(res => {
-				wx.requestPayment({
-					timeStamp: res.timeStamp.toString(),
-					nonceStr: res.nonceStr,
-					package: res.package,
-					signType: 'MD5',
-					paySign: res.paySign,
-					success(res) {
-						debugger;
-					},
-					fail(res) {
-						debugger;
-					}
-				});
+			let result = await this.toPlaceOrder(1, this.login_user_type && this.login_user_type.login_user_type ? this.login_user_type.login_user_type : '');
+			let res = await this.getPayParams(result.prepay_id);
+			wx.requestPayment({
+				timeStamp: res.timeStamp.toString(),
+				nonceStr: res.nonceStr,
+				package: res.package,
+				signType: 'MD5',
+				paySign: res.paySign,
+				success(res) {
+					debugger;
+					// 支付成功
+				},
+				fail(res) {
+					debugger;
+				}
 			});
 		},
 		hideModal() {
@@ -421,20 +423,20 @@ export default {
 	},
 	created() {
 		this.toAddPage().then(res => {
-			if(res){
+			if (res) {
 				this.getPageItem();
 			}
 		});
 	},
 	onShow(option) {
 		// #ifdef MP-WEIXIN
-		if (!this.authUserInfo||typeof this.authUserInfo ==='object') {
-			debugger
-			this.$store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
-			let pageStack = getCurrentPages()
+		if (!this.authUserInfo || typeof this.authUserInfo === 'object') {
+			debugger;
+			this.$store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec');
+			let pageStack = getCurrentPages();
 			if (Array.isArray(pageStack) && pageStack.length >= 1) {
-				let currentPage = pageStack[pageStack.length - 1]
-				this.$store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
+				let currentPage = pageStack[pageStack.length - 1];
+				this.$store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath);
 			}
 			uni.reLaunch({
 				url: '/publicPages/accountExec/accountExec'

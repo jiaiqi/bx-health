@@ -40,7 +40,7 @@ export default {
 				return false
 			}
 		}
-		Vue.prototype.getPayParams = async () => {
+		Vue.prototype.getPayParams = async (prepay_id) => {
 			// 获取微信支付需要的参数（签名等）
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_app_pay_sign_select', 'select');
 			let req = {
@@ -51,12 +51,17 @@ export default {
 				"condition": [{
 						"colName": "app_no",
 						"ruleType": "eq",
-						"value": api.appNo.wxmp
+						"value": 'APPNO20201124160702'
 					},
 					{
 						"colName": "wx_mch_id",
 						"ruleType": "eq",
 						"value": "1485038452"
+					},
+					{
+						"colName": "prepay_id",
+						"ruleType": "eq",
+						"value": prepay_id
 					}
 				]
 			}
@@ -69,22 +74,22 @@ export default {
 			}
 		}
 
-		Vue.prototype.toPlaceOrder = async () => {
+		Vue.prototype.toPlaceOrder = async (total_fee, login_user_type,orderData) => {
 			// 下单
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_order', 'operate');
 			let req = [{
 				"serviceName": "srvwx_order",
 				"data": [{
-					"app_no": api.appNo.wxmp,
+					"app_no": 'APPNO20201124160702',
 					"wx_mch_id": "1485038452",
-					"out_trade_no": "20210115163311",
-					"total_fee": 1,
+					"out_trade_no":orderData?orderData.order_no:new Date().getTime(),
+					"total_fee": total_fee, // 单位是分
 					"spbill_create_ip": "192.168.0.21",
-					"notify_url": "http://wx2.100xsys.cn/notifytest",
+					"notify_url": "http://wx2.100xsys.cn/wx/notify/payment",
+					// "notify_url": "http://wx2.100xsys.cn/notifytest",
 					"body": "test producet",
 					"user_no": "jiaqi",
-					"login_user_type": "内部用户"
-
+					"login_user_type": login_user_type ? login_user_type : "user"
 				}]
 			}]
 			let res = await _http.post(url, req)
@@ -93,7 +98,7 @@ export default {
 					let info = res.data.response[0]
 					if (info.response) {
 						info = info.response
-						store.commit('SET_PREPAY_INFO'.info)
+						store.commit('SET_PREPAY_INFO', info)
 						return info
 					}
 				}

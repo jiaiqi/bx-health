@@ -16,26 +16,40 @@
 								confirm-type="search"
 							/>
 						</view>
-						<view class="action">
-							<!-- <text style="margin-right: 20rpx;" @click="search">搜索</text> -->
-							<!-- <text @click="showRecent" v-if="!this.pageDetType">历史</text> -->
+						<!-- 		<view class="action">
+							<text class="margin-right" @click="showModal('sort')" :class="{ 'text-cyan text-bold': filterVal && filterVal.indexOf('全部') === -1 }">
+								<text>排序</text>
+								<text class="cuIcon-sort"></text>
+								<text v-if="filterVal && filterVal.indexOf('全部') === -1" style="font-size: 12px;">({{filterVal}})</text>
+							</text>
 							<text @click="showModal('filter')" :class="{ 'text-cyan text-bold': filterVal && filterVal.indexOf('全部') === -1 }">
 								<text>筛选</text>
 								<text class="cuIcon-filter"></text>
 								<text v-if="filterVal && filterVal.indexOf('全部') === -1" style="font-size: 12px;">({{filterVal}})</text>
 							</text>
-						</view>
+						</view> -->
 					</view>
 				</view>
 			</view>
 		</view>
-		<view class="filtrate-wrap">
+		<view class="handler-action">
+			<text class="margin-right" @click="showModal('sort')" :class="{ 'text-cyan text-bold': childChooseArr.length > 0 }">
+				<text>排序</text>
+				<text class="cuIcon-order"></text>
+				<text v-if="childChooseArr.length === 1" style="font-size: 12px;">({{ childChooseArr[0].title }})</text>
+			</text>
+			<text @click="showModal('filter')" :class="{ 'text-cyan text-bold': filterVal && filterVal.indexOf('全部') === -1 }">
+				<text>筛选</text>
+				<text class="cuIcon-filter"></text>
+				<text v-if="filterVal && filterVal.indexOf('全部') === -1" style="font-size: 12px;">({{ filterVal }})</text>
+			</text>
+		</view>
+		<!-- 	<view class="filtrate-wrap">
 			<view v-if="childChooseArr.length > 0" class="filtrate-choose">
 				<text>已选择：</text>
 				<view @click="tagClick(item)" v-for="(item, index) in childChooseArr" :key="index" class="filtrate-choose-item">
 					<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning" mode="light">{{ item.title }}</text>
 					<text class="lg text-gray cuIcon-close filtrate-close"></text>
-					<!-- <u-tag :text="item.title" closeable :show="item.choose" type="warning" @close="tagClick(item)" mode="light"/> -->
 				</view>
 			</view>
 			<view class="filtrate-item-wrap">
@@ -53,7 +67,7 @@
 					</view>
 				</view>
 			</view>
-		</view>
+		</view> -->
 		<sPullScroll
 			ref="pullScroll"
 			:heightStyle="heightStyle"
@@ -240,6 +254,38 @@
 						</view>
 					</view>
 				</view>
+				<view class="button-box"><button type="primary" class="cu-btn bg-blue" @click="hideModal">确定</button></view>
+			</view>
+		</view>
+		<view class="cu-modal drawer-modal justify-start" :class="{ show: modalName === 'sort' }" @click="hideModal">
+			<view class="cu-dialog wider" @click.stop="">
+				<view class="filter-box">
+					<view class="filtrate-wrap">
+						<view class="filtrate-item-wrap">
+							<view v-for="(item, index) in menuAgList" :key="index" class="filtrate-item filter-item-box">
+								<view class="filtrate-item-left label">{{ item.classify_name }}</view>
+								<view class="" style="display: flex;  flex-flow: wrap;">
+									<view @click="chooseMenu(item, cate)" v-for="(cate, i) in item.children" :key="i" :class="cate.choose ? 'cate-active' : ''" class="filtrate-item-right">
+										<text>{{ cate.title }}</text>
+										<u-icon size="24" v-show="cate.current_num == 1 && item.type !== 'food' && childChooseArrLength == 1" name="arrow-downward"></u-icon>
+										<u-icon size="24" v-show="cate.current_num == 2 && item.type !== 'food' && childChooseArrLength == 1" name="arrow-upward"></u-icon>
+										<text v-show="cate.current_num == 1 && item.type !== 'food' && childChooseArrLength >= 2">(高)</text>
+										<text v-show="cate.current_num == 2 && item.type !== 'food' && childChooseArrLength >= 2">(中)</text>
+										<text v-show="cate.current_num == 3 && item.type !== 'food' && childChooseArrLength >= 2">(低)</text>
+									</view>
+								</view>
+							</view>
+						</view>
+						<view v-if="childChooseArr.length > 0" class="filtrate-choose">
+							<view class="label">已选择：</view>
+							<view @click="tagClick(item)" v-for="(item, index) in childChooseArr" :key="index" class="filtrate-choose-item">
+								<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning" mode="light">{{ item.title }}</text>
+								<text class="lg text-gray cuIcon-close filtrate-close"></text>
+							</view>
+						</view>
+					</view>
+				</view>
+				<view class="button-box"><button type="primary" class="cu-btn bg-blue" @click="hideModal">确定</button></view>
 			</view>
 		</view>
 	</view>
@@ -400,7 +446,7 @@ export default {
 			current: 0,
 			isLoad: false,
 			currIndex: '',
-			topNum: 280,
+			topNum: 150,
 			colData: [],
 			currFoodLabel: {},
 			listTouchStart: 0,
@@ -1089,7 +1135,7 @@ export default {
 
 			this.submenu = submenu;
 			this.menuAgList = menuData;
-			this.topNum = 160;
+			// this.topNum = 160;
 			this.getChooseSportList();
 		}
 		this.onRefresh();
@@ -1098,19 +1144,19 @@ export default {
 		childChooseArr(newValue, oldValue) {
 			console.log('-------------', newValue.length);
 			this.childChooseArrLength = newValue.length;
-			if (newValue.length > 0) {
-				if (this.pageType == 'food') {
-					this.topNum = 280;
-				} else if (this.pageType == 'sport') {
-					this.topNum = 240;
-				}
-			} else {
-				if (this.pageType == 'food') {
-					this.topNum = 280;
-				} else if (this.pageType == 'sport') {
-					this.topNum = 180;
-				}
-			}
+			// if (newValue.length > 0) {
+			// 	if (this.pageType == 'food') {
+			// 		// this.topNum = 280;
+			// 	} else if (this.pageType == 'sport') {
+			// 		// this.topNum = 240;
+			// 	}
+			// } else {
+			// 	if (this.pageType == 'food') {
+			// 		this.topNum = 280;
+			// 	} else if (this.pageType == 'sport') {
+			// 		this.topNum = 180;
+			// 	}
+			// }
 		}
 	},
 	methods: {
@@ -1143,7 +1189,7 @@ export default {
 			this.condObj = cond;
 			this.classifyCond = cond;
 			this.getFoodsList(null, cond);
-			this.hideModal();
+			// this.hideModal();
 		},
 		/*点击前往反馈页面**/
 		tofeedback() {
@@ -1360,7 +1406,6 @@ export default {
 								choose: false
 							}
 						];
-						console.log('-------------', this.menuAgList);
 						this.searchArg.serviceName = 'srvhealth_mixed_food_nutrition_contents_select';
 					} else if (child.value === 'matter') {
 						foodsArr = [
@@ -1433,15 +1478,8 @@ export default {
 						];
 						this.searchArg.serviceName = 'srvhealth_diet_contents_select';
 					}
-					// this.menuAgList = this.menuAgList.map(c => {
-					// 	if (c.type === 'subclass') {
-					// 		c.children = foodsArr;
-					// 	}
-					// 	return c;
-					// });
 					this.condObj = null;
 					this.classifyCond = null;
-					console.log('this.menuAgList-----', this.menuAgList);
 					this.onRefresh();
 				} else if (parent.type == 'subclass') {
 					if (this.menuAgList[0].children[0].choose) {
@@ -1624,16 +1662,12 @@ export default {
 					if (condOrder.data.length === 0) {
 						condOrder = null;
 					}
-					console.log('-----order-----', condOrder);
 					this.childChooseArr = childChooseArr;
 					this.order = order;
 					this.condObj = this.classifyCond ? this.classifyCond : condOrder;
-					console.log('childChooseArr-----', order);
-					// this.getFoodsList(this.order?this.order:order, this.condObj, 'filtrate');
 				}
 			}
 			this.onRefresh();
-			console.log('parent:', parent, 'child', child);
 		},
 		tabSelect(e) {
 			this.TabCur = e.currentTarget.dataset.id;
@@ -2325,27 +2359,40 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
-.contents {
-	// overflow: hidden;
-	.flexSelece {
-	}
+<style lang="scss" scoped>
+.handler-action {
+	display: flex;
+	justify-content: space-around;
+	background-color: #fff;
+	padding: 0 10px 5px;
 }
+
 .filtrate-wrap {
 	.filtrate-choose {
 		display: flex;
 		align-items: center;
-		padding: 10upx;
-		padding-left: 20upx;
+		padding: 10px 0;
+		flex-wrap: wrap;
+		.label {
+			width: 100%;
+			text-align: left;
+			margin-bottom: 5px;
+		}
 		.filtrate-choose-item {
 			// padding: 10upx;
 			display: flex;
 			align-items: center;
 			border: 1px solid #ff9900;
 			background-color: rgb(253, 246, 236);
+			margin-right: 3px;
+			margin-bottom: 3px;
+			border-radius: 50px;
+			overflow: hidden;
+			padding: 0 10px;
+			background-color: rgb(253, 246, 236);
+			color: #ff9900;
 			.cu-tag {
-				background-color: rgb(253, 246, 236);
-				color: #ff9900;
+				padding: 0;
 			}
 			.filtrate-close {
 				color: #ff9900;
@@ -2357,17 +2404,15 @@ export default {
 		background-color: white;
 		.filtrate-item {
 			display: flex;
-			.filtrate-item-left {
-				padding: 10upx 20upx;
-			}
-			.filtrate-item-left:first {
-				padding: 0 20upx 10upx 20upx;
-			}
 			.filtrate-item-right {
 				// padding: 10upx 20upx;
 				display: flex;
-				margin: 0 10upx;
 				align-items: center;
+				background-color: #f1f1f1;
+				border-radius: 50px;
+				padding: 2px 10px;
+				margin-bottom: 5px;
+				margin-right: 5px;
 			}
 			.cate-active {
 				color: red;
@@ -2576,14 +2621,29 @@ export default {
 }
 .drawer-modal .cu-dialog {
 	width: 280px;
+	background-color: #fff;
+	display: flex;
+	flex-direction: column;
+	&.wider {
+		width: 330px;
+	}
+	.button-box {
+		padding: 20rpx;
+		.cu-btn {
+			min-width: 65%;
+		}
+	}
 	.filter-box {
+		flex: 1;
 		width: 100%;
 		padding: 20rpx;
 		.filter-item-box {
 			margin-bottom: 20px;
+			display: flex;
+			flex-direction: column;
 			.label {
 				text-align: left;
-				padding: 20rpx;
+				padding: 20rpx 0;
 				color: #777;
 			}
 		}

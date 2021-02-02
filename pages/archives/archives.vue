@@ -1132,7 +1132,13 @@ export default {
 					url: '/archivesPages/archives-history/archives-history?isAll=true'
 				});
 			} else if (type === 'plan') {
-				let fieldsCond = [{ column: 'create_manager_no', display: false }, { column: 'owner_person_no', display: false, value: this.vuex_userInfo.no }];
+				let fieldsCond = [
+					{ column: 'create_manager_no', display: false },
+					{ column: 'owner_type', display: false, value: '个人' },
+					{ column: 'store_no', display: false },
+					{ column: 'sdr_no', display: false },
+					{ column: 'owner_person_no', display: false, value: this.vuex_userInfo.no }
+				];
 				let params = {
 					to: '/archivesPages/DrugPlan/DrugPlan', //提交后要跳转的页面
 					idCol: 'ds_no' // 跳转时携带的参数
@@ -1698,10 +1704,10 @@ export default {
 				// grid-row-gap: 20rpx;
 				// grid-column-gap: 20rpx;
 				.grid-item {
-					width: calc(33% - 20rpx/3);
+					width: calc(33% - 20rpx / 3);
 					margin-bottom: 10rpx;
 					margin-right: 10rpx;
-					&:nth-child(3n){
+					&:nth-child(3n) {
 						margin-right: 0;
 					}
 					display: flex;
@@ -1734,11 +1740,17 @@ export default {
 				}
 			}
 			&.disease-risk {
-				display: grid;
-				grid-template-columns: repeat(3, calc(33.33% - 20rpx));
-				grid-row-gap: 20rpx;
-				grid-column-gap: 20rpx;
+				display: flex;
+				white-space: wrap;
+				justify-content: flex-start;
+				// display: grid;
+				// grid-template-columns: repeat(3, calc(33.33% - 20rpx));
+				// grid-row-gap: 20rpx;
+				// grid-column-gap: 20rpx;
 				.disease-item {
+					margin-right: 20rpx;
+					width: calc(33% - 40rpx/3);
+					margin-bottom: 20rpx;
 					padding: 10rpx 20rpx;
 					border: 1px solid #999;
 					display: flex;
@@ -1807,12 +1819,16 @@ export default {
 				}
 			}
 			&.todo-list {
-				display: grid;
-				grid-template-columns: repeat(3, calc(33.33% - 20rpx));
-				grid-row-gap: 20rpx;
-				grid-column-gap: 20rpx;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
+				// display: grid;
+				// grid-template-columns: repeat(3, calc(33.33% - 20rpx));
+				// grid-row-gap: 20rpx;
+				// grid-column-gap: 20rpx;
 				font-weight: normal;
 				.todo-item {
+					width: calc(33% - 40rpx/3);
 					display: flex;
 					flex-direction: column;
 					justify-content: center;

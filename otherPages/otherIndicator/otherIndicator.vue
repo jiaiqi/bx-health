@@ -33,20 +33,40 @@
 						<text>体脂率(%)</text>
 						<text class="margin-left-xs">{{ inputVal.body_fat_rate }}%</text>
 					</view>
-					<slider-number v-model="inputVal.body_fat_rate" :max="50" :min="5" :step="0.1"></slider-number>
+					<slider-number v-model="inputVal.body_fat_rate" :max="50" :min="0" :step="0.1"></slider-number>
+				</view>
+				<view class="item-list">
+					<view class="item-list-top">
+						<view class="label">
+							<text>*</text>
+							<text>测量时间:</text>
+						</view>
+						<view class="value" v-if="inputVal.measure_time">
+							<picker mode="date" :value="inputVal.measure_time.split(' ')[0]" @change="DateChange($event, 'measure_time')">
+								<view class="picker">{{ inputVal.measure_time.split(' ')[0] }}</view>
+							</picker>
+							<view class="margin-right"></view>
+							<picker mode="time" :value="inputVal.measure_time.split(' ')[1]" @change="TimeChange($event, 'measure_time')">
+								<view class="picker">{{ inputVal.measure_time.split(' ')[1] }}</view>
+							</picker>
+						</view>
+					</view>
+					<view class="number-change">
+						<button class="operate cu-btn" @click="changeTime('measure_time', -60)">-1小时</button>
+						<button class="operate cu-btn margin-right" @click="changeTime('measure_time', -10)">-10分钟</button>
+						<button class="operate cu-btn" @click="changeTime('measure_time', 10)">+10分钟</button>
+						<button class="operate cu-btn" @click="changeTime('measure_time', 60)">+1小时</button>
+					</view>
 				</view>
 			</view>
 			<view v-else-if="type && type === 'sleep'" class="item-wrap">
 				<view class="item-list">
-					<!-- <view class="item-list" @click="openTime({ type: 'sleep', field: 'retire_time' })"> -->
 					<view class="item-list-top">
 						<view class="label">
 							<text>*</text>
 							<text>就寝时间:</text>
 						</view>
 						<view class="value" v-if="inputVal.retire_time">
-							<!-- <text class="date">{{ inputVal.retire_time.split(' ')[0] }}</text> -->
-							<!-- <text class="time">{{ inputVal.retire_time.split(' ')[1] }}</text> -->
 							<picker mode="date" :value="inputVal.retire_time.split(' ')[0]" @change="DateChange($event, 'retire_time')">
 								<view class="picker">{{ inputVal.retire_time.split(' ')[0] }}</view>
 							</picker>
@@ -171,6 +191,29 @@
 					<slider-number v-model="inputVal.heart_rate" :max="200" :min="30"></slider-number>
 				</view>
 				<view class="item-list">
+					<view class="item-list-top">
+						<view class="label">
+							<text>*</text>
+							<text>测量时间:</text>
+						</view>
+						<view class="value" v-if="inputVal.measure_time">
+							<picker mode="date" :value="inputVal.measure_time.split(' ')[0]" @change="DateChange($event, 'measure_time')">
+								<view class="picker">{{ inputVal.measure_time.split(' ')[0] }}</view>
+							</picker>
+							<view class="margin-right"></view>
+							<picker mode="time" :value="inputVal.measure_time.split(' ')[1]" @change="TimeChange($event, 'measure_time')">
+								<view class="picker">{{ inputVal.measure_time.split(' ')[1] }}</view>
+							</picker>
+						</view>
+					</view>
+					<view class="number-change">
+						<button class="operate cu-btn" @click="changeTime('measure_time', -60)">-1小时</button>
+						<button class="operate cu-btn margin-right" @click="changeTime('measure_time', -10)">-10分钟</button>
+						<button class="operate cu-btn" @click="changeTime('measure_time', 10)">+10分钟</button>
+						<button class="operate cu-btn" @click="changeTime('measure_time', 60)">+1小时</button>
+					</view>
+				</view>
+				<view class="item-list">
 					<text>说明</text>
 					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.remark" /></view>
 				</view>
@@ -273,6 +316,7 @@ export default {
 			inputVal: {
 				// top_title:'',
 				weight: 50,
+				measure_time: '', //测量时间
 				body_fat_rate: 20,
 				glucose_time: '', //血糖 - 测量时机
 				remark: '', // 说明
@@ -690,7 +734,8 @@ export default {
 									weight: this.inputVal.weight,
 									body_fat_rate: this.inputVal.body_fat_rate ? this.inputVal.body_fat_rate : 0,
 									wearing: this.inputVal.wearing.toString(),
-									alimentary_canal: this.inputVal.alimentary_canal.toString()
+									alimentary_canal: this.inputVal.alimentary_canal.toString(),
+									measure_time:this.inputVal.measure_time
 								}
 							]
 						}
@@ -743,7 +788,8 @@ export default {
 									diastolic_pressure: this.inputVal.diastolic_pressure,
 									posture: this.inputVal.posture,
 									measure_position: this.inputVal.measure_position,
-									remark: this.inputVal.remark
+									remark: this.inputVal.remark,
+									measure_time:this.inputVal.measure_time
 								}
 							]
 						}
@@ -920,8 +966,15 @@ export default {
 					this.inputVal.getup_time = dayjs().format('YYYY-MM-DD') + ' 07:00';
 				} else {
 					// 当前时间早于早上七点 默认值为当前时间
-					this.inputVal.getup_time = dayjs().format('YYYY-MM-DD HH:mm');
+					this.inputVal.getup_time = dayjs().format('YYYY-MM-DD HH') + ':00'
 				}
+			}
+			if (Number(dayjs().format('HH')) > 7) {
+				// 当前时间晚于早上七点 默认值为七点
+				this.inputVal.measure_time = dayjs().format('YYYY-MM-DD') + ' 07:00';
+			} else {
+				// 当前时间早于早上七点 默认值为当前时间
+				this.inputVal.measure_time = dayjs().format('YYYY-MM-DD HH') + ':00'
 			}
 		}
 		let user_info_list = uni.getStorageSync('user_info_list');
@@ -985,7 +1038,7 @@ export default {
 					.operate {
 						padding: 2px 10px;
 						background-color: #dff5f5;
-						color: #0BC99D;
+						color: #0bc99d;
 						& + .operate {
 							margin-left: 10rpx;
 						}
@@ -1012,8 +1065,8 @@ export default {
 						font-weight: bold;
 						margin-left: 20px;
 						display: flex;
-						color: #0BC99D;
-						.picker{
+						color: #0bc99d;
+						.picker {
 						}
 					}
 				}

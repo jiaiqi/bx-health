@@ -801,13 +801,13 @@ function stepRunFunc(callback, thisObj = null) {
 /************************** js libs ****************************/
 </script>
 
-<style scoped lang="less">
-@normal-color: #606266; //正常情况下的字体颜色
-@hover-color: #c0c4cc; //边框的颜色
-@active-color: #409eff; //活动的颜色
-@mouse-move-color: #f5f7fa; //在列表项上按下时的列表项的背景色
-@padding-left: 5%; //两侧的边距
-@arrowWidth: 12%; //右边的小三角按钮区域的宽度
+<style scoped lang="scss">
+$normal-color: #606266; //正常情况下的字体颜色
+$hover-color: #c0c4cc; //边框的颜色
+$active-color: #409eff; //活动的颜色
+$mouse-move-color: #f5f7fa; //在列表项上按下时的列表项的背景色
+$padding-left: 5%; //两侧的边距
+$arrowWidth: 12%; //右边的小三角按钮区域的宽度
 
 .placeholder11 {
 	color: red;
@@ -815,12 +815,12 @@ function stepRunFunc(callback, thisObj = null) {
 }
 .show-box {
 	&.active {
-		border-color: @active-color;
+		border-color: $active-color;
 	}
 	// &:hover{
-	// 	border-color: @normal-color;
+	// 	border-color: $normal-color;
 	// 	&.active{
-	// 		border-color: @active-color;
+	// 		border-color: $active-color;
 	// 	}
 	// }
 	&.disabled {
@@ -831,15 +831,15 @@ function stepRunFunc(callback, thisObj = null) {
 	background-color: #fff;
 	background-image: none;
 	border-radius: 4px;
-	border: 1px solid @hover-color;
+	border: 1px solid $hover-color;
 	box-sizing: border-box;
-	color: @normal-color;
+	color: $normal-color;
 	display: inline-block;
 	font-size: inherit;
 	height: 3em;
 	line-height: inherit;
 	outline: none;
-	padding: 0 @arrowWidth 0 @padding-left;
+	padding: 0 $arrowWidth 0 $padding-left;
 	transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
 	width: 100%;
 	position: relative;
@@ -866,16 +866,16 @@ function stepRunFunc(callback, thisObj = null) {
 		display: flex;
 		top: 0;
 		align-items: center;
-		color: @hover-color;
+		color: $hover-color;
 		height: 100%;
 		font-weight: 100;
-		width: @arrowWidth;
+		width: $arrowWidth;
 		justify-content: center;
 	}
 	.clear {
 		color: #fff;
 		line-height: 1;
-		background-color: @hover-color;
+		background-color: $hover-color;
 		border-radius: 50%;
 		padding: 2px;
 	}
@@ -932,24 +932,24 @@ function stepRunFunc(callback, thisObj = null) {
 			//***************************  弹出框中每一项样式  ***************************
 			.item {
 				&:hover {
-					background-color: @mouse-move-color;
+					background-color: $mouse-move-color;
 					&.disabled {
 						background-color: transparent;
 					}
 				}
 				&.active {
-					color: @active-color;
+					color: $active-color;
 					font-weight: 500;
-					background-color: @mouse-move-color;
+					background-color: $mouse-move-color;
 				}
 				&.disabled {
-					color: @hover-color;
+					color: $hover-color;
 				}
-				padding: 0 @padding-left;
+				padding: 0 $padding-left;
 				line-height: 2;
 			}
 			.data-state {
-				color: @hover-color;
+				color: $hover-color;
 			}
 		}
 	}

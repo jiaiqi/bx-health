@@ -1497,6 +1497,7 @@ export default {
 					// 有add_store 未进入过医院主页
 					let pageInfo = Vue.prototype.getShareParams()
 					if (pageInfo.add_url.indexOf('/pediaPages/hospitalOverview/hospital') === -1) {
+						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store.state.user.userInfo.add_store_no,
 							success() {
@@ -1543,9 +1544,10 @@ export default {
 				uni.setStorageSync('current_user', res.data.data[0].name);
 				// #ifdef MP-WEIXIN
 				if (res.data.data[0].add_store_no && !store.state.app.hasIntoHospital) {
-					// 有add_store 未进入过医院主页
+					// 有add_store 此次打开小程序未进入过医院主页
 					let pageInfo = Vue.prototype.getShareParams()
 					if (pageInfo.add_url.indexOf('/pediaPages/hospitalOverview/hospital') === -1) {
+						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res.data.data[0].add_store_no,
 							success() {

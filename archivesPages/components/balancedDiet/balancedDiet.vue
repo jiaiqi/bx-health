@@ -345,9 +345,6 @@
 										<text type="number" class="input">{{ item.amount }}</text>
 										<text class="separator" @click.stop="calc(item, 'add')">+</text>
 									</view>
-								<!-- 	<text class="text-left margin-left-xs text-gray" style="font-weight: normal;" @click="changeChecked(item)">
-										{{ item.unit_weight_g }}g/{{ item.unit === 'g' ? '份' : item.unit }}
-									</text> -->
 								</view>
 							</view>
 						</view>
@@ -2564,7 +2561,7 @@ export default {
 			item.checked = !item.checked;
 			this.$set(item, 'checked', item.checked);
 		},
-		calc(e, type, step = 1) {
+		calc(e, type, step = 0.1) {
 			if (type === 'minus') {
 				if (e.amount - step > 0) {
 					e.amount = Number((e.amount - step).toFixed(1));
