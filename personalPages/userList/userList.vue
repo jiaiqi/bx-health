@@ -9,14 +9,19 @@
 </template>
 
 <script>
+	import { mapState} from 'vuex'
 import bxFilter from '@/components/bx-filtrate/bx-filtrate';
 export default {
 	components: {
 		bxFilter
 	},
+	computed: {
+		...mapState({
+			userInfo:state=>state.user.userInfo
+		})
+	},
 	data() {
 		return {
-			userInfo: {},
 			currentUser: {},
 			doctorInfo: {},
 			searchArg: null,
@@ -97,12 +102,11 @@ export default {
 		console.log('app-onReady======>');
 	},
 	onShow() {
-		let userInfo = uni.getStorageSync('wxUserInfo');
-		this.userInfo = userInfo;
 		let userList = uni.getStorageSync('user_info_list');
 		let current_user = uni.getStorageSync('current_user_info');
-		if (userList && current_user) {
-			this.currentUser = current_user;
+		// if (userList && current_user) {
+		if (this.userInfo&&this.userInfo.no) {
+			this.currentUser = this.userInfo;
 			// this.getDoctorInfo().then(res => {
 			// 	if (res && res.dt_no) {
 			// 		this.doctorInfo = res;

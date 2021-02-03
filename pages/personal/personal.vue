@@ -28,30 +28,29 @@
 		</view>
 		<view class="container-cen">
 			<view class="container-cen-top">
-				<view class="container-cen-top-list bg-white">
-					<text @click="toPages('doctor')" class="cuIcon-friendfavor" style="font-size: 30px;"></text>
-					<text @click="toPages('doctor')" class="label">医生</text>
+				<view class="container-cen-top-list bg-white" @click="toPages('doctor')">
+					<text class="cuIcon-friendfavor" style="font-size: 30px;"></text>
+					<text class="label">医生</text>
 					<view v-if="doctor_message != 0" class="message-tag">{{ doctor_message }}</view>
 				</view>
-				<view class="container-cen-top-list bg-white">
-					<text @click="toPages('userList')" class="cuIcon-peoplelist" style="font-size: 30px;"></text>
-					<text @click="toPages('userList')" class="label">用户</text>
+				<view class="container-cen-top-list bg-white" @click="toPages('userList')">
+					<text class="cuIcon-peoplelist" style="font-size: 30px;"></text>
+					<text class="label">用户</text>
 					<view v-if="hzMessage != 0" class="message-tag">{{ hzMessage }}</view>
 				</view>
-				<view class="container-cen-top-list bg-white">
-					<text @click="toPages('group')" class="cuIcon-link" style="font-size: 30px;"></text>
-					<text @click="toPages('group')" class="label">圈子</text>
+				<view class="container-cen-top-list bg-white" @click="toPages('group')">
+					<text class="cuIcon-link" style="font-size: 30px;"></text>
+					<text class="label">圈子</text>
 					<view v-if="groupMsgUnreadAmount != 0" class="message-tag">{{ groupMsgUnreadAmount }}</view>
 				</view>
-				<view class="container-cen-top-list bg-white">
-					<text @click="toPages('mineStore')" class="cuIcon-home" style="font-size: 30px;"></text>
-					<text @click="toPages('mineStore')" class="label">单位</text>
+				<view class="container-cen-top-list bg-white" @click="toPages('mineStore')">
+					<text class="cuIcon-home" style="font-size: 30px;"></text>
+					<text class="label">单位</text>
 				</view>
 			</view>
 			<view class="container-bot">
 				<view class="cu-list menu sm-border">
 					<view @click="toPages('updateInfo')" class="cu-item arrow">
-						<!-- <view @click="toPersonDetail('person')" class="cu-item arrow"> -->
 						<view class="content">
 							<text class="cuIcon-news"></text>
 							<text class="text-grey">基本信息</text>
@@ -357,7 +356,7 @@ export default {
 							},
 							{
 								column: 'manager_type',
-								display: false
+								// display: false
 							},
 							{
 								column: 'no',
@@ -492,11 +491,23 @@ export default {
 				}
 			];
 			let res = await this.$http.post(url, req);
+			// let res = await this.$fetch('operate', 'srvhealth_person_info_update', req, 'health')
 			// .then(res => {
 			if (res.data.state === 'SUCCESS') {
 				uni.showToast({
 					title: '申请成功'
 				});
+				if (
+					Array.isArray(res.data.response) &&
+					res.data.response.length > 0 &&
+					res.data.response[0].response &&
+					Array.isArray(res.data.response[0].response.effect_data) &&
+					res.data.response[0].response.effect_data.length > 0
+				) {
+					let data = res.data.response[0].response.effect_data[0]
+					this.$store.commit('SET_USERINFO',data)
+				}
+				debugger
 				this.toAddPage();
 			} else {
 				uni.showModal({
@@ -784,6 +795,7 @@ export default {
 	position: relative;
 	padding-top: 30px;
 	.container-cen-top {
+		z-index: 5;
 		width: calc(100% - 40rpx);
 		display: flex;
 		margin: 0 10px;
