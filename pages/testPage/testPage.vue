@@ -1,6 +1,6 @@
 <template>
 	<view class="test">
-		<dataPicker @getCascaderValue="getCascaderValue" :srvInfo="srvInfo"></dataPicker>
+		<!-- <dataPicker @getCascaderValue="getCascaderValue" :srvInfo="srvInfo"></dataPicker> -->
 		<!-- <a-form v-if="colsV2Data && colsV2Data._fieldInfo" :fields="colsV2Data._fieldInfo" :pageType="srvType" :formType="use_type"> -->
 		<!-- 	<a-form-item v-for="field in colsV2Data._fieldInfo" :key="field.id" :field="field" :pageType="srvType">
 				<view class="form-item-detail" v-if="srvType === 'detail'">
@@ -25,10 +25,10 @@
 </template>
 
 <script>
-import dataPicker from '@/components/cascader/cascaderSelector.vue';
+// import dataPicker from '@/components/cascader/cascaderSelector.vue';
 export default {
 	components: {
-		dataPicker
+		// dataPicker
 	},
 	data() {
 		return {

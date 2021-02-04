@@ -48,6 +48,32 @@
 					<text class="label">单位</text>
 				</view>
 			</view>
+			<view class="container-center ">
+				<view class="container-title" @click="toPages('order-list')">
+					<view class="label">我的订单</view>
+					<view class="arrow">
+						全部
+						<text class="cuIcon-right"></text>
+					</view>
+				</view>
+				<view class="container-cen-top-list" @click="toPages('order-unpaid')">
+					<text class="icon cuIcon-sponsor"></text>
+					<!-- <text class="icon cuIcon-pay"></text> -->
+					<text class="label">待支付</text>
+				</view>
+				<view class="container-cen-top-list" @click="toPages('order-deliver')">
+					<text class="icon cuIcon-send"></text>
+					<text class="label">待发货</text>
+				</view>
+				<view class="container-cen-top-list" @click="toPages('order-receiving')">
+					<text class="icon cuIcon-deliver"></text>
+					<text class="label">待收货</text>
+				</view>
+				<view class="container-cen-top-list" @click="toPages('order-finish')">
+					<text class="icon cuIcon-goods"></text>
+					<text class="label">已完成</text>
+				</view>
+			</view>
 			<view class="container-bot">
 				<view class="cu-list menu sm-border">
 					<view @click="toPages('updateInfo')" class="cu-item arrow">
@@ -355,7 +381,7 @@ export default {
 								display: false
 							},
 							{
-								column: 'manager_type',
+								column: 'manager_type'
 								// display: false
 							},
 							{
@@ -409,6 +435,15 @@ export default {
 						}
 					});
 					// #endif
+					break;
+					case 'order-list': //全部
+					case 'order-finish': //已完成
+					case 'order-receiving': //待收货
+					case 'order-deliver': // 待发货
+					case 'order-unpaid': //待支付
+					uni.navigateTo({
+						url:'/personalPages/OrderList/OrderList?type='+e
+					})
 					break;
 			}
 		},
@@ -504,10 +539,10 @@ export default {
 					Array.isArray(res.data.response[0].response.effect_data) &&
 					res.data.response[0].response.effect_data.length > 0
 				) {
-					let data = res.data.response[0].response.effect_data[0]
-					this.$store.commit('SET_USERINFO',data)
+					let data = res.data.response[0].response.effect_data[0];
+					this.$store.commit('SET_USERINFO', data);
 				}
-				debugger
+				debugger;
 				this.toAddPage();
 			} else {
 				uni.showModal({
@@ -745,8 +780,6 @@ export default {
 	}
 	.top-left {
 		height: 120upx;
-		/* border-radius: 50%; */
-		/* border: 1px solid white; */
 		width: 120upx;
 		display: flex;
 		align-items: center;
@@ -813,14 +846,10 @@ export default {
 			border-radius: 50rpx;
 			margin: 10px;
 			flex: 1;
-			// width: calc(25% - 60rpx / 4);
-			// width: calc(33% - 40rpx / 3);
-			// & + .container-cen-top-list {
-			// 	margin-left: 10px;
-			// }
-			// & + .container-cen-top-list:nth-child(3n + 1) {
-			// 	margin-left: 0;
-			// }
+			transition: all 0.2s ease;
+			&:active{
+				background-color: #f1f1f1;
+			}
 			.label {
 				padding: 2px 0;
 			}
@@ -841,6 +870,40 @@ export default {
 				line-height: 45rpx;
 				text-align: center;
 				font-size: 24rpx;
+			}
+		}
+	}
+	.container-center {
+		display: flex;
+		flex-wrap: wrap;
+		margin: 20rpx;
+		margin-top: 0;
+		border-radius: 10px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		.container-title {
+			width: 100%;
+			display: flex;
+			justify-content: space-between;
+			border-bottom: 1px solid #f1f1f1;
+			padding: 10rpx 20rpx;
+			.arrow {
+				font-size: 12px;
+				color: #777;
+			}
+		}
+		.container-cen-top-list{
+			padding: 20rpx;
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+			justify-content: center;
+			align-items: center;
+			transition: all 0.2s ease;
+			&:active{
+				background-color: #f1f1f1;
+			}
+			.icon{
+				font-size: 30px;
 			}
 		}
 	}

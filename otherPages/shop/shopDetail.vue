@@ -67,117 +67,6 @@
 					</view>
 				</view>
 			</view>
-
-			<!-- <view class="shop-detail-bot-t">
-				<view class="shop-detail-bot-t-t">
-					食物营养素含量
-				</view>
-				<view class="ele-text-cen-item-wrap">
-					<view class="ele-text-cen-item">
-						<view class="ele-text-cen-item-title">
-							脂溶性维生素
-						</view>
-						<view class="ele-text-cen-item-cen">
-							<view class="ele-text">
-								<text>VA:</text>
-								<text>1ug</text>
-							</view>
-							<view class="ele-text">
-								<text>VE:</text>
-								<text>2mg</text>
-							</view>
-						</view>
-					</view>
-					<view class="ele-text-cen-item">
-						<view class="ele-text-cen-item-title">
-							有机物
-						</view>
-						<view class="ele-text-cen-item-cen">
-							<view class="ele-text">
-								<text>蛋白质:</text>							
-								<text>{{ foodObj.protein ? foodObj.protein:'0' }}g</text>
-							</view>								
-						</view>
-					</view>
-					<view class="ele-text-cen-item">
-						<view class="ele-text-cen-item-title">
-							水溶性维生素
-						</view>
-						<view class="ele-text-cen-item-cen">
-							<view class="ele-text">
-								<text>VB1:</text>
-								<text>2</text>
-								<text>{{ foodObj.vitamin_b1 ? foodObj.vitamin_b1:0 }}mg</text>
-							</view>
-							<view class="ele-text">
-								<text>VB2:</text>
-								<text>{{ foodObj.vitamin_b2 ? foodObj.vitamin_b2:0 }}mg</text>
-							</view>
-							<view class="ele-text">
-								<text>VB3:</text>
-								<text>{{ foodObj.vitamin_b3 ? foodObj.vitamin_b3:0 }}mg</text>
-							</view>		
-							<view class="ele-text">
-								<text>VC:</text>								
-								<text>{{ foodObj.vitamin_c ? foodObj.vitamin_c:0 }}mg</text>								
-							</view>
-						</view>
-					</view>
-					<view class="ele-text-cen-item">
-						<view class="ele-text-cen-item-title">
-							常量矿物质
-						</view>
-						<view class="ele-text-cen-item-cen">
-							<view class="ele-text">
-								<text>钙:</text>
-								<text>{{ foodObj.vitamin_a ? foodObj.element_ca:0 }}mg</text>
-								
-							</view>
-							<view class="ele-text">
-								<text>镁:</text>
-								<text>{{ foodObj.element_mg ? foodObj.element_mg:0 }}mg</text>
-								
-							</view>
-							<view class="ele-text">
-								<text>磷:</text>								
-								<text>{{ foodObj.element_p ? foodObj.element_p:0 }}mg</text>								
-							</view>
-							<view class="ele-text">
-								<text>钾:</text>								
-								<text>{{ foodObj.element_k ? foodObj.element_k:0 }}mg</text>								
-							</view>
-						</view>
-					</view>
-					
-					<view class="ele-text-cen-item">
-						<view class="ele-text-cen-item-title">
-							微量元素
-						</view>
-						<view class="ele-text-cen-item-cen">
-							<view class="ele-text">
-								<text>铁:</text>								
-								<text>{{ foodObj.element_fe ? foodObj.element_fe:0 }}mg</text>								
-							</view>
-							<view class="ele-text">
-								<text>锌:</text>								
-								<text>{{ foodObj.element_zn ? foodObj.element_zn:0 }}mg</text>								
-							</view>
-							<view class="ele-text">
-								<text>硒:</text>								
-								<text>{{ foodObj.element_se ? foodObj.element_se:0 }}mg</text>								
-							</view>
-							<view class="ele-text">
-								<text>铜:</text>
-								<text>{{ foodObj.element_cu ? foodObj.element_cu:0 }}mg</text>								
-							</view>
-							<view class="ele-text">
-								<text>锰:</text>								
-								<text>{{ foodObj.element_mn ? foodObj.element_mn:0 }}mg</text>								
-							</view>
-						</view>
-					</view>	
-				</view>
-			</view>	 -->
 		</view>
 		<jumpBall :backgroundColor="'red'" :start.sync="num" :element.sync="element" @msg="jbMsg" />
 		<view class="public-button-box">
@@ -196,6 +85,7 @@ import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #ifdef H5
 import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
+import { mapState } from 'vuex';
 export default {
 	name: 'shopDetail',
 	components: {
@@ -435,6 +325,9 @@ export default {
 		};
 	},
 	computed: {
+		...mapState({
+			cartInfo: state => state.order.cartInfo
+		}),
 		age() {
 			if (this.userInfo.birthday) {
 				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
@@ -627,29 +520,31 @@ export default {
 			if (!this.foodObj.car_num) {
 				this.foodObj['car_num'] = 1;
 			}
-			if (!uni.getStorageSync('shop_car')) {
-				// this.foodObj.car_num  = 1
-				let shopCarData = [this.foodObj];
-				uni.setStorageSync('shop_car', shopCarData);
+			let shopCarData = this.cartInfo[this.restaurant_no];
+			if (shopCarData && Array.isArray(shopCarData.cart)) {
+				// 此店铺已有购物车数据
+				shopCarData = shopCarData.cart;
+				shopCarData.push(this.foodObj);
 			} else {
-				let shop_car_data = uni.getStorageSync('shop_car');
+				// 此店铺没有购物车数据
+				shopCarData = [this.foodObj];
 				let isHas = false;
-				shop_car_data.forEach(item => {
+				shopCarData.forEach(item => {
 					if (item.id === this.foodObj.id) {
 						isHas = true;
 						item.car_num = this.foodObj.car_num;
 					}
 				});
 				if (!isHas) {
-					shop_car_data.push(this.foodObj);
+					shopCarData.push(this.foodObj);
 				}
-				uni.setStorageSync('shop_car', shop_car_data);
 			}
+			this.$store.commit('SET_STORE_CART', { store_no: this.foodObj.restaurant_no, list: shopCarData });
 		},
 		/* 点击购物车前往购物车列表**/
 		goCar() {
 			uni.navigateTo({
-				url: '/otherPages/shop/shopCarList'
+				url: '/otherPages/shop/shopCarList?store_no=' + this.foodObj.restaurant_no
 			});
 		},
 		/* 点击计数器加号回调**/
@@ -724,9 +619,7 @@ export default {
 			let data = res.data.data;
 			let eleData = this.eleData;
 			let dataArr = [];
-			// if(data.length > 0){
 			this.foodChild = data;
-			// }
 		}
 	},
 	onShow() {
@@ -738,7 +631,10 @@ export default {
 	},
 	onLoad(option) {
 		let foodsDetail = JSON.parse(decodeURIComponent(option.itemData));
-
+		if (!this.cartInfo[foodsDetail.restaurant_no]) {
+			// vuex中没有此店铺购物车数据
+			this.$store.commit('SET_STORE_CART', { store_no: foodsDetail.restaurant_no, list: [] });
+		}
 		this.queryType = option.type;
 		if (foodsDetail.imgurl) {
 			foodsDetail.imgurl = foodsDetail.imgurl.substring(0, foodsDetail.imgurl.lastIndexOf('&'));
@@ -758,6 +654,9 @@ export default {
 		this.assembleData();
 		if (uni.getStorageSync('shop_car')) {
 			let car_data = uni.getStorageSync('shop_car');
+			if (car_data.restaurant_no !== this.currFood.restaurant_no) {
+				return;
+			}
 			let isHas = false;
 			let car_curr = null;
 			car_data.forEach(item => {

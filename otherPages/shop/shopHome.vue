@@ -28,19 +28,6 @@
 					<image v-else-if="changeType === 'singleRow'" src="/otherPages/static/img/changelist1.png" mode=""></image>
 				</view>
 			</view>
-			<!-- <sPullScroll
-			
-				ref="pullScroll"
-				:heightStyle="heightStyle"
-				:pullDown="pullDown"
-				:pullUp="loadData"
-				:enablePullDown="true"
-				:enablePullUp="true"
-				:top="510"
-				:fixed="true"
-				:bottom="0"
-				finishText="我是有底线的..."
-			> -->
 			<view v-if="shopList.length > 0" :class="changeType === 'doubleRow' ? 'doubleRow' : ''" class="shop-main-list">
 				<view class="shop-main-list-wrap">
 					<view @click="toDetail(item)" v-for="(item, index) in shopList" class="shop-main-list-item">
@@ -81,7 +68,6 @@
 					<text>暂无数据</text>
 				</view>
 			</view>
-			<!-- </sPullScroll> -->
 		</view>
 		<view v-if="queryType === 'myShop'" class="public-button-box">
 			<view @click="addFoods" class="add-button"><!-- <text class="add-button-num"></text> --></view>
@@ -91,15 +77,18 @@
 
 <script>
 import uniRate from '@/otherPages/components/uni-rate/uni-rate.vue';
-import sPullScroll from '@/components/s-pull-scroll';
+import { mapState } from 'vuex';
 export default {
 	name: 'shopHome',
-	comments: { uniRate },
-	components: { sPullScroll, uniRate },
+	components: { uniRate },
+	computed: {
+		...mapState({
+			cartInfo: state => state.order.cartInfo
+		})
+	},
 	data() {
 		return {
-			TabCur: 0,
-			scrollLeft: 0,
+			storeInfo:{},
 			isShowFinish: false,
 			restAurn: null,
 			fixation: false, //顶部是否固定
@@ -138,7 +127,6 @@ export default {
 		};
 	},
 	onShow() {
-		// this.onRefresh()
 		this.pageInfo.pageNo = 1;
 		this.getFoodsList();
 	},
@@ -147,7 +135,6 @@ export default {
 		if (!this.isShowFinish) {
 			this.getFoodsList();
 		}
-		// console.log("触底")
 	},
 	onPageScroll(e) {
 		if (e.scrollTop >= 160) {
@@ -162,7 +149,7 @@ export default {
 		console.log('query----', query);
 		this.queryType = query;
 		this.rest_no = option.restaurantNo;
-		// this.getRestaurant()
+		this.getStoreInfo();
 	},
 	methods: {
 		onRefresh() {
@@ -179,31 +166,13 @@ export default {
 			let self = this;
 			setTimeout(() => {
 				this.loadData(pullScroll);
-				// self.getDrawCoupon(self.req.serviceName, self.req.cond).then(callBackData => {
-				// if (callBackData.page.rownumber * callBackData.page.pageNo >= callBackData.page.total) {
-				// 	// finish(boolean:是否显示finishText,默认显示)
-				// 	self.$refs.pullScroll.finish();
-				// } else {
-				// 	self.$refs.pullScroll.success();
-				// }
-				// });
-				// this.loadData(pullScroll);
 			}, 200);
 		},
 		loadData(pullScroll) {
-			console.log('上拉加载');
 			let page = this.pageInfo;
 			this.pageInfo.pageNo = pullScroll.page;
 			console.log(pullScroll.page);
 			this.getFoodsList();
-			// this.getDrawCoupon(this.req.serviceName, this.req.cond);
-			// if (page.rownumber * page.pageNo >= page.total) {
-			// 	// finish(boolean:是否显示finishText,默认显示)
-			// 	pullScroll.finish();
-			// } else {
-			// 	pullScroll.success();
-			// }
-			// });
 		},
 		changeTypes() {
 			if (this.changeType === 'singleRow') {
@@ -235,29 +204,19 @@ export default {
 				url: '/otherPages/shop/shopDetail?itemData=' + encodeURIComponent(JSON.stringify(item)) + '&type=' + this.queryType
 			});
 		},
-		tabSelect(e) {
-			this.TabCur = e.currentTarget.dataset.id;
-			this.scrollLeft = (e.currentTarget.dataset.id - 1) * 60;
-		},
-		async getRestaurant() {
-			let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
+		async getStoreInfo() {
 			let req = {
-				serviceName: 'srvhealth_restaurant_mgmt_select',
-				colNames: ['*'],
-				condition: [
-					{
-						colName: 'restaurant_no',
-						ruleType: 'eq',
-						value: this.rest_no
-					}
-				],
-				order: []
+				condition: [{ colName: 'store_no', ruleType: 'in', value: this.rest_no }]
 			};
-
-			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS') {
-				this.restAurn = res.data.data[0];
-				this.getFoodsList();
+			let storeInfo = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health');
+			if (storeInfo.success && Array.isArray(storeInfo.data) && storeInfo.data.length > 0) {
+				storeInfo =  storeInfo.data[0];
+				this.storeInfo = storeInfo;
+				debugger
+				if (!this.cartInfo[storeInfo.store_no]) {
+					// vuex中没有此店铺购物车数据
+					this.$store.commit('SET_STORE_CART', { storeInfo, list: [] });
+				}
 			}
 		},
 		async getFoodsList(orders) {
@@ -389,7 +348,6 @@ export default {
 			];
 			let rea = await self.$http.post(url, req);
 			if (rea.data.resultCode === 'SUCCESS') {
-				// self.getFoodsList()
 				self.onRefresh();
 			} else {
 				uni.showToast({

@@ -34,7 +34,7 @@ import DietInfo from './diet-info.vue';
 import elementDetail from './element-detail.vue';
 import HandlerBar from './handler-bar.vue';
 import energyListWrap from './data.js';
-import UniQrcode from '../components/uni-qrcode/uni-qrcode';
+import UniQrcode from '@/components/uni-qrcode/uni-qrcode';
 import { mapState } from 'vuex';
 export default {
 	components: {

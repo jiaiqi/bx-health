@@ -10,9 +10,6 @@
 				<view class="bottom">
 					<view class="introduce" v-if="doctorStoreList.length === 1&&doctorStoreList[0].staff_introduction">
 						{{ doctorStoreList[0].staff_introduction }}
-						<!-- 	副主任医师，毕业于xx大学医学院，美国Mayo Clinic
-						从事博士后研究1年。擅长肝脏肿瘤及胆道结石微创外科治疗。中国医师协会腹腔镜肝切除推广与发展专家委员会委员，陕西省分会腹腔镜外科学会青年委员会副主任委员。长期参与肝脏肿瘤和胆管结石的临床及基础研究，积累了丰富的经验。主持省级科研基金一项，参与多项国家及省级科研基金课题研究
-					 -->
 					</view>
 					<view class="introduce" v-else>
 						暂无介绍

@@ -56,7 +56,8 @@ export default {
 	computed: {
 		...mapState({
 			userInfo: state => state.user.userInfo,
-			loginUserInfo: state => state.user.loginUserInfo
+			loginUserInfo: state => state.user.loginUserInfo,
+			cartInfo: state => state.order.cartInfo
 		}),
 		totalPrice() {
 			return this.chooseCarData.reduce((pre, cur) => {
@@ -66,6 +67,7 @@ export default {
 	},
 	data() {
 		return {
+			restaurant_no: '',
 			iSchoose: false,
 			checkAll: false,
 			total: 0,
@@ -94,16 +96,16 @@ export default {
 	},
 	methods: {
 		valueChange(e, item) {
-			// if (Number(item.car_num) < e) {
-			// 	this.total = this.total + Number(item.price);
-			// } else if (Number(item.car_num) > e) {
-			// 	this.total = this.total - Number(item.price);
-			// }
 			this.$set(item, 'car_num', e);
 			uni.setStorageSync('shop_car', this.shopCarData);
 		},
 		payOrder() {
-			this.generateOrder();
+			if (this.chooseCarData.length > 0) {
+				// this.generateOrder();
+				uni.navigateTo({
+					url:'/personalPages/payOrder/payOrder?store_no=' + this.restaurant_no
+				})
+			}
 		},
 		async generateOrder() {
 			let goods = this.deepClone(this.chooseCarData);
@@ -131,6 +133,7 @@ export default {
 							user_account: this.userInfo.userno,
 							nick_name: this.userInfo.nick_name,
 							sex: this.userInfo.sex,
+							pay_state: '待支付',
 							child_data_list: [
 								{
 									serviceName: 'srvhealth_store_order_goods_detail_add',
@@ -147,12 +150,14 @@ export default {
 			if (res.success === true && res.data.length > 0) {
 				let orderData = res.data[0];
 				if (orderData.order_no) {
-					if (orderData.order_no.length > 24 && orderData.order_no.indexOf('RT') !== -1) {
-						// orderData.order_no = 'RT' + orderData.order_no.split('RT')[1];
-						orderData.order_no = orderData.order_no.slice(0,32)
-					}
+					debugger;
+					// if (orderData.order_no.length > 24 && orderData.order_no.indexOf('RT') !== -1) {
+					uni.navigateTo({
+						url: '/personalPages/payOrder/payOrder?order_no=' + orderData.order_no
+					});
+					// }
 				}
-				this.toPay(orderData, goods);
+				// this.toPay(orderData, goods);
 			}
 		},
 		async toPay(orderData, goodsData) {
@@ -221,9 +226,6 @@ export default {
 				});
 			}
 		},
-		RadioChange() {
-			console.log('=--=');
-		},
 		checkAllCar() {
 			let shopData = this.shopCarData;
 			this.checkAll = !this.checkAll;
@@ -272,17 +274,23 @@ export default {
 			uni.setStorageSync('shop_car', this.shopCarData);
 		}
 	},
-	onLoad() {
-		let shopCarData = uni.getStorageSync('shop_car');
-		if (shopCarData) {
-			shopCarData.forEach(item => {
+	onLoad(option) {
+		if (option.restaurant_no) {
+			this.restaurant_no = option.restaurant_no;
+		}
+		if (option.store_no) {
+			this.restaurant_no = option.store_no;
+		}
+		let shopCarData = this.cartInfo[this.restaurant_no];
+		if (shopCarData && Array.isArray(shopCarData.cart)) {
+			shopCarData.cart.forEach(item => {
 				// this.$set(item,'iSchoose',false)
 				item['iSchoose'] = false;
 				item.imgurl = this.getImagePath(item.image);
 				// this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')+"&thumbnailType=fwsu_100";
 			});
+			this.shopCarData = shopCarData.cart;
 		}
-		this.shopCarData = shopCarData;
 	}
 };
 </script>

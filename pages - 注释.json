@@ -254,7 +254,7 @@
 				}, {
 					"path": "successPay/successPay",
 					"style": {
-						"navigationBarTextStyle": "black",
+						"navigationBarTextStyle":"black",
 						"enablePullDownRefresh": false,
 						"navigationBarBackgroundColor": "#fff"
 					}
@@ -264,42 +264,43 @@
 		},
 		{
 			"root": "otherPages",
-			"pages": [{
-					"path": "shopDietStore/shopDietStore",
-					"style": {
-						"navigationBarTitleText": "店铺列表"
-					}
-				},
-				{
-					"path": "otherIndicator/otherIndicator",
-					"style": {
-						"navigationBarTitleText": "身体指标"
-					}
-				},
-				{
-					"path": "elementDetail/elementDetail",
-					"style": {
-						"navigationBarTitleText": "营养素详情"
-					}
-				},
-				{
-					"path": "symptomSelect/symptomSelect",
-					"style": {
-						"navigationBarTitleText": "症状选择",
-						"navigationStyle": "custom"
-					}
-				},
-				{
-					"path": "symptomSelect/symptomSelect2",
-					"style": {
-						"navigationBarTitleText": "症状选择",
-						"navigationStyle": "custom"
-					}
-				},
-				{
-					"path": "dietSelect/dietSelect",
-					"style": {}
-				},
+			"pages": [
+				// {
+				// 	"path": "shopDietStore/shopDietStore",
+				// 	"style": {
+				// 		"navigationBarTitleText": "店铺列表"
+				// 	}
+				// },
+				// {
+				// 	"path": "otherIndicator/otherIndicator",
+				// 	"style": {
+				// 		"navigationBarTitleText": "身体指标"
+				// 	}
+				// },
+				// {
+				// 	"path": "elementDetail/elementDetail",
+				// 	"style": {
+				// 		"navigationBarTitleText": "营养素详情"
+				// 	}
+				// },
+				// {
+				// 	"path": "symptomSelect/symptomSelect",
+				// 	"style": {
+				// 		"navigationBarTitleText": "症状选择",
+				// 		"navigationStyle": "custom"
+				// 	}
+				// },
+				// {
+				// 	"path": "symptomSelect/symptomSelect2",
+				// 	"style": {
+				// 		"navigationBarTitleText": "症状选择",
+				// 		"navigationStyle": "custom"
+				// 	}
+				// },
+				// {
+				// 	"path": "dietSelect/dietSelect",
+				// 	"style": {}
+				// },
 				{
 					"path": "shop/shopHome",
 					"style": {}
@@ -313,106 +314,107 @@
 					"style": {
 						"navigationBarTitleText": "购物车"
 					}
-				},
-				{
-					"path": "shop/foodMaterial",
-					"style": {}
-				},
-				{
-					"path": "chooseFood/chooseFood",
-					"style": {}
-				},
-				{
-					"path": "chooseFood/myFoodList",
-					"style": {}
-				},
-				{
-					"path": "chooseFood/myFoodsInfo",
-					"style": {}
 				}
+				// ,
+				// {
+				// 	"path": "shop/foodMaterial",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "chooseFood/chooseFood",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "chooseFood/myFoodList",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "chooseFood/myFoodsInfo",
+				// 	"style": {}
+				// }
 			]
 		},
-		{
-			// 健康百科中的页面
-			"root": "pediaPages",
-			"pages": [{
-					"path": "hospitalOverview/hospitalOverview",
-					"style": {
-						"navigationBarBackgroundColor": "#0094ff",
-						"navigationBarTitleText": "医院简介"
-					}
-				}, {
-					"path": "HospitalList/HospitalList",
-					"style": {
-						"navigationBarTitleText": "列表",
-						"enablePullDownRefresh": true
-					}
-				}, {
-					"path": "ClinicDetail/ClinicDetail",
-					"style": {
-						"navigationBarBackgroundColor": "#ffffff",
-						"navigationBarTextStyle": "black",
-						"enablePullDownRefresh": false
-					}
-				}, {
-					"path": "department/department",
-					"style": {
-						"navigationBarTitleText": "科室介绍",
-						"enablePullDownRefresh": false
-					}
-				}, {
-					"path": "pregnant/pregnant",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantHome",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantDetail",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantFoods",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantFoodsDetail",
-					"style": {}
-				},
-				{
-					"path": "pregnant/antenatal",
-					"style": {}
-				},
-				{
-					"path": "pregnant/symptomDetail",
-					"style": {}
-				},
-				{
-					"path": "pathogen/pathogen",
-					"style": {}
-				},
-				{
-					"path": "pathogen/pathogenDetail",
-					"style": {}
-				},
-				{
-					"path": "sickness/sickness",
-					"style": {
-						"navigationBarTitleText": "疾病列表",
-						"navigationBarBackgroundColor": "#409eff",
-						"enablePullDownRefresh": false
-					}
-				}, {
-					"path": "sickness/sicknessDetail",
-					"style": {
-						"navigationBarTitleText": "疾病详情",
-						"navigationBarBackgroundColor": "#409eff",
-						"enablePullDownRefresh": false
-					}
-				}
-			]
-		},
+		// {
+		// 	// 健康百科中的页面
+		// 	"root": "pediaPages",
+		// 	"pages": [{
+		// 			"path": "hospitalOverview/hospitalOverview",
+		// 			"style": {
+		// 				"navigationBarBackgroundColor": "#0094ff",
+		// 				"navigationBarTitleText": "医院简介"
+		// 			}
+		// 		}, {
+		// 			"path": "HospitalList/HospitalList",
+		// 			"style": {
+		// 				"navigationBarTitleText": "列表",
+		// 				"enablePullDownRefresh": true
+		// 			}
+		// 		}, {
+		// 			"path": "ClinicDetail/ClinicDetail",
+		// 			"style": {
+		// 				"navigationBarBackgroundColor": "#ffffff",
+		// 				"navigationBarTextStyle": "black",
+		// 				"enablePullDownRefresh": false
+		// 			}
+		// 		}, {
+		// 			"path": "department/department",
+		// 			"style": {
+		// 				"navigationBarTitleText": "科室介绍",
+		// 				"enablePullDownRefresh": false
+		// 			}
+		// 		}, {
+		// 			"path": "pregnant/pregnant",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "pregnant/pregnantHome",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "pregnant/pregnantDetail",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "pregnant/pregnantFoods",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "pregnant/pregnantFoodsDetail",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "pregnant/antenatal",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "pregnant/symptomDetail",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "pathogen/pathogen",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "pathogen/pathogenDetail",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "sickness/sickness",
+		// 			"style": {
+		// 				"navigationBarTitleText": "疾病列表",
+		// 				"navigationBarBackgroundColor": "#409eff",
+		// 				"enablePullDownRefresh": false
+		// 			}
+		// 		}, {
+		// 			"path": "sickness/sicknessDetail",
+		// 			"style": {
+		// 				"navigationBarTitleText": "疾病详情",
+		// 				"navigationBarBackgroundColor": "#409eff",
+		// 				"enablePullDownRefresh": false
+		// 			}
+		// 		}
+		// 	]
+		// },
 		{
 			"root": "publicPages",
 			"pages": [{
@@ -421,31 +423,31 @@
 						"navigationBarTitleText": "登录"
 					}
 				},
-				{
-					"path": "list/list",
-					"style": {
-						"navigationBarTitleText": "列表"
-					}
-				},
-				{
-					"path": "webviewPage/webviewPage",
-					"style": {
-						"enablePullDownRefresh": false
-					}
-				},
-				{
-					"path": "mapPage/mapPage",
-					"style": {
-						"enablePullDownRefresh": false,
-						"navigationBarTitleText": "位置选择"
-					}
-				}, {
-					"path": "newForm/newForm",
-					"style": {
-						"navigationBarTitleText": "",
-						"enablePullDownRefresh": false
-					}
-				},
+				// {
+				// 	"path": "list/list",
+				// 	"style": {
+				// 		"navigationBarTitleText": "列表"
+				// 	}
+				// },
+				// {
+				// 	"path": "webviewPage/webviewPage",
+				// 	"style": {
+				// 		"enablePullDownRefresh": false
+				// 	}
+				// },
+				// {
+				// 	"path": "mapPage/mapPage",
+				// 	"style": {
+				// 		"enablePullDownRefresh": false,
+				// 		"navigationBarTitleText": "位置选择"
+				// 	}
+				// }, {
+				// 	"path": "newForm/newForm",
+				// 	"style": {
+				// 		"navigationBarTitleText": "",
+				// 		"enablePullDownRefresh": false
+				// 	}
+				// },
 				{
 					"path": "chat/chat",
 					"style": {

@@ -13,22 +13,7 @@
 					<view class="detail">{{item.detail}}</view>
 				</view>
 			</view>
-			<!-- <view class="correlation">
-				科室说明：{{item.symptom}}
-			</view> -->
 			
-			<!-- <view class="bottomSty">
-				<view class="">患病几率：</view>
-				<view class="flex  pressline" style="display: flex;align-items: center;">
-					<view class="cu-progress round">
-						<view :class="[estimate({id:item.possibility})]"
-						:style="[{ width:item.possibility?(item.possibility+'%'):'0'}]"
-						>
-						</view>
-					</view>
-					<text class="margin-left">{{item.possibility+'%'}}</text>
-				</view>
-			</view> -->
 			
 		</view>
 		<view v-if="symptomSkillList.length == 0" class="none-data">

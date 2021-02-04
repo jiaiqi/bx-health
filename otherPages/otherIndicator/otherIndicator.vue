@@ -267,7 +267,7 @@
 			<button class="cu-btn lg btn" @click="back" v-if="isSubmit">返回</button>
 			<button class="cu-btn sm round bg-red margin-left-xs" @click="deleteItem" v-if="submitType === 'update'"><text class="cuIcon-delete"></text></button>
 		</view>
-		<bz-date-picker
+		<!-- <bz-date-picker
 			v-model="popupStatus"
 			title="请选择时间"
 			:defaultTime="formateDate('', 'full')"
@@ -280,7 +280,7 @@
 			@confirm="handleDatePickerConfirm"
 			@cancel="handleDatePickerCancel"
 			@close="handleDatePickerClose"
-		></bz-date-picker>
+		></bz-date-picker> -->
 		<mx-date-picker
 			style="z-index: 1290;"
 			:format="dateFormat"

@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import UniQrcode from '../components/uni-qrcode/uni-qrcode';
+import UniQrcode from '@/components/uni-qrcode/uni-qrcode';
 export default {
 	components: { UniQrcode },
 	data() {

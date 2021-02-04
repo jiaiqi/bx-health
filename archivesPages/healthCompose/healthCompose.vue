@@ -13,16 +13,8 @@
 			<view class="more-couple-cen-wrap">
 				<view class="couple-cen more-couple-cen">
 					<view @click="toQuestionnaire(item)" v-for="(item, index) in coupleData" :key="index" class="couple-cen-item">
-						<!-- <view
-						@click="clickItem(item)"
-						v-for="(item, index) in coupleData"
-						:key="index"
-						class="couple-cen-item"
-					> -->
 						<view class="couple-cen-item-b">
 							<text>{{ item.name }}</text>
-							<!-- <text class="item-total-score"><text>总分:</text>{{item.fullMark ? Number(item.fullMark.toFixed(1)) : ''}}分</text> -->
-							<!-- <text class="ratio">[{{ item.fullMark ? Number(item.fullMark.toFixed(1)) : '' }}%]</text> -->
 						</view>
 						<view v-if="item.name !== '其它'" class="couple-cen-item-t">
 							<text class="text-blue score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">

@@ -1,106 +1,16 @@
 <template>
-	<view>
+	<view v-if="swiperCurrent || swiperCurrent === 0">
 		<view class="wrap">
 			<view class="u-tabs-box">
-				<u-tabs-swiper activeColor="#f29100" ref="tabs" :list="list" :current="current" @change="change" :is-scroll="false" swiperWidth="750"></u-tabs-swiper>
+				<u-tabs-swiper activeColor="#0bc99d" ref="tabs" :list="list" :current="current" @change="change" :is-scroll="false" swiperWidth="750"></u-tabs-swiper>
 			</view>
 			<swiper class="swiper-box" :current="swiperCurrent" @transition="transition" @animationfinish="animationfinish">
 				<swiper-item class="swiper-item">
 					<scroll-view scroll-y style="height: 100%;width: 100%;" @scrolltolower="reachBottom">
-						<view class="page-box">
-							<view class="order" v-for="(res, index) in orderList[0]" :key="res.id">
-								<view class="top">
-									<view class="left">
-										<u-icon name="home" :size="30" color="rgb(94,94,94)"></u-icon>
-										<view class="store">{{ res.store }}</view>
-										<u-icon name="arrow-right" color="rgb(203,203,203)" :size="26"></u-icon>
-									</view>
-									<view class="right">{{ res.deal }}</view>
-								</view>
-								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
-									<view class="left"><image :src="item.goodsUrl" mode="aspectFill"></image></view>
-									<view class="content">
-										<view class="title u-line-2">{{ item.title }}</view>
-										<view class="type">{{ item.type }}</view>
-										<view class="delivery-time">发货时间 {{ item.deliveryTime }}</view>
-									</view>
-									<view class="right">
-										<view class="price">
-											￥{{ priceInt(item.price) }}
-											<text class="decimal">.{{ priceDecimal(item.price) }}</text>
-										</view>
-										<view class="number">x{{ item.number }}</view>
-									</view>
-								</view>
-								<view class="total">
-									共{{ totalNum(res.goodsList) }}件商品 合计:
-									<text class="total-price">
-										￥{{ priceInt(totalPrice(res.goodsList)) }}.
-										<text class="decimal">{{ priceDecimal(totalPrice(res.goodsList)) }}</text>
-									</text>
-								</view>
-								<view class="bottom">
-									<view class="more"><u-icon name="more-dot-fill" color="rgb(203,203,203)"></u-icon></view>
-									<view class="logistics btn">查看物流</view>
-									<view class="exchange btn">卖了换钱</view>
-									<view class="evaluate btn">评价</view>
-								</view>
-							</view>
-							<u-loadmore :status="loadStatus[0]" bgColor="#f2f2f2"></u-loadmore>
-						</view>
-					</scroll-view>
-				</swiper-item>
-				<swiper-item class="swiper-item">
-					<scroll-view scroll-y style="height: 100%;width: 100%;" @scrolltolower="reachBottom">
-						<view class="page-box">
-							<view class="order" v-for="(res, index) in  orderList[1]" :key="res.id">
-								<view class="top">
-									<view class="left">
-										<u-icon name="home" :size="30" color="rgb(94,94,94)"></u-icon>
-										<view class="store">{{ res.store }}</view>
-										<u-icon name="arrow-right" color="rgb(203,203,203)" :size="26"></u-icon>
-									</view>
-									<view class="right">{{ res.deal }}</view>
-								</view>
-								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
-									<view class="left"><image :src="item.goodsUrl" mode="aspectFill"></image></view>
-									<view class="content">
-										<view class="title u-line-2">{{ item.title }}</view>
-										<view class="type">{{ item.type }}</view>
-										<view class="delivery-time">发货时间 {{ item.deliveryTime }}</view>
-									</view>
-									<view class="right">
-										<view class="price">
-											￥{{ priceInt(item.price) }}
-											<text class="decimal">.{{ priceDecimal(item.price) }}</text>
-										</view>
-										<view class="number">x{{ item.number }}</view>
-									</view>
-								</view>
-								<view class="total">
-									共{{ totalNum(res.goodsList) }}件商品 合计:
-									<text class="total-price">
-										￥{{ priceInt(totalPrice(res.goodsList)) }}.
-										<text class="decimal">{{ priceDecimal(totalPrice(res.goodsList)) }}</text>
-									</text>
-								</view>
-								<view class="bottom">
-									<view class="more"><u-icon name="more-dot-fill" color="rgb(203,203,203)"></u-icon></view>
-									<view class="logistics btn">查看物流</view>
-									<view class="exchange btn">卖了换钱</view>
-									<view class="evaluate btn">评价</view>
-								</view>
-							</view>
-							<u-loadmore :status="loadStatus[1]" bgColor="#f2f2f2"></u-loadmore>
-						</view>
-					</scroll-view>
-				</swiper-item>
-				<swiper-item class="swiper-item">
-					<scroll-view scroll-y style="height: 100%;width: 100%;">
-						<view class="page-box">
+						<view class="page-box" v-if="loadStatus[0] === 'noMore' && orderList[0].length === 0">
 							<view>
 								<view class="centre">
-									<image src="https://cdn.uviewui.com/uview/template/taobao-order.png" mode=""></image>
+									<image class="image" src="https://cdn.uviewui.com/uview/template/taobao-order.png" mode=""></image>
 									<view class="explain">
 										您还没有相关的订单
 										<view class="tips">可以去看看有那些想买的</view>
@@ -109,50 +19,267 @@
 								</view>
 							</view>
 						</view>
+						<view class="page-box" v-else>
+							<view class="order" v-for="(res, index) in orderList[0]" :key="res.id" @click="toOrderDetail(res)">
+								<view class="top">
+									<view class="left">
+										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
+										<view class="store">{{ res.store }}</view>
+										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
+									</view>
+									<view class="right">{{ res.deal || '' }}</view>
+								</view>
+								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
+									<view class="left"><image class="image" :src="item.goodsUrl" mode="aspectFill"></image></view>
+									<view class="content">
+										<view class="title">{{ item.title }}</view>
+										<view class="type">{{ item.type || '' }}</view>
+										<view class="right">
+											<view class="price">
+												￥{{ priceInt(item.price) }}
+												<text class="decimal">.{{ priceDecimal(item.price) }}</text>
+											</view>
+											<view class="number">x{{ item.number }}</view>
+										</view>
+										<view class="total">
+											共{{ totalNum(res.goodsList) }}件商品 合计:
+											<text class="total-price">
+												￥{{ priceInt(totalPrice(res.goodsList)) }}.
+												<text class="decimal">{{ priceDecimal(totalPrice(res.goodsList)) }}</text>
+											</text>
+										</view>
+									</view>
+								</view>
+								<view class="bottom">
+									<button class="cu-btn line-red round sm" @click.stop="deleteOrder(res)">删除订单</button>
+									<button class="cu-btn line-orange round sm" v-if="res.order_state === '待支付' && res.pay_state === '待支付'" @click.stop="toPay(res)">去支付</button>
+								</view>
+							</view>
+							<uni-load-more :status="loadStatus[0]"></uni-load-more>
+						</view>
 					</scroll-view>
 				</swiper-item>
 				<swiper-item class="swiper-item">
 					<scroll-view scroll-y style="height: 100%;width: 100%;" @scrolltolower="reachBottom">
-						<view class="page-box">
-							<view class="order" v-for="(res, index) in  orderList[3]" :key="res.id">
+						<view class="page-box" v-if="loadStatus[1] === 'noMore' && orderList[1].length === 0">
+							<view>
+								<view class="centre">
+									<image class="image" src="https://cdn.uviewui.com/uview/template/taobao-order.png" mode=""></image>
+									<view class="explain">
+										您还没有相关的订单
+										<view class="tips">可以去看看有那些想买的</view>
+									</view>
+									<view class="btn">随便逛逛</view>
+								</view>
+							</view>
+						</view>
+						<view class="page-box" v-else>
+							<view class="order" v-for="(res, index) in orderList[1]" :key="res.id" @click="toOrderDetail(res)">
 								<view class="top">
 									<view class="left">
-										<u-icon name="home" :size="30" color="rgb(94,94,94)"></u-icon>
+										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
 										<view class="store">{{ res.store }}</view>
-										<u-icon name="arrow-right" color="rgb(203,203,203)" :size="26"></u-icon>
+										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
-									<view class="right">{{ res.deal }}</view>
+									<view class="right">{{ res.deal || '' }}</view>
 								</view>
 								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
-									<view class="left"><image :src="item.goodsUrl" mode="aspectFill"></image></view>
+									<view class="left">
+										<image class="image" :src="item.goodsUrl" mode="aspectFill" v-if="item.goodsUrl"></image>
+										<text class="cuIcon-goods image" v-else></text>
+									</view>
 									<view class="content">
 										<view class="title u-line-2">{{ item.title }}</view>
 										<view class="type">{{ item.type }}</view>
-										<view class="delivery-time">发货时间 {{ item.deliveryTime }}</view>
-									</view>
-									<view class="right">
-										<view class="price">
-											￥{{ priceInt(item.price) }}
-											<text class="decimal">.{{ priceDecimal(item.price) }}</text>
+										<!-- <view class="delivery-time">发货时间 {{ item.deliveryTime }}</view> -->
+										<view class="right">
+											<view class="price">
+												￥{{ priceInt(item.price) }}
+												<text class="decimal">.{{ priceDecimal(item.price) }}</text>
+											</view>
+											<view class="number">x{{ item.number }}</view>
 										</view>
-										<view class="number">x{{ item.number }}</view>
+										<view class="total">
+											共{{ totalNum(res.goodsList) }}件商品 合计:
+											<text class="total-price">
+												￥{{ priceInt(totalPrice(res.goodsList)) }}.
+												<text class="decimal">{{ priceDecimal(totalPrice(res.goodsList)) }}</text>
+											</text>
+										</view>
 									</view>
-								</view>
-								<view class="total">
-									共{{ totalNum(res.goodsList) }}件商品 合计:
-									<text class="total-price">
-										￥{{ priceInt(totalPrice(res.goodsList)) }}.
-										<text class="decimal">{{ priceDecimal(totalPrice(res.goodsList)) }}</text>
-									</text>
 								</view>
 								<view class="bottom">
-									<view class="more"><u-icon name="more-dot-fill" color="rgb(203,203,203)"></u-icon></view>
-									<view class="logistics btn">查看物流</view>
-									<view class="exchange btn">卖了换钱</view>
-									<view class="evaluate btn">评价</view>
+									<button class="cu-btn line-red round sm" @click.stop="deleteOrder(res)">删除订单</button>
+									<button class="cu-btn line-grey round sm" @click.stop="cancelOrder(res)">取消订单</button>
+									<button class="cu-btn line-orange round sm" @click.stop="toPay(res)">去支付</button>
 								</view>
 							</view>
-							<u-loadmore :status="loadStatus[3]" bgColor="#f2f2f2"></u-loadmore>
+							<uni-load-more :status="loadStatus[1]"></uni-load-more>
+						</view>
+					</scroll-view>
+				</swiper-item>
+				<swiper-item class="swiper-item">
+					<scroll-view scroll-y style="height: 100%;width: 100%;" @scrolltolower="reachBottom">
+						<view class="page-box" v-if="loadStatus[2] === 'noMore' && orderList[2].length === 0">
+							<view>
+								<view class="centre">
+									<image class="image" src="https://cdn.uviewui.com/uview/template/taobao-order.png" mode=""></image>
+									<view class="explain">
+										您还没有相关的订单
+										<view class="tips">可以去看看有那些想买的</view>
+									</view>
+									<view class="btn">随便逛逛</view>
+								</view>
+							</view>
+						</view>
+						<view class="page-box" v-else>
+							<view class="order" v-for="(res, index) in orderList[2]" :key="res.id" @click="toOrderDetail(res)">
+								<view class="top">
+									<view class="left">
+										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
+										<view class="store">{{ res.store }}</view>
+										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
+									</view>
+									<view class="right">{{ res.deal || '' }}</view>
+								</view>
+								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
+									<view class="left"><image class="image" :src="item.goodsUrl" mode="aspectFill"></image></view>
+									<view class="content">
+										<view class="title u-line-2">{{ item.title }}</view>
+										<view class="type">{{ item.type }}</view>
+										<view class="right">
+											<view class="price">
+												￥{{ priceInt(item.price) }}
+												<text class="decimal">.{{ priceDecimal(item.price) }}</text>
+											</view>
+											<view class="number">x{{ item.number }}</view>
+										</view>
+										<view class="total">
+											共{{ totalNum(res.goodsList) }}件商品 合计:
+											<text class="total-price">
+												￥{{ priceInt(totalPrice(res.goodsList)) }}.
+												<text class="decimal">{{ priceDecimal(totalPrice(res.goodsList)) }}</text>
+											</text>
+										</view>
+									</view>
+								</view>
+								<view class="bottom">
+									<view class="more"><bx-icon name="more" :size="26" color="rgb(203,203,203)"></bx-icon></view>
+									<button class="cu-btn line-cyan round sm">再次购买</button>
+								</view>
+							</view>
+							<uni-load-more :status="loadStatus[2]"></uni-load-more>
+						</view>
+					</scroll-view>
+				</swiper-item>
+				<swiper-item class="swiper-item">
+					<scroll-view scroll-y style="height: 100%;width: 100%;">
+						<view class="page-box" v-if="loadStatus[3] === 'noMore' && orderList[3].length === 0">
+							<view>
+								<view class="centre">
+									<image class="image" src="https://cdn.uviewui.com/uview/template/taobao-order.png" mode=""></image>
+									<view class="explain">
+										您还没有相关的订单
+										<view class="tips">可以去看看有那些想买的</view>
+									</view>
+									<view class="btn">随便逛逛</view>
+								</view>
+							</view>
+						</view>
+						<view class="page-box" v-else>
+							<view class="order" v-for="(res, index) in orderList[3]" :key="res.id" @click="toOrderDetail(res)">
+								<view class="top">
+									<view class="left">
+										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
+										<view class="store">{{ res.store }}</view>
+										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
+									</view>
+									<view class="right">{{ res.deal || '' }}</view>
+								</view>
+								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
+									<view class="left">
+										<image class="image" :src="item.goodsUrl" mode="aspectFill" v-if="item.goodsUrl"></image>
+										<text class="cuIcon-goods image" v-else></text>
+									</view>
+									<view class="content">
+										<view class="title u-line-2">{{ item.title }}</view>
+										<view class="type">{{ item.type }}</view>
+										<view class="right">
+											<view class="price">
+												￥{{ priceInt(item.price) }}
+												<text class="decimal">.{{ priceDecimal(item.price) }}</text>
+											</view>
+											<view class="number">x{{ item.number }}</view>
+										</view>
+										<view class="total">
+											共{{ totalNum(res.goodsList) }}件商品 合计:
+											<text class="total-price">
+												￥{{ priceInt(totalPrice(res.goodsList)) }}.
+												<text class="decimal">{{ priceDecimal(totalPrice(res.goodsList)) }}</text>
+											</text>
+										</view>
+									</view>
+								</view>
+								<view class="bottom">
+									<view class="more"><bx-icon name="more" :size="26" color="rgb(203,203,203)"></bx-icon></view>
+									<button class="cu-btn line-orange round sm" @click.stop="toPay(res)">去支付</button>
+								</view>
+							</view>
+							<uni-load-more :status="loadStatus[3]"></uni-load-more>
+						</view>
+					</scroll-view>
+				</swiper-item>
+				<swiper-item class="swiper-item">
+					<scroll-view scroll-y style="height: 100%;width: 100%;" @scrolltolower="reachBottom">
+						<view class="page-box" v-if="loadStatus[4] === 'noMore' && orderList[4].length === 0">
+							<view>
+								<view class="centre">
+									<image class="image" src="https://cdn.uviewui.com/uview/template/taobao-order.png" mode=""></image>
+									<view class="explain">
+										您还没有相关的订单
+										<view class="tips">可以去看看有那些想买的</view>
+									</view>
+									<view class="btn">随便逛逛</view>
+								</view>
+							</view>
+						</view>
+						<view class="page-box" v-else>
+							<view class="order" v-for="(res, index) in orderList[4]" :key="res.id" @click="toOrderDetail(res)">
+								<view class="top">
+									<view class="left">
+										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
+										<view class="store">{{ res.store }}</view>
+										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
+									</view>
+									<view class="right">{{ res.deal || '' }}</view>
+								</view>
+								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
+									<view class="left"><image class="image" :src="item.goodsUrl" mode="aspectFill"></image></view>
+									<view class="content">
+										<view class="title u-line-2">{{ item.title }}</view>
+										<view class="type">{{ item.type }}</view>
+										<view class="right">
+											<view class="price">
+												￥{{ priceInt(item.price) }}
+												<text class="decimal">.{{ priceDecimal(item.price) }}</text>
+											</view>
+											<view class="number">x{{ item.number }}</view>
+										</view>
+										<view class="total">
+											共{{ totalNum(res.goodsList) }}件商品 合计:
+											<text class="total-price">
+												￥{{ priceInt(totalPrice(res.goodsList)) }}.
+												<text class="decimal">{{ priceDecimal(totalPrice(res.goodsList)) }}</text>
+											</text>
+										</view>
+									</view>
+								</view>
+								<view class="bottom">
+									<view class="more"><bx-icon name="more" :size="26" color="rgb(94,94,94)"></bx-icon></view>
+									<button class="cu-btn line-cyan round sm">再次购买</button>
+								</view>
+							</view>
+							<uni-load-more :status="loadStatus[4]"></uni-load-more>
 						</view>
 					</scroll-view>
 				</swiper-item>
@@ -162,139 +289,69 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
 	data() {
 		return {
-			orderList: [[], [], [], []],
-			dataList: [
-				{
-					id: 1,
-					store: '夏日流星限定贩卖',
-					deal: '交易成功',
-					goodsList: [
-						{
-							goodsUrl: '//img13.360buyimg.com/n7/jfs/t1/103005/7/17719/314825/5e8c19faEb7eed50d/5b81ae4b2f7f3bb7.jpg',
-							title: '【冬日限定】现货 原创jk制服女2020冬装新款小清新宽松软糯毛衣外套女开衫短款百搭日系甜美风',
-							type: '灰色;M',
-							deliveryTime: '付款后30天内发货',
-							price: '348.58',
-							number: 2
-						},
-						{
-							goodsUrl: '//img12.360buyimg.com/n7/jfs/t1/102191/19/9072/330688/5e0af7cfE17698872/c91c00d713bf729a.jpg',
-							title: '【葡萄藤】现货 小清新学院风制服格裙百褶裙女短款百搭日系甜美风原创jk制服女2020新款',
-							type: '45cm;S',
-							deliveryTime: '付款后30天内发货',
-							price: '135.00',
-							number: 1
-						}
-					]
-				},
-				{
-					id: 2,
-					store: '江南皮革厂',
-					deal: '交易失败',
-					goodsList: [
-						{
-							goodsUrl: '//img14.360buyimg.com/n7/jfs/t1/60319/15/6105/406802/5d43f68aE9f00db8c/0affb7ac46c345e2.jpg',
-							title: '【冬日限定】现货 原创jk制服女2020冬装新款小清新宽松软糯毛衣外套女开衫短款百搭日系甜美风',
-							type: '粉色;M',
-							deliveryTime: '付款后7天内发货',
-							price: '128.05',
-							number: 1
-						}
-					]
-				},
-				{
-					id: 3,
-					store: '三星旗舰店',
-					deal: '交易失败',
-					goodsList: [
-						{
-							goodsUrl: '//img11.360buyimg.com/n7/jfs/t1/94448/29/2734/524808/5dd4cc16E990dfb6b/59c256f85a8c3757.jpg',
-							title: '三星（SAMSUNG）京品家电 UA65RUF70AJXXZ 65英寸4K超高清 HDR 京东微联 智能语音 教育资源液晶电视机',
-							type: '4K，广色域',
-							deliveryTime: '保质5年',
-							price: '1998',
-							number: 3
-						},
-						{
-							goodsUrl: '//img14.360buyimg.com/n7/jfs/t6007/205/4099529191/294869/ae4e6d4f/595dcf19Ndce3227d.jpg!q90.jpg',
-							title: '美的(Midea)639升 对开门冰箱 19分钟急速净味 一级能效冷藏双开门杀菌智能家用双变频节能 BCD-639WKPZM(E)',
-							type: '容量大，速冻',
-							deliveryTime: '保质5年',
-							price: '2354',
-							number: 1
-						}
-					]
-				},
-				{
-					id: 4,
-					store: '三星旗舰店',
-					deal: '交易失败',
-					goodsList: [
-						{
-							goodsUrl: '//img10.360buyimg.com/n7/jfs/t22300/31/1505958241/171936/9e201a89/5b2b12ffNe6dbb594.jpg!q90.jpg',
-							title: '法国进口红酒 拉菲（LAFITE）传奇波尔多干红葡萄酒750ml*6整箱装',
-							type: '4K，广色域',
-							deliveryTime: '珍藏10年好酒',
-							price: '1543',
-							number: 3
-						},
-						{
-							goodsUrl: '//img10.360buyimg.com/n7/jfs/t1/107598/17/3766/525060/5e143aacE9a94d43c/03573ae60b8bf0ee.jpg',
-							title: '蓝妹（BLUE GIRL）酷爽啤酒 清啤 原装进口啤酒 罐装 500ml*9听 整箱装',
-							type: '一打',
-							deliveryTime: '口感好',
-							price: '120',
-							number: 1
-						}
-					]
-				},
-				{
-					id: 5,
-					store: '三星旗舰店',
-					deal: '交易成功',
-					goodsList: [
-						{
-							goodsUrl: '//img12.360buyimg.com/n7/jfs/t1/52408/35/3554/78293/5d12e9cfEfd118ba1/ba5995e62cbd747f.jpg!q90.jpg',
-							title: '企业微信 中控人脸指纹识别考勤机刷脸机 无线签到异地多店打卡机WX108',
-							type: '识别效率高',
-							deliveryTime: '使用方便',
-							price: '451',
-							number: 9
-						}
-					]
-				}
-			],
+			orderList: [[], [], [], [], []],
+			listPage: [{ pageNo: 1, rownumber: 10 }, { pageNo: 1, rownumber: 10 }, { pageNo: 1, rownumber: 10 }, { pageNo: 1, rownumber: 10 }, { pageNo: 1, rownumber: 10 }],
+			dataList: [],
 			list: [
 				{
-					name: '待支付'
+					name: '全部',
+					count: 0
 				},
 				{
-					name: '待发货'
+					name: '待支付',
+					count: 0
 				},
 				{
-					name: '待收货'
+					name: '待发货',
+					count: 0
+				},
+				{
+					name: '待收货',
+					count: 0
 				},
 				{
 					name: '已完成',
-					count: 12
+					count: 0
 				}
 			],
 			current: 0,
-			swiperCurrent: 0,
+			swiperCurrent: null,
 			tabsHeight: 0,
 			dx: 0,
-			loadStatus: ['loadmore','loadmore','loadmore','loadmore'],
+			loadStatus: ['more', 'more', 'more', 'more', 'more']
 		};
 	},
-	onLoad() {
-		this.getOrderList(0);
-		this.getOrderList(1);
-		this.getOrderList(3);
+	onLoad(option) {
+		for (let i = 0; i < 5; i++) {
+			this.getOrderList(i);
+		}
+		switch (option.type) {
+			case 'order-list': //全部
+				this.swiperCurrent = 0;
+				break;
+			case 'order-unpaid': //待支付
+				this.swiperCurrent = 1;
+				break;
+			case 'order-deliver': // 待发货
+				this.swiperCurrent = 2;
+				break;
+			case 'order-receiving': //待收货
+				this.swiperCurrent = 3;
+				break;
+			case 'order-finish': //已完成
+				this.swiperCurrent = 4;
+				break;
+		}
+		this.current = this.swiperCurrent;
 	},
 	computed: {
+		...mapState({
+			userInfo: state => state.user.userInfo
+		}),
 		// 价格小数
 		priceDecimal() {
 			return val => {
@@ -310,31 +367,179 @@ export default {
 			};
 		}
 	},
+	onPullDownRefresh() {
+		this.loadStatus[this.current] = 'more';
+		this.orderList[this.current] = [];
+		this.getOrderList(this.current);
+		setTimeout(_ => {
+			uni.stopPullDownRefresh();
+		}, 1000);
+	},
 	methods: {
+		cancelOrder(e) {
+			let self = this;
+			uni.showModal({
+				title: '提示',
+				content: '是否取消订单',
+				confirmText: '确定取消',
+				cancelText: '暂不取消',
+				success(res) {
+					if (res.confirm) {
+						self.updateOrderState('取消订单', '待支付');
+					}
+				}
+			});
+		},
+		deleteOrder(e) {
+			let self = this;
+			uni.showModal({
+				title: '提示',
+				content: '是否删除订单',
+				confirmText: '删除',
+				cancelText: '取消',
+				success(res) {
+					if (res.confirm) {
+						let req = [{ serviceName: 'srvhealth_store_order_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
+						self.$fetch('operate', 'srvhealth_store_order_delete', req, 'health').then(result => {
+							console.log(result);
+							debugger;
+							uni.startPullDownRefresh();
+						});
+					}
+				}
+			});
+		},
+		updateOrderState(order_state, pay_state) {
+			let req = [
+				{
+					serviceName: 'srvhealth_store_order_update',
+					condition: [{ colName: 'id', ruleType: 'eq', value: this.orderInfo.id }],
+					data: [{ order_state: order_state }, { pay_state: pay_state }]
+				}
+			];
+			this.$fetch('operate', 'srvhealth_store_order_update', req, 'health').then(res => {
+				console.log(res);
+				uni.startPullDownRefresh();
+			});
+		},
+		toOrderDetail(e) {
+			debugger;
+			uni.navigateTo({
+				url: '/personalPages/payOrder/payOrder?order_no=' + e.order_no
+			});
+		},
+		toPay(e) {
+			uni.navigateTo({
+				url: '/personalPages/payOrder/payOrder?order_no=' + e.order_no
+			});
+		},
 		reachBottom() {
 			// 此tab为空数据
-			if(this.current != 2) {
-				this.loadStatus.splice(this.current,1,"loading")
+			if (this.loadStatus[this.current] == 'more') {
+				// if (this.current != 2) {
+				// this.loadStatus.splice(this.current, 1, 'loading');
 				setTimeout(() => {
-					this.getOrderList(this.current);
+					this.getOrderList(this.current, 'more');
 				}, 1200);
+				// }
 			}
 		},
 		// 页面数据
-		getOrderList(idx) {
-			for(let i = 0; i < 5; i++) {
-				let index = this.$u.random(0, this.dataList.length - 1);
-				let data = JSON.parse(JSON.stringify(this.dataList[index]));
-				data.id = this.$u.guid();
-				this.orderList[idx].push(data);
+		async getOrderGoodsList(orderNos) {
+			let req = {
+				serviceName: 'srvhealth_store_order_goods_detail_select',
+				colNames: ['*'],
+				condition: [{ colName: 'order_no', ruleType: 'in', value: orderNos }],
+				query_source: 'list_page'
+			};
+			let goodsList = await this.$fetch('select', 'srvhealth_store_order_goods_detail_select', req, 'health');
+			if (goodsList.success) {
+				return goodsList.data;
+			} else {
+				return [];
 			}
-			this.loadStatus.splice(this.current,1,"loadmore")
+		},
+		async getOrderList(idx) {
+			let req = {
+				serviceName: 'srvhealth_store_order_select',
+				colNames: ['*'],
+				condition: [{ colName: 'order_state', ruleType: 'in', value: this.list[idx].name }],
+				page: { pageNo: this.orderList[idx].length === 0 ? this.listPage[idx].pageNo : this.listPage[idx].pageNo + 1, rownumber: this.listPage[idx].rownumber },
+				query_source: 'list_page'
+			};
+			if (this.loadStatus[idx] === 'more') {
+				this.loadStatus.splice(idx, 1, 'loading');
+			} else if (this.loadStatus[idx] === 'noMore') {
+				console.log(this.loadStatus);
+				debugger;
+				return;
+			}
+			if (idx === 0) {
+				req.condition = [];
+			}
+			let orderList = await this.$fetch('select', 'srvhealth_store_order_select', req, 'health');
+			this.listPage.splice(this.current, 1, { pageNo: orderList.page.pageNo, rownumber: orderList.page.rownumber, total: orderList.page.total });
+			if (orderList.success) {
+				this.listPage[idx].pageNo = orderList.page.pageNo;
+				this.list = this.list.map((item, index) => {
+					if (index === idx) {
+						if (orderList.page.total > 99) {
+							orderList.page.total = '99+';
+						}
+						if (idx === 0 || idx === 4) {
+							orderList.page.total = '';
+						}
+						this.$set(item, 'count', orderList.page.total);
+					}
+					return item;
+				});
+				let goodsList = await this.getOrderGoodsList(orderList.data.map(item => item.order_no).toString());
+				let resultData = orderList.data.map((item, index) => {
+					let data = {
+						...item,
+						// id: item.id,
+						// order_no:item.order_no,
+						store: item.store_name,
+						// deal: '交易失败',
+						goodsList: goodsList.reduce((pre, goods) => {
+							if (goods.order_no === item.order_no) {
+								pre.push({
+									goodsUrl: this.getImagePath(goods.goods_image),
+									title: goods.goods_desc,
+									// type: '4K，广色域',
+									// deliveryTime: '珍藏10年好酒',
+									price: goods.unit_price ? goods.unit_price : 0,
+									number: goods.goods_amount
+								});
+							}
+							return pre;
+						}, [])
+					};
+					return data;
+				});
+				let originData = this.deepClone(this.orderList[idx]);
+				if (this.listPage[idx].pageNo === 1) {
+					this.orderList[idx] = resultData;
+				} else {
+				}
+				this.orderList[idx] = [...originData, ...resultData];
+				if (orderList.page && orderList.page.pageNo) {
+					if (orderList.page.total <= orderList.page.rownumber * orderList.page.pageNo) {
+						// 没有更多数据了
+						this.$set(this.loadStatus, idx, 'noMore');
+					} else {
+						this.$set(this.loadStatus, idx, 'more');
+					}
+				} else {
+					this.$set(this.loadStatus, idx, 'more');
+				}
+			}
 		},
 		// 总价
 		totalPrice(item) {
 			let price = 0;
 			item.map(val => {
-				price += parseFloat(val.price);
+				price += parseFloat(val.price * val.number);
 			});
 			return price.toFixed(2);
 		},
@@ -349,7 +554,10 @@ export default {
 		// tab栏切换
 		change(index) {
 			this.swiperCurrent = index;
-			this.getOrderList(index);
+			if (this.orderList[index].length === 0 && this.loadStatus[index] === 'more') {
+				//
+				this.getOrderList(index);
+			}
 		},
 		transition({ detail: { dx } }) {
 			this.$refs.tabs.setDx(dx);
@@ -373,10 +581,6 @@ page {
 </style>
 
 <style lang="scss" scoped>
-.swiper-item uni-image{
-		margin: 0 auto;
-}
-	
 .order {
 	width: 710rpx;
 	background-color: #ffffff;
@@ -398,7 +602,7 @@ page {
 			}
 		}
 		.right {
-			color: $u-type-warning-dark;
+			color: $uni-color-success;
 		}
 	}
 	.item {
@@ -406,16 +610,25 @@ page {
 		margin: 20rpx 0 0;
 		.left {
 			margin-right: 20rpx;
-			image {
+			.image {
+				display: inline-block;
+				text-align: center;
+				line-height: 200rpx;
+				font-size: 40px;
+				background-color: #f1f1f1;
 				width: 200rpx;
 				height: 200rpx;
 				border-radius: 10rpx;
 			}
 		}
 		.content {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
 			.title {
-				font-size: 28rpx;
-				line-height: 50rpx;
+				font-size: 32rpx;
+				line-height: 40rpx;
+				font-weight: bold;
 			}
 			.type {
 				margin: 10rpx 0;
@@ -429,7 +642,6 @@ page {
 		}
 		.right {
 			margin-left: 10rpx;
-			padding-top: 20rpx;
 			text-align: right;
 			.decimal {
 				font-size: 24rpx;
@@ -442,7 +654,8 @@ page {
 		}
 	}
 	.total {
-		margin-top: 20rpx;
+		width: 100%;
+		// margin-top: 20rpx;
 		text-align: right;
 		font-size: 24rpx;
 		.total-price {
@@ -467,6 +680,8 @@ page {
 		.evaluate {
 			color: $u-type-warning-dark;
 			border-color: $u-type-warning-dark;
+			background-color: #fff;
+			margin: 0;
 		}
 	}
 }
@@ -478,6 +693,7 @@ page {
 		width: 164rpx;
 		height: 164rpx;
 		border-radius: 50%;
+		margin: 0 auto;
 		margin-bottom: 20rpx;
 	}
 	.tips {

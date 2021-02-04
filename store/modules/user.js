@@ -2,12 +2,6 @@ import {
 	getItem,
 	setItem
 } from '../utils.js'
-try {
-	// 尝试获取本地是否存在persistData变量，第一次启动APP时是不存在的
-	persistData = uni.getStorageSync('persistData') ? uni.getStorageSync('persistData') : {};
-} catch (e) {
-
-}
 
 const state = {
 	loginUserInfo: getItem('loginUserInfo') ? getItem('loginUserInfo') : {}, //账号信息

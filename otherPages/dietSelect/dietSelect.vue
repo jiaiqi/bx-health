@@ -32,7 +32,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="handler-action">
+		<view class="handler-action" v-if="pageType!=='sport'">
 			<text class="margin-right" @click="showModal('sort')" :class="{ 'text-cyan text-bold': childChooseArr.length > 0 }">
 				<text>排序</text>
 				<text class="cuIcon-order"></text>
@@ -810,8 +810,10 @@ export default {
 		};
 	},
 	onShow() {
-		this.getChooseFoodList();
-		this.getElementLabel();
+		if(this.pageType==='food'){
+			this.getChooseFoodList();
+			this.getElementLabel();
+		}
 		if (this.searchValue) {
 			this.getSearchValue(this.searchValue);
 		} else {
@@ -2042,16 +2044,6 @@ export default {
 						let weight = uni.getStorageSync('current_user_info').weight;
 						obj.energy = obj.energy * weight;
 					}
-					// if (this.searchArg.type === 'food') {
-					// 	if(item.classify && item.classify === 'mixed_food'){
-					// 		obj['mixed_food_no'] = item.meal_no
-					// 		obj['diret_type'] = item.classify
-					// 		obj['unit_weight_g'] = this.radioLabel?this.radioLabel.amount:100
-					// 	}else {
-					// 		obj['diet_contents_no'] = item.food_no
-					// 		obj['diret_type'] = 'diet_contents'
-					// 	}
-					// }
 					arr.push(obj);
 				});
 				let serviceName = '';

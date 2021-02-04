@@ -26,7 +26,10 @@
 				</view>
 			</view>
 		</view>
-		<view class="loadmore-box"><u-loadmore :status="status" @loadmore="loadMore" :load-text="loadText" v-if="list && list.length > 0" /></view>
+		<view class="loadmore-box">
+			<!-- <uni-load-more :status="status"></uni-load-more> -->
+			<u-loadmore :status="status" @loadmore="loadMore" :load-text="loadText" v-if="list && list.length > 0" />
+			</view>
 		<u-empty text="没有找到填写记录" v-if="list.length === 0 && !initLoad"></u-empty>
 	</view>
 </template>

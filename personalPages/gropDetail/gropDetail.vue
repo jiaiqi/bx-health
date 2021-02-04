@@ -83,7 +83,7 @@
 </template>
 
 <script>
-import UniQrcode from '../components/uni-qrcode/uni-qrcode';
+import UniQrcode from '@/components/uni-qrcode/uni-qrcode';
 import { mapState } from 'vuex';
 export default {
 	components: { UniQrcode },

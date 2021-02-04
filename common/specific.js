@@ -75,7 +75,7 @@ export default {
 		}
 
 		Vue.prototype.toPlaceOrder = async (total_fee, login_user_type,orderData) => {
-			// 下单
+			// 统一下单
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_order', 'operate');
 			let req = [{
 				"serviceName": "srvwx_order",
