@@ -59,7 +59,7 @@
 					</view>
 				</view>
 			</view>
-			<view class="qiun-charts">
+			<view class="qiun-charts" v-if="ec&&ec.option">
 				<!-- #ifdef MP-WEIXIN -->
 				<uni-ec-canvas class="uni-ec-canvas" ref="canvasPie" @click-chart="clickCharts" canvas-id="canvasPie" :ec="ec"></uni-ec-canvas>
 				<!-- #endif -->
@@ -116,68 +116,6 @@
 				</view>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal" :class="{ show: showEditModal }" @click.self="(showEditModal = false), (currentRecord = null)">
-			<view class="cu-dialog current-diet-detail" v-if="currentDiet">
-				<view class="title-bar" v-if="currentDiet.hdate && currentDiet.htime">
-					<view class="date">{{ currentDiet.hdate + ' ' + currentDiet.htime.slice(0, 5) }}</view>
-				</view>
-				<view class="diet-info">
-					<view class="img"><image width="100%" mode="aspectFit" height="100%" :src="currentDietImgUrl"></image></view>
-					<view class="info">
-						<view class="name">
-							{{ currentDiet.name }}
-							<view class="delete-icon" @click="deleteItem(currentDiet)">
-								<text class="text">删除记录</text>
-								<text class="cuIcon-delete"></text>
-							</view>
-						</view>
-						<view class="weight">
-							<text class="label margin-right-xs">热量:</text>
-							<text class="heat">
-								{{ currentDiet.energy }}
-								<text class="unit">千卡</text>
-							</text>
-						</view>
-						<view class="">
-							<text class="label text-bold margin-right-xs">单位:</text>
-							<!-- {{ currentDiet.unit_weight_g ? currentDiet.amount * currentDiet.unit_weight_g : currentDiet.amount }} -->
-							<text class="unit">{{ currentDiet.unit }}</text>
-						</view>
-					</view>
-					<view class="chart-box">
-						<!-- #ifdef MP-WEIXIN -->
-						<uni-ec-canvas class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-ec-canvas>
-						<!-- #endif -->
-						<!-- #ifdef H5 -->
-						<uni-echarts class="uni-ec-canvas" ref="uni-ec-canvas2" canvas-id="uni-ec-canvas2" :ec="currentDietChartData"></uni-echarts>
-						<!-- #endif -->
-					</view>
-					<view class="unit-box">
-						<view class="title">单位:</view>
-						<view class="unit-item" :class="{ 'active-unit': currentUnitIndex === index }" v-for="(u, index) in unitList" :key="index" @click="checkUnit(u, index)">
-							{{ u.unit_weight_g && u.unit === 'g' ? u.unit_weight_g + u.unit : u.unit }}
-						</view>
-					</view>
-					<view class="amount">
-						<view class="title">数量:</view>
-						<view class="number-box">
-							<text @click="changeCurrentVal('minus', 0.1)" class="symbol">-0.1</text>
-							<text @click="changeCurrentVal('minus')" class="symbol">-1</text>
-							<input class="input" @change="changeValue" v-model.number="currentDiet.amount" type="number" />
-							<text @click="changeCurrentVal('plus')" class="symbol">+1</text>
-							<text @click="changeCurrentVal('plus', 0.1)" class="symbol">+0.1</text>
-						</view>
-					</view>
-				</view>
-				<view class="delete-bar">
-					<view class="btn bg-grey" @click="(showEditModal = false), (currentDiet = null)">取消</view>
-					<view class="btn bg-blue" @click="UpdateDietInfo">确认</view>
-				</view>
-				<view class="number-bar"></view>
-				<view class="unit-bar"></view>
-			</view>
-			<!-- </u-popup> -->
-		</view>
 	</view>
 </template>
 
@@ -189,7 +127,6 @@ import uniEcCanvas from '@/components/uni-ec-canvas/uni-ec-canvas.vue';
 // #ifdef H5
 import uniEcharts from '@/components/uni-ec-canvas/uni-echarts.vue';
 // #endif
-import energyListWrap from '../static/js/totalEnergyList.js';
 export default {
 	components: {
 		// #ifdef MP-WEIXIN
@@ -221,12 +158,6 @@ export default {
 			});
 			return Number(total.toFixed(1));
 		},
-		currentDietImgUrl() {
-			let currentDiet = this.currentDiet;
-			if (currentDiet && currentDiet.image) {
-				return this.$api.downloadFile + currentDiet['image'] + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
-			}
-		},
 		age() {
 			if (this.userInfo.birthday) {
 				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
@@ -245,12 +176,8 @@ export default {
 	},
 	data() {
 		return {
-			currentDietChartData: {},
 			ec: {},
-			currentDiet: null,
-			currentUnitIndex: 0,
 			unitList: [],
-			showEditModal: false,
 			chartData: {
 				series: []
 			},
@@ -263,251 +190,12 @@ export default {
 			listTouchStart: 0,
 			modalName: null,
 			piearr: [],
-			energyListWrap: energyListWrap,
 			userInfo: uni.getStorageSync('current_user_info')
 		};
 	},
 	methods: {
 		clickCharts(e) {
 			console.log(e);
-		},
-		async getFoodUnit(item) {
-			// 查找当前食物的单位
-			let url = this.getServiceUrl('health', 'srvhealth_food_unit_amount_estimate_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_food_unit_amount_estimate_select',
-				colNames: ['*'],
-				condition: [{ colName: 'food_no', ruleType: 'eq', value: item.diet_contents_no ? item.diet_contents_no : item.mixed_food_no }],
-				page: { pageNo: 1, rownumber: 10 }
-			};
-			let res = await this.$http.post(url, req);
-			let unitList = [];
-			unitList.push(item);
-			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-				unitList = [...unitList, ...res.data.data];
-			} else {
-				// unitList = [item];
-			}
-			this.unitList = unitList;
-			return unitList;
-		},
-		async getFoodType(cond) {
-			// 食物类型
-			let url = this.getServiceUrl('health', 'srvhealth_diet_contents_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_diet_contents_select',
-				colNames: ['*'],
-				condition: [],
-				order: []
-			};
-			if (cond) {
-				req.condition = cond;
-			}
-			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
-				console.log(res.data.data);
-				this.foodType = res.data.data;
-			}
-			return res.data.data;
-		},
-		checkUnit(item, index) {
-			// 切换单位
-			this.currentUnitIndex = index;
-			let currentUnit = this.unitList[index];
-			console.log(this.currentDiet);
-			//TODO 动态改变热量
-			this.currentDiet.unit_weight_g = currentUnit.unit_weight_g ? currentUnit.unit_weight_g : currentUnit.amount;
-			this.currentDiet.unit = item.unit;
-			this.buildCurrenDietChartOption();
-		},
-		async buildCurrenDietChartOption() {
-			let currentDiet = this.deepClone(this.currentDiet);
-			let dietRecordList = this.deepClone(this.dietRecord);
-			let foodType = [];
-			if (Array.isArray(this.foodType) && this.foodType.length > 0) {
-				foodType = this.deepClone(this.foodType);
-			} else {
-				let record = this.dietRecord;
-				let condition = null;
-				if (Array.isArray(record) && record.length > 0) {
-					let names = record.map(item => item.name);
-					condition = [
-						{
-							colName: 'name',
-							ruleType: 'in',
-							value: names.toString()
-						}
-					];
-					foodType = await this.getFoodType(condition);
-				}
-			}
-			foodType.forEach(food => {
-				if (currentDiet.name === food.name) {
-					currentDiet = { ...food, ...currentDiet };
-				}
-			});
-			this.energyListWrap = await this.buildDietData();
-			console.log(this.energyListWrap);
-			let energyList = this.deepClone(this.energyListWrap);
-			let eleArr = [];
-			energyList.forEach(item => {
-				item.matterList.forEach(ele => {
-					eleArr.push(ele);
-				});
-			});
-			let category = eleArr.map(item => {
-				return item.name;
-			});
-			let legendData = ['其它食物', '当前食物', 'NRV%达标线'];
-			let seriesData = legendData.map(le => {
-				let obj = {
-					name: le,
-					data: []
-				};
-				obj.type = 'bar';
-				obj.stack = '营养素';
-				let data = eleArr.map(item => {
-					let num = (item.value * 100) / Number(item.EAR);
-					num = parseFloat(num.toFixed(1));
-					return num;
-				});
-				switch (le) {
-					case '其它食物':
-						obj.data = eleArr.map(item => {
-							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							item.value = item.value - currentDiet[item.key];
-							let num = (item.value * 100) / Number(item.EAR);
-							num = Math.abs(parseFloat(num.toFixed(1)));
-							return num;
-						});
-						break;
-					case '当前食物':
-						obj.data = eleArr.map(item => {
-							let ratio = (currentDiet.unit_weight_g * currentDiet.amount) / 100;
-							let num = currentDiet[item.key] ? (ratio * currentDiet[item.key] * 100) / Number(item.EAR) : 0;
-							num = Math.abs(parseFloat(num.toFixed(1)));
-							return num;
-						});
-						break;
-					case 'NRV%达标线':
-						obj.type = 'line';
-						obj.stack = false;
-						obj.data = eleArr.map(item => {
-							return 100;
-						});
-						break;
-				}
-				return obj;
-			});
-			let option = {
-				color: ['#92d050', '#f79646', '#4f81bd'],
-				title: {
-					text: ''
-				},
-				tooltip: {
-					show: false,
-					trigger: 'axis'
-				},
-				legend: {
-					data: legendData
-				},
-				grid: {
-					left: '3%',
-					right: '4%',
-					bottom: '3%',
-					top: '10%',
-					containLabel: true
-				},
-				xAxis: [
-					{
-						type: 'category',
-						data: category,
-						axisLabel: {
-							rotate: 70,
-							interval: 0,
-							fontSize: 10
-						}
-					}
-				],
-				yAxis: [
-					{
-						type: 'value',
-						axisLabel: {
-							formatter: `{value}%`
-						}
-					}
-				],
-				series: []
-			};
-			option.series = seriesData;
-			let result = {
-				option: option
-			};
-			this.currentDietChartData = result;
-		},
-		async getNutrientRecommended() {
-			let self = this;
-			let url = this.getServiceUrl('health', 'srvhealth_nutrient_values_recommended_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_nutrient_values_recommended_select',
-				colNames: ['*'],
-				order: [
-					{
-						colName: 'nutrient',
-						orderType: 'desc' // asc升序  desc降序
-					}
-				]
-			};
-			let res = await this.$http.post(url, req);
-			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-				let result = res.data.data.filter(item => {
-					if ((item.sex && item.sex.indexOf(self.userInfo.sex) !== -1) || !item.sex) {
-						if (item.age_start && item.age_end) {
-							return self.age >= item.age_start && self.age < item.age_end;
-						} else if (item.age_start && !item.age_end) {
-							return self.age >= item.age_start;
-						} else if (!item.age_start && !item.age_end) {
-							return true;
-						} else {
-							return false;
-						}
-					}
-				});
-				result.forEach(item => {
-					self.energyListWrap.forEach(energy => {
-						energy.matterList.forEach(mat => {
-							if (item.nutrient === mat.name || item.nutrient.indexOf(mat.name) !== -1) {
-								mat.UL = item.val_ul ? item.val_ul : mat.UL;
-								mat.EAR = item.val_rni ? item.val_rni : mat.EAR;
-								if (energy.title !== '水溶性维生素') {
-									mat.UL = item.val_ul ? item.val_ul : mat.UL;
-								} else {
-									mat.UL = 0;
-								}
-								if (mat.name === '蛋白') {
-									mat.EAR = item.val_rni
-										? item.val_rni * self.userInfo.weight
-										: item.val_ear
-										? item.val_ear * self.userInfo.weight
-										: mat.EAR * self.userInfo.weight;
-									mat.UL = 0;
-								}
-							} else {
-								if (mat.name === '脂肪') {
-									mat.EAR = Number((self.userInfo.weight * 50 * 0.2) / 9).toFixed(2);
-									mat.UL = 0;
-								}
-								if (mat.name === '碳水') {
-									mat.EAR = self.userInfo.weight * 4;
-									mat.UL = 0;
-								}
-							}
-						});
-					});
-				});
-				console.log(this.deepClone(self.energyListWrap));
-				return result;
-			}
 		},
 		/* 根据饮食记录查找食物**/
 		async getChooseFood(str) {
@@ -527,95 +215,10 @@ export default {
 			console.log('res-------', res.data.data);
 			return res.data.data;
 		},
-		async buildDietData() {
-			let data = this.dietRecord;
-			let strArr = [];
-			data.forEach(item => {
-				item['editable'] = false;
-				strArr.push(item.name);
-			});
-			let energyList = this.deepClone(this.energyListWrap);
-			let str = strArr.join();
-			let a = await this.getChooseFood(str);
-			if (Array.isArray(a) && a.length > 0) {
-				a.forEach(food => {
-					data.forEach(re => {
-						if (food.name === re.name) {
-							food['amount'] = food['amount'] ? food['amount'] + re.amount : re.amount;
-						}
-					});
-				});
-				let chooseFood = a;
-				if (chooseFood && chooseFood.length > 0) {
-					let eledata = '';
-					energyList.forEach(item => {
-						item.matterList.forEach(mat => {
-							mat.value = 0;
-							chooseFood.forEach(fod => {
-								for (let a in fod) {
-									if (mat.key && mat.key == a) {
-										mat.value = Number(mat.value) + Number(fod.amount) * Number(fod[a]);
-									}
-								}
-							});
-						});
-					});
-				}
-			}
-			return energyList;
-		},
 		async clickDietItem(item) {
-			let unitList = await this.getFoodUnit(item);
-			unitList.forEach((unit, index) => {
-				console.log(item, unit);
-				if (item.unit === unit.unit) {
-					this.currentUnitIndex = index;
-				}
-			});
-			// this.showEditModal = true;
-			// this.currentDiet = this.deepClone(item);
-			// this.buildCurrenDietChartOption();
 			uni.navigateTo({
 				url: `/archivesPages/DietDetail/DietDetail?chooseDate=${this.date}&no=${item.diet_record_no}`
 			});
-		},
-		async UpdateDietInfo() {
-			let self = this;
-			let dietInfo = this.deepClone(this.currentDiet);
-			let serviceName = 'srvhealth_diet_record_update';
-			let url = this.getServiceUrl('health', serviceName, 'operate');
-			let req = [
-				{
-					serviceName: 'srvhealth_diet_record_update',
-					condition: [{ colName: 'id', ruleType: 'eq', value: dietInfo.id }],
-					data: [
-						{
-							amount: dietInfo.amount,
-							energy: dietInfo.energy,
-							unit_weight_g: dietInfo.unit_weight_g,
-							unit: dietInfo.unit
-						}
-					]
-				}
-			];
-			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS') {
-				await self.getDietRecord();
-				console.log(self.elementData);
-				self.showEditModal = false;
-			}
-		},
-		changeCurrentVal(e, step = 1) {
-			if (e === 'minus') {
-				if (this.currentDiet.amount >= 1) {
-					this.currentDiet.amount = Number((this.currentDiet.amount - step).toFixed(1));
-				} else {
-					return;
-				}
-			} else {
-				this.currentDiet.amount = Number((this.currentDiet.amount + step).toFixed(1));
-			}
-			this.buildCurrenDietChartOption();
 		},
 		toAddDiet() {
 			// 跳转到选餐页面
@@ -632,7 +235,6 @@ export default {
 				},
 				lackEle: elementData
 			};
-			// if (elementData.value < elementData.EAR) {
 			condType.order = [
 				{
 					colName: this.elementData.key,
@@ -663,7 +265,6 @@ export default {
 								uni.showToast({
 									title: '删除成功'
 								});
-								self.showEditModal = false;
 								self.getDietRecord();
 							}
 						});
@@ -691,7 +292,6 @@ export default {
 			return res.data.data;
 		},
 		async getDietRecord() {
-			await this.getNutrientRecommended();
 			// 饮食记录
 			let url = this.getServiceUrl('health', 'srvhealth_diet_record_select', 'select');
 			let req = {
