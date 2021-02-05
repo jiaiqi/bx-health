@@ -63,7 +63,7 @@
 					</view>
 					<text class="title-action" @click="toPages('record')">
 						<text class="cuIcon-add "></text>
-						<text class="see-histroy">添加</text>
+						<!-- <text class="see-histroy">添加</text> -->
 					</text>
 				</view>
 				<view class="drug-record-timeline">
@@ -80,20 +80,23 @@
 									v-for="(record, index) in item.data"
 									:key="index"
 									@click="toPages('record-detail', record)"
-									:class="{ 'bg-blue': item.date === nowDate, 'bg-gray': item.date !== nowDate }"
+									:class="{ 'bg-blue': item.date === nowDate && !record.incomplete, 'bg-gray': item.date !== nowDate }"
 								>
-									<view class="time">
+									<view class="time" v-if="!record.incomplete">
 										<text>{{ record.take_time.slice(0, 5) }}</text>
 										<text class="margin-left-xs" v-if="record.blood_glucose_val">({{ record.blood_glucose_val }}mmol/L)</text>
 										<text class="margin-left-xs" v-if="record.weight">({{ record.weight }}kg)</text>
 										<text class="margin-left-xs" v-if="record.name && !record.blood_glucose_val && !record.weight">({{ record.name }})</text>
 									</view>
-									<view class="info" v-if="planDetail.play_srv === '运动'">{{ record.name + record.amount + record.unit }}</view>
-									<view class="info" v-if="isArray(record.drugList) && planDetail.play_srv !== '运动'">已完成：{{ getDegree(record.drugList, 'degree') }}</view>
+									<view class="incompltet-view" v-if="record.incomplete" @click.stop="toPages('record')">待完成</view>
+									<view class="info" v-if="planDetail.play_srv === '运动' && !record.incomplete">{{ record.name + record.amount + record.unit }}</view>
+									<view class="info" v-if="isArray(record.drugList) && planDetail.play_srv !== '运动' && !record.incomplete">
+										已完成：{{ getDegree(record.drugList, 'degree') }}
+									</view>
 									<view
 										class="progress bg-blue"
 										:style="{ width: getDegree(record.drugList).width }"
-										v-if="isArray(record.drugList) && planDetail.play_srv !== '运动' && getDegree(record.drugList) && getDegree(record.drugList).width"
+										v-if="!record.incomplete && isArray(record.drugList) && planDetail.play_srv !== '运动' && getDegree(record.drugList) && getDegree(record.drugList).width"
 									></view>
 								</view>
 							</view>
@@ -312,7 +315,6 @@ export default {
 		monthSwitch(e) {
 			this.getDrugRecord(this.planNo, `${e.year}-${e.month}`);
 		},
-		openCalendar() {},
 		getDegree(drugList, type) {
 			if (type === 'degree') {
 				return `${drugList.filter(item => item.hasTook).length}/${drugList.length}`;
@@ -657,6 +659,7 @@ export default {
 			this.drugDetailType = 'update';
 		},
 		async getFieldsV2(serviceName) {
+			let self = this;
 			let colVs = await this.getServiceV2('srvhealth_plan_schedule_select', 'detail', 'detail', 'health');
 			let defaultVal = '';
 			if (this.planNo) {
@@ -689,11 +692,23 @@ export default {
 							this.drugList = res.data.data;
 						}
 					}
+					if (item.service_name === 'srvhealth_plan_schedule_sports_detail_select'&&item.service_view_name.indexOf(this.planDetail.play_srv) !== -1 ) {
+						let req = {
+							condition: [{ colName: 'ds_no', ruleType: 'eq', value: this.planNo }]
+						};
+						self.$fetch('select', item.service_name, req, 'health').then(res => {
+							if (res.success) {
+								childServiceData.push({
+									colVs: item,
+									data: res.data
+								});
+								this.childServiceData = childServiceData;
+								this.drugList = res.data;
+							}
+						});
+					}
 				}
 			}
-			// if(Array.isArray(this.childServiceData)){
-
-			// }
 			let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params.defaultVal);
 			let hideColumns = [
 				'play_srv',
@@ -736,7 +751,7 @@ export default {
 				req.condition = [{ colName: 'plan_no', ruleType: 'eq', value: this.planNo }];
 			}
 			let res = await this.$http.post(url, req);
-			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+			if (Array.isArray(res.data.data)) {
 				return res.data.data;
 			}
 		},
@@ -748,11 +763,8 @@ export default {
 				serviceName: 'srvhealth_plan_schedule_record_select',
 				colNames: ['*'],
 				order: [{ colName: 'take_date', orderType: 'desc' }],
-				condition: [{ colName: 'ds_no', ruleType: 'eq', value: no }]
+				condition: [{ colName: 'ds_no', ruleType: 'eq', value: no }, { colName: 'create_user', ruleType: 'eq', value: this.userInfo.userno }]
 			};
-			if (this.login_user_info && this.login_user_info.user_no) {
-				req.condition.push({ colName: 'create_user', ruleType: 'eq', value: this.login_user_info.user_no });
-			}
 			if (this.planDetail.play_srv === '测血压') {
 				url = this.getServiceUrl('health', 'srvhealth_blood_pressure_record_select', 'select');
 				req.serviceName = 'srvhealth_blood_pressure_record_select';
@@ -923,11 +935,13 @@ export default {
 							if (this.planDetail.play_srv === '运动' && date === item.take_date) {
 								if (Array.isArray(DrugRecordDetailList) && DrugRecordDetailList.length > 0) {
 									DrugRecordDetailList.forEach(detail => {
-										detail.date = detail.hdate;
-										detail.take_date = detail.hdate;
-										detail.hasTook = true; //已服用
-										detail.take_time = detail.htime;
-										record.data.push(detail);
+										if (detail.dsr_no === item.dsr_no) {
+											detail.date = detail.hdate;
+											detail.take_date = detail.hdate;
+											detail.hasTook = true; //已服用
+											detail.take_time = detail.htime;
+											record.data.push(detail);
+										}
 									});
 								}
 							} else {
@@ -966,8 +980,62 @@ export default {
 							return pre;
 						}, []);
 					}
-					this.drugRecord = recordList.filter(item => {
-						return item.date.indexOf(date) !== -1;
+					recordList = recordList.filter(item => {
+						let lastDay = dayjs(date)
+							.subtract(1, 'd')
+							.format('YYYY-MM-DD');
+						if (item.date.indexOf(date) !== -1 || item.date.indexOf(lastDay) !== -1) {
+							return true;
+						}
+					});
+					let todayRecord = recordList.filter(item => item.date.indexOf(date) !== -1);
+					console.log(recordList);
+					if (Array.isArray(todayRecord) && todayRecord.length > 0) {
+						todayRecord = todayRecord[0];
+					} else {
+						todayRecord = {
+							data: [],
+							date: date
+						};
+						recordList.unshift(todayRecord);
+					}
+					let needTakeTimes = 0;
+					if (Array.isArray(this.drugList) && this.drugList.length > 0) {
+						this.drugList.forEach(item => {
+							if (item.take_times && needTakeTimes < Number(item.take_times)) {
+								needTakeTimes = Number(item.take_times);
+							}
+							// if (item.amount_each_time && needTakeTimes < item.amount_each_time) {
+							// 	needTakeTimes = Number(item.amount_each_time);
+							// }
+						});
+					}
+					if (todayRecord.data.length < needTakeTimes) {
+						todayRecord.data.length = needTakeTimes;
+						let arr = [];
+						for (let i = 0; i < needTakeTimes; i++) {
+							for (let idx = 0; idx < todayRecord.data.length; idx++) {
+								if (i === idx) {
+									let item = this.deepClone(todayRecord.data[idx]);
+									let obj = {};
+									if (item) {
+										obj = this.deepClone(item);
+									} else {
+										obj = {
+											incomplete: true
+										};
+									}
+									arr.push(obj);
+								}
+							}
+						}
+						todayRecord.data = arr;
+					}
+					this.drugRecord = recordList.map(item => {
+						if (item.date === date) {
+							item.data = todayRecord.data;
+						}
+						return item;
 					});
 					if (this.drugRecord.length === 0) {
 						this.noRecord = true;
@@ -1081,6 +1149,9 @@ export default {
 			self.modalName = 'drugDetail';
 		});
 		uni.$on('addDrug', e => {
+			this.getFieldsV2(this.serviceName);
+		});
+		uni.$on('record-update', () => {
 			this.getFieldsV2(this.serviceName);
 		});
 	},

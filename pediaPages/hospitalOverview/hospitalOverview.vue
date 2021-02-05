@@ -6,9 +6,6 @@
 				<view class="left">
 					<view class="top">
 						<view class="name">{{ storeInfo.name }}</view>
-						<!-- 	<view class="tags">
-							<text class="tag" v-for="item in hospitalInfo.tag" :key="item">{{ item }}</text>
-						</view> -->
 					</view>
 					<view class="bottom">
 						<view class="address" @click="getCurrentLocation">
@@ -22,10 +19,13 @@
 			<view class="introduction">
 				<view class="title">
 					<text class="cuIcon-titles text-blue"></text>
-					医院简介
+					{{ storeInfo.name || '' }}
 				</view>
 				<view class="content">
-					<view class="rich-text">{{ storeInfo.introduction || '暂无介绍' }}</view>
+					<view class="rich-text">
+						{{ introduction || '暂无介绍' }}
+						<view class="see-more" v-if="introduction !== storeInfo.introduction" @click="seeMore">查看更多</view>
+					</view>
 				</view>
 			</view>
 			<view class="introduction news">
@@ -34,15 +34,10 @@
 					<text class="">通知公告</text>
 				</view>
 				<view class="content news-list">
-					<view class="news-item">
+					<view class="news-item" v-for="item in noticeList" @click="toArticle(item)">
 						<text class="cuIcon-mail text-orange margin-right-xs"></text>
-						<text class="title-text">关于启动2021年3月进修人员招收的通知</text>
-						<text class="date">2021-01-20</text>
-					</view>
-					<view class="news-item">
-						<text class="cuIcon-mail text-orange margin-right-xs"></text>
-						<text class="title-text">国家药监局核查中心对我院药物临床试验数据现场核查工作顺利结束</text>
-						<text class="date">2021-01-19</text>
+						<text class="title-text">{{ item.title }}</text>
+						<text class="date">{{ formateDate(item.create_time) }}</text>
 					</view>
 				</view>
 			</view>
@@ -125,10 +120,12 @@ export default {
 	data() {
 		return {
 			storeNo: '',
+			fullIntro:false,
 			storeInfo: {},
 			staffList: [], //工作人员
 			deptList: [], //科室
 			groupList: [], // 关联圈子
+			noticeList: [],
 			hospitalData: {},
 			hospitalInfo: {
 				name: '西安交通大学第一附属医院',
@@ -157,12 +154,17 @@ export default {
 			}
 		},
 		introduction() {
-			if (this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction.length > 50) {
-				return this.storeInfo.introduction.slice(0, 50) + '...';
+			if (!this.fullIntro&&this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction.length > 80) {
+				return this.storeInfo.introduction.slice(0, 80) + '...';
+			} else {
+				return this.storeInfo.introduction;
 			}
 		}
 	},
 	methods: {
+		seeMore(){
+			this.fullIntro = true
+		},
 		toStorePage() {
 			uni.switchTab({
 				url: '/pages/store/store'
@@ -177,6 +179,31 @@ export default {
 			if (Array.isArray(res.data)) {
 				this.groupList = res.data;
 			}
+		},
+		toArticle(e) {
+			if (e.content_no) {
+				uni.navigateTo({
+					url: '/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=' + e.content_no
+				});
+			}
+		},
+		getNotice() {
+			let req = {
+				condition: [{ colName: 'website_no', ruleType: 'eq', value: this.storeInfo.website_no }]
+			};
+			this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(res => {
+				if (res.success && res.data.length > 0) {
+					let data = res.data[0];
+					let req = {
+						condition: [{ colName: 'no', ruleType: 'eq', value: data.no }]
+					};
+					this.$fetch('select', 'srvdaq_cms_content_select', req, 'daq').then(res => {
+						if (res.success) {
+							this.noticeList = res.data;
+						}
+					});
+				}
+			});
 		},
 		async toGroup(e) {
 			// let res = await this.selectPersonInGroup(e.gc_no)
@@ -232,6 +259,7 @@ export default {
 				this.$http.post(url, req).then(res => {
 					if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 						this.storeInfo = res.data.data[0];
+						this.getNotice();
 						resolve(res.data.data[0]);
 					} else {
 						reject(res);
@@ -500,10 +528,19 @@ export default {
 			}
 		}
 		.content {
-			padding: 5px 10px;
+			padding: 0 10px;
 			.rich-text {
-				height: 100rpx;
-				overflow: hidden;
+				min-height: 100rpx;
+				overflow: scroll;
+				transition: all .2s linear;
+				.see-more{
+					background: linear-gradient(rgba(255,255,255,0.5),#fff);
+					color: #888;
+					text-align: center;
+					position: relative;
+					top: -10px;
+					z-index: 2;
+				}
 			}
 			.group-box {
 				width: 100%;

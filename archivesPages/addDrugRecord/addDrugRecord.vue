@@ -206,6 +206,7 @@ export default {
 										showCancel: false,
 										success(res) {
 											if (res.confirm) {
+												uni.$emit('addDrug')
 												uni.navigateBack();
 											}
 										}
@@ -308,6 +309,7 @@ export default {
 			}
 			if (this.ds_no) {
 				let res = await this.$http.post(url, req);
+				debugger
 				if (Array.isArray(res.data.data)) {
 					if (this.addType == 'sport') {
 						if (this.formType === 'detail') {
@@ -507,6 +509,7 @@ export default {
 								let resData = this.getResData(res.data.response);
 								console.log('resData', resData);
 								this.type = 'detail';
+								uni.$emit('addDrug')
 								await this.getFieldsV2();
 							}
 						}

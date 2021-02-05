@@ -208,7 +208,6 @@ export default {
 			this.$fetch('operate', 'srvhealth_store_order_add', req, 'health').then(res => {
 				if (res.success && Array.isArray(res.data) && res.data.length > 0) {
 					console.log(res.data[0]);
-					debugger;
 					this.orderNo = res.data[0].order_no;
 					this.getOrderInfo().then(data => {
 						debugger;
@@ -218,7 +217,7 @@ export default {
 			});
 		},
 		async toPay() {
-			let self = this
+			let self = this;
 			let orderData = this.deepClone(this.orderInfo);
 			let goodsData = this.deepClone(this.orderInfo.goodsList);
 			if (typeof this.totalMoney !== 'number' || this.totalMoney.toString() === 'NaN') {
@@ -239,28 +238,30 @@ export default {
 					orderData
 				);
 			}
-			let res = await this.getPayParams(result.prepay_id);
-			wx.requestPayment({
-				timeStamp: res.timeStamp.toString(),
-				nonceStr: res.nonceStr,
-				package: res.package,
-				signType: 'MD5',
-				paySign: res.paySign,
-				success(res) {
-					// 支付成功
-					self.orderInfo.order_state = '待发货';
-					self.updateOrderState('待发货', '已支付', result.prepay_id);
-					self.orderInfo.pay_state = '已支付';
-					uni.redirectTo({
-						url: '/personalPages/successPay/successPay?order_no=' + orderData.order_no+'&totalMoney='+self.totalMoney 
-					});
-				},
-				fail(res) {
-					// 支付失败/取消支付
-					self.orderInfo.pay_state = '取消支付';
-					self.updateOrderState('待支付', '取消支付', result.prepay_id);
-				}
-			});
+			if (result && result.prepay_id) {
+				let res = await this.getPayParams(result.prepay_id);
+				wx.requestPayment({
+					timeStamp: res.timeStamp.toString(),
+					nonceStr: res.nonceStr,
+					package: res.package,
+					signType: 'MD5',
+					paySign: res.paySign,
+					success(res) {
+						// 支付成功
+						self.orderInfo.order_state = '待发货';
+						self.updateOrderState('待发货', '已支付', result.prepay_id);
+						self.orderInfo.pay_state = '已支付';
+						uni.redirectTo({
+							url: '/personalPages/successPay/successPay?order_no=' + orderData.order_no + '&totalMoney=' + self.totalMoney
+						});
+					},
+					fail(res) {
+						// 支付失败/取消支付
+						self.orderInfo.pay_state = '取消支付';
+						self.updateOrderState('待支付', '取消支付', result.prepay_id);
+					}
+				});
+			}
 		}
 	},
 	onLoad(option) {

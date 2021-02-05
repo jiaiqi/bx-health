@@ -3,14 +3,10 @@
 	background-color: #fff;
 	overflow: hidden;
 	.main-table {
-		// padding: 20rpx 0;
 		display: grid;
 		margin: 20rpx;
 		grid-template-columns: repeat(2, calc(50% - 0rpx));
-		// grid-column-gap: 20rpx;
 		background-color: #b3d8ff33;
-		// box-shadow: 0px 1px 4px 0px #4e87c6, 0px 5px 2px 0px #b3d8ff;
-		// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		border-radius: 20rpx;
 		min-height: 220rpx;
 		overflow: hidden;
@@ -19,16 +15,13 @@
 			padding: 10rpx 20rpx;
 			line-height: 40rpx;
 			color: #333;
-			// border: 1px solid #f1f1f1;
 			margin-left: -1px;
 			margin-top: -1px;
 			align-items: center;
 			&.wrap-row {
-				// flex-direction: column;
 				grid-column-end: 3;
 				grid-column-start: 1;
 				.label {
-					// flex: 0.5;
 					margin-right: 20rpx;
 				}
 				.value {
@@ -52,14 +45,6 @@
 				align-items: center;
 				.text {
 					position: relative;
-					// &::after{
-					// 	content: '';
-					// 	position: absolute;
-					// 	width: 80%;
-					// 	bottom: -10rpx;
-					// 	left: 0;
-					// 	border-bottom: 5rpx solid #fff;
-					// }
 				}
 			}
 			.value {
@@ -82,7 +67,7 @@
 .drug-record-timeline {
 	.cu-timeline {
 		& > .cu-item {
-			padding: 20rpx 20rpx 20rpx 90rpx;
+			padding: 20rpx 0rpx 20rpx 90rpx;
 		}
 		.cu-time {
 			width: 150rpx;
@@ -105,11 +90,9 @@
 		background-color: #fff;
 		display: flex;
 		flex-wrap: wrap;
-		// flex-direction: column;
-		// box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12);
 		.timeline-item {
-			min-width: calc(50% - 20rpx);
-			margin-right: 20rpx;
+			width: calc(33% - 40rpx/3);
+			margin-right: 10rpx;
 			margin-bottom: 20rpx;
 			padding: 10rpx 20rpx;
 			box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
@@ -120,7 +103,7 @@
 			overflow: hidden;
 			color: #fff;
 			text-align: center;
-			&:nth-child(2n) {
+			&:nth-child(3n) {
 				margin-right: 0;
 			}
 			.info {
@@ -129,6 +112,14 @@
 			}
 			.time {
 				z-index: 2;
+			}
+			.incompltet-view{
+				color: #333;
+				height: 100%;
+				min-height: 45px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
 			}
 			.delete-bar {
 				position: absolute;

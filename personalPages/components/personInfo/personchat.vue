@@ -3,13 +3,22 @@
 		class="person-chat-wrap"
 		:style="{
 			'--chart-height': chartHeight,
+			'--msgListHeight': msgListHeight,
 			'--global-text-font-size': globalTextFontSize + 'px',
 			'--global-label-font-size': globalLabelFontSize + 'px'
 		}"
 	>
 		<view class="person-chat-top" @click.stop="closeBottomPoup" :class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
 			<audio v-if="currentChat.id" class="audio" @ended="playEnd" :action="audioAction" id="myMp3" style="height: 0;opacity: 0;" :src="currentChat.voice_url" controls />
-			<scroll-view @scrolltoupper="loadData" @scroll="chatScroll" :scroll-y="true" :scroll-top="scrollTop" :scroll-into-view="chatTextBottom" :scroll-with-animation="scrollAnimation">
+			<scroll-view
+				@scrolltoupper="loadData"
+				:scroll-y="true"
+				:scroll-top="scrollTop"
+				:scroll-into-view="chatTextBottom"
+				:scroll-with-animation="scrollAnimation"
+				class="msg-list"
+				:class="{ 'top-height': topHeight, showLayer: !isFeed && isSendLink, showKeyboard: !isSendLink && showKeyboard }"
+			>
 				<view
 					:id="`person-chat-item${item.id}`"
 					v-for="(item, index) in recordList"
@@ -132,7 +141,6 @@
 								<view class="voice_icon voice_icon_right" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''"></view>
 								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
 							</view>
-							<!-- <audio class="audio" @ended="playEnd(item)" :action="audioAction" id="myMp3" :id="item.id.toString()" style="width:0;height: 0;opacity: 0;" :src="currentChat.voice_url" controls />							 -->
 						</view>
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
@@ -199,7 +207,7 @@
 					>
 						{{ voiceTitle }}
 					</text>
-					<input v-else v-model="chatText" class="send-text" type="text" @focus="onInput" @confirm="sendMessage" confirm-type="send" />
+					<input v-else v-model="chatText" confirm-hold hold-keyboard class="send-text" type="text" @blur="onBlur" @focus="onInput" @confirm="sendMessage" confirm-type="send" />
 				</view>
 				<view class="person-chat-rig" :class="{ 'is-feed': isFeed }">
 					<view class="person-chat-rig-add-wrap">
@@ -208,36 +216,34 @@
 					<text class="send" @click="sendMessage" v-if="isFeed">发送</text>
 				</view>
 			</view>
-			<view class="person-chat-bot-bot">
-				<view class="person-chat-bot-bot-item-w">
-					<view @click="openMenuPoup('question')" class="person-chat-bot-bot-item">
-						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/question.png" mode=""></image></view>
-						<view class="person-chat-bot-bot-item-b"><text>问卷记录</text></view>
-					</view>
-					<view @click="openMenuPoup('bite')" class="person-chat-bot-bot-item">
-						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/diet.png" mode=""></image></view>
-						<view class="person-chat-bot-bot-item-b"><text>饮食记录</text></view>
-					</view>
-					<view @click="openMenuPoup('photo')" class="person-chat-bot-bot-item">
-						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/photo.png" mode=""></image></view>
-						<view class="person-chat-bot-bot-item-b"><text>图片</text></view>
-					</view>
-					<view @click="openMenuPoup('word')" class="person-chat-bot-bot-item">
-						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/file.png" mode=""></image></view>
-						<view class="person-chat-bot-bot-item-b"><text>文档</text></view>
-					</view>
-					<view @click="openMenuPoup('wx_word')" class="person-chat-bot-bot-item">
-						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/paper.png" mode=""></image></view>
-						<view class="person-chat-bot-bot-item-b"><text>微信文档</text></view>
-					</view>
-					<view @click="openMenuPoup('video')" class="person-chat-bot-bot-item">
-						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/video.png" mode=""></image></view>
-						<view class="person-chat-bot-bot-item-b"><text>视频</text></view>
-					</view>
-					<view @click="openMenuPoup('location')" class="person-chat-bot-bot-item">
-						<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/address.png" mode=""></image></view>
-						<view class="person-chat-bot-bot-item-b"><text>位置</text></view>
-					</view>
+			<view class="person-chat-bot-bot" :class="{ showLayer: isSendLink && !showKeyboard }">
+				<view @click="openMenuPoup('question')" class="person-chat-bot-bot-item">
+					<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/question.png" mode=""></image></view>
+					<view class="person-chat-bot-bot-item-b"><text>问卷记录</text></view>
+				</view>
+				<view @click="openMenuPoup('bite')" class="person-chat-bot-bot-item">
+					<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/diet.png" mode=""></image></view>
+					<view class="person-chat-bot-bot-item-b"><text>饮食记录</text></view>
+				</view>
+				<view @click="openMenuPoup('photo')" class="person-chat-bot-bot-item">
+					<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/photo.png" mode=""></image></view>
+					<view class="person-chat-bot-bot-item-b"><text>图片</text></view>
+				</view>
+				<view @click="openMenuPoup('word')" class="person-chat-bot-bot-item">
+					<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/file.png" mode=""></image></view>
+					<view class="person-chat-bot-bot-item-b"><text>文档</text></view>
+				</view>
+				<view @click="openMenuPoup('wx_word')" class="person-chat-bot-bot-item">
+					<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/paper.png" mode=""></image></view>
+					<view class="person-chat-bot-bot-item-b"><text>微信文档</text></view>
+				</view>
+				<view @click="openMenuPoup('video')" class="person-chat-bot-bot-item">
+					<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/video.png" mode=""></image></view>
+					<view class="person-chat-bot-bot-item-b"><text>视频</text></view>
+				</view>
+				<view @click="openMenuPoup('location')" class="person-chat-bot-bot-item">
+					<view class="person-chat-bot-bot-item-top"><image src="/personalPages/static/address.png" mode=""></image></view>
+					<view class="person-chat-bot-bot-item-b"><text>位置</text></view>
 				</view>
 			</view>
 		</view>
@@ -293,9 +299,22 @@ export default {
 		}),
 		chartHeight() {
 			if (this.topHeight) {
-				return `calc(100vh - 60px - ${this.topHeight}px - var(--window-top) - var(--window-bottom))`;
+				return `calc(100vh - ${this.topHeight}px - var(--window-top) - var(--window-bottom))`;
 			} else {
-				return 'calc(100vh - 60px - var(--window-top) - var(--window-bottom))';
+				return 'calc(100vh  - var(--window-top) - var(--window-bottom))';
+			}
+		},
+		msgListHeight() {
+			if (this.topHeight) {
+				if (this.isSendLink) {
+					return `calc(100vh - 310px - var(--window-top))`;
+				}
+				return `calc(100vh - 120px - var(--window-top))`;
+			} else {
+				if (this.isSendLink) {
+					return 'calc(100vh - 250px - var(--window-top))';
+				}
+				return 'calc(100vh - 60px - var(--window-top))';
 			}
 		},
 		isFeed() {
@@ -314,7 +333,7 @@ export default {
 	},
 	data() {
 		return {
-			heightStyle: '',
+			showKeyboard: false,
 			videoContext: '',
 			audioAction: {
 				method: 'pause'
@@ -414,17 +433,23 @@ export default {
 		},
 		/*关闭底部选择按钮**/
 		closeBottomPoup() {
-			this.$nextTick(() => {
-				if (this.topHeight) {
-					this.heightStyle = `calc(100vh - 50px - var(--window-top) - var(--window-bottom) - var(--chart-height) - ${this.topHeight}px);`;
-				} else {
-					this.heightStyle = 'calc(100vh - 50px - var(--window-top) - var(--chart-height) - var(--window-bottom) );';
-				}
-			});
+			uni.hideKeyboard();
 			this.isSendLink = false;
+		},
+		onBlur() {
+			this.showKeyboard = false;
 		},
 		onInput(e) {
 			this.isSendLink = false;
+			this.showKeyboard = true;
+			this.scrollAnimation = false;
+			this.$nextTick(function() {
+				//进入页面滚动到底部
+				this.scrollTop = 99999;
+				this.$nextTick(function() {
+					this.scrollAnimation = true;
+				});
+			});
 		},
 		openMap(item) {
 			// 打开地图
@@ -611,8 +636,7 @@ export default {
 			// 	});
 			// }
 		},
-		loadData(){
-			debugger
+		loadData() {
 			this.isLoading = true;
 			this.pageInfo.pageNo += 1;
 			this.getMessageInfo().then(_ => {
@@ -949,19 +973,26 @@ export default {
 		},
 		/*打开发送链接弹窗**/
 		openLink() {
+			uni.hideKeyboard();
 			this.isSendLink = !this.isSendLink;
 			if (!this.isSendLink) {
-				if (this.topHeight) {
-					this.heightStyle = `calc(100vh -  var(--window-top) - var(--window-bottom) - 50px - ${this.topHeight}px);`;
-				} else {
-					this.heightStyle = 'calc(100vh - 50px) - var(--window-top) - var(--window-bottom);';
-				}
 			} else {
-				if (this.topHeight) {
-					this.heightStyle = `calc(100vh - 240px - var(--window-top) - var(--window-bottom) - ${this.topHeight}px);`;
-				} else {
-					this.heightStyle = 'calc(100vh - 240px - var(--window-top) - var(--window-bottom));';
-				}
+				this.scrollAnimation = false;
+				this.$nextTick(function() {
+					//进入页面滚动到底部
+					this.scrollTop = 99999;
+					this.$nextTick(function() {
+						this.scrollAnimation = true;
+						this.$nextTick(() => {
+							if (this.recordList.length > 0 && Array.isArray(this.recordList) && this.recordList.length > 0) {
+								this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
+							}
+							this.$nextTick(function() {
+								this.scrollAnimation = true; //恢复滚动动画
+							});
+						});
+					});
+				});
 			}
 		},
 		/*切换文字或者链接**/
@@ -973,13 +1004,6 @@ export default {
 			this.sendMessageInfo();
 			this.chatText = '';
 			this.isSendLink = false;
-			this.heightStyle = 'calc(100vh - 50px)';
-			if (this.topHeight) {
-				this.heightStyle = `calc(100vh - 50px - var(--window-top) - var(--window-bottom) - ${this.topHeight}px);`;
-			} else {
-				this.heightStyle = 'calc(100vh - 50px - var(--window-top) - var(--window-bottom));';
-			}
-			// this.heightStyle = 'calc(100vh - 100px)'
 		},
 		changeVoice(type) {
 			// if(type = ){
@@ -1373,23 +1397,13 @@ export default {
 					}
 				});
 				this.$nextTick(() => {
-					if (this.recordList.length > 0 && Array.isArray(_SortJsonData) && _SortJsonData.length > 0) {
-					this.chatTextBottom = 'person-chat-item' + _SortJsonData[_SortJsonData.length - 1].id;
+					if (this.recordList.length > 0 && Array.isArray(this.recordList) && this.recordList.length > 0) {
+						this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
 					}
 					this.$nextTick(function() {
 						this.scrollAnimation = true; //恢复滚动动画
 					});
 				});
-				if (type && type === 'onLoad') {
-					this.$nextTick(function() {
-						//进入页面滚动到底部
-						this.scrollTop = 99999;
-						this.$nextTick(function() {
-							this.scrollAnimation = true;
-						});
-					});
-					this.updateMessageInfo();
-				}
 			}
 		},
 		/*修改消息记录状态**/
@@ -1446,9 +1460,16 @@ export default {
 					res.data.data[0]['img_url'] = this.$api.downloadFile + res.data.data[0].profile_url + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 				}
 				this.userInfo = res.data.data[0];
-
 				uni.setStorageSync('current_patient', this.userInfo);
-				this.getMessageInfo('onLoad');
+				this.getMessageInfo('onLoad').then(_ => {
+					this.$nextTick(function() {
+						//进入页面滚动到底部
+						this.scrollTop = 99999;
+						this.$nextTick(function() {
+							this.scrollAnimation = true;
+						});
+					});
+				});
 				clearInterval(this.updateMessageTimer);
 				this.updateMessageTimer = setInterval(() => {
 					this.getMessageInfo('update');
@@ -1484,15 +1505,6 @@ export default {
 		if (this.customer_no || (this.groupInfo && this.groupInfo.gc_no)) {
 			this.getRecorderManagerList();
 		}
-		setTimeout(() => {
-			this.$nextTick(() => {
-				if (this.topHeight) {
-					this.heightStyle = `calc(100vh - 50px - var(--window-top) - var(--window-bottom) - ${this.topHeight}px);`;
-				} else {
-					this.heightStyle = 'calc(100vh - 50px - var(--window-top) - var(--window-bottom));';
-				}
-			});
-		}, 500);
 	},
 	onLoad(option) {
 		//录音开始事件
@@ -1528,23 +1540,30 @@ export default {
 	overflow: hidden;
 	width: 100%;
 	height: var(--chart-height);
-	padding-bottom: 10px;
+	display: flex;
+	flex-direction: column;
 	.nav-chat-top {
 		background-color: rgb(11, 201, 157) !important;
 		color: white;
 		font-weight: 700;
 	}
-
 	.person-chat-top {
-		display: flex;
-		flex-direction: column;
-		max-height: var(--chart-height);
-		overflow-y: scroll;
-		// margin: 10rpx;
-		padding-bottom: 60px;
+		height: var(--msgListHeight);
+		position: relative;
+		.msg-list {
+			height: calc(100vh - var(--window-top) - 60px);
+			&.top-height {
+				height: calc(100vh - var(--window-top) - 60px - 60px);
+			}
+			&.showLayer {
+				height: calc(100vh - var(--window-top) - 60px - 190px);
+			}
+			&.top-height.showLayer {
+				height: calc(100vh - var(--window-top) - 60px - 60px - 190px);
+			}
+		}
+
 		.person-chat-item {
-			// display: flex;
-			// margin-right: 20rpx;
 			flex-direction: column;
 			align-items: flex-end;
 			.send-time {
@@ -1582,7 +1601,6 @@ export default {
 						}
 					}
 				}
-
 				.person-chat-item-left {
 					margin-right: 20rpx;
 					image {
@@ -1682,10 +1700,6 @@ export default {
 						min-height: 130rpx;
 						border-radius: 5px;
 					}
-					// image{
-					// 	width: 100rpx;
-					// 	height: 100rpx;
-					// }
 				}
 				.person-chat-item-right-link {
 					.link-left {
@@ -1884,32 +1898,14 @@ export default {
 		.person-chat-item-my {
 			display: flex;
 			justify-content: flex-end;
-			// .person-chat-item-send{
-			// 	.person-chat-item-right{
-			// 		background-color: #eeeeee;
-			// 		text{
-			// 			width: 100%;
-			// 			background-color: #12b7f5;
-			// 		}
-			// 	}
-			// }
 		}
 	}
-	.person-chat-top-w {
-		// max-height: calc(100vh - 260rpx);
-	}
-	.person-chat-top-w-h {
-		// max-height: calc(100vh - 180rpx);
-	}
 	.person-chat-bot {
-		position: fixed;
-		bottom: 0;
+		height: 60px;
 		width: 100%;
-		top: calc(100% - 60px);
 		transition: all 0.15s linear;
 		&.showLayer {
-			top: 100%;
-			transform: translate3d(0, -250px, 0);
+			height: 250px;
 		}
 		.person-chat-bot-top {
 			background-color: #f7f7f7;
@@ -1972,40 +1968,38 @@ export default {
 			}
 		}
 		.person-chat-bot-bot {
-			.person-chat-bot-bot-item-w {
+			display: flex;
+			border-top: 1px solid #ccc;
+			background-color: #f7f7f7;
+			flex-wrap: wrap;
+			&.showLayer {
+				height: 190px;
+			}
+			.person-chat-bot-bot-item {
 				display: flex;
-				border-top: 1px solid #ccc;
-				background-color: #f7f7f7;
-				flex-wrap: wrap;
-				.person-chat-bot-bot-item {
+				flex-direction: column;
+				align-items: center;
+				margin: 20rpx;
+				width: calc(25% - 20px);
+				.person-chat-bot-bot-item-top {
+					padding: 5px;
+					background: #fff;
+					width: 50px;
+					height: 50px;
 					display: flex;
-					flex-direction: column;
 					align-items: center;
-					margin: 20rpx;
-					width: calc(25% - 20px);
-					.person-chat-bot-bot-item-top {
-						padding: 5px;
-						background: #fff;
-						width: 50px;
-						height: 50px;
-						display: flex;
-						align-items: center;
-						justify-content: center;
-						font-size: 22px;
-						font-weight: 600;
-						border-radius: 10px;
-						margin-bottom: 5px;
-						image {
-							width: 50rpx;
-							height: 50rpx;
-						}
+					justify-content: center;
+					font-size: 22px;
+					font-weight: 600;
+					border-radius: 10px;
+					margin-bottom: 5px;
+					image {
+						width: 50rpx;
+						height: 50rpx;
 					}
 				}
 			}
 		}
-	}
-	.person-doctor-chat-bot {
-		bottom: 0rpx;
 	}
 }
 .recode-poup {

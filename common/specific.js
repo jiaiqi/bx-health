@@ -74,7 +74,7 @@ export default {
 			}
 		}
 
-		Vue.prototype.toPlaceOrder = async (total_fee, login_user_type,orderData) => {
+		Vue.prototype.toPlaceOrder = async (total_fee, login_user_type, orderData) => {
 			// 统一下单
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_order', 'operate');
 			let req = [{
@@ -82,13 +82,12 @@ export default {
 				"data": [{
 					"app_no": 'APPNO20201124160702',
 					"wx_mch_id": "1485038452",
-					"out_trade_no":orderData?orderData.order_no:new Date().getTime(),
+					"out_trade_no": orderData ? orderData.order_no : new Date().getTime(),
 					"total_fee": total_fee, // 单位是分
 					"spbill_create_ip": "192.168.0.21",
 					"notify_url": "http://wx2.100xsys.cn/wx/notify/payment",
-					// "notify_url": "http://wx2.100xsys.cn/notifytest",
 					"body": "test producet",
-					"user_no": "jiaqi",
+					"user_no": store.state.user.userInfo.userno,
 					"login_user_type": login_user_type ? login_user_type : "user"
 				}]
 			}]

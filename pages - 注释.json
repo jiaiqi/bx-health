@@ -155,75 +155,75 @@
 		{
 			"root": "personalPages",
 			"pages": [
-				// {
-				// 	"path": "myDoctor/myDoctor",
-				// 	"style": {
-				// 		"navigationBarTitleText": "我的管理者",
-				// 		"enablePullDownRefresh": true
-				// 	}
-				// },
-				// {
-				// 	"path": "nameCard/nameCard",
-				// 	"style": {
-				// 		"navigationBarTitleText": "二维码名片",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// },
-				// {
-				// 	"path": "patientsInfo/patientsInfo",
-				// 	"style": {
-				// 		"navigationBarTitleText": "患者信息",
-				// 		"enablePullDownRefresh": false,
-				// 		"navigationStyle": "custom"
-				// 	}
-				// },
-				// {
-				// 	"path": "myDoctor/doctorChat",
-				// 	"style": {
-				// 		"navigationBarBackgroundColor": "#fff",
-				// 		"navigationBarTextStyle": "black",
-				// 		"navigationBarTitleText": "聊天列表",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// }, {
-				// 	"path": "userList/userList",
-				// 	"style": {
-				// 		"navigationBarTitleText": "用户管理",
-				// 		"enablePullDownRefresh": false,
-				// 		"navigationStyle": "custom"
-				// 	}
+				{
+					"path": "myDoctor/myDoctor",
+					"style": {
+						"navigationBarTitleText": "我的管理者",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "nameCard/nameCard",
+					"style": {
+						"navigationBarTitleText": "二维码名片",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "patientsInfo/patientsInfo",
+					"style": {
+						"navigationBarTitleText": "患者信息",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "myDoctor/doctorChat",
+					"style": {
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
+						"navigationBarTitleText": "聊天列表",
+						"enablePullDownRefresh": false
+					}
+				}, {
+					"path": "userList/userList",
+					"style": {
+						"navigationBarTitleText": "用户管理",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
+					}
 
-				// }, {
-				// 	"path": "tagManagement/tagManagement",
-				// 	"style": {
-				// 		"navigationBarTitleText": "标签管理",
-				// 		"enablePullDownRefresh": true
-				// 	}
-				// }, {
-				// 	"path": "FontSizeSetting/FontSizeSetting",
-				// 	"style": {
-				// 		"navigationBarTitleText": "字体大小",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// }, {
-				// 	"path": "chatGroup/chatGroup",
-				// 	"style": {
-				// 		"navigationBarTitleText": "圈子",
-				// 		"enablePullDownRefresh": true
-				// 	}
-				// }, {
-				// 	"path": "gropDetail/gropDetail",
-				// 	"style": {
-				// 		"navigationBarTitleText": "圈子设置",
-				// 		"enablePullDownRefresh": true
-				// 	}
-				// }, {
-				// 	"path": "StoreList/StoreList",
-				// 	"style": {
-				// 		"navigationBarTitleText": "",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// },
+				}, {
+					"path": "tagManagement/tagManagement",
+					"style": {
+						"navigationBarTitleText": "标签管理",
+						"enablePullDownRefresh": true
+					}
+				}, {
+					"path": "FontSizeSetting/FontSizeSetting",
+					"style": {
+						"navigationBarTitleText": "字体大小",
+						"enablePullDownRefresh": false
+					}
+				}, {
+					"path": "chatGroup/chatGroup",
+					"style": {
+						"navigationBarTitleText": "圈子",
+						"enablePullDownRefresh": true
+					}
+				}, {
+					"path": "gropDetail/gropDetail",
+					"style": {
+						"navigationBarTitleText": "圈子设置",
+						"enablePullDownRefresh": true
+					}
+				}, {
+					"path": "StoreList/StoreList",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+				},
 				{
 					"path": "StoreDetail/StoreDetail",
 					"style": {
@@ -254,7 +254,7 @@
 				}, {
 					"path": "successPay/successPay",
 					"style": {
-						"navigationBarTextStyle":"black",
+						"navigationBarTextStyle": "black",
 						"enablePullDownRefresh": false,
 						"navigationBarBackgroundColor": "#fff"
 					}
@@ -262,78 +262,76 @@
 				}
 			]
 		},
-		{
-			"root": "otherPages",
-			"pages": [
-				// {
-				// 	"path": "shopDietStore/shopDietStore",
-				// 	"style": {
-				// 		"navigationBarTitleText": "店铺列表"
-				// 	}
-				// },
-				// {
-				// 	"path": "otherIndicator/otherIndicator",
-				// 	"style": {
-				// 		"navigationBarTitleText": "身体指标"
-				// 	}
-				// },
-				// {
-				// 	"path": "elementDetail/elementDetail",
-				// 	"style": {
-				// 		"navigationBarTitleText": "营养素详情"
-				// 	}
-				// },
-				// {
-				// 	"path": "symptomSelect/symptomSelect",
-				// 	"style": {
-				// 		"navigationBarTitleText": "症状选择",
-				// 		"navigationStyle": "custom"
-				// 	}
-				// },
-				// {
-				// 	"path": "symptomSelect/symptomSelect2",
-				// 	"style": {
-				// 		"navigationBarTitleText": "症状选择",
-				// 		"navigationStyle": "custom"
-				// 	}
-				// },
-				// {
-				// 	"path": "dietSelect/dietSelect",
-				// 	"style": {}
-				// },
-				{
-					"path": "shop/shopHome",
-					"style": {}
-				},
-				{
-					"path": "shop/shopDetail",
-					"style": {}
-				},
-				{
-					"path": "shop/shopCarList",
-					"style": {
-						"navigationBarTitleText": "购物车"
-					}
-				}
-				// ,
-				// {
-				// 	"path": "shop/foodMaterial",
-				// 	"style": {}
-				// },
-				// {
-				// 	"path": "chooseFood/chooseFood",
-				// 	"style": {}
-				// },
-				// {
-				// 	"path": "chooseFood/myFoodList",
-				// 	"style": {}
-				// },
-				// {
-				// 	"path": "chooseFood/myFoodsInfo",
-				// 	"style": {}
-				// }
-			]
-		},
+		// {
+		// 	"root": "otherPages",
+		// 	"pages": [{
+		// 			"path": "shopDietStore/shopDietStore",
+		// 			"style": {
+		// 				"navigationBarTitleText": "店铺列表"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "otherIndicator/otherIndicator",
+		// 			"style": {
+		// 				"navigationBarTitleText": "身体指标"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "elementDetail/elementDetail",
+		// 			"style": {
+		// 				"navigationBarTitleText": "营养素详情"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "symptomSelect/symptomSelect",
+		// 			"style": {
+		// 				"navigationBarTitleText": "症状选择",
+		// 				"navigationStyle": "custom"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "symptomSelect/symptomSelect2",
+		// 			"style": {
+		// 				"navigationBarTitleText": "症状选择",
+		// 				"navigationStyle": "custom"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "dietSelect/dietSelect",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "shop/shopHome",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "shop/shopDetail",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "shop/shopCarList",
+		// 			"style": {
+		// 				"navigationBarTitleText": "购物车"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "shop/foodMaterial",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "chooseFood/chooseFood",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "chooseFood/myFoodList",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "chooseFood/myFoodsInfo",
+		// 			"style": {}
+		// 		}
+		// 	]
+		// },
 		// {
 		// 	// 健康百科中的页面
 		// 	"root": "pediaPages",
@@ -423,31 +421,31 @@
 						"navigationBarTitleText": "登录"
 					}
 				},
-				// {
-				// 	"path": "list/list",
-				// 	"style": {
-				// 		"navigationBarTitleText": "列表"
-				// 	}
-				// },
-				// {
-				// 	"path": "webviewPage/webviewPage",
-				// 	"style": {
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// },
-				// {
-				// 	"path": "mapPage/mapPage",
-				// 	"style": {
-				// 		"enablePullDownRefresh": false,
-				// 		"navigationBarTitleText": "位置选择"
-				// 	}
-				// }, {
-				// 	"path": "newForm/newForm",
-				// 	"style": {
-				// 		"navigationBarTitleText": "",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// },
+				{
+					"path": "list/list",
+					"style": {
+						"navigationBarTitleText": "列表"
+					}
+				},
+				{
+					"path": "webviewPage/webviewPage",
+					"style": {
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "mapPage/mapPage",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationBarTitleText": "位置选择"
+					}
+				}, {
+					"path": "newForm/newForm",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+				},
 				{
 					"path": "chat/chat",
 					"style": {

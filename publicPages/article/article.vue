@@ -12,8 +12,7 @@
 		<view class="content" v-if="articleData.introduce">
 			<view class="" v-html="JSON.parse(JSON.stringify(articleData.introduce).replace(/\<img/gi, '<img width=100% height=100%'))"></view>
 		</view>
-		<view class="footer">
-		</view>
+		<view class="footer"></view>
 	</view>
 </template>
 
@@ -38,7 +37,7 @@ export default {
 	},
 	methods: {
 		getArticleData() {
-			let app = 'daq'
+			let app = 'daq';
 			let url = this.getServiceUrl(app, this.serviceName, 'select');
 			let req = { serviceName: this.serviceName, colNames: ['*'], condition: [{ colName: 'content_no', ruleType: 'in', value: this.content_no }] };
 			if (this.serviceName === 'srvsalesroom_shop_select') {
@@ -47,10 +46,10 @@ export default {
 			this.$http.post(url, req).then(res => {
 				if (res.data.state === 'SUCCESS' && res.data.data.length > 0) {
 					this.articleData = res.data.data[0];
-					if(res.data.data[0].title){
+					if (res.data.data[0].title) {
 						uni.setNavigationBarTitle({
-							title:res.data.data[0].title
-						})
+							title: res.data.data[0].title
+						});
 					}
 				} else {
 					uni.showModal({
@@ -131,7 +130,6 @@ export default {
 		min-height: 800upx;
 		margin-top: 30upx;
 		padding: 30upx 0;
-		border-bottom: dashed 1px #eee;
 		border-top: dashed 1px #eee;
 		line-height: 60upx;
 		font-size: 36upx;

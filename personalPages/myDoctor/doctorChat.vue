@@ -1,5 +1,5 @@
 <template>
-	<view class="doctor-wrap">
+	<view class="doctor-wrap" :class="{ 'padding-top': groupInfo && groupInfo.gc_no }">
 		<view class="util-bar" v-if="groupInfo && groupInfo.gc_no">
 			<view class="util-item " @click="toPages('group-member')">
 				<view class="icon"><text class="cuIcon-friend "></text></view>
@@ -133,9 +133,11 @@ page {
 }
 .doctor-wrap {
 	overflow: hidden;
-	padding-top: 60px;
 	position: relative;
 	width: 100%;
+	&.padding-top {
+		padding-top: 60px;
+	}
 	.menu {
 		padding: 0 40rpx;
 		font-size: 36rpx;

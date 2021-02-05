@@ -30,8 +30,7 @@
 			}
 		}
 	],
-	"subPackages": [
-		{
+	"subPackages": [{
 			// 问卷
 			"root": "questionnaire",
 			"pages": [{
@@ -154,8 +153,7 @@
 		},
 		{
 			"root": "personalPages",
-			"pages": [
-				{
+			"pages": [{
 					"path": "myDoctor/myDoctor",
 					"style": {
 						"navigationBarTitleText": "我的管理者",
@@ -460,6 +458,7 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
+
 				}
 			]
 		}
