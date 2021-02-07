@@ -25,7 +25,7 @@
 					<view class="content">
 						<view class="rich-text">
 							{{ introduction || '暂无介绍' }}
-							<view class="see-more" v-if="introduction !== storeInfo.introduction" @click="seeMore">查看更多</view>
+							<view class="see-more" v-if="introduction !== storeInfo.introduction&&introduction" @click="seeMore">查看更多</view>
 						</view>
 					</view>
 				</view>
