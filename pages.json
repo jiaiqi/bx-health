@@ -8,13 +8,6 @@
 			}
 		},
 		{
-			"path": "pages/store/store",
-			"style": {
-				"navigationBarTitleText": "健康生活",
-				"navigationBarBackgroundColor": "#0bc99d"
-			}
-		},
-		{
 			"path": "pages/archives/archives",
 			"style": {
 				"navigationBarTitleText": "健康档案",
@@ -22,6 +15,14 @@
 
 			}
 		},
+		{
+			"path": "pages/store/store",
+			"style": {
+				"navigationBarTitleText": "健康生活",
+				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		},
+
 		{
 			"path": "pages/personal/personal",
 			"style": {
@@ -190,7 +191,6 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom"
 					}
-
 				}, {
 					"path": "tagManagement/tagManagement",
 					"style": {
@@ -215,7 +215,8 @@
 						"navigationBarTitleText": "圈子设置",
 						"enablePullDownRefresh": true
 					}
-				}, {
+				},
+				{
 					"path": "StoreList/StoreList",
 					"style": {
 						"navigationBarTitleText": "",
@@ -452,13 +453,13 @@
 						"navigationBarBackgroundColor": "#fff",
 						"enablePullDownRefresh": false
 					}
-				}, {
+				},
+				{
 					"path": "article/article",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}
 			]
 		}

@@ -1,115 +1,117 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
-	<view>
-		<view class="header-wrap" v-if="storeInfo && storeInfo.id" :style="{ 'background-image': 'url(' + getImagePath(storeInfo.image) + ')' }">
-			<view class="hospital-top">
-				<view class="left">
-					<view class="top">
-						<view class="name">{{ storeInfo.name }}</view>
+	<view class="page-wrap" :class="{'onlyCurrentPage':onlyCurrentPage}">
+		<view class="page-content">
+			<view class="header-wrap" v-if="storeInfo && storeInfo.id" :style="{ 'background-image': 'url(' + getImagePath(storeInfo.image) + ')' }">
+				<view class="hospital-top">
+					<view class="left">
+						<view class="top">
+							<view class="name">{{ storeInfo.name }}</view>
+						</view>
+						<view class="bottom">
+							<view class="address" @click="getCurrentLocation">
+								<text class="content">{{ storeInfo.address }}</text>
+								<text class="cuIcon-locationfill text-blue margin-left-xs"></text>
+							</view>
+						</view>
 					</view>
-					<view class="bottom">
-						<view class="address" @click="getCurrentLocation">
-							<text class="content">{{ storeInfo.address }}</text>
-							<text class="cuIcon-locationfill text-blue margin-left-xs"></text>
+					<view class="right"><text class="cuIcon-phone text-black" @click="makePhoneCall"></text></view>
+				</view>
+				<view class="introduction">
+					<view class="title">
+						<text class="cuIcon-titles text-blue"></text>
+						{{ storeInfo.name || '' }}
+					</view>
+					<view class="content">
+						<view class="rich-text">
+							{{ introduction || '暂无介绍' }}
+							<view class="see-more" v-if="introduction !== storeInfo.introduction" @click="seeMore">查看更多</view>
 						</view>
 					</view>
 				</view>
-				<view class="right"><text class="cuIcon-phone text-black" @click="makePhoneCall"></text></view>
-			</view>
-			<view class="introduction">
-				<view class="title">
-					<text class="cuIcon-titles text-blue"></text>
-					{{ storeInfo.name || '' }}
-				</view>
-				<view class="content">
-					<view class="rich-text">
-						{{ introduction || '暂无介绍' }}
-						<view class="see-more" v-if="introduction !== storeInfo.introduction" @click="seeMore">查看更多</view>
-					</view>
-				</view>
-			</view>
-			<view class="introduction news">
-				<view class="title">
-					<text class="cuIcon-titles text-blue"></text>
-					<text class="">通知公告</text>
-				</view>
-				<view class="content news-list">
-					<view class="news-item" v-for="item in noticeList" @click="toArticle(item)">
-						<text class="cuIcon-mail text-orange margin-right-xs"></text>
-						<text class="title-text">{{ item.title }}</text>
-						<text class="date">{{ formateDate(item.create_time) }}</text>
-					</view>
-				</view>
-			</view>
-			<view class="introduction">
-				<view class="title">
-					<view>
+				<view class="introduction news">
+					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
-						科室列表
+						<text class="">通知公告</text>
 					</view>
-				</view>
-				<view class="content">
-					<view class="depart-box">
-						<button class="depart-item cu-btn bg-blue sm margin-right-xs" v-for="item in deptList" @click="toDeptDetail(item)">{{ item.dept_name }}</button>
-					</view>
-				</view>
-			</view>
-			<view class="introduction">
-				<view class="title">
-					<view>
-						<text class="cuIcon-titles text-blue"></text>
-						关联圈子
-					</view>
-				</view>
-				<view class="content">
-					<view class="group-box">
-						<view class="group-item" v-for="item in groupList" @click="toGroup(item)">
-							<image class="image" :src="getImagePath(item.icon)" mode="aspectFit" v-if="item.icon"></image>
-							<text class=" image cuIcon-group_fill text-grey" v-else></text>
-							<view class="label">{{ item.name }}</view>
+					<view class="content news-list">
+						<view class="news-item" v-for="item in noticeList" @click="toArticle(item)">
+							<text class="cuIcon-mail text-orange margin-right-xs"></text>
+							<text class="title-text">{{ item.title }}</text>
+							<text class="date">{{ formateDate(item.create_time) }}</text>
 						</view>
 					</view>
 				</view>
-			</view>
-			<view class="introduction">
-				<view class="title"><view class="">专家团队</view></view>
-				<view class="content">
-					<view class="professor-box">
-						<view class="professor-item" v-for="item in staffList" @click="toDocotrDetail(item)">
-							<image class="img" :src="getImagePath(item.profile_url) ? getImagePath(item.profile_url) : '../static/img/doctor_default.jpg'" mode="aspectFit"></image>
-							<view class="doc-info">
-								<view class="top">
-									<text class="doc-name">{{ item.person_name ? item.person_name : item.nick_name || '' }}</text>
-								</view>
-								<view class="center">
-									<view class="depart-name">科室：{{ item.deptName || '-' }}</view>
-								</view>
-								<view class="bottom">{{ item.staff_introduction || '暂无介绍' }}</view>
+				<view class="introduction">
+					<view class="title">
+						<view>
+							<text class="cuIcon-titles text-blue"></text>
+							科室列表
+						</view>
+					</view>
+					<view class="content">
+						<view class="depart-box">
+							<button class="depart-item cu-btn bg-blue sm margin-right-xs" v-for="item in deptList" @click="toDeptDetail(item)">{{ item.dept_name }}</button>
+						</view>
+					</view>
+				</view>
+				<view class="introduction">
+					<view class="title">
+						<view>
+							<text class="cuIcon-titles text-blue"></text>
+							关联圈子
+						</view>
+					</view>
+					<view class="content">
+						<view class="group-box">
+							<view class="group-item" v-for="item in groupList" @click="toGroup(item)">
+								<image class="image" :src="getImagePath(item.icon)" mode="aspectFit" v-if="item.icon"></image>
+								<text class=" image cuIcon-group_fill text-grey" v-else></text>
+								<view class="label">{{ item.name }}</view>
 							</view>
 						</view>
 					</view>
 				</view>
-			</view>
-			<view class="introduction news">
-				<view class="title">
-					<text class="cuIcon-titles text-blue"></text>
-					<text class="">医院新闻</text>
-				</view>
-				<view class="content news-list">
-					<view class="news-item">
-						<text class="cuIcon-title"></text>
-						<text class="title-text">关于维护良好就医秩序对广大患者的告知书</text>
-						<text class="date">2021-01-20</text>
+				<view class="introduction">
+					<view class="title"><view class="">专家团队</view></view>
+					<view class="content">
+						<view class="professor-box">
+							<view class="professor-item" v-for="item in staffList" @click="toDocotrDetail(item)">
+								<image class="img" :src="getImagePath(item.profile_url) ? getImagePath(item.profile_url) : '../static/img/doctor_default.jpg'" mode="aspectFit"></image>
+								<view class="doc-info">
+									<view class="top">
+										<text class="doc-name">{{ item.person_name ? item.person_name : item.nick_name || '' }}</text>
+									</view>
+									<view class="center">
+										<view class="depart-name">科室：{{ item.deptName || '-' }}</view>
+									</view>
+									<view class="bottom">{{ item.staff_introduction || '暂无介绍' }}</view>
+								</view>
+							</view>
+						</view>
 					</view>
-					<view class="news-item">
-						<text class="cuIcon-title"></text>
-						<text class="title-text">国家药监局核查中心对我院药物临床试验数据现场核查工作顺利结束</text>
-						<text class="date">2021-01-19</text>
+				</view>
+				<view class="introduction news">
+					<view class="title">
+						<text class="cuIcon-titles text-blue"></text>
+						<text class="">医院新闻</text>
+					</view>
+					<view class="content news-list">
+						<view class="news-item">
+							<text class="cuIcon-title"></text>
+							<text class="title-text">关于维护良好就医秩序对广大患者的告知书</text>
+							<text class="date">2021-01-20</text>
+						</view>
+						<view class="news-item">
+							<text class="cuIcon-title"></text>
+							<text class="title-text">国家药监局核查中心对我院药物临床试验数据现场核查工作顺利结束</text>
+							<text class="date">2021-01-19</text>
+						</view>
 					</view>
 				</view>
 			</view>
 		</view>
-		<view class="bottom-layer" v-if="onlyCurrentPage === true"><button class="cu-btn bg-cyan" @click="toStorePage">体验完整小程序</button></view>
+		<view class="bottom-layer" v-if="onlyCurrentPage === true"><button class="cu-btn bg-black" @click="toStorePage">体验完整小程序</button></view>
 	</view>
 </template>
 
@@ -145,7 +147,7 @@ export default {
 		}),
 		onlyCurrentPage() {
 			let pageStack = getCurrentPages();
-			if (Array.isArray(pageStack) && pageStack.length >= 1) {
+			if (Array.isArray(pageStack) && pageStack.length > 1) {
 				let currentPage = pageStack[pageStack.length - 1];
 				this.$store.commit('SET_CURRENT_PAGE', currentPage.route);
 				return false;
@@ -424,6 +426,19 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.page-wrap{
+		&.onlyCurrentPage{
+			height: calc(100vh - var(--window-top) - 50px);
+			background-color:#000;
+			overflow: hidden;
+			.page-content{
+				min-height: calc(100vh - var(--window-top) - 50px);
+				background-color: #f1f1f1;
+				overflow: scroll;
+				border-radius: 0 0 20px 20px ;
+			}
+		}
+}
 .header-wrap {
 	height: 500rpx;
 	background-size: cover;
@@ -637,6 +652,8 @@ export default {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background-color: rgba($color: #000000, $alpha: 0.7);
+	background-color:#000;
+	padding:0 20rpx;
+	z-index: 2;
 }
 </style>

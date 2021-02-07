@@ -95,6 +95,7 @@ export default {
 			this.getDrugList('', this.keywords);
 		},
 		async getDrugList(isMore, val) {
+			debugger;
 			let serviceName = 'srvhealth_medicine_info_select';
 			if (this.dataType === '运动') {
 				serviceName = 'srvhealth_body_activity_contents_select';
@@ -106,25 +107,25 @@ export default {
 				page: { pageNo: this.page.pageNo, rownumber: this.page.rownumber }
 			};
 			if (this.dataType === '用药') {
-				req.relation_condition = {
-					relation: 'OR',
-					data: [
-						{
-							colName: 'audit_status',
-							value: '正常',
-							ruleType: 'eq'
-						},
-						{
-							colName: 'create_user',
-							value: this.userInfo.userno,
-							ruleType: 'eq'
-						}
-					]
-				};
+				// req.relation_condition = {
+				// 	relation: 'OR',
+				// 	data: [
+				// 		{
+				// 			colName: 'audit_status',
+				// 			value: '正常',
+				// 			ruleType: 'eq'
+				// 		},
+				// 		{
+				// 			colName: 'create_user',
+				// 			value: this.userInfo.userno,
+				// 			ruleType: 'eq'
+				// 		}
+				// 	]
+				// };
 			}
 			if (val) {
 				if (this.dataType === '用药') {
-					req.relation_condition.data.concat([
+					req.relation_condition.data = req.relation_condition.data.concat([
 						{
 							colName: 'medicine_goods_name',
 							value: val,
@@ -137,17 +138,37 @@ export default {
 						}
 					]);
 					// req.relation_condition = {
-					// 	relation: 'OR',
+					// 	relation: 'AND',
 					// 	data: [
 					// 		{
-					// 			colName: 'medicine_goods_name',
-					// 			value: val,
-					// 			ruleType: 'like'
+					// 			relation: 'OR',
+					// 			data: [
+					// 				{
+					// 					colName: 'medicine_goods_name',
+					// 					value: val,
+					// 					ruleType: 'like'
+					// 				},
+					// 				{
+					// 					colName: 'medicine_name',
+					// 					value: val,
+					// 					ruleType: 'like'
+					// 				}
+					// 			]
 					// 		},
 					// 		{
-					// 			colName: 'medicine_name',
-					// 			value: val,
-					// 			ruleType: 'like'
+					// 			relation: 'OR',
+					// 			data: [
+					// 				{
+					// 					colName: 'audit_status',
+					// 					value: '正常',
+					// 					ruleType: 'eq'
+					// 				},
+					// 				{
+					// 					colName: 'create_user',
+					// 					value: this.userInfo.userno,
+					// 					ruleType: 'eq'
+					// 				}
+					// 			]
 					// 		}
 					// 	]
 					// };

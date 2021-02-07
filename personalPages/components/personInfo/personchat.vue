@@ -15,7 +15,7 @@
 				:scroll-y="true"
 				:scroll-top="scrollTop"
 				:scroll-into-view="chatTextBottom"
-				:scroll-with-animation="scrollAnimation"
+				:scroll-with-animation="true"
 				class="msg-list"
 				:class="{ 'top-height': topHeight, showLayer: !isFeed && isSendLink, showKeyboard: !isSendLink && showKeyboard }"
 			>
@@ -177,6 +177,7 @@
 						</view>
 					</view>
 				</view>
+				<view class="chart-bottom" v-if="isArray(recordList)" :id="'chart-bottom' + recodeList.id"></view>
 			</scroll-view>
 			<view class="voice_an" v-if="recording">
 				<view class="voice_an_icon">
@@ -207,7 +208,7 @@
 					>
 						{{ voiceTitle }}
 					</text>
-					<input v-else v-model="chatText" confirm-hold hold-keyboard class="send-text" type="text" @blur="onBlur" @focus="onInput" @confirm="sendMessage" confirm-type="send" />
+					<input :focus="onFocus" :auto-focus="onFocus" v-else v-model="chatText" confirm-hold hold-keyboard class="send-text" type="text" @blur="onBlur" @focus="onInput" @confirm="sendMessage" confirm-type="send" />
 				</view>
 				<view class="person-chat-rig" :class="{ 'is-feed': isFeed }">
 					<view class="person-chat-rig-add-wrap">
@@ -334,6 +335,7 @@ export default {
 	data() {
 		return {
 			showKeyboard: false,
+			showLayer: false,
 			videoContext: '',
 			audioAction: {
 				method: 'pause'
@@ -342,6 +344,7 @@ export default {
 			checkRadioValue: '',
 			chatText: '',
 			isSendLink: false,
+			onFocus:false,
 			showBottom: false,
 			currentSendType: '',
 			apiUrl: this.$api.downloadFile,
@@ -434,22 +437,19 @@ export default {
 		/*关闭底部选择按钮**/
 		closeBottomPoup() {
 			uni.hideKeyboard();
-			this.isSendLink = false;
+			this.showKeyboard = false
+			this.$nextTick(function(){
+				this.isSendLink = false;
+			})
 		},
 		onBlur() {
 			this.showKeyboard = false;
 		},
 		onInput(e) {
-			this.isSendLink = false;
-			this.showKeyboard = true;
-			this.scrollAnimation = false;
-			this.$nextTick(function() {
-				//进入页面滚动到底部
-				this.scrollTop = 99999;
-				this.$nextTick(function() {
-					this.scrollAnimation = true;
-				});
-			});
+			// this.$nextTick(function() {
+			// 	//进入页面滚动到底部
+			// 	this.scrollTop = 99999;
+			// });
 		},
 		openMap(item) {
 			// 打开地图
@@ -973,27 +973,27 @@ export default {
 		},
 		/*打开发送链接弹窗**/
 		openLink() {
+			if(this.isSendLink){
+				debugger
+				this.isSendLink = false;
+				this.onFocus = true
+				return
+			}
 			uni.hideKeyboard();
-			this.isSendLink = !this.isSendLink;
-			if (!this.isSendLink) {
-			} else {
-				this.scrollAnimation = false;
+			this.isSendLink = true;
+			debugger
+			this.showKeyboard = false
+			this.$nextTick(function() {
+				//进入页面滚动到底部
+				this.scrollTop = 99999;
 				this.$nextTick(function() {
-					//进入页面滚动到底部
-					this.scrollTop = 99999;
-					this.$nextTick(function() {
-						this.scrollAnimation = true;
-						this.$nextTick(() => {
-							if (this.recordList.length > 0 && Array.isArray(this.recordList) && this.recordList.length > 0) {
-								this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
-							}
-							this.$nextTick(function() {
-								this.scrollAnimation = true; //恢复滚动动画
-							});
-						});
+					this.$nextTick(() => {
+						if (this.recordList.length > 0 && Array.isArray(this.recordList) && this.recordList.length > 0) {
+							this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
+						}
 					});
 				});
-			}
+			});
 		},
 		/*切换文字或者链接**/
 		changeType(type) {
@@ -1414,15 +1414,15 @@ export default {
 					serviceName: 'srvhealth_consultation_chat_record_update',
 					colNames: ['*'],
 					condition: [
-						{
-							colName: 'sender_account',
-							ruleType: 'eq',
-							value: this.doctor_no.id ? this.doctor_no.usera_no : this.userInfo.userno
-						},
+						// {
+						// 	colName: 'sender_account',
+						// 	ruleType: 'eq',
+						// 	value: this.doctor_no.id ? this.doctor_no.usera_no : this.userInfo.userno
+						// },
 						{
 							colName: 'receiver_person_no',
 							ruleType: 'eq',
-							value: this.userInfo.no
+							value: this.currentUserInfo.no
 						},
 						{
 							colName: 'msg_state',
@@ -1482,12 +1482,31 @@ export default {
 					icon: 'none'
 				});
 			}
+		},
+		toBottom() {
+			this.chatTextBottom = '';
+			this.$nextTick(() => {
+				if (Array.isArray(this.recordList)) {
+					this.chatTextBottom = 'chart-bottom' + this.recodeList.length;
+				}
+			});
 		}
 	},
 	beforeDestroy() {
 		clearInterval(this.updateMessageTimer);
+		uni.offKeyboardHeightChange();
 	},
 	mounted() {
+		uni.onKeyboardHeightChange(res => {
+			console.log(res.height);
+			if(res.height>0){
+				this.showKeyboard = true
+				this.isSendLink = false;
+			}
+			this.$nextTick(() => {
+				this.scrollTop = 999999
+			});
+		});
 		this.Recorder = uni.getRecorderManager();
 		this.Recorder.onStart(e => {
 			this.beginVoice();
@@ -1556,10 +1575,10 @@ export default {
 				height: calc(100vh - var(--window-top) - 60px - 60px);
 			}
 			&.showLayer {
-				height: calc(100vh - var(--window-top) - 60px - 190px);
+				height: calc(100vh - var(--window-top) - 60px - 230px);
 			}
 			&.top-height.showLayer {
-				height: calc(100vh - var(--window-top) - 60px - 60px - 190px);
+				height: calc(100vh - var(--window-top) - 60px - 60px - 230px);
 			}
 		}
 
@@ -1905,7 +1924,7 @@ export default {
 		width: 100%;
 		transition: all 0.15s linear;
 		&.showLayer {
-			height: 250px;
+			height: 290px;
 		}
 		.person-chat-bot-top {
 			background-color: #f7f7f7;
@@ -1973,7 +1992,7 @@ export default {
 			background-color: #f7f7f7;
 			flex-wrap: wrap;
 			&.showLayer {
-				height: 190px;
+				height: 230px;
 			}
 			.person-chat-bot-bot-item {
 				display: flex;
@@ -2205,5 +2224,9 @@ export default {
 }
 .seven {
 	animation: runVoice 0.6s infinite 0.1s;
+}
+.chart-bottom {
+	width: 100vw;
+	height: 20px;
 }
 </style>

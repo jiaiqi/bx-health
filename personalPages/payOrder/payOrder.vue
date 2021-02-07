@@ -210,7 +210,6 @@ export default {
 					console.log(res.data[0]);
 					this.orderNo = res.data[0].order_no;
 					this.getOrderInfo().then(data => {
-						debugger;
 						this.toPay();
 					});
 				}

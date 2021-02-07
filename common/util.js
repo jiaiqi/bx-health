@@ -703,7 +703,7 @@ export default {
 				uni.setStorageSync('isLogin', true);
 				store.commit('SET_LOGIN_STATE', true)
 				let resData = res.data.response[0].response;
-				if (resData.login_user_info.user_no) {
+				if (resData&&resData.login_user_info.user_no) {
 					uni.setStorageSync('login_user_info', resData.login_user_info);
 					store.commit('SET_LOGIN_USER', resData.login_user_info)
 				}

@@ -15,6 +15,7 @@
 				<view @click="toMyTodayFood" class="shop-detail-hod">添加至今日饮食</view>
 				<view v-if="!isJoin" @click="joinCar" class="shop-detail-btn">加入购物车</view>
 				<view v-else class="counter"><u-number-box @minus="subtract" @plus="adds" :min="1" v-model.number="value" @change="valChange"></u-number-box></view>
+				<view @click="payOrder" class="shop-detail-btn">立即下单</view>
 			</view>
 		</view>
 		<view class="shop-detail-bot">
@@ -99,6 +100,8 @@ export default {
 	},
 	data() {
 		return {
+			orderNo:'',
+			orderInfo:{},
 			categoryTop: [
 				{
 					name: 'NRV%占比',
@@ -280,22 +283,6 @@ export default {
 							name: '食物含量',
 							type: 'bar',
 							stack: '总数',
-							// itemStyle:{
-							// 	normal:{
-							// 		label:{
-							// 			show:true,
-							// 			position:'top',
-							// 			formatter: function(v) {
-							// 				var val = v.data;
-							// 				return val +'%';
-							// 			},
-							// 			textStyle:{
-							// 				color:'#f79646',
-							// 				fontSize:10
-							// 			}
-							// 		}
-							// 	}
-							// },
 							data: []
 						}
 					]
@@ -414,6 +401,11 @@ export default {
 				option.series.push(addObj);
 			}
 		},
+		payOrder() {
+			uni.navigateTo({
+				url:'/personalPages/payOrder/payOrder?store_no='+this.foodObj.restaurant_no
+			})
+		},
 		async getNutrientRecommended() {
 			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_nutrient_values_recommended_select', 'select');
@@ -494,29 +486,17 @@ export default {
 				}
 			});
 			let currData = await this.getNutrientRecommended();
-			console.log('currData======>', currData);
-			// option.series[0].data = currData.map(ser => {
-			// 	return ser;
-			// });
 			if (!option.series[1]) {
 				option.series.push(obj);
 			}
-			// if(this.value1 == 0){
-			// 	this.countDietNum('+1');
-			// }else{
 			this.originalData();
-			// }
 		},
 		/*计数器change方法*/
 		valChange(e) {
-			// if(!this.foodObj.car_num){
-			// 	this.foodObj['car_num'] = e.value
-			// }else{
 			this.foodObj.car_num = e.value;
 			this.setShopCarData();
-			// }
 		},
-		setShopCarData() {
+		setShopCarData(isAdd) {
 			if (!this.foodObj.car_num) {
 				this.foodObj['car_num'] = 1;
 			}
@@ -539,7 +519,7 @@ export default {
 					shopCarData.push(this.foodObj);
 				}
 			}
-			this.$store.commit('SET_STORE_CART', { store_no: this.foodObj.restaurant_no, list: shopCarData });
+			this.$store.commit('SET_STORE_CART', { store_no: this.foodObj.restaurant_no, list: shopCarData, isAdd });
 		},
 		/* 点击购物车前往购物车列表**/
 		goCar() {
@@ -593,7 +573,7 @@ export default {
 			this.element = ['.shop-detail-cen-rig', '.add-button'];
 			this.num = 1;
 			this.isJoin = true;
-			this.setShopCarData();
+			this.setShopCarData(true);
 			this.carNum += 1;
 		},
 		jbMsg(res) {
@@ -615,7 +595,6 @@ export default {
 				]
 			};
 			let res = await this.$http.post(url, req);
-			console.log('-0-----');
 			let data = res.data.data;
 			let eleData = this.eleData;
 			let dataArr = [];
@@ -652,23 +631,17 @@ export default {
 			}
 		}
 		this.assembleData();
-		if (uni.getStorageSync('shop_car')) {
-			let car_data = uni.getStorageSync('shop_car');
-			if (car_data.restaurant_no !== this.currFood.restaurant_no) {
-				return;
-			}
-			let isHas = false;
-			let car_curr = null;
-			car_data.forEach(item => {
-				if (item.id === this.foodObj.id) {
-					isHas = true;
-					car_curr = item;
+		if (this.cartInfo && this.cartInfo[this.currFood.restaurant_no] && Array.isArray(this.cartInfo[this.currFood.restaurant_no].cart)) {
+			this.carNum = this.cartInfo[this.currFood.restaurant_no].cart.reduce((pre, cur) => {
+				if (cur.car_num) {
+					pre += cur.car_num;
 				}
-				this.carNum += item.car_num;
-			});
-			if (isHas) {
+				return pre;
+			}, 0);
+			let curfood = this.cartInfo[this.currFood.restaurant_no].cart.find(item => item.id === this.currFood.id);
+			if (curfood && curfood.id) {
 				this.isJoin = true;
-				this.value = car_curr.car_num;
+				this.value = curfood.car_num;
 			}
 		}
 	}
@@ -744,7 +717,8 @@ export default {
 				margin-bottom: 20rpx;
 			}
 			.counter {
-				margin-right: 20upx;
+				margin-right: 20rpx;
+				margin-bottom: 20rpx;
 			}
 		}
 	}

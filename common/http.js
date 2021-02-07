@@ -74,7 +74,7 @@ fly.interceptors.request.use(async (request) => {
 		console.log(store.state.app.xhrNum, store.state.app.xhrTimestamp - new Date().getTime(), '11111111')
 		if (store.state.app.xhrNum === 0 && new Date().getTime() - store.state.app.xhrTimestamp > 1000) {
 			uni.showLoading({
-				mask: true,
+				// mask: true,
 				title: '加载中...'
 			})
 		}

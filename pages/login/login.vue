@@ -71,7 +71,7 @@ export default {
 					uni.setStorageSync('bx_auth_ticket', res.bx_auth_ticket);
 					uni.setStorageSync('expire_time', res.expire_time); // 有效时间
 					uni.setStorageSync('expire_timestamp', expire_timestamp); // 过期时间
-					if (res.login_user_info.user_no) {
+					if (res&res.login_user_info.user_no) {
 						uni.setStorageSync('login_user_info', res.login_user_info);
 						console.log('res.login_user_info', res.login_user_info);
 					}
@@ -151,7 +151,7 @@ export default {
 			if (res.data.resultCode === 'SUCCESS') {
 				// 登录成功
 				let resData = res.data.response[0].response;
-				if (resData.login_user_info.user_no) {
+				if (resData&&resData.login_user_info.user_no) {
 					uni.setStorageSync('login_user_info', resData.login_user_info);
 				}
 				uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);

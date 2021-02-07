@@ -6,7 +6,7 @@
 			</view>
 			<swiper class="swiper-box" :current="swiperCurrent" @transition="transition" @animationfinish="animationfinish">
 				<swiper-item class="swiper-item">
-					<scroll-view scroll-y style="height: 100%;width: 100%;" @scrolltolower="reachBottom">
+					<scroll-view scroll-y  @scrolltolower="reachBottom" class="scroll-view">
 						<view class="page-box" v-if="loadStatus[0] === 'noMore' && orderList[0].length === 0">
 							<view>
 								<view class="centre">
@@ -60,7 +60,7 @@
 					</scroll-view>
 				</swiper-item>
 				<swiper-item class="swiper-item">
-					<scroll-view scroll-y style="height: 100%;width: 100%;" @scrolltolower="reachBottom">
+					<scroll-view scroll-y  @scrolltolower="reachBottom" class="scroll-view">
 						<view class="page-box" v-if="loadStatus[1] === 'noMore' && orderList[1].length === 0">
 							<view>
 								<view class="centre">
@@ -119,7 +119,7 @@
 					</scroll-view>
 				</swiper-item>
 				<swiper-item class="swiper-item">
-					<scroll-view scroll-y style="height: 100%;width: 100%;" @scrolltolower="reachBottom">
+					<scroll-view scroll-y class="scroll-view" @scrolltolower="reachBottom">
 						<view class="page-box" v-if="loadStatus[2] === 'noMore' && orderList[2].length === 0">
 							<view>
 								<view class="centre">
@@ -173,7 +173,7 @@
 					</scroll-view>
 				</swiper-item>
 				<swiper-item class="swiper-item">
-					<scroll-view scroll-y style="height: 100%;width: 100%;">
+					<scroll-view scroll-y class="scroll-view">
 						<view class="page-box" v-if="loadStatus[3] === 'noMore' && orderList[3].length === 0">
 							<view>
 								<view class="centre">
@@ -230,7 +230,7 @@
 					</scroll-view>
 				</swiper-item>
 				<swiper-item class="swiper-item">
-					<scroll-view scroll-y style="height: 100%;width: 100%;" @scrolltolower="reachBottom">
+					<scroll-view scroll-y class="scroll-view" @scrolltolower="reachBottom">
 						<view class="page-box" v-if="loadStatus[4] === 'noMore' && orderList[4].length === 0">
 							<view>
 								<view class="centre">
@@ -571,16 +571,13 @@ export default {
 };
 </script>
 
-<style>
-/* #ifndef H5 */
-page {
-	height: 100%;
-	background-color: #f2f2f2;
-}
-/* #endif */
-</style>
+
 
 <style lang="scss" scoped>
+.scroll-view{
+	width: 100vw;
+	height: calc(100vh - var(--window-top) - 40px);
+}
 .order {
 	width: 710rpx;
 	background-color: #ffffff;

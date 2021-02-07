@@ -100,12 +100,12 @@ const wxVerifyLogin = async () => {
 				return await wxOpenLogin(userInfo.response, resData.bx_open_code)
 			}
 			store.commit('SET_TICKET', resData.bx_auth_ticket)
-			if (resData.login_user_info.user_no) {
+			if (resData&&resData.login_user_info.user_no) {
 				uni.setStorageSync('login_user_info', resData.login_user_info);
 				store.commit('SET_LOGIN_USER', resData.login_user_info)
 			}
 			uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
-			if (resData.login_user_info.data) {
+			if (resData&&resData.login_user_info.data) {
 				uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 			}
 			return true

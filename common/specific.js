@@ -65,12 +65,26 @@ export default {
 					}
 				]
 			}
-			let res = await _http.post(url, req)
-			if (res.data.state === 'SUCCESS') {
-				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-					store.commit('SET_PAY_PARAMS', res.data.data[0])
-					return res.data.data[0]
+			if(prepay_id){
+				let res = await _http.post(url, req)
+				if (res.data.state === 'SUCCESS') {
+					if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+						store.commit('SET_PAY_PARAMS', res.data.data[0])
+						return res.data.data[0]
+					}else{
+						uni.showModal({
+							title:'提示',
+							content:JSON.stringify(res.data),
+							showCancel:false
+						})
+					}
 				}
+			}else{
+				uni.showModal({
+					title:'提示',
+					content:'未知prepay_id',
+					showCancel:false
+				})
 			}
 		}
 

@@ -19,14 +19,29 @@ const mutations = {
 		storeInfo:{},
 		list: []
 	}) => {
-		debugger
 		if (cart.storeInfo && cart.storeInfo.store_no) {
 			state.cartInfo[cart.storeInfo.store_no] = {
 				storeInfo: cart.storeInfo,
 				cart: cart.list
 			}
 		} else if (cart.store_no) {
-			state.cartInfo[cart.store_no].cart = cart.list
+			if(!state.cartInfo[cart.store_no].cart){
+				state.cartInfo[cart.store_no].cart = []
+			}
+			if(cart.isAdd){
+				let cartList = state.cartInfo[cart.store_no].cart.map(item=>{
+					cart.list.forEach((c,index)=>{
+						if(c.id===item.id){
+							item.car_num += c.car_num
+							cart.list.splice(index,1)
+						}
+					})
+					return item
+				})
+				state.cartInfo[cart.store_no].cart = [...cartList,...cart.list]
+			}else{
+				state.cartInfo[cart.store_no].cart = cart.list
+			}
 		}
 		setItem('cartInfo', state.cartInfo)
 	},

@@ -1699,10 +1699,6 @@ export default {
 			&.grid-layout {
 				display: flex;
 				flex-wrap: wrap;
-				// display: grid;
-				// grid-template-columns: repeat(3, calc(33.33% - 20rpx));
-				// grid-row-gap: 20rpx;
-				// grid-column-gap: 20rpx;
 				.grid-item {
 					width: calc(33% - 20rpx / 3);
 					margin-bottom: 10rpx;
@@ -1711,9 +1707,7 @@ export default {
 						margin-right: 0;
 					}
 					display: flex;
-					// justify-content: center;
 					height: 150rpx;
-					// border: 1px solid #999;
 					box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 					padding: 10rpx;
 					flex-direction: column;
@@ -1743,10 +1737,6 @@ export default {
 				display: flex;
 				white-space: wrap;
 				justify-content: flex-start;
-				// display: grid;
-				// grid-template-columns: repeat(3, calc(33.33% - 20rpx));
-				// grid-row-gap: 20rpx;
-				// grid-column-gap: 20rpx;
 				.disease-item {
 					margin-right: 20rpx;
 					width: calc(33% - 40rpx/3);
@@ -1821,11 +1811,7 @@ export default {
 			&.todo-list {
 				display: flex;
 				flex-wrap: wrap;
-				justify-content: space-between;
-				// display: grid;
-				// grid-template-columns: repeat(3, calc(33.33% - 20rpx));
-				// grid-row-gap: 20rpx;
-				// grid-column-gap: 20rpx;
+				justify-content: flex-start;
 				font-weight: normal;
 				.todo-item {
 					width: calc(33% - 40rpx/3);
@@ -1840,6 +1826,11 @@ export default {
 					padding: 20rpx;
 					position: relative;
 					overflow: hidden;
+					margin-right: 20rpx;
+					margin-bottom: 20rpx;
+					&:nth-child(3n){
+						margin-right: 0;
+					}
 					.type {
 						text-align: center;
 						font-weight: normal;
