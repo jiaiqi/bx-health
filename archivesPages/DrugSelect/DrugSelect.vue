@@ -3,7 +3,7 @@
 		<view class="search-bar cu-bar search bg-white">
 			<view class="search-form round">
 				<text class="cuIcon-search"></text>
-				<input @confirm="searchVal" :adjust-position="false" type="text" :placeholder="`搜索${dataType}名称`" confirm-type="search" v-model="keywords" />
+				<input @confirm="searchVal" @blur="searchVal" :adjust-position="false" type="text" :placeholder="`搜索${dataType}名称`" confirm-type="search" v-model="keywords" />
 			</view>
 			<view class="action"><button class="cu-btn bg-blue shadow-blur round">搜索</button></view>
 		</view>
@@ -51,9 +51,9 @@ export default {
 		};
 	},
 	watch: {
-		keywords(newValue, oldValue) {
-			this.getDrugList('', newValue);
-		}
+		// keywords(newValue, oldValue) {
+		// 	this.getDrugList('', newValue);
+		// }
 	},
 	onLoad(option) {
 		if (option.ds_no) {
@@ -95,7 +95,6 @@ export default {
 			this.getDrugList('', this.keywords);
 		},
 		async getDrugList(isMore, val) {
-			debugger;
 			let serviceName = 'srvhealth_medicine_info_select';
 			if (this.dataType === '运动') {
 				serviceName = 'srvhealth_body_activity_contents_select';
@@ -125,8 +124,9 @@ export default {
 			}
 			if (val) {
 				if (this.dataType === '用药') {
-					req.relation_condition.data = req.relation_condition.data.concat([
-						{
+					req.relation_condition = {
+						relation:"OR",
+						data:[{
 							colName: 'medicine_goods_name',
 							value: val,
 							ruleType: 'like'
@@ -135,8 +135,8 @@ export default {
 							colName: 'medicine_name',
 							value: val,
 							ruleType: 'like'
-						}
-					]);
+						}]
+					}
 					// req.relation_condition = {
 					// 	relation: 'AND',
 					// 	data: [

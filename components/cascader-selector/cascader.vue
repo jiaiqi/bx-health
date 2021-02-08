@@ -1,7 +1,7 @@
 <template>
-	<view class="cascader-content">
+	<view class="cascader-content" :class="{'insert':insert}">
 		<view class="tag-line">
-			<view class="bx-tagline">
+			<view class="bx-tagline" :class="{hideBorder:hideBorder}">
 				<view
 					@click="lineClick(item, index)"
 					class="bx-item bx-text-blue"
@@ -16,7 +16,7 @@
 				<view class="bx-item bx-text-yellow line-end" v-if="isShowSelect">请选择</view>
 			</view>
 			<view class="bx-tagbox">
-				<view v-if="showSelect"><cascaderItem :currentNo="currentNo" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem></view>
+				<view v-if="showSelect"><cascaderItem :hideBorder="hideBorder" :insert="insert" :currentNo="currentNo" :showCol="showCol" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem></view>
 			</view>
 		</view>
 	</view>
@@ -60,7 +60,6 @@ export default {
 			this.$emit('line-click', item, index);
 		}
 	},
-	created() {},
 	watch: {
 		lineDataDefault: {
 			deep: true,
@@ -132,6 +131,14 @@ export default {
 		tagBackground: {
 			type: String,
 			default: 'yellow'
+		},
+		insert:{
+			type: Boolean,
+			default: false
+		},
+		hideBorder:{
+			type: Boolean,
+			default: false
 		}
 	}
 };
@@ -143,6 +150,12 @@ export default {
 	flex: 1;
 	display: flex;
 	height: calc(90vh - 200rpx);
+	&.insert{
+		height: auto;
+		.bx-tagline{
+			margin: 20rpx 2px;
+		}
+	}
 }
 .tag-line {
 	display: flex;
@@ -154,6 +167,10 @@ export default {
 		margin: 20rpx 20rpx;
 		padding: 10rpx 40rpx;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+		&.hideBorder{
+			box-shadow: none;
+			margin: 0;
+		}
 		.bx-item {
 			height: 80upx;
 			line-height: 80rpx;

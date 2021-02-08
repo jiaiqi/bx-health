@@ -25,14 +25,14 @@ const mutations = {
 				cart: cart.list
 			}
 		} else if (cart.store_no) {
-			if(!state.cartInfo[cart.store_no].cart){
+			if(!state.cartInfo[cart.store_no]||!state.cartInfo[cart.store_no].cart){
 				state.cartInfo[cart.store_no].cart = []
 			}
 			if(cart.isAdd){
 				let cartList = state.cartInfo[cart.store_no].cart.map(item=>{
 					cart.list.forEach((c,index)=>{
 						if(c.id===item.id){
-							item.car_num += c.car_num
+							item.car_num = c.car_num
 							cart.list.splice(index,1)
 						}
 					})

@@ -212,7 +212,6 @@ export default {
 			if (storeInfo.success && Array.isArray(storeInfo.data) && storeInfo.data.length > 0) {
 				storeInfo =  storeInfo.data[0];
 				this.storeInfo = storeInfo;
-				debugger
 				if (!this.cartInfo[storeInfo.store_no]) {
 					// vuex中没有此店铺购物车数据
 					this.$store.commit('SET_STORE_CART', { storeInfo, list: [] });

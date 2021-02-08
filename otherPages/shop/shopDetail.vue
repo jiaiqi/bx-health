@@ -4,19 +4,25 @@
 		<view class="shop-detail-cen">
 			<view class="shop-detail-cen-left">
 				<view class="cen-title">{{ foodObj.name ? foodObj.name : '' }}</view>
-				<view class="cen-referral">脆糯营养，口感好，健康绿色</view>
-				<view class="cen-score">{{ foodObj.mark ? foodObj.mark : 0 }}分</view>
-				<view class="cen-money">
-					<text>￥</text>
-					<text>{{ foodObj.price ? foodObj.price : 0 }}</text>
+				<view class="evaluate">
+					<view class="cen-referral">脆糯营养，口感好，健康绿色</view>
+					<view class="cen-score">{{ foodObj.mark ? foodObj.mark : 0 }}分</view>
+				</view>
+				<view class="number-box">
+					<view class="cen-money">
+						<text>￥</text>
+						<text>{{ foodObj.price ? foodObj.price : 0 }}</text>
+					</view>
+					<!-- <button class="cu-btn bg-orange round shadow-blur add-to-cart" @click="joinCar" v-if="!carNum">加入购物车</button> -->
+					<u-number-box class="u-number-box" @change="valChange" @plus="adds" @minus="subtract" :min="0" v-model.number="carNum"></u-number-box>
 				</view>
 			</view>
-			<view class="shop-detail-cen-rig">
-				<view @click="toMyTodayFood" class="shop-detail-hod">添加至今日饮食</view>
-				<view v-if="!isJoin" @click="joinCar" class="shop-detail-btn">加入购物车</view>
+			<!-- <view class="shop-detail-cen-rig"> -->
+			<!-- <view @click="toMyTodayFood" class="shop-detail-hod">添加至今日饮食</view> -->
+			<!-- 		<view v-if="!isJoin" @click="joinCar" class="shop-detail-btn">加入购物车</view>
 				<view v-else class="counter"><u-number-box @minus="subtract" @plus="adds" :min="1" v-model.number="value" @change="valChange"></u-number-box></view>
-				<view @click="payOrder" class="shop-detail-btn">立即下单</view>
-			</view>
+				<view @click="payOrder" class="shop-detail-btn">立即下单</view> -->
+			<!-- </view> -->
 		</view>
 		<view class="shop-detail-bot">
 			<view class="ele-text-top-tit">
@@ -70,9 +76,29 @@
 			</view>
 		</view>
 		<jumpBall :backgroundColor="'red'" :start.sync="num" :element.sync="element" @msg="jbMsg" />
-		<view class="public-button-box">
+		<!-- 		<view class="public-button-box">
 			<view @click="goCar" class="lg text-gray cuIcon-cart add-button">
 				<text class="add-button-num">{{ carNum }}</text>
+			</view>
+		</view> -->
+		<view class="cu-bar foot bottom bg-white tabbar border shop">
+			<button class="action" @click="toShop">
+				<view class="cuIcon-shop text-orange"></view>
+				店铺
+			</button>
+			<button class="action cart-action" @click="goCar">
+				<view class="cuIcon-cart">
+					<view class="cu-tag badge">{{ carNum > 99 ? '99+' : carNum }}</view>
+				</view>
+				购物车
+			</button>
+			<view class="btn-group">
+				<button class="cu-btn bg-yellow round shadow-blur" @click="toMyTodayFood">记饮食</button>
+				<button class="cu-btn bg-orange round shadow-blur add-to-cart" @click="joinCar">
+					<text class="cuIcon-add"></text>
+					购物车
+				</button>
+				<button class="cu-btn bg-red round shadow-blur" @click="payOrder">去结算</button>
 			</view>
 		</view>
 	</view>
@@ -100,8 +126,8 @@ export default {
 	},
 	data() {
 		return {
-			orderNo:'',
-			orderInfo:{},
+			orderNo: '',
+			orderInfo: {},
 			categoryTop: [
 				{
 					name: 'NRV%占比',
@@ -402,9 +428,11 @@ export default {
 			}
 		},
 		payOrder() {
-			uni.navigateTo({
-				url:'/personalPages/payOrder/payOrder?store_no='+this.foodObj.restaurant_no
-			})
+			if (this.foodObj.restaurant_no) {
+				uni.navigateTo({
+					url: '/personalPages/payOrder/payOrder?store_no=' + this.foodObj.restaurant_no + '&goods_info=' + encodeURIComponent(JSON.stringify(this.foodObj))
+				});
+			}
 		},
 		async getNutrientRecommended() {
 			let self = this;
@@ -497,7 +525,7 @@ export default {
 			this.setShopCarData();
 		},
 		setShopCarData(isAdd) {
-			if (!this.foodObj.car_num) {
+			if (!this.foodObj.car_num && this.foodObj.car_num !== 0) {
 				this.foodObj['car_num'] = 1;
 			}
 			let shopCarData = this.cartInfo[this.restaurant_no];
@@ -521,60 +549,78 @@ export default {
 			}
 			this.$store.commit('SET_STORE_CART', { store_no: this.foodObj.restaurant_no, list: shopCarData, isAdd });
 		},
-		/* 点击购物车前往购物车列表**/
+		toShop() {
+			// 返回店铺主页
+			if (this.foodObj.restaurant_no) {
+				uni.redirectTo({
+					url: '/otherPages/shop/shopHome?type=find&restaurantNo=' + this.foodObj.restaurant_no
+				});
+			}
+		},
 		goCar() {
+			// 跳转到购物车
 			uni.navigateTo({
 				url: '/otherPages/shop/shopCarList?store_no=' + this.foodObj.restaurant_no
 			});
 		},
 		/* 点击计数器加号回调**/
 		adds(e) {
-			this.element = ['.counter', '.add-button'];
-			this.num = e.value;
-			this.carNum++;
+			this.foodObj['car_num'] = this.carNum;
+			this.element = ['.u-number-box', '.cart-action'];
+			// this.element = ['.counter', '.add-button'];
+			// this.num = e.value;
 		},
 		/* 点击计数器减号回调**/
 		subtract(e) {
-			this.carNum--;
+			this.foodObj['car_num'] = this.carNum;
 		},
 		/*添加到今日饮食记录**/
 		async toMyTodayFood() {
+			let self = this;
 			let current_food = this.currFood;
-			let obj = [
-				{
-					userno: uni.getStorageSync('login_user_info').user_no,
-					hdate: this.nowDate,
-					htime: this.nowDateTime,
-					name: current_food.name,
-					amount: 1,
-					unit: current_food.unit,
-					energy: current_food.unit_energy,
-					user_name: uni.getStorageSync('current_user'),
-					image: current_food.image,
-					unit_weight_g: 100,
-					mixed_food_no: current_food.meal_no,
-					diret_type: 'mixed_food'
+			uni.showModal({
+				title: '提示',
+				content: '是否将当前食物添加到今日饮食记录',
+				success(res) {
+					if (res.confirm) {
+						let obj = [
+							{
+								userno: uni.getStorageSync('login_user_info').user_no,
+								hdate: self.nowDate,
+								htime: self.nowDateTime,
+								name: current_food.name,
+								amount: 1,
+								unit: current_food.unit,
+								energy: current_food.unit_energy,
+								user_name: uni.getStorageSync('current_user'),
+								image: current_food.image,
+								unit_weight_g: 100,
+								mixed_food_no: current_food.meal_no,
+								diret_type: 'mixed_food'
+							}
+						];
+						let serviceName = 'srvhealth_diet_record_add';
+						let url = self.getServiceUrl('health', serviceName, 'operate');
+						let req = [{ serviceName: serviceName, colNames: ['*'], data: obj }];
+						self.$http.post(url, req).then(res => {
+							if (res.data.state === 'SUCCESS') {
+								uni.showToast({
+									title: '添加成功',
+									duration: 2000,
+									icon: 'none'
+								});
+							}
+						});
+					}
 				}
-			];
-			let serviceName = 'srvhealth_diet_record_add';
-			let url = this.getServiceUrl('health', serviceName, 'operate');
-			let req = [{ serviceName: serviceName, colNames: ['*'], data: obj }];
-			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS') {
-				uni.showToast({
-					title: '添加成功',
-					duration: 2000,
-					icon: 'none'
-				});
-			}
+			});
 		},
 		/* 点击加入购物车**/
 		joinCar() {
-			this.element = ['.shop-detail-cen-rig', '.add-button'];
-			this.num = 1;
-			this.isJoin = true;
+			this.element = ['.u-number-box', '.cart-action'];
+			this.carNum++;
+			this.foodObj['car_num'] = this.carNum;
 			this.setShopCarData(true);
-			this.carNum += 1;
 		},
 		jbMsg(res) {
 			//执行加入购物车的逻辑
@@ -619,6 +665,11 @@ export default {
 			foodsDetail.imgurl = foodsDetail.imgurl.substring(0, foodsDetail.imgurl.lastIndexOf('&'));
 		}
 		this.foodObj = foodsDetail;
+		if (foodsDetail.name) {
+			uni.setNavigationBarTitle({
+				title: foodsDetail.name
+			});
+		}
 		this.currFood = foodsDetail;
 		if (uni.getStorageSync('current_user_info')) {
 			this.userInfo = uni.getStorageSync('current_user_info');
@@ -640,8 +691,8 @@ export default {
 			}, 0);
 			let curfood = this.cartInfo[this.currFood.restaurant_no].cart.find(item => item.id === this.currFood.id);
 			if (curfood && curfood.id) {
-				this.isJoin = true;
 				this.value = curfood.car_num;
+				this.carNum = curfood.car_num;
 			}
 		}
 	}
@@ -650,6 +701,9 @@ export default {
 
 <style scoped lang="scss">
 .shop-detail-wrap {
+	.cu-bar.tabbar.shop .action {
+		width: 50px;
+	}
 	.shop-detail-top {
 		width: 100%;
 		height: 480upx;
@@ -663,34 +717,41 @@ export default {
 		justify-content: space-between;
 		padding-bottom: 30upx;
 		.shop-detail-cen-left {
+			width: 100%;
 			.cen-title {
 				font-size: 36upx;
 				font-weight: 700;
 				padding: 15px;
 			}
-			.cen-referral {
-				padding-left: 15px;
-			}
-			.cen-score {
+			.evaluate {
 				display: flex;
-				width: 100upx;
-				justify-content: center;
-				margin-left: 20upx;
-				margin-top: 20upx;
-				background: #fff5d5;
-				color: #e88412;
-				border-radius: 10upx;
+				align-items: center;
+				.cen-referral {
+					padding: 0 15px;
+				}
+				.cen-score {
+					display: flex;
+					width: 100upx;
+					justify-content: center;
+					background: #fff5d5;
+					color: #e88412;
+					border-radius: 10upx;
+				}
 			}
-			.cen-money {
-				margin-top: 30upx;
-				margin-left: 30upx;
-				color: #ff0000;
-				text {
-					&:first-child {
-						font-size: 24upx;
-					}
-					&:last-child {
-						font-size: 30px;
+			.number-box {
+				display: flex;
+				justify-content: space-between;
+				padding: 10px 15px 0;
+				align-items: center;
+				.cen-money {
+					color: #ff0000;
+					text {
+						&:first-child {
+							font-size: 24upx;
+						}
+						&:last-child {
+							font-size: 30px;
+						}
 					}
 				}
 			}
@@ -698,7 +759,7 @@ export default {
 		.shop-detail-cen-rig {
 			display: flex;
 			flex-direction: column;
-			justify-content: flex-end;
+			justify-content: flex-start;
 			padding: 20rpx;
 			.shop-detail-btn {
 				margin-bottom: 10upx;
@@ -725,7 +786,7 @@ export default {
 	.shop-detail-bot {
 		background-color: white;
 		margin-top: 30upx;
-		padding: 20upx 0;
+		padding: 20upx 0 50px;
 		// height: 520rpx;
 
 		.shop-detail-bot-t {

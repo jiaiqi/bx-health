@@ -4,12 +4,12 @@
 		<view class="page-content">
 			<view class="header-wrap" v-if="storeInfo && storeInfo.id" :style="{ 'background-image': 'url(' + getImagePath(storeInfo.image) + ')' }">
 				<view class="hospital-top">
-					<view class="left">
+					<view class="left"  @click="getCurrentLocation">
 						<view class="top">
 							<view class="name">{{ storeInfo.name }}</view>
 						</view>
 						<view class="bottom">
-							<view class="address" @click="getCurrentLocation">
+							<view class="address">
 								<text class="content">{{ storeInfo.address }}</text>
 								<text class="cuIcon-locationfill text-blue margin-left-xs"></text>
 							</view>

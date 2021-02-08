@@ -1,13 +1,9 @@
 <template>
 	<view class="cascader-wrap">
-		<!-- <view class="cu-bar search bg-white">
-			<view class="search-form round">
-				<text class="cuIcon-search"></text>
-				<input @confirm="searchWithKey" v-model="searchKey" :adjust-position="false" type="text" placeholder="根据关键词进行搜索" confirm-type="search" />
-			</view>
-			<view class="action"><button class="cu-btn bg-green shadow-blur round" @click="searchWithKey">搜索</button></view>
-		</view> -->
 		<cascader
+			:insert="insert"
+			:hideBorder="hideBorder"
+			:hidePath="hidePath"
 			@tag-click="clickTag"
 			:areaList="oldAreaList"
 			:currentNo="current_no"
@@ -19,7 +15,7 @@
 			:isShowMore="isShowMore"
 			:lineDataDefault="lineDataDefault"
 		></cascader>
-		<view class="button-box">
+		<view class="button-box" v-if="!hideButton">
 			<button class="cu-btn bg-green" @click="resetData">重 置</button>
 			<button class="cu-btn bg-blue" @click="emitSelectVal">{{ lineDataDefault[lineDataDefault.length - 1] ? '确 定' : '取 消' }}</button>
 		</view>
@@ -278,6 +274,22 @@ export default {
 		}
 	},
 	props: {
+		insert: {
+			type: Boolean,
+			default: false
+		},
+		hideBorder: {
+			type: Boolean,
+			default: false
+		},
+		hidePath: {
+			type: Boolean,
+			default: false
+		},
+		hideButton: {
+			type: Boolean,
+			default: false
+		},
 		srvInfo: {
 			type: Object,
 			default: () => {
@@ -295,13 +307,9 @@ export default {
 .cascader-wrap {
 	width: 100%;
 	background-color: #fff;
-	// min-height: 1100rpx;
-	// height: 100%;
-	// height: calc(90vh - 90rpx);
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	// z-index: 99999;
 	overflow: scroll;
 	.button-box {
 		width: 100%;

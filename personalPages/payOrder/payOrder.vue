@@ -264,16 +264,29 @@ export default {
 		}
 	},
 	onLoad(option) {
-		if (option.store_no) {
+		if (option.store_no && option.goods_info) {
+			if (this.cartInfo[option.store_no]) {
+				this.orderInfo = this.cartInfo[option.store_no].storeInfo;
+				option.goods_info = JSON.parse(decodeURIComponent(option.goods_info));
+				if(!option.goods_info.car_num){
+					option.goods_info.car_num = 1
+				}
+				this.orderInfo.goodsList = [option.goods_info];
+			}
+		} else if (option.store_no) {
 			// 从购物车进入 还未生成订单
 			if (this.cartInfo[option.store_no] && Array.isArray(this.cartInfo[option.store_no].cart)) {
 				this.orderInfo = this.cartInfo[option.store_no].storeInfo;
-				this.orderInfo.goodsList = this.cartInfo[option.store_no].cart;
+				this.orderInfo.goodsList = this.cartInfo[option.store_no].cart.map(item=>{
+					if(!item.car_num){
+						item.car_num = 1
+					}
+					return item
+				});
 				this.orderInfo.order_state = '待提交';
 				this.orderInfo.pay_state = '待支付';
 			}
-		}
-		if (option.order_no) {
+		} else if (option.order_no) {
 			this.orderNo = option.order_no;
 			this.getOrderInfo();
 		}
@@ -339,6 +352,9 @@ export default {
 		}
 		.goods-item {
 			display: flex;
+			& + .goods-item {
+				margin-top: 20px;
+			}
 			.goods-image {
 				width: 100rpx;
 				height: 100rpx;

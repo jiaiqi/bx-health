@@ -1,13 +1,20 @@
 <template>
 	<view class="bx-tagbox-c">
-		<view class="bx-tagbox-c-wrap">
+		<view class="bx-tagbox-c-wrap" :class="{ hideBorder: hideBorder, insert: insert }">
 			<view class="bx-item-wrap">
 				<view class="bx-item" @click="selectArea(item)" :class="{ 'choose-item': item.no === currentItem.no }" v-for="(item, index) in areaList" :key="index">
 					{{ getLabel(item) }}
 				</view>
 			</view>
 		</view>
-		<cascaderItem v-if="currentItem.child && currentItem.child.length > 0" @selectAreaItem="selectArea2" :areaList="currentItem.child"></cascaderItem>
+		<cascaderItem
+			:hideBorder="hideBorder"
+			:insert="insert"
+			:showCol="showCol"
+			v-if="currentItem.child && currentItem.child.length > 0"
+			@selectAreaItem="selectArea2"
+			:areaList="currentItem.child"
+		></cascaderItem>
 	</view>
 </template>
 
@@ -30,8 +37,8 @@ export default {
 		// #endif
 	},
 	methods: {
-		getLabel(item){
-			return item.name ? item.name : this.showCol ? item[this.showCol] : ''
+		getLabel(item) {
+			return item.name ? item.name : this.showCol ? item[this.showCol] : '';
 		},
 		selectArea2(e) {
 			this.$emit('selectAreaItem', e);
@@ -98,8 +105,19 @@ export default {
 				return [];
 			}
 		},
+		showCol: {
+			type: String
+		},
 		currentNo: {
 			type: String
+		},
+		hideBorder: {
+			type: Boolean,
+			default: false
+		},
+		insert: {
+			type: Boolean,
+			default: false
 		}
 	}
 };
@@ -111,6 +129,13 @@ export default {
 	padding: 20rpx;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	border-radius: 30rpx;
+	&.insert {
+		margin: 10rpx 2px;
+	}
+	&.hideBorder {
+		box-shadow: none;
+		margin: 0;
+	}
 }
 .bx-tagbox-c {
 	text-align: left;

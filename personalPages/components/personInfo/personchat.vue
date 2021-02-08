@@ -40,8 +40,12 @@
 							></image>
 							<image :src="getSenderProfile(item) ? getSenderProfile(item) : '/static/man-profile.png'" mode="aspectFit" v-if="groupInfo && groupInfo.gc_no"></image>
 						</view>
-						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
-							<image :src="item.img_url" :style="{ width: item.imgWidth + 'px', height: item.imgHeight + 'px' }"></image>
+						<view
+							@click="previewImages(item.img_url)"
+							v-if="item.image && item.img_url && item.msg_content_type === '图片'"
+							class="person-chat-item-right person-chat-item-right-image"
+						>
+							<image :src="item.img_url" :style="{ width: item.imgWidth + 'px', height: item.imgHeight + 'px' }" lazy-load show-menu-by-longpress></image>
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
@@ -86,7 +90,15 @@
 						</view>
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
-							<video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video>
+							<video
+								class="video-msg"
+								:poster="item.image ? getImagePath(item.image, true) : false"
+								:style="{ width: item.videoWidth + 'px', height: item.videoHeight + 'px' }"
+								id="myVideo"
+								:src="item.video_url"
+								:duration="item.attribute && item.attribute.duration ? item.attribute.duration : ''"
+								controls
+							></video>
 						</view>
 						<view @click="downloadfile(item)" v-else-if="item.msg_content_type === '文件'" class="documents-wrap">
 							<view class="documents-item">
@@ -144,7 +156,17 @@
 						</view>
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
-							<video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video>
+							<video
+								class="video-msg"
+								style="width: 250px;height: 200px;"
+								:poster="item.image ? getImagePath(item.image, true) : ''"
+								:style="{ width: item.videoWidth + 'px', height: item.videoHeight + 'px' }"
+								id="myVideo"
+								:duration="item.attribute && item.attribute.duration ? item.attribute.duration : ''"
+								:src="item.video_url"
+								controls
+							></video>
+							<!-- <video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video> -->
 						</view>
 						<view v-else-if="item.longitude && item.latitude && item.msg_content_type === '位置'" class="map-container" @tap="openMap(item)">
 							<view class="map-info">
@@ -208,7 +230,20 @@
 					>
 						{{ voiceTitle }}
 					</text>
-					<input :focus="onFocus" :auto-focus="onFocus" v-else v-model="chatText" confirm-hold hold-keyboard class="send-text" type="text" @blur="onBlur" @focus="onInput" @confirm="sendMessage" confirm-type="send" />
+					<input
+						:focus="onFocus"
+						:auto-focus="onFocus"
+						v-else
+						v-model="chatText"
+						confirm-hold
+						hold-keyboard
+						class="send-text"
+						type="text"
+						@blur="onBlur"
+						@focus="onInput"
+						@confirm="sendMessage"
+						confirm-type="send"
+					/>
 				</view>
 				<view class="person-chat-rig" :class="{ 'is-feed': isFeed }">
 					<view class="person-chat-rig-add-wrap">
@@ -344,7 +379,7 @@ export default {
 			checkRadioValue: '',
 			chatText: '',
 			isSendLink: false,
-			onFocus:false,
+			onFocus: false,
 			showBottom: false,
 			currentSendType: '',
 			apiUrl: this.$api.downloadFile,
@@ -398,7 +433,18 @@ export default {
 			}
 			return content;
 		},
-
+		setImgSize(content, isVideo) {
+			// 让图片最长边等于设置的最大长度，短边等比例缩小，图片控件真实改变，区别于aspectFit方式。
+			let max = isVideo ? 500 : 350;
+			let maxW = uni.upx2px(max); //max是定义消息图片最大宽度
+			let maxH = uni.upx2px(max); //max是定义消息图片最大高度
+			if (content.width > maxW || content.height > maxH) {
+				let scale = content.width / content.height;
+				content.width = scale > 1 ? maxW : maxH * scale;
+				content.height = scale > 1 ? maxW / scale : maxH;
+			}
+			return content;
+		},
 		getCovers(item) {
 			return [
 				{
@@ -437,10 +483,10 @@ export default {
 		/*关闭底部选择按钮**/
 		closeBottomPoup() {
 			uni.hideKeyboard();
-			this.showKeyboard = false
-			this.$nextTick(function(){
+			this.showKeyboard = false;
+			this.$nextTick(function() {
 				this.isSendLink = false;
-			})
+			});
 		},
 		onBlur() {
 			this.showKeyboard = false;
@@ -688,7 +734,6 @@ export default {
 				]
 			};
 			const res = await this.$http.post(url, req);
-			debugger;
 			this.$store.commit('SET_USERLIST', res.data.data);
 			console.log('userInfo=====>', res.data.data);
 		},
@@ -724,7 +769,6 @@ export default {
 					count: 6, //默认9
 					sourceType: ['album'], //从相册选择
 					success: function(res) {
-						console.log('上传图片----》', res);
 						let reqHeader = {
 							bx_auth_ticket: uni.getStorageSync('bx_auth_ticket')
 						};
@@ -738,19 +782,24 @@ export default {
 						};
 						let url = '';
 						for (let i = 0; i < res.tempFilePaths.length; i++) {
-							uni.uploadFile({
-								url: self.$api.upload,
-								header: reqHeader,
-								formData: formData,
-								filePath: res.tempFilePaths[i],
-								name: 'file',
-								success: e => {
-									if (e.statusCode === 200) {
-										let photoDataNo = JSON.parse(e.data).file_no;
-										self.sendMessageLanguageInfo('图片', photoDataNo);
-									} else {
-									}
-									// console.log(uploadFileRes.data);
+							uni.getImageInfo({
+								src: res.tempFilePaths[i],
+								success: function(image) {
+									uni.uploadFile({
+										url: self.$api.upload,
+										header: reqHeader,
+										formData: formData,
+										filePath: res.tempFilePaths[i],
+										name: 'file',
+										success: e => {
+											if (e.statusCode === 200) {
+												let photoDataNo = JSON.parse(e.data).file_no;
+												self.sendMessageLanguageInfo('图片', photoDataNo, image);
+											} else {
+											}
+											// console.log(uploadFileRes.data);
+										}
+									});
 								}
 							});
 						}
@@ -834,7 +883,10 @@ export default {
 					sourceType: ['camera', 'album'],
 					success: function(res) {
 						let src = res.tempFilePath;
-						console.log('-----------res----视频', src);
+						// 1. 上传视频文件res.tempFilePath、2.上传视频缩略图res.thumbTempFilePath
+						uni.showLoading({
+							title: '发送中...'
+						});
 						uni.uploadFile({
 							url: self.$api.upload,
 							header: reqHeader,
@@ -845,16 +897,45 @@ export default {
 								console.log('上传文件-----', e);
 								if (e.statusCode === 200) {
 									let photoDataNo = JSON.parse(e.data).file_no;
-									console.log('上传文件-----', e);
-									self.sendMessageLanguageInfo('视频', photoDataNo);
+									let thumbFormData = {
+										serviceName: 'srv_bxfile_service',
+										interfaceName: 'add',
+										app_no: 'health',
+										columns: 'image'
+									};
+									uni.uploadFile({
+										url: self.$api.upload,
+										header: reqHeader,
+										formData: formData,
+										filePath: res.thumbTempFilePath,
+										name: 'file',
+										success: e => {
+											if (e.statusCode === 200) {
+												let imageNo = JSON.parse(e.data).file_no;
+												res.imageNo = imageNo;
+												// #ifdef MP-WEIXIN
+												uni.getVideoInfo({
+													src: res.tempFilePath,
+													success(info) {
+														info.imageNo = imageNo;
+														self.sendMessageLanguageInfo('视频', photoDataNo, info);
+													},
+													fail() {
+														self.sendMessageLanguageInfo('视频', photoDataNo, res);
+													}
+												});
+												// #endif
+												// #ifndef MP-WEIXIN
+												self.sendMessageLanguageInfo('视频', photoDataNo, res);
+												// #endif
+											}
+										}
+									});
+									// self.sendMessageLanguageInfo('视频', photoDataNo,res);
 								} else {
 								}
-							},
-							fail: e => {
-								console.log('失败---', e);
 							}
 						});
-						console.log('点击视频----', res);
 					}
 				});
 			}
@@ -973,16 +1054,14 @@ export default {
 		},
 		/*打开发送链接弹窗**/
 		openLink() {
-			if(this.isSendLink){
-				debugger
+			if (this.isSendLink) {
 				this.isSendLink = false;
-				this.onFocus = true
-				return
+				this.onFocus = true;
+				return;
 			}
 			uni.hideKeyboard();
 			this.isSendLink = true;
-			debugger
-			this.showKeyboard = false
+			this.showKeyboard = false;
 			this.$nextTick(function() {
 				//进入页面滚动到底部
 				this.scrollTop = 99999;
@@ -1022,7 +1101,6 @@ export default {
 			wx.downloadFile({
 				url: url,
 				success(res) {
-					// console.log(res)
 					//保存到本地
 					wx.saveFile({
 						tempFilePath: res.tempFilePath,
@@ -1051,7 +1129,7 @@ export default {
 			});
 		},
 		/*点击发送后添加图片或语音数据**/
-		async sendMessageLanguageInfo(type, value) {
+		async sendMessageLanguageInfo(type, value, info) {
 			console.log('type----sendMessageLanguageInfo', type);
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
 			let req = [
@@ -1090,7 +1168,13 @@ export default {
 				};
 			}
 			if (type === '图片') {
+				req[0].data[0].attribute = info;
 				req[0].data[0].image = value;
+				try {
+					req[0].data[0].attribute = JSON.stringify(info);
+				} catch (e) {
+					//TODO handle the exception
+				}
 			} else if (type === '语音') {
 				req[0].data[0].msg_link = value.content;
 				req[0].data[0].voice_time = value.contentDuration;
@@ -1098,6 +1182,12 @@ export default {
 				req[0].data[0].attachment = value;
 			} else if (type === '视频') {
 				req[0].data[0].video = value;
+				req[0].data[0].image = info.imageNo;
+				try {
+					req[0].data[0].attribute = JSON.stringify(info);
+				} catch (e) {
+					//TODO handle the exception
+				}
 			} else if (type === '位置') {
 				if (value.latitude && value.longitude) {
 					// 发送位置
@@ -1106,6 +1196,11 @@ export default {
 					req[0].data[0].longitude = value.longitude; //经度
 					req[0].data[0].location_name = value.name;
 					req[0].data[0].location_address = value.address;
+					try {
+						req[0].data[0].attribute = JSON.stringify(value);
+					} catch (e) {
+						//TODO handle the exception
+					}
 				} else {
 					uni.showToast({
 						title: '发送失败,请重试！',
@@ -1115,7 +1210,7 @@ export default {
 				}
 			}
 			let res = await this.$http.post(url, req);
-			console.log('发送成功', res);
+			uni.hideLoading();
 			if (
 				Array.isArray(res.data.response) &&
 				res.data.response.length > 0 &&
@@ -1342,16 +1437,34 @@ export default {
 					}
 					if (item.image) {
 						let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-						this.$set(item, 'img_url', url);
-						this.getImageInfo({ url: url }).then(picInfo => {
-							if (picInfo.w && picInfo.h) {
-								let res = this.setPicSize(picInfo);
-								if (res.w && res.h) {
-									this.$set(item, 'imgWidth', res.w);
-									this.$set(item, 'imgHeight', res.h);
-								}
+						if (item.msg_content_type === '图片') {
+							this.$set(item, 'img_url', url);
+						}
+						if (item.attribute) {
+							try {
+								item.attribute = JSON.parse(item.attribute);
+								this.$set(item, 'attribute', item.attribute);
+							} catch (e) {
+								//TODO handle the exception
 							}
-						});
+						}
+						if (item.attribute && item.attribute.width && item.attribute.height) {
+							let info = this.setImgSize(item.attribute);
+							if (info.width && info.height) {
+								this.$set(item, 'imgWidth', info.width);
+								this.$set(item, 'imgHeight', info.height);
+							}
+						} else {
+							this.getImageInfo({ url: url }).then(picInfo => {
+								if (picInfo.w && picInfo.h) {
+									let res = this.setPicSize(picInfo);
+									if (res.w && res.h) {
+										this.$set(item, 'imgWidth', res.w);
+										this.$set(item, 'imgHeight', res.h);
+									}
+								}
+							});
+						}
 					}
 					if (item.attachment) {
 						this.getFileNo(item.attachment).then(obj => {
@@ -1361,6 +1474,21 @@ export default {
 						});
 					}
 					if (item.msg_content_type === '视频' && item.video) {
+						if (item.attribute) {
+							try {
+								item.attribute = JSON.parse(item.attribute);
+								this.$set(item, 'attribute', item.attribute);
+							} catch (e) {
+								//TODO handle the exception
+							}
+						}
+						if (item.attribute && item.attribute.width && item.attribute.height) {
+							let info = this.setImgSize(item.attribute, true);
+							if (info.width && info.height) {
+								this.$set(item, 'videoWidth', info.width);
+								this.$set(item, 'videoHeight', info.height);
+							}
+						}
 						let video_url = this.$api.downloadFile + item.video + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
 						this.$set(resData[i], 'video_url', video_url);
 					}
@@ -1499,12 +1627,12 @@ export default {
 	mounted() {
 		uni.onKeyboardHeightChange(res => {
 			console.log(res.height);
-			if(res.height>0){
-				this.showKeyboard = true
+			if (res.height > 0) {
+				this.showKeyboard = true;
 				this.isSendLink = false;
 			}
 			this.$nextTick(() => {
-				this.scrollTop = 999999
+				this.scrollTop = 999999;
 			});
 		});
 		this.Recorder = uni.getRecorderManager();

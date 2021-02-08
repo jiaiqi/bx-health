@@ -69,10 +69,13 @@
 					</swiper-item>
 				</swiper>
 			</view>
+			<view class="page-article" v-if="pageItem.div_type === 'tablist' && pageItem.tablist">
+				<view class="title">{{ pageItem.item_name }}</view>
+				<article-list :config="pageItem"></article-list>
+			</view>
 		</view>
+
 		<button class="contact-button" @click="toFeedBack"><text class="cuIcon-servicefill text-blue icon"></text></button>
-		<!-- <button class="cu-btn bg-blue" @click="toPay" v-if="loginUserInfo && loginUserInfo.user_type === '内部用户'">支付测试</button> -->
-		<!-- <button class="contact-button" open-type="contact"><text class="cuIcon-servicefill text-blue icon"></text></button> -->
 		<view class="cu-modal" :class="modalName === 'feedback' ? 'show' : ''">
 			<view class="cu-dialog">
 				<view class="cu-bar bg-white justify-end">
@@ -83,11 +86,6 @@
 					<button class="cu-btn bg-blue" open-type="contact">客服</button>
 					<button class="cu-btn bg-green" @click="toPages('feedback')">意见反馈</button>
 				</view>
-				<!-- 	<view class="cu-bar bg-white justify-center">
-					<view class="action">
-						<button class="cu-btn line-green text-green" @tap="hideModal">取消</button>
-					</view>
-				</view> -->
 			</view>
 		</view>
 	</view>
@@ -95,8 +93,12 @@
 
 <script>
 import { mapState } from 'vuex';
+import ArticleList from './article-list.vue';
 export default {
 	// 通用站点首页
+	components: {
+		ArticleList
+	},
 	data() {
 		return {
 			pageItemList: [], // 页面项
@@ -160,24 +162,6 @@ export default {
 					url: url
 				});
 			}
-		},
-		async toPay() {
-			let result = await this.toPlaceOrder(1, this.login_user_type && this.login_user_type.login_user_type ? this.login_user_type.login_user_type : '');
-			let res = await this.getPayParams(result.prepay_id);
-			wx.requestPayment({
-				timeStamp: res.timeStamp.toString(),
-				nonceStr: res.nonceStr,
-				package: res.package,
-				signType: 'MD5',
-				paySign: res.paySign,
-				success(res) {
-					debugger;
-					// 支付成功
-				},
-				fail(res) {
-					debugger;
-				}
-			});
 		},
 		hideModal() {
 			this.modalName = '';
@@ -264,9 +248,7 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				// return res.data.data;
 				this.pageItemList.length = [];
-				// this.getPageDetail(res.data.data)
 				for (let index in res.data.data) {
 					let result = await this.getItemDetail(res.data.data[index]);
 					switch (res.data.data[index].div_type) {
@@ -287,6 +269,9 @@ export default {
 						case 'carousel':
 							res.data.data[index]['carousel'] = result;
 							break;
+						case 'tablist':
+							res.data.data[index]['tablist'] = result;
+							break;
 					}
 					if (res.data.data[index].disp_flag !== '否') {
 						this.pageItemList.push(res.data.data[index]);
@@ -294,30 +279,6 @@ export default {
 				}
 				return res.data.data;
 			}
-		},
-		async getPageDetail(list) {
-			let req = [];
-			for (let item of list) {
-				let obj = {
-					colNames: ['*'],
-					condition: [{ colName: 'item_no', ruleType: 'in', value: item.item_no }],
-					serviceName: ''
-				};
-				switch (item.div_type) {
-					case 'buttons':
-						obj.serviceName = 'srvdaq_page_item_buttons_select';
-						break;
-					case 'carousel':
-						obj.serviceName = 'srvdaq_page_item_carousel_select';
-						break;
-				}
-				if (obj.serviceName && item.item_no) {
-					req.push(obj);
-				}
-			}
-			let url = this.getServiceUrl('daq', 'select', 'multi');
-			let res = await this.$http.post(url, req);
-			// debugger
 		},
 		async getItemDetail(item) {
 			// 获取页面项详情
@@ -328,6 +289,9 @@ export default {
 					break;
 				case 'carousel':
 					serviceName = 'srvdaq_page_item_carousel_select';
+					break;
+				case 'tablist':
+					serviceName = 'srvdaq_page_item_tablist_select';
 					break;
 			}
 			if (serviceName && item.item_no) {
@@ -344,7 +308,6 @@ export default {
 						switch (item.div_type) {
 							case 'carousel':
 								pageitem['picUrl'] = this.$api.downloadFile + pageitem.carousel_image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-								// pageitem['picUrl'] = this.getImagePath(pageitem.carousel_image) ;
 								break;
 							case 'buttons':
 								break;
@@ -355,64 +318,6 @@ export default {
 					});
 					return itemList;
 				}
-			}
-		},
-		// 查找当前帐号建立的用户列表
-		async selectUserList(userInfo) {
-			let self = this;
-			const url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_person_info_select',
-				colNames: ['*'],
-				condition: [{ colName: 'create_user', ruleType: 'eq', value: userInfo.user_no }],
-				order: [
-					{
-						colName: 'create_time',
-						orderType: 'asc'
-					}
-				]
-			};
-			const res = await this.$http.post(url, req);
-			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-				// 有数据
-				this.$store.commit('SET_USERLIST', res.data.data);
-				if (uni.getStorageSync('current_user')) {
-					res.data.data.forEach(item => {
-						if (item.name === uni.getStorageSync('current_user')) {
-							uni.setStorageSync('current_user', item.name);
-							this.$store.commit('SET_USERINFO', item);
-						}
-					});
-				} else {
-					uni.setStorageSync('current_user_info', res.data.data[0]);
-					uni.setStorageSync('current_user', res.data.data[0].name);
-				}
-				if (this.userInfo && this.userInfo.font_size) {
-					switch (this.userInfo.font_size) {
-						case '小':
-							this.$store.commit('SET_GLOBAL_TEXT_SIZE', 14);
-							this.$store.commit('SET_GLOBAL_LABEL_SIZE', 14);
-							break;
-						case '中':
-							this.$store.commit('SET_GLOBAL_TEXT_SIZE', 16);
-							this.$store.commit('SET_GLOBAL_LABEL_SIZE', 16);
-							break;
-						case '大':
-							this.$store.commit('SET_GLOBAL_TEXT_SIZE', 18);
-							this.$store.commit('SET_GLOBAL_LABEL_SIZE', 18);
-							break;
-					}
-				}
-				uni.setStorageSync('user_info_list', res.data.data);
-				return res.data.data;
-			} else if (res.data.resultCode === '0011') {
-				// 登录失效 进行静默登录
-				this.$store.commit('SET_LOGIN_STATE', false);
-				uni.setStorageSync('isLogin', false);
-				self.toAddPage();
-			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
-				// 没有角色 提示跳转到创建角色页面
-				self.toAddPage();
 			}
 		},
 		openOfficialImage() {

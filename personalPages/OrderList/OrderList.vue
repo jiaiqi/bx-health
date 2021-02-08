@@ -6,7 +6,7 @@
 			</view>
 			<swiper class="swiper-box" :current="swiperCurrent" @transition="transition" @animationfinish="animationfinish">
 				<swiper-item class="swiper-item">
-					<scroll-view scroll-y  @scrolltolower="reachBottom" class="scroll-view">
+					<scroll-view scroll-y @scrolltolower="reachBottom" class="scroll-view">
 						<view class="page-box" v-if="loadStatus[0] === 'noMore' && orderList[0].length === 0">
 							<view>
 								<view class="centre">
@@ -20,16 +20,16 @@
 							</view>
 						</view>
 						<view class="page-box" v-else>
-							<view class="order" v-for="(res, index) in orderList[0]" :key="res.id" @click="toOrderDetail(res)">
+							<view class="order" v-for="(res, index) in orderList[0]" :key="res.id">
 								<view class="top">
-									<view class="left">
+									<view class="left" @click.stop="toStore(res)">
 										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
 									<view class="right">{{ res.deal || '' }}</view>
 								</view>
-								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
+								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left"><image class="image" :src="item.goodsUrl" mode="aspectFill"></image></view>
 									<view class="content">
 										<view class="title">{{ item.title }}</view>
@@ -60,7 +60,7 @@
 					</scroll-view>
 				</swiper-item>
 				<swiper-item class="swiper-item">
-					<scroll-view scroll-y  @scrolltolower="reachBottom" class="scroll-view">
+					<scroll-view scroll-y @scrolltolower="reachBottom" class="scroll-view">
 						<view class="page-box" v-if="loadStatus[1] === 'noMore' && orderList[1].length === 0">
 							<view>
 								<view class="centre">
@@ -74,16 +74,16 @@
 							</view>
 						</view>
 						<view class="page-box" v-else>
-							<view class="order" v-for="(res, index) in orderList[1]" :key="res.id" @click="toOrderDetail(res)">
+							<view class="order" v-for="(res, index) in orderList[1]" :key="res.id">
 								<view class="top">
-									<view class="left">
+									<view class="left" @click.stop="toStore(res)">
 										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
 									<view class="right">{{ res.deal || '' }}</view>
 								</view>
-								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
+								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left">
 										<image class="image" :src="item.goodsUrl" mode="aspectFill" v-if="item.goodsUrl"></image>
 										<text class="cuIcon-goods image" v-else></text>
@@ -133,16 +133,16 @@
 							</view>
 						</view>
 						<view class="page-box" v-else>
-							<view class="order" v-for="(res, index) in orderList[2]" :key="res.id" @click="toOrderDetail(res)">
+							<view class="order" v-for="(res, index) in orderList[2]" :key="res.id">
 								<view class="top">
-									<view class="left">
+									<view class="left" @click.stop="toStore(res)">
 										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
 									<view class="right">{{ res.deal || '' }}</view>
 								</view>
-								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
+								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left"><image class="image" :src="item.goodsUrl" mode="aspectFill"></image></view>
 									<view class="content">
 										<view class="title u-line-2">{{ item.title }}</view>
@@ -187,16 +187,16 @@
 							</view>
 						</view>
 						<view class="page-box" v-else>
-							<view class="order" v-for="(res, index) in orderList[3]" :key="res.id" @click="toOrderDetail(res)">
+							<view class="order" v-for="(res, index) in orderList[3]" :key="res.id">
 								<view class="top">
-									<view class="left">
+									<view class="left" @click.stop="toStore(res)">
 										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
 									<view class="right">{{ res.deal || '' }}</view>
 								</view>
-								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
+								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left">
 										<image class="image" :src="item.goodsUrl" mode="aspectFill" v-if="item.goodsUrl"></image>
 										<text class="cuIcon-goods image" v-else></text>
@@ -244,16 +244,16 @@
 							</view>
 						</view>
 						<view class="page-box" v-else>
-							<view class="order" v-for="(res, index) in orderList[4]" :key="res.id" @click="toOrderDetail(res)">
+							<view class="order" v-for="(res, index) in orderList[4]" :key="res.id">
 								<view class="top">
-									<view class="left">
+									<view class="left"  @click.stop="toStore(res)">
 										<bx-icon name="home" :size="30" color="rgb(94,94,94)"></bx-icon>
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
 									<view class="right">{{ res.deal || '' }}</view>
 								</view>
-								<view class="item" v-for="(item, index) in res.goodsList" :key="index">
+								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left"><image class="image" :src="item.goodsUrl" mode="aspectFill"></image></view>
 									<view class="content">
 										<view class="title u-line-2">{{ item.title }}</view>
@@ -355,14 +355,24 @@ export default {
 		// 价格小数
 		priceDecimal() {
 			return val => {
-				if (val !== parseInt(val)) return val.slice(-2);
-				else return '00';
+				if (val) {
+					val = Number(val).toFixed(2);
+				} else {
+					return '0';
+				}
+				if (Number(val) !== parseInt(val)) return val.slice(-2);
+				else return '0';
 			};
 		},
 		// 价格整数
 		priceInt() {
 			return val => {
-				if (val !== parseInt(val)) return val.split('.')[0];
+				if (val) {
+					val = Number(val).toFixed(2);
+				} else {
+					return '0';
+				}
+				if (Number(val) !== parseInt(val)) return val.split('.')[0];
 				else return val;
 			};
 		}
@@ -422,8 +432,12 @@ export default {
 				uni.startPullDownRefresh();
 			});
 		},
+		toStore(e) {
+			uni.navigateTo({
+				url: '/otherPages/shop/shopHome?restaurantNo=' + e.store_no
+			});
+		},
 		toOrderDetail(e) {
-			debugger;
 			uni.navigateTo({
 				url: '/personalPages/payOrder/payOrder?order_no=' + e.order_no
 			});
@@ -571,10 +585,8 @@ export default {
 };
 </script>
 
-
-
 <style lang="scss" scoped>
-.scroll-view{
+.scroll-view {
 	width: 100vw;
 	height: calc(100vh - var(--window-top) - 40px);
 }

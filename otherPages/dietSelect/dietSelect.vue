@@ -16,23 +16,11 @@
 								confirm-type="search"
 							/>
 						</view>
-						<!-- 		<view class="action">
-							<text class="margin-right" @click="showModal('sort')" :class="{ 'text-cyan text-bold': filterVal && filterVal.indexOf('全部') === -1 }">
-								<text>排序</text>
-								<text class="cuIcon-sort"></text>
-								<text v-if="filterVal && filterVal.indexOf('全部') === -1" style="font-size: 12px;">({{filterVal}})</text>
-							</text>
-							<text @click="showModal('filter')" :class="{ 'text-cyan text-bold': filterVal && filterVal.indexOf('全部') === -1 }">
-								<text>筛选</text>
-								<text class="cuIcon-filter"></text>
-								<text v-if="filterVal && filterVal.indexOf('全部') === -1" style="font-size: 12px;">({{filterVal}})</text>
-							</text>
-						</view> -->
 					</view>
 				</view>
 			</view>
 		</view>
-		<view class="handler-action" v-if="pageType!=='sport'">
+		<view class="handler-action" v-if="pageType !== 'sport'">
 			<text class="margin-right" @click="showModal('sort')" :class="{ 'text-cyan text-bold': childChooseArr.length > 0 }">
 				<text>排序</text>
 				<text class="cuIcon-order"></text>
@@ -44,30 +32,6 @@
 				<text v-if="filterVal && filterVal.indexOf('全部') === -1" style="font-size: 12px;">({{ filterVal }})</text>
 			</text>
 		</view>
-		<!-- 	<view class="filtrate-wrap">
-			<view v-if="childChooseArr.length > 0" class="filtrate-choose">
-				<text>已选择：</text>
-				<view @click="tagClick(item)" v-for="(item, index) in childChooseArr" :key="index" class="filtrate-choose-item">
-					<text class="cu-tag" :text="item.title" closeable :show="item.choose" type="warning" mode="light">{{ item.title }}</text>
-					<text class="lg text-gray cuIcon-close filtrate-close"></text>
-				</view>
-			</view>
-			<view class="filtrate-item-wrap">
-				<view v-for="(item, index) in menuAgList" :key="index" class="filtrate-item">
-					<view class="filtrate-item-left" style="display: flex;flex-shrink: 0;width: 152rpx;">{{ item.classify_name }}</view>
-					<view class="" style="display: flex;  flex-flow: wrap;">
-						<view @click="chooseMenu(item, cate)" v-for="(cate, i) in item.children" :key="i" :class="cate.choose ? 'cate-active' : ''" class="filtrate-item-right">
-							<text>{{ cate.title }}</text>
-							<u-icon size="24" v-show="cate.current_num == 1 && item.type !== 'food' && childChooseArrLength == 1" name="arrow-downward"></u-icon>
-							<u-icon size="24" v-show="cate.current_num == 2 && item.type !== 'food' && childChooseArrLength == 1" name="arrow-upward"></u-icon>
-							<text v-show="cate.current_num == 1 && item.type !== 'food' && childChooseArrLength >= 2">(高)</text>
-							<text v-show="cate.current_num == 2 && item.type !== 'food' && childChooseArrLength >= 2">(中)</text>
-							<text v-show="cate.current_num == 3 && item.type !== 'food' && childChooseArrLength >= 2">(低)</text>
-						</view>
-					</view>
-				</view>
-			</view>
-		</view> -->
 		<sPullScroll
 			ref="pullScroll"
 			:heightStyle="heightStyle"
@@ -245,6 +209,12 @@
 		<view class="cu-modal drawer-modal justify-start" :class="{ show: modalName === 'filter' }" @click="hideModal">
 			<view class="cu-dialog" @click.stop="">
 				<view class="filter-box">
+					<view class="filter-item-box">
+						<view class="label">食材</view>
+						<view class="child-data">
+							<cascader-selector ref="cascader" insert hideButton @clickTag="changeFilter($event, '食材')" :srvInfo="dietClassifySrv"></cascader-selector>
+						</view>
+					</view>
 					<view class="filter-item-box" v-for="item in filterOption">
 						<view class="label">{{ item.label }}</view>
 						<view class="child-data">
@@ -338,81 +308,88 @@ export default {
 		return {
 			planNo: null,
 			recentDiet: [],
+			dietClassifySrv: {
+				column: 'no',
+				showCol: 'dc_name',
+				isTree: true,
+				serviceName: 'srvhealth_diet_classify_select',
+				appNo: 'health'
+			},
 			filterVal: '',
 			// recentDietMode: 'edit',
 			heightStyle: 'calc(100vh-200upx)',
 			filterOption: [
-				{
-					label: '食材',
-					data: [
-						{
-							label: '全部',
-							value: '全部1',
-							checked: false
-						},
-						{
-							label: '蔬菜',
-							value: '蔬菜',
-							checked: false
-						},
-						{
-							label: '水果干果',
-							value: '水果干果',
-							checked: false
-						},
+				// {
+				// 	label: '食材',
+				// 	data: [
+				// 		{
+				// 			label: '全部',
+				// 			value: '全部1',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '蔬菜',
+				// 			value: '蔬菜',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '水果干果',
+				// 			value: '水果干果',
+				// 			checked: false
+				// 		},
 
-						{
-							label: '菌藻类',
-							value: '菌藻类',
-							checked: false
-						},
-						{
-							label: '坚果',
-							value: '坚果',
-							checked: false
-						},
-						{
-							label: '谷薯类',
-							value: '谷薯类',
-							checked: false
-						},
-						{
-							label: '蛋奶类',
-							value: '蛋奶类',
-							checked: false
-						},
-						{
-							label: '畜禽肉',
-							value: '畜禽肉',
-							checked: false
-						},
-						{
-							label: '水产品',
-							value: '水产品',
-							checked: false
-						},
-						{
-							label: '调味品',
-							value: '调味品',
-							checked: false
-						},
-						{
-							label: '饮品',
-							value: '饮品',
-							checked: false
-						},
-						{
-							label: '糕点类',
-							value: '糕点类',
-							checked: false
-						},
-						{
-							label: '其他',
-							value: '其他',
-							checked: false
-						}
-					]
-				},
+				// 		{
+				// 			label: '菌藻类',
+				// 			value: '菌藻类',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '坚果',
+				// 			value: '坚果',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '谷薯类',
+				// 			value: '谷薯类',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '蛋奶类',
+				// 			value: '蛋奶类',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '畜禽肉',
+				// 			value: '畜禽肉',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '水产品',
+				// 			value: '水产品',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '调味品',
+				// 			value: '调味品',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '饮品',
+				// 			value: '饮品',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '糕点类',
+				// 			value: '糕点类',
+				// 			checked: false
+				// 		},
+				// 		{
+				// 			label: '其他',
+				// 			value: '其他',
+				// 			checked: false
+				// 		}
+				// 	]
+				// },
 				{
 					label: '食物',
 					data: [
@@ -810,7 +787,7 @@ export default {
 		};
 	},
 	onShow() {
-		if(this.pageType==='food'){
+		if (this.pageType === 'food') {
 			this.getChooseFoodList();
 			this.getElementLabel();
 		}
@@ -841,94 +818,6 @@ export default {
 		this.searchArg = query;
 		if (query.type === 'food') {
 			let menuData = [
-				// {
-				// 	classify_name: '分类',
-				// 	type: 'food',
-				// 	children: [
-				// 		{
-				// 			title: '食材',
-				// 			value: 'matter',
-				// 			choose: true
-				// 		},
-				// 		{
-				// 			title: '食物',
-				// 			value: 'foods',
-				// 			choose: false
-				// 		}
-				// 	]
-				// },
-				// {
-				// 	classify_name: '子类',
-				// 	type: 'subclass',
-				// 	children: [
-				// 		{
-				// 			title: '全部',
-				// 			value: '全部',
-				// 			choose: true
-				// 		},
-				// 		{
-				// 			title: '蔬菜',
-				// 			value: '蔬菜',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '水果干果',
-				// 			value: '水果干果',
-				// 			choose: false
-				// 		},
-
-				// 		{
-				// 			title: '菌藻类',
-				// 			value: '菌藻类',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '坚果',
-				// 			value: '坚果',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '谷薯类',
-				// 			value: '谷薯类',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '蛋奶类',
-				// 			value: '蛋奶类',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '畜禽肉',
-				// 			value: '畜禽肉',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '水产品',
-				// 			value: '水产品',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '调味品',
-				// 			value: '调味品',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '饮品',
-				// 			value: '饮品',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '糕点类',
-				// 			value: '糕点类',
-				// 			choose: false
-				// 		},
-				// 		{
-				// 			title: '其他',
-				// 			value: '其他',
-				// 			choose: false
-				// 		}
-				// 	]
-				// },
 				{
 					classify_name: '宏量成分',
 					type: 'capacity',
@@ -1146,34 +1035,31 @@ export default {
 		childChooseArr(newValue, oldValue) {
 			console.log('-------------', newValue.length);
 			this.childChooseArrLength = newValue.length;
-			// if (newValue.length > 0) {
-			// 	if (this.pageType == 'food') {
-			// 		// this.topNum = 280;
-			// 	} else if (this.pageType == 'sport') {
-			// 		// this.topNum = 240;
-			// 	}
-			// } else {
-			// 	if (this.pageType == 'food') {
-			// 		this.topNum = 280;
-			// 	} else if (this.pageType == 'sport') {
-			// 		this.topNum = 180;
-			// 	}
-			// }
 		}
 	},
 	methods: {
 		changeFilter(val, type) {
+			if(typeof val==='object'&&val.path){
+				this.filterVal = val.dc_name
+				val = val.path
+			}
 			let cond = null;
 			if (type === '食材') {
 				this.searchArg.serviceName = 'srvhealth_diet_contents_select';
 				if (val !== '全部1') {
+					// cond = {
+					// 	colName: 'classify',
+					// 	ruleType: 'eq',
+					// 	value: val
+					// };
 					cond = {
-						colName: 'classify',
-						ruleType: 'eq',
+						colName: 'classify_tree_path',
+						ruleType: 'like',
 						value: val
 					};
 				}
 			} else if (type === '食物') {
+				this.$refs.cascader.resetData()
 				if (val !== '全部2') {
 					cond = {
 						colName: 'owner',
@@ -1192,6 +1078,9 @@ export default {
 			this.classifyCond = cond;
 			this.getFoodsList(null, cond);
 			// this.hideModal();
+		},
+		getCascaderValue(e) {
+			debugger;
 		},
 		/*点击前往反馈页面**/
 		tofeedback() {
@@ -2629,6 +2518,8 @@ export default {
 		flex: 1;
 		width: 100%;
 		padding: 20rpx;
+		max-height: calc(100vh - var(--window-top) - var(--window-bottom));
+		overflow-y: scroll;
 		.filter-item-box {
 			margin-bottom: 20px;
 			display: flex;

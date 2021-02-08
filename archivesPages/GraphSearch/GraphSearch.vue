@@ -3,8 +3,7 @@
 		<view class="cu-bar bg-white search">
 			<view class="search-form radius">
 				<text class="cuIcon-search"></text>
-				<!-- <text class="cuIcon-searchlist"></text> -->
-				<input @input="valueChange" :focus="true"  :adjust-position="false"  type="text" confirm-type="search" />
+				<input @input="valueChange" focus type="text" confirm-type="search" />
 			</view>
 		</view>
 		<view class="hot-search-box" v-if="nodeList.length === 0">

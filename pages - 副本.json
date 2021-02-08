@@ -305,7 +305,10 @@
 				},
 				{
 					"path": "shop/shopDetail",
-					"style": {}
+					"style": {
+						"navigationBarBackgroundColor":"#fff",
+						"navigationBarTextStyle":"black"
+					}
 				},
 				{
 					"path": "shop/shopCarList",
