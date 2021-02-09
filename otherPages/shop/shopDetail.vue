@@ -1,28 +1,38 @@
 <template>
 	<view class="shop-detail-wrap">
-		<view class="shop-detail-top"><image :src="foodObj.imgurl" mode=""></image></view>
+		<view class="shop-detail-top">
+			<image class="image" :src="getImagePath(foodObj.image, true)" mode="aspectFill" v-if="foodObj && foodObj.image" @click="toPreviewImage(getImagePath(foodObj.image, true))"></image>
+		</view>
 		<view class="shop-detail-cen">
 			<view class="shop-detail-cen-left">
-				<view class="cen-title">{{ foodObj.name ? foodObj.name : '' }}</view>
-				<view class="evaluate">
-					<view class="cen-referral">脆糯营养，口感好，健康绿色</view>
-					<view class="cen-score">{{ foodObj.mark ? foodObj.mark : 0 }}分</view>
+				<view class="left-info">
+					<view class="cen-title">{{ foodObj.name || '' }}</view>
+					<view class="evaluate">
+						<view class="cen-referral">脆糯营养，口感好，健康绿色</view>
+						<view class="cen-score">{{ foodObj.mark || 0 }}分</view>
+					</view>
+				</view>
+				<view class="right-code">
+					<uni-qrcode
+						cid="qrcodeCanvas"
+						:text="qrCodeText"
+						:size="codeSize"
+						class="qrcode-canvas"
+						foregroundColor="#333"
+						makeOnLoad
+						@makeComplete="qrcodeCanvasComplete"
+						v-if="qrCodeText"
+					></uni-qrcode>
+					<image :src="qrcodePath" class="qr-code-image" mode="aspectFit" v-if="qrcodePath" @click="toPreviewImage(qrcodePath)"></image>
 				</view>
 				<view class="number-box">
 					<view class="cen-money">
 						<text>￥</text>
-						<text>{{ foodObj.price ? foodObj.price : 0 }}</text>
+						<text>{{ foodObj.price || 0 }}</text>
 					</view>
-					<!-- <button class="cu-btn bg-orange round shadow-blur add-to-cart" @click="joinCar" v-if="!carNum">加入购物车</button> -->
 					<u-number-box class="u-number-box" @change="valChange" @plus="adds" @minus="subtract" :min="0" v-model.number="carNum"></u-number-box>
 				</view>
 			</view>
-			<!-- <view class="shop-detail-cen-rig"> -->
-			<!-- <view @click="toMyTodayFood" class="shop-detail-hod">添加至今日饮食</view> -->
-			<!-- 		<view v-if="!isJoin" @click="joinCar" class="shop-detail-btn">加入购物车</view>
-				<view v-else class="counter"><u-number-box @minus="subtract" @plus="adds" :min="1" v-model.number="value" @change="valChange"></u-number-box></view>
-				<view @click="payOrder" class="shop-detail-btn">立即下单</view> -->
-			<!-- </view> -->
 		</view>
 		<view class="shop-detail-bot">
 			<view class="ele-text-top-tit">
@@ -75,12 +85,7 @@
 				</view>
 			</view>
 		</view>
-		<jumpBall :backgroundColor="'red'" :start.sync="num" :element.sync="element" @msg="jbMsg" />
-		<!-- 		<view class="public-button-box">
-			<view @click="goCar" class="lg text-gray cuIcon-cart add-button">
-				<text class="add-button-num">{{ carNum }}</text>
-			</view>
-		</view> -->
+		<jumpBall :backgroundColor="'red'" :start.sync="carNum" :element.sync="element" @msg="jbMsg" />
 		<view class="cu-bar foot bottom bg-white tabbar border shop">
 			<button class="action" @click="toShop">
 				<view class="cuIcon-shop text-orange"></view>
@@ -98,7 +103,7 @@
 					<text class="cuIcon-add"></text>
 					购物车
 				</button>
-				<button class="cu-btn bg-red round shadow-blur" @click="payOrder">去结算</button>
+				<button class="cu-btn bg-red round shadow-blur" @click="payOrder">立即购买</button>
 			</view>
 		</view>
 	</view>
@@ -128,6 +133,8 @@ export default {
 		return {
 			orderNo: '',
 			orderInfo: {},
+			qrcodePath: '',
+			codeSize: uni.upx2px(550),
 			categoryTop: [
 				{
 					name: 'NRV%占比',
@@ -140,9 +147,7 @@ export default {
 			],
 			foodObj: '',
 			foodChild: '',
-			queryType: '',
 			value: 1,
-			num: 0,
 			carNum: 0,
 			element: [],
 			nowDate: this.formateDate(new Date(), 'date').replace(/\s*/g, ''),
@@ -341,6 +346,11 @@ export default {
 		...mapState({
 			cartInfo: state => state.order.cartInfo
 		}),
+		qrCodeText() {
+			if (this.foodObj && this.foodObj.meal_no) {
+				return 'https://wx2.100xsys.cn/shareShopFood/' + this.foodObj.meal_no;
+			}
+		},
 		age() {
 			if (this.userInfo.birthday) {
 				let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
@@ -376,6 +386,9 @@ export default {
 				this.currentAppr = item;
 				this.assembleData();
 			}
+		},
+		qrcodeCanvasComplete(e) {
+			this.qrcodePath = e;
 		},
 		originalData() {
 			let self = this;
@@ -568,7 +581,6 @@ export default {
 			this.foodObj['car_num'] = this.carNum;
 			this.element = ['.u-number-box', '.cart-action'];
 			// this.element = ['.counter', '.add-button'];
-			// this.num = e.value;
 		},
 		/* 点击计数器减号回调**/
 		subtract(e) {
@@ -626,6 +638,17 @@ export default {
 			//执行加入购物车的逻辑
 			console.log('执行回调', res.code);
 		},
+		async getFoodDetail(no) {
+			let req = {
+				condition: [{ colName: 'meal_no', ruleType: 'eq', value: no }]
+			};
+			if (no) {
+				let res = await this.$fetch('select', 'srvhealth_mixed_food_nutrition_contents_select', req, 'health');
+				if (res.success && res.data.length > 0) {
+					return res.data[0];
+				}
+			}
+		},
 		async getMixChildFood() {
 			let self = this;
 			let url = this.getServiceUrl('health', 'srvhealth_mixed_food_nutrition_item_select', 'select');
@@ -654,13 +677,27 @@ export default {
 		this.currentAppr = this.approveData[0];
 		this.getMixChildFood();
 	},
-	onLoad(option) {
-		let foodsDetail = JSON.parse(decodeURIComponent(option.itemData));
+	async onLoad(option) {
+		let foodsDetail = {};
+		if (option.q) {
+			let text = decodeURIComponent(option.q);
+			if (text.indexOf('https://wx2.100xsys.cn/shareShopFood/') !== -1) {
+				let result = text.split('https://wx2.100xsys.cn/shareShopFood/')[1];
+				option.meal_no = result;
+			}
+		}
+		if (option.itemData) {
+			foodsDetail = JSON.parse(decodeURIComponent(option.itemData));
+		} else if (option.meal_no) {
+			foodsDetail = await this.getFoodDetail(option.meal_no);
+		}
+		if (!foodsDetail || !foodsDetail.meal_no) {
+			return;
+		}
 		if (!this.cartInfo[foodsDetail.restaurant_no]) {
 			// vuex中没有此店铺购物车数据
 			this.$store.commit('SET_STORE_CART', { store_no: foodsDetail.restaurant_no, list: [] });
 		}
-		this.queryType = option.type;
 		if (foodsDetail.imgurl) {
 			foodsDetail.imgurl = foodsDetail.imgurl.substring(0, foodsDetail.imgurl.lastIndexOf('&'));
 		}
@@ -707,8 +744,9 @@ export default {
 	.shop-detail-top {
 		width: 100%;
 		height: 480upx;
-		image {
+		.image {
 			width: 100%;
+			height: 480upx;
 		}
 	}
 	.shop-detail-cen {
@@ -718,6 +756,25 @@ export default {
 		padding-bottom: 30upx;
 		.shop-detail-cen-left {
 			width: 100%;
+			display: flex;
+			flex-wrap: wrap;
+			.left-info {
+				flex: 1;
+			}
+			.right-code {
+				background-color: #fff;
+				width: 100px;
+				height: 100px;
+				padding: 10px;
+				.qrcode-canvas {
+					position: fixed;
+					top: -999999px;
+				}
+				.qr-code-image {
+					width: 80px;
+					height: 80px;
+				}
+			}
 			.cen-title {
 				font-size: 36upx;
 				font-weight: 700;
@@ -743,6 +800,7 @@ export default {
 				justify-content: space-between;
 				padding: 10px 15px 0;
 				align-items: center;
+				width: 100%;
 				.cen-money {
 					color: #ff0000;
 					text {
@@ -818,7 +876,6 @@ export default {
 	.shop-detail-bot-b {
 		background-color: white;
 		margin-top: 30upx;
-		// padding-bottom: 100upx;
 		.shop-detail-bot-b-t {
 			font-weight: 600;
 			margin-left: 20upx;

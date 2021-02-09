@@ -6,31 +6,27 @@
 			'--global-label-font-size': globalLabelFontSize + 'px'
 		}"
 	>
-		<!-- <view class="status_bar"> -->
-		<!-- 这里是状态栏 -->
-		<!-- </view> -->
 		<view
 			class="page-item"
-			v-for="(pageItem, index) in pageItemList"
+			v-for="pageItem in pageItemList"
 			:class="{
 				'swiper-view': pageItem.div_type === 'carousel',
 				'menu-view': pageItem.div_type === 'buttons',
 				'tab-list-view': pageItem.div_type === 'tablist'
 			}"
-			:key="index"
 		>
-			<view class="page-slide">
+			<view class="page-slide" v-if="pageItem.div_type === 'carousel'">
 				<swiper
-					class="screen-swiper item-box round-dot"
+					class="screen-swiper item-box square-dot"
+					easing-function="linear"
 					:height="300"
 					:indicator-dots="true"
 					:circular="true"
 					:autoplay="true"
 					interval="5000"
 					duration="500"
-					v-if="pageItem.div_type === 'carousel'"
 				>
-					<swiper-item v-for="(item, index) in pageItem.carousel" :key="index"><image :src="item.picUrl" mode="scaleToFill"></image></swiper-item>
+					<swiper-item v-for="(item, index) in pageItem.carousel" @click="toSwiperDetail(item)"><image :src="getImagePath(item.carousel_image, true)"></image></swiper-item>
 				</swiper>
 			</view>
 			<!-- #ifdef MP-WEIXIN -->
@@ -118,35 +114,6 @@ export default {
 		})
 	},
 	methods: {
-		async getStoreUserInfo() {
-			let url = this.getServiceUrl('health', 'srvhealth_store_user_select', 'select');
-			let req = {
-				serviceName: 'srvhealth_store_user_select',
-				colNames: ['*'],
-				condition: [{ colName: 'person_no', ruleType: 'eq', value: this.userInfo.no }]
-			};
-			let res = await this.$http.post(url, req);
-			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-				this.$store.commit('SET_STORE_LIST', res.data.data);
-				if (res.data.data.length > 1) {
-					// 多个店铺 跳转到店铺列表
-				} else {
-					// 只有一个店铺 跳转到店铺详情页
-					this.$store.commit('SET_HOSPITAL_INFO', res.data.data[0]);
-					if (['大夫', '管理员', '工作人员', '药房人员', '客服'].includes(res.data.data[0].user_role.split(','))) {
-						// 不是用户 跳转到商铺管理页面
-						uni.navigateTo({
-							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res.data.data[0].store_no
-						});
-					} else {
-						uni.navigateTo({
-							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res.data.data[0].store_no
-						});
-					}
-				}
-				return this.storeUserInfo;
-			}
-		},
 		toFeedBack() {
 			// 跳转到反馈页面
 			this.modalName = 'feedback';
@@ -166,15 +133,19 @@ export default {
 		hideModal() {
 			this.modalName = '';
 		},
-		isDoctor() {
-			// 查询当前用户是否是医生
-			let url = this.getServiceUrl('daq', 'srvdaq_website_page_item_select', 'select');
-			let req = {
-				serviceName: 'srvdaq_website_page_item_select',
-				colNames: ['*'],
-				condition: [{ colName: 'page_no', ruleType: 'eq', value: 'BX202004280847490008' }],
-				page: null
-			};
+		toSwiperDetail(e) {
+			if (!e || typeof e !== 'object') {
+				return;
+			}
+			if (e.content_no) {
+				uni.navigateTo({
+					url: '/publicPages/article/article?content_no=' + e.content_no
+				});
+			} else if (e.mini_program_url) {
+				uni.navigateTo({
+					url: e.mini_program_url
+				});
+			}
 		},
 		skip(item) {
 			let dest_page = '';
@@ -304,19 +275,20 @@ export default {
 				};
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS') {
-					let itemList = res.data.data.map((pageitem, index) => {
-						switch (item.div_type) {
-							case 'carousel':
-								pageitem['picUrl'] = this.$api.downloadFile + pageitem.carousel_image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-								break;
-							case 'buttons':
-								break;
-							case 'tablist':
-								break;
-						}
-						return pageitem;
-					});
-					return itemList;
+					// let itemList = res.data.data.map((pageitem, index) => {
+					// 	switch (item.div_type) {
+					// 		case 'carousel':
+					// 			pageitem['picUrl'] = this.getImagePath(pageitem.carousel_image, true);
+					// 			break;
+					// 		case 'buttons':
+					// 			break;
+					// 		case 'tablist':
+					// 			debugger;
+					// 			break;
+					// 	}
+					// 	return pageitem;
+					// });
+					return res.data.data;
 				}
 			}
 		},
@@ -335,18 +307,17 @@ export default {
 	},
 	onShow(option) {
 		// #ifdef MP-WEIXIN
-		if (!this.authUserInfo || typeof this.authUserInfo === 'object') {
-			debugger;
-			this.$store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec');
-			let pageStack = getCurrentPages();
-			if (Array.isArray(pageStack) && pageStack.length >= 1) {
-				let currentPage = pageStack[pageStack.length - 1];
-				this.$store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath);
-			}
-			uni.reLaunch({
-				url: '/publicPages/accountExec/accountExec'
-			});
-		}
+		// if (!this.authUserInfo || typeof this.authUserInfo === 'object') {
+		// 	this.$store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec');
+		// 	let pageStack = getCurrentPages();
+		// 	if (Array.isArray(pageStack) && pageStack.length >= 1) {
+		// 		let currentPage = pageStack[pageStack.length - 1];
+		// 		this.$store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath);
+		// 	}
+		// 	uni.reLaunch({
+		// 		url: '/publicPages/accountExec/accountExec'
+		// 	});
+		// }
 		// #endif
 	},
 	onShareAppMessage() {

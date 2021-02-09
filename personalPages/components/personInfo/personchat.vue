@@ -433,18 +433,6 @@ export default {
 			}
 			return content;
 		},
-		setImgSize(content, isVideo) {
-			// 让图片最长边等于设置的最大长度，短边等比例缩小，图片控件真实改变，区别于aspectFit方式。
-			let max = isVideo ? 500 : 350;
-			let maxW = uni.upx2px(max); //max是定义消息图片最大宽度
-			let maxH = uni.upx2px(max); //max是定义消息图片最大高度
-			if (content.width > maxW || content.height > maxH) {
-				let scale = content.width / content.height;
-				content.width = scale > 1 ? maxW : maxH * scale;
-				content.height = scale > 1 ? maxW / scale : maxH;
-			}
-			return content;
-		},
 		getCovers(item) {
 			return [
 				{
@@ -1483,7 +1471,7 @@ export default {
 							}
 						}
 						if (item.attribute && item.attribute.width && item.attribute.height) {
-							let info = this.setImgSize(item.attribute, true);
+							let info = this.setImgSize(item.attribute, 500);
 							if (info.width && info.height) {
 								this.$set(item, 'videoWidth', info.width);
 								this.$set(item, 'videoHeight', info.height);

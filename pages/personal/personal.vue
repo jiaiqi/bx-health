@@ -202,9 +202,6 @@ export default {
 		})
 	},
 	methods: {
-		changeSwitch(e) {
-			this.openOfficialImage();
-		},
 		openOfficialImage() {
 			uni.navigateTo({
 				url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent('https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ')

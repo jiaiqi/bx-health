@@ -90,7 +90,6 @@
 				</view>
 			</view>
 		</sPullScroll>
-		<!-- </scroll-view> -->
 		<view v-if="pageType === 'sport'" class="cu-modal bottom-modal" :class="{ show: showBottomModal }">
 			<view class="cu-dialog" :class="pageType === 'sport' ? 'sport-dialog' : ''">
 				<view class="cu-bar bg-white">
@@ -206,21 +205,13 @@
 				<text v-show="chooseFoodArr.length > 0" class="add-button-num">{{ chooseFoodArr.length }}</text>
 			</view>
 		</view>
-		<view class="cu-modal drawer-modal justify-start" :class="{ show: modalName === 'filter' }" @click="hideModal">
+		<view class="cu-modal drawer-modal justify-end" :class="{ show: modalName === 'filter' }" @click="hideModal">
 			<view class="cu-dialog" @click.stop="">
 				<view class="filter-box">
 					<view class="filter-item-box">
 						<view class="label">食材</view>
 						<view class="child-data">
 							<cascader-selector ref="cascader" insert hideButton @clickTag="changeFilter($event, '食材')" :srvInfo="dietClassifySrv"></cascader-selector>
-						</view>
-					</view>
-					<view class="filter-item-box" v-for="item in filterOption">
-						<view class="label">{{ item.label }}</view>
-						<view class="child-data">
-							<bx-radio-group class="radio-group" mode="button" v-model="filterVal" @change="changeFilter($event, item.label)">
-								<bx-radio class="radio" v-for="child in item.data" :name="child.value">{{ child.label }}</bx-radio>
-							</bx-radio-group>
 						</view>
 					</view>
 				</view>
@@ -316,106 +307,7 @@ export default {
 				appNo: 'health'
 			},
 			filterVal: '',
-			// recentDietMode: 'edit',
 			heightStyle: 'calc(100vh-200upx)',
-			filterOption: [
-				// {
-				// 	label: '食材',
-				// 	data: [
-				// 		{
-				// 			label: '全部',
-				// 			value: '全部1',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '蔬菜',
-				// 			value: '蔬菜',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '水果干果',
-				// 			value: '水果干果',
-				// 			checked: false
-				// 		},
-
-				// 		{
-				// 			label: '菌藻类',
-				// 			value: '菌藻类',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '坚果',
-				// 			value: '坚果',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '谷薯类',
-				// 			value: '谷薯类',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '蛋奶类',
-				// 			value: '蛋奶类',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '畜禽肉',
-				// 			value: '畜禽肉',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '水产品',
-				// 			value: '水产品',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '调味品',
-				// 			value: '调味品',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '饮品',
-				// 			value: '饮品',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '糕点类',
-				// 			value: '糕点类',
-				// 			checked: false
-				// 		},
-				// 		{
-				// 			label: '其他',
-				// 			value: '其他',
-				// 			checked: false
-				// 		}
-				// 	]
-				// },
-				{
-					label: '食物',
-					data: [
-						{
-							label: '全部',
-							value: '全部2',
-							checked: true
-						},
-						{
-							label: '公共饭菜',
-							value: '公共',
-							checked: false
-						},
-						{
-							label: '饭馆饭菜',
-							value: '饭馆',
-							checked: false
-						},
-						{
-							label: '我的饭菜',
-							value: '我的',
-							checked: false
-						}
-					]
-				}
-			],
 			isSeekValue: true, // 是否搜索到内容
 			chooseFoods: [],
 			value1: 1.0,
@@ -431,8 +323,6 @@ export default {
 			order: '',
 			heatNum: 0,
 			searchValue: '',
-			themeColor: '#000000',
-			titleColor: '#666666',
 			condObj: '',
 			dateFormat: 'hh:ii:ss',
 			showTimePicker: false,
@@ -634,45 +524,6 @@ export default {
 							value: 'vitamin_c',
 							num: 25
 						}
-						// {
-						// 	title: 'VE',
-						// 	value: 'VE'
-						// },
-						// {
-						// 	title: 'VK',
-						// 	value: 'VK'
-						// },
-						// {
-						// 	title: 'B1',
-						// 	value: 'vitamin_b1',
-						// 	num:6
-						// },
-						// {
-						// 	title: 'B2',
-						// 	value: 'vitamin_b2',
-						// 	num:6
-						// },
-						// {
-						// 	title: 'B3',
-						// 	value: 'B3'
-						// },
-						// {
-						// 	title: 'B6',
-						// 	value: 'B6'
-						// },
-						// {
-						// 	title: 'B12',
-						// 	value: 'B12'
-						// },
-						// {
-						// 	title: '叶酸',
-						// 	value: '叶酸'
-						// },
-						// {
-						// 	title: 'VC',
-						// 	value: 'vitamin_c',
-						// 	num:6.5
-						// }
 					]
 				},
 				{
@@ -1026,7 +877,6 @@ export default {
 
 			this.submenu = submenu;
 			this.menuAgList = menuData;
-			// this.topNum = 160;
 			this.getChooseSportList();
 		}
 		this.onRefresh();
@@ -1039,9 +889,9 @@ export default {
 	},
 	methods: {
 		changeFilter(val, type) {
-			if(typeof val==='object'&&val.path){
-				this.filterVal = val.dc_name
-				val = val.path
+			if (typeof val === 'object' && val.path) {
+				this.filterVal = val.dc_name;
+				val = val.path;
 			}
 			let cond = null;
 			if (type === '食材') {
@@ -1054,12 +904,12 @@ export default {
 					// };
 					cond = {
 						colName: 'classify_tree_path',
-						ruleType: 'like',
+						ruleType: 'like]',
 						value: val
 					};
 				}
 			} else if (type === '食物') {
-				this.$refs.cascader.resetData()
+				this.$refs.cascader.resetData();
 				if (val !== '全部2') {
 					cond = {
 						colName: 'owner',
@@ -1699,15 +1549,6 @@ export default {
 			let self = this;
 			setTimeout(() => {
 				this.getFoodsList(this.order, this.condObj);
-				// self.getDrawCoupon(self.req.serviceName, self.req.cond).then(callBackData => {
-				// if (callBackData.page.rownumber * callBackData.page.pageNo >= callBackData.page.total) {
-				// 	// finish(boolean:是否显示finishText,默认显示)
-				// 	self.$refs.pullScroll.finish();
-				// } else {
-				// 	self.$refs.pullScroll.success();
-				// }
-				// });
-				// this.loadData(pullScroll);
 			}, 200);
 		},
 		loadData(pullScroll) {
@@ -1720,14 +1561,6 @@ export default {
 			} else {
 				this.getFoodsList(this.order, this.condObj);
 			}
-			// this.getDrawCoupon(this.req.serviceName, this.req.cond);
-			// if (page.rownumber * page.pageNo >= page.total) {
-			// 	// finish(boolean:是否显示finishText,默认显示)
-			// 	pullScroll.finish();
-			// } else {
-			// 	pullScroll.success();
-			// }
-			// });
 		},
 		/* 点击跳转至食物详情 **/
 		toFoodsDetail(itemFood) {
@@ -2039,7 +1872,6 @@ export default {
 						}
 					]
 				};
-				// req.relation_condition.data = this.condObj
 			} else if (cond) {
 				req.relation_condition.data.push(cond);
 			}
@@ -2205,20 +2037,7 @@ export default {
 			this.condObj = condObj;
 			this.getFoodsList(null, condObj);
 			console.log('condObj---', condObj);
-			// this.onHideFilter();
 		},
-
-		// onResetFilter(e) {
-		// 	//重置
-		// 	console.log(e);
-		// },
-		// onHideFilter() {
-		// 	this.filterShow = false;
-		// },
-		// showfilter() {
-		// 	this.$refs.filter.hideclose();
-		// 	this.filterShow = true;
-		// },
 		searchStart() {
 			let serValue = this.searchValue;
 			console.log('searchStart', serValue);

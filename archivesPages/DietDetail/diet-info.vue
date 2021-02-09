@@ -1,17 +1,15 @@
 <template>
 	<view class="diet-info">
-		<view class="img"><image mode="aspectFit" class="img" :src="getImagePath(dietInfo.image)" v-if="dietInfo && dietInfo.image"></image></view>
+		<image mode="aspectFill" class="img" :src="getImagePath(dietInfo.image)" v-if="dietInfo && dietInfo.image"></image>
 		<view class="info" v-if="dietInfo">
 			<view class="name">
 				<view class="title">
 					<text>{{ dietInfo.name }}</text>
-					<text class="hot">({{ hotNum | toFixed1 }}千卡)</text>
 				</view>
-				<!-- 	<view class="">
-					<text class="label">膳食纤维:</text>
-						{{ dietInfo.dietary_fiber || ' - ' }}g
-					</text>
-				</view> -->
+			</view>
+			<view class="gi">
+				<text class="label margin-right-xs">热量:</text>
+				<text class="heat">{{ hotNum | toFixed1 }}千卡</text>
 			</view>
 			<view class="gi">
 				<text class="label margin-right-xs">膳食纤维:</text>
@@ -27,7 +25,7 @@
 			</view>
 			<view class="gi">
 				<text class="label margin-right-xs">水分(g):</text>
-				<text class="heat">{{ dietInfo.moisture_content ? dietInfo.moisture_content + 'g/100g' : ' - ' }}</text>
+				<text class="heat">{{ dietInfo.moisture_content ? dietInfo.moisture_content : ' - ' }}</text>
 			</view>
 			<view class="unit-box">
 				<text class="label  margin-right-xs">单位:</text>
@@ -91,8 +89,8 @@ export default {
 	border-bottom: #eee 1rpx solid;
 	display: flex;
 	.img {
-		width: 100rpx;
-		height: 100rpx;
+		width: 200rpx;
+		height: 200rpx;
 		border-radius: 10rpx;
 		overflow: hidden;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
@@ -100,7 +98,7 @@ export default {
 	.info {
 		flex: 1;
 		min-width: 400rpx;
-		padding-left: 50rpx;
+		padding-left: 20rpx;
 		display: flex;
 		flex-wrap: wrap;
 		.name {

@@ -21,7 +21,6 @@
 		<view class="charts" v-if="nodeDetail && nutrientsChartOption.option && nutrientsChartOption.option.title">
 			<bx-echart @click-chart="clickCharts" class="uni-ec-canvas" canvas-id="uni-ec-canvas" :ec="nutrientsChartOption"></bx-echart>
 		</view>
-		<view class="node-img"><image class="image" :src="item" :key="item" mode="aspectFit" v-for="item in nodeImageList"></image></view>
 		<view class="detail-desc" v-if="nodeDetail">
 			<!-- 		<txv-video
 				:vid="nodeDetail.video_link"
@@ -31,15 +30,29 @@
 				:usePoster="true"
 				v-if="nodeDetail.video_link"
 			></txv-video> -->
-			<view class="video-box" v-if="txv_path"><video class="video-player" :src="txv_path" :usePoster="true" controls object-fit="contain"></video></view>
+			<!-- <view class="video-box" v-if="txv_path"><video class="video-player" :src="txv_path" :usePoster="true" controls object-fit="contain"></video></view> -->
 			<view v-html="nodeDetail.node_desc" v-if="nodeDetail.node_desc" class="rich-text"></view>
-
+			<view class="node-img"><image class="image" :src="item" :key="item" mode="aspectFit" v-for="item in nodeImageList"></image></view>
+			<view class="refenence-list margin-tb-sm">
+				<view class="title text-bold margin-tb-sm">
+					参考文献
+				</view>
+				<view class="ref-item" v-for="(item,index) in referenceList">
+					[{{index}}] {{item.author}}.{{item.refer_name}}.{{item.publisher}}.{{item.pub_year}}
+				</view>
+			</view>
 			<view class="link-box">
+				<view class="title text-bold margin-tb-sm">
+					相关链接
+				</view>
 				<view class="node-link">
 					<!-- <view class="link-title">内部页面</view> -->
 					<view class="link-item-box" v-for="item in nodesLinkList['inPage']" @click="toLink(item)">
 						<view class="title">{{ item.link_name }}</view>
-						<view class="origin">来源：{{ item.external_link_src }}</view>
+						<view class="origin">
+							来源：百想健康
+							<!-- {{ item.external_link_src }} -->
+						</view>
 					</view>
 				</view>
 				<view class="node-link">
@@ -64,7 +77,6 @@
 				</view>
 			</view>
 		</view>
-		<!-- <view class="data-empty" v-else-if="!nodeDetail || !nodeDetail.kn_no"><u-empty :text="emptyText"></u-empty></view> -->
 	</view>
 </template>
 
@@ -78,7 +90,7 @@ export default {
 	computed: {
 		...mapState({
 			loginUserInfo: state => state.user.loginUserInfo,
-			userInfo:state=>state.user.userInfo,
+			userInfo: state => state.user.userInfo,
 			wxUserInfo: state => state.user.wxUserInfo,
 			globalTextFontSize: state => state.app['globalTextFontSize'],
 			globalLabelFontSize: state => state.app.globalLabelFontSize
@@ -98,6 +110,7 @@ export default {
 			nodeData: [],
 			nodeDetail: null,
 			nodeImageList: [],
+			referenceList:[],
 			nodesLinkList: {
 				outPage: [],
 				inPage: [],
@@ -139,9 +152,15 @@ export default {
 					break;
 			}
 			if (url) {
-				uni.navigateTo({
-					url: url
-				});
+				if (url.indexOf('//mp.weixin.qq.com') !== -1) {
+					uni.navigateTo({
+						url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(item.page_link_url)
+					});
+				} else {
+					uni.navigateTo({
+						url: url
+					});
+				}
 			}
 		},
 		toSearchPage() {
@@ -226,11 +245,15 @@ export default {
 				});
 			});
 			let links = data.map(item => {
+				debugger;
 				return {
 					value: `  ${item.path_name ? item.path_name : ''} ${item.path_value ? `(${item.path_value})` : ''}`,
 					label: { show: true },
 					source: item.source_name,
 					target: item.target_name,
+					source_node_no: item.source_node_no,
+					type: 'path',
+					target_node_no: item.target_node_no,
 					lineStyle: {
 						color: item.source_name === self.currentNodes ? '#10a050' : '#006acc'
 					}
@@ -408,9 +431,22 @@ export default {
 					return pre;
 				}, {});
 				this.nodesLinkList = list;
-				// res.data.data.map(item => {
-
-				// });
+			}
+		},
+		async selectReference(e) {
+			let req = {
+				serviceName: 'srvhealth_knowledge_node_reference_select',
+				colNames: ['*'],
+				condition: [{ colName: 'kn_no', ruleType: 'eq', value: e.kn_no }],
+				relation_condition: {},
+				page: null,
+				order: [],
+				draft: false,
+				query_source: 'list_page'
+			};
+			let res = await this.$fetch('select', 'srvhealth_knowledge_node_reference_select', req, 'health');
+			if(res.success){
+				this.referenceList = res.data
 			}
 		},
 		async getNodeDetail(no, type) {
@@ -418,10 +454,6 @@ export default {
 			let req = {
 				serviceName: 'srvhealth_knowledge_node_select',
 				colNames: ['*'],
-				// relation_condition: {
-				// 	relation: 'OR',
-				// 	// data: [{ colName: 'kn_no', ruleType: 'eq', value: no }]
-				// },
 				condition: [{ colName: 'kn_no', ruleType: 'in', value: no }],
 				page: { pageNo: 1 }
 			};
@@ -435,6 +467,7 @@ export default {
 				}
 				this.nodeDetail = nodeDetail;
 				this.getNodeImagePath(nodeDetail);
+				this.selectReference(nodeDetail)
 				// if (this.nodeDetail && this.nodeDetail.video_link) {
 				// 	// this.getVideoInfo(this.nodeDetail.video_link);
 				// } else {
@@ -512,6 +545,7 @@ export default {
 			}
 		},
 		async clickCharts(e) {
+			debugger;
 			if (e.data && e.data.nodeNo) {
 				this.currentNodes = e.name;
 				this.currentNodeNo = e.data.nodeNo;
@@ -608,7 +642,7 @@ export default {
 			path = `/archivesPages/RelationGraph/RelationGraph?currentNodeNo=${this.nodeDetail.kn_no}&from=share&invite_user_no=${this.loginUserInfo.userno}`;
 			title = `【${this.nodeDetail.node_name ? this.nodeDetail.node_name : '健康'}】知识图谱`;
 		}
-		this.saveSharerInfo(this.userInfo,path)
+		this.saveSharerInfo(this.userInfo, path);
 		return {
 			title: title,
 			path: path
@@ -656,9 +690,14 @@ export default {
 		height: 700rpx;
 		margin-bottom: 20rpx;
 	}
+	.refenence-list {
+		margin-bottom: 20px;
+	}
 	.node-img {
 		padding: 20rpx;
 		display: flex;
+		width: calc(100vw - 40rpx);
+		overflow-y: scroll;
 		.image {
 			width: 200rpx;
 			height: 200rpx;
