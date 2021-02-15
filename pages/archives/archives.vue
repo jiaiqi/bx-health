@@ -1173,7 +1173,7 @@ export default {
 			const res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				// 有数据
-				debugger;
+				
 				this.$store.commit('SET_USERLIST', res.data.data);
 				if (uni.getStorageSync('current_user')) {
 					res.data.data.forEach(item => {
@@ -1279,9 +1279,9 @@ export default {
 				if (!Array.isArray(this.checkboxList) || this.checkboxList.length === 0) {
 					await this.getCheckboxList();
 				}
-				if (!this.vuex_userInfo) {
+				// if (!this.vuex_userInfo) {
 					await this.selectUserList();
-				}
+				// }
 				if (!this.dietScore && this.dietScore !== 0) {
 					this.dietScore = await this.calcDietScore();
 				}
