@@ -4,7 +4,7 @@
 			<!-- <block slot="backText">返回</block> -->
 			<block slot="content">用户管理</block>
 		</cu-custom>
-		<bx-filter ref="filter" :searchArg="searchArg" v-if="searchArg" :menuAgList="menuAgList" @clickItem="toPages('patients', $event)" @click-add-item="clickAddItem"></bx-filter>
+		<bx-filter ref="filter" :searchArg="searchArg" v-if="searchArg" :menuAgList="menuAgList" @toMessage="toMessage" @clickItem="toPages('patients', $event)" @click-add-item="clickAddItem"></bx-filter>
 	</view>
 </template>
 
@@ -30,6 +30,13 @@ export default {
 	},
 	methods: {
 		onBack() {},
+		toMessage(e){
+			if(e&&e.userb_person_no){
+				uni.navigateTo({
+					url:'/personalPages/myDoctor/doctorChat?no='+e.userb_person_no
+				})
+			}
+		},
 		toPages(type, item) {
 			if (type === 'patients') {
 				uni.navigateTo({

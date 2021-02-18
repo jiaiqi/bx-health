@@ -64,14 +64,8 @@ export default {
 		loadMsgComplete(e) {
 			this.updateLastLookTime(e);
 		},
-		// completeSendMessage(e) {
-		// 	// 发送完一条消息后的回调
-		// 	// debugger;
-		// 	this.updateLastLookTime(e);
-		// },
 		async selectGroupMember() {
 			// 查询圈子成员
-			// srvhealth_person_group_circle_select
 			let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_select', 'select');
 			let req = {
 				serviceName: 'srvhealth_person_group_circle_select',
@@ -80,7 +74,6 @@ export default {
 			};
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data)) {
-				// this.memberList = res.data.data;
 				return res.data.data;
 			}
 		},

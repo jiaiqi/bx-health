@@ -84,13 +84,11 @@ fly.interceptors.request.use(async (request) => {
 	// 如果是浏览器运行的记录 请求的页面path和参数
 	if (uni.getStorageSync('client_env') === 'wxh5' || uni.getStorageSync('client_env') === 'web') {
 		request.headers["requrl"] = window.location.pathname + window.location.search
-		console.log("requrl", window.location.pathname + window.location.search, window.location)
 	}
 	let bxAuthTicket = uni.getStorageSync("bx_auth_ticket")
 	if(store.state.app.bx_auth_ticket){
 		bxAuthTicket = store.state.app.bx_auth_ticket
 	}
-	// console.log('api.onTicket', api.onTicket, api.ticket, bxAuthTicket)
 	if (api.onTicket) {
 		request.headers["bx_auth_ticket"] = api.ticket
 	} else {

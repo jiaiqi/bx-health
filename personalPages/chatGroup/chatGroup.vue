@@ -1,13 +1,11 @@
 <template>
 	<view class="chat-group">
 		<view class="tab-view">
-			<view class="tab-item" :class="{ 'active-tab': index == TabCur }" v-for="(item, index) in tabList" :key="index" @tap="tabSelect" :data-id="index">
-				{{ item.label }}
-			</view>
+			<view class="tab-item" :class="{ 'active-tab': index == TabCur }" v-for="(item, index) in tabList" :key="index" @tap="tabSelect" :data-id="index">{{ item.label }}</view>
 		</view>
 		<view class="group-list" v-if="TabCur === 0">
 			<view class="group-item" v-for="item in groupList" :key="item.gc_no" @click="toChat(item)">
-				<view class="icon" @click.stop="toChat2(item)"><image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit" class="image"></image></view>
+				<view class="icon" @click.stop="toChat(item)"><image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit" class="image"></image></view>
 				<view class="content">
 					<view class="top">
 						<view class="name">{{ item.name }}</view>
@@ -155,12 +153,12 @@ export default {
 				});
 			}
 		},
-		toChat2(item) {
-			//跳转到群组聊天页面
-			uni.navigateTo({
-				url: `/publicPages/chat/chat?no=${this.vuex_userInfo.no}&group_no=${item.gc_no}`
-			});
-		},
+		// toChat2(item) {
+		// 	//跳转到群组聊天页面
+		// 	uni.navigateTo({
+		// 		url: `/publicPages/chat/chat?no=${this.vuex_userInfo.no}&group_no=${item.gc_no}`
+		// 	});
+		// },
 		toChat(item) {
 			//跳转到群组聊天页面
 			uni.navigateTo({

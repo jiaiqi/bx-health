@@ -30,7 +30,7 @@
 						<image class="img" :src="getImagePath(custom.profile_url)" mode="aspectFit"></image>
 						<view class="doc-info">
 							<view class="top">
-								<text class="doc-name">{{ custom.nick_name }}</text>
+								<text class="doc-name">{{ custom.nick_name || custom.person_name || '' }}</text>
 							</view>
 						</view>
 					</view>
@@ -72,7 +72,7 @@
 						<image class="img" :src="getImagePath(staff.profile_url)" mode="aspectFit"></image>
 						<view class="doc-info">
 							<view class="top">
-								<text class="doc-name">{{ staff.nick_name }}</text>
+								<text class="doc-name">{{ staff.nick_name || staff.person_name || '' }}</text>
 								<view class="titleDn">{{ staff.titleDn }}</view>
 							</view>
 							<view class="center">

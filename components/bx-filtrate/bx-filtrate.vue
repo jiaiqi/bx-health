@@ -73,7 +73,7 @@
 						</view>
 						<view class="textbox">
 							<view class="title-food">{{ food[searchArg.wordKey.title] }}</view>
-							<view v-if="searchArg.serviceName === 'srvhealth_person_relation_select'" class="content-right">
+							<view v-if="searchArg.serviceName === 'srvhealth_person_relation_select'" class="content-right" @click.stop="toMessage(food)">
 								<text v-if="food.message_num" style="z-index: 1;">{{ food.message_num > 99 ? '99+' : food.message_num }}</text>
 								<image src="/static/chat.png" mode=""></image>
 							</view>
@@ -162,6 +162,9 @@ export default {
 		this.onRefresh();
 	},
 	methods: {
+		toMessage(e){
+			this.$emit('toMessage',e)
+		},
 		searchStart() {
 			let serValue = this.searchValue;
 			console.log('searchStart', serValue);

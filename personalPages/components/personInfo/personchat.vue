@@ -9,7 +9,16 @@
 		}"
 	>
 		<view class="person-chat-top" @click.stop="closeBottomPoup" :class="!doctor_no.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
-			<audio v-if="currentChat.id" class="audio" @ended="playEnd" :action="audioAction" id="myMp3" style="height: 0;opacity: 0;" :src="currentChat.voice_url" controls />
+			<audio
+				v-if="currentChat.id"
+				class="audio"
+				@ended="playEnd"
+				:action="audioAction"
+				id="myMp3"
+				style="height: 0;opacity: 0;overflow: hidden;position: absolute;top: 0;"
+				:src="currentChat.voice_url"
+				controls
+			/>
 			<scroll-view
 				@scrolltoupper="loadData"
 				:scroll-y="true"
@@ -19,6 +28,16 @@
 				class="msg-list"
 				:class="{ 'top-height': topHeight, showLayer: !isFeed && isSendLink, showKeyboard: !isSendLink && showKeyboard }"
 			>
+				<!-- 加载历史数据waitingUI -->
+				<view class="loading" v-if="isLoading">
+					<view class="spinner">
+						<view class="rect1"></view>
+						<view class="rect2"></view>
+						<view class="rect3"></view>
+						<view class="rect4"></view>
+						<view class="rect5"></view>
+					</view>
+				</view>
 				<view
 					:id="`person-chat-item${item.id}`"
 					v-for="(item, index) in recordList"
@@ -69,9 +88,13 @@
 							</view>
 						</view>
 						<view @tap="audioPlay(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'" hover-class="contentType2-hover-class" class="content contentType2">
-							<view class="voice_icon_left-wrap">
+							<view class="voice_icon_left-wrap" :class="{ 'play-left': currentChat && item.id === currentChat.id && currentChat.anmitionPlay }">
 								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
-								<view class="voice_icon voice_icon_left" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_left_an' : ''"></view>
+								<image
+									class="voice_icon voice_icon_left"
+									src="../../static/voice-l.png"
+									:class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_left_an' : ''"
+								></image>
 							</view>
 						</view>
 						<view v-else-if="item.longitude && item.latitude && item.msg_content_type === '位置'" class="map-container" @tap="openMap(item)">
@@ -149,8 +172,13 @@
 							hover-class="contentType2-hover-class"
 							class="content contentType2 content-type-right"
 						>
-							<view class="voice_icon_right-wrap">
-								<view class="voice_icon voice_icon_right" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''"></view>
+							<view class="voice_icon_right-wrap" :class="{ 'play-right': currentChat && item.id === currentChat.id && currentChat.anmitionPlay }">
+								<image
+									class="voice_icon voice_icon_right"
+									src="../../static/voice-r.png"
+									:class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''"
+								></image>
+								<!-- <view class="voice_icon voice_icon_right" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''"></view> -->
 								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
 							</view>
 						</view>
@@ -199,7 +227,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="chart-bottom" v-if="isArray(recordList)" :id="'chart-bottom' + recodeList.id"></view>
+				<view class="chart-bottom" v-if="isArray(recordList)" :id="'chart-bottom' + recordList.length"></view>
 			</scroll-view>
 			<view class="voice_an" v-if="recording">
 				<view class="voice_an_icon">
@@ -480,10 +508,10 @@ export default {
 			this.showKeyboard = false;
 		},
 		onInput(e) {
-			// this.$nextTick(function() {
-			// 	//进入页面滚动到底部
-			// 	this.scrollTop = 99999;
-			// });
+			this.$nextTick(function() {
+				//进入页面滚动到底部
+				this.scrollTop = 99999;
+			});
 		},
 		openMap(item) {
 			// 打开地图
@@ -546,7 +574,6 @@ export default {
 		},
 		//准备开始录音
 		startVoice(e) {
-			console.log('-==----------------');
 			if (!this.Audio.paused) {
 				//如果音频正在播放 先暂停。
 				this.stopAudio(this.AudioExam);
@@ -593,7 +620,7 @@ export default {
 		},
 		handleRecorder({ tempFilePath, duration }) {
 			let self = this;
-			console.log('0000000000录音结束');
+			debugger;
 			let contentDuration;
 			// #ifdef MP-WEIXIN
 			this.voiceTime = 0;
@@ -626,8 +653,9 @@ export default {
 				content: tempFilePath,
 				contentDuration: Math.ceil(contentDuration)
 			};
-			// this.canSend && this.sendMessageLanguageInfo('语音', params);
-			this.canSend && this.sendMsg(params);
+			debugger;
+			// this.canSend &&
+			this.sendMsg(params);
 		},
 		/*发送语音**/
 		sendMsg(params) {
@@ -652,6 +680,7 @@ export default {
 					if (e.statusCode === 200) {
 						let photoDataNo = JSON.parse(e.data).file_no;
 						params.content = photoDataNo;
+						debugger;
 						self.sendMessageLanguageInfo('语音', params);
 					} else {
 					}
@@ -659,23 +688,23 @@ export default {
 				}
 			});
 		},
-		/*滚动**/
-		chatScroll(e) {
-			// this.scrollNum = e.detail.scrollTop;
-			// if (e.detail.scrollTop < 50 && e.detail.scrollTop != 0 && !this.isLoading && !this.isAll) {
-			// 	this.isLoading = true;
-			// 	this.pageInfo.pageNo += 1;
-			// 	this.getMessageInfo().then(_ => {
-			// 		this.isLoading = false;
-			// 	});
-			// }
-		},
+		// /*滚动**/
+		// chatScroll(e) {
+		// 	// this.scrollNum = e.detail.scrollTop;
+		// 	// if (e.detail.scrollTop < 50 && e.detail.scrollTop != 0 && !this.isLoading && !this.isAll) {
+		// 	// 	this.isLoading = true;
+		// 	// 	this.pageInfo.pageNo += 1;
+		// 	// 	this.getMessageInfo().then(_ => {
+		// 	// 		this.isLoading = false;
+		// 	// 	});
+		// 	// }
+		// },
 		loadData() {
-			this.isLoading = true;
-			this.pageInfo.pageNo += 1;
-			this.getMessageInfo().then(_ => {
-				this.isLoading = false;
-			});
+			if (!this.isAll && !this.isLoading) {
+				this.isLoading = true;
+				this.pageInfo.pageNo += 1;
+				this.getMessageInfo('add');
+			}
 		},
 		closeAnmition() {
 			const hasBeenSentId = this.Audio.id;
@@ -785,7 +814,6 @@ export default {
 												self.sendMessageLanguageInfo('图片', photoDataNo, image);
 											} else {
 											}
-											// console.log(uploadFileRes.data);
 										}
 									});
 								}
@@ -1055,8 +1083,10 @@ export default {
 				this.scrollTop = 99999;
 				this.$nextTick(function() {
 					this.$nextTick(() => {
+						this.toBottom()
 						if (this.recordList.length > 0 && Array.isArray(this.recordList) && this.recordList.length > 0) {
-							this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
+							// this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
+							// this.toBottom()
 						}
 					});
 				});
@@ -1130,8 +1160,10 @@ export default {
 							sender_name: this.currentUserInfo.name,
 							sender_profile_url: this.currentUserInfo.profile_url,
 							sender_user_image: this.currentUserInfo.user_image,
-							receiver_account: this.doctor_no.userb_no ? this.doctor_no.userb_no : this.userInfo.userno,
-							receiver_person_no: this.doctor_no.userb_person_no ? this.doctor_no.userb_person_no : this.userInfo.no,
+							receiver_account: this.doctor_no.usera_no ? this.doctor_no.usera_no : this.userInfo.userno,
+							receiver_person_no: this.doctor_no.usera_person_no ? this.doctor_no.usera_person_no : this.userInfo.no,
+							// receiver_account: this.doctor_no.userb_no ? this.doctor_no.userb_no : this.userInfo.userno,
+							// receiver_person_no: this.doctor_no.userb_person_no ? this.doctor_no.userb_person_no : this.userInfo.no,
 							sender_person_no: this.currentUserInfo.no,
 							msg_content_type: type,
 							identity: this.pageType ? '患者' : '医生'
@@ -1164,6 +1196,7 @@ export default {
 					//TODO handle the exception
 				}
 			} else if (type === '语音') {
+				debugger;
 				req[0].data[0].msg_link = value.content;
 				req[0].data[0].voice_time = value.contentDuration;
 			} else if (type === '文件') {
@@ -1284,9 +1317,13 @@ export default {
 			}
 		},
 		_SortJson(json) {
-			json.sort((a, b) => {
-				return new Date(a.create_time).getTime() - new Date(b.create_time).getTime(); //时间反序
-			});
+			if (Array.isArray(json)) {
+				json.sort((a, b) => {
+					return new Date(a.create_time).getTime() - new Date(b.create_time).getTime(); //时间反序
+				});
+			} else {
+				json = [];
+			}
 			return json;
 		},
 		showSendTime(item, index) {
@@ -1301,6 +1338,10 @@ export default {
 		async getMessageInfo(type = null) {
 			this.scrollAnimation = false; //关闭滑动动画
 			let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
+			if (type === 'refresh') {
+				this.pageInfo.pageNo = 1;
+				// this.recordList = [];
+			}
 			let req = {
 				serviceName: 'srvhealth_consultation_chat_record_select',
 				colNames: ['*'],
@@ -1400,6 +1441,7 @@ export default {
 				];
 			}
 			req.relation_condition.data = conditionData;
+
 			let res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				this.$emit('load-msg-complete', res.data.data[0]);
@@ -1407,11 +1449,13 @@ export default {
 				this.$emit('load-msg-complete', res.data.data);
 			}
 			let resData = res.data.data;
-			this.pageInfo.total = res.data.page.total;
-			if (this.pageInfo.pageNo == 1 && type !== 'update') {
-				console.log('page为0');
-				// this.recordList = [];
+			if (type) {
+				this.isLoading = false;
 			}
+			if (Array.isArray(resData) !== true || this.isAll) {
+				return;
+			}
+			this.pageInfo.total = res.data.page.total;
 			if (resData.length > 0) {
 				resData.forEach((item, i) => {
 					if (item.msg_content_type === '语音') {
@@ -1497,25 +1541,34 @@ export default {
 						}
 					}
 				});
-				let _SortJsonData = null;
+				if (type === 'refresh') {
+					this.pageInfo.pageNo == 1;
+					this.recordList = [];
+				}
+				if (type === 'refresh') {
+					this.pageInfo.pageNo = 1;
+					// this.recordList = [];
+				}else{
+					resData = [...resData, ...this.recordList];
+				}
+				// resData = [...resData, ...this.recordList];
+				resData = resData.reduce((pre, cur) => {
+					if (Array.isArray(pre) && !pre.find(item => item.id === cur.id)) {
+						pre.push(cur);
+						return pre;
+					}
+				}, []);
 				this.$nextTick(() => {
-					if (!this.isAll) {
-						_SortJsonData = this._SortJson(resData);
-						this.recordList = _SortJsonData;
-						console.log('排序============', _SortJsonData);
-					}
-					if (type && type === 'update') {
-						this._SortJson(resData);
-						this.recordList = resData;
-					}
+					this.recordList = this._SortJson(resData);
 					if (this.pageInfo.pageNo * this.pageInfo.rownumber >= res.data.page.total) {
 						this.isAll = true;
 					}
 				});
 				this.$nextTick(() => {
-					if (this.recordList.length > 0 && Array.isArray(this.recordList) && this.recordList.length > 0) {
-						this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
-					}
+					this.toBottom()
+					// if (this.recordList.length > 0 && Array.isArray(this.recordList) && this.recordList.length > 0) {
+					// 	this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length - 1].id;
+					// }
 					this.$nextTick(function() {
 						this.scrollAnimation = true; //恢复滚动动画
 					});
@@ -1530,11 +1583,6 @@ export default {
 					serviceName: 'srvhealth_consultation_chat_record_update',
 					colNames: ['*'],
 					condition: [
-						// {
-						// 	colName: 'sender_account',
-						// 	ruleType: 'eq',
-						// 	value: this.doctor_no.id ? this.doctor_no.usera_no : this.userInfo.userno
-						// },
 						{
 							colName: 'receiver_person_no',
 							ruleType: 'eq',
@@ -1554,12 +1602,11 @@ export default {
 				}
 			];
 			let res = await this.$http.post(url, req);
-			if (res.data.state === 'SUCCESS') {
-				this.getMessageInfo('update').then(_ => {
-					uni.$emit('updateSuccess');
-				});
-				console.log('更新成功');
-			}
+			this.pageInfo.pageNo = 1;
+			this.getMessageInfo('refresh').then(_ => {
+				uni.$emit('updateSuccess');
+			});
+			console.log('更新成功');
 		},
 		/*查询当前病人**/
 		async getUserInfo(customer_no) {
@@ -1577,7 +1624,8 @@ export default {
 				}
 				this.userInfo = res.data.data[0];
 				uni.setStorageSync('current_patient', this.userInfo);
-				this.getMessageInfo('onLoad').then(_ => {
+				clearInterval(this.updateMessageTimer);
+				this.getMessageInfo('refresh').then(_ => {
 					this.$nextTick(function() {
 						//进入页面滚动到底部
 						this.scrollTop = 99999;
@@ -1586,10 +1634,18 @@ export default {
 						});
 					});
 				});
-				clearInterval(this.updateMessageTimer);
 				this.updateMessageTimer = setInterval(() => {
-					this.getMessageInfo('update');
+					this.updateMessageInfo();
 				}, 6 * 1000);
+				// this.getMessageInfo('onLoad').then(_ => {
+				// 	this.$nextTick(function() {
+				// 		//进入页面滚动到底部
+				// 		this.scrollTop = 99999;
+				// 		this.$nextTick(function() {
+				// 			this.scrollAnimation = true;
+				// 		});
+				// 	});
+				// });
 				return res.data.data[0];
 			} else {
 				uni.setStorageSync('current_patient', '');
@@ -1602,18 +1658,19 @@ export default {
 		toBottom() {
 			this.chatTextBottom = '';
 			this.$nextTick(() => {
-				if (Array.isArray(this.recordList)) {
-					this.chatTextBottom = 'chart-bottom' + this.recodeList.length;
-				}
+				this.scrollTop = 999999;
+				// if (Array.isArray(this.recordList)) {
+				// 	this.chatTextBottom = 'chart-bottom' + this.recodeList.length;
+				// }
 			});
 		}
 	},
 	beforeDestroy() {
 		clearInterval(this.updateMessageTimer);
-		uni.offKeyboardHeightChange();
+		uni.hideKeyboard();
 	},
 	mounted() {
-		uni.onKeyboardHeightChange(res => {
+		uni.onKeyboardHeightChange((res = {}) => {
 			console.log(res.height);
 			if (res.height > 0) {
 				this.showKeyboard = true;
@@ -1683,10 +1740,52 @@ export default {
 		font-weight: 700;
 	}
 	.person-chat-top {
-		height: var(--msgListHeight);
+		// height: var(--msgListHeight);
 		position: relative;
 		.msg-list {
 			height: calc(100vh - var(--window-top) - 60px);
+			.loading {
+				//loading动画
+				display: flex;
+				justify-content: center;
+				@keyframes stretchdelay {
+					0%,
+					40%,
+					100% {
+						transform: scaleY(0.6);
+					}
+					20% {
+						transform: scaleY(1);
+					}
+				}
+				.spinner {
+					margin: 20upx 0;
+					width: 60upx;
+					height: 100upx;
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					view {
+						background-color: #f06c7a;
+						height: 50upx;
+						width: 6upx;
+						border-radius: 6upx;
+						animation: stretchdelay 1.2s infinite ease-in-out;
+					}
+					.rect2 {
+						animation-delay: -1.1s;
+					}
+					.rect3 {
+						animation-delay: -1s;
+					}
+					.rect4 {
+						animation-delay: -0.9s;
+					}
+					.rect5 {
+						animation-delay: -0.8s;
+					}
+				}
+			}
 			&.top-height {
 				height: calc(100vh - var(--window-top) - 60px - 60px);
 			}
@@ -2151,10 +2250,12 @@ export default {
 	align-items: center;
 	.voice_icon_right-wrap {
 		background-color: #12b7f5;
-		padding: 16rpx 16rpx 16rpx 80rpx;
+		padding: 16rpx;
+		min-width: 150rpx;
 		border-radius: 8rpx;
 		position: relative;
 		display: flex;
+		justify-content: flex-end;
 		&::after {
 			content: '';
 			display: block;
@@ -2171,7 +2272,8 @@ export default {
 	}
 	.voice_icon_left-wrap {
 		background-color: #fff;
-		padding: 16rpx 80rpx 16rpx 16rpx;
+		padding: 16rpx;
+		min-width: 150rpx;
 		border-radius: 8rpx;
 		position: relative;
 		display: flex;
@@ -2201,41 +2303,58 @@ export default {
 		width: 34rpx;
 		background-repeat: no-repeat;
 		background-size: 100%;
+		.icon::after {
+			content: ' ';
+			width: 32rpx;
+			height: 32rpx;
+			border-radius: 100%;
+			// position: absolute;
+			position: relative;
+			box-sizing: border-box;
+		}
 	}
 	.voice_icon_right {
-		background-image: url(../../static/voice-left-3.png);
+		background-color: #fff;
+		background-image: url(../../static/voice-r.jpg);
 		margin-left: 10rpx;
-	}
-	.voice_icon_left {
-		background-image: url(../../static/voice-right-3.png);
 		margin-right: 10rpx;
 	}
+	.voice_icon_left {
+		background-image: url(../../static/voice%20L.jpg);
+		background-color: #000000;
+		margin-right: 10rpx;
+		margin-left: 10rpx;
+	}
 	.voice_icon_right_an {
-		animation: voiceAn_right 1s linear alternate infinite;
+		animation: voiceAn_right 1s linear reverse infinite;
 	}
 	.voice_icon_left_an {
-		animation: voiceAn_left 1s linear alternate infinite;
+		animation: voiceAn_left 1s linear normal infinite;
 	}
 	@keyframes voiceAn_right {
 		0% {
-			background-image: url(../../static/voice-left-1.png);
+			background-color: transparent;
+			background-size: 100% 100%;
 		}
 		50% {
-			background-image: url(../../static/voice-left-2.png);
+			background-size: 50% 100%;
 		}
 		100% {
-			background-image: url(../../static/voice-left-3.png);
+			background-size: 0% 100%;
+			background-color: #fff;
 		}
 	}
 	@keyframes voiceAn_left {
 		0% {
-			background-image: url(../../static/voice-right-1.png);
+			background-color: transparent;
+			background-size: 0% 100%;
 		}
 		50% {
-			background-image: url(../../static/voice-right-2.png);
+			background-size: 50% 100%;
 		}
 		100% {
-			background-image: url(../../static/voice-right-3.png);
+			background-color: #000;
+			background-size: 100% 100%;
 		}
 	}
 }

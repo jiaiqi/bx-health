@@ -1,21 +1,19 @@
 {
-	"pages": [
-		// {
-		// 	"path": "pages/pedia/pedia",
-		// 	"style": {
-		// 		// "navigationStyle": "custom",
-		// 		"navigationBarTitleText": "健康宝典",
-		// 		"navigationBarBackgroundColor": "#0bc99d"
-		// 	}
-		// },
-		// {
-		// 	"path": "pages/archives/archives",
-		// 	"style": {
-		// 		"navigationBarTitleText": "健康档案",
-		// 		"enablePullDownRefresh": true
+	"pages": [{
+			"path": "pages/pedia/pedia",
+			"style": {
+				"navigationBarTitleText": "健康宝典",
+				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		},
+		{
+			"path": "pages/archives/archives",
+			"style": {
+				"navigationBarTitleText": "健康档案",
+				"enablePullDownRefresh": true
 
-		// 	}
-		// },
+			}
+		},
 		{
 			"path": "pages/store/store",
 			"style": {
@@ -217,7 +215,8 @@
 						"navigationBarTitleText": "圈子设置",
 						"enablePullDownRefresh": true
 					}
-				}, {
+				},
+				{
 					"path": "StoreList/StoreList",
 					"style": {
 						"navigationBarTitleText": "",
@@ -258,81 +257,82 @@
 						"enablePullDownRefresh": false,
 						"navigationBarBackgroundColor": "#fff"
 					}
-
 				}
 			]
 		},
-		{
-			"root": "otherPages",
-			"pages": [{
-					"path": "shopDietStore/shopDietStore",
-					"style": {
-						"navigationBarTitleText": "店铺列表"
-					}
-				},
-				// {
-				// 	"path": "otherIndicator/otherIndicator",
-				// 	"style": {
-				// 		"navigationBarTitleText": "身体指标"
-				// 	}
-				// },
-				// {
-				// 	"path": "elementDetail/elementDetail",
-				// 	"style": {
-				// 		"navigationBarTitleText": "营养素详情"
-				// 	}
-				// },
-				// {
-				// 	"path": "symptomSelect/symptomSelect",
-				// 	"style": {
-				// 		"navigationBarTitleText": "症状选择",
-				// 		"navigationStyle": "custom"
-				// 	}
-				// },
-				// {
-				// 	"path": "symptomSelect/symptomSelect2",
-				// 	"style": {
-				// 		"navigationBarTitleText": "症状选择",
-				// 		"navigationStyle": "custom"
-				// 	}
-				// },
-				// {
-				// 	"path": "dietSelect/dietSelect",
-				// 	"style": {}
-				// },
-				{
-					"path": "shop/shopHome",
-					"style": {}
-				},
-				{
-					"path": "shop/shopDetail",
-					"style": {}
-				},
-				{
-					"path": "shop/shopCarList",
-					"style": {
-						"navigationBarTitleText": "购物车"
-					}
-				}
-				// ,
-				// {
-				// 	"path": "shop/foodMaterial",
-				// 	"style": {}
-				// },
-				// {
-				// 	"path": "chooseFood/chooseFood",
-				// 	"style": {}
-				// },
-				// {
-				// 	"path": "chooseFood/myFoodList",
-				// 	"style": {}
-				// },
-				// {
-				// 	"path": "chooseFood/myFoodsInfo",
-				// 	"style": {}
-				// }
-			]
-		},
+		// {
+		// 	"root": "otherPages",
+		// 	"pages": [{
+		// 			"path": "shopDietStore/shopDietStore",
+		// 			"style": {
+		// 				"navigationBarTitleText": "店铺列表"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "otherIndicator/otherIndicator",
+		// 			"style": {
+		// 				"navigationBarTitleText": "身体指标"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "elementDetail/elementDetail",
+		// 			"style": {
+		// 				"navigationBarTitleText": "营养素详情"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "symptomSelect/symptomSelect",
+		// 			"style": {
+		// 				"navigationBarTitleText": "症状选择",
+		// 				"navigationStyle": "custom"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "symptomSelect/symptomSelect2",
+		// 			"style": {
+		// 				"navigationBarTitleText": "症状选择",
+		// 				"navigationStyle": "custom"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "dietSelect/dietSelect",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "shop/shopHome",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "shop/shopDetail",
+		// 			"style": {
+		// 				"navigationBarBackgroundColor":"#fff",
+		// 				"navigationBarTextStyle":"black"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "shop/shopCarList",
+		// 			"style": {
+		// 				"navigationBarTitleText": "购物车"
+		// 			}
+		// 		},
+		// 		{
+		// 			"path": "shop/foodMaterial",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "chooseFood/chooseFood",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "chooseFood/myFoodList",
+		// 			"style": {}
+		// 		},
+		// 		{
+		// 			"path": "chooseFood/myFoodsInfo",
+		// 			"style": {}
+		// 		}
+		// 	]
+		// },
 		// {
 		// 	// 健康百科中的页面
 		// 	"root": "pediaPages",
@@ -422,47 +422,46 @@
 						"navigationBarTitleText": "登录"
 					}
 				},
-				// {
-				// 	"path": "list/list",
-				// 	"style": {
-				// 		"navigationBarTitleText": "列表"
-				// 	}
-				// },
-				// {
-				// 	"path": "webviewPage/webviewPage",
-				// 	"style": {
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// },
-				// {
-				// 	"path": "mapPage/mapPage",
-				// 	"style": {
-				// 		"enablePullDownRefresh": false,
-				// 		"navigationBarTitleText": "位置选择"
-				// 	}
-				// }, {
-				// 	"path": "newForm/newForm",
-				// 	"style": {
-				// 		"navigationBarTitleText": "",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// },
-				// {
-				// 	"path": "chat/chat",
-				// 	"style": {
-				// 		"navigationBarTitleText": "聊天室",
-				// 		"navigationBarTextStyle": "black",
-				// 		"navigationBarBackgroundColor": "#fff",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// }, 
+				{
+					"path": "list/list",
+					"style": {
+						"navigationBarTitleText": "列表"
+					}
+				},
+				{
+					"path": "webviewPage/webviewPage",
+					"style": {
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "mapPage/mapPage",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationBarTitleText": "位置选择"
+					}
+				}, {
+					"path": "newForm/newForm",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "chat/chat",
+					"style": {
+						"navigationBarTitleText": "聊天室",
+						"navigationBarTextStyle": "black",
+						"navigationBarBackgroundColor": "#fff",
+						"enablePullDownRefresh": false
+					}
+				},
 				{
 					"path": "article/article",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}
 			]
 		}
@@ -472,19 +471,18 @@
 		"selectedColor": "#facc31", //选中时文字颜色
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
-		"list": [
-			// {
-			// 	"pagePath": "pages/pedia/pedia", //页面路径
-			// 	"iconPath": "/static/icon/baodian.png", //图标路径
-			// 	"selectedIconPath": "static/icon/baodian_selected.png", //选中状态图标路径
-			// 	"text": "宝典" //显示文字
-			// },
-			// {
-			// 	"pagePath": "pages/archives/archives",
-			// 	"iconPath": "/static/icon/geren.png",
-			// 	"selectedIconPath": "static/icon/geren_selected.png",
-			// 	"text": "个人"
-			// },
+		"list": [{
+				"pagePath": "pages/pedia/pedia", //页面路径
+				"iconPath": "/static/icon/baodian.png", //图标路径
+				"selectedIconPath": "static/icon/baodian_selected.png", //选中状态图标路径
+				"text": "宝典" //显示文字
+			},
+			{
+				"pagePath": "pages/archives/archives",
+				"iconPath": "/static/icon/geren.png",
+				"selectedIconPath": "static/icon/geren_selected.png",
+				"text": "个人"
+			},
 			{
 				"pagePath": "pages/store/store",
 				"iconPath": "/static/icon/shenghuo.png",

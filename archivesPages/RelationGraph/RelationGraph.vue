@@ -33,18 +33,18 @@
 			<!-- <view class="video-box" v-if="txv_path"><video class="video-player" :src="txv_path" :usePoster="true" controls object-fit="contain"></video></view> -->
 			<view v-html="nodeDetail.node_desc" v-if="nodeDetail.node_desc" class="rich-text"></view>
 			<view class="node-img"><image class="image" :src="item" :key="item" mode="aspectFit" v-for="item in nodeImageList"></image></view>
-			<view class="refenence-list margin-tb-sm">
-				<view class="title text-bold margin-tb-sm">
-					参考文献
-				</view>
-				<view class="ref-item" v-for="(item,index) in referenceList">
-					[{{index}}] {{item.author}}.{{item.refer_name}}.{{item.publisher}}.{{item.pub_year}}
+			<view class="refenence-list margin-tb-sm" v-if="referenceList && referenceList.length > 0">
+				<view class="title text-bold margin-tb-sm">参考资料：</view>
+				<view class="ref-item" v-for="(item, index) in referenceList">
+					<text class="margin-right-xs ref-item-text">[{{ index }}]</text>
+					<text class="ref-item-text" v-if="item.refer_name">《{{ item.refer_name || '' }}》</text>
+					<text class="ref-item-text">{{ item.author | fillDot }}</text>
+					<text class="ref-item-text">{{ item.publisher | fillDot }}</text>
+					<text class="ref-item-text">{{ item.pub_year | fillDot }}</text>
 				</view>
 			</view>
 			<view class="link-box">
-				<view class="title text-bold margin-tb-sm">
-					相关链接
-				</view>
+				<view class="title text-bold margin-tb-sm">相关链接：</view>
 				<view class="node-link">
 					<!-- <view class="link-title">内部页面</view> -->
 					<view class="link-item-box" v-for="item in nodesLinkList['inPage']" @click="toLink(item)">
@@ -87,6 +87,17 @@ export default {
 	components: {
 		bxEchart
 	},
+	filters: {
+		fillDot: function(value) {
+			if (!value) return '';
+			if (value.indexOf('-') !== -1 && value.split('-').length === 3) {
+				value = value.replace(/-/g, '.');
+			} else {
+				value = value + ' • ';
+			}
+			return value;
+		}
+	},
 	computed: {
 		...mapState({
 			loginUserInfo: state => state.user.loginUserInfo,
@@ -110,7 +121,7 @@ export default {
 			nodeData: [],
 			nodeDetail: null,
 			nodeImageList: [],
-			referenceList:[],
+			referenceList: [],
 			nodesLinkList: {
 				outPage: [],
 				inPage: [],
@@ -245,7 +256,6 @@ export default {
 				});
 			});
 			let links = data.map(item => {
-				debugger;
 				return {
 					value: `  ${item.path_name ? item.path_name : ''} ${item.path_value ? `(${item.path_value})` : ''}`,
 					label: { show: true },
@@ -445,8 +455,8 @@ export default {
 				query_source: 'list_page'
 			};
 			let res = await this.$fetch('select', 'srvhealth_knowledge_node_reference_select', req, 'health');
-			if(res.success){
-				this.referenceList = res.data
+			if (res.success) {
+				this.referenceList = res.data;
 			}
 		},
 		async getNodeDetail(no, type) {
@@ -467,7 +477,7 @@ export default {
 				}
 				this.nodeDetail = nodeDetail;
 				this.getNodeImagePath(nodeDetail);
-				this.selectReference(nodeDetail)
+				this.selectReference(nodeDetail);
 				// if (this.nodeDetail && this.nodeDetail.video_link) {
 				// 	// this.getVideoInfo(this.nodeDetail.video_link);
 				// } else {
@@ -545,7 +555,6 @@ export default {
 			}
 		},
 		async clickCharts(e) {
-			debugger;
 			if (e.data && e.data.nodeNo) {
 				this.currentNodes = e.name;
 				this.currentNodeNo = e.data.nodeNo;
@@ -692,6 +701,15 @@ export default {
 	}
 	.refenence-list {
 		margin-bottom: 20px;
+		.ref-item {
+			.ref-item-text {
+				line-height: 1.8;
+				letter-spacing: 1.5px;
+			}
+			// display: flex;
+			// flex-wrap: wrap;
+			// align-items: center;
+		}
 	}
 	.node-img {
 		padding: 20rpx;

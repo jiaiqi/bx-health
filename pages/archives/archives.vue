@@ -1179,13 +1179,10 @@ export default {
 					res.data.data.forEach(item => {
 						if (item.name === uni.getStorageSync('current_user')) {
 							uni.setStorageSync('current_user', item.name);
-							console.log(this.checkboxList);
 							this.userInfo = item;
-							console.log(this.wxUserInfo);
 							if (!item.profile_url) {
 								if (this.wxUserInfo.headimgurl) {
 									this.updateUserInfo();
-									// this.userInfo.profile_url = this.wxUserInfo.headimgurl;
 								}
 							}
 							this.$store.commit('SET_USERINFO', item);
@@ -1198,7 +1195,6 @@ export default {
 					if (!item.profile_url) {
 						if (this.wxUserInfo.headimgurl) {
 							this.updateUserInfo();
-							// this.userInfo.profile_url = this.wxUserInfo.headimgurl;
 						}
 					}
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
