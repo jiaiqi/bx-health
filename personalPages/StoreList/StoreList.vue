@@ -22,7 +22,8 @@
 				</view>
 				<view class="action">
 					<button class="cu-btn sm line-green round" open-type="share" data-type="bindOrganization" :data-data="item"><text class="cuIcon-forward"></text></button>
-					<button class="cu-btn bg-blue sm" @click.stop="toDetail(item)">设置</button>
+					<!-- <button class="cu-btn bg-blue sm" @click.stop="toDetail(item)">设置</button> -->
+					<button class="cu-btn bg-blue sm" @click.stop="toManage(item)">管理</button>
 				</view>
 			</view>
 		</view>
@@ -74,6 +75,11 @@ export default {
 			];
 			uni.navigateTo({
 				url: '/publicPages/newForm/newForm?serviceName=srvhealth_store_mgmt_add&type=add&fieldsCond=' + JSON.stringify(fieldsCond)
+			});
+		},
+		toManage(e) {
+			uni.navigateTo({
+				url: '/personalPages/StoreManager/StoreManager?store_no=' + e.store_no
 			});
 		},
 		toDetail(e) {

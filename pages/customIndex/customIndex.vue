@@ -41,7 +41,7 @@
 			</view>
 			<!-- #endif -->
 			<view class="page-menu" v-if="pageItem.div_type === 'buttons'">
-				<view class="title">{{ pageItem.item_label||'' }}</view>
+				<view class="title">{{ pageItem.item_label || '' }}</view>
 				<view
 					class="item-box"
 					:class="{ 'low-height': pageItem.buttons && pageItem.buttons.length > 0 && pageItem.buttons[0].buttons && pageItem.buttons[0].buttons.length <= 4 }"
@@ -66,7 +66,7 @@
 				</swiper>
 			</view>
 			<view class="page-article" v-if="pageItem.div_type === 'tablist' && pageItem.tablist">
-				<view class="title">{{ pageItem.item_label||'' }}</view>
+				<view class="title">{{ pageItem.item_label || '' }}</view>
 				<article-list :config="pageItem"></article-list>
 			</view>
 		</view>
@@ -100,7 +100,8 @@ export default {
 			pageItemList: [], // 页面项
 			code: '', // 微信登录用
 			modalName: '',
-			isAuthUserInfo: false
+			isAuthUserInfo: false,
+			pageNo: ''
 		};
 	},
 	computed: {
@@ -215,7 +216,7 @@ export default {
 			let req = {
 				serviceName: 'srvdaq_website_page_item_select',
 				colNames: ['*'],
-				condition: [{ colName: 'page_no', ruleType: 'eq', value: 'BX202004280847490008' }]
+				condition: [{ colName: 'page_no', ruleType: 'eq', value: this.pageNo }]
 			};
 			let res = await this.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
@@ -275,19 +276,6 @@ export default {
 				};
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS') {
-					// let itemList = res.data.data.map((pageitem, index) => {
-					// 	switch (item.div_type) {
-					// 		case 'carousel':
-					// 			pageitem['picUrl'] = this.getImagePath(pageitem.carousel_image, true);
-					// 			break;
-					// 		case 'buttons':
-					// 			break;
-					// 		case 'tablist':
-					// 			debugger;
-					// 			break;
-					// 	}
-					// 	return pageitem;
-					// });
 					return res.data.data;
 				}
 			}
@@ -297,13 +285,6 @@ export default {
 				url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent('https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ')
 			});
 		}
-	},
-	created() {
-		this.toAddPage().then(res => {
-			if (res) {
-				this.getPageItem();
-			}
-		});
 	},
 	onShareAppMessage() {
 		let path = '';
@@ -321,6 +302,14 @@ export default {
 		};
 	},
 	onLoad(option) {
+		if (option.no) {
+			this.pageNo = option.no;
+			this.toAddPage().then(res => {
+				if (res) {
+					this.getPageItem();
+				}
+			});
+		}
 		this.checkOptionParams(option);
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({

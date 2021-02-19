@@ -735,7 +735,7 @@ export default {
 									body_fat_rate: this.inputVal.body_fat_rate ? this.inputVal.body_fat_rate : 0,
 									wearing: this.inputVal.wearing.toString(),
 									alimentary_canal: this.inputVal.alimentary_canal.toString(),
-									measure_time:this.inputVal.measure_time
+									measure_time: this.inputVal.measure_time
 								}
 							]
 						}
@@ -789,7 +789,7 @@ export default {
 									posture: this.inputVal.posture,
 									measure_position: this.inputVal.measure_position,
 									remark: this.inputVal.remark,
-									measure_time:this.inputVal.measure_time
+									measure_time: this.inputVal.measure_time
 								}
 							]
 						}
@@ -966,16 +966,16 @@ export default {
 					this.inputVal.getup_time = dayjs().format('YYYY-MM-DD') + ' 07:00';
 				} else {
 					// 当前时间早于早上七点 默认值为当前时间
-					this.inputVal.getup_time = dayjs().format('YYYY-MM-DD HH') + ':00'
+					this.inputVal.getup_time = dayjs().format('YYYY-MM-DD HH') + ':00';
 				}
 			}
-			if (Number(dayjs().format('HH')) > 7) {
-				// 当前时间晚于早上七点 默认值为七点
-				this.inputVal.measure_time = dayjs().format('YYYY-MM-DD') + ' 07:00';
-			} else {
-				// 当前时间早于早上七点 默认值为当前时间
-				this.inputVal.measure_time = dayjs().format('YYYY-MM-DD HH') + ':00'
-			}
+			// if (Number(dayjs().format('HH')) > 7) {
+			// 	// 当前时间晚于早上七点 默认值为七点
+			// 	this.inputVal.measure_time = dayjs().format('YYYY-MM-DD') + ' 07:00';
+			// } else {
+			// 当前时间早于早上七点 默认值为当前时间
+			this.inputVal.measure_time = dayjs().format('YYYY-MM-DD HH') + ':00';
+			// }
 		}
 		let user_info_list = uni.getStorageSync('user_info_list');
 		let name = uni.getStorageSync('current_user');

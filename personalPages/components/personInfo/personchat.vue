@@ -1542,16 +1542,10 @@ export default {
 					}
 				});
 				if (type === 'refresh') {
-					this.pageInfo.pageNo == 1;
-					this.recordList = [];
-				}
-				if (type === 'refresh') {
-					this.pageInfo.pageNo = 1;
-					// this.recordList = [];
+					resData = resData;
 				}else{
 					resData = [...resData, ...this.recordList];
 				}
-				// resData = [...resData, ...this.recordList];
 				resData = resData.reduce((pre, cur) => {
 					if (Array.isArray(pre) && !pre.find(item => item.id === cur.id)) {
 						pre.push(cur);

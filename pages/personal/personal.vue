@@ -117,7 +117,7 @@
 					<view class="cu-item arrow" @click="toPages('bxoa')" v-if="isAdminUser">
 						<view class="content">
 							<text class="cuIcon-forward"></text>
-							<text class="text-grey">测试</text>
+							<text class="text-grey">西安市民一码通</text>
 						</view>
 					</view>
 				</view>

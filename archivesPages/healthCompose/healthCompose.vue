@@ -4,13 +4,27 @@
 			{{ totalScore | fixed1 }}
 			<text class="unit">分</text>
 		</view>
-		<view class="tips" v-if="weightAdvice"><text class="cuIcon-creative">{{weightAdvice}}<!-- ，下方每一项右侧显示的百分数代表当前项占总分的比例 --></text></view>
+		<view class="tips" v-if="weightAdvice">
+			<text class="cuIcon-creative">
+				{{ weightAdvice }}
+				<!-- ，下方每一项右侧显示的百分数代表当前项占总分的比例 -->
+			</text>
+		</view>
 		<view class="couple-more-wrap">
 			<view class="couple-more-top">
 				<text></text>
 				<text>健康总分构成</text>
 			</view>
-			<view class="more-couple-cen-wrap">
+			<view class="health-box">
+				<view class="health-item" @click="toQuestionnaire(item)" v-for="(item, index) in coupleData">
+					<text class="grade" :class="{ 'bg-blue': item.finished && item.grade, 'bg-gray': item.finished && !item.grade, 'bg-cyan': !item.finished }">
+						{{ item.grade || item.grade === 0 ? item.grade+"分" : item.finished ? '暂无得分' : '点击评测' }}
+					</text>
+					<image class="image" :src="item.icon"></image>
+					<text>{{ item.name }}</text>
+				</view>
+			</view>
+			<!-- 		<view class="more-couple-cen-wrap">
 				<view class="couple-cen more-couple-cen">
 					<view @click="toQuestionnaire(item)" v-for="(item, index) in coupleData" :key="index" class="couple-cen-item">
 						<view class="couple-cen-item-b">
@@ -18,7 +32,7 @@
 						</view>
 						<view v-if="item.name !== '其它'" class="couple-cen-item-t">
 							<text class="text-blue score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">
-								{{ item.grade | fixed1  }}
+								{{ item.grade | fixed1 }}
 								<text class="unit">分</text>
 							</text>
 							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
@@ -33,10 +47,14 @@
 						</text>
 					</view>
 				</view>
-			</view>
+			</view> -->
 			<view class="couple-more-top">
 				<text></text>
 				<text>体质健康评测</text>
+			</view>
+			<uni-echarts class="uni-ec-canvas" canvas-id="nutrients-canvas" :ec="radarOption"></uni-echarts>
+			<view class="text-center margin-tb-sm text-gray">
+				请在下方体质测试问卷选择一个问卷进行评测
 			</view>
 			<view class="more-couple-cen-wrap">
 				<view class="couple-cen more-couple-cen">
@@ -45,23 +63,24 @@
 						v-for="(item, index) in corporeity"
 						:key="index"
 						:class="{
-							'couple-cen-item-active': item.name === currentItem.name
+							'couple-cen-item-active': item.name === currentItem.name && false
 						}"
-						class="couple-cen-item"
+						class="couple-cen-item "
 					>
+						<view v-if="item.name !== '其它'" class="couple-cen-item-t" :class="item.grade === 0 ? '' : item.grade >= 0 && item.grade <= 5 ? 'risk' : 'normal'">
+							<!-- 		<text class="score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">
+								{{ item.grade | fixed1 }}
+								<text class="unit">分</text>
+							</text> -->
+							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
+							<view class="unfilled" @click="toQuestionnaire(item)">
+								<!-- <view class="unfilled" v-if="!item.finished" @click="toQuestionnaire(item)"> -->
+								<text class="text-icon cuIcon-edit "></text>
+								<!-- <text class="text">{{item.finished?'点击修改':'点击填写'}}</text> -->
+							</view>
+						</view>
 						<view class="couple-cen-item-b">
 							<text>{{ item.name }}</text>
-						</view>
-						<view v-if="item.name !== '其它'" class="couple-cen-item-t" :class="item.grade === 0 ? '' : item.grade >= 0 && item.grade <= 5 ? 'risk' : 'normal'">
-							<text class="score-detail" v-if="item.finished && ((item.grade !== null && item.grade !== undefined) || item.grade === 0)">
-								{{ item.grade | fixed1  }}
-								<text class="unit">分</text>
-							</text>
-							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
-							<view class="unfilled" v-if="!item.finished" @click="toQuestionnaire(item)">
-								<text class="text-icon cuIcon-edit"></text>
-								<text class="text">点击填写</text>
-							</view>
 						</view>
 					</view>
 				</view>
@@ -71,131 +90,148 @@
 </template>
 
 <script>
+import uniEcharts from '@/components/uni-ec-canvas/uni-echart.vue';
 export default {
+	components: {
+		uniEcharts
+	},
 	data() {
 		return {
 			userInfo: '',
+			radarOption: {
+				option: {}
+			},
 			coupleData: [
 				{
-					name: '体重',
+					name: '身体数据',
 					grade: null,
-					fullMark: 20,
+					fullMark: 25,
 					finished: false,
+					icon: '/static/icon/body.png',
 					detail: {}
 				},
-				{
-					name: '年龄',
-					grade: null,
-					fullMark: 5,
-					finished: false
-				},
+				// {
+				// 	name: '年龄',
+				// 	grade: null,
+				// 	fullMark: 5,
+				// 	finished: false
+				// },
 				{
 					name: '家族史',
 					grade: null,
 					fullMark: 5,
 					no: '20201105111540000164',
-					finished: false
+					finished: false,
+					icon: '/static/icon/family.png'
 				},
 				{
 					name: '疾病史',
 					finished: false,
 					no: '20201027152801000160',
 					grade: null,
-					fullMark: 5
+					fullMark: 5,
+					icon: '/static/icon/case.png'
 				},
 				{
 					name: '饮食',
 					finished: false,
 					no: '20201106104133000174',
 					grade: null,
-					fullMark: 20
+					fullMark: 20,
+					icon: '/static/icon/diet.png'
 				},
 				{
 					name: '运动',
 					finished: false,
 					no: '20201109095316000178',
 					grade: null,
-					fullMark: 10
+					fullMark: 10,
+					icon: '/static/icon/sport.png'
 				},
 				{
 					name: '睡眠',
 					finished: false,
 					no: '20201109104327000185',
 					grade: null,
-					fullMark: 10
+					fullMark: 10,
+					icon: '/static/icon/sleep.png'
 				},
 				{
 					name: '吸烟情况',
 					finished: false,
 					no: '20201106115503000176',
 					grade: null,
-					fullMark: 5
+					fullMark: 5,
+					icon: '/static/icon/cigarette.png'
 				},
 				{
 					name: '饮酒情况',
 					finished: false,
 					no: '20201106142616000177',
 					grade: null,
-					fullMark: 5
+					fullMark: 5,
+					icon: '/static/icon/drink.png'
 				},
 				{
 					name: '心理',
 					finished: false,
 					no: '20201109103435000184',
 					grade: null,
-					fullMark: 10
+					fullMark: 10,
+					icon: '/static/icon/mind.png'
 				},
 				{
 					name: '健康素养',
 					finished: false,
 					no: '20201109105128000186',
 					grade: null,
-					fullMark: 5
+					fullMark: 5,
+					icon: '/static/icon/health.png'
 				}
 			],
 			corporeity: [
 				{
-					name: '阴虚质体质',
+					name: '阴虚质',
 					grade: null,
 					no: '20201112110542000192'
 				},
 				{
-					name: '气郁质体质',
+					name: '气郁质',
 					grade: null,
 					no: '20201112112218000193'
 				},
 				{
-					name: '血瘀质体质',
+					name: '血瘀质',
 					grade: null,
 					no: '20201112113200000194'
 				},
 				{
-					name: '痰湿质体质',
+					name: '痰湿质',
 					grade: null,
 					no: '20201112114401000195'
 				},
 				{
-					name: '湿热质体质',
+					name: '湿热质',
 					grade: null,
 					no: '20201112143740000196'
 				},
 				{
-					name: '特禀质体质',
+					name: '特禀质',
 					grade: null,
 					no: '20201112145435000197'
 				},
 				{
-					name: '阳虚质体质',
+					name: '阳虚质',
 					grade: null,
 					no: '20201112105018000191'
 				},
 				{
-					name: '气虚质体质',
+					name: '气虚质',
 					grade: null,
 					no: '20201112104036000190'
 				},
 				{
-					name: '平和质体质',
+					name: '平和质',
 					grade: null,
 					no: '20201112103143000189'
 				}
@@ -232,55 +268,168 @@ export default {
 			uni.setStorageSync('healthTotalScore', result);
 			return result;
 		},
-		weightAdvice(){
-			let score = this.getWeightScore()
-			let result = ''
+		weightAdvice() {
+			let score = this.getWeightScore();
+			let result = '';
 			let bmi = this.bmi;
-			if(typeof score === 'number'){
+			if (typeof score === 'number') {
 				if (bmi >= 28 && bmi < 38) {
 					// 0-5
-					result = '您的体重过高，若想提高体重分数,您需要适当进行运动，减少热量摄入'
+					result = '您的体重过高，若想提高体重分数,您需要适当进行运动，减少热量摄入';
 				} else if (bmi < 28 && bmi >= 24) {
 					// 5-10
-					result = '您的体重略高于标准范围，若想提高体重分数,您需要适当进行运动，减少热量摄入'
+					result = '您的体重略高于标准范围，若想提高体重分数,您需要适当进行运动，减少热量摄入';
 				} else if (bmi >= 18.5 && bmi < 21) {
 					// 10-20
-					result = '您的体重在标准范围之内，若想提高体重分数,您需要适当进行运动，增加热量摄入'
+					result = '您的体重在标准范围之内，若想提高体重分数,您需要适当进行运动，增加热量摄入';
 				} else if (bmi >= 21 && bmi < 24) {
 					// 10-20
-					result = '您的体重在标准范围之内，若想提高体重分数,您需要适当进行运动并避免过多摄入高热量食物'
+					result = '您的体重在标准范围之内，若想提高体重分数,您需要适当进行运动并避免过多摄入高热量食物';
 				} else if (bmi < 18.5 && bmi >= 10) {
 					// 0-5
-					result = '您的体重过低，若想提高体重分数,您需要适当进行运动并从食物中补充足够的蛋白质。'
+					result = '您的体重过低，若想提高体重分数,您需要适当进行运动并从食物中补充足够的蛋白质。';
 				}
 			}
-			return result
-		},
+			return result;
+		}
 	},
 
 	methods: {
+		buildRadarData(corporeity) {
+			let data = corporeity.map(item => item.grade);
+			let indicator = corporeity.map(item => {
+				if (item.name === '阴虚质') {
+					return {
+						axisTick: {
+							show: true,
+							inside: true,
+							lineStyle:{
+								color:"#000"
+							}
+						},
+						axisLabel: {
+							show: true,
+							inside: true,
+							fontSize:12
+						},
+						name: item.name,
+						max:
+							this.deepClone(data).sort(function(a, b) {
+								return b - a;
+							})[0] + 3
+					};
+				}
+				return {
+					name: item.name,
+					max:
+						this.deepClone(data).sort(function(a, b) {
+							return b - a;
+						})[0] + 3
+				};
+			});
+			let option = {
+				normal: {
+					top: 200,
+					left: 300,
+					width: 500,
+					height: 400,
+					zIndex: 6,
+					backgroundColor: ''
+				},
+				color: ['rgba(245, 166, 35, 1)', 'rgba(19, 173, 255, 1)'],
+				radar: {
+					// shape: 'circle',
+					name: {
+						textStyle: {
+							color: '#fff',
+							backgroundColor: '#999',
+							borderRadius: 3,
+							padding: [3, 5]
+						}
+					},
+					nameGap: 10,
+					center: ['50%', '50%'],
+					radius: '70%',
+					startAngle: 90,
+					splitNumber: 4,
+					splitArea: {
+						areaStyle: {
+							// color: ['transparent']
+						}
+					},
+					axisLabel: {
+						show: false,
+						fontSize: 14,
+						color: '#333',
+						fontStyle: 'normal',
+						fontWeight: 'normal'
+					},
+
+					indicator: indicator
+				},
+				series: [
+					{
+						type: 'radar',
+						// areaStyle: {normal: {}},
+						data: [data],
+						symbol: 'circle',
+						label: {
+							normal: {
+								show: true,
+								formatter: params => {
+									return params.value;
+								},
+								fontSize: 12
+							}
+						}
+					}
+				]
+			};
+			this.radarOption.option = option;
+		},
 		toQuestionnaire(item) {
 			if (item && item.no) {
 				uni.navigateTo({
 					url: `/questionnaire/index/index?formType=form&activity_no=${item.no}&status=进行中`
 				});
 			} else {
-				if (item && (item.name !== '体重' || item.name !== '年龄')) {
-					let fieldsCond = [
-						{
-							column: 'profile_url',
-							display: false
-						},
-						{
-							column: 'userno',
-							display: false,
-							value: uni.getStorageSync('login_user_info').user_no
-						},
-						{
-							column: 'no',
-							value: this.userInfo.no
-						}
-					];
+				if (item && item.name === '身体数据') {
+					// if (item && (item.name !== '体重' || item.name !== '年龄')) {
+					let fieldsCond = Object.keys(this.userInfo)
+						.filter(key => key && key[0] !== '_')
+						.map(key => {
+							let obj = {
+								column: key,
+								display: false,
+								value: this.userInfo[key]
+							};
+							if (['weight', 'birthday', 'height'].includes(key)) {
+								obj.display = true;
+							}
+							return obj;
+						});
+					// let fieldsCond = [
+					// 	{
+					// 		column: 'sex',
+					// 		display: false,
+					// 		value: this.userInfo.sex
+					// 	},
+					// 	{
+					// 		column: 'profile_url',
+					// 		display: false,
+					// 		value: this.userInfo.profile_url
+					// 	},
+					// 	{
+					// 		column: 'userno',
+					// 		display: false,
+					// 		value: this.userInfo.userno
+					// 	},
+					// 	{
+					// 		column: 'no',
+					// 		display: false,
+					// 		value: this.userInfo.no
+					// 	},
+					// ];
 					uni.navigateTo({
 						url: '/publicPages/newForm/newForm?serviceName=srvhealth_person_info_update&type=update&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
 					});
@@ -385,6 +534,7 @@ export default {
 					}
 				}
 			}
+			this.buildRadarData(corporeity);
 		},
 		async getScoreInfo() {
 			let scoreInfo = this.scoreInfo || {};
@@ -396,6 +546,9 @@ export default {
 						break;
 					case '年龄':
 						item.grade = this.getAgeScore();
+						break;
+					case '身体数据':
+						item.grade = this.getWeightScore() + this.getAgeScore();
 						break;
 					case '家族史':
 					case '疾病史':
@@ -500,22 +653,37 @@ export default {
 		}
 	}
 	.couple-cen {
-		display: grid;
-		grid-template-columns: repeat(3, calc(33.33% - 20rpx));
-		grid-row-gap: 20rpx;
-		grid-column-gap: 20rpx;
+		// display: grid;
+		// grid-template-columns: repeat(3, calc(33.33% - 20rpx));
+		// grid-row-gap: 20rpx;
+		// grid-column-gap: 20rpx;
 		position: relative;
-		margin-left: 20rpx;
+		// margin-left: 20rpx;
 		transition: all 1s;
+		display: flex;
+		flex-wrap: wrap;
+		margin: 0 20rpx;
+		padding-bottom: 20rpx;
 		.couple-cen-item {
-			height: 170rpx;
-			box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
-			border-radius: 14rpx;
+			// height: 170rpx;
+			width: 25%;
+			box-sizing: border-box;
+			// box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
+			// border-radius: 14rpx;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			padding: 10rpx;
 			border: 1px solid transparent;
+			border: 1px solid #f1f1f1;
+
+			border-top: none;
+			&:nth-child(1),
+			&:nth-child(2),
+			&:nth-child(3),
+			&:nth-child(4) {
+				border-top: 1px solid #f1f1f1;
+			}
 			.couple-cen-item-t {
 				font-size: 72rpx;
 				color: #ccc;
@@ -555,6 +723,8 @@ export default {
 				font-size: 30rpx;
 				font-weight: 700;
 				position: relative;
+				text-align: center;
+				margin-top: 10rpx;
 				width: 100%;
 				.ratio {
 					font-weight: normal;
@@ -603,6 +773,55 @@ export default {
 				}
 			}
 		}
+		.health-box {
+			display: flex;
+			flex-wrap: wrap;
+			padding: 0 20rpx;
+			.health-item {
+				width: 33.33%;
+				height: calc((100vw - 80rpx) / 3);
+				box-sizing: border-box;
+				padding: 10rpx;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				flex-direction: column;
+				border-right: 1px solid #f1f1f1;
+				border-bottom: 1px solid #f1f1f1;
+				position: relative;
+				&:active {
+					background-color: #f1f1f1;
+				}
+				&:nth-child(3n + 1) {
+					border-left: 1px solid #f1f1f1;
+				}
+				&:nth-child(1),
+				&:nth-child(2),
+				&:nth-child(3) {
+					border-top: 1px solid #f1f1f1;
+				}
+				.grade {
+					font-size: 12px;
+					display: inline-block;
+					padding: 2px 10px;
+					// border-radius: 10px;
+					position: absolute;
+					left: 0;
+					top: 0;
+				}
+				.image {
+					padding: 10rpx;
+					width: 40px;
+					height: 40px;
+				}
+			}
+		}
 	}
+}
+.uni-ec-canvas {
+	width: calc(100% - 40rpx);
+	height: 500rpx;
+	padding: 0 20rpx 20rpx 20rpx;
+	display: block;
 }
 </style>

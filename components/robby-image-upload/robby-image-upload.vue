@@ -5,7 +5,6 @@
 				<image
 					:src="path"
 					:class="{ dragging: isDragging(index) }"
-					draggable="true"
 					@tap="previewImage"
 					:data-index="index"
 					@touchstart="start"

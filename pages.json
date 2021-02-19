@@ -28,6 +28,12 @@
 				"navigationBarTitleText": "个人中心",
 				"enablePullDownRefresh": true
 			}
+		}, {
+			"path": "pages/customIndex/customIndex",
+			"style": {
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false
+			}
 		}
 	],
 	"subPackages": [{
@@ -256,12 +262,30 @@
 						"enablePullDownRefresh": false,
 						"navigationBarBackgroundColor": "#fff"
 					}
+				}, {
+					"path": "StoreManager/StoreManager",
+					"style": {
+						"navigationBarTitleText": "店铺管理",
+						"enablePullDownRefresh": false
+					}
 				}
 			]
 		},
 		{
 			"root": "otherPages",
 			"pages": [{
+					"path": "tool/toolTwo/toolTwo",
+					"style": {
+						"navigationBarTitleText": "BMI计算"
+					}
+				},
+				{
+					"path": "tool/toolThree/toolThree",
+					"style": {
+						"navigationBarTitleText": "婴儿发育查询"
+					}
+				},
+				{
 					"path": "shopDietStore/shopDietStore",
 					"style": {
 						"navigationBarTitleText": "店铺列表"
