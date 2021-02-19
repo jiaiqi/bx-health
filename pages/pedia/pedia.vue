@@ -41,7 +41,7 @@
 			</view>
 			<!-- #endif -->
 			<view class="page-menu" v-if="pageItem.div_type === 'buttons'">
-				<view class="title">{{ pageItem.item_label||'' }}</view>
+				<view class="title">{{ pageItem.item_label || '' }}</view>
 				<view
 					class="item-box"
 					:class="{ 'low-height': pageItem.buttons && pageItem.buttons.length > 0 && pageItem.buttons[0].buttons && pageItem.buttons[0].buttons.length <= 4 }"
@@ -66,7 +66,7 @@
 				</swiper>
 			</view>
 			<view class="page-article" v-if="pageItem.div_type === 'tablist' && pageItem.tablist">
-				<view class="title">{{ pageItem.item_label||'' }}</view>
+				<view class="title">{{ pageItem.item_label || '' }}</view>
 				<article-list :config="pageItem"></article-list>
 			</view>
 		</view>
@@ -89,12 +89,7 @@
 
 <script>
 import { mapState } from 'vuex';
-// import ArticleList from './article-list.vue';
 export default {
-	// 通用站点首页
-	// components: {
-	// 	ArticleList
-	// },
 	data() {
 		return {
 			pageItemList: [], // 页面项
@@ -345,7 +340,6 @@ export default {
 		width: 100%;
 	}
 	.page-item {
-		background-color: #fff;
 		margin-bottom: 10rpx;
 		.item-box {
 			border-radius: 10rpx;
@@ -382,7 +376,8 @@ export default {
 					height: 60rpx;
 				}
 				.swiper-button {
-					width: calc(25% - 20rpx);
+					width: calc(25% - 60rpx/4);
+					background-color: #fff;
 					// width: 150rpx;
 					height: 150rpx;
 					display: inline-flex;
@@ -390,7 +385,12 @@ export default {
 					align-items: center;
 					flex-direction: column;
 					border-radius: 8rpx;
-					margin: 10rpx;
+					margin-right: 20rpx;
+					margin-bottom: 20rpx;
+					box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1) ;
+					&:nth-child(4n){
+						margin-right: 0;
+					}
 					.btn-name {
 						padding: 10rpx 0;
 						overflow: hidden;

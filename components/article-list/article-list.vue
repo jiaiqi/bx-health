@@ -69,10 +69,13 @@ export default {
 	padding:10px;
 	display: flex;
 	align-items: center;
+	background-color: #fff;
 	border-bottom: 1px dashed #f1f1f1;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-	// border: 1px solid #f1f1f1;
-	margin-bottom: 10px;
+	&:nth-child(1){
+		border-top: 1px solid #f1f1f1;
+	}
+	// box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	// margin-bottom: 10px;
 	border-radius: 5px;
 	align-items: flex-start;
 	&:active{
