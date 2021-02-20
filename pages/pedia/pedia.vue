@@ -66,11 +66,10 @@
 				</swiper>
 			</view>
 			<view class="page-article" v-if="pageItem.div_type === 'tablist' && pageItem.tablist">
-				<view class="title">{{ pageItem.item_label || '' }}</view>
+				<!-- <view class="title">{{ pageItem.item_label || '' }}</view> -->
 				<article-list :config="pageItem"></article-list>
 			</view>
 		</view>
-
 		<button class="contact-button" @click="toFeedBack"><text class="cuIcon-servicefill text-blue icon"></text></button>
 		<view class="cu-modal" :class="modalName === 'feedback' ? 'show' : ''">
 			<view class="cu-dialog">
@@ -341,6 +340,8 @@ export default {
 	}
 	.page-item {
 		margin-bottom: 10rpx;
+		border-radius: 20rpx;
+		overflow: hidden;
 		.item-box {
 			border-radius: 10rpx;
 			// box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
@@ -376,8 +377,8 @@ export default {
 					height: 60rpx;
 				}
 				.swiper-button {
-					width: calc(25% - 60rpx/4);
-					background-color: #fff;
+					width: calc(25% - 60rpx / 4);
+					// background-color: #fff;
 					// width: 150rpx;
 					height: 150rpx;
 					display: inline-flex;
@@ -387,8 +388,8 @@ export default {
 					border-radius: 8rpx;
 					margin-right: 20rpx;
 					margin-bottom: 20rpx;
-					box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1) ;
-					&:nth-child(4n){
+					// box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1) ;
+					&:nth-child(4n) {
 						margin-right: 0;
 					}
 					.btn-name {

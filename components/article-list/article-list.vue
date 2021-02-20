@@ -1,9 +1,9 @@
 <template>
 	<view class="article-list">
-<!-- 		<view class="action margin-top-xs">
+		<view class="action margin-top-xs" v-if="config.item_label">
 			<text class="cuIcon-titles text-cyan"></text>
 			<text class="text-bold">{{ config.item_label }}</text>
-		</view> -->
+		</view>
 		<u-tabs :list="tabs" :is-scroll="true" activeColor="#0bc99d" ref="tabs" :current="current" @change="changeTab" v-if="tabs.length>1"></u-tabs>
 		<view class="">
 			<view class="article-item" v-for="item in list" @click="toDetail(item)">
@@ -69,17 +69,16 @@ export default {
 	padding:10px;
 	display: flex;
 	align-items: center;
-	background-color: #fff;
-	border-bottom: 1px dashed #f1f1f1;
+	// background-color: #fff;
+	border-bottom: 1px solid #f1f1f1;
+	border-top:none;
 	&:nth-child(1){
-		border-top: 1px solid #f1f1f1;
+		// border-top: 1px solid #f1f1f1;
 	}
 	// box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-	// margin-bottom: 10px;
-	border-radius: 5px;
 	align-items: flex-start;
 	&:active{
-		background-color: #f1f1f1;
+		background-color: #f9f9f9;
 	}
 	.slide-image{
 		width: 200rpx;
@@ -90,8 +89,9 @@ export default {
 		display: flex;
 		flex-direction: column;
 		flex: 1;
-		padding:0 20rpx;
+		padding:10rpx 20rpx;
 		height: 150rpx;
+		box-sizing: border-box;
 	}
 	.title{
 		flex: 1;

@@ -149,7 +149,9 @@ export default {
 			let unitList = [];
 			let self = this;
 			let basicUnit = this.deepClone(this.dietInfo);
-			if (basicUnit.unit !== 'g' && basicUnit.unit.indexOf('g') !== -1) {
+			debugger
+			if (basicUnit.unit !== 'g') {
+			// if (basicUnit.unit !== 'g' && basicUnit.unit.indexOf('g') !== -1) {
 				basicUnit.unit = 'g';
 				basicUnit.amount = 1;
 				basicUnit.energy = (basicUnit.energy * 100) / basicUnit.unit_weight_g;

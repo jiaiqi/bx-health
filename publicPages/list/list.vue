@@ -94,7 +94,6 @@ export default {
 	},
 	onShow() {
 		if (this.serviceName && this.$refs.bxList) {
-			// this.getListV2();
 			this.$refs.bxList.onRefresh();
 		}
 	},
@@ -126,7 +125,6 @@ export default {
 			this.queryOption = option;
 		}
 		if (query.viewTemp) {
-			// let viewTemp = this.getDecodeUrl(option.viewTemp);
 			this.viewTemp = JSON.parse(decodeURIComponent(query.viewTemp));
 			if (this.viewTemp.title) {
 				this.keyColumn = this.viewTemp.title;
@@ -439,26 +437,6 @@ export default {
 								defaultVal: res.row,
 								eventOrigin: res.button
 							};
-							if ((data.button.main_table = 'bxzhxq_member' && data.button.operate_service === 'srvzhxq_syrk_add')) {
-								params.cond = [
-									{
-										colName: 'fwbm',
-										ruleType: 'condition',
-										value: [
-											{
-												colName: 'dybm',
-												ruleType: 'eq',
-												value: 'dybm'
-											},
-											{
-												colName: 'lybm',
-												ruleType: 'eq',
-												value: 'lybm'
-											}
-										]
-									}
-								];
-							}
 							uni.navigateTo({
 								url: '/pages/public/formPage/formPage?params=' + JSON.stringify(params)
 							});

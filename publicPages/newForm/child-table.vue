@@ -4,7 +4,7 @@
 		<view class="child-service-item" v-for="item in list" @click="toChildServiceList(item)">
 			<view class="child-service-title">
 				<view class="cu-tag badge" v-if="item.total">
-					<block>{{ item.total > 99 ? '99+' : item.total || 0 }}</block>
+					<block>{{ item.total > 99 ? '99+' : item.total}}</block>
 				</view>
 				<view class="label">{{ item.foreign_key && item.foreign_key.section_name ? item.foreign_key.section_name : item.service_view_name }}</view>
 			</view>
@@ -106,24 +106,25 @@ export default {
 
 <style scoped lang="scss">
 .child-service-box {
-	margin: 20rpx;
-	padding: 20rpx;
+	padding: 10px;
 	display: flex;
 	flex-wrap: wrap;
-	box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	.child-service-item {
+		// box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		min-height: 100rpx;
-		width: calc(33% - 6rpx);
+		width: calc(33% - 40rpx/3);
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		transform: translate(2px, 2px);
-		background-color: #409eff;
-		color: #fff;
+		// background-color: #409eff;
+		// color: #fff;
+		background-color: #f1f1f1;
 		transition: 0.2s all ease-in-out;
 		border-radius: 10rpx;
-		margin-right: 10rpx;
-		margin-bottom: 10rpx;
+		margin-right: 20rpx;
+		margin-bottom: 20rpx;
 		&:nth-child(3n) {
 			margin-right: 0;
 		}

@@ -363,7 +363,7 @@
 					"path": "hospitalOverview/hospitalOverview",
 					"style": {
 						"navigationBarBackgroundColor": "#0094ff",
-						"navigationBarTitleText": "医院简介"
+						"navigationBarTitleText": "简介"
 					}
 				}, {
 					"path": "HospitalList/HospitalList",

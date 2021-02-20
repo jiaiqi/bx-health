@@ -1,5 +1,5 @@
 <template>
-	<view class="list-item-wrap bg-white" :class="{'grid-layout-item':layout==='grid'}">
+	<view class="list-item-wrap bg-white" :class="{ 'grid-layout-item': layout === 'grid' }">
 		<view class="list-item flex" v-if="viewType === 'normal'">
 			<imgLazy class="main-image" v-if="itemData[viewTemp['img']]" :item="goodsData" :imgColName="'img'"></imgLazy>
 			<view class="content-box flex-twice" v-if="listType === 'proc' && pageType === 'proc'">
@@ -87,7 +87,7 @@
 				<view class="title-tip" v-if="goodsData.tip" @click="listItemClick">{{ goodsData.tip }}</view>
 				<view class="content" v-if="goodsData.price" @click="listItemClick">
 					<view class="numbers">
-						<!-- <text class="unit" v-if="!isNaN(Number(goodsData.price))">￥</text> -->
+						<text class="unit" v-if="!isNaN(Number(goodsData.price)) && viewTemp.price.indexOf('price') !== -1">￥</text>
 						{{ goodsData.price }}
 					</view>
 					<view class="tags"></view>
@@ -288,7 +288,7 @@ export default {
 			immediate: true,
 			handler(newValue, oldValue) {
 				if (newValue[this.viewTemp.img]) {
-					this.goodsData.img= this.getImagePath(newValue[this.viewTemp.img])
+					this.goodsData.img = this.getImagePath(newValue[this.viewTemp.img]);
 					// this.getPicture(newValue[this.viewTemp.img]).then(url => {
 					// 	this.goodsData.img = url;
 					// });
@@ -317,18 +317,18 @@ export default {
 	margin: 10rpx 0;
 	box-sizing: border-box;
 	.list-item {
-		// width: calc(100% - 40upx);
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		padding: 10upx;
-		// margin: 20upx;
 		box-sizing: border-box;
 		.main-image {
 			width: 220upx;
 			height: 220upx;
 			border-radius: 5upx;
 			margin-right: 20upx;
+			border-radius: 10rpx;
+			overflow: hidden;
 			flex: 1;
 		}
 		.content-box {
@@ -383,8 +383,6 @@ export default {
 				overflow: hidden;
 				text-overflow: ellipsis;
 				white-space: nowrap;
-				display: flex;
-				align-items: center;
 			}
 			.content {
 				// text-overflow: ellipsis;

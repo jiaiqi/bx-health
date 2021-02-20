@@ -75,6 +75,7 @@
 							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
 							<view class="unfilled" @click="toQuestionnaire(item)">
 								<!-- <view class="unfilled" v-if="!item.finished" @click="toQuestionnaire(item)"> -->
+								<view class="bg-blue cu-tag badge" v-if="item.grade">{{ item.grade}}分</view>
 								<text class="text-icon cuIcon-edit "></text>
 								<!-- <text class="text">{{item.finished?'点击修改':'点击填写'}}</text> -->
 							</view>
@@ -653,12 +654,8 @@ export default {
 		}
 	}
 	.couple-cen {
-		// display: grid;
-		// grid-template-columns: repeat(3, calc(33.33% - 20rpx));
-		// grid-row-gap: 20rpx;
-		// grid-column-gap: 20rpx;
+
 		position: relative;
-		// margin-left: 20rpx;
 		transition: all 1s;
 		display: flex;
 		flex-wrap: wrap;
@@ -668,15 +665,15 @@ export default {
 			// height: 170rpx;
 			width: 25%;
 			box-sizing: border-box;
-			// box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 10px, rgba(0, 0, 0, 0.04) 0px 0px 6px;
-			// border-radius: 14rpx;
+			min-height: 150rpx;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+			justify-content: center;
 			padding: 10rpx;
 			border: 1px solid transparent;
 			border: 1px solid #f1f1f1;
-
+			position: relative;
 			border-top: none;
 			&:nth-child(1),
 			&:nth-child(2),
@@ -685,10 +682,15 @@ export default {
 				border-top: 1px solid #f1f1f1;
 			}
 			.couple-cen-item-t {
+				position: relative;
 				font-size: 72rpx;
 				color: #ccc;
 				font-weight: 600;
-
+				display: flex;
+				width: 100%;
+				flex: 1;
+				justify-content: center;
+				align-items: flex-end;
 				.score-detail {
 					position: relative;
 					.unit {
@@ -779,9 +781,9 @@ export default {
 			padding: 0 20rpx;
 			.health-item {
 				width: 33.33%;
-				height: calc((100vw - 80rpx) / 3);
+				height: calc((100vw - 150rpx) / 3);
 				box-sizing: border-box;
-				padding: 10rpx;
+				padding-top: 20rpx;
 				display: flex;
 				justify-content: center;
 				align-items: center;
@@ -803,10 +805,13 @@ export default {
 				.grade {
 					font-size: 12px;
 					display: inline-block;
-					padding: 2px 10px;
+					padding: 2px 0;
 					// border-radius: 10px;
 					position: absolute;
-					left: 0;
+					// left: 0;
+					width: 150rpx;
+					left: calc(50% - 75rpx);
+					text-align: center;
 					top: 0;
 				}
 				.image {

@@ -85,7 +85,6 @@ export default {
 		},
 		async addDietRecord() {
 			let self = this;
-			debugger
 			this.dietRecordList = [this.dietInfo];
 			if (this.dietRecordList.length > 0) {
 				let arr = [];
@@ -103,7 +102,7 @@ export default {
 						energy: (item.unit_amount * item.unit_energy) / 100,
 						user_name: this.userInfo.name,
 						image: item.image,
-						unit_weight_g: 100,
+						unit_weight_g: item.unit_weight_g ? item.unit_weight_g : 100,
 						dining_type: this.dining_type,
 						protein: Number(this.dietInfo.protein) * item.amount,
 						axunge: Number(this.dietInfo.axunge) * item.amount,
@@ -133,7 +132,7 @@ export default {
 					};
 					if (item.meal_no) {
 						obj.energy = item.unit_amount * item.unit_energy;
-						if(obj.unit==='g'){
+						if (obj.unit === 'g') {
 							obj.energy = item.unit_energy;
 						}
 					}

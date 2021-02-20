@@ -261,6 +261,9 @@ export default {
 				this.$http.post(url, req).then(res => {
 					if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 						this.storeInfo = res.data.data[0];
+						uni.setNavigationBarTitle({
+							title:this.storeInfo.name
+						})
 						this.getNotice();
 						resolve(res.data.data[0]);
 					} else {

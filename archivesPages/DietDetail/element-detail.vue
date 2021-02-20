@@ -140,17 +140,17 @@ export default {
 	methods: {
 		changeCrowd(item) {
 			// 切换人群
-			let self = this
+			let self = this;
 			if (item.type === 'mine' && (!item.age || !item.sex)) {
 				uni.showModal({
 					title: '提示',
 					content: '当前没有进行登记年龄、性别或体重，是否去登记?',
 					success: function(res) {
 						if (res.confirm) {
-							let pageStack = getCurrentPages()
+							let pageStack = getCurrentPages();
 							if (Array.isArray(pageStack) && pageStack.length >= 1) {
-								let currentPage = pageStack[pageStack.length - 1]
-								self.$store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
+								let currentPage = pageStack[pageStack.length - 1];
+								self.$store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath);
 							}
 							uni.redirectTo({
 								url: '/otherPages/chooseFood/myFoodsInfo'
@@ -192,7 +192,6 @@ export default {
 			let weight = self.currentCrowd === 'man' ? 65 : self.currentCrowd === 'woman' ? 55 : self.userInfo.weight;
 			let age = self.currentCrowd === 'man' || self.currentCrowd === 'woman' ? 18 : self.age;
 			let sex = self.currentCrowd === 'man' ? '男' : self.currentCrowd === 'woman' ? '女' : self.userInfo.sex;
-			debugger;
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				let result = res.data.data.filter(item => {
 					if ((item.sex && item.sex.indexOf(sex) !== -1) || !item.sex) {
@@ -360,6 +359,9 @@ export default {
 								if (currentDiet.unit_amount === 100 && currentDiet.unit_weight_g && currentDiet.unit_weight_g > 1) {
 									ratio = currentDiet.unit_weight_g / currentDiet.unit_amount;
 								}
+								if (currentDiet.unit_weight_g > 1) {
+									ratio = currentDiet.unit_weight_g / 100;
+								}
 							} else {
 								if (currentDiet.unit_weight_g > 1) {
 									ratio = currentDiet.unit_weight_g / 100;
@@ -373,14 +375,15 @@ export default {
 							num = parseFloat(num.toFixed(1));
 							return num;
 						});
+						debugger;
 						break;
 					case '当前食物':
-						debugger;
 						obj.data = eleArr.map(ele => {
-							debugger;
 							let cur = this.deepClone(ele);
 							let ratio = 1;
-							if (currentDiet.unit.indexOf('g') !== -1 && currentDiet.unit_weight_g > 1) {
+							debugger
+							if (currentDiet.unit_weight_g > 1) {
+								// if (currentDiet.unit.indexOf('g') !== -1 && currentDiet.unit_weight_g > 1) {
 								ratio = currentDiet.unit_weight_g / 100;
 							}
 							let val = currentDiet[cur.key] * ratio * currentDiet.amount;

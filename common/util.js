@@ -431,7 +431,7 @@ export default {
 				if (optionType === "select") {
 					return {
 						success: true,
-						page:res.data.page,
+						page: res.data.page,
 						data: res.data.data
 					}
 				} else {
@@ -703,7 +703,7 @@ export default {
 				uni.setStorageSync('isLogin', true);
 				store.commit('SET_LOGIN_STATE', true)
 				let resData = res.data.response[0].response;
-				if (resData&&resData.login_user_info.user_no) {
+				if (resData && resData.login_user_info.user_no) {
 					uni.setStorageSync('login_user_info', resData.login_user_info);
 					store.commit('SET_LOGIN_USER', resData.login_user_info)
 				}
@@ -1227,6 +1227,11 @@ export default {
 											if (res.data.state === "SUCCESS") {
 												resolve(res.data)
 											} else {
+												uni.showModal({
+													title: '提示',
+													content: res.data.resultMessage,
+													showCancel: false,
+												})
 												reject(res.data)
 											}
 
@@ -1298,9 +1303,6 @@ export default {
 								Vue.prototype.onButtonRequest(e).then((res) => {
 									if (res) {
 										resolve(res)
-										// uni.showToast({
-										// 	title:e.button.button_name
-										// })
 									} else {
 										reject(res)
 									}
@@ -1895,16 +1897,16 @@ export default {
 			}
 		}
 
-		Vue.prototype.getImagePath = (no,notThumb) => {
+		Vue.prototype.getImagePath = (no, notThumb) => {
 			if (no && (no.indexOf('http://') !== -1 || no.indexOf('https://') !== -1)) {
 				return no
 			} else if (no) {
 				if (no.indexOf('&bx_auth_ticket') !== -1) {
 					no = no.split('&bx_auth_ticket')[0]
 				}
-				if(notThumb){
+				if (notThumb) {
 					return api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
-				}else{
+				} else {
 					return api.downloadFile + no + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
 						'&thumbnailType=fwsu_100';
 				}
