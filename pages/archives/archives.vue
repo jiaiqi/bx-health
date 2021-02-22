@@ -211,14 +211,14 @@
 				</view>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal"></view>
 		<view class="cu-modal" :class="{ show: showUserListPopup }" @tap="showUserListPopup = false">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="user-list">
 					<view class="user-item" @click="switchUser(item)" v-for="item in vuex_userList" :key="item.id" :class="{ 'text-blue': item.name === vuex_userInfo.name }">
-						<image class="avatar" :src="getUserImage(item)" size="60" v-if="getUserImage(item)"></image>
+						<image class="avatar" :src="getUserImage(item)" v-if="getUserImage(item)"></image>
 						<image class="avatar" src="/static/man-profile.png" v-else></image>
-						{{ item.name }}
+						<view class="name">{{ item.name }}</view>
+						<button class="cu-btn bg-blue settings" @click.stop="editUserInfo(userInfo)" v-if="item.name === vuex_userInfo.name"><view class="cuIcon-settings"></view></button>
 					</view>
 				</view>
 				<view class="button-box"><button class="cu-btn bg-white text-blue" @click="toAddPages">添加新用户</button></view>
@@ -235,7 +235,6 @@
 				</view>
 			</view>
 		</view>
-		<!-- <official-account></official-account> -->
 	</view>
 	<bx-auth v-else-if="authBoxDisplay" @getuserinfo="getuserinfo"></bx-auth>
 </template>
@@ -436,6 +435,61 @@ export default {
 		}
 	},
 	methods: {
+		editUserInfo(e) {
+			if (e.no) {
+				let fieldsCond = [
+					{
+						column: 'invite_user_no',
+						display: false
+					},
+					{
+						column: 'add_url',
+						display: false
+					},
+					{
+						column: 'manager_type'
+						// display: false
+					},
+					{
+						column: 'no',
+						value: e.no,
+						display: false
+					},
+					{
+						column: '_userno_disp',
+						display: false
+					},
+					{
+						column: 'font_size',
+						display: false
+					},
+					{
+						column: 'userno',
+						display: false
+					},
+					{
+						column: 'add_store_no',
+						display: false
+					},
+					{
+						column: 'create_time',
+						display: false
+					},
+					{
+						column: 'create_user',
+						display: false
+					},
+					{
+						column: 'create_user_disp',
+						display: false
+					}
+				];
+				uni.navigateTo({
+					url:
+						'/publicPages/newForm/newForm?showChildService=false&serviceName=srvhealth_person_info_select&type=detail&fieldsCond=' + encodeURIComponent(JSON.stringify(fieldsCond))
+				});
+			}
+		},
 		getCycle(e) {
 			let endDate = dayjs(e.start_date).add(e.take_days, 'day');
 			return `${dayjs(e.start_date).format('MM.DD')}-${dayjs(endDate).format('MM.DD')}`;
@@ -992,7 +1046,6 @@ export default {
 			if (res.data.resultCode === 'SUCCESS' && Array.isArray(res.data.data.srv_cols)) {
 				let { srv_cols } = res.data.data;
 				if (Array.isArray(srv_cols) && srv_cols.length > 0) {
-					console.log(this.vuex_userInfo);
 					if (this.vuex_userInfo && this.vuex_userInfo.requirement) {
 						let requirement = this.vuex_userInfo.requirement.split(',');
 						console.log(requirement);
@@ -1007,6 +1060,8 @@ export default {
 								});
 							}
 						});
+					} else {
+						this.selectedTags = [];
 					}
 				}
 			}
@@ -1173,7 +1228,7 @@ export default {
 			const res = await this.$http.post(url, req);
 			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 				// 有数据
-				
+
 				this.$store.commit('SET_USERLIST', res.data.data);
 				if (uni.getStorageSync('current_user')) {
 					res.data.data.forEach(item => {
@@ -1272,11 +1327,11 @@ export default {
 			if (userInfo) {
 				this.loginUserInfo = userInfo;
 				this.getplanList();
-				if (!Array.isArray(this.checkboxList) || this.checkboxList.length === 0) {
-					await this.getCheckboxList();
-				}
+				// if (!Array.isArray(this.checkboxList) || this.checkboxList.length === 0) {
+				await this.getCheckboxList();
+				// }
 				// if (!this.vuex_userInfo) {
-					await this.selectUserList();
+				await this.selectUserList();
 				// }
 				if (!this.dietScore && this.dietScore !== 0) {
 					this.dietScore = await this.calcDietScore();
@@ -1735,7 +1790,7 @@ export default {
 				justify-content: flex-start;
 				.disease-item {
 					margin-right: 20rpx;
-					width: calc(33% - 40rpx/3);
+					width: calc(33% - 40rpx / 3);
 					margin-bottom: 20rpx;
 					padding: 10rpx 20rpx;
 					border: 1px solid #999;
@@ -1810,7 +1865,7 @@ export default {
 				justify-content: flex-start;
 				font-weight: normal;
 				.todo-item {
-					width: calc(33% - 40rpx/3);
+					width: calc(33% - 40rpx / 3);
 					display: flex;
 					flex-direction: column;
 					justify-content: center;
@@ -1824,7 +1879,7 @@ export default {
 					overflow: hidden;
 					margin-right: 20rpx;
 					margin-bottom: 20rpx;
-					&:nth-child(3n){
+					&:nth-child(3n) {
 						margin-right: 0;
 					}
 					.type {
@@ -1912,18 +1967,70 @@ export default {
 }
 .user-list {
 	min-height: 300rpx;
-	padding: 50rpx 30rpx 30rpx;
+	padding: 50rpx 20rpx;
+	display: flex;
+	flex-wrap: wrap;
+	position: relative;
+	.settings {
+		position: absolute;
+		right: 5px;
+		top: 5px;
+		font-size: 14px;
+		padding: 4px;
+		width: 30px;
+		height: 30px;
+	}
 	.user-item {
-		text-indent: 40rpx;
 		display: flex;
+		justify-content: center;
 		align-items: center;
+		flex-direction: column;
 		font-weight: bold;
-		font-size: 34rpx;
-		padding: 30rpx 20rpx 10rpx;
+		padding: 20rpx 20rpx 10rpx;
 		border-bottom: 1rpx solid #f1f1f1;
 		transition: all 0.5s;
+		position: relative;
+		width: 33%;
+		border-right: 1rpx solid #f1f1f1;
+		// &:nth-child(3n) {
+		// 	border-right: none;
+		// }
+		&:nth-child(3n + 1) {
+			border-left: 1rpx solid #f1f1f1;
+		}
+		&:nth-child(1),
+		&:nth-child(2),
+		&:nth-child(3) {
+			border-top: 1rpx solid #f1f1f1;
+		}
+		&:active {
+			background-color: #f1f1f1;
+		}
+
+		// .cuIcon-settings {
+		// 	position: absolute;
+		// 	right: 5px;
+		// 	top: 5px;
+		// 	font-size: 14px;
+		// 	border-radius: 50%;
+		// 	padding: 4px;
+		// }
+		.cuIcon-delete {
+			position: absolute;
+			left: 5px;
+			top: 5px;
+			font-size: 14px;
+			background-color: #333;
+			border-radius: 50%;
+			color: #fff;
+			padding: 4px;
+		}
 		.avatar {
-			margin-right: 20rpx;
+			width: 100rpx;
+			height: 100rpx;
+		}
+		.name {
+			padding: 10rpx 0;
 		}
 		&:active {
 			background-color: #f1f1f1;

@@ -114,9 +114,6 @@
 			</sPullScroll>
 		</view>
 		<view class="footzw"></view>
-		<!-- 		<view class="public-button-box">
-			<view @click="addShop" class="add-button"><text class="cuIcon-add"></text></view>
-		</view> -->
 	</view>
 </template>
 
@@ -138,7 +135,8 @@ export default {
 				{ label: '体检中心', value: '体检中心' },
 				{ label: '药店', value: '药店' },
 				{ label: '孕婴店', value: '孕婴店' },
-				{ label: '其他', value: '其他' }
+				{ label: '健康服务', value: '健康服务' }
+				// { label: '其他', value: '其他' }
 			],
 			currentType: '全部',
 			isLogin: false, //是否已经登录
@@ -276,7 +274,7 @@ export default {
 		},
 		/*跳转至商铺详情*/
 		toShopDetail(item) {
-			if (['诊所', '医院'].includes(item.type)) {
+			if (['诊所', '医院', '健康服务'].includes(item.type)) {
 				uni.navigateTo({
 					url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + item.store_no
 				});

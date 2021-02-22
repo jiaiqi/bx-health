@@ -1,14 +1,30 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
-	<view class="page-wrap" :class="{'onlyCurrentPage':onlyCurrentPage}">
+	<view class="page-wrap" :class="{ onlyCurrentPage: onlyCurrentPage }">
+		<swiper
+			class="screen-swiper item-box square-dot"
+			easing-function="linear"
+			:height="300"
+			:indicator-dots="true"
+			:circular="true"
+			:autoplay="true"
+			interval="5000"
+			duration="500"
+		>
+			<swiper-item v-for="(item, index) in swiperList" :key="item.url"><image :src="item.url" mode="aspectFill" @click="toPreviewImage(item.url)"></image></swiper-item>
+		</swiper>
 		<view class="page-content">
-			<view class="header-wrap" v-if="storeInfo && storeInfo.id" :style="{ 'background-image': 'url(' + getImagePath(storeInfo.image) + ')' }">
+			<view class="header-wrap" v-if="storeInfo && storeInfo.id">
+				<!-- <view class="header-wrap" v-if="storeInfo && storeInfo.id" :style="{ 'background-image': 'url(' + getImagePath(storeInfo.image) + ')' }"> -->
 				<view class="hospital-top">
-					<view class="left"  @click="getCurrentLocation">
+					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
+					<view class="logo" v-else>{{ storeInfo.name.slice(0, 1) }}</view>
+					<view class="left" @click="getCurrentLocation">
 						<view class="top">
 							<view class="name">{{ storeInfo.name }}</view>
 						</view>
-						<view class="bottom">
+						<view class="bottom" v-if="introduction && introduction.length < 25">{{ introduction }}</view>
+						<view class="bottom" v-if="storeInfo.address">
 							<view class="address">
 								<text class="content">{{ storeInfo.address }}</text>
 								<text class="cuIcon-locationfill text-blue margin-left-xs"></text>
@@ -17,19 +33,34 @@
 					</view>
 					<view class="right"><text class="cuIcon-phone text-black" @click="makePhoneCall"></text></view>
 				</view>
-				<view class="introduction">
-					<view class="title">
-						<text class="cuIcon-titles text-blue"></text>
-						{{ storeInfo.name || '' }}
-					</view>
+				<view class="introduction" v-if="introduction && introduction.length >= 25">
 					<view class="content">
 						<view class="rich-text">
 							{{ introduction || '暂无介绍' }}
-							<view class="see-more" v-if="introduction !== storeInfo.introduction&&introduction" @click="seeMore">查看更多</view>
+							<view class="see-more" v-if="introduction !== storeInfo.introduction && introduction" @click="seeMore">查看更多</view>
 						</view>
 					</view>
 				</view>
-				<view class="introduction news">
+				<view class="menu-list">
+					<view class="menu-item">
+						<view class="icon" @click="toPages(1)">食</view>
+						<text class="title">食物库</text>
+					</view>
+					<view class="menu-item">
+						<view class="icon" @click="toPages(2)">症</view>
+						<text class="title">症状自检</text>
+					</view>
+					<view class="menu-item">
+						<view class="icon" @click="toPages(3)">健</view>
+						<text class="title">健康评测</text>
+					</view>
+					<view class="menu-item">
+						<view class="icon" @click="toPages(4)">健</view>
+						<text class="title">健康记录</text>
+					</view>
+				</view>
+				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name" desc="goods_desc"></goods-list>
+				<view class="introduction news" v-if="noticeList.length > 0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
 						<text class="">通知公告</text>
@@ -42,7 +73,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction">
+				<view class="introduction" v-if="storeInfo.type !== '健康服务'">
 					<view class="title">
 						<view>
 							<text class="cuIcon-titles text-blue"></text>
@@ -55,7 +86,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction">
+				<view class="introduction" v-if="storeInfo.type !== '健康服务'">
 					<view class="title">
 						<view>
 							<text class="cuIcon-titles text-blue"></text>
@@ -72,7 +103,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction">
+				<view class="introduction" v-if="storeInfo.type !== '健康服务'">
 					<view class="title"><view class="">专家团队</view></view>
 					<view class="content">
 						<view class="professor-box">
@@ -91,7 +122,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction news">
+				<view class="introduction news" v-if="storeInfo.type !== '健康服务'">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
 						<text class="">医院新闻</text>
@@ -111,18 +142,24 @@
 				</view>
 			</view>
 		</view>
-		<view class="bottom-layer" v-if="onlyCurrentPage === true"><button class="cu-btn bg-black" @click="toStorePage">体验完整小程序</button></view>
+		<view class="bottom-layer" v-if="onlyCurrentPage === true"><button class="cu-btn bg-cyan" @click="toStorePage">体验完整小程序</button></view>
 	</view>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import hospitalData from '../static/data/hospital1.js';
+import goodsList from './goods-list.vue';
 export default {
+	components: {
+		goodsList
+	},
 	data() {
 		return {
+			swiperList: [],
+			goodsListData: [],
 			storeNo: '',
-			fullIntro:false,
+			fullIntro: false,
 			storeInfo: {},
 			staffList: [], //工作人员
 			deptList: [], //科室
@@ -156,7 +193,7 @@ export default {
 			}
 		},
 		introduction() {
-			if (!this.fullIntro&&this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction.length > 80) {
+			if (!this.fullIntro && this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction.length > 80) {
 				return this.storeInfo.introduction.slice(0, 80) + '...';
 			} else {
 				return this.storeInfo.introduction;
@@ -164,8 +201,31 @@ export default {
 		}
 	},
 	methods: {
-		seeMore(){
-			this.fullIntro = true
+		toPages(e) {
+			let url = '';
+			switch (e) {
+				case 1:
+					url =
+						'/otherPages/dietSelect/dietSelect?condType={"type":"food","serviceName":"srvhealth_diet_contents_select","colName":"name","imgCol":"image","wordKey":{"title":"name","unit":"unit","energy":"unit_energy"},"pagetType":"detail"}';
+					break;
+				case 2:
+					url = '/otherPages/symptomSelect/symptomSelect2?term=%7B"serviceName"%3A"srvhealth_self_symptoms_select","srvApp"%3A"health","key"%3A"name","type"%3A"symptom"%7D';
+					break;
+				case 3:
+					url = '/archivesPages/healthCompose/healthCompose';
+					break;
+				case 4:
+					url = '/personalPages/HealthRecord/HealthRecord';
+					break;
+			}
+			if (url) {
+				uni.navigateTo({
+					url: url
+				});
+			}
+		},
+		seeMore() {
+			this.fullIntro = true;
 		},
 		toStorePage() {
 			uni.switchTab({
@@ -208,10 +268,7 @@ export default {
 			});
 		},
 		async toGroup(e) {
-			// let res = await this.selectPersonInGroup(e.gc_no)
 			uni.navigateTo({
-				// url: `/publicPages/chat/chat?no=${this.userInfo.no}&group_no=${e.gc_no}`
-				// url:`/personalPages/myDoctor/doctorChat?no=${this.userInfo.no}&groupInfo=${encodeURIComponent(JSON.stringify(e))}`,
 				url: `/personalPages/gropDetail/gropDetail?gc_no=${e.gc_no}&pb_no=${this.userInfo.no}&type=group-detail&from=store-detail`
 			});
 		},
@@ -247,6 +304,30 @@ export default {
 				}
 			});
 		},
+		getGoodsListData() {
+			let req = {
+				condition: [{ colName: 'store_no', ruleType: 'eq', value: this.storeNo }]
+			};
+			this.$fetch('select', 'srvhealth_store_goods_select', req, 'health').then(res => {
+				if (Array.isArray(res.data)) {
+					this.goodsListData = res.data;
+				}
+			});
+		},
+		async getSwiperList(e) {
+			if (e.image) {
+				let res = await this.getFilePath(e.image);
+				if (Array.isArray(res)) {
+					this.swiperList = res.reduce((pre, cur) => {
+						if (cur.fileurl) {
+							cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+						}
+						pre.push(cur);
+						return pre;
+					}, []);
+				}
+			}
+		},
 		selectStoreInfo() {
 			let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
 			let req = {
@@ -261,9 +342,13 @@ export default {
 				this.$http.post(url, req).then(res => {
 					if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 						this.storeInfo = res.data.data[0];
+						if (this.storeInfo.type === '健康服务') {
+							this.getGoodsListData();
+						}
+						this.getSwiperList(this.storeInfo);
 						uni.setNavigationBarTitle({
-							title:this.storeInfo.name
-						})
+							title: this.storeInfo.name
+						});
 						this.getNotice();
 						resolve(res.data.data[0]);
 					} else {
@@ -392,9 +477,6 @@ export default {
 			if (res === 'fail') {
 				return;
 			}
-			// if (!this.userInfo || !this.userInfo.no) {
-			// 	return;
-			// }
 			if (option.share_type === 'bindOrganization') {
 				// 绑定诊所
 				if (option.store_no && option.invite_user_no) {
@@ -429,32 +511,32 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.page-wrap{
-		&.onlyCurrentPage{
-			height: calc(100vh - var(--window-top) - 50px);
-			background-color:#000;
-			overflow: hidden;
-			.page-content{
-				min-height: calc(100vh - var(--window-top) - 50px);
-				background-color: #f1f1f1;
-				overflow: scroll;
-				border-radius: 0 0 20px 20px ;
-			}
-		}
+.page-wrap {
+	&.onlyCurrentPage {
+		height: calc(100vh - var(--window-top) - 50px);
+		overflow: scroll;
+	}
 }
 .header-wrap {
 	height: 500rpx;
 	background-size: cover;
 	background-position: top center;
 	background-repeat: no-repeat;
-	padding: 300rpx 0rpx 0;
 	.hospital-top {
-		border-radius: 20rpx;
 		background-color: #fff;
 		padding: 30rpx 28rpx;
-		box-shadow: 0 3px 3px rgba(5, 34, 75, 0.18);
 		display: flex;
-		margin: 0 20rpx 20rpx;
+		margin-bottom: 20rpx;
+		.logo {
+			width: 100rpx;
+			height: 100rpx;
+			border-radius: 50%;
+			margin-right: 20rpx;
+			font-size: 30px;
+			font-weight: bold;
+			line-height: 100rpx;
+			text-align: center;
+		}
 		.left {
 			display: flex;
 			flex-direction: column;
@@ -474,6 +556,7 @@ export default {
 				.name {
 					font-size: 32rpx;
 					color: #333;
+					font-weight: bold;
 				}
 				.tags {
 					display: flex;
@@ -489,8 +572,8 @@ export default {
 			}
 			.bottom {
 				padding-top: 10rpx;
+				color: #aaa;
 				.address {
-					color: #bbb;
 					width: 100%;
 					display: flex;
 					.content {
@@ -511,6 +594,33 @@ export default {
 			align-items: center;
 			color: #0ea8ff;
 			// transform: rotate(10deg);
+		}
+	}
+	.menu-list {
+		display: flex;
+		background-color: #fff;
+		margin-bottom: 20rpx;
+		padding: 20rpx 0;
+		.menu-item {
+			width: 25%;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			.icon {
+				width: 100rpx;
+				height: 100rpx;
+				border-radius: 50%;
+				font-size: 30px;
+				text-align: center;
+				line-height: 100rpx;
+				// border: 1px solid #f1f1f1;
+				box-shadow: -1px -1px 15px 1px rgba(5, 34, 75, 0.18);
+			}
+			.title {
+				margin-top: 10rpx;
+				font-size: 14px;
+			}
 		}
 	}
 	.introduction {
@@ -550,9 +660,9 @@ export default {
 			.rich-text {
 				min-height: 100rpx;
 				overflow: scroll;
-				transition: all .2s linear;
-				.see-more{
-					background: linear-gradient(rgba(255,255,255,0.5),#fff);
+				transition: all 0.2s linear;
+				.see-more {
+					background: linear-gradient(rgba(255, 255, 255, 0.5), #fff);
 					color: #888;
 					text-align: center;
 					position: relative;
@@ -655,8 +765,8 @@ export default {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background-color:#000;
-	padding:0 20rpx;
+	padding: 0 20rpx;
 	z-index: 2;
+	background-color: #fff;
 }
 </style>

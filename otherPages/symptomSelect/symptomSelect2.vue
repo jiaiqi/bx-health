@@ -6,129 +6,14 @@
 				<block slot="content">病症选择</block>
 			</cu-custom>
 			<Thetable :list="chooseArr" @delAlltabAllansw="delAlltabAllansw" ref="tabbox" @delHtml="deltab"></Thetable>
-			<!-- <view class="box">
-				<view class="cu-bar search bg-white">
-					<view class="search-form round">
-						<text class="cuIcon-search"></text>
-						<input
-							:adjust-position="false"
-							v-model="searchValue"
-							@keyup.enter="searchStart"
-							@input="searchStart"
-							type="text"
-							:placeholder="'请输入病症搜索'"
-							confirm-type="search"
-						/>
-					</view>
-					<view class="action"><button v-if="isSearch" @click.stop="searchEnd" class="cu-btn bg-orange shadow-blur round">取消</button></view>
-				</view>
-			</view> -->
-			<!-- <view @click="showTreeSelector = true" class="tree-select-box">
-				<text class="tree-select-box-l">症状选择：</text>
-				<text  v-if="chooseArr.length == 0">请选择</text>
-				<text class="tree-select-box-item" v-else>
-					<text v-for="it in chooseArr" :key="it.id">{{it.name}}</text>
-				</text>
-			</view> -->
-			<!-- <view class="symptom-bot-wrap-top">
-				<view class="symptom-bot-wrap-top-l">
-					<scroll-view :scroll-with-animation="true" style="height: 60upx;" scroll-x :scroll-left="scrollMenuLeft">
-						<text
-							@click="changeMenu(item, index)"
-							v-if="item.name !== '导入数据'"
-							:class="activeIndex === index ? 'activeSympt' : ''"
-							v-for="(item, index) in symptomTitList"
-							:key="index"
-						>
-							{{ item.name }}
-						</text>
-					</scroll-view>
-				</view>
-				<view class="symptom-bot-wrap-top-r">
-					<text v-if="!menuIsShow" size="48" @click="showMore('open')" class="cuIcon-sort"></text>
-					<text v-else size="48" @click="showMore('close')" class="cuIcon-close"></text>
-				</view>
-			</view> -->
 		</view>
-
 		<view class="symptom-bot-wrap">
 			<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[0].children.length > 0 && !isSearch">
-				<!-- <view v-if="symptomList[0].is_show && items.is_leaf === '否'" :key="index" v-for="(items, index) in symptomList[0].children" class="wrapCont"> -->
-					<!-- <view v-if="items.is_leaf === '否' && items.children.length > 0" class="wrapCont_row"> -->
-						<!-- <view class="wrapCont-top">{{ items[query.key] }}</view>
-						<view class="wrapCont-main-no">
-							<view
-								v-for="(noillnes, nos) in items.children"
-								:key="nos"
-								v-if="!Array.isArray(noillnes.children) || noillnes.children.length <= 0"
-								class="wrapCont_row_item_wrap-b"
-							>
-								<view @click="chooseItem(noillnes)" :class="noillnes.is_checked ? 'actived' : ''" class="wrapCont_row_item">{{ noillnes.name }}</view>
-							</view>
-						</view> -->
-
-						<!-- <view class="wrapCont-main">
-							<view
-								v-if="Array.isArray(illnes.children) && illnes.children.length > 0"
-								v-for="(illnes, n) in items.children"
-								:key="n"
-								class="wrapCont_row_item_wrap"
-								:class="Array.isArray(illnes.children) && illnes.children.length > 0 ? '' : 'no_wrapCont_row_item_wrap'"
-							> -->
-								<!-- <view class="wrapCont_row_item_wrap-t">
-									<text>{{ illnes.name }}</text>
-								</view> -->
-								<!-- <view v-if="Array.isArray(illnes.children) && illnes.children.length > 0" class="wrapCont_row_item_wrap-b">
-									<view
-										@click="chooseItem(single)"
-										v-for="(single, idx) in illnes.children"
-										:key="idx"
-										:class="single.is_checked ? 'actived' : ''"
-										class="wrapCont_row_item"
-									>
-										{{ single.name }}
-									</view>
-								</view> -->
-							<!-- </view>
-						</view> -->
-					<!-- </view>
-				</view> -->
-				<cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="srvInfo"></cascader-selector>
+				<cascader-selector @clickTag="clickTag" hideButton :srvInfo="srvInfo"></cascader-selector>
 			</view>
-			<!-- <view v-else class="wrapCont">
-				<view class="box" v-show="serseData.length > 0">
-					<view @click="chooseItem(item)" v-for="(item, index) in serseData" :key="index" class="wrapCont_row_item" :class="item.is_checked ? 'actived' : ''">
-						{{ item[query.key] }}
-					</view>
-				</view>
-				<view class="box normalstyle" v-show="serseData.length == 0">没有找到相关内容</view>
-			</view> -->
 			<view class="boxbtn"><view class="btns" @click="lookobj">完成</view></view>
 		</view>
-		<view class="symptom_from">
-			<!-- <u-popup v-model="show" width="85%" border-radius="14" mode="center">
-				<view class="select">请完善</view>
-				<view class="contentpop">
-					<view class="contentpop_title">发烧症状</view>
-					<scroll-view scroll-y="true" style="height: 540rpx;">
-						<view class="contentpop_cen_bot">
-							<view class="sym-check"><sym-from @checkedItemChange="checkedItemChange" :fromTypeData="fromTypeData"></sym-from></view>
-						</view>
-					</scroll-view>
-				</view>
-				<view class="contYes">
-					<view class="btn concel" @tap="confirm">提交</view>
-					<view class="btn" @tap="cancel">取消</view>
-				</view>
-			</u-popup> -->
-		</view>
-
-		<view class="cu-modal bottom-modal" :class="{ show: showTreeSelector }">
-			<view class="cu-dialog">
-				<view class="tree-selector"><cascader-selector @getCascaderValue="getCascaderValue" :srvInfo="srvInfo"></cascader-selector></view>
-			</view>
-		</view>
-
+		<view class="symptom_from"></view>
 		<view class="cu-modal bottom-modal" :class="{ show: menuIsShow }">
 			<view class="cu-dialog">
 				<view class="action pregnant-main-top-item-poup-top" @tap="menuIsShow = false"><text class="cuIcon-close text-red"></text></view>
@@ -184,9 +69,8 @@ export default {
 				isTree: true,
 				serviceName: 'srvhealth_self_symptoms_select',
 				appNo: 'health',
-				key_disp_col:'name'
+				key_disp_col: 'name'
 			},
-			showTreeSelector: false,
 			checkedData: [],
 			current_item: '',
 			menuIsShow: false,
@@ -195,22 +79,15 @@ export default {
 			fromTypeData: '' //表单类型和数据
 		};
 	},
-	created() {},
 	mounted(e) {
-		// uni.$on('chooseSymptom',(e)=>{
-		// 	this.chooseArr = e
-		// 	console.log("e------",e)
-		// })
 		if (this.query.type === 'symptom') {
 			this.getSymptomTitList();
-			// this.getSymptomList();
 			uni.setStorageSync('is_chunk', this.isChunk);
 		}
 	},
 	watch: {
 		chooseArr: {
 			handler(newval, oldval) {
-				console.log('------watch=========-----');
 				let flattArr = this.flag(this.symptomList);
 				if (newval.length > 0) {
 					newval.forEach(item => {
@@ -242,9 +119,21 @@ export default {
 		}
 	},
 	methods: {
+		clickTag(e) {
+			let self = this;
+			if (e.node_type && e.node_type !== '分类' && this.chooseArr.findIndex(item => item.no === e.no) === -1) {
+				uni.showModal({
+					title: e.name,
+					content: '确认添加此症状?',
+					success(res) {
+						if (res.confirm) {
+							self.getCascaderValue(e);
+						}
+					}
+				});
+			}
+		},
 		getCascaderValue(e) {
-			console.log('e------', e);
-			this.showTreeSelector = false;
 			e.is_checked = true;
 			let chooseArr = this.chooseArr;
 			if (chooseArr.length == 0) {
@@ -438,7 +327,6 @@ export default {
 				colNames: ['*'],
 				relation_condition: {},
 				order: []
-				// page:{pageNo: 1, rownumber: 500}
 			};
 			let chooseData = uni.getStorageSync('symptomList');
 			let res = await this.$http.post(url, req);
@@ -456,41 +344,9 @@ export default {
 					});
 					let parentNode = this.assemblyData(res.data.data);
 					this.symptomList = parentNode;
-
-					// parentNode.forEach(parent => {
-					// 	parent.children = [];
-
-					// 	if (Array.isArray(parent.children) && parent.children.length > 0) {
-					// 		parent.children.forEach(child => {
-					// 			child.children = [];
-					// 			res.data.data.forEach(item => {
-					// 				if (item.parent_no === child.no) {
-					// 					if (Array.isArray(symptomList)) {
-					// 						symptomList.forEach(sym => {
-					// 							if (sym.name === item.name) {
-					// 								item.checked = true;
-					// 							}
-					// 						});
-					// 					}
-					// 					child.children.push(item);
-					// 				}
-					// 			});
-					// 		});
-					// 	}
-					// });
 				}
 			}
 		},
-		// flatteningArr(arr,key){
-		// 	arr.forEach((item,index)=>{
-		// 		if(item[key] && item[key].length > 0){
-		// 			arr = [...arr,...item[key]]
-		// 			delete item[key]
-		// 			this.flatteningArr(arr,key)
-		// 		}
-		// 	})
-		// 	return arr
-		// },
 		/**
 		 * 扁平化数组
 		 * */
@@ -651,11 +507,6 @@ export default {
 				});
 				this.show = false;
 			} else {
-				// uni.showToast({
-				// 	title:'请完善信息',
-				// 	duration: 2000,
-				// 	icon:'none'
-				// })
 				data.forEach(must => {
 					if (must.required && !must.value) {
 						must.isfail = true;
@@ -685,6 +536,7 @@ export default {
 		/deep/ .u-tab-item {
 			padding: 0 20upx;
 		}
+		background-color: #fff;
 		.symptom-bot-wrap-main {
 			// height: calc(100vh - 240rpx);
 		}

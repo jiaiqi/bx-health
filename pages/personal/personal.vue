@@ -824,6 +824,7 @@ export default {
 	background-color: white;
 	position: relative;
 	padding-top: 30px;
+	margin-bottom: 50px;
 	.container-cen-top {
 		z-index: 5;
 		width: calc(100% - 40rpx);

@@ -165,7 +165,7 @@
 								</view>
 								<view class="bottom">
 									<view class="more"><bx-icon name="more" :size="26" color="rgb(203,203,203)"></bx-icon></view>
-									<button class="cu-btn line-cyan round sm">再次购买</button>
+									<!-- <button class="cu-btn line-cyan round sm">再次购买</button> -->
 								</view>
 							</view>
 							<uni-load-more :status="loadStatus[2]"></uni-load-more>

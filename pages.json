@@ -269,7 +269,16 @@
 						"enablePullDownRefresh": false
 					}
 				}
-			]
+			    ,{
+                    "path" : "HealthRecord/HealthRecord",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "otherPages",
@@ -362,7 +371,8 @@
 			"pages": [{
 					"path": "hospitalOverview/hospitalOverview",
 					"style": {
-						"navigationBarBackgroundColor": "#0094ff",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle":"black",
 						"navigationBarTitleText": "简介"
 					}
 				}, {
@@ -435,7 +445,20 @@
 						"enablePullDownRefresh": false
 					}
 				}
-			]
+			    ,{
+                    "path" : "GoodsDetail/GoodsDetail",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
+		},
+		{
+			"root": "storePages",
+			"pages": []
 		},
 		{
 			"root": "publicPages",

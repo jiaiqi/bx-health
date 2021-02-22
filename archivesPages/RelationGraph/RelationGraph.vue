@@ -44,14 +44,20 @@
 				</view>
 			</view>
 			<view class="link-box">
-				<view class="title text-bold margin-tb-sm">相关链接：</view>
+				<!-- <view class="title text-bold margin-tb-sm" v-if="nodesLinkList['questionnaire'].length > 0">相关评测：</view> -->
+				<view class="node-link quest ">
+					<view class="link-item-box" v-for="item in nodesLinkList['questionnaire']" @click="toLink(item)">
+						<image class="image" src="../../static/img/diaoyan.png" mode=""></image>
+						<view class="title">{{ item.link_name }}</view>
+					</view>
+				</view>
+				<view class="title text-bold margin-tb-sm" v-if="isArray(nodesLinkList['inPage']) && nodesLinkList['inPage'].length > 0">相关链接：</view>
 				<view class="node-link">
 					<!-- <view class="link-title">内部页面</view> -->
 					<view class="link-item-box" v-for="item in nodesLinkList['inPage']" @click="toLink(item)">
 						<view class="title">{{ item.link_name }}</view>
 						<view class="origin">
 							来源：百想健康
-							<!-- {{ item.external_link_src }} -->
 						</view>
 					</view>
 				</view>
@@ -125,7 +131,8 @@ export default {
 			nodesLinkList: {
 				outPage: [],
 				inPage: [],
-				outVideo: []
+				outVideo: [],
+				questionnaire: []
 			} //节点链接列表
 		};
 	},
@@ -160,6 +167,9 @@ export default {
 					break;
 				case '内部页面':
 					url = item.page_link_url;
+					break;
+				case '评测':
+					url = `/questionnaire/index/index?formType=form&activity_no=${item.questionnaire_no}&status=进行中`;
 					break;
 			}
 			if (url) {
@@ -430,6 +440,9 @@ export default {
 								break;
 							case '外部视频':
 								key = 'outVideo';
+								break;
+							case '评测':
+								key = 'questionnaire';
 								break;
 						}
 					}
@@ -747,6 +760,26 @@ export default {
 				width: 100%;
 				display: flex;
 				flex-direction: column;
+				&.quest{
+					flex-direction: row;
+					.link-item-box{
+						width: 33%;
+						display: flex;
+						justify-content: center;
+						align-items: center;
+						border-radius: 50%;
+						width: 220rpx;
+						height: 220rpx;
+						.image{
+							width: 80rpx;
+							height: 80rpx;
+							margin-bottom: 20rpx;
+						}
+						.title{
+							font-size: 12px;
+						}
+					}
+				}
 				.link-title {
 					font-weight: bold;
 					width: 100%;
