@@ -1,12 +1,27 @@
 <template>
-	<view class="store-wrap" v-if="isLogin"><shop-store ref="store"></shop-store></view>
+	<view class="store-wrap" v-if="!authBoxDisplay"><shop-store ref="store"></shop-store></view>
+	<bx-auth v-else-if="authBoxDisplay" @getuserinfo="getuserinfo"></bx-auth>
 </template>
 
 <script>
 //引入测试数据
 import shopStore from '@/components/shopStore/shopStore.vue';
+import { mapGetters } from 'vuex';
 export default {
 	components: { shopStore },
+	computed: {
+		...mapGetters({
+			authSetting: 'authSetting',
+			is_login: 'isLogin',
+			wxUserInfo: 'wxUserInfo',
+			login_user_info: 'loginUserInfo',
+			client_env: 'env',
+			authBoxDisplay: 'authBoxDisplay'
+		})
+	},
+	onLoad(option) {
+		this.checkOptionParams(option);
+	},
 	data() {
 		return {
 			isLogin: false, //是否已经登录
@@ -69,6 +84,26 @@ export default {
 		}
 	},
 	methods: {
+		async getuserinfo(e) {
+			// #ifdef MP-WEIXIN
+			const user = e.mp.detail;
+			if (user && user.userInfo) {
+				let rawData = {
+					nickname: user.userInfo.nickName,
+					sex: user.userInfo.gender,
+					country: user.userInfo.country,
+					province: user.userInfo.province,
+					city: user.userInfo.city,
+					headimgurl: user.userInfo.avatarUrl
+				};
+				this.setWxUserInfo(rawData);
+				this.$store.commit('SET_WX_USERINFO', rawData);
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				this.$store.commit('SET_AUTH_USERINFO', true);
+				this.toAddPage();
+			}
+			// #endif
+		},
 		onRefresh() {
 			this.pageInfo.pageNo = 1;
 			this.$nextTick(() => {
@@ -155,6 +190,32 @@ export default {
 				});
 			}
 		},
+		async getuserinfo(e) {
+			// #ifdef MP-WEIXIN
+			const user = e.mp.detail;
+			if (user && user.userInfo) {
+				let rawData = {
+					nickname: user.userInfo.nickName,
+					sex: user.userInfo.gender,
+					country: user.userInfo.country,
+					province: user.userInfo.province,
+					city: user.userInfo.city,
+					headimgurl: user.userInfo.avatarUrl
+				};
+				this.setWxUserInfo(rawData);
+				this.$store.commit('SET_WX_USERINFO', rawData);
+				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
+				this.$store.commit('SET_AUTH_USERINFO', true);
+				const result = await wx.login();
+				if (result.code) {
+					this.wxLogin({
+						code: result.code
+					});
+					this.initPage();
+				}
+			}
+			// #endif
+		},
 		goSearch() {
 			if (this.current_tit.type === 'shop') {
 				this.getShopList('search', this.searchVal);
@@ -172,7 +233,7 @@ export default {
 		},
 		/*跳转至商铺详情*/
 		toShopDetail(item) {
-			debugger
+			debugger;
 			uni.navigateTo({
 				url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.restaurant_no
 			});

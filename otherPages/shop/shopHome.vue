@@ -8,7 +8,7 @@
 			<view class="container storeInfo hx-shadow">
 				<image class="storeAvatar hx-shadow" src="@/otherPages/static/img/3.png" mode=""></image>
 				<view v-if="restAurn" class="hx-txt-18 hx-color-black hx-txt-weigth hx-mb-15 ">{{ restAurn.name }}</view>
-				<view class="hx-txt-14 hx-color-black ">店家说明,本店放心吃，地方名才</view>
+				<view class="hx-txt-14 hx-color-black ">店家说明,本店放心吃，地方名菜</view>
 				<!-- <view class="">
 					后续再扩展优惠券，满减，折扣，活动等功能
 				</view> -->
@@ -30,10 +30,10 @@
 			</view>
 			<view v-if="shopList.length > 0" :class="changeType === 'doubleRow' ? 'doubleRow' : ''" class="shop-main-list">
 				<view class="shop-main-list-wrap">
-					<view @click="toDetail(item)" v-for="(item, index) in shopList" class="shop-main-list-item">
+					<view @click="toDetail(item)" v-for="(item, index) in shopList" :key="item.id" class="shop-main-list-item">
 						<view class="item-left">
-							<image v-if="!item.imgurl" src="/otherPages/static/img/none.png" mode=""></image>
-							<image v-else :src="item.imgurl" mode=""></image>
+							<image v-if="!item.imgurl" style="height: 180px;" src="/otherPages/static/img/none.png" mode=""></image>
+							<image v-else :src="item.imgurl" mode="aspectFill" :style="{ height: item.imgHeight + 'px' }"></image>
 						</view>
 						<view class="item-right">
 							<view class="item-right-top">
@@ -83,12 +83,13 @@ export default {
 	components: { uniRate },
 	computed: {
 		...mapState({
-			cartInfo: state => state.order.cartInfo
+			cartInfo: state => state.order.cartInfo,
+			userInfo: state => state.user.userInfo
 		})
 	},
 	data() {
 		return {
-			storeInfo:{},
+			storeInfo: {},
 			isShowFinish: false,
 			restAurn: null,
 			fixation: false, //顶部是否固定
@@ -102,7 +103,7 @@ export default {
 			],
 			pageInfo: {
 				total: 0,
-				rownumber: 5,
+				rownumber: 6,
 				pageNo: 1
 			},
 			labelList: [
@@ -142,19 +143,22 @@ export default {
 		} else {
 			this.fixation = false;
 		}
-		// console.log("滚动",e)
 	},
 	onLoad(option) {
+		this.checkOptionParams(option);
+		this.toAddPage();
 		let query = option.type;
-		console.log('query----', query);
 		this.queryType = query;
-		this.rest_no = option.restaurantNo;
+		if (option.store_no) {
+			this.rest_no = option.restaurantNo;
+		} else if (option.restaurantNo) {
+			this.rest_no = option.restaurantNo;
+		}
 		this.getStoreInfo();
 	},
 	methods: {
 		onRefresh() {
 			this.pageInfo.pageNo = 1;
-			// this.getListData();
 			this.$nextTick(() => {
 				this.$refs.pullScroll.refresh();
 			});
@@ -210,13 +214,44 @@ export default {
 			};
 			let storeInfo = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health');
 			if (storeInfo.success && Array.isArray(storeInfo.data) && storeInfo.data.length > 0) {
-				storeInfo =  storeInfo.data[0];
+				storeInfo = storeInfo.data[0];
 				this.storeInfo = storeInfo;
 				if (!this.cartInfo[storeInfo.store_no]) {
 					// vuex中没有此店铺购物车数据
 					this.$store.commit('SET_STORE_CART', { storeInfo, list: [] });
 				}
 			}
+		},
+		sortData(resData) {
+			let self = this;
+			if (Array.isArray(self.order) && self.order.length > 0) {
+				let order = self.order[0].colName;
+				resData = resData.sort((a, b) => {
+					if (!a[order]) {
+						a[order] = 0;
+					}
+					if (!b[order]) {
+						b[order] = 0;
+					}
+					a[order] = Number(a[order]);
+					b[order] = Number(b[order]);
+					return b[order] - a[order];
+				});
+			}
+			resData = this.deepClone(resData);
+			let data1 = resData.reduce((pre, cur, cIdx, arr) => {
+				if (cIdx % 2 === 0) {
+					pre.push(cur);
+				}
+				return pre;
+			}, []);
+			let data2 = resData.reduce((pre, cur, cIdx, arr) => {
+				if (cIdx % 2 !== 0) {
+					pre.push(cur);
+				}
+				return pre;
+			}, []);
+			return data1.concat(data2);
 		},
 		async getFoodsList(orders) {
 			let self = this;
@@ -241,10 +276,6 @@ export default {
 				order: this.order
 			};
 			if (!this.isShowFinish) {
-				// uni.showToast({
-				// 	title:'加载中',
-				// 	icon:'none'
-				// })
 				uni.showLoading({
 					title: '加载中',
 					duration: 2000
@@ -259,24 +290,62 @@ export default {
 			self.pageInfo.pageNo = res.data.page.pageNo;
 			let page = self.pageInfo;
 			if (page.rownumber * page.pageNo >= page.total) {
-				// finish(boolean:是否显示finishText,默认显示)
-				// self.$refs.pullScroll.finish();
 				this.isShowFinish = true;
 			} else {
 				this.isShowFinish = false;
-				// self.$refs.pullScroll.success();
 			}
 			if (res.data.state === 'SUCCESS') {
-				// this.shopList = res.data.data
-				this.shopList = [...this.shopList, ...res.data.data];
+				let resData = [...this.deepClone(this.shopList), ...this.deepClone(res.data.data)];
+				this.shopList = this.sortData(resData);
+				// if (Array.isArray(self.order) && self.order.length > 0) {
+				// 	let order = self.order[0].colName;
+				// 	resData = resData.sort((a, b) => {
+				// 		if (!a[order]) {
+				// 			a[order] = 0;
+				// 		}
+				// 		if (!b[order]) {
+				// 			b[order] = 0;
+				// 		}
+				// 		a[order] = Number(a[order]);
+				// 		b[order] = Number(b[order]);
+				// 		return b[order] - a[order];
+				// 	});
+				// }
+				// resData = this.deepClone(resData)
+				// let data1 = resData.reduce((pre, cur, cIdx, arr) => {
+				// 	if (cIdx % 2 === 0) {
+				// 		pre.push(cur);
+				// 	}
+				// 	return pre;
+				// }, []);
+				// let data2 = resData.reduce((pre, cur, cIdx, arr) => {
+				// 	if (cIdx % 2 !== 0) {
+				// 		pre.push(cur);
+				// 	}
+				// 	return pre;
+				// }, []);
+				// this.shopList = [...data1, ...data2];
+				// this.shopList = [...this.shopList, ...data];
 				this.shopList.forEach((item, index) => {
 					if (item.image) {
 						self.getFilePath(item.image).then(url => {
 							let urls = self.$api.getFilePath + url[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
-							this.$set(this.shopList[index], 'imgurl', urls);
+							self.$set(self.shopList[index], 'imgurl', urls);
+							if (!url) {
+								url = '/otherPages/static/img/none.png';
+							}
+							self.getImageInfo({ url: urls }).then(picInfo => {
+								if (picInfo.w && picInfo.h) {
+									let res = self.setPicHeight(picInfo, 360);
+									if (res.h) {
+										self.$set(self.shopList[index], 'imgHeight', res.h);
+									}
+								}
+							});
 						});
 					}
 				});
+
 				console.log('food------', this.shopList);
 			}
 		},
@@ -373,6 +442,19 @@ export default {
 				url: `/publicPages/newForm/newForm?type=update&serviceName=srvhealth_mixed_food_nutrition_contents_update&fieldsCond=${encodeURIComponent(JSON.stringify(cond))}`
 			});
 		}
+	},
+	onShareAppMessage() {
+		let path = `/otherPages/shop/shopHome?type=find&store_no=${this.storeInfo.store_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
+			this.userInfo.no
+		}&share_type=bindOrganization`;
+		let title = `${this.userInfo.name}邀请您加入【${this.storeInfo.name}】`;
+		let imageUrl = this.getImagePath(this.storeInfo.image);
+		this.saveSharerInfo(this.userInfo, path);
+		return {
+			imageUrl: imageUrl,
+			title: title,
+			path: path
+		};
 	}
 };
 </script>
@@ -452,12 +534,14 @@ export default {
 			justify-content: center;
 			flex-direction: column;
 			.shop-main-list-item {
+				// break-inside: avoid;
 				display: flex;
-				padding: 5px 0 5px 15px;
 				border-bottom: 1px solid #efefef;
+				width: calc(100% - 20rpx);
+				padding-right: 20rpx;
 				.item-left {
-					width: 95px;
-					height: 95px;
+					width: 100%;
+					// height: 95px;
 					image {
 						width: 100%;
 						height: 100%;
@@ -540,36 +624,38 @@ export default {
 	}
 
 	.doubleRow {
-		display: flex;
-		flex-wrap: wrap;
-
 		.shop-main-list-wrap {
-			width: 100%;
-			display: flex;
-			flex-direction: row !important;
-			flex-wrap: wrap;
-			justify-content: start;
+			display: block;
+			column-count: 2;
+			column-gap: 10px;
+			padding: 10rpx;
+			// display: flex;
 			.shop-main-list-item {
-				width: 45%;
-				display: flex;
+				border-radius: 5px;
+				overflow: hidden;
+				width: 100%;
+				// width: calc(50% - 20rpx);
+				margin-right: 10rpx;
+				display: inline-flex;
 				flex-direction: column;
 				border-bottom: none;
-				padding-left: 0;
-				margin-left: 24upx;
-				&:nth-child(2n + 1) {
-					// margin-left: 40upx;
-				}
+				// margin: 0;
+				margin: 0 auto;
+				padding: 0;
+				margin-bottom: 10px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 				.item-left {
 					width: 100%;
 				}
 				.item-right {
-					width: 100%;
+					width: calc(100% - 20rpx);
 					margin-left: 0;
+					padding: 0 10rpx;
 					.item-right-top {
 						width: 100%;
+						text-align: left;
 						text {
 							&:first-child {
-								text-align: center;
 								padding: 10upx 0;
 							}
 						}

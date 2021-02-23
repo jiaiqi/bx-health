@@ -44,7 +44,6 @@
 				</view>
 			</view>
 			<view class="link-box">
-				<!-- <view class="title text-bold margin-tb-sm" v-if="nodesLinkList['questionnaire'].length > 0">相关评测：</view> -->
 				<view class="node-link quest ">
 					<view class="link-item-box" v-for="item in nodesLinkList['questionnaire']" @click="toLink(item)">
 						<image class="image" src="../../static/img/diaoyan.png" mode=""></image>

@@ -141,7 +141,16 @@ export default {
 				});
 			}
 		},
-		skip(item) {
+		async skip(item) {
+			let res = await this.toAddPage();
+			if (!res) {
+				return;
+			}
+			// this.toAddPage().then(res => {
+			// 	if (res) {
+			// 		this.getPageItem();
+			// 	}
+			// });
 			let dest_page = '';
 			let self = this;
 			if (item.dest_page && item.dest_page.indexOf('/pages/specific/health') !== -1) {
@@ -293,11 +302,12 @@ export default {
 		}
 	},
 	created() {
-		this.toAddPage().then(res => {
-			if (res) {
-				this.getPageItem();
-			}
-		});
+		this.getPageItem();
+		// this.toAddPage().then(res => {
+		// 	if (res) {
+		// 		this.getPageItem();
+		// 	}
+		// });
 	},
 	onShareAppMessage() {
 		let path = '';

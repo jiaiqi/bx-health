@@ -179,6 +179,7 @@ export default {
 							user_image: this.userInfo.user_image,
 							sex: this.userInfo.sex,
 							user_role: this.userInfo.user_role,
+							order_amount: this.totalMoney,
 							order_remark: '订单备注',
 							pay_state: '待支付',
 							order_state: '待支付',
@@ -189,14 +190,22 @@ export default {
 									depend_keys: [{ type: 'column', add_col: 'order_no', depend_key: 'order_no' }],
 									data: this.orderInfo.goodsList.map(item => {
 										let obj = {
-											food_no: item.meal_no,
+											food_no: item.meal_no?item.meal_no:item.goods_no,
 											goods_amount: item.car_num,
 											goods_desc: item.name,
-											goods_image: item.image,
 											store_no: this.orderInfo.store_no,
 											sum_price: item.car_num * item.unit_price,
 											unit_price: Number(item.price)
 										};
+										if (item.image) {
+											obj.goods_image = item.image;
+										}
+										if (item.goods_image) {
+											obj.goods_image = item.goods_image;
+										}
+										if (item.goods_img) {
+											obj.goods_image = item.goods_img;
+										}
 										return obj;
 									})
 								}
@@ -268,20 +277,24 @@ export default {
 			if (this.cartInfo[option.store_no]) {
 				this.orderInfo = this.cartInfo[option.store_no].storeInfo;
 				option.goods_info = JSON.parse(decodeURIComponent(option.goods_info));
-				if(!option.goods_info.car_num){
-					option.goods_info.car_num = 1
+				if (!option.goods_info.car_num) {
+					option.goods_info.car_num = 1;
 				}
 				this.orderInfo.goodsList = [option.goods_info];
+				if (!this.orderInfo.order_state && !this.orderInfo.pay_state) {
+					this.orderInfo.order_state = '待提交';
+					this.orderInfo.pay_state = '待支付';
+				}
 			}
 		} else if (option.store_no) {
 			// 从购物车进入 还未生成订单
 			if (this.cartInfo[option.store_no] && Array.isArray(this.cartInfo[option.store_no].cart)) {
 				this.orderInfo = this.cartInfo[option.store_no].storeInfo;
-				this.orderInfo.goodsList = this.cartInfo[option.store_no].cart.map(item=>{
-					if(!item.car_num){
-						item.car_num = 1
+				this.orderInfo.goodsList = this.cartInfo[option.store_no].cart.map(item => {
+					if (!item.car_num) {
+						item.car_num = 1;
 					}
-					return item
+					return item;
 				});
 				this.orderInfo.order_state = '待提交';
 				this.orderInfo.pay_state = '待支付';

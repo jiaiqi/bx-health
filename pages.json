@@ -268,17 +268,15 @@
 						"navigationBarTitleText": "店铺管理",
 						"enablePullDownRefresh": false
 					}
+				}, {
+					"path": "HealthRecord/HealthRecord",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+
 				}
-			    ,{
-                    "path" : "HealthRecord/HealthRecord",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "otherPages",
@@ -372,7 +370,7 @@
 					"path": "hospitalOverview/hospitalOverview",
 					"style": {
 						"navigationBarBackgroundColor": "#fff",
-						"navigationBarTextStyle":"black",
+						"navigationBarTextStyle": "black",
 						"navigationBarTitleText": "简介"
 					}
 				}, {
@@ -444,21 +442,35 @@
 						"navigationBarBackgroundColor": "#409eff",
 						"enablePullDownRefresh": false
 					}
+				}, {
+					"path": "GoodsDetail/GoodsDetail",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "personal/personal",
+					"style": {
+						"navigationBarTitleText": "我的",
+						"enablePullDownRefresh": false
+					}
+
 				}
-			    ,{
-                    "path" : "GoodsDetail/GoodsDetail",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "storePages",
-			"pages": []
+			"pages": [{
+				"path": "StoreIntroduce/StoreIntroduce",
+				"style": {
+					"navigationBarTitleText": "详情",
+					"navigationBarBackgroundColor": "#fff",
+					"navigationBarTextStyle": "black",
+					"enablePullDownRefresh": false
+				}
+
+			}]
 		},
 		{
 			"root": "publicPages",

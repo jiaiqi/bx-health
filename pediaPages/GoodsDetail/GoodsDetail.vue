@@ -30,7 +30,7 @@
 			</view>
 		</view>
 		<view class="cu-bar foot bottom bg-white tabbar border shop">
-			<view class="price text-red margin-left">
+			<view class="price text-red margin-left margin-right">
 				<text class="symbol">￥</text>
 				<text class="number" v-if="fill2Digit(goodsInfo.price)">
 					<text class="int">{{ fill2Digit(goodsInfo.price)[0] }}.</text>
@@ -43,6 +43,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
 	data() {
 		return {
@@ -51,8 +52,21 @@ export default {
 			goodsDetailImage: []
 		};
 	},
-	filters: {},
+	computed: {
+		...mapState({
+			cartInfo: state => state.order.cartInfo
+		})
+	},
 	methods: {
+		payOrder() {
+			if (!this.goodsInfo.goods_image && this.goodsInfo.goods_img) {
+				this.goodsInfo.goods_image = this.goodsInfo.goods_img;
+			}
+			this.$store.commit('SET_STORE_CART', { storeInfo: this.goodsInfo, store_no: this.goodsInfo.store_no, list: [this.goodsInfo] });
+			uni.navigateTo({
+				url: '/personalPages/payOrder/payOrder?store_no=' + this.goodsInfo.store_no + '&goods_info=' + encodeURIComponent(JSON.stringify(this.goodsInfo))
+			});
+		},
 		async getSwiperList(e) {
 			if (e.goods_img) {
 				let res = await this.getFilePath(e.goods_img);
@@ -101,8 +115,8 @@ export default {
 		},
 		setPicHeight(content) {
 			let maxW = uni.upx2px(750);
-			content.h = (maxW * content.h) / 	content.w ;
-			content.w = maxW;			
+			content.h = (maxW * content.h) / content.w;
+			content.w = maxW;
 			return content;
 		},
 		getGoodsInfo(no) {
@@ -194,9 +208,11 @@ export default {
 }
 .right-btn {
 	display: flex;
-	justify-content: flex-end;
+	justify-content: center;
 	flex: 1;
-	padding-right: 20rpx;
+	align-items: center;
+	background-color: #1cbbb4;
+	height: 100%;
 }
 .price {
 	.symbol {

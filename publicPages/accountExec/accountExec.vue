@@ -65,7 +65,7 @@
 						<text class="text-cyan" @click="toArticle('CT2021012816470103')">隐私政策</text>
 					</view>
 					<view class="button-box">
-						<button type="primary" class="cu-btn bg-cyan" lang="zh_CN" open-type="getUserInfo" @getuserinfo="saveWxUser" :withCredentials="false">同意</button>
+						<button type="primary" class="cu-btn bg-cyan" lang="zh_CN" open-type="getUserInfo" @getuserinfo="saveWxUser" :withCredentials="false">同意(授权微信用户信息)</button>
 						<!-- <button class="cu-btn bg-white text-grey" @click="disagree">不同意</button> -->
 						<navigator class="cu-btn bg-grey" open-type="exit" target="miniProgram" @click="disagree">不同意(退出小程序)</navigator>
 					</view>

@@ -19,12 +19,12 @@
 				<view class="hospital-top">
 					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
 					<view class="logo" v-else>{{ storeInfo.name.slice(0, 1) }}</view>
-					<view class="left" @click="getCurrentLocation">
+					<view class="left" @click="toPages('instroduce')">
 						<view class="top">
 							<view class="name">{{ storeInfo.name }}</view>
 						</view>
 						<view class="bottom" v-if="introduction && introduction.length < 25">{{ introduction }}</view>
-						<view class="bottom" v-if="storeInfo.address">
+						<view class="bottom" v-if="storeInfo.address" @click="getCurrentLocation">
 							<view class="address">
 								<text class="content">{{ storeInfo.address }}</text>
 								<text class="cuIcon-locationfill text-blue margin-left-xs"></text>
@@ -142,7 +142,17 @@
 				</view>
 			</view>
 		</view>
-		<view class="bottom-layer" v-if="onlyCurrentPage === true"><button class="cu-btn bg-cyan" @click="toStorePage">体验完整小程序</button></view>
+		<view class="bottom-layer" v-if="onlyCurrentPage === true">
+			<!-- <button class="cu-btn bg-cyan" @click="toStorePage">体验完整小程序</button> -->
+			<view class="bottom-button" @click="toStorePage">
+				<text class="cuIcon-home icon"></text>
+				<view class="label">主页</view>
+			</view>
+			<view class="bottom-button" @click="toPages('personal')">
+				<text class="cuIcon-people icon"></text>
+				<view class="label">我的</view>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -216,6 +226,12 @@ export default {
 					break;
 				case 4:
 					url = '/personalPages/HealthRecord/HealthRecord';
+					break;
+				case 'personal':
+					url = '/pediaPages/personal/personal?type=shop';
+					break;
+				case 'instroduce':
+					url = '/storePages/StoreIntroduce/StoreIntroduce?store_no=' + this.storeNo;
 					break;
 			}
 			if (url) {
@@ -768,5 +784,18 @@ export default {
 	padding: 0 20rpx;
 	z-index: 2;
 	background-color: #fff;
+	.bottom-button {
+		flex: 1;
+		text-align: center;
+		& + .bottom-button {
+			border-left: 1px solid #f1f1f1;
+		}
+		&:active {
+			background-color: #f1f1f1;
+		}
+		.icon {
+			font-size: 25px;
+		}
+	}
 }
 </style>

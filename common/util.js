@@ -742,10 +742,10 @@ export default {
 							let currentPage = pageStack[pageStack.length - 1]
 							store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
 						}
-						debugger
-						uni.reLaunch({
-							url: '/publicPages/accountExec/accountExec'
-						})
+						// debugger
+						// uni.reLaunch({
+						// 	url: '/publicPages/accountExec/accountExec'
+						// })
 					}
 					return false;
 				}
@@ -1499,12 +1499,21 @@ export default {
 				if (store.state.user.userInfo.add_store_no && !store.state.app.hasIntoHospital) {
 					// 有add_store 未进入过医院主页
 					let pageInfo = Vue.prototype.getShareParams()
-					if (pageInfo.add_url.indexOf('/pediaPages/hospitalOverview/hospital') === -1) {
+					if (pageInfo.add_url.indexOf('/pediaPages/hospitalOverview/hospital') === -1 && store.state.user.userInfo.add_store_no) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store.state.user.userInfo.add_store_no,
 							success() {
 								// 标记 已进入过医院主页
+								store.commit('SET_INTO_HOSPITAL_STATUS', true)
+							}
+						})
+					} else if (pageInfo.add_url.indexOf('/otherPages/shop/shopHome') === -1 && store.state.user.userInfo.add_store_no) {
+						// 通过分享医院主页加入的用户
+						uni.redirectTo({
+							url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state.user.userInfo.add_store_no,
+							success() {
+								// 标记 已进入过餐馆主页
 								store.commit('SET_INTO_HOSPITAL_STATUS', true)
 							}
 						})
@@ -1547,7 +1556,7 @@ export default {
 				uni.setStorageSync('current_user', res.data.data[0].name);
 				// #ifdef MP-WEIXIN
 				if (res.data.data[0].add_store_no && !store.state.app.hasIntoHospital) {
-					// 有add_store 此次打开小程序未进入过医院主页
+					// 有add_store 此次打开小程序未进入过医院/餐馆主页
 					let pageInfo = Vue.prototype.getShareParams()
 					if (pageInfo.add_url.indexOf('/pediaPages/hospitalOverview/hospital') === -1) {
 						// 通过分享医院主页加入的用户
@@ -1555,6 +1564,15 @@ export default {
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res.data.data[0].add_store_no,
 							success() {
 								// 标记 已进入过医院主页
+								store.commit('SET_INTO_HOSPITAL_STATUS', true)
+							}
+						})
+					} else if (pageInfo.add_url.indexOf('/otherPages/shop/shopHome') === -1 && store.state.user.userInfo.add_store_no) {
+						// 通过分享医院主页加入的用户
+						uni.redirectTo({
+							url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state.user.userInfo.add_store_no,
+							success() {
+								// 标记 已进入过餐馆主页
 								store.commit('SET_INTO_HOSPITAL_STATUS', true)
 							}
 						})
@@ -1974,7 +1992,16 @@ export default {
 				}
 			}
 		}
-
+		Vue.prototype.setPicHeight = (content, max = 350) => {
+			// 固定宽度，计算等比例下图片的高度
+			let maxW = uni.upx2px(350);
+			if (max) {
+				maxW = uni.upx2px(max)
+			}
+			content.h = (maxW * content.h) / content.w;
+			content.w = maxW;
+			return content;
+		}
 		Vue.prototype.delNotChineseChar = (str) => {
 			// 去掉非中文字符
 			if (str) {

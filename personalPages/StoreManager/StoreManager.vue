@@ -4,7 +4,7 @@
 			<image :src="getImagePath(storeInfo.image)" class="logo" mode="aspectFill"></image>
 			<view class="store-name">
 				<view class="name">{{ storeInfo.name }}</view>
-				<view class="address" @click="openLocation">
+				<view class="address" v-if="storeInfo.address" @click="openLocation">
 					{{ storeInfo.address }}
 					<text class="location cuIcon-locationfill text-blue margin-left-xs"></text>
 				</view>
@@ -131,8 +131,8 @@ export default {
 				case 'order_count':
 					viewTemp = {
 						title: 'order_no',
-						tip: 'order_remark',
-						// img: 'img',
+						tip: 'create_time',
+						img: 'image',
 						price: 'order_amount',
 						footer: 'rcv_addr_str'
 					};
@@ -265,7 +265,6 @@ export default {
 		.name {
 			font-weight: bold;
 			font-size: 16px;
-			width: 80%;
 		}
 		.address {
 			max-width: 400rpx;

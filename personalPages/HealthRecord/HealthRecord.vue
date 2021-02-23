@@ -2,7 +2,7 @@
 	<view>
 		<view class="menu-list">
 			<view class="menu-item" v-for="item in menuList" @click="navPages(item.type)">
-				<image src="../static/links.png" mode="" class="icon"></image>
+				<view class="icon">{{ item.label.slice(0, 1) }}</view>
 				<view class="label">{{ item.label }}</view>
 			</view>
 		</view>
@@ -62,25 +62,49 @@ export default {
 <style scoped lang="scss">
 .menu-list {
 	display: flex;
-	flex-wrap: wrap;
 	background-color: #fff;
+	margin-bottom: 20rpx;
+	padding: 20rpx 0;
+	flex-wrap: wrap;
 	.menu-item {
 		width: 25%;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		padding: 10px;
-		&:active {
-			background-color: #f1f1f1;
-		}
+		margin-bottom: 20rpx;
 		.icon {
 			width: 100rpx;
 			height: 100rpx;
+			border-radius: 50%;
+			font-size: 25px;
+			text-align: center;
+			line-height: 100rpx;
+			// border: 1px solid #f1f1f1;
+			box-shadow: -1px -1px 15px 1px rgba(5, 34, 75, 0.18);
 		}
 		.label {
-			margin-top: 5px;
+			margin-top: 10rpx;
+			font-size: 14px;
 		}
 	}
+	// .menu-item {
+	// 	width: 25%;
+	// 	display: flex;
+	// 	flex-direction: column;
+	// 	justify-content: center;
+	// 	align-items: center;
+	// 	padding: 10px;
+	// 	&:active {
+	// 		background-color: #f1f1f1;
+	// 	}
+	// 	.icon {
+	// 		width: 100rpx;
+	// 		height: 100rpx;
+	// 	}
+	// 	.label {
+	// 		margin-top: 5px;
+	// 	}
+	// }
 }
 </style>
