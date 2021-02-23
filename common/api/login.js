@@ -59,19 +59,16 @@ const getUserInfo = async () => {
 				let currentPage = pageStack[pageStack.length - 1]
 				store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
 			}
-			uni.redirectTo({
-				url: '/publicPages/accountExec/accountExec'
-			})
 		}
 	}
 	return false;
 }
 
 // 小程序验证登陆
-const wxVerifyLogin = async () => {
+const wxVerifyLogin = async (dontCheckAuth=false) => {
 	// #ifdef MP-WEIXIN
-	const userInfo = await getUserInfo()
-	if (!userInfo || !userInfo.response) {
+	const userInfo = await getUserInfo(dontCheckAuth)
+	if ((!userInfo || !userInfo.response)&&!dontCheckAuth) {
 		// 只有有获取微信用户信息权限的才能继续登录
 		return false
 	}
@@ -100,12 +97,12 @@ const wxVerifyLogin = async () => {
 				return await wxOpenLogin(userInfo.response, resData.bx_open_code)
 			}
 			store.commit('SET_TICKET', resData.bx_auth_ticket)
-			if (resData&&resData.login_user_info.user_no) {
+			if (resData && resData.login_user_info.user_no) {
 				uni.setStorageSync('login_user_info', resData.login_user_info);
 				store.commit('SET_LOGIN_USER', resData.login_user_info)
 			}
 			uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
-			if (resData&&resData.login_user_info.data) {
+			if (resData && resData.login_user_info.data) {
 				uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 			}
 			return true

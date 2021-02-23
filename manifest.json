@@ -88,11 +88,11 @@
         }
     },
     "h5" : {
-        "title" : "百想软件",
+        "title" : "百想健康",
         "domain" : "wx2.100xsys.cn",
         "router" : {
             "mode" : "history",
-            "base" : ""
+            "base" : "/health/"
         },
         "devServer" : {
             "disableHostCheck" : true,

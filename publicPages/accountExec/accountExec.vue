@@ -635,8 +635,6 @@ export default {
 					uni.setStorageSync('isLogin', true);
 					that.$store.commit('SET_LOGIN_STATE', true);
 					console.log('that.backUrl', that.backUrl);
-
-					console.log('userLogined', response.data);
 					let backUrl = uni.getStorageSync('backUrl');
 					if (backUrl && backUrl !== '/') {
 						backUrl = that.getDecodeUrl(backUrl);
@@ -651,9 +649,10 @@ export default {
 							uni.redirectTo({
 								url: backUrl,
 								fail() {
-									uni.navigateBack({
+									uni.switchTab({
+										url:'/pages/pedia/pedia',
 										animationType: 'zoom-fade-in'
-									});
+									})
 								}
 							});
 						}

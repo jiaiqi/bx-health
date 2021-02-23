@@ -295,6 +295,14 @@ export default {
 				}
 			}
 		},
+		checkUserInfoParams() {
+			let self = this;
+			self.wxVerifyLogin().then(_ => {
+				self.selectBasicUserList().then(res => {
+					self.selectBasicUserInfo();
+				});
+			});
+		},
 		openOfficialImage() {
 			uni.navigateTo({
 				url: '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent('https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ')
@@ -325,6 +333,8 @@ export default {
 		};
 	},
 	onLoad(option) {
+		this.checkUserInfoParams();
+		// this.toAddPage()
 		this.checkOptionParams(option);
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({

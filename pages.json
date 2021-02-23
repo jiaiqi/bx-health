@@ -600,7 +600,7 @@
 			{
 				"name": "邀请新用户加入诊所",
 				"path": "pediaPages/hospitalOverview/hospitalOverview",
-				"query": "store_no=ST202101191842170001&from=share&invite_user_no=jiaqi&&doctor_no=jiaqi&share_type=bindOrganization"
+				"query": "store_no=S20210204015&from=share&invite_user_no=jiaqi&&doctor_no=jiaqi&share_type=bindOrganization"
 			}
 		]
 	}

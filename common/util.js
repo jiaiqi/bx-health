@@ -1508,16 +1508,17 @@ export default {
 								store.commit('SET_INTO_HOSPITAL_STATUS', true)
 							}
 						})
-					} else if (pageInfo.add_url.indexOf('/otherPages/shop/shopHome') === -1 && store.state.user.userInfo.add_store_no) {
-						// 通过分享医院主页加入的用户
-						uni.redirectTo({
-							url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state.user.userInfo.add_store_no,
-							success() {
-								// 标记 已进入过餐馆主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
 					}
+					//  else if (pageInfo.add_url.indexOf('/otherPages/shop/shopHome') === -1 && store.state.user.userInfo.add_store_no) {
+					// 	// 通过分享医院主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state.user.userInfo.add_store_no,
+					// 		success() {
+					// 			// 标记 已进入过餐馆主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// }
 				}
 				// #endif
 				return store.state.user.userInfo
@@ -1567,16 +1568,17 @@ export default {
 								store.commit('SET_INTO_HOSPITAL_STATUS', true)
 							}
 						})
-					} else if (pageInfo.add_url.indexOf('/otherPages/shop/shopHome') === -1 && store.state.user.userInfo.add_store_no) {
-						// 通过分享医院主页加入的用户
-						uni.redirectTo({
-							url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state.user.userInfo.add_store_no,
-							success() {
-								// 标记 已进入过餐馆主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
 					}
+					//  else if (pageInfo.add_url.indexOf('/otherPages/shop/shopHome') === -1 && store.state.user.userInfo.add_store_no) {
+					// 	// 通过分享医院主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state.user.userInfo.add_store_no,
+					// 		success() {
+					// 			// 标记 已进入过餐馆主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// }
 				}
 				// #endif
 				return true

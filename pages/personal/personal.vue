@@ -38,6 +38,7 @@ export default {
 		}
 	},
 	async created() {
+		// #ifdef MP-WEIXIN
 		let res = await wx.getSetting();
 		if (!res.authSetting['scope.userInfo']) {
 			this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
@@ -47,6 +48,7 @@ export default {
 		} else {
 			// this.updateUserInfo();
 		}
+		// #endif
 	},
 	onLoad(option) {
 		this.checkOptionParams(option);
