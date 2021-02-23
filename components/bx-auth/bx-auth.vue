@@ -12,7 +12,7 @@
 			获取你的公开信息（昵称、头像等）
 		</view> -->
 		<!-- <button type="primary" class="cu-btn bg-green" lang="zh_CN" :open-type="openType" @getuserinfo="getuserinfo">微信授权用户信息</button> -->
-		<button type="primary" class="cu-btn bg-green button" lang="zh_CN" @click="toAuthPage">跳转到授权页面</button>
+		<button type="primary" class="cu-btn bg-green button" lang="zh_CN" @click="toAuthPage">打开授权页面</button>
 	</view>
 </template>
 
