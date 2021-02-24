@@ -146,11 +146,6 @@ export default {
 			if (!res) {
 				return;
 			}
-			// this.toAddPage().then(res => {
-			// 	if (res) {
-			// 		this.getPageItem();
-			// 	}
-			// });
 			let dest_page = '';
 			let self = this;
 			if (item.dest_page && item.dest_page.indexOf('/pages/specific/health') !== -1) {
@@ -278,26 +273,13 @@ export default {
 				};
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS') {
-					// let itemList = res.data.data.map((pageitem, index) => {
-					// 	switch (item.div_type) {
-					// 		case 'carousel':
-					// 			pageitem['picUrl'] = this.getImagePath(pageitem.carousel_image, true);
-					// 			break;
-					// 		case 'buttons':
-					// 			break;
-					// 		case 'tablist':
-					// 			debugger;
-					// 			break;
-					// 	}
-					// 	return pageitem;
-					// });
 					return res.data.data;
 				}
 			}
 		},
 		checkUserInfoParams() {
 			let self = this;
-			self.wxVerifyLogin().then(_ => {
+			self.wxVerifyLogin(true).then(_ => {
 				self.selectBasicUserList().then(res => {
 					self.selectBasicUserInfo();
 				});
@@ -334,7 +316,6 @@ export default {
 	},
 	onLoad(option) {
 		this.checkUserInfoParams();
-		// this.toAddPage()
 		this.checkOptionParams(option);
 		// #ifdef MP-WEIXIN
 		wx.showShareMenu({

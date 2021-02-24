@@ -23,6 +23,10 @@
 </template>
 
 <script>
+/**
+ * @description 树状数据展示/选择组件
+ * @property  {Boolean}  insert = [true,false]  是否为页面内嵌组件，否则为弹出组件
+ */
 import cascaderItem from './cascaderItem.vue';
 export default {
 	name: 'cascader', //层叠选择器内层，ui渲染
@@ -133,6 +137,7 @@ export default {
 			default: 'yellow'
 		},
 		insert:{
+			// 内嵌组件
 			type: Boolean,
 			default: false
 		},

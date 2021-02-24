@@ -30,21 +30,35 @@
 				</view>
 			</view>
 		</view>
+		<view class="cu-modal" :class="{ show: showSymptomDateSelector }">
+			<view class="cu-dialog"><symptom-form @change="symptomFormChange" :currentSymptom="currentSymptom"></symptom-form></view>
+		</view>
 	</view>
 </template>
 
 <script>
-import Thetable from '../components/Thetable/Thetable.vue';
-import symFrom from '../components/bx-sym-from/bx-sym-from.vue';
-import cascaderSelector from '@/components/cascader-selector/cascader-selector.vue';
+import Thetable from '../components/Thetable/Thetable.vue'
+import symFrom from '../components/bx-sym-from/bx-sym-from.vue'
+import cascaderSelector from '@/components/cascader-selector/cascader-selector.vue'
+import symptomForm from './symptom-form.vue'
+import { mapState } from 'vuex'
 export default {
 	components: {
 		Thetable,
 		symFrom,
-		cascaderSelector
+		cascaderSelector,
+		symptomForm
+	},
+	computed: {
+		...mapState({
+			userInfo: state => state.user.userInfo
+		})
 	},
 	data() {
 		return {
+			from: '',
+			showSymptomDateSelector: false,
+			currentSymptom: {},
 			searchValue: '',
 			currentTab: 0,
 			currentMenu: 0,
@@ -77,27 +91,27 @@ export default {
 			activeIndex: 0,
 			currentTopTab: '',
 			fromTypeData: '' //表单类型和数据
-		};
+		}
 	},
 	mounted(e) {
 		if (this.query.type === 'symptom') {
-			this.getSymptomTitList();
-			uni.setStorageSync('is_chunk', this.isChunk);
+			this.getSymptomTitList()
+			uni.setStorageSync('is_chunk', this.isChunk)
 		}
 	},
 	watch: {
 		chooseArr: {
 			handler(newval, oldval) {
-				let flattArr = this.flag(this.symptomList);
+				let flattArr = this.flag(this.symptomList)
 				if (newval.length > 0) {
 					newval.forEach(item => {
 						flattArr.forEach(fal => {
 							if (item.id === fal.id) {
-								fal.is_checked = item.is_checked;
+								fal.is_checked = item.is_checked
 							}
-						});
-					});
-					this.symptomList = this.assemblyData(flattArr);
+						})
+					})
+					this.symptomList = this.assemblyData(flattArr)
 				}
 			},
 			deep: true,
@@ -105,72 +119,125 @@ export default {
 		}
 	},
 	onLoad(option) {
+		if (option.from) {
+			this.from = option.from
+		}
 		if (!option.term) {
 			let term = {
 				serviceName: 'srvhealth_self_symptoms_select',
 				srvApp: 'health',
 				key: 'name',
 				type: 'symptom'
-			};
-			this.query = term;
+			}
+			this.query = term
 		} else {
-			let query = JSON.parse(decodeURIComponent(option.term));
-			this.query = query;
+			let query = JSON.parse(decodeURIComponent(option.term))
+			this.query = query
 		}
 	},
 	methods: {
-		clickTag(e) {
-			let self = this;
-			if (e.node_type && e.node_type !== '分类' && this.chooseArr.findIndex(item => item.no === e.no) === -1) {
+		symptomFormChange(e) {
+			this.showSymptomDateSelector = false
+			if (e === false) {
+			} else if (e.occur_time) {
+				this.currentSymptom.occur_time = e.occur_time
+				this.currentSymptom.symptoms_remark = e.symptoms_remark
+				this.getCascaderValue(this.currentSymptom)
+			}
+		},
+		async addSymptom() {
+			let data = this.currentSymptom
+			let self = this
+			let req = [
+				{
+					serviceName: 'srvhealth_self_symptoms_record_add',
+					condition: [],
+					data: []
+				}
+			]
+			req[0].data = self.chooseArr.map(item => {
+				return {
+					info_no: self.userInfo.no,
+					user_account: self.userInfo.userno,
+					occur_time: item.occur_time,
+					symptoms_no: item.no,
+					symptoms_name: item.name,
+					symptoms_remark: item.symptoms_remark
+				}
+			})
+			let res = await this.$fetch('operate', 'srvhealth_self_symptoms_record_add', req, 'health')
+			if (res.success) {
 				uni.showModal({
-					title: e.name,
-					content: '确认添加此症状?',
+					title: '提示',
+					content: '提交成功',
+					showCancel: false,
 					success(res) {
 						if (res.confirm) {
-							self.getCascaderValue(e);
+							uni.redirectTo({
+								url: '/archivesPages/archives-history/archives-history?pageType=symptom'
+							})
 						}
 					}
-				});
+				})
+			}
+		},
+		clickTag(e) {
+			let self = this
+			if (e.node_type && e.node_type !== '分类' && this.chooseArr.findIndex(item => item.no === e.no) === -1) {
+				if (this.from === 'symptom_record') {
+					this.showSymptomDateSelector = true
+					this.currentSymptom = e
+				} else {
+					uni.showModal({
+						title: e.name,
+						content: '确认添加此症状?',
+						success(res) {
+							if (res.confirm) {
+								self.getCascaderValue(e)
+							}
+						}
+					})
+				}
 			}
 		},
 		getCascaderValue(e) {
-			e.is_checked = true;
-			let chooseArr = this.chooseArr;
+			e.is_checked = true
+			let chooseArr = this.chooseArr
 			if (chooseArr.length == 0) {
-				chooseArr.push(e);
+				chooseArr.push(e)
 			} else {
-				let isHas = false;
+				let isHas = false
 				chooseArr.forEach(it => {
 					if (it.id === e.id) {
-						isHas = true;
+						isHas = true
 					}
-				});
+				})
 				if (!isHas) {
-					chooseArr.push(e);
+					chooseArr.push(e)
 				}
 			}
 		},
 		/* 点击菜单展开或者收缩**/
 		showMore() {
-			this.menuIsShow = !this.menuIsShow;
+			this.menuIsShow = !this.menuIsShow
 		},
 		changeListType() {
-			this.isChunk = !this.isChunk;
+			this.isChunk = !this.isChunk
 		},
 		changeMenu(item, i) {
-			this.activeIndex = i;
-			this.scrollMenuLeft = (i - 1) * 85;
-			this.currentTab = i;
-			this.currentTopTab = item;
-			this.getCurrentTabList(item);
+			this.activeIndex = i
+			this.scrollMenuLeft = (i - 1) * 85
+			this.currentTab = i
+			this.currentTopTab = item
+			this.getCurrentTabList(item)
 			if (this.menuIsShow) {
-				this.menuIsShow = false;
+				this.menuIsShow = false
 			}
 		},
 		/*获取点击顶部菜单数据**/
 		async getCurrentTabList(item) {
-			let no = item.no;
-			let url = this.getServiceUrl(this.query.srvApp, this.query.serviceName, 'select');
+			let no = item.no
+			let url = this.getServiceUrl(this.query.srvApp, this.query.serviceName, 'select')
 			let req = {
 				serviceName: this.query.serviceName,
 				colNames: ['*'],
@@ -183,125 +250,128 @@ export default {
 				],
 				order: [],
 				page: { pageNo: 1, rownumber: 6000 }
-			};
-			let res = await this.$http.post(url, req);
-			let chooseData = uni.getStorageSync('symptomList');
-			console.log('======>点击顶部数据', res.data.data);
+			}
+			let res = await this.$http.post(url, req)
+			let chooseData = uni.getStorageSync('symptomList')
+			console.log('======>点击顶部数据', res.data.data)
 			res.data.data.forEach(item => {
-				item['is_checked'] = false;
+				item['is_checked'] = false
 				if (chooseData && chooseData.length > 0) {
 					chooseData.forEach(choose => {
 						if (item.id === choose.id) {
-							item.is_checked = true;
+							item.is_checked = true
 						}
-					});
+					})
 				}
-			});
+			})
 			if (this.chooseArr.length > 0) {
 				this.chooseArr.forEach(s => {
 					res.data.data.forEach(o => {
 						if (o.id === s.id) {
-							o.is_checked = true;
+							o.is_checked = true
 						}
-					});
-				});
+					})
+				})
 			}
-			let parentNodeData = this.assemblyData(res.data.data);
-			this.symptomList = parentNodeData;
+			let parentNodeData = this.assemblyData(res.data.data)
+			this.symptomList = parentNodeData
 		},
 		change(index) {
-			this.currentTab = index;
-			this.currentMenu = 0;
+			this.currentTab = index
+			this.currentMenu = 0
 		},
 
 		/** 复选框事件*/
 		checkedItemChange(e, item) {
-			console.log(e, item);
-			let self = this;
-			let checkedData = this.checkedData;
-			let data = this.fromTypeData;
+			console.log(e, item)
+			let self = this
+			let checkedData = this.checkedData
+			let data = this.fromTypeData
 			if (this.checkedData.length >= 0) {
 				if (checkedData.indexOf(e.name) > -1) {
-					let word_index = checkedData.indexOf(e.name);
+					let word_index = checkedData.indexOf(e.name)
 					checkedData.forEach((item, index) => {
-						checkedData.splice(word_index, 1);
-					});
+						checkedData.splice(word_index, 1)
+					})
 				} else {
-					checkedData.push(e.name);
+					checkedData.push(e.name)
 				}
 			}
 			data.forEach((d, i) => {
 				if (d.title === item.title) {
 					if (checkedData.length > 0) {
-						let a = checkedData.join();
-						d.value = a;
-						self.$set(self.fromTypeData, i, d);
+						let a = checkedData.join()
+						d.value = a
+						self.$set(self.fromTypeData, i, d)
 					} else {
-						d.value = '';
-						self.$set(self.fromTypeData, i, d);
+						d.value = ''
+						self.$set(self.fromTypeData, i, d)
 					}
 				}
-			});
+			})
 		},
 
 		chooseItem(item) {
-			let fromTypeData = item.optional_para ? JSON.parse(item.optional_para) : '';
-			item.is_checked = !item.is_checked;
-			this.current_item = item;
+			let fromTypeData = item.optional_para ? JSON.parse(item.optional_para) : ''
+			item.is_checked = !item.is_checked
+			this.current_item = item
 			if (this.chooseArr.indexOf(this.current_item)) {
 			}
 			if (fromTypeData) {
 				fromTypeData.forEach(item => {
-					item['value'] = '';
-					item['isfail'] = false;
+					item['value'] = ''
+					item['isfail'] = false
 					if (item.type === 'num') {
-						item.value = 0;
+						item.value = 0
 					}
-				});
-				this.fromTypeData = fromTypeData;
+				})
+				this.fromTypeData = fromTypeData
 				if (item.is_checked) {
-					this.show = true;
+					this.show = true
 				}
 			}
 
-			console.log('----', item);
-			let chooseArr = this.chooseArr;
+			console.log('----', item)
+			let chooseArr = this.chooseArr
 			if (item.is_checked) {
-				chooseArr.push(item);
+				chooseArr.push(item)
 			} else {
 				if (chooseArr.length > 0) {
 					chooseArr.forEach((alo, i) => {
 						if (item.id === alo.id) {
-							chooseArr.splice(i, 1);
+							chooseArr.splice(i, 1)
 						}
-					});
+					})
 				}
 			}
 		},
 		lookobj() {
+			let self = this
 			uni.showModal({
 				title: '提示',
 				content: '确认提交?',
 				success: res => {
 					if (res.confirm) {
-						// uni.$emit('checkedItem', this.answerDataItem);
-						if (this.query.type === 'symptom') {
-							uni.setStorageSync('symptomList', this.chooseArr);
-							uni.$emit('symptomSelect', this.chooseArr);
-						}
-						// uni.navigateBack();
-						if (this.chooseArr.length > 0) {
-							this.$store.commit('SET_SYMPTOM_ARR', this.chooseArr);
-							uni.navigateTo({
-								url: '/archivesPages/illnessDetaiList/illnessDetaiList'
-							});
+						if (self.from === 'symptom_record') {
+							self.addSymptom()
+						} else {
+							if (self.query.type === 'symptom') {
+								// uni.setStorageSync('symptomList', self.chooseArr)
+								uni.$emit('symptomSelect', self.chooseArr)
+							}
+							if (self.chooseArr.length > 0) {
+								// self.$store.commit('SET_SYMPTOM_ARR', self.chooseArr)
+								uni.navigateTo({
+									url: '/archivesPages/illnessDetaiList/illnessDetaiList'
+								})
+							}
 						}
 					}
 				}
-			});
+			})
 		},
 		async getSymptomTitList() {
-			let url = this.getServiceUrl(this.query.srvApp, this.query.serviceName, 'select');
+			let url = this.getServiceUrl(this.query.srvApp, this.query.serviceName, 'select')
 			let req = {
 				serviceName: this.query.serviceName,
 				colNames: ['*'],
@@ -313,37 +383,37 @@ export default {
 				],
 				order: []
 				// page:{pageNo: 1, rownumber: 500}
-			};
-			let res = await this.$http.post(url, req);
-			this.symptomTitList = res.data.data;
-			this.getCurrentTabList(res.data.data[0]);
-			console.log('---标题---', this.symptomTitList);
+			}
+			let res = await this.$http.post(url, req)
+			this.symptomTitList = res.data.data
+			this.getCurrentTabList(res.data.data[0])
+			console.log('---标题---', this.symptomTitList)
 		},
 		async getSymptomList(symptomList) {
 			// 请求疾病列表
-			let url = this.getServiceUrl(this.query.srvApp, this.query.serviceName, 'select');
+			let url = this.getServiceUrl(this.query.srvApp, this.query.serviceName, 'select')
 			let req = {
 				serviceName: this.query.serviceName,
 				colNames: ['*'],
 				relation_condition: {},
 				order: []
-			};
-			let chooseData = uni.getStorageSync('symptomList');
-			let res = await this.$http.post(url, req);
+			}
+			let chooseData = uni.getStorageSync('symptomList')
+			let res = await this.$http.post(url, req)
 			if (res.data.state === 'SUCCESS') {
 				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 					res.data.data.forEach(item => {
-						item['is_checked'] = false;
+						item['is_checked'] = false
 						if (chooseData && chooseData.length > 0) {
 							chooseData.forEach(choose => {
 								if (item.id === choose.id) {
-									item.is_checked = true;
+									item.is_checked = true
 								}
-							});
+							})
 						}
-					});
-					let parentNode = this.assemblyData(res.data.data);
-					this.symptomList = parentNode;
+					})
+					let parentNode = this.assemblyData(res.data.data)
+					this.symptomList = parentNode
 				}
 			}
 		},
@@ -351,91 +421,88 @@ export default {
 		 * 扁平化数组
 		 * */
 		flag(arr) {
-			let result = [];
+			let result = []
 			for (let item of arr) {
-				var res = JSON.parse(JSON.stringify(item)); // 先克隆一份数据作为第一层级的填充
-				delete res['children'];
-				result.push(res);
+				var res = JSON.parse(JSON.stringify(item)) // 先克隆一份数据作为第一层级的填充
+				delete res['children']
+				result.push(res)
 				if (item.children instanceof Array && item.children.length > 0) {
 					// 如果当前child为数组并且长度大于0，才可进入flag()方法
-					result = result.concat(this.flag(item.children));
+					result = result.concat(this.flag(item.children))
 				}
 			}
-			return result;
+			return result
 		},
 		/**
 		 * 对扁平化数组进行重新组装
 		 * */
 		assemblyData(arr) {
-			let flattArr = arr;
-			let parentNode = flattArr.filter(item => !item.parent_no);
+			let flattArr = arr
+			let parentNode = flattArr.filter(item => !item.parent_no)
 			parentNode.forEach(parent => {
-				parent.children = [];
-				parent['is_show'] = false;
+				parent.children = []
+				parent['is_show'] = false
 				flattArr.forEach(item => {
 					if (item.parent_no === parent.no) {
-						parent.children.push(item);
+						parent.children.push(item)
 					}
-				});
+				})
 				if (Array.isArray(parent.children) && parent.children.length > 0) {
 					parent.children.forEach(child => {
-						child.children = [];
+						child.children = []
 						flattArr.forEach(item => {
 							if (item.parent_no === child.no) {
-								child.children.push(item);
-								parent.is_show = true;
+								child.children.push(item)
+								parent.is_show = true
 							}
-						});
+						})
 						if (Array.isArray(child.children)) {
 							child.children.forEach(thirdChild => {
-								thirdChild.children = [];
+								thirdChild.children = []
 								flattArr.forEach(thirdChilditem => {
 									if (thirdChilditem.parent_no === thirdChild.no) {
-										thirdChild.children.push(thirdChilditem);
+										thirdChild.children.push(thirdChilditem)
 										// parent.is_show = true;
 									}
-								});
-							});
+								})
+							})
 						}
-					});
+					})
 				}
-			});
-			return parentNode;
+			})
+			return parentNode
 		},
 		delAlltabAllansw(type) {
-			this.chooseArr = [];
+			this.chooseArr = []
 			// uni.setStorageSync('symptomList',this.chooseArr)
-			let alls = this.symptomList;
-			let flattArr = this.flag(alls);
+			let alls = this.symptomList
+			let flattArr = this.flag(alls)
 			flattArr.forEach(item => {
-				item.is_checked = false;
-			});
-			let newData = this.assemblyData(flattArr);
-			this.symptomList = newData;
+				item.is_checked = false
+			})
+			let newData = this.assemblyData(flattArr)
+			this.symptomList = newData
 		},
 		deltab(item) {
-			let allArr = this.deepClone(this.chooseArr);
+			let allArr = this.deepClone(this.chooseArr)
 			allArr.forEach((items, index) => {
 				if (item.id === items.id) {
-					allArr.splice(index, 1);
+					allArr.splice(index, 1)
 				}
-			});
-			// uni.setStorageSync('symptomList',allArr)
-			this.chooseArr = allArr;
-			let flattArr = this.flag(this.symptomList);
+			})
+			this.chooseArr = allArr
+			let flattArr = this.flag(this.symptomList)
 			flattArr.forEach(flt => {
 				if (flt.id === item.id) {
-					flt.is_checked = false;
+					flt.is_checked = false
 				}
-			});
-			let newData = this.assemblyData(flattArr);
-			this.symptomList = newData;
+			})
+			let newData = this.assemblyData(flattArr)
+			this.symptomList = newData
 		},
 		searchStart() {
-			let searchVal = this.searchValue;
-			// let flattArr = this.flag(this.symptomList)
-
-			let url = this.getServiceUrl('health', 'srvhealth_self_symptoms_select', 'select');
+			let searchVal = this.searchValue
+			let url = this.getServiceUrl('health', 'srvhealth_self_symptoms_select', 'select')
 			let req = {
 				serviceName: 'srvhealth_self_symptoms_select',
 				colNames: ['*'],
@@ -450,77 +517,77 @@ export default {
 					pageNo: 1,
 					rownumber: 50
 				}
-			};
+			}
 			if (searchVal) {
 				this.$http.post(url, req).then(res => {
-					this.isSearch = true;
-					this.serseData = res.data.data;
-					console.log('搜索开始----', res.data.data);
-				});
+					this.isSearch = true
+					this.serseData = res.data.data
+					console.log('搜索开始----', res.data.data)
+				})
 			} else {
-				this.isSearch = false;
+				this.isSearch = false
 			}
 		},
 		searchEnd() {
-			this.isSearch = false;
+			this.isSearch = false
 		},
 		cancel() {
-			let currtItem = this.current_item;
+			let currtItem = this.current_item
 			this.chooseArr.forEach((item, index) => {
 				if (item.id === currtItem.id) {
-					this.chooseArr.splice(index, 1);
+					this.chooseArr.splice(index, 1)
 				}
-			});
-			let flattArr = this.flag(this.symptomList);
+			})
+			let flattArr = this.flag(this.symptomList)
 			flattArr.forEach(flt => {
 				if (flt.id === currtItem.id) {
-					flt.is_checked = false;
+					flt.is_checked = false
 				}
-			});
-			this.symptomList = this.assemblyData(flattArr);
+			})
+			this.symptomList = this.assemblyData(flattArr)
 
-			this.show = false;
+			this.show = false
 		},
 		confirm() {
-			let data = this.fromTypeData;
-			let current_item = this.current_item;
-			let values = [];
-			let fromData = [];
-			let isPass = false;
+			let data = this.fromTypeData
+			let current_item = this.current_item
+			let values = []
+			let fromData = []
+			let isPass = false
 			data.forEach(item => {
 				if (item.value) {
-					values.push(item.value);
+					values.push(item.value)
 				}
 				if (item.required && item.value) {
-					isPass = true;
+					isPass = true
 				} else if (item.required && !item.value) {
-					isPass = false;
+					isPass = false
 				}
-			});
+			})
 			if (isPass) {
-				let str = values.join();
-				this.$set(current_item, 'answer', str);
+				let str = values.join()
+				this.$set(current_item, 'answer', str)
 				this.chooseArr.forEach(chose => {
 					if (chose.id === current_item.id) {
-						chose['fromTypeData'] = this.fromTypeData;
+						chose['fromTypeData'] = this.fromTypeData
 					}
-				});
-				this.show = false;
+				})
+				this.show = false
 			} else {
 				data.forEach(must => {
 					if (must.required && !must.value) {
-						must.isfail = true;
+						must.isfail = true
 					}
-				});
+				})
 				uni.showToast({
 					title: '请完善信息',
 					icon: 'none',
 					duration: 1000
-				});
+				})
 			}
 		}
 	}
-};
+}
 </script>
 
 <style lang="scss" scoped>

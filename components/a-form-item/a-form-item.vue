@@ -10,9 +10,11 @@
 			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }"
 			:style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }"
 		>
-			<text class="cuIcon-titles text-cyan"></text>
-			<text class="text-red is-required" v-if="fieldData.isRequire">{{ fieldData.isRequire ? '*' : '' }}</text>
-			<text class="label" :for="fieldData.column">{{ fieldData.label }}</text>
+			<text class="label" :for="fieldData.column">
+				<text class="cuIcon-titles text-cyan"></text>
+				<text class="text-red is-required" v-if="fieldData.isRequire">{{ fieldData.isRequire ? '*' : '' }}</text>
+				<text>{{ fieldData.label }}</text>
+			</text>
 		</label>
 		<view class="form-item-content" :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }">
 			<!-- detail-详情-start -->

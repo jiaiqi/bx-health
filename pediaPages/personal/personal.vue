@@ -4,11 +4,11 @@
 		<view class="bottom-layer">
 			<view class="bottom-button" @click="toPages('home')">
 				<text class="cuIcon-home icon"></text>
-				<view class="label">主页</view>
+				<view class="label">小程序主页</view>  
 			</view>
 			<view class="bottom-button" @click="toPages('shop')">
-				<text class="cuIcon-people icon"></text>
-				<view class="label">商城</view>
+				<text class="cuIcon-back icon"></text>
+				<view class="label">返回</view>
 			</view>
 		</view>
 	</view>

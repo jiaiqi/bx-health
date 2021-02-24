@@ -294,9 +294,7 @@ export default {
 											}
 											if (self.params.to && self.params.fill_batch_no) {
 												self.showNextBtn = true;
-												// self.toNextPages()
-											}
-											if (self.target && self.target === 'health') {
+											}else if (self.target && self.target === 'health') {
 												let data = {
 													from: '饮食',
 													data: req[0].data[0],
@@ -316,7 +314,7 @@ export default {
 													showCancel:false,
 													success(res) {
 														if(res.confirm){
-															uni.navigateBack()
+															// uni.navigateBack()
 														}
 													}
 												})
@@ -426,21 +424,24 @@ export default {
 						});
 					}
 					if (data.user_data) {
-						console.log('data.answer_times', data.answer_times);
-						configCols.forEach(item => {
-							if (this.formType === 'detail') {
-								item.disabled = true;
-							}
-							data.user_data.forEach(items => {
-								if (item.column === items.item_no) {
-									if (item.item_type_attr && item.item_type_attr.radioType === 'multi') {
-										item.value = items.option_data;
-									} else {
-										item.value = items.option_data[0];
-									}
+						if(this.params&&this.params.emptyValue){
+							// 不填充默认值
+						}else{
+							configCols.forEach(item => {
+								if (this.formType === 'detail') {
+									item.disabled = true;
 								}
+								data.user_data.forEach(items => {
+									if (item.column === items.item_no) {
+										if (item.item_type_attr && item.item_type_attr.radioType === 'multi') {
+											item.value = items.option_data;
+										} else {
+											item.value = items.option_data[0];
+										}
+									}
+								});
 							});
-						});
+						}
 					}
 					this.formData = data;
 					if (data.title) {
@@ -759,6 +760,7 @@ export default {
 <style lang="scss" scoped>
 .page-wrap {
 	background-color: #fff;
+	overflow: scroll;
 }
 .content {
 	width: 100%;

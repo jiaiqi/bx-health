@@ -21,7 +21,7 @@
 			</view>
 			<view class="phone"><image class="image" src="../../static/icon/makePhone.png" mode="" @click="makePhoneCall"></image></view>
 		</view>
-		<view class="instroduce">{{ storeInfo.introduction }}</view>
+		<view class="instroduce"><view v-html="storeInfo.introduction"></view></view>
 	</view>
 </template>
 
@@ -32,22 +32,22 @@ export default {
 			swiperList: [],
 			storeNo: '',
 			storeInfo: {}
-		};
+		}
 	},
 	onLoad(option) {
 		if (option.store_no) {
-			this.storeNo = option.store_no;
-			this.selectStoreInfo();
+			this.storeNo = option.store_no
+			this.selectStoreInfo()
 		}
 	},
 	methods: {
 		makePhoneCall() {
 			uni.makePhoneCall({
 				phoneNumber: this.storeInfo.telephone ? this.storeInfo.telephone : '10086'
-			});
+			})
 		},
 		selectStoreInfo() {
-			let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
+			let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select')
 			let req = {
 				serviceName: 'srvhealth_store_mgmt_select',
 				colNames: ['*'],
@@ -55,43 +55,43 @@ export default {
 				page: { pageNo: 1, rownumber: 1 },
 				draft: false,
 				query_source: 'list_page'
-			};
+			}
 			return new Promise((resolve, reject) => {
 				this.$http.post(url, req).then(res => {
 					if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-						this.storeInfo = res.data.data[0];
-						this.getSwiperList(this.storeInfo);
+						this.storeInfo = res.data.data[0]
+						this.getSwiperList(this.storeInfo)
 						uni.setNavigationBarTitle({
 							title: this.storeInfo.name
-						});
-						resolve(res.data.data[0]);
+						})
+						resolve(res.data.data[0])
 					} else {
-						reject(res);
+						reject(res)
 					}
-				});
-			});
+				})
+			})
 		},
 		async getSwiperList(e) {
 			if (e.image) {
-				let res = await this.getFilePath(e.image);
+				let res = await this.getFilePath(e.image)
 				if (Array.isArray(res)) {
 					this.swiperList = res.reduce((pre, cur) => {
 						if (cur.fileurl) {
-							cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+							cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
 						}
-						pre.push(cur);
-						return pre;
-					}, []);
+						pre.push(cur)
+						return pre
+					}, [])
 				}
 			}
 		},
 		goHome() {
 			uni.redirectTo({
 				url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + this.storeNo
-			});
+			})
 		}
 	}
-};
+}
 </script>
 
 <style scoped lang="scss">

@@ -12,7 +12,6 @@
 						<bx-checkbox v-for="item in list" :key="item.value" :name="item.value" v-model="item.checked">{{ item.value }}</bx-checkbox>
 					</bx-checkbox-group>
 				</view>
-
 				<view class="item-list" @click="showWeightDigSelect = true">
 					<text>消化道情况</text>
 					<bx-checkbox-group v-model="inputVal.alimentary_canal" mode="button">
@@ -84,7 +83,6 @@
 					</view>
 				</view>
 				<view class="item-list">
-					<!-- <view class="item-list" @click="openTime({ type: 'sleep', field: 'getup_time' })"> -->
 					<view class="item-list-top">
 						<view class="label">
 							<text>*</text>
@@ -98,7 +96,6 @@
 							<picker mode="time" :value="inputVal.getup_time.split(' ')[1]" start="07:00" end="23:00" @change="TimeChange($event, 'getup_time')">
 								<view class="picker">{{ inputVal.getup_time.split(' ')[1] }}</view>
 							</picker>
-							<!-- <view class="time-display">{{ inputVal.getup_time }}</view> -->
 						</view>
 					</view>
 					<view class="number-change">
@@ -140,7 +137,7 @@
 					<!-- <view class="item-list-bot"><input type="number" :value="inputVal.urinate_times" /></view> -->
 				</view>
 			</view>
-			<view v-else-if="type && type === 'heartRate'" class="item-wrap">
+			<!-- 			<view v-else-if="type && type === 'heartRate'" class="item-wrap">
 				<view class="item-list" @click="openTime({ type: 'heartRate', field: 'date' })">
 					<text>日期和时间</text>
 					<view class="item-list-bot"><input type="text" value="" /></view>
@@ -149,7 +146,7 @@
 					<text>心率(次/分)</text>
 					<slider-number v-model="inputVal.heart_rate" :max="200" :min="50"></slider-number>
 				</view>
-			</view>
+			</view> -->
 			<view v-else-if="type && (type === 'pressure' || type === 'bp')" class="item-wrap">
 				<!-- 血压 -->
 				<view class="item-list">
@@ -218,7 +215,7 @@
 					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.remark" /></view>
 				</view>
 			</view>
-			<view v-else-if="type && type === 'oxygen'" class="item-wrap">
+			<!-- 	<view v-else-if="type && type === 'oxygen'" class="item-wrap">
 				<view class="item-list" @click="openTime({ type: 'oxygen', field: 'start_time' })">
 					<text>开始时间</text>
 					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.start_time" /></view>
@@ -243,7 +240,7 @@
 					<text>说明</text>
 					<view class="item-list-bot"><input type="text" value="" v-model="inputVal.remark" /></view>
 				</view>
-			</view>
+			</view> -->
 			<view v-else-if="type && type === 'glucose'" class="item-wrap">
 				<!-- 血糖 -->
 				<view class="item-list" @click="showSelect = true">
@@ -263,49 +260,20 @@
 			</view>
 		</view>
 		<view class="other-bot">
-			<button class="cu-btn lg btn" :class="{ disabled: !canSave }" @click="submitRecord" v-if="!isSubmit">保存</button>
-			<button class="cu-btn lg btn" @click="back" v-if="isSubmit">返回</button>
+			<button type="primary" class="cu-btn btn bg-cyan shadow-blur" :class="{ disabled: !canSave }" @click="submitRecord" v-if="!isSubmit">保存</button>
+			<button class="cu-btn  btn" @click="back" v-if="isSubmit">返回</button>
 			<button class="cu-btn sm round bg-red margin-left-xs" @click="deleteItem" v-if="submitType === 'update'"><text class="cuIcon-delete"></text></button>
 		</view>
-		<!-- <bz-date-picker
-			v-model="popupStatus"
-			title="请选择时间"
-			:defaultTime="formateDate('', 'full')"
-			:minuteStep="10"
-			days="7"
-			minHour="6"
-			maxHour="22"
-			minMinute="0"
-			maxMinute="59"
-			@confirm="handleDatePickerConfirm"
-			@cancel="handleDatePickerCancel"
-			@close="handleDatePickerClose"
-		></bz-date-picker> -->
-		<mx-date-picker
-			style="z-index: 1290;"
-			:format="dateFormat"
-			:show="showTimePicker"
-			:type="timeType"
-			:value="currentVal"
-			:show-tips="true"
-			:begin-text="'入住'"
-			:isMultiSelect="true"
-			:end-text="'离店'"
-			:show-seconds="true"
-			@confirm="onSelected"
-			@cancel="onSelected"
-		/>
 	</view>
 </template>
 
 <script>
-import MxDatePicker from '@/components/mx-datepicker/mx-datepicker.vue';
 import bxRadio from '@/components/bx-radio/bx-radio.vue';
 import bxRadioGroup from '@/components/bx-radio-group/bx-radio-group.vue';
 import dayjs from '@/static/js/dayjs.min.js';
 export default {
 	name: 'otherIndicator',
-	components: { MxDatePicker, bxRadio, bxRadioGroup },
+	components: { bxRadio, bxRadioGroup },
 	data() {
 		return {
 			planNo: '', //关联方按计划编码
@@ -314,7 +282,6 @@ export default {
 			curItem: {},
 			popupStatus: false,
 			inputVal: {
-				// top_title:'',
 				weight: 50,
 				measure_time: '', //测量时间
 				body_fat_rate: 20,
@@ -379,18 +346,10 @@ export default {
 			currentUserInfo: null,
 			serviceLog: null,
 			type: null,
-			dateFormat: 'yyyy-mm-dd hh:ii:ss',
-			showTimePicker: false,
-			timeType: 'datetime',
-			currentVal: null,
-			currTime: '',
-			dateTimeField: '',
 			dateTime: this.formateDate(new Date(), 'dates'),
 			isSubmit: false,
 			showWeightSelect: false,
 			showWeightDigSelect: false,
-			weightCurrentRadio: '',
-			digeCurrentRadio: '',
 			measureList: [
 				{
 					value: '右上臂',
@@ -489,7 +448,6 @@ export default {
 					result = result = this.inputVal.systolic_pressure && this.inputVal.diastolic_pressure ? true : false;
 					break;
 			}
-			// if()
 			return result;
 		},
 		topTitle() {
@@ -875,51 +833,14 @@ export default {
 				}
 			});
 		},
-		openTime(e) {
-			// this.popupStatus = true
-			this.showTimePicker = true;
-			if (e.type && e.field) {
-				this.dateTimeField = e.field;
-			}
-		},
 		back() {
 			uni.navigateBack();
 		},
-		selectTimeEvent(e) {
-			debugger;
-		},
-		onSelected(e) {
-			//时间选择器
-			this.showTimePicker = false;
-			if (e) {
-				// this.dietIn = 0
-				// this.sportOut = 0
-				//选择的值
-				console.log('value => ' + e.value);
-				this.dateTime = e.value;
-				if (this.dateTimeField) {
-					this.inputVal[this.dateTimeField] = e.value;
-				}
-			}
-		},
-		handleDatePickerConfirm(e) {
-			debugger;
-		},
-		handleDatePickerCancel(e) {
-			debugger;
-		},
-		handleDatePickerClose(e) {
-			debugger;
-		},
 		TimeChange(e, type) {
-			// this.time = e.detail.value
-			debugger;
 			let val = this.inputVal[type];
 			this.inputVal[type] = val.split(' ')[0] + ' ' + e.detail.value;
 		},
 		DateChange(e, type) {
-			// this.date = e.detail.value
-			debugger;
 			let val = this.inputVal[type];
 			this.inputVal[type] = e.detail.value + ' ' + val.split(' ')[1];
 		},
@@ -974,7 +895,8 @@ export default {
 			// 	this.inputVal.measure_time = dayjs().format('YYYY-MM-DD') + ' 07:00';
 			// } else {
 			// 当前时间早于早上七点 默认值为当前时间
-			this.inputVal.measure_time = dayjs().format('YYYY-MM-DD HH') + ':00';
+			this.inputVal.measure_time = dayjs().format('YYYY-MM-DD HH:mm') 
+			// + ':00';
 			// }
 		}
 		let user_info_list = uni.getStorageSync('user_info_list');
@@ -990,7 +912,7 @@ export default {
 				showCancel: false,
 				success(res) {
 					if (res.confirm) {
-						uni.navigateBack({});
+						uni.navigateBack();
 					}
 				}
 			});
@@ -1001,14 +923,14 @@ export default {
 
 <style lang="scss" scoped>
 .other-wrap {
-	min-height: 100vh;
+	min-height: calc(100vh - var(--window-top));
 	background-color: white;
 
 	.other-top {
 		width: 100%;
 		padding-top: 30upx;
 		margin: 0 auto 0;
-		min-height: 85vh;
+		// min-height: 85vh;
 		.other-top-tit {
 			background-color: #f5f5f5;
 			padding: 10rpx 20rpx;
@@ -1100,7 +1022,7 @@ export default {
 		justify-content: center;
 		align-items: center;
 		position: relative;
-		margin: 20px 0;
+		margin: 50px 0 20px;
 		.round {
 			border-radius: 50%;
 			height: 60rpx;
@@ -1110,13 +1032,9 @@ export default {
 			right: 30rpx;
 		}
 		.btn {
-			width: 70%;
-			height: 70upx;
+			width: 60%;
 			color: #fff;
-			// background-image: linear-gradient(90deg, #70c6ff, #0081ff);
-			background-color: #0081ff;
 			border-radius: 50upx;
-			box-shadow: 3px 3px 4px rgba(10, 141, 255, 0.2);
 			&.disabled {
 				cursor: not-allowed;
 				opacity: 0.6;

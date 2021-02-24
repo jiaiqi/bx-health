@@ -33,14 +33,14 @@
 					</view>
 					<view class="right"><text class="cuIcon-phone text-black" @click="makePhoneCall"></text></view>
 				</view>
-				<view class="introduction" v-if="introduction && introduction.length >= 25">
+<!-- 				<view class="introduction" v-if="introduction && introduction.length >= 25">
 					<view class="content">
 						<view class="rich-text">
 							{{ introduction || '暂无介绍' }}
 							<view class="see-more" v-if="introduction !== storeInfo.introduction && introduction" @click="seeMore">查看更多</view>
 						</view>
 					</view>
-				</view>
+				</view> -->
 				<view class="menu-list">
 					<view class="menu-item">
 						<view class="icon" @click="toPages(1)">食</view>
@@ -73,7 +73,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction" v-if="storeInfo.type !== '健康服务'">
+				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&deptList.length>0">
 					<view class="title">
 						<view>
 							<text class="cuIcon-titles text-blue"></text>
@@ -86,7 +86,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction" v-if="storeInfo.type !== '健康服务'">
+				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&groupList.length>0">
 					<view class="title">
 						<view>
 							<text class="cuIcon-titles text-blue"></text>
@@ -128,25 +128,19 @@
 						<text class="">医院新闻</text>
 					</view>
 					<view class="content news-list">
-						<view class="news-item">
+						<view class="news-item" v-for="item in noticeList" @click="toArticle(item)">
 							<text class="cuIcon-title"></text>
-							<text class="title-text">关于维护良好就医秩序对广大患者的告知书</text>
-							<text class="date">2021-01-20</text>
-						</view>
-						<view class="news-item">
-							<text class="cuIcon-title"></text>
-							<text class="title-text">国家药监局核查中心对我院药物临床试验数据现场核查工作顺利结束</text>
-							<text class="date">2021-01-19</text>
+							<text class="title-text">{{ item.title }}</text>
+							<text class="date">{{ formateDate(item.create_time) }}</text>
 						</view>
 					</view>
 				</view>
 			</view>
 		</view>
 		<view class="bottom-layer" v-if="onlyCurrentPage === true">
-			<!-- <button class="cu-btn bg-cyan" @click="toStorePage">体验完整小程序</button> -->
 			<view class="bottom-button" @click="toStorePage">
 				<text class="cuIcon-home icon"></text>
-				<view class="label">主页</view>
+				<view class="label">小程序主页</view>
 			</view>
 			<view class="bottom-button" @click="toPages('personal')">
 				<text class="cuIcon-people icon"></text>
@@ -534,7 +528,6 @@ export default {
 	}
 }
 .header-wrap {
-	height: 500rpx;
 	background-size: cover;
 	background-position: top center;
 	background-repeat: no-repeat;
@@ -784,6 +777,7 @@ export default {
 	padding: 0 20rpx;
 	z-index: 2;
 	background-color: #fff;
+	box-shadow: 0 5px 20px 10px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	.bottom-button {
 		flex: 1;
 		text-align: center;

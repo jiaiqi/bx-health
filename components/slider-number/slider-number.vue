@@ -1,17 +1,65 @@
 <template>
 	<view class="slider-number">
-		<button class="operate cu-btn" hover-class="active" @click="numberChange('minus', 0.1)" @longpress="longpressNumChange('minus', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
+		<button
+			class="operate cu-btn"
+			hover-class="active"
+			@click="numberChange('minus', item)"
+			@longpress="longpressNumChange('minus', item)"
+			@touchend="longpressNumEnd"
+			v-for="item in stepList"
+		>
+			-{{ item }}
+		</button>
+		<button
+			class="operate cu-btn"
+			hover-class="active"
+			@click="numberChange('minus', 0.1)"
+			@longpress="longpressNumChange('minus', 0.1)"
+			@touchend="longpressNumEnd"
+			v-if="step === 0.1"
+		>
 			-0.1
 		</button>
-		<button class="operate cu-btn" hover-class="active" @click="numberChange('minus')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('minus')" @touchend="longpressNumEnd">
+		<button
+			class="operate cu-btn"
+			hover-class="active"
+			@click="numberChange('minus')"
+			@longpress="longpressNumChange('minus')"
+			@touchend="longpressNumEnd"
+			v-if="step === 1 || step === 0.1"
+		>
 			-1
 		</button>
-		<slider class="uni-slider"  @changing="changeSlider" :step="step" :min="min" :max="max" :value="bindValue" :show-value="showValue" />
-		<button class="operate cu-btn" hover-class="active" @click="numberChange('add')" :class="{ big: step !== 0.1 }" @longpress="longpressNumChange('add')" @touchend="longpressNumEnd">
+		<slider class="uni-slider" @changing="changeSlider" :step="sliderStep" :min="min" :max="max" :value="bindValue" :show-value="showValue" />
+		<button
+			class="operate cu-btn"
+			hover-class="active"
+			@click="numberChange('add')"
+			@longpress="longpressNumChange('add')"
+			@touchend="longpressNumEnd"
+			v-if="step === 1 || step === 0.1"
+		>
 			+1
 		</button>
-		<button class="operate cu-btn" hover-class="active" @click="numberChange('add', 0.1)" @longpress="longpressNumChange('add', 0.1)" @touchend="longpressNumEnd" v-if="step === 0.1">
+		<button
+			class="operate cu-btn"
+			hover-class="active"
+			@click="numberChange('add', 0.1)"
+			@longpress="longpressNumChange('add', 0.1)"
+			@touchend="longpressNumEnd"
+			v-if="step === 0.1"
+		>
 			+0.1
+		</button>
+		<button
+			class="operate cu-btn"
+			hover-class="active"
+			@click="numberChange('add', item)"
+			@longpress="longpressNumChange('add', item)"
+			@touchend="longpressNumEnd"
+			v-for="item in reverseStepList"
+		>
+			+{{ item }}
 		</button>
 	</view>
 </template>
@@ -21,8 +69,20 @@ export default {
 	data() {
 		return {
 			bindValue: 0,
-			longpressTimer: null //定时器
+			longpressTimer: null, //定时器
+			stepList: [],
+			reverseStepList: [],
+			sliderStep: ''
 		};
+	},
+	created() {
+		if (Array.isArray(this.step) && this.step.length > 0) {
+			this.stepList = this.deepClone(this.step).sort((a, b) => a - b);
+			this.reverseStepList = this.deepClone(this.stepList).reverse();
+			this.sliderStep = this.deepClone(this.step).sort((a, b) => a - b)[0];
+		} else {
+			this.sliderStep = this.step;
+		}
 	},
 	props: {
 		showValue: {
@@ -34,7 +94,7 @@ export default {
 		},
 		step: {
 			// 步进值
-			type: Number,
+			type: [Number, Array],
 			default: 1
 		},
 		min: {
@@ -115,24 +175,12 @@ export default {
 		padding: 20rpx 10rpx;
 		background-color: #f1f1f1;
 		position: relative;
-		// font-size: 20rpx;
 		margin-right: 10rpx;
 		width: 80rpx;
-		&.big{
-			// transform: scale(1.1);
-		}
 		&.active {
 			transition: all 0.2s;
 			transform: scale(1.1);
 		}
-		// &::before {
-		// 	content: '';
-		// 	width: 110%;
-		// 	height: 110%;
-		// 	top: 5%;
-		// 	left: 5%;
-		// 	position: absolute;
-		// }
 	}
 	.input {
 		width: 80rpx;

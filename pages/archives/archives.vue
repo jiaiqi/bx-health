@@ -30,7 +30,6 @@
 						点击评测
 					</text>
 					<view class="trend" v-if="healthTotalScore">
-						<!-- <image src="/static/icon/down3.png" mode="aspectFit" class="trend-icon" style="transform: rotate(180deg);"></image> -->
 						<image src="/static/icon/up3.png" mode="aspectFit" class="trend-icon"></image>
 						<text class="text">较上次评测增加两分</text>
 					</view>
@@ -47,7 +46,6 @@
 			</view>
 		</view>
 		<view class="health-advice">
-			<!-- <view class="title">健康建议</view> -->
 			<view class="content" :style="{ height: showAdvice ? 'auto' : 0 }">
 				<view class="health-advice-item bg-orange light" v-if="weightAdvice">
 					<text class="cuIcon-info">{{ weightAdvice }}</text>
@@ -607,6 +605,7 @@ export default {
 						to: `/archivesPages/report/report?serviceName=srvhealth_examination_report_add&type=add`, //提交后要跳转的页面
 						idCol: 'report_daq_survey_activity_no', // 跳转时携带的参数
 						buttonLabel: '下一步',
+						emptyValue: true, //清空值
 						fieldsCond: fieldsCond
 					};
 					fieldsCond[fieldsCond.findIndex(item => item.column === 'report_daq_survey_activity_no')].value = e.item.daq_survey_activity_no;
@@ -638,7 +637,11 @@ export default {
 		},
 		toRecord(item) {
 			// 跳转到血脂检查记录页面。
-			// fill_batch_no activity_no
+			// if (item.activity_no && item.fill_batch_no) {
+			// 	uni.navigateTo({
+			// 		url: `/questionnaire/index/index?formType=detail&activity_no=${item.activity_no}&status=完成&fill_batch_no=${item.fill_batch_no}`
+			// 	});
+			// }else{
 			let fieldsCond = [
 				{ column: 'jybg_no', display: false, value: item.jybg_no },
 				{ column: 'jy_no', display: false },
@@ -653,10 +656,6 @@ export default {
 			uni.navigateTo({
 				url: url
 			});
-			// if (item.activity_no && item.fill_batch_no) {
-			// 	uni.navigateTo({
-			// 		url: `/questionnaire/index/index?formType=detail&activity_no=${item.activity_no}&status=完成&fill_batch_no=${item.fill_batch_no}`
-			// 	});
 			// }
 		},
 		async selectInspectionReport() {
