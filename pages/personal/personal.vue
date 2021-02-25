@@ -1,5 +1,5 @@
 <template>
-	<personal v-if="!authBoxDisplay"></personal>
+	<personal v-if="!authBoxDisplay" ref="personal"></personal>
 	<bx-auth v-else-if="authBoxDisplay" @getuserinfo="getuserinfo"></bx-auth>
 </template>
 <script>
@@ -49,6 +49,12 @@ export default {
 			// this.updateUserInfo();
 		}
 		// #endif
+	},
+	onPullDownRefresh() {
+		this.$refs.personal.selectMyGroup();
+		setTimeout(() => {
+			uni.stopPullDownRefresh();
+		}, 500);
 	},
 	onLoad(option) {
 		this.checkOptionParams(option);

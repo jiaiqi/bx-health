@@ -115,7 +115,6 @@ export default {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	// transition: height .5s ease-in-out;
 	.cascader-wrap {
 		flex: 1;
 	}

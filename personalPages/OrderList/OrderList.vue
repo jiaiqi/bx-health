@@ -27,7 +27,7 @@
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
-									<view class="right">{{ res.deal || '' }}</view>
+									<view class="right">{{ res.order_state || '' }}</view>
 								</view>
 								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left"><image class="image" :src="item.goodsUrl" mode="aspectFill"></image></view>
@@ -81,7 +81,7 @@
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
-									<view class="right">{{ res.deal || '' }}</view>
+									<view class="right">{{ res.order_state || '' }}</view>
 								</view>
 								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left">
@@ -140,7 +140,7 @@
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
-									<view class="right">{{ res.deal || '' }}</view>
+									<view class="right">{{ res.order_state || '' }}</view>
 								</view>
 								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left"><image class="image" :src="item.goodsUrl" mode="aspectFill"></image></view>
@@ -194,7 +194,7 @@
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
-									<view class="right">{{ res.deal || '' }}</view>
+									<view class="right">{{ res.order_state || '' }}</view>
 								</view>
 								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left">
@@ -251,7 +251,7 @@
 										<view class="store">{{ res.store }}</view>
 										<bx-icon name="right" :size="26" color="rgb(203,203,203)"></bx-icon>
 									</view>
-									<view class="right">{{ res.deal || '' }}</view>
+									<view class="right">{{ res.order_state || '' }}</view>
 								</view>
 								<view class="item" v-for="(item, index) in res.goodsList" :key="index" @click="toOrderDetail(res)">
 									<view class="left"><image class="image" :src="item.goodsUrl" mode="aspectFill"></image></view>
@@ -358,10 +358,10 @@ export default {
 				if (val) {
 					val = Number(val).toFixed(2);
 				} else {
-					return '0';
+					return '00';
 				}
 				if (Number(val) !== parseInt(val)) return val.slice(-2);
-				else return '0';
+				else return '00';
 			};
 		},
 		// 价格整数
@@ -373,7 +373,7 @@ export default {
 					return '0';
 				}
 				if (Number(val) !== parseInt(val)) return val.split('.')[0];
-				else return val;
+				else return Number(val);
 			};
 		}
 	},
@@ -395,7 +395,7 @@ export default {
 				cancelText: '暂不取消',
 				success(res) {
 					if (res.confirm) {
-						self.updateOrderState('取消订单', '待支付');
+						self.updateOrderState('取消订单', '待支付',e);
 					}
 				}
 			});
@@ -419,11 +419,11 @@ export default {
 				}
 			});
 		},
-		updateOrderState(order_state, pay_state) {
+		updateOrderState(order_state, pay_state,info) {
 			let req = [
 				{
 					serviceName: 'srvhealth_store_order_update',
-					condition: [{ colName: 'id', ruleType: 'eq', value: this.orderInfo.id }],
+					condition: [{ colName: 'id', ruleType: 'eq', value: info.id }],
 					data: [{ order_state: order_state }, { pay_state: pay_state }]
 				}
 			];
@@ -611,7 +611,7 @@ export default {
 			}
 		}
 		.right {
-			color: $uni-color-success;
+			color: $uni-color-error;
 		}
 	}
 	.item {
@@ -675,8 +675,8 @@ export default {
 		display: flex;
 		margin-top: 40rpx;
 		padding: 0 10rpx;
-		justify-content: space-between;
 		align-items: center;
+		justify-content: flex-end;
 		.btn {
 			line-height: 52rpx;
 			width: 160rpx;
@@ -685,6 +685,12 @@ export default {
 			font-size: 26rpx;
 			text-align: center;
 			color: $u-type-info-dark;
+			
+		}
+		.cu-btn{
+			&+.cu-btn{
+				margin-left: 20rpx;
+			}
 		}
 		.evaluate {
 			color: $u-type-warning-dark;

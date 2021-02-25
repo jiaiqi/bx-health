@@ -26,7 +26,7 @@
 							mode=""
 						></image>
 						<view class="content">
-							<view class="goods-name">{{ goods.goods_desc ? goods.goods_desc : goods.name || '' }}</view>
+							<view class="goods-name">{{ goods.name?goods.name:goods.goods_desc ? goods.goods_desc:'' }}</view>
 						</view>
 						<view class="num">
 							<view class="price">
@@ -214,6 +214,7 @@ export default {
 					]
 				}
 			];
+			debugger
 			this.$fetch('operate', 'srvhealth_store_order_add', req, 'health').then(res => {
 				if (res.success && Array.isArray(res.data) && res.data.length > 0) {
 					console.log(res.data[0]);
@@ -271,6 +272,9 @@ export default {
 				});
 			}
 		}
+	},
+	created() {
+		console.log('$route.query',this.$route.query)
 	},
 	onLoad(option) {
 		if (option.store_no && option.goods_info) {
