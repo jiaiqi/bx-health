@@ -252,7 +252,7 @@
 					</view>
 					<view class="table grid-layout" v-if="sportsRecord && sportLayout === 'grid'">
 						<view class="diet-item" v-for="(item, index) in sportsRecord" :key="index" @click="clickSportRecordItem(item)">
-							<image class="u-image" :src="getDownloadPath(item)" mode="aspectFill"></image>
+							<image class="u-image" :src="getDownloadPath(item)" mode="scaleToFill"></image>
 							<view class="diet-detail">
 								<view class="name">{{ item.name }}</view>
 								<view class="number">

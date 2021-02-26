@@ -286,12 +286,12 @@
 						"navigationBarTitleText": "BMI计算"
 					}
 				},
-				{
-					"path": "tool/toolThree/toolThree",
-					"style": {
-						"navigationBarTitleText": "婴儿发育查询"
-					}
-				},
+				// {
+				// 	"path": "tool/toolThree/toolThree",
+				// 	"style": {
+				// 		"navigationBarTitleText": "婴儿发育查询"
+				// 	}
+				// },
 				{
 					"path": "shopDietStore/shopDietStore",
 					"style": {
@@ -310,13 +310,13 @@
 						"navigationBarTitleText": "营养素详情"
 					}
 				},
-				{
-					"path": "symptomSelect/symptomSelect",
-					"style": {
-						"navigationBarTitleText": "症状选择",
-						"navigationStyle": "custom"
-					}
-				},
+				// {
+				// 	"path": "symptomSelect/symptomSelect",
+				// 	"style": {
+				// 		"navigationBarTitleText": "症状选择",
+				// 		"navigationStyle": "custom"
+				// 	}
+				// },
 				{
 					"path": "symptomSelect/symptomSelect2",
 					"style": {
@@ -392,42 +392,43 @@
 						"navigationBarTitleText": "科室介绍",
 						"enablePullDownRefresh": false
 					}
-				}, {
-					"path": "pregnant/pregnant",
-					"style": {}
 				},
-				{
-					"path": "pregnant/pregnantHome",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantDetail",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantFoods",
-					"style": {}
-				},
-				{
-					"path": "pregnant/pregnantFoodsDetail",
-					"style": {}
-				},
-				{
-					"path": "pregnant/antenatal",
-					"style": {}
-				},
-				{
-					"path": "pregnant/symptomDetail",
-					"style": {}
-				},
-				{
-					"path": "pathogen/pathogen",
-					"style": {}
-				},
-				{
-					"path": "pathogen/pathogenDetail",
-					"style": {}
-				},
+				// {
+				// 	"path": "pregnant/pregnant",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/pregnantHome",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/pregnantDetail",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/pregnantFoods",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/pregnantFoodsDetail",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/antenatal",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pregnant/symptomDetail",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pathogen/pathogen",
+				// 	"style": {}
+				// },
+				// {
+				// 	"path": "pathogen/pathogenDetail",
+				// 	"style": {}
+				// },
 				{
 					"path": "sickness/sickness",
 					"style": {
@@ -448,7 +449,6 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-
 				}, {
 					"path": "personal/personal",
 					"style": {
@@ -470,6 +470,12 @@
 					"enablePullDownRefresh": false
 				}
 
+			}, {
+				"path": "Registration/Registration",
+				"style": {
+					"navigationBarTitleText": "就诊登记",
+					"enablePullDownRefresh": false
+				}
 			}]
 		},
 		{
@@ -492,13 +498,14 @@
 						"enablePullDownRefresh": false
 					}
 				},
+				// {
+				// 	"path": "mapPage/mapPage",
+				// 	"style": {
+				// 		"enablePullDownRefresh": false,
+				// 		"navigationBarTitleText": "位置选择"
+				// 	}
+				// }, 
 				{
-					"path": "mapPage/mapPage",
-					"style": {
-						"enablePullDownRefresh": false,
-						"navigationBarTitleText": "位置选择"
-					}
-				}, {
 					"path": "newForm/newForm",
 					"style": {
 						"navigationBarTitleText": "",

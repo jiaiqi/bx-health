@@ -165,7 +165,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import dayjs from '../static/dayjs/dayjs.min.js';
+import dayjs from '@/static/js/dayjs.min.js';
 import DrugDetailInfo from '../components/DrugInfo/DrugInfo.vue';
 /**
  * 获取任意时间

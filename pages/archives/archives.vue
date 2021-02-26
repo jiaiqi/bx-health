@@ -147,7 +147,7 @@
 			</view>
 			<view class="content inspection-report">
 				<view class="report-item" v-for="item in inspectReportRecord" :key="item.id" @click="toRecord(item)">
-					<view class="images"><image class="image" src="../../static/xuehzi.png" mode="aspectFill"></image></view>
+					<view class="images"><image class="image" src="../../static/xuehzi.jpg" mode="aspectFill"></image></view>
 					<view class="title">{{ item.name || '' }}</view>
 					<view class="date">{{ item.create_time.slice(0, 10) }}</view>
 				</view>
@@ -1344,9 +1344,6 @@ export default {
 				if (!this.BPScore) {
 					this.BPScore = await this.calcBPScore();
 				}
-				// this.sportScore = await this.calcSportScore();
-				// this.sleepScore = await this.calcSleepScore();
-				// this.BPScore = await this.calcBPScore();
 				if (!this.isLoad) {
 					this.selectInspectionReport();
 				}

@@ -11,7 +11,8 @@
 			<uniEcCharts class="uni-ec-charts" id="uni-ec-canvas" v-if="currentChart === 'canvasLineC'" :ec="sleepEcData"></uniEcCharts>
 		</view>
 		<view class="button-box" v-if="isAllPages">
-			<button class="buttons" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key" @click="showCanvas(item.key)">
+			<button class="buttons" :class="{ active: currentChart === item.chartID }" size="mini" v-for="item in subList" :key="item.key"
+			 @click="showCanvas(item.key)">
 				{{ item.name }}
 			</button>
 		</view>
@@ -28,45 +29,31 @@
 				<button class="cu-btn bg-cyan symptom-add-button shadow-blur" v-if="pageType === 'symptom'" @click="toPages('symptom')">添加</button>
 			</view>
 			<view class="history-content">
-				<dietList
-					:chatChoseTime="chatChoseTime"
-					:key="pageType"
-					@changePageType="changePageType"
-					:pageType="pageType"
-					v-if="pageType === 'diet' || pageType === 'sport'"
-				></dietList>
-				<view
-					class="other-record"
-					v-if="pageType === 'sleep' || pageType === 'bp' || pageType === 'weight'"
-					:class="{
+				<dietList :chatChoseTime="chatChoseTime" :key="pageType" @changePageType="changePageType" :pageType="pageType" v-if="pageType === 'diet' || pageType === 'sport'"></dietList>
+				<view class="other-record" v-if="pageType === 'sleep' || pageType === 'bp' || pageType === 'weight'" :class="{
 						'sleep-record': pageType === 'sleep',
 						'bp-record': pageType === 'bp',
 						'weight-record': pageType === 'weight'
-					}"
-				>
+					}">
 					<!-- 体重、血压、睡眠 -->
 					<view class="record-title" v-if="pageType !== 'weight'">最新数据</view>
 					<view class="record-data" v-if="pageType !== 'weight'">
 						<view class="last-data" v-if="isArray(historyRecord) && historyRecord.length > 0 && pageType === 'bp'">
 							<text class="digital ">
 								<text>
-									<text
-										:class="{
+									<text :class="{
 											'text-green': historyRecord[0].systolic_pressure < 120,
 											'text-yellow': historyRecord[0].systolic_pressure >= 120 && historyRecord[0].systolic_pressure < 140,
 											'text-red': historyRecord[0].systolic_pressure >= 140
-										}"
-									>
+										}">
 										{{ getFixedNum(historyRecord[0].systolic_pressure) }}
 									</text>
 									<text class="text-gray">/</text>
-									<text
-										:class="{
+									<text :class="{
 											'text-green': historyRecord[0].diastolic_pressure < 80,
 											'text-yellow': historyRecord[0].diastolic_pressure < 90 && historyRecord[0].diastolic_pressure >= 80,
 											'text-red': historyRecord[0].diastolic_pressure >= 90
-										}"
-									>
+										}">
 										{{ getFixedNum(historyRecord[0].diastolic_pressure) }}
 									</text>
 								</text>
@@ -100,28 +87,33 @@
 									<view class="digit bmi">{{ bmi }}</view>
 								</view>
 							</view>
+
+							<view class="bmi-bar">
+								<view class="bar1 bar-box">
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi < 18.5"><text class="cuIcon-deliver_fill text-blue"><text
+											 class="bmi-tip">{{bmi}}</text></text></view>
+									<view class="bar">偏瘦</view>
+								</view>
+								<view class="bar2 bar-box">
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24"><text class="cuIcon-deliver_fill text-cyan"><text
+											 class="bmi-tip">{{bmi}}</text></text></view>
+									<view class="bar">正常</view>
+								</view>
+								<view class="bar3 bar-box">
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi <= 28 && bmi > 24"><text class="cuIcon-deliver_fill text-yellow"><text
+											 class="bmi-tip">{{bmi}}</text></text></view>
+									<view class="bar">超重</view>
+								</view>
+								<view class="bar4 bar-box">
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi > 28"><text class="cuIcon-deliver_fill text-orange"><text
+											 class="bmi-tip">{{bmi}}</text></text></view>
+									<view class="bar">肥胖</view>
+								</view>
+							</view>
 							<view class="bmi-label" v-if="isArray(weightForBmi)">
 								<view class="label text-bold">体重:</view>
 								<view class="value" v-for="item in weightForBmi" :key="item.bmi">
 									<text v-if="item.weight && isString(item.weight)">{{ item.weight }}</text>
-								</view>
-							</view>
-							<view class="bmi-bar">
-								<view class="bar1 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi < 18.5"><text class="cuIcon-triangledownfill"></text></view>
-									<view class="bar">偏瘦</view>
-								</view>
-								<view class="bar2 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24"><text class="cuIcon-triangledownfill"></text></view>
-									<view class="bar">正常</view>
-								</view>
-								<view class="bar3 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi <= 28 && bmi > 24"><text class="cuIcon-triangledownfill"></text></view>
-									<view class="bar">超重</view>
-								</view>
-								<view class="bar4 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi > 28"><text class="cuIcon-triangledownfill"></text></view>
-									<view class="bar">肥胖</view>
 								</view>
 							</view>
 							<view class="bmi-label" v-if="isArray(weightForBmi)">
@@ -139,31 +131,20 @@
 						<view class="title">历史数据</view>
 						<u-empty mode="history" v-if="historyRecord && historyRecord.length === 0"></u-empty>
 						<view class="list-box cu-list" v-if="historyRecord && historyRecord.length > 0">
-							<view
-								class="cu-item list-item"
-								:class="modalName == 'move-box-' + index ? 'move-cur' : ''"
-								@touchstart="ListTouchStart"
-								@touchmove="ListTouchMove"
-								@touchend="ListTouchEnd"
-								:data-target="'move-box-' + index"
-								@tap="updateItem(item)"
-								v-for="(item, index) in historyRecord"
-								:key="index"
-							>
+							<view class="cu-item list-item" :class="modalName == 'move-box-' + index ? 'move-cur' : ''" @touchstart="ListTouchStart"
+							 @touchmove="ListTouchMove" @touchend="ListTouchEnd" :data-target="'move-box-' + index" @tap="updateItem(item)"
+							 v-for="(item, index) in historyRecord" :key="index">
 								<image src="../static/icon/xueya.png" mode="" class="icon" v-if="pageType === 'bp'"></image>
 								<image src="../static/icon/sleep.png" mode="" class="icon" v-if="pageType === 'sleep'"></image>
 								<image src="../static/icon/tizhong.png" mode="" class="icon" v-if="pageType === 'weight'"></image>
 								<view class="content">
 									<view class="item">
-										<text
-											class="digital"
-											:class="{
+										<text class="digital" :class="{
 												'text-green': item.systolic_pressure < 120,
 												'text-yellow': item.systolic_pressure >= 120 && item.systolic_pressure < 140,
 												'text-red': item.systolic_pressure >= 140
 											}"
-											v-if="pageType === 'bp' && item && item.systolic_pressure"
-										>
+										 v-if="pageType === 'bp' && item && item.systolic_pressure">
 											{{ item.systolic_pressure ? getFixedNum(item.systolic_pressure) : '-' }}
 										</text>
 										<text class="digital" v-if="pageType === 'weight'">{{ item.weight ? getFixedNum(item.weight) : '-' }}</text>
@@ -171,14 +152,12 @@
 									</view>
 									<view class="item" v-if="pageType === 'bp' && item && item.diastolic_pressure">
 										<text class="text-gray">/</text>
-										<text
-											:class="{
+										<text :class="{
 												'text-green': item.diastolic_pressure < 80,
 												'text-yellow': item.diastolic_pressure < 90 && item.diastolic_pressure >= 80,
 												'text-red': item.diastolic_pressure >= 90
 											}"
-											class="digital bp"
-										>
+										 class="digital bp">
 											{{ item.diastolic_pressure ? getFixedNum(item.diastolic_pressure) : '-' }}
 										</text>
 									</view>
@@ -201,7 +180,9 @@
 										{{ getDate(item.create_time) }}
 									</text>
 								</view>
-								<view class="move"><view class="bg-red" @click.stop="deleteItem(item)">删除</view></view>
+								<view class="move">
+									<view class="bg-red" @click.stop="deleteItem(item)">删除</view>
+								</view>
 							</view>
 						</view>
 					</view>
@@ -211,20 +192,14 @@
 		<view class="cu-modal bottom-modal" :class="{ show: showSymptom }" @click="showSymptom = false">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="symptom-selector" :class="{ 'low-height': showSymptomDateSelector }">
-					<cascader-selector
-						v-if="!showSymptomDateSelector"
-						@clickTag="clickTag"
-						hideButton
-						insert
-						:srvInfo="{
+					<cascader-selector v-if="!showSymptomDateSelector" @clickTag="clickTag" hideButton insert :srvInfo="{
 							column: 'no',
 							showCol: 'name',
 							isTree: true,
 							serviceName: 'srvhealth_self_symptoms_select',
 							appNo: 'health',
 							key_disp_col: 'name'
-						}"
-					></cascader-selector>
+						}"></cascader-selector>
 					<view class="symptom-date-selector" v-if="showSymptomDateSelector">
 						<view class="item-list">
 							<view class="item-list-top">
@@ -251,7 +226,7 @@
 					</view>
 					<view class="remark" v-if="currentSymptom && currentSymptom.node_type === '症状' && showSymptomDateSelector">
 						<textarea v-model="symptoms_remark" placeholder="输入症状说明" />
-					</view>
+						</view>
 					<view class="button-box">
 						<button
 							type="primary"
@@ -292,7 +267,7 @@
 import uniEcCharts from '@/components/uni-ec-canvas/uni-echart.vue'
 import energyListWrap from './totalEnergyList.js'
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet'
-import dayjs from '../static/dayjs/dayjs.min.js'
+import dayjs from '@/static/js/dayjs.min.js'
 import { mapState } from 'vuex'
 export default {
 	components: {
@@ -362,11 +337,24 @@ export default {
 			loginUserInfo: {},
 			userInfo: {},
 			wxUserInfo: {},
-			stepEcData: {},
-			weightEcData: {},
-			bpEcData: {},
-			caloriesEcData: {},
-			sleepEcData: {},
+			stepEcData: {
+				option:{} //一定要写option 不然echarts会报错
+			},
+			weightEcData: {
+				option:{}
+			},
+			bpEcData: {
+				option:{}
+			},
+			caloriesEcData: {
+				option:{}
+			},
+			sleepEcData: {
+				option:{}
+			},
+			stepChartData:{
+				option:{},
+			},
 			weightChartData: {
 				categories: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18'],
 				series: [
@@ -1248,7 +1236,7 @@ export default {
 				option.series.push(obj)
 			})
 			let data = {
-				option: option
+				option: option?option:{}
 			}
 			return data
 		},
@@ -1295,6 +1283,62 @@ export default {
 			let res = await this.$http.post(url, req)
 			if (res.data.state === 'SUCCESS') {
 				await this.selectServiceLog()
+			}
+		},
+		async getStepData(data){
+			if(!Array.isArray(data)){
+				let timeRange = {
+					start: '',
+					end: ''
+				}
+				timeRange.end = dayjs()
+					.add(1, 'days')
+					.format('YYYY-MM-DD')
+				timeRange.start = dayjs()
+					.subtract(31, 'days')
+					.format('YYYY-MM-DD')
+				let req = {
+					"serviceName":"srvhealth_body_activity_record_select",
+					"colNames":["*"],
+					order: [{colName: "hdate", orderType: "desc"}],
+					"condition":[
+						{"colName":"userno",ruleType:'eq',value:this.vuex_userInfo.userno},
+						{"colName":"name","ruleType":"like","value":"手机计步"},
+						{ "colName": 'hdate', ruleType: 'lt', value: timeRange.end }, 
+						{ "colName": 'hdate', ruleType: 'gt', value: timeRange.start }
+					],
+					"page":{"pageNo":1,"rownumber":30},
+				}
+				let res = await this.$fetch('select', 'srvhealth_body_activity_record_select', req, 'health')
+				if(res.success&&Array.isArray(res.data)){
+					data = res.data
+				}
+			}
+			if(Array.isArray(data)){
+				data = data.reverse()
+				this.stepChartData = {
+					categories: data.map(item=>item.hdate),
+				series: [
+					{
+						name: '体重',
+						data: data.map(item=>item.amount),
+						color: '#1890ff'
+					}
+				]
+				}
+				try{
+					this.stepEcData = this.buildEcData(this.stepChartData, '步', '步数')
+				}catch(e){
+					//TODO handle the exception
+					// uni.showModal({
+					// 	title:'提示11',
+					// 	content:e,
+					// })
+				}
+				// uni.showModal({
+				// 	title:'提示1',
+				// 	content:JSON.stringify(this.stepEcData),
+				// })
 			}
 		},
 		async getChartData(type) {
@@ -1455,6 +1499,7 @@ export default {
 				return data
 			}
 			// #endif
+			return true
 		},
 		async decryptData(result) {
 			// 解密微信加密数据
@@ -1489,7 +1534,19 @@ export default {
 						}
 						chartData.series[0].data = stepList.map(item => item.step)
 						this.wxRunData = chartData
-						this.stepEcData = this.buildEcData(this.wxRunData, '步', '步数')
+						try{
+							this.stepEcData = this.buildEcData(this.wxRunData, '步', '步数')
+						}catch(e){
+							//TODO handle the exception
+							// uni.showModal({
+							// 	title:'提示2',
+							// 	content:e,
+							// })
+						}
+						// uni.showModal({
+						// 	title:'提示2',
+						// 	content:JSON.stringify(this.stepEcData),
+						// })
 						return stepList
 					} else {
 						return false
@@ -1508,24 +1565,25 @@ export default {
 				colNames: ['*'],
 				condition: [{ colName: 'userno', ruleType: 'like', value: this.vuex_userInfo.userno }, { colName: 'name', ruleType: 'like', value: '手机计步' }],
 				relation_condition: {},
-				page: { pageNo: 1, rownumber: 31 }
+				order: [{colName: "hdate", orderType: "desc"}],
+				page: { pageNo: 1, rownumber:50 }
 			}
 			let timeRange = {
 				start: '',
 				end: ''
 			}
-			timeRange.end = dayjs().format('YYYY-MM-DD')
+			timeRange.end = dayjs().add(1,'days').format('YYYY-MM-DD')
 			timeRange.start = dayjs()
-				.subtract(31, 'days')
+				.subtract(32, 'days')
 				.format('YYYY-MM-DD')
 			req.condition = req.condition.concat([{ colName: 'hdate', ruleType: 'lt', value: timeRange.end }, { colName: 'hdate', ruleType: 'gt', value: timeRange.start }])
 			let res = await this.$http.post(url, req)
 			if (Array.isArray(res.data.data)) {
-				let dateArr = res.data.data.map(item => item.hdate.trim()).push(dayjs().format('YYYY-MM-DD'))
+				let dateArr = res.data.data.map(item => dayjs(item.hdate.trim()).format('YYYY-MM-DD'))
 				let pushData = []
 				if (Array.isArray(stepList) && stepList.length > 0) {
 					stepList.forEach(item => {
-						if (!dateArr.includes(item.date)) {
+						if (!Array.isArray(dateArr)||!dateArr.includes(item.date)) {
 							pushData.push({
 								userno: this.vuex_userInfo.userno,
 								hdate: item.date,
@@ -1534,6 +1592,7 @@ export default {
 								unit: '步',
 								amount: item.step,
 								energy: (item.step * 150) / 1000,
+								image:'20201120203910653100',
 								user_name: this.vuex_userInfo.name
 							})
 						}
@@ -1542,6 +1601,8 @@ export default {
 				pushData = pushData.reverse()
 				if (pushData.length > 0) {
 					this.insertStepData(pushData)
+				}else{
+					this.getStepData(res.data.data)
 				}
 			}
 		},
@@ -1555,6 +1616,7 @@ export default {
 				}
 			]
 			await this.$http.post(url, req)
+			this.getStepData()
 		},
 		async getNutrientRecommended() {
 			let url = this.getServiceUrl('health', 'srvhealth_nutrient_values_recommended_select', 'select')
@@ -1858,12 +1920,12 @@ export default {
 					if (!this.serviceLog) {
 						await this.selectServiceLog()
 					}
-					// #ifdef MP-WEIXIN
-					this.currentChart = 'stepChart'
-					this.getwxStepInfoList().then(_ => {
-						//获取微信运动记录
-					})
-					// #endif
+					// this.currentChart = 'stepChart'
+					// this.showCanvas('step')
+					// // this.getwxStepInfoList().then(_ => {
+					// // 	//获取微信运动记录
+					// // 							this.selectDataFromSportRecord()
+					// // })
 				}
 			}
 			console.log(this.pageType)
@@ -1981,10 +2043,6 @@ export default {
 		}
 	},
 	onShow() {
-		this.initPage()
-	},
-	created() {
-		// uni.$on('getFile',(e)=>{console.log('getFile',e)})
 	},
 	onLoad(option) {
 		uni.$on('deleteItem', () => {
@@ -1993,7 +2051,9 @@ export default {
 		})
 		if (option.isAll) {
 			this.isAllPages = true
+			this.pageType = 'sport'
 		}
+		this.initPage()
 		if (option.customer_no) {
 			this.customer_no = option.customer_no
 		}

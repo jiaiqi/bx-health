@@ -234,6 +234,7 @@ export default {
 </script>
 
 <style lang="scss">
+@import "./static/iconfont.css"; //引入字体文件
 @import 'colorui/main.css';
 @import 'colorui/icon.css';
 @import '@/common/uni.css';

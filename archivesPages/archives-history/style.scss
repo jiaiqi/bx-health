@@ -205,13 +205,21 @@
 							margin-top: 10rpx;
 							.scale {
 								position: absolute;
-								top: -40rpx;
+								top: -25px;
 								font-size: 50rpx;
 								left: 0;
 								transition: left 2s ease;
+								// font-weight: bold;
+								.bmi-tip{
+									right: 0px;
+									top: -12px;
+									font-size: 14px;
+									// position: absolute;
+								}
 							}
 							.bar {
-								height: 40rpx;
+								height: 30px;
+								line-height: 30px;
 								color: #f1f1f1;
 							}
 						}

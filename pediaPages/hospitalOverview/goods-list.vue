@@ -104,10 +104,12 @@ export default {
 	padding: 0 5px 20px;
 }
 .goods-item {
+	border-radius: 10px;
+	overflow: hidden;
 	background-color: #fff;
 	break-inside: avoid;
 	margin-bottom: 20rpx;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+	// box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	&:nth-child(2n) {
 		margin-right: 0;
 	}
