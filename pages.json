@@ -320,8 +320,7 @@
 				{
 					"path": "symptomSelect/symptomSelect2",
 					"style": {
-						"navigationBarTitleText": "症状选择",
-						"navigationStyle": "custom"
+						"navigationBarTitleText": "症状选择"
 					}
 				},
 				{

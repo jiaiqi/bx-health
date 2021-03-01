@@ -1,40 +1,19 @@
 <template>
 	<view class="symptoomSelectWrap">
 		<view class="symptopm-tops">
-			<cu-custom bgColor="bg-gradual-green" :isBack="!serBtn">
-				<block slot="backText" v-if="!serBtn">返回</block>
-				<block slot="content">病症选择</block>
-			</cu-custom>
 			<Thetable :list="chooseArr" @delAlltabAllansw="delAlltabAllansw" ref="tabbox" @delHtml="deltab"></Thetable>
 		</view>
-		<view class="symptom-bot-wrap">
-			<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[0].children.length > 0 && !isSearch">
-				<cascader-selector @clickTag="clickTag" hideButton :srvInfo="srvInfo"></cascader-selector>
-			</view>
-			<view class="boxbtn">
-				<view class="btns" @click="lookobj">完成</view>
-			</view>
+		<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[0].children.length > 0 && !isSearch">
+			<cascader-selector @clickTag="clickTag" hideButton :srvInfo="srvInfo"></cascader-selector>
 		</view>
-		<view class="symptom_from"></view>
-		<view class="cu-modal bottom-modal" :class="{ show: menuIsShow }">
-			<view class="cu-dialog" @click.stop="">
-				<view class="action pregnant-main-top-item-poup-top" @tap="menuIsShow = false"><text class="cuIcon-close text-red"></text></view>
-				<view class="pregnant-main-top-item-poup">
-					<text @click="changeMenu(item, index)" v-if="item.name !== '导入数据'" :class="activeIndex === index ? 'activeSympt' : ''"
-					 v-for="(item, index) in symptomTitList" :key="index">
-						{{ item.name }}
-					</text>
-				</view>
-			</view>
-		</view>
-		<!-- 	<u-popup v-model="showSymptomDateSelector"  mode="bottom">
-			<symptom-form @change="symptomFormChange" :form-type="from" :currentSymptom="currentSymptom"></symptom-form>
-		</u-popup> -->
-		<view class="cu-modal bottom-modal" :class="{ show: showSymptomDateSelector }">
+<!-- 		<view class="cu-modal bottom-modal" :class="{ show: showSymptomDateSelector }">
 			<view class="cu-dialog" @click.stop="">
 				<symptom-form @change="symptomFormChange" :form-type="from" :currentSymptom="currentSymptom"></symptom-form>
 			</view>
-		</view>
+		</view> -->
+		<uni-popup ref="popup" type="bottom">
+			<symptom-form @change="symptomFormChange" :form-type="from" :currentSymptom="currentSymptom"></symptom-form>
+		</uni-popup>
 	</view>
 </template>
 
@@ -141,6 +120,7 @@
 		},
 		methods: {
 			symptomFormChange(e) {
+				this.$refs.popup.close();
 				this.showSymptomDateSelector = false
 				if (e === false) {} else if (e.occur_time) {
 					this.currentSymptom.occur_time = e.occur_time
@@ -187,6 +167,7 @@
 				if (e.node_type && e.node_type !== '分类' && this.chooseArr.findIndex(item => item.no === e.no) === -1) {
 					// if (this.from === 'symptom_record') {
 					this.showSymptomDateSelector = true
+					this.$refs.popup.open();
 					this.currentSymptom = e
 					// } else {
 					// 	uni.showModal({
@@ -216,23 +197,6 @@
 					if (!isHas) {
 						chooseArr.push(e)
 					}
-				}
-			},
-			/* 点击菜单展开或者收缩**/
-			showMore() {
-				this.menuIsShow = !this.menuIsShow
-			},
-			changeListType() {
-				this.isChunk = !this.isChunk
-			},
-			changeMenu(item, i) {
-				this.activeIndex = i
-				this.scrollMenuLeft = (i - 1) * 85
-				this.currentTab = i
-				this.currentTopTab = item
-				this.getCurrentTabList(item)
-				if (this.menuIsShow) {
-					this.menuIsShow = false
 				}
 			},
 			/*获取点击顶部菜单数据**/
@@ -588,371 +552,9 @@
 </script>
 
 <style lang="scss" scoped>
-	.cu-modal.show{
-		overflow-y: hidden;
-	}
-	
-	
 	.symptoomSelectWrap {
 		overflow-x: hidden;
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
-
-		.symptom-bot-wrap {
-			height: calc(100vh - 360rpx);
-			flex: 1;
-			overflow-y: scroll;
-
-			/deep/ .u-tab-item {
-				padding: 0 20upx;
-			}
-
-			background-color: #fff;
-
-			.symptom-bot-wrap-main {
-				// height: calc(100vh - 240rpx);
-			}
-		}
-	}
-
-	.wrapCont {
-		margin: 20upx;
-		padding: 20upx;
-		box-shadow: 0px 2px 10px 0px #d6d4d4;
-
-		.wrapCont-top {
-			font-weight: 700;
-			font-size: 18px;
-			text-align: center;
-			margin-bottom: 20upx;
-		}
-
-		.wrapCont_row {
-			display: flex;
-			flex-direction: column;
-			margin: 20upx 0;
-
-			text {
-				&:first-child {
-					font-size: 15px;
-					font-weight: bold;
-					margin-bottom: 10px;
-					padding-right: 10px;
-					box-sizing: border-box;
-				}
-			}
-
-			.wrapCont-main {
-				display: flex;
-				flex-direction: column;
-
-				.wrapCont_row_item_wrap {
-					display: flex;
-					flex-direction: column;
-					margin-top: 20upx;
-
-					.wrapCont_row_item_wrap-t {
-						color: #000000;
-						font-size: 30upx;
-						margin-bottom: 10upx;
-					}
-
-					.wrapCont_row_item_wrap-b {
-						display: flex;
-						flex-wrap: wrap;
-					}
-				}
-			}
-
-			.wrapCont-main-no {
-				display: flex;
-				flex-wrap: wrap;
-			}
-
-			.no_wrapCont_row_item_wrap {
-				display: flex;
-			}
-		}
-
-		.box {
-			display: flex;
-			flex-wrap: wrap;
-		}
-	}
-
-	.tree-select-box {
-		display: flow-root;
-		background-color: white;
-		margin: 20rpx 0;
-		padding: 20rpx 0;
-
-		text {
-			&:last-child {
-				color: #fbbd08;
-			}
-		}
-
-		.tree-select-box-l {
-			margin-left: 40rpx;
-			min-width: 140rpx;
-		}
-
-		.tree-select-box-item {
-			text {
-				margin-left: 0 !important;
-				margin-right: 10rpx;
-			}
-		}
-	}
-
-	.wrapCont_row_item {
-		line-height: 34px;
-		padding: 0 10px;
-		box-sizing: border-box;
-		border: #e5e5e5 solid 1px;
+		min-height: calc(100vh - var(--window-top));
 		background-color: #fff;
-		color: #333;
-		position: relative;
-		overflow: hidden;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		margin: 0 2px 2px 0;
-		// min-width: 50upx;
-		// max-width: ;
-	}
-
-	.actived {
-		background-color: #f5fff9;
-		color: #42b983;
-		border: #42b983 solid 1px;
-
-		&::before {
-			content: '';
-			display: block;
-			width: 20px;
-			height: 20px;
-			background-color: #42b983;
-			position: absolute;
-			right: -1px;
-			bottom: -1px;
-			z-index: 1;
-			clip-path: polygon(100% 0, 0% 100%, 100% 100%);
-		}
-
-		&::after {
-			content: '';
-			display: block;
-			width: 4px;
-			height: 8px;
-			border-right: #fff solid 2px;
-			border-bottom: #fff solid 2px;
-			transform: rotate(25deg);
-			position: absolute;
-			right: 2px;
-			bottom: 3px;
-			z-index: 2;
-		}
-	}
-
-	.box {
-		margin: 10px 0;
-	}
-
-	.symptom-bot-wrap-top {
-		display: flex;
-		align-items: center;
-		line-height: 30px;
-		background-color: #fff;
-		font-size: 30upx;
-		padding: 10upx 0;
-
-		.symptom-bot-wrap-top-l {
-			width: 670upx;
-			overflow-x: scroll;
-			white-space: nowrap;
-
-			text {
-				padding: 10upx 40upx;
-			}
-
-			.activeSympt {
-				color: rgb(66, 185, 131);
-				font-weight: 700;
-			}
-		}
-	}
-
-	.poupbox {
-		.mask {
-			background: rgba(0, 0, 0, 0.6);
-			position: fixed;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			z-index: 888;
-		}
-
-		.boxpou {
-			z-index: 999;
-			width: 88%;
-			max-height: 800upx;
-			min-height: 600upx;
-			// box-shadow: 0px 2px 6px 0px #d6d4d4;
-			position: fixed;
-			background: #ffffff;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			margin: auto;
-			border-radius: 5px;
-			animation: 0.3s opacity2;
-
-			.select {
-				width: 100%;
-				text-align: center;
-				font-size: 34upx;
-				line-height: 80upx;
-			}
-
-			.contYes {
-				display: flex;
-				justify-content: space-around;
-				position: absolute;
-				bottom: 0;
-				width: 100%;
-
-				.btn {
-					width: 50%;
-					text-align: center;
-					color: rgb(0, 122, 255);
-					border-top: 1px solid #d5d5d6;
-					line-height: 100upx;
-					font-weight: bold;
-				}
-
-				.concel {
-					border-right: 1px solid #d5d5d6;
-				}
-			}
-		}
-	}
-
-	@keyframes opacity2 {
-		0% {
-			opacity: 0;
-		}
-
-		50% {
-			opacity: 0.5;
-		}
-
-		100% {
-			opacity: 1;
-		}
-	}
-
-	.normalstyle {
-		color: #848080;
-		justify-content: center;
-	}
-
-	.boxbtn {
-		width: 100vw;
-	}
-
-	.btns {
-		margin: 20px auto;
-		height: 40px;
-		width: 90%;
-		background: linear-gradient(to right, #ffc458, #ff635f);
-		font-size: 16px;
-		color: #ffffff;
-		text-align: center;
-		line-height: 40px;
-		border-radius: 30px;
-	}
-
-	.select {
-		width: 100%;
-		text-align: center;
-		font-size: 34upx;
-		line-height: 80upx;
-	}
-
-	.contentpop {
-		height: 600upx;
-
-		.contentpop_title {
-			padding-left: 20upx;
-			font-size: 16px;
-			border-left: 4px solid rgb(107, 161, 255);
-			margin-left: 30upx;
-		}
-
-		.contentpop_cen_tit {
-			margin: 10px;
-			color: #777777;
-			margin-left: 0;
-		}
-	}
-
-	.contentpop_cen_bot {
-		height: 560upx;
-		// overflow-y: scroll!important;
-	}
-
-	.contYes {
-		display: flex;
-		justify-content: space-around;
-		width: 100%;
-
-		.btn {
-			width: 50%;
-			text-align: center;
-			color: rgb(0, 122, 255);
-			border-top: 1px solid #d5d5d6;
-			line-height: 100upx;
-			font-weight: bold;
-		}
-
-		.concel {
-			border-right: 1px solid #d5d5d6;
-		}
-	}
-
-	.navs-top {
-		margin-right: 20upx;
-	}
-
-	.pregnant-main-top-item-poup-top {
-		display: flex;
-		justify-content: flex-end;
-		margin: 20rpx;
-		font-size: 36rpx;
-	}
-
-	.pregnant-main-top-item-poup {
-		width: 95%;
-		margin: 0 auto;
-		padding: 0upx 0 30rpx;
-		font-size: 30upx;
-		color: #000000;
-
-		text {
-			display: inline-block;
-			padding: 10upx 20upx;
-			border: 1px solid #ccc;
-			margin-right: 10upx;
-			margin-bottom: 20upx;
-			background-color: rgb(242, 242, 242);
-		}
-
-		.activeSympt {
-			color: rgb(66, 185, 131);
-			font-weight: 700;
-		}
 	}
 </style>

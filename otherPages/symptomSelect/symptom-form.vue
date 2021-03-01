@@ -1,37 +1,41 @@
 <template>
 	<view class="symptom-form">
 		<view class="main-title">
-			<text> 是否选择此症状 </text>
+			<text> 选择症状 </text>
 			<text class="text-bold">【{{ currentSymptom.name }}】</text>
 		</view>
-		<view class="form-content">
-			<a-form ref="bxform" class="a-form" v-if="currentSymptom&&currentSymptom.daq_survey_activity_no" :fields="configCols" label-position="top" option-mode="normal" pageType="add"></a-form>
-			<view class="symptom-date-selector" v-if="formType==='symptom_record'">
-				<view class="item-list">
-					<view class="item-list-top">
-						<view class="label"><text>请选择症状发生时间:</text></view>
-						<view class="value" v-if="occur_time">
-							<picker mode="date" :value="occur_time.split(' ')[0]" @change="DateChange($event, 'occur_time')">
-								<view class="picker">{{ occur_time.split(' ')[0] }}</view>
-							</picker>
-							<view class="margin-right"></view>
-							<picker mode="time" :value="occur_time.split(' ')[1]" @change="TimeChange($event, 'occur_time')">
-								<view class="picker">{{ occur_time.split(' ')[1] }}</view>
-							</picker>
+		<scroll-view scroll-y="true" >
+			<view class="form-content">
+				<a-form ref="bxform" class="a-form" v-if="currentSymptom&&currentSymptom.daq_survey_activity_no" :fields="configCols"
+				 label-position="top" option-mode="normal" pageType="add"></a-form>
+				<view class="symptom-date-selector" v-if="formType==='symptom_record'">
+					<view class="item-list">
+						<view class="item-list-top">
+							<view class="label"><text>请选择症状发生时间:</text></view>
+							<view class="value" v-if="occur_time">
+								<picker mode="date" :value="occur_time.split(' ')[0]" @change="DateChange($event, 'occur_time')">
+									<view class="picker">{{ occur_time.split(' ')[0] }}</view>
+								</picker>
+								<view class="margin-right"></view>
+								<picker mode="time" :value="occur_time.split(' ')[1]" @change="TimeChange($event, 'occur_time')">
+									<view class="picker">{{ occur_time.split(' ')[1] }}</view>
+								</picker>
+							</view>
 						</view>
-					</view>
-					<view class="item-list-center">
-						<view class="number-change">
-							<button class="operate cu-btn" @click="changeTime('occur_time', -60)">-1小时</button>
-							<button class="operate cu-btn margin-right" @click="changeTime('occur_time', -10)">-10分钟</button>
-							<button class="operate cu-btn" @click="changeTime('occur_time', 10)">+10分钟</button>
-							<button class="operate cu-btn" @click="changeTime('occur_time', 60)">+1小时</button>
+						<view class="item-list-center">
+							<view class="number-change">
+								<button class="operate cu-btn" @click="changeTime('occur_time', -60)">-1小时</button>
+								<button class="operate cu-btn margin-right" @click="changeTime('occur_time', -10)">-10分钟</button>
+								<button class="operate cu-btn" @click="changeTime('occur_time', 10)">+10分钟</button>
+								<button class="operate cu-btn" @click="changeTime('occur_time', 60)">+1小时</button>
+							</view>
 						</view>
 					</view>
 				</view>
+				<view class="remark" v-if="formType==='symptom_record'"><textarea v-model="symptoms_remark" placeholder="输入症状说明" /></view>
 			</view>
-			<view class="remark" v-if="formType==='symptom_record'"><textarea v-model="symptoms_remark" placeholder="输入症状说明" /></view>
-		</view>
+		</scroll-view>
+		
 		<view class="button-box">
 			<button class="cu-btn next-btn bg-gray shadow-blur round margin-top" @click="submitFormData('cancel')">取消</button>
 			<button class="cu-btn next-btn bg-blue shadow-blur round margin-top" type="primary" @click="submitFormData">确定</button>
@@ -340,18 +344,20 @@ export default {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	overflow-y: scroll;
+	overflow: hidden;
 	.main-title{
+		width: 100%;
 		padding: 20rpx;
+		font-size: 16px;
+		font-weight: bold;
+		border-bottom: 1px solid #f1f1f1;
+		text-align: center;
 	}
 	.form-content{
-		max-height: calc(100vh - var(--window-bottom) - var(--window-top) - 150px);
-		overflow-y: scroll;
+		max-height: calc(100vh - var(--window-top) - 200px);
+		// overflow-y: scroll;
 		}
 
-	.cascader-wrap {
-		flex: 1;
-	}
 	/deep/ .form-item .form-item-content.label-top{
 		padding: 0;
 	}
