@@ -21,13 +21,13 @@
 				<image :src="topBgImg" mode="aspectFit"></image>
 			</view>
 		</view>
-		<view class="introduction">
+	<!-- 	<view class="introduction">
 			<view class="title">
 				<text class="cuIcon-titles text-blue"></text>
 				<text class="">出诊表</text>
 			</view>
 			<uni-calendar :selected="calenderSelected" :insert="true" :lunar="true" :start-date="'2019-3-2'" :end-date="'2019-5-20'"></uni-calendar>
-		</view>
+		</view> -->
 		<view class="button-area">
 			<view class="button-item" @click="toPages('seeDoctor')">
 				<button class="cu-btn bg-cyan"><text class="cuIcon-edit"></text></button>

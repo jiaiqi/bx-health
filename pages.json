@@ -476,6 +476,13 @@
 					"navigationBarTitleText": "就诊登记",
 					"enablePullDownRefresh": false
 				}
+			}, {
+				"path": "Registration/RegistrationDetail",
+				"style": {
+					"navigationBarTitleText": "",
+					"enablePullDownRefresh": false
+				}
+
 			}]
 		},
 		{

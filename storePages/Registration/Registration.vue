@@ -2,7 +2,7 @@
 	<view>
 		<lx-calendar :show-arrow="false" class="calendar"></lx-calendar>
 		<view class="professor-box">
-			<view class="professor-item" v-for="item in professorList">
+			<view class="professor-item" v-for="item in professorList" @click="toDetail(item)">
 				<image class="img" :src="getImagePath(item.profile_url) ? getImagePath(item.profile_url) : '../static/img/doctor_default.jpg'"
 				 mode="aspectFit"></image>
 				<view class="doc-info">
@@ -33,6 +33,11 @@
 			}
 		},
 		methods: {
+			toDetail(e){
+				uni.navigateTo({
+					url:`./RegistrationDetail?storeNo=${this.storeNo}&doctorNo=${e.person_no}`
+				})
+			},
 			selectStoreInfo() {
 				let req = {
 					serviceName: 'srvhealth_store_mgmt_select',

@@ -621,6 +621,27 @@ export default {
 			} else {
 				date = new Date(date)
 			}
+			let today = new Date()
+			let todayInfo = {
+				'yy': today.getFullYear(),
+				'MM': (() => {
+					let MM = today.getMonth() + 1
+					if (MM < 10) {
+						MM = '0' + MM
+					}
+					return MM
+				})(),
+				'dd': today.getDate() < 10 ? '0' + today.getDate() : today.getDate(),
+				'HH': today.getHours() < 10 ? '0' + today.getHours() : today.getHours(),
+				'mm': (() => {
+					let mm = today.getMinutes()
+					if (mm < 10) {
+						mm = '0' + mm
+					}
+					return mm
+				})(),
+				'ss': today.getSeconds() < 10 ? "0" + today.getSeconds() : today.getSeconds()
+			}
 			let o = {
 				'yy': date.getFullYear(),
 				'MM': (() => {
@@ -652,6 +673,23 @@ export default {
 			} else if (type === 'time' || type === 'hh:mm:ss') {
 				return o.HH + ':' + o.mm + ':' + o.ss
 			} else if (type === 'normal') {
+				if (o.MM === todayInfo.MM && o.dd === todayInfo.dd) {
+					if (o.HH >= 0 && o.HH < 5) {
+						return '凌晨 ' + o.HH + ':' + o.mm;
+					} else if (o.HH >= 5 && o.HH < 7) {
+						return '早上 ' + o.HH + ':' + o.mm;
+					} else if (o.HH >= 7 && o.HH < 11) {
+						return '上午 ' + o.HH + ':' + o.mm;
+					} else if (o.HH >= 11 && o.HH < 14) {
+						return '中午 ' + o.HH + ':' + o.mm;
+					} else if (o.HH >= 14 && o.HH < 18) {
+						return '下午 ' + o.HH + ':' + o.mm;
+					} else if (o.HH >= 18 && o.HH < 22) {
+						return '晚上 ' + o.HH + ':' + o.mm;
+					} else if (o.HH >= 22 && o.HH <= 24) {
+						return '深夜 ' + o.HH + ':' + o.mm;
+					}
+				}
 				return o.MM + '-' + o.dd + ' ' + o.HH + ':' + o.mm;
 			} else if (type === 'h') {
 				return o.HH;

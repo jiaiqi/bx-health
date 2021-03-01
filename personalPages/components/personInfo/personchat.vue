@@ -18,9 +18,9 @@ s<template>
 						<view class="rect5"></view>
 					</view>
 				</view>
-				<view :id="`person-chat-item${item.id}`" v-for="(item, index) in recordList" :key="index" class="person-chat-item"
+				<view :id="`person-chat-item${item.id}`" v-for="(item, index) in recordList" :key="item.id" class="person-chat-item"
 				 :class="item.sender_account === currentUserInfo.userno ? 'person-chat-item-my' : ''">
-					<view class="send-time" v-if="showSendTime(item, index)">{{ formateDate(item.create_time, false) }}</view>
+					<view class="send-time" v-if="showSendTime(item, index)">{{ formateDate(item.create_time, 'normal') }}</view>
 					<view v-if="item.sender_account != currentUserInfo.userno" class="person-chat-item-accept">
 						<view class="sender-info" v-if="groupInfo && groupInfo.gc_no">
 							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
@@ -33,7 +33,7 @@ s<template>
 						</view>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url && item.msg_content_type === '图片'"
 						 class="person-chat-item-right person-chat-item-right-image">
-							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url"></u-image>
+							<chat-image :max="350" :src="item.img_url"></chat-image>
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
@@ -97,7 +97,8 @@ s<template>
 						<text class="unread" v-if="item.msg_state === '未读' && (!groupInfo || !groupInfo.gc_no)">{{ item.msg_state }}</text>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
 							<!-- <image :src="item.img_url" :style="{ width: item.imgWidth + 'px', height: item.imgHeight + 'px' }"></image> -->
-							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url"></u-image>
+							<!-- <u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url"></u-image> -->
+							<chat-image :src="item.img_url"></chat-image>
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
@@ -1430,14 +1431,10 @@ s<template>
 					}
 				}
 			},
-			setRefreshMessageTimer(second = 6 * 1000) {
+			setRefreshMessageTimer(second = 30 * 1000) {
 				// 设置定时刷新消息的定时器
 				this.refreshMessageTimer = setInterval(() => {
-					this.initMessageList('refresh').then(_ => {
-						// this.$nextTick(() => {
-						// 	this.toBottom()
-						// })
-					})
+					this.initMessageList('refresh')
 				}, second)
 			},
 			async updateMessageInfo(e) {
@@ -1798,7 +1795,7 @@ s<template>
 						box-shadow: none;
 						border-radius: 10rpx;
 						padding: 0;
-						border: 1px solid #fff;
+						// border: 1px solid #fff;
 						margin-top: 5px;
 						overflow: hidden;
 
@@ -1955,7 +1952,7 @@ s<template>
 						overflow: hidden;
 						border-radius: 10rpx;
 						padding: 0;
-						border: 1px solid #fff;
+						// border: 1px solid #fff;
 						margin-top: 5px;
 
 						image {

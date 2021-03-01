@@ -1,10 +1,10 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="page-wrap" :class="{ onlyCurrentPage: onlyCurrentPage }">
-		<swiper class="screen-swiper item-box square-dot" easing-function="linear" :height="300" :indicator-dots="true"
-		 :circular="true" :autoplay="true" interval="5000" duration="500">
-			<swiper-item v-for="(item, index) in swiperList" :key="item.url">
-				<image :src="item.url" mode="aspectFill" @click="toPreviewImage(item.url)"></image>
+		<swiper class="screen-swiper item-box square-dot" easing-function="linear" :indicator-dots="true" :circular="true"
+		 :autoplay="true" interval="5000" duration="500" height="300">
+			<swiper-item v-for="(item, index) in swiperList" :key="item.url" @click.stop="toPreviewImage(item.url)">
+				<image :src="item.url" mode="scaleToFill"></image>
 			</swiper-item>
 		</swiper>
 		<view class="page-content">
@@ -15,9 +15,10 @@
 					<view class="left" @click="toPages('instroduce')">
 						<view class="top">
 							<view class="name">{{ storeInfo.name }}</view>
+							<view class="bind" v-if="!isBind"><button @click.stop="bindStore" type="primary" class="bg-blue cu-btn sm">绑定</button></view>
 						</view>
 						<view class="bottom" v-if="introduction && introduction.length < 25">{{ introduction }}</view>
-						<view class="bottom" v-if="storeInfo.address" @click="getCurrentLocation">
+						<view class="bottom" v-if="storeInfo.address" @click.stop="getCurrentLocation">
 							<view class="address">
 								<text class="content">{{ storeInfo.address }}</text>
 								<text class="cuIcon-locationfill text-blue margin-left-xs"></text>
@@ -146,7 +147,6 @@
 	import {
 		mapState
 	} from 'vuex';
-	import hospitalData from '../static/data/hospital1.js';
 	import goodsList from './goods-list.vue';
 	export default {
 		components: {
@@ -154,6 +154,8 @@
 		},
 		data() {
 			return {
+				isBind: false, //当前用户是否绑定此诊所
+				bindUserInfo: {},
 				swiperList: [],
 				goodsListData: [],
 				storeNo: '',
@@ -163,16 +165,6 @@
 				deptList: [], //科室
 				groupList: [], // 关联圈子
 				noticeList: [],
-				hospitalData: {},
-				hospitalInfo: {
-					name: '西安交通大学第一附属医院',
-					tag: ['三甲'],
-					posititon: {
-						address: '', //详细地址
-						longitude: '', //经度
-						latitude: '' // 纬度
-					}
-				}
 			};
 		},
 		computed: {
@@ -208,7 +200,39 @@
 
 						break;
 					case 1: // 就诊登记
-						url = '/storePages/Registration/Registration?storeNo='+this.storeNo
+						// url = '/storePages/Registration/Registration?storeNo=' + this.storeNo
+						let fieldsCond = [{
+								"column": "user_info_no",
+								"display": false
+							}, {
+								"column": "name",
+								"value": this.userInfo.name
+							}, {
+								"column": "time",
+								"value": this.formateDate('', 'date')
+							}, {
+								"column": "user_no",
+								"display": false,
+								value: this.userInfo.userno
+							},
+							// {
+							// 	"column": "doctor_no",
+							// 	"display": false,
+							// 	"value": "PB2020092209440043"
+							// }, 
+							// {
+							// 	"column": "doctor_name",
+							// 	"display": false,
+							// 	"value": "贾琦"
+							// },
+							{
+								"column": "store_no",
+								"display": false,
+								"value": this.storeNo
+							}
+						]
+						url = '/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' + JSON.stringify(
+							fieldsCond)
 						break;
 					case 2:
 						url =
@@ -302,7 +326,8 @@
 			toDocotrDetail(e) {
 				// 跳转到医生主页
 				uni.navigateTo({
-					url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + e.person_no + '&store_no=' + e.store_no
+					url: `/storePages/Registration/RegistrationDetail?storeNo=${e.store_no}&doctorNo=${e.person_no}`
+					// url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + e.person_no + '&store_no=' + e.store_no
 				});
 			},
 			seletGroupList() {
@@ -347,6 +372,20 @@
 					}
 				});
 			},
+			setPicSize(content, max = 750) {
+				// 让图片最长边等于设置的最大长度，短边等比例缩小，图片控件真实改变，区别于aspectFit方式。
+				if (this.max) {
+					max = this.max
+				}
+				let maxW = uni.upx2px(max); //max是定义消息图片最大宽度
+				let maxH = uni.upx2px(max); //max是定义消息图片最大高度
+				if (content.w > maxW || content.h > maxH) {
+					let scale = content.w / content.h;
+					content.w = scale > 1 ? maxW : maxH * scale;
+					content.h = scale > 1 ? maxW / scale : maxH;
+				}
+				return content;
+			},
 			async getSwiperList(e) {
 				if (e.image) {
 					let res = await this.getFilePath(e.image);
@@ -354,6 +393,14 @@
 						this.swiperList = res.reduce((pre, cur) => {
 							if (cur.fileurl) {
 								cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+								this.getImageInfo({
+									url: cur.url
+								}).then(picInfo => {
+									let res = this.setPicSize(picInfo);
+									if (res.w && res.h) {
+										this.$set(cur, 'imgHeight', Number(res.h.toFixed(2)))
+									}
+								})
 							}
 							pre.push(cur);
 							return pre;
@@ -375,8 +422,6 @@
 						pageNo: 1,
 						rownumber: 1
 					},
-					draft: false,
-					query_source: 'list_page'
 				};
 				return new Promise((resolve, reject) => {
 					this.$http.post(url, req).then(res => {
@@ -397,6 +442,29 @@
 					});
 				});
 			},
+			selectUserList() {
+				let req = {
+					"serviceName": "srvhealth_store_user_select",
+					"colNames": ["*"],
+					"condition": [{
+							"colName": "store_no",
+							"ruleType": "eq",
+							"value": this.storeNo
+						},
+						{
+							colName: "person_no",
+							ruleType: "eq",
+							value: this.userInfo.no
+						}
+					],
+				}
+				this.$fetch('select', 'srvhealth_store_user_select', req, 'health').then(res => {
+					if (res.success && res.data.length >= 1) {
+						this.isBind = true
+						this.bindUserInfo = res.data[0]
+					}
+				})
+			},
 			selectStaffList() {
 				let url = this.getServiceUrl('health', 'srvhealth_store_user_select', 'select');
 				let req = {
@@ -415,14 +483,40 @@
 						pageNo: 1,
 						rownumber: 10
 					},
-					draft: false,
-					query_source: 'list_page'
 				};
 				this.$http.post(url, req).then(res => {
 					if (Array.isArray(res.data.data)) {
 						this.staffList = res.data.data;
 					}
 				});
+			},
+			bindStore() {
+				// 将当前登录用户添加到店铺用户列表，角色为用户
+				let req = [{
+					"serviceName": "srvhealth_store_user_add",
+					"condition": [],
+					"data": [{
+						"store_no": this.storeNo,
+						"name": this.storeInfo.name,
+						"image": this.storeInfo.image,
+						"type": this.storeInfo.type,
+						"person_no": this.userInfo.no,
+						"person_name": this.userInfo.name,
+						"user_account": this.userInfo.userno,
+						"nick_name": this.userInfo.nick_name,
+						"profile_url": this.userInfo.profile_url,
+						"sex": this.userInfo.sex,
+						"user_role": "用户"
+					}]
+				}]
+				this.$fetch('operate', 'srvhealth_store_user_add', req, 'health').then(res => {
+					if (res.success) {
+						this.isBind = true
+						if (res.data.length > 0) {
+							this.bindUserInfo = res.data[0]
+						}
+					}
+				})
 			},
 			makePhoneCall() {
 				uni.makePhoneCall({
@@ -433,12 +527,15 @@
 				let latitude = 34.219329;
 				let longitude = 108.935485;
 				uni.openLocation({
-					latitude: this.storeInfo.latitude ? this.storeInfo.latitude : latitude,
-					longitude: this.storeInfo.longitude ? this.storeInfo.longitude : longitude,
+					latitude: this.storeInfo.latitude ? Number(this.storeInfo.latitude) : latitude,
+					longitude: this.storeInfo.longitude ? Number(this.storeInfo.longitude) : longitude,
 					name: this.storeInfo.name,
 					address: this.storeInfo.address,
 					success: function() {
 						console.log('success');
+					},
+					fail(err) {
+						console.log('err', err);
 					}
 				});
 			},
@@ -508,11 +605,13 @@
 			}
 		},
 		onShareAppMessage() {
+			// 	let path =
+			// 		`/pediaPages/hospitalOverview/hospitalOverview?store_no=${this.storeInfo.store_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
+			// 	this.userInfo.no
+			// }&share_type=bindOrganization`;
 			let path =
-				`/pediaPages/hospitalOverview/hospitalOverview?store_no=${this.storeInfo.store_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
-			this.userInfo.no
-		}&share_type=bindOrganization`;
-			let title = `${this.userInfo.name}邀请您加入【${this.storeInfo.name}】`;
+				`/pediaPages/hospitalOverview/hospitalOverview?from=share&invite_user_no=${this.userInfo.userno}`;
+			let title = `${this.userInfo.name}邀请您查看【${this.storeInfo.name}】`;
 			let imageUrl = this.getImagePath(this.storeInfo.image);
 			this.saveSharerInfo(this.userInfo, path);
 			return {
@@ -533,33 +632,28 @@
 				if (res === 'fail') {
 					return;
 				}
-				if (option.share_type === 'bindOrganization') {
+				if (option.share_type === 'bindOrganization' && option.store_no && option.invite_user_no) {
 					// 绑定诊所
-					if (option.store_no && option.invite_user_no) {
-						// 查找店铺用户列表
-						this.storeNo = option.store_no;
-						this.selectStoreInfo().then(res => {
-							this.getStoreUserInfo(option.store_no).then(res => {
-								if (Array.isArray(res) && res.length >= 1) {
-									// 店铺用户列表中已存在此用户
-								} else {
-									// 当前用户不在此诊所中 则添加当前用户到此诊所中
-									this.addToStore(option.store_no, option.invite_user_no);
-								}
-							});
+					// 查找店铺用户列表
+					this.storeNo = option.store_no;
+					this.selectStoreInfo().then(res => {
+						this.getStoreUserInfo(option.store_no).then(res => {
+							if (Array.isArray(res) && res.length >= 1) {
+								// 店铺用户列表中已存在此用户
+							} else {
+								// 当前用户不在此诊所中 则添加当前用户到此诊所中
+								this.addToStore(option.store_no, option.invite_user_no);
+							}
 						});
-						this.selectStaffList();
-						this.selectDepartList();
-						this.seletGroupList();
-					}
-				} else {
-					if (option.store_no) {
-						this.storeNo = option.store_no;
-						this.selectStoreInfo();
-						this.selectStaffList();
-						this.selectDepartList();
-						this.seletGroupList();
-					}
+					});
+				}
+				if (option.store_no) {
+					this.storeNo = option.store_no;
+					this.selectUserList()
+					this.selectStoreInfo();
+					this.selectStaffList();
+					this.selectDepartList();
+					this.seletGroupList();
 				}
 			});
 		}
@@ -614,11 +708,14 @@
 
 				.top {
 					display: flex;
+					justify-content: space-between;
+					padding-right: 20rpx;
 
 					.name {
 						font-size: 32rpx;
 						color: #333;
 						font-weight: bold;
+						flex: 1;
 					}
 
 					.tags {
@@ -644,7 +741,8 @@
 						display: flex;
 
 						.content {
-							width: calc(100% - 60rpx);
+							flex: 1;
+							max-width: 400rpx;
 							overflow: hidden;
 							text-overflow: ellipsis;
 							white-space: nowrap;

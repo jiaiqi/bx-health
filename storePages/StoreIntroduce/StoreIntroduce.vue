@@ -2,6 +2,7 @@
 	<view class="store-instroduce">
 		<view class="home" @click="goHome"><text class="cuIcon-back"></text></view>
 		<swiper
+		v-if="swiperList.length>0"
 			class="screen-swiper item-box square-dot"
 			easing-function="linear"
 			:height="300"
