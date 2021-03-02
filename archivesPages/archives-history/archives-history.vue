@@ -87,7 +87,7 @@
 									<view class="digit bmi">{{ bmi }}</view>
 								</view>
 							</view>
-							<bmi-weight-bar :height="userInfo.height" :weight="lastWeight"></bmi-weight-bar>
+							<bmi-weight-bar :height="vuex_userInfo.height" :weight="lastWeight"></bmi-weight-bar>
 							<!-- <view class="bmi-bar">
 								<view class="bar1 bar-box">
 									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi < 18.5"><text class="cuIcon-locationfill text-blue"><text
@@ -432,29 +432,29 @@ export default {
 			// 标准体重=(身高cm-100)x0.9(kg)
 			// 标准体重(女)=(身高cm-100)x0.9(kg)-2.5(kg)
 			// 正常体重：标准体重＋-(多少）10％．
-			if (this.userInfo.height) {
-				return Number(((this.userInfo.height - 100) * 0.9).toFixed(1))
+			if (this.vuex_userInfo.height) {
+				return Number(((this.vuex_userInfo.height - 100) * 0.9).toFixed(1))
 			}
 			return 0
 		},
 		bmi() {
 			// 体重（kg）/身高*身高（m）
-			if (this.userInfo.weight && this.userInfo.height) {
+			if (this.vuex_userInfo.weight && this.vuex_userInfo.height) {
 				if (Array.isArray(this.historyRecord) && this.historyRecord.length > 0) {
 					if (this.historyRecord[0].weight) {
-						return Number(((this.historyRecord[0].weight * 10000) / this.userInfo.height ** 2).toFixed(1))
+						return Number(((this.historyRecord[0].weight * 10000) / this.vuex_userInfo.height ** 2).toFixed(1))
 					}
 				} else {
-					return Number(((this.userInfo.weight * 10000) / this.userInfo.height ** 2).toFixed(1))
+					return Number(((this.vuex_userInfo.weight * 10000) / this.vuex_userInfo.height ** 2).toFixed(1))
 				}
 			}
 		},
 		weightForBmi() {
 			let bmiList = [18.5, 24, 28]
 			let weightList = []
-			if (this.bmi && this.userInfo && this.userInfo.height) {
+			if (this.bmi && this.vuex_userInfo && this.vuex_userInfo.height) {
 				bmiList.forEach(bmi => {
-					let weight = ((bmi * this.userInfo.height ** 2) / 10000).toFixed(1) + 'kg'
+					let weight = ((bmi * this.vuex_userInfo.height ** 2) / 10000).toFixed(1) + 'kg'
 					weightList.push({
 						bmi,
 						weight
@@ -484,7 +484,6 @@ export default {
 	methods: {
 		buildBPOption(data) {
 			data = this.deepClone(data)
-			if (Array.isArray(this.weightForBmi) && this.weightForBmi.length === 3) {
 				const yAxisData0 = data.map(item => 80) // 舒张压-正常
 				const yAxisData01 = data.map(item => 90) // 舒张压-高
 				const yAxisData02 = data.map(item => 120) // 收缩压-正常
@@ -671,7 +670,6 @@ export default {
 					]
 				}
 				this.BPChartOption = { option }
-			}
 		},
 		buildWeightOption(data) {
 			data = this.deepClone(data)
@@ -898,7 +896,7 @@ export default {
 									title: '删除成功'
 								})
 								self.initPage()
-								self.getChartData()
+								// self.getChartData()
 							}
 						})
 					}
@@ -1021,7 +1019,6 @@ export default {
 					this.currentChart = 'canvasLineA'
 					this.getChartData('weight').then(_ => {
 						this.weightEcData = this.buildEcData(this.weightChartData, 'kg', '体重')
-						// this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重');
 					}) // 体重
 					this.currentType = '体重'
 					break
@@ -1070,8 +1067,8 @@ export default {
 					condition: [],
 					data: [
 						{
-							info_no: this.userInfo.no,
-							user_account: this.userInfo.userno,
+							info_no: this.vuex_userInfo.no,
+							user_account: this.vuex_userInfo.userno,
 							occur_time: this.occur_time,
 							symptoms_no: data.no,
 							symptoms_name: data.name,
@@ -1247,51 +1244,6 @@ export default {
 			}
 			return data
 		},
-		async selectServiceLog() {
-			// 查找服务记录编号
-			let serviceName = 'srvhealth_service_record_select'
-			let url = this.getServiceUrl('health', serviceName, 'select')
-			let req = {
-				serviceName: 'srvhealth_service_record_select',
-				colNames: ['*'],
-				condition: [{ colName: 'user_info_no', ruleType: 'like', value: this.customer_no ? this.customer_no : this.userInfo.no }],
-				page: { pageNo: 1, rownumber: 100 }
-			}
-			let res = await this.$http.post(url, req)
-			if (res.data.state === 'SUCCESS') {
-				// 请求成功
-				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-					// 有记录
-					this.serviceLog = res.data.data[0]
-				} else {
-					// 没有记录，添加记录
-					await this.addServiceLog()
-				}
-			}
-		},
-		async addServiceLog() {
-			// 创建服务记录
-			let serviceName = 'srvhealth_service_record_add'
-			let url = this.getServiceUrl('health', serviceName, 'operate')
-			let req = [
-				{
-					serviceName: 'srvhealth_service_record_add',
-					condition: [],
-					data: [
-						{
-							user_info_no: this.customer_no ? this.customer_no : this.userInfo.no,
-							user_no: this.userInfo.userno,
-							name: this.userInfo.name,
-							time: this.formateDate(new Date(), 'dateTimes')
-						}
-					]
-				}
-			]
-			let res = await this.$http.post(url, req)
-			if (res.data.state === 'SUCCESS') {
-				await this.selectServiceLog()
-			}
-		},
 		async getStepData(data){
 			if(!Array.isArray(data)){
 				let timeRange = {
@@ -1336,20 +1288,10 @@ export default {
 				try{
 					this.stepEcData = this.buildEcData(this.stepChartData, '步', '步数')
 				}catch(e){
-					//TODO handle the exception
-					// uni.showModal({
-					// 	title:'提示11',
-					// 	content:e,
-					// })
 				}
-				// uni.showModal({
-				// 	title:'提示1',
-				// 	content:JSON.stringify(this.stepEcData),
-				// })
 			}
 		},
 		async getChartData(type) {
-			console.log(this.serviceLog)
 			let serviceObj = {
 				weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
 				bloodPressure: 'srvhealth_blood_pressure_record_select', // 血压
@@ -1360,7 +1302,7 @@ export default {
 			let req = {
 				serviceName: serviceName,
 				colNames: ['*'],
-				condition: [{ colName: 'person_no', ruleType: 'like', value: this.userInfo.no }],
+				condition: [{ colName: 'person_no', ruleType: 'like', value: this.vuex_userInfo.no }],
 				// condition: [{ colName: 'service_no', ruleType: 'like', value: this.serviceLog.no }],
 				order: [
 					{
@@ -1374,7 +1316,7 @@ export default {
 				}
 			}
 			if(this.pageType==='sleep'){
-				req.condition =  [{ colName: 'user_info_no', ruleType: 'like', value: this.userInfo.no }]
+				req.condition =  [{ colName: 'user_info_no', ruleType: 'like', value: this.vuex_userInfo.no }]
 			}
 			let res = await this.$http.post(url, req)
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
@@ -1387,7 +1329,7 @@ export default {
 					})
 					this.weightChartData.series = series
 					this.weightChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'))
-					this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重')
+					// this.chartData = this.buildEcData(this.weightChartData, 'kg', '体重')
 					this.buildWeightOption(res.data.data)
 				} else if (type === 'bloodPressure') {
 					series = this.BPChartData.series
@@ -1397,7 +1339,7 @@ export default {
 					series[1].data = res.data.data.map(item => Number(item.diastolic_pressure.toFixed(1)))
 					this.BPChartData.series = series
 					this.BPChartData.categories = res.data.data.map(item => dayjs(item.create_time).format('MM-DD'))
-					this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压')
+					// this.chartData = this.buildEcData(this.BPChartData, 'mmHg', '血压')
 					this.buildBPOption(res.data.data)
 				}
 				this.historyRecord = this.deepClone(res.data.data).reverse()
@@ -1442,8 +1384,8 @@ export default {
 					serviceName: serviceName,
 					colNames: ['*'],
 					condition: [
-						{ colName: 'userno', ruleType: 'like', value: this.userInfo.userno },
-						{ colName: 'user_name', ruleType: 'like', value: this.userInfo.name },
+						{ colName: 'userno', ruleType: 'like', value: this.vuex_userInfo.userno },
+						{ colName: 'user_name', ruleType: 'like', value: this.vuex_userInfo.name },
 						{ colName: 'hdate', ruleType: 'gt', value: timeRange.start },
 						{ colName: 'hdate', ruleType: 'lt', value: timeRange.end }
 					]
@@ -1706,7 +1648,7 @@ export default {
 					{
 						colName: 'user_name',
 						ruleType: 'like',
-						value: this.userInfo.name
+						value: this.vuex_userInfo.name
 					},
 					{
 						colName: 'hdate',
@@ -1875,63 +1817,6 @@ export default {
 			}
 		},
 		async initPage() {
-			let userInfo = uni.getStorageSync('login_user_info')
-			if (userInfo && userInfo.user_no) {
-				this.loginUserInfo = userInfo
-				// #ifdef MP-WEIXIN
-				let res = await wx.getSetting()
-				if (!res.authSetting['scope.userInfo']) {
-					// 没有获取用户信息授权
-					uni.showModal({
-						title: '提示',
-						content: '请登录并授权获取用户信息后再进行查看',
-						confirmText: '去登录',
-						confirmColor: '#02D199',
-						success(res) {
-							if (res.confirm) {
-								// 确认 跳转到登录页
-								uni.navigateTo({
-									url: '/publicPages/accountExec/accountExec'
-								})
-							} else if (res.cancel) {
-								// 取消 返回首页
-								uni.switchTab({
-									url: '/pages/pedia/pedia'
-								})
-							}
-						}
-					})
-					return
-				}
-				// #endif
-				if (!userInfo || !uni.getStorageSync('isLogin')) {
-					// 未登录
-					// #ifdef MP-WEIXIN
-					const result = await wx.login()
-					if (result.code) {
-						this.code = result.code
-						await this.wxLogin({ code: result.code })
-						await this.initPage()
-					}
-					// #endif
-				} else {
-					this.isLogin = true
-				}
-				if (userInfo && userInfo.user_no) {
-					this.loginUserInfo = userInfo
-					uni.setStorageSync('activeApp', 'health')
-					let userInfo = await this.selectBasicUserList()
-					if (userInfo) {
-						this.userInfo = userInfo
-					}
-					if (!this.wxUserInfo) {
-						await this.getUserInfo() //查找微信用户基本信息
-					}
-					// if (!this.serviceLog) {
-					// 	await this.selectServiceLog()
-					// }
-				}
-			}
 			switch (this.pageType) {
 				case 'diet':
 					this.pageName = '饮食记录'
@@ -1975,51 +1860,6 @@ export default {
 				return e.slice(5, 10)
 			}
 		},
-		/*查询当前登录人创建得用户信息**/
-		async getCurrUserInfo() {
-			let self = this
-			const url = self.getServiceUrl('health', 'srvhealth_person_info_select', 'select')
-			let req = {
-				serviceName: 'srvhealth_person_info_select',
-				colNames: ['*'],
-				condition: [{ colName: 'userno', ruleType: 'eq', value: uni.getStorageSync('login_user_info').user_no }],
-				order: [
-					{
-						colName: 'create_time',
-						orderType: 'asc'
-					}
-				]
-			}
-			const res = await this.$http.post(url, req)
-			if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-				// 有数据
-				if (uni.getStorageSync('current_user')) {
-					res.data.data.forEach(item => {
-						if (item.name === uni.getStorageSync('current_user')) {
-							uni.setStorageSync('current_user', item.name)
-						}
-					})
-				} else {
-					uni.setStorageSync('current_user_info', res.data.data[0])
-					this.$store.commit('SET_USERINFO', res.data.data[0])
-				}
-				uni.setStorageSync('user_info_list', res.data.data)
-				return res.data.data
-			} else if (res.data.resultCode === '0011') {
-				// 登录失效 进行静默登录
-				this.isLogin = false
-				this.$store.commit('SET_LOGIN_STATE', false)
-				const result = await wx.login()
-				if (result.code) {
-					this.code = result.code
-					await this.wxLogin({ code: result.code })
-					// await this.initPage();
-				}
-			} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
-				// 没有角色 提示跳转到创建角色页面
-				self.toAddPage()
-			}
-		},
 		onBack() {
 			uni.$emit('data-update')
 		},
@@ -2044,41 +1884,7 @@ export default {
 		}
 	},
 	onShow() {
-		switch (this.pageType) {
-			case 'diet':
-				this.pageName = '饮食记录'
-				this.showCanvas('calories')
-				break
-			case 'sport':
-				this.pageName = '运动记录'
-				this.showCanvas('step')
-				break
-			case 'weight':
-				this.pageName = '体重记录'
-				this.showCanvas('weight')
-				break
-			case 'bp':
-				this.pageName = '血压记录'
-				this.showCanvas('BP')
-				break
-			case 'sleep':
-				this.pageName = '睡眠记录'
-				this.showCanvas('sleep')
-				break
-			case 'symptom':
-				this.pageName = '症状记录'
-				this.getSymptomRecord()
-				break
-			case 'all':
-				this.pageName = '历史记录'
-				// #ifdef MP-WEIXIN
-				this.showCanvas('step')
-				// #endif
-				// #ifdef H5
-				this.showCanvas('weight')
-				// #endif
-				break
-		}
+		this.initPage()
 	},
 	onLoad(option) {
 		uni.$on('deleteItem', () => {

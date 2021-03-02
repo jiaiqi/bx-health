@@ -380,7 +380,6 @@
 					label: '其他',
 					value: '其他'
 				}],
-				currentUserInfo: null,
 				serviceLog: null,
 				type: null,
 				dateTime: this.formateDate(new Date(), 'dates'),
@@ -594,9 +593,9 @@
 					serviceName: 'srvhealth_service_record_add',
 					condition: [],
 					data: [{
-						user_info_no: this.currentUserInfo.no,
-						user_no: this.currentUserInfo.userno,
-						name: this.currentUserInfo.name,
+						user_info_no: this.userInfo.no,
+						user_no: this.userInfo.userno,
+						name: this.userInfo.name,
 						time: this.formateDate(new Date(), 'dateTimes')
 					}]
 				}];
@@ -615,7 +614,7 @@
 					condition: [{
 						colName: 'user_info_no',
 						ruleType: 'like',
-						value: this.currentUserInfo.no
+						value: this.userInfo.no
 					}],
 					relation_condition: {},
 					page: {
@@ -905,7 +904,7 @@
 					condition: [{
 						colName: 'userno',
 						ruleType: 'eq',
-						value: this.currentUserInfo.userno
+						value: this.userInfo.userno
 					}],
 					data: [{
 						weight: weight
@@ -995,27 +994,6 @@
 				// + ':00';
 				// }
 			}
-			// let user_info_list = uni.getStorageSync('user_info_list');
-			// let name = uni.getStorageSync('current_user');
-			// user_info_list = user_info_list.filter(item => item.name === name);
-			// if (Array.isArray(user_info_list) && user_info_list.length > 0) {
-			// 	this.currentUserInfo = user_info_list[0];
-			// 	this.selectServiceLog();
-			// } else {
-			// 	uni.showModal({
-			// 		title: '提示',
-			// 		content: '登录信息有误,即将返回上一页面',
-			// 		showCancel: false,
-			// 		success(res) {
-			// 			if (res.confirm) {
-			// 				// uni.redirectTo({
-			// 				// 	url:'/archivesPages/archives-history/archives-history?pageType='+this.type
-			// 				// })
-			// 				uni.navigateBack();
-			// 			}
-			// 		}
-			// 	});
-			// }
 		}
 	};
 </script>
