@@ -764,9 +764,6 @@
 					if (!this.BPScore) {
 						this.BPScore = await this.calcBPScore();
 					}
-					if (!this.isLoad) {
-						this.selectInspectionReport();
-					}
 				}
 			},
 			updateUserInfo() {

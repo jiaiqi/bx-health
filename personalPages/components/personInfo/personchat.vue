@@ -33,7 +33,8 @@ s<template>
 						</view>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url && item.msg_content_type === '图片'"
 						 class="person-chat-item-right person-chat-item-right-image">
-							<chat-image :max="350" :src="item.img_url"></chat-image>
+							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url"></u-image>
+							<!-- <chat-image :max="350" :src="item.img_url"></chat-image> -->
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
@@ -71,7 +72,7 @@ s<template>
 						</view>
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
 							<!-- <text>视频</text> -->
-							<video class="video-msg" :poster="item.image ? getImagePath(item.image, true) : false" :style="{ width: item.videoWidth + 'px', height: item.videoHeight + 'px' }"
+							<video class="video-msg" :poster="item.image ? getImagePath(item.image, true) : ''" :style="{ width: item.videoWidth + 'px', height: item.videoHeight + 'px' }"
 							 id="myVideo" :src="item.video_url" :duration="item.attribute && item.attribute.duration ? item.attribute.duration : ''"
 							 controls></video>
 						</view>
@@ -94,11 +95,11 @@ s<template>
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
 							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
 						</view>
-						<text class="unread" v-if="item.msg_state === '未读' && (!groupInfo || !groupInfo.gc_no)">{{ item.msg_state }}</text>
+						<text class="unread" v-if="item.msg_state === '未读' &&!groupNo&& (!groupInfo || !groupInfo.gc_no)">{{ item.msg_state }}</text>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
 							<!-- <image :src="item.img_url" :style="{ width: item.imgWidth + 'px', height: item.imgHeight + 'px' }"></image> -->
-							<!-- <u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url"></u-image> -->
-							<chat-image :src="item.img_url"></chat-image>
+							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url"></u-image>
+							<!-- <chat-image :src="item.img_url"></chat-image> -->
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
@@ -285,6 +286,12 @@ s<template>
 			topHeight: {
 				type: Number,
 				default: 0
+			},
+			sessionNo: {
+				type: String //会话编号
+			},
+			groupNo: {
+				type: String // 群组编号
 			}
 		},
 		computed: {
@@ -1037,6 +1044,34 @@ s<template>
 						msg_content_type: type,
 						identity: this.groupInfo.group_role
 					};
+				} else if (this.pageType === 'session') {
+					// 会话聊天
+					req[0].data[0] = {
+						sender_account: this.currentUserInfo.userno,
+						sender_name: this.currentUserInfo.name,
+						sender_person_no: this.currentUserInfo.no,
+						sender_profile_url: this.currentUserInfo.profile_url,
+						sender_user_image: this.currentUserInfo.user_image,
+						msg_content_type: type,
+						session_no: this.sessionNo
+					};
+					if (this.groupNo) {
+						req[0].data[0].rcv_group_no = this.groupNo
+					}
+					if (!this.sessionNo) {
+						uni.showModal({
+							title: '提示',
+							content: '会话不存在，即将返回上一页面',
+							showCancel: false,
+							success(res) {
+								if (res.confirm) {
+									uni.navigateBack({
+										animationType: 'fade-out'
+									})
+								}
+							}
+						})
+					}
 				} else {
 					// 一对一聊天
 					req[0].data[0] = {
@@ -1163,6 +1198,34 @@ s<template>
 						msg_content_type: !this.isSendLink ? '文本' : '链接',
 						identity: this.groupInfo.group_role
 					};
+				} else if (this.pageType === 'session') {
+					// 会话聊天
+					req[0].data[0] = {
+						sender_account: this.currentUserInfo.userno,
+						sender_name: this.currentUserInfo.name,
+						sender_person_no: this.currentUserInfo.no,
+						sender_profile_url: this.currentUserInfo.profile_url,
+						sender_user_image: this.currentUserInfo.user_image,
+						msg_content_type: !this.isSendLink ? '文本' : '链接',
+						session_no: this.sessionNo
+					};
+					if (this.groupNo) {
+						req[0].data[0].rcv_group_no = this.groupNo
+					}
+					if (!this.sessionNo) {
+						uni.showModal({
+							title: '提示',
+							content: '会话不存在，即将返回上一页面',
+							showCancel: false,
+							success(res) {
+								if (res.confirm) {
+									uni.navigateBack({
+										animationType: 'fade-out'
+									})
+								}
+							}
+						})
+					}
 				} else {
 					// 一对一聊天
 					req[0].data[0] = {
@@ -1215,7 +1278,6 @@ s<template>
 				let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_select', 'select');
 				if (type === 'refresh') {
 					this.pageInfo.pageNo = 1;
-					// this.recordList = [];
 				}
 				let req = {
 					serviceName: 'srvhealth_consultation_chat_record_select',
@@ -1241,6 +1303,31 @@ s<template>
 								value: this.groupInfo.gc_no
 							}]
 						}];
+					} else if (this.pageType === 'session') {
+						conditionData = [{
+							relation: 'AND',
+							data: [{
+								colName: 'session_no', // 会话编码
+								ruleType: 'eq',
+								value: this.sessionNo
+							}]
+						}];
+						if (this.groupNo) {
+							conditionData = [{
+								relation: 'OR',
+								data: [{
+										colName: 'session_no', // 会话编码
+										ruleType: 'eq',
+										value: this.sessionNo
+									},
+									{
+										colName: 'rcv_group_no', // 接收群组编码
+										ruleType: 'eq',
+										value: this.groupNo
+									}
+								]
+							}];
+						}
 					} else {
 						conditionData = [{
 								relation: 'AND',
@@ -1560,6 +1647,10 @@ s<template>
 				this.getUserInfo(this.customer_no);
 			} else if (this.groupInfo && this.groupInfo.gc_no) {
 				// 圈子聊天
+				this.initMessageList('refresh').then(_ => {
+					this.setRefreshMessageTimer()
+				});
+			} else if (this.sessionNo) {
 				this.initMessageList('refresh').then(_ => {
 					this.setRefreshMessageTimer()
 				});

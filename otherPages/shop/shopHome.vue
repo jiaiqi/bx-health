@@ -447,7 +447,7 @@ export default {
 		let path = `/otherPages/shop/shopHome?type=find&store_no=${this.storeInfo.store_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
 			this.userInfo.no
 		}&share_type=bindOrganization`;
-		let title = `${this.userInfo.name}邀请您加入【${this.storeInfo.name}】`;
+		let title = `${this.userInfo.name}邀请您查看【${this.storeInfo.name}】`;
 		let imageUrl = this.getImagePath(this.storeInfo.image);
 		this.saveSharerInfo(this.userInfo, path);
 		return {

@@ -300,7 +300,6 @@ export default {
 							});
 							return item;
 						});
-						// this.inspectReportRecord = this.totalInspectReportRecord.slice(0,6)
 						this.inspectReportRecord = this.totalInspectReportRecord;
 					}
 				}

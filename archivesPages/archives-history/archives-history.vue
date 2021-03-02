@@ -87,30 +87,30 @@
 									<view class="digit bmi">{{ bmi }}</view>
 								</view>
 							</view>
-
-							<view class="bmi-bar">
+							<bmi-weight-bar :height="userInfo.height" :weight="lastWeight"></bmi-weight-bar>
+							<!-- <view class="bmi-bar">
 								<view class="bar1 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi < 18.5"><text class="cuIcon-deliver_fill text-blue"><text
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi < 18.5"><text class="cuIcon-locationfill text-blue"><text
 											 class="bmi-tip">{{bmi}}</text></text></view>
 									<view class="bar">偏瘦</view>
 								</view>
 								<view class="bar2 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24"><text class="cuIcon-deliver_fill text-cyan"><text
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24"><text class="cuIcon-locationfill text-cyan"><text
 											 class="bmi-tip">{{bmi}}</text></text></view>
 									<view class="bar">正常</view>
 								</view>
 								<view class="bar3 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi <= 28 && bmi > 24"><text class="cuIcon-deliver_fill text-yellow"><text
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi <= 28 && bmi > 24"><text class="cuIcon-locationfill text-yellow"><text
 											 class="bmi-tip">{{bmi}}</text></text></view>
 									<view class="bar">超重</view>
 								</view>
 								<view class="bar4 bar-box">
-									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi > 28"><text class="cuIcon-deliver_fill text-orange"><text
+									<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi > 28"><text class="cuIcon-locationfill text-orange"><text
 											 class="bmi-tip">{{bmi}}</text></text></view>
 									<view class="bar">肥胖</view>
 								</view>
-							</view>
-							<view class="bmi-label" v-if="isArray(weightForBmi)">
+							</view> -->
+							<!-- 	<view class="bmi-label" v-if="isArray(weightForBmi)">
 								<view class="label text-bold">体重:</view>
 								<view class="value" v-for="item in weightForBmi" :key="item.bmi">
 									<text v-if="item.weight && isString(item.weight)">{{ item.weight }}</text>
@@ -119,7 +119,7 @@
 							<view class="bmi-label" v-if="isArray(weightForBmi)">
 								<view class="label text-bold">BMI:</view>
 								<view class="value" v-for="item in weightForBmi" :key="item.bmi">{{ item.bmi }}</view>
-							</view>
+							</view> -->
 							<button class="nav-button" @click="toPages(pageType)" v-if="!this.customer_no">记录数据</button>
 						</view>
 					</view>
@@ -420,6 +420,13 @@ export default {
 		}),
 		echartsData() {
 			return this.deepClone(this.chartData)
+		},
+		lastWeight(){
+			if(Array.isArray(this.historyRecord)&&this.historyRecord.length>0){
+				return this.historyRecord[0].weight
+			}else{
+				return 0
+			}
 		},
 		standardWeight() {
 			// 标准体重=(身高cm-100)x0.9(kg)
@@ -1353,7 +1360,8 @@ export default {
 			let req = {
 				serviceName: serviceName,
 				colNames: ['*'],
-				condition: [{ colName: 'service_no', ruleType: 'like', value: this.serviceLog.no }],
+				condition: [{ colName: 'person_no', ruleType: 'like', value: this.userInfo.no }],
+				// condition: [{ colName: 'service_no', ruleType: 'like', value: this.serviceLog.no }],
 				order: [
 					{
 						colName: 'create_time',
@@ -1364,6 +1372,9 @@ export default {
 					pageNo: 1,
 					rownumber: 30
 				}
+			}
+			if(this.pageType==='sleep'){
+				req.condition =  [{ colName: 'user_info_no', ruleType: 'like', value: this.userInfo.no }]
 			}
 			let res = await this.$http.post(url, req)
 			if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
@@ -1909,7 +1920,6 @@ export default {
 				if (userInfo && userInfo.user_no) {
 					this.loginUserInfo = userInfo
 					uni.setStorageSync('activeApp', 'health')
-					// await this.getCurrUserInfo(); // 查找健康app个人基本信息
 					let userInfo = await this.selectBasicUserList()
 					if (userInfo) {
 						this.userInfo = userInfo
@@ -1917,18 +1927,11 @@ export default {
 					if (!this.wxUserInfo) {
 						await this.getUserInfo() //查找微信用户基本信息
 					}
-					if (!this.serviceLog) {
-						await this.selectServiceLog()
-					}
-					// this.currentChart = 'stepChart'
-					// this.showCanvas('step')
-					// // this.getwxStepInfoList().then(_ => {
-					// // 	//获取微信运动记录
-					// // 							this.selectDataFromSportRecord()
-					// // })
+					// if (!this.serviceLog) {
+					// 	await this.selectServiceLog()
+					// }
 				}
 			}
-			console.log(this.pageType)
 			switch (this.pageType) {
 				case 'diet':
 					this.pageName = '饮食记录'
@@ -1952,7 +1955,6 @@ export default {
 					break
 				case 'symptom':
 					this.pageName = '症状记录'
-					// this.showCanvas('sleep');
 					this.getSymptomRecord()
 					break
 				case 'all':
@@ -2021,7 +2023,6 @@ export default {
 		onBack() {
 			uni.$emit('data-update')
 		},
-
 		// ListTouch触摸开始
 		ListTouchStart(e) {
 			this.listTouchStart = e.touches[0].pageX
@@ -2043,6 +2044,41 @@ export default {
 		}
 	},
 	onShow() {
+		switch (this.pageType) {
+			case 'diet':
+				this.pageName = '饮食记录'
+				this.showCanvas('calories')
+				break
+			case 'sport':
+				this.pageName = '运动记录'
+				this.showCanvas('step')
+				break
+			case 'weight':
+				this.pageName = '体重记录'
+				this.showCanvas('weight')
+				break
+			case 'bp':
+				this.pageName = '血压记录'
+				this.showCanvas('BP')
+				break
+			case 'sleep':
+				this.pageName = '睡眠记录'
+				this.showCanvas('sleep')
+				break
+			case 'symptom':
+				this.pageName = '症状记录'
+				this.getSymptomRecord()
+				break
+			case 'all':
+				this.pageName = '历史记录'
+				// #ifdef MP-WEIXIN
+				this.showCanvas('step')
+				// #endif
+				// #ifdef H5
+				this.showCanvas('weight')
+				// #endif
+				break
+		}
 	},
 	onLoad(option) {
 		uni.$on('deleteItem', () => {

@@ -4,7 +4,7 @@
 			<text> 选择症状 </text>
 			<text class="text-bold">【{{ currentSymptom.name }}】</text>
 		</view>
-		<scroll-view scroll-y="true" >
+		<scroll-view scroll-y="true">
 			<view class="form-content">
 				<a-form ref="bxform" class="a-form" v-if="currentSymptom&&currentSymptom.daq_survey_activity_no" :fields="configCols"
 				 label-position="top" option-mode="normal" pageType="add"></a-form>
@@ -118,7 +118,10 @@ export default {
 		},
 		submitQuestionnaireData(){
 				let self = this;
-				let itemData = self.$refs.bxform.getFieldModel();
+				let itemData = {};
+				if(this.currentSymptom&&this.currentSymptom.daq_survey_activity_no){
+					
+				}
 				if (itemData !== false) {
 					let resultData = [];
 					Object.keys(itemData).forEach(item => {
@@ -355,7 +358,6 @@ export default {
 	}
 	.form-content{
 		max-height: calc(100vh - var(--window-top) - 200px);
-		// overflow-y: scroll;
 		}
 
 	/deep/ .form-item .form-item-content.label-top{

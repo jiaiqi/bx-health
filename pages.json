@@ -262,13 +262,15 @@
 						"enablePullDownRefresh": false,
 						"navigationBarBackgroundColor": "#fff"
 					}
-				}, {
-					"path": "StoreManager/StoreManager",
-					"style": {
-						"navigationBarTitleText": "店铺管理",
-						"enablePullDownRefresh": false
-					}
-				}, {
+				},
+				// {
+				// 	"path": "StoreManager/StoreManager",
+				// 	"style": {
+				// 		"navigationBarTitleText": "店铺管理",
+				// 		"enablePullDownRefresh": false
+				// 	}
+				// }, 
+				{
 					"path": "HealthRecord/HealthRecord",
 					"style": {
 						"navigationBarTitleText": "",
@@ -276,7 +278,16 @@
 					}
 
 				}
-			]
+			    ,{
+                    "path" : "chat/chat",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "otherPages",
@@ -359,6 +370,13 @@
 				{
 					"path": "chooseFood/myFoodsInfo",
 					"style": {}
+				}, {
+					"path": "MessageCenter/MessageCenter",
+					"style": {
+						"navigationBarTitleText": "消息",
+						"enablePullDownRefresh": true
+					}
+
 				}
 			]
 		},

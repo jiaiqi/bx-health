@@ -25,7 +25,16 @@
 							</view>
 						</view>
 					</view>
-					<view class="right"><text class="cuIcon-phone text-black" @click="makePhoneCall"></text></view>
+					<view class="right">
+						<view class="right-item" @click="makePhoneCall">
+							<image class="image" src="../../static/icon/makePhone.png" mode="aspectFit"></image>
+							<text>电话</text>
+						</view>
+						<view class="right-item" @click="toConsult">
+							<image class="image" src="../../static/icon/msg.png" mode="aspectFit"></image>
+							<text>在线咨询</text>
+						</view>
+					</view>
 				</view>
 				<view class="menu-list">
 					<view class="menu-item" @click="toPages('food')" v-if="storeInfo.type === '健康服务'">
@@ -44,10 +53,14 @@
 						<u-icon name="zhenduan" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
 						<text class="title">健康评测</text>
 					</view>
-					<view class="menu-item" @click="toPages(4)">
+					<view class="menu-item" @click="toPages('groupChat')" v-if="storeInfo.session_no">
+						<text class="cuIcon-comment" style="font-size: 30px;color:#00aaff;"></text>
+						<text class="title">店铺群聊</text>
+					</view>
+					<!-- 			<view class="menu-item" @click="toPages(4)">
 						<u-icon name="jilu" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
 						<text class="title">健康记录</text>
-					</view>
+					</view> -->
 				</view>
 				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name" desc="goods_desc"></goods-list>
 				<view class="introduction news" v-if="noticeList.length > 0">
@@ -93,7 +106,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction" v-if="storeInfo.type !== '健康服务'">
+				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&staffList.length>0">
 					<view class="title">
 						<view class="">专家团队</view>
 					</view>
@@ -115,7 +128,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction news" v-if="storeInfo.type !== '健康服务'">
+				<view class="introduction news" v-if="storeInfo.type !== '健康服务'&&noticeList.length>0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
 						<text class="">医院新闻</text>
@@ -241,8 +254,15 @@
 					case 3:
 						url = '/archivesPages/healthCompose/healthCompose';
 						break;
-					case 4:
-						url = '/personalPages/HealthRecord/HealthRecord';
+						// case 4:
+						// 	url = '/personalPages/HealthRecord/HealthRecord';
+						// 	break;
+					case 'groupChat':
+						if (this.storeInfo.member_session_no) {
+							url = '/personalPages/chat/chat?type=店铺机构全员&session_no=' + this.storeInfo.member_session_no;
+						} else {
+							url = '/personalPages/chat/chat?type=店铺机构全员&storeNo=' + this.storeNo
+						}
 						break;
 					case 'personal':
 						url = '/pediaPages/personal/personal?type=shop';
@@ -518,6 +538,10 @@
 					}
 				})
 			},
+			toConsult() {
+				// 在线咨询
+
+			},
 			makePhoneCall() {
 				uni.makePhoneCall({
 					phoneNumber: this.storeInfo.telephone ? this.storeInfo.telephone : '10086'
@@ -621,6 +645,11 @@
 			};
 		},
 		async onLoad(option) {
+			uni.$on('updateStoreInfo', (e) => {
+				if (e && e.store_no === this.storeNo) {
+					this.storeInfo = e
+				}
+			})
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
 				withShareTicket: true,
@@ -703,7 +732,7 @@
 					height: 80%;
 					content: '';
 					width: 1px;
-					background-color: #dfdada;
+					background-color: #f1f1f1;
 				}
 
 				.top {
@@ -742,7 +771,7 @@
 
 						.content {
 							flex: 1;
-							max-width: 400rpx;
+							max-width: 330rpx;
 							overflow: hidden;
 							text-overflow: ellipsis;
 							white-space: nowrap;
@@ -753,13 +782,24 @@
 
 			.right {
 				margin-left: 20rpx;
-				width: 100rpx;
-				font-size: 70rpx;
+				// width: 100rpx;
 				display: flex;
 				justify-content: center;
 				align-items: center;
-				color: #0ea8ff;
+
 				// transform: rotate(10deg);
+				.right-item {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					font-size: 12px;
+				}
+
+				.image {
+					width: 40px;
+					height: 40px;
+					padding: 5px;
+				}
 			}
 		}
 

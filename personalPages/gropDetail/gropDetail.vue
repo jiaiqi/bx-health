@@ -98,7 +98,7 @@ export default {
 			loadmoreMemeber: 'more', //more,loading,noMore
 			memberPage: {
 				total: 0,
-				rownumber: 5,
+				rownumber:10,
 				pageNo: 1
 			},
 			showQrCode: false,

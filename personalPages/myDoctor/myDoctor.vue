@@ -134,10 +134,13 @@
 			},
 			/*点击前往聊天页面**/
 			toChatPage(item) {
-				uni.navigateTo({
-					url: '/personalPages/myDoctor/doctorChat?no=' + item.usera_person_no + '&doctor=' + encodeURIComponent(JSON.stringify(
-						item))
-				});
+				if(item.row_no){
+					uni.navigateTo({
+						// url: '/personalPages/myDoctor/doctorChat?no=' + item.usera_person_no + '&doctor=' + encodeURIComponent(JSON.stringify(
+						// 	item))
+						url: '/personalPages/chat/chat?type=用户间&row_no=' + item.row_no
+					});
+				}
 			},
 			toScan() {
 				// 调起客户端扫码功能,允许从相机和相册扫码

@@ -177,13 +177,17 @@
 			// 	});
 			// },
 			toChat(item) {
+				debugger
 				//跳转到群组聊天页面
 				// uni.navigateTo({
 				// 	url: `/personalPages/myDoctor/doctorChat?no=${this.vuex_userInfo.no}&groupInfo=${encodeURIComponent(JSON.stringify(item))}`
 				// });
 				uni.navigateTo({
-					url: `/personalPages/myDoctor/doctorChat?no=${this.vuex_userInfo.no}&attend_approve=${item.attend_approve}&gc_no=${item.gc_no}&pg_no=${item.pg_no}&circle_visible=${item.circle_visible}&group_role=${item.group_role}`
+					url: `/personalPages/chat/chat?type=群组圈子&attend_approve=${item.attend_approve}&groupNo=${item.gc_no}&pg_no=${item.pg_no}&circle_visible=${item.circle_visible}&group_role=${item.group_role}`
 				});
+				// uni.navigateTo({
+				// 	url: `/personalPages/myDoctor/doctorChat?no=${this.vuex_userInfo.no}&attend_approve=${item.attend_approve}&gc_no=${item.gc_no}&pg_no=${item.pg_no}&circle_visible=${item.circle_visible}&group_role=${item.group_role}`
+				// });
 			},
 			joinGroup(e) {
 				let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_add', 'operate');
@@ -305,7 +309,9 @@
 				let req = {
 					serviceName: 'srvhealth_consultation_chat_record_select',
 					colNames: ['*'],
-					page:{rownumber:20},
+					page: {
+						rownumber: 20
+					},
 					condition: [{
 						colName: 'rcv_group_no',
 						ruleType: 'in',

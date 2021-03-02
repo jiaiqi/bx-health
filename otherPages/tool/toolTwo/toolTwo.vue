@@ -17,11 +17,12 @@
 			</view>
 		</view>
 		<view class="bmi-box">
-			<view class="bmi-bar-box">
+			<bmi-weight-bar :height="info.height" :weight="info.weight"></bmi-weight-bar>
+			<!-- <view class="bmi-bar-box">
 				<view class="bmi-bar">
 					<view class="bar1 bar-box">
 						<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi < 18.5">
-							<text class="cuIcon-deliver_fill text-blue">
+							<text class="cuIcon-locationfill text-blue">
 								<text class="tip-bmi">
 									{{ bmi }}
 								</text>
@@ -31,7 +32,7 @@
 					</view>
 					<view class="bar2 bar-box">
 						<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24">
-							<text class="cuIcon-deliver_fill text-cyan">
+							<text class="cuIcon-locationfill text-cyan">
 								<text class="tip-bmi">
 									{{ bmi }}
 								</text>
@@ -41,7 +42,7 @@
 					</view>
 					<view class="bar3 bar-box">
 						<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi <= 28 && bmi > 24">
-							<text class="cuIcon-deliver_fill text-yellow">
+							<text class="cuIcon-locationfill text-yellow">
 								<text class="tip-bmi">
 									{{ bmi }}
 								</text>
@@ -51,7 +52,7 @@
 					</view>
 					<view class="bar4 bar-box">
 						<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi > 28">
-							<text class="cuIcon-deliver_fill text-orange">
+							<text class="cuIcon-locationfill text-orange">
 								<text class="tip-bmi">
 									{{ bmi }}
 								</text>
@@ -70,7 +71,7 @@
 					<view class="label text-bold">BMI:</view>
 					<view class="value" v-for="item in weightForBmi" :key="item.bmi">{{ item.bmi }}</view>
 				</view>
-			</view>
+			</view> -->
 		</view>
 		<view class="text-center text-cyan text-bold">请输入您的基本信息</view>
 		<view class="item-list">
@@ -330,7 +331,7 @@
 
 					.scale {
 						position: absolute;
-						top: -20px;
+						top: -25px;
 						font-size: 50rpx;
 						left: 0;
 						transition: left 2s ease;
