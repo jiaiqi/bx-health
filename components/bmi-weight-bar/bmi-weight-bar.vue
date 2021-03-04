@@ -43,14 +43,14 @@
 			</view>
 		</view>
 		<view class="bmi-label" v-if="isArray(weightForBmi)">
-			<view class="label text-bold">体重:</view>
-			<view class="value" v-for="item in weightForBmi" :key="item.bmi">
-				<text v-if="item.weight && isString(item.weight)">{{ item.weight }}</text>
-			</view>
-		</view>
-		<view class="bmi-label" v-if="isArray(weightForBmi)">
 			<view class="label text-bold">BMI:</view>
 			<view class="value" v-for="item in weightForBmi" :key="item.bmi">{{ item.bmi }}</view>
+		</view>
+		<view class="bmi-label" v-if="isArray(weightForBmi)">
+			<view class="label text-bold">体重:</view>
+			<view class="value" v-for="item in weightForBmi" :key="item.bmi">
+				<text v-if="item.weight && isString(item.weight)">{{ item.weight }}kg</text>
+			</view>
 		</view>
 	</view>
 </template>
@@ -102,15 +102,14 @@
 			weightForBmi() {
 				let bmiList = [18.5, 24, 28];
 				let weightList = [];
-				if (this.bmi && this.height) {
-					bmiList.forEach(bmi => {
-						let weight = ((bmi * this.height ** 2) / 10000).toFixed(1) + 'kg';
-						weightList.push({
-							bmi,
-							weight
-						});
+				let height = this.height ? this.height : 0
+				bmiList.forEach(bmi => {
+					let weight = ((bmi * height ** 2) / 10000).toFixed(1);
+					weightList.push({
+						bmi,
+						weight
 					});
-				}
+				});
 				return weightList;
 			},
 		},

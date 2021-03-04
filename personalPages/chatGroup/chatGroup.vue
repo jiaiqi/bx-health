@@ -177,7 +177,6 @@
 			// 	});
 			// },
 			toChat(item) {
-				debugger
 				//跳转到群组聊天页面
 				// uni.navigateTo({
 				// 	url: `/personalPages/myDoctor/doctorChat?no=${this.vuex_userInfo.no}&groupInfo=${encodeURIComponent(JSON.stringify(item))}`

@@ -37,6 +37,9 @@
 			uni.$on('updateSuccess', () => {
 				this.getBindDoctor();
 			});
+			uni.$on('updateUnread',_=>{
+				this.getBindDoctor();
+			})
 		},
 		methods: {
 			toDoctorDetail(e) {
@@ -138,7 +141,7 @@
 					uni.navigateTo({
 						// url: '/personalPages/myDoctor/doctorChat?no=' + item.usera_person_no + '&doctor=' + encodeURIComponent(JSON.stringify(
 						// 	item))
-						url: '/personalPages/chat/chat?type=用户间&row_no=' + item.row_no
+						url: '/personalPages/chat/chat?type=用户间&identity=患者&row_no=' + item.row_no
 					});
 				}
 			},

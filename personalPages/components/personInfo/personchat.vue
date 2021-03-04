@@ -19,16 +19,19 @@ s<template>
 					</view>
 				</view>
 				<view :id="`person-chat-item${item.id}`" v-for="(item, index) in recordList" :key="item.id" class="person-chat-item"
-				 :class="item.sender_account === currentUserInfo.userno ? 'person-chat-item-my' : ''">
+				 :class="item.sender_account === currentUserInfo.userno&&identity==item.identity? 'person-chat-item-my' : ''">
 					<view class="send-time" v-if="showSendTime(item, index)">{{ formateDate(item.create_time, 'normal') }}</view>
-					<view v-if="item.sender_account != currentUserInfo.userno" class="person-chat-item-accept">
-						<view class="sender-info" v-if="groupInfo && groupInfo.gc_no">
+					<view v-if="item.sender_account != currentUserInfo.userno||(identity!==item.identity&&identity)" class="person-chat-item-accept">
+						<view class="sender-info" v-if="(groupInfo && groupInfo.gc_no)||(identity&&item.identity)">
 							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
+							<text class="cu-tag bg-blue sm" v-if="item.identity">{{ item.identity }}</text>
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
 						</view>
 						<view class="person-chat-item-left">
-							<image :src="userInfo.profile_url ? getImagePath(userInfo.profile_url) : '/personalPages/static/doctor_default.jpg'"
-							 mode="aspectFit" v-if="!groupInfo || !groupInfo.gc_no"></image>
+							<image :src="storeInfo.log?getImagePath(storeInfo.logo):getImagePath(storeInfo.image)" mode="aspectFill" v-if="identity==='客户'&&item.identity!==identity"></image>
+							<image :src="getImagePath(item.sender_profile_url)" mode="aspectFit" v-if="identity==='客服'&&identity!==item.identity"></image>
+							<image :src="identity==='患者'?getImagePath(rowInfo.userb_profile_url):getImagePath(rowInfo.usera_profile_url)"
+							 mode="aspectFit" v-if="!groupNo&&identity&&rowInfo&&rowInfo.row_no"></image>
 							<image :src="getSenderProfile(item) ? getSenderProfile(item) : '/static/man-profile.png'" mode="aspectFit" v-if="groupInfo && groupInfo.gc_no"></image>
 						</view>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url && item.msg_content_type === '图片'"
@@ -90,10 +93,11 @@ s<template>
 							</view>
 						</view>
 					</view>
-					<view v-else-if="item.sender_account === currentUserInfo.userno" class="person-chat-item-send">
-						<view class="sender-info" v-if="groupInfo && groupInfo.gc_no">
+					<view v-else-if="item.sender_account === currentUserInfo.userno&&identity===item.identity" class="person-chat-item-send">
+						<view class="sender-info" v-if="(groupInfo && groupInfo.gc_no)||(identity&&item.identity)">
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
 							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
+							<text class="cu-tag bg-blue sm" v-if="item.identity">{{ item.identity }}</text>
 						</view>
 						<text class="unread" v-if="item.msg_state === '未读' &&!groupNo&& (!groupInfo || !groupInfo.gc_no)">{{ item.msg_state }}</text>
 						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
@@ -157,8 +161,9 @@ s<template>
 							</view>
 						</view>
 						<view class="person-chat-item-left">
+							<image :src="getImagePath(storeInfo.image)" mode="aspectFill" v-if="identity==='客服'"></image>
 							<image :src="currentUserInfo.profile_url ? currentUserInfo.profile_url : '/personalPages/static/doctor_default.jpg'"
-							 mode="aspectFill"></image>
+							 mode="aspectFill" v-else></image>
 						</view>
 					</view>
 				</view>
@@ -280,6 +285,12 @@ s<template>
 			pageType: {
 				type: String
 			},
+			storeNo: {
+				type: String
+			},
+			sessionType: {
+				type: String
+			},
 			doctor_info: {
 				type: Object
 			},
@@ -292,6 +303,15 @@ s<template>
 			},
 			groupNo: {
 				type: String // 群组编号
+			},
+			rowInfo: {
+				type: Object
+			},
+			storeInfo: {
+				type: Object
+			},
+			identity: {
+				type: String //一对一会话身份 - 医生/患者
 			}
 		},
 		computed: {
@@ -1051,12 +1071,40 @@ s<template>
 						sender_name: this.currentUserInfo.name,
 						sender_person_no: this.currentUserInfo.no,
 						sender_profile_url: this.currentUserInfo.profile_url,
-						sender_user_image: this.currentUserInfo.user_image,
+						sender_user_image: this.currentUserInfo.user_image ? this.currentUserInfo.user_image : this.currentUserInfo.profile_url,
 						msg_content_type: type,
-						session_no: this.sessionNo
+						session_no: this.sessionNo,
 					};
+					if (this.rowInfo && this.rowInfo.row_no) {
+						let targetUserinfo = {}
+						if (this.identity === '患者') {
+							targetUserinfo = {
+								userno: this.rowInfo.userb_no,
+								person_no: this.rowInfo.userb_person_no,
+								name: this.rowInfo.userb_name,
+								profile_url: this.rowInfo.userb_profile_url,
+								user_image: this.rowInfo.userb_image,
+								identity: this.identity ? this.identity : '患者'
+							}
+						} else {
+							targetUserinfo = {
+								userno: this.rowInfo.usera_no,
+								person_no: this.rowInfo.usera_person_no,
+								name: this.rowInfo.usera_name,
+								profile_url: this.rowInfo.usera_profile_url,
+								user_image: this.rowInfo.usera_image,
+								identity: this.identity ? this.identity : '医生'
+							}
+						}
+						req[0].data[0].receiver_account = targetUserinfo.userno,
+							req[0].data[0].receiver_person_no = targetUserinfo.person_no,
+							req[0].data[0].identity = targetUserinfo.identity
+					}
 					if (this.groupNo) {
 						req[0].data[0].rcv_group_no = this.groupNo
+					}
+					if (this.identity) {
+						req[0].data[0].identity = this.identity
 					}
 					if (!this.sessionNo) {
 						uni.showModal({
@@ -1205,12 +1253,43 @@ s<template>
 						sender_name: this.currentUserInfo.name,
 						sender_person_no: this.currentUserInfo.no,
 						sender_profile_url: this.currentUserInfo.profile_url,
-						sender_user_image: this.currentUserInfo.user_image,
+						sender_user_image: this.currentUserInfo.user_image ? this.currentUserInfo.user_image : this.currentUserInfo.profile_url,
 						msg_content_type: !this.isSendLink ? '文本' : '链接',
 						session_no: this.sessionNo
 					};
+					// if(this.sessionType==='机构用户客服'){
+					// 	// storeNo
+					// }
+					if (this.rowInfo && this.rowInfo.row_no) {
+						let targetUserinfo = {}
+						if (this.identity === '患者') {
+							targetUserinfo = {
+								userno: this.rowInfo.userb_no,
+								person_no: this.rowInfo.userb_person_no,
+								name: this.rowInfo.userb_name,
+								profile_url: this.rowInfo.userb_profile_url,
+								user_image: this.rowInfo.userb_image,
+								identity: '患者'
+							}
+						} else {
+							targetUserinfo = {
+								userno: this.rowInfo.usera_no,
+								person_no: this.rowInfo.usera_person_no,
+								name: this.rowInfo.usera_name,
+								profile_url: this.rowInfo.usera_profile_url,
+								user_image: this.rowInfo.usera_image,
+								identity: '医生'
+							}
+						}
+						req[0].data[0].receiver_account = targetUserinfo.userno,
+							req[0].data[0].receiver_person_no = targetUserinfo.person_no,
+							req[0].data[0].identity = targetUserinfo.identity
+					}
 					if (this.groupNo) {
 						req[0].data[0].rcv_group_no = this.groupNo
+					}
+					if (this.identity) {
+						req[0].data[0].identity = this.identity
 					}
 					if (!this.sessionNo) {
 						uni.showModal({
@@ -1505,9 +1584,17 @@ s<template>
 						}
 					}, []);
 					this.recordList = this._SortJson(resData);
-					if (this.customer_no) {
+					// if (this.customer_no) {
+					// 	let recordList = this.recordList.filter((item) => {
+					// 		if (item.sender_person_no === this.customer_no && item.msg_state === '未读') {
+					// 			return true
+					// 		}
+					// 	})
+					// 	this.updateMessageInfo(recordList)
+					// }
+					if (this.identity) {
 						let recordList = this.recordList.filter((item) => {
-							if (item.sender_person_no === this.customer_no && item.msg_state === '未读') {
+							if (item.identity !== this.identity && item.msg_state === '未读') {
 								return true
 							}
 						})
@@ -1548,11 +1635,12 @@ s<template>
 				if (Array.isArray(e) && e.length > 0) {
 					this.$http.post(url, req).then(res => {
 						if (res.data.state === 'SUCCESS') {
-							this.recordList.map((item) => {
-								if (item.sender_person_no === this.customer_no && item.msg_state === '未读') {
-									this.$set(item, 'msg_state', '已读')
-								}
-							})
+							uni.$emit('updateUnread')
+							// this.recordList.map((item) => {
+							// if (item.sender_person_no === this.customer_no && item.msg_state === '未读') {
+							// 	this.$set(item, 'msg_state', '已读')
+							// }
+							// })
 						}
 					})
 				}

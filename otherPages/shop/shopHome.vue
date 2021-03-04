@@ -444,7 +444,7 @@ export default {
 		}
 	},
 	onShareAppMessage() {
-		let path = `/otherPages/shop/shopHome?type=find&store_no=${this.storeInfo.store_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
+		let path = `/otherPages/shop/shopHome?type=find&store_no=${this.rest_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
 			this.userInfo.no
 		}&share_type=bindOrganization`;
 		let title = `${this.userInfo.name}邀请您查看【${this.storeInfo.name}】`;

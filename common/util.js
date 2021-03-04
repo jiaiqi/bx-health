@@ -428,6 +428,7 @@ export default {
 			let url = Vue.prototype.getServiceUrl(app || uni.getStorageSync("activeApp"), srv, optionType)
 			let res = await _http.post(url, req)
 			if (res.data.state === 'SUCCESS') {
+				// select
 				if (optionType === "select") {
 					return {
 						success: true,
@@ -435,6 +436,7 @@ export default {
 						data: res.data.data
 					}
 				} else {
+					// update|add|delete
 					if (
 						Array.isArray(res.data.response) &&
 						res.data.response.length > 0 &&
@@ -449,6 +451,13 @@ export default {
 					}
 				}
 			} else {
+				if (res.data && res.data.resultMessage) {
+					uni.showModal({
+						title: '提示',
+						content: res.data.resultCode + ':' + res.data.resultMessage,
+						showCancel: false
+					})
+				}
 				return {
 					success: false,
 					data: res.data
@@ -1605,7 +1614,7 @@ export default {
 								store.commit('SET_INTO_HOSPITAL_STATUS', true)
 							}
 						})
-					}  else if (pageInfo.add_url.indexOf('/otherPages/shop/shopHome') === -1 && store.state.user.userInfo.add_store_no) {
+					} else if (pageInfo.add_url.indexOf('/otherPages/shop/shopHome') === -1 && store.state.user.userInfo.add_store_no) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state.user.userInfo.add_store_no,
@@ -1762,6 +1771,7 @@ export default {
 					"userno": user_no,
 					"name": wxUserInfo ? wxUserInfo.nickname : "",
 					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
+					"user_image": wxUserInfo ? wxUserInfo.headimgurl : "",
 					"sex": wxUserInfo ? (wxUserInfo.sex === 0 ? "男" : wxUserInfo.sex === 1 ? "女" : "") : "",
 					"is_main": "是",
 					"font_size": "中"

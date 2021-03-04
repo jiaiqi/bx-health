@@ -209,7 +209,7 @@
 									<text class="heat">{{ item.energy }}千卡</text>
 								</view>
 								<view class="number">
-									<text>{{ item.unit !== 'g' ? item.amount + item.unit : item.amount * item.unit_weight_g + item.unit }}</text>
+									<text>{{ item.unit !== 'g' ? item.amount + item.unit : item.amount * 100 + item.unit }}</text>
 									<text class="time">{{ item.htime ? item.htime.slice(0, 5) : '' }}</text>
 								</view>
 							</view>
@@ -2471,6 +2471,8 @@ export default {
 						delete item._userno_disp;
 						delete item.checked;
 						delete item.amountEditable;
+						delete item.id;
+						delete item.diet_record_no;
 						item.hdate = this.selectDate;
 						item.htime = this.nowDateTime;
 						return item;

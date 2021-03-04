@@ -263,31 +263,30 @@
 						"navigationBarBackgroundColor": "#fff"
 					}
 				},
+				{
+					"path": "StoreManager/StoreManager",
+					"style": {
+						"navigationBarTitleText": "店铺管理",
+						"enablePullDownRefresh": false
+					}
+				},
 				// {
-				// 	"path": "StoreManager/StoreManager",
+				// 	"path": "HealthRecord/HealthRecord",
 				// 	"style": {
-				// 		"navigationBarTitleText": "店铺管理",
+				// 		"navigationBarTitleText": "",
 				// 		"enablePullDownRefresh": false
 				// 	}
+
 				// }, 
 				{
-					"path": "HealthRecord/HealthRecord",
+					"path": "chat/chat",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
 
 				}
-			    ,{
-                    "path" : "chat/chat",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			]
 		},
 		{
 			"root": "otherPages",

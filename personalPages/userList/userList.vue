@@ -37,7 +37,7 @@
 					// type: 121 - 一对一
 					uni.navigateTo({
 						// url:'/personalPages/myDoctor/doctorChat?no='+e.userb_person_no
-						url: '/personalPages/chat/chat?type=用户间&row_no=' + e.row_no
+						url: '/personalPages/chat/chat?type=用户间&identity=医生&row_no=' + e.row_no
 					})
 				}
 			},
@@ -116,9 +116,6 @@
 				};
 			}
 		},
-		onReady() {
-			console.log('app-onReady======>');
-		},
 		onShow() {
 			let userList = uni.getStorageSync('user_info_list');
 			let current_user = uni.getStorageSync('current_user_info');
@@ -137,6 +134,9 @@
 			}
 		},
 		mounted() {
+			uni.$on('updateUnread',_=>{
+				this.$refs.filter.onRefresh();
+			})
 			uni.$on('backPage', () => {
 				this.$refs.filter.onRefresh();
 			});

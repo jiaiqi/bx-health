@@ -677,43 +677,51 @@
 					// this.groupMsgUnreadAmount = amount;
 					return amount;
 				}
-			}
+			},
+			async updateUnreadAmount(){
+				let amount = await this.selectMyGroup();
+				this.getDoctorAllRecod(this.userInfo.userno).then(r => {
+					if (amount) {
+						r += amount;
+					}
+					if (this.orderMsgNum) {
+						r += this.orderMsgNum
+					}
+					if (r > 99) {
+						r = '99+';
+					} else {
+						r = r.toString();
+					}
+					if (r != 0) {
+						uni.setTabBarBadge({
+							index: 3,
+							text: r
+						});
+					} else {
+						uni.removeTabBarBadge({
+							index: 3
+						});
+					}
+				});
+			},
 		},
+		
 		async mounted() {
+			uni.$on('updateUnread',_=>{
+				this.updateUnreadAmount();
+			})
 			if (this.vuex_userInfo && this.vuex_userInfo.hasOwnProperty('manager_type')) {
 				this.manager_type = this.vuex_userInfo.manager_type;
 			}
 			this.userInfo = this.vuex_userInfo
-			let amount = await this.selectMyGroup();
-			this.getDoctorAllRecod(this.userInfo.userno).then(r => {
-				if (amount) {
-					r += amount;
-				}
-				if (this.orderMsgNum) {
-					r += this.orderMsgNum
-				}
-				if (r > 99) {
-					r = '99+';
-				} else {
-					r = r.toString();
-				}
-				if (r != 0) {
-					uni.setTabBarBadge({
-						index: 3,
-						text: r
-					});
-				} else {
-					uni.removeTabBarBadge({
-						index: 3
-					});
-				}
-			});
+			
 			this.getBindDoctor();
 			this.getDoctorInfo().then(res => {
 				if (res) {
 					this.getBindhzDoctor(res.dt_no);
 				}
 			});
+			this.updateUnreadAmount()
 		},
 		onShareAppMessage() {
 			let path = `/pages/personal/personal?from=share&invite_user_no=${this.vuex_userInfo.userno}`;

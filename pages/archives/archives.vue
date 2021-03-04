@@ -1445,9 +1445,6 @@ export default {
 			menus: ['shareAppMessage', 'shareTimeline']
 		});
 		// #endif
-		// if (this.is_login && this.authSetting['userInfo']) {
-		// 	this.initPage();
-		// }
 		uni.$on('healthTotalScoreChanged', result => {
 			if (result) {
 				if (parseInt(result !== parseFloat(result))) {

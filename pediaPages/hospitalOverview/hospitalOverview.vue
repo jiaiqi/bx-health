@@ -53,7 +53,7 @@
 						<u-icon name="zhenduan" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
 						<text class="title">健康评测</text>
 					</view>
-					<view class="menu-item" @click="toPages('groupChat')" v-if="storeInfo.session_no">
+					<view class="menu-item" @click="toPages('groupChat')" v-if="storeInfo.member_session_no">
 						<text class="cuIcon-comment" style="font-size: 30px;color:#00aaff;"></text>
 						<text class="title">店铺群聊</text>
 					</view>
@@ -106,13 +106,13 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&staffList.length>0">
+				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&doctorList.length>0">
 					<view class="title">
 						<view class="">专家团队</view>
 					</view>
 					<view class="content">
 						<view class="professor-box">
-							<view class="professor-item" v-for="item in staffList" @click="toDocotrDetail(item)">
+							<view class="professor-item" v-for="item in doctorList" @click="toDocotrDetail(item)">
 								<image class="img" :src="getImagePath(item.profile_url) ? getImagePath(item.profile_url) : '../static/img/doctor_default.jpg'"
 								 mode="aspectFit"></image>
 								<view class="doc-info">
@@ -174,7 +174,7 @@
 				storeNo: '',
 				fullIntro: false,
 				storeInfo: {},
-				staffList: [], //工作人员
+				storeUserList: [],
 				deptList: [], //科室
 				groupList: [], // 关联圈子
 				noticeList: [],
@@ -185,6 +185,18 @@
 				userInfo: state => state.user.userInfo,
 				inviterInfo: state => state.app.inviterInfo
 			}),
+			customerList() {
+				// 客服列表
+				return this.storeUserList.filter(item => item.user_role.indexOf('客服') !== -1)
+			},
+			staffList() {
+				// 工作人员
+				return this.storeUserList.filter(item => item.user_role.indexOf('工作人员') !== -1 || item.user_role === '药房人员')
+			},
+			doctorList() {
+				// 大夫列表
+				return this.storeUserList.filter(item => item.user_role === '大夫')
+			},
 			onlyCurrentPage() {
 				let pageStack = getCurrentPages();
 				if (Array.isArray(pageStack) && pageStack.length > 1) {
@@ -471,46 +483,24 @@
 							"ruleType": "eq",
 							"value": this.storeNo
 						},
-						{
-							colName: "person_no",
-							ruleType: "eq",
-							value: this.userInfo.no
-						}
+						// {
+						// 	colName: "person_no",
+						// 	ruleType: "eq",
+						// 	value: this.userInfo.no
+						// }
 					],
 				}
 				this.$fetch('select', 'srvhealth_store_user_select', req, 'health').then(res => {
 					if (res.success && res.data.length >= 1) {
-						this.isBind = true
-						this.bindUserInfo = res.data[0]
+						if (res.data.find(item => item.store_no === this.storeNo)) {
+							this.isBind = true
+							this.bindUserInfo = res.data.find(item => item.store_no === this.storeNo)
+						}
+						this.storeUserList = res.data
 					}
 				})
 			},
-			selectStaffList() {
-				let url = this.getServiceUrl('health', 'srvhealth_store_user_select', 'select');
-				let req = {
-					serviceName: 'srvhealth_store_user_select',
-					colNames: ['*'],
-					condition: [{
-						colName: 'store_no',
-						ruleType: 'eq',
-						value: this.storeNo
-					}, {
-						colName: 'user_role',
-						value: '大夫',
-						ruleType: 'like'
-					}],
-					page: {
-						pageNo: 1,
-						rownumber: 10
-					},
-				};
-				this.$http.post(url, req).then(res => {
-					if (Array.isArray(res.data.data)) {
-						this.staffList = res.data.data;
-					}
-				});
-			},
-			bindStore() {
+			bindStore(nullRole) {
 				// 将当前登录用户添加到店铺用户列表，角色为用户
 				let req = [{
 					"serviceName": "srvhealth_store_user_add",
@@ -526,7 +516,7 @@
 						"nick_name": this.userInfo.nick_name,
 						"profile_url": this.userInfo.profile_url,
 						"sex": this.userInfo.sex,
-						"user_role": "用户"
+						"user_role": nullRole ? null : "用户"
 					}]
 				}]
 				this.$fetch('operate', 'srvhealth_store_user_add', req, 'health').then(res => {
@@ -534,13 +524,20 @@
 						this.isBind = true
 						if (res.data.length > 0) {
 							this.bindUserInfo = res.data[0]
+							return this.bindUserInfo
 						}
 					}
 				})
 			},
-			toConsult() {
+			async toConsult() {
 				// 在线咨询
-
+				let storeUserInfo = this.storeUserList.find(item => item.person_no === this.userInfo.no)
+				if (!storeUserInfo) {
+					storeUserInfo = await this.bindStore()
+				}
+				uni.navigateTo({
+					url: `/personalPages/chat/chat?type=机构用户客服&identity=客户&storeNo=${this.storeNo}&store_user_no=${storeUserInfo.store_user_no}`
+				})
 			},
 			makePhoneCall() {
 				uni.makePhoneCall({
@@ -680,7 +677,6 @@
 					this.storeNo = option.store_no;
 					this.selectUserList()
 					this.selectStoreInfo();
-					this.selectStaffList();
 					this.selectDepartList();
 					this.seletGroupList();
 				}
