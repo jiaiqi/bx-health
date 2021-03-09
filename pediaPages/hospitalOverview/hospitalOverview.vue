@@ -1,8 +1,8 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="page-wrap" :class="{ onlyCurrentPage: onlyCurrentPage }">
-		<swiper class="screen-swiper item-box square-dot" easing-function="linear" :indicator-dots="true" :circular="true"
-		 :autoplay="true" interval="5000" duration="500" height="300">
+		<swiper class="screen-swiper item-box square-dot" easing-function="linear" :indicator-dots="true"
+			:circular="true" :autoplay="true" interval="5000" duration="500" height="300">
 			<swiper-item v-for="(item, index) in swiperList" :key="item.url" @click.stop="toPreviewImage(item.url)">
 				<image :src="item.url" mode="scaleToFill"></image>
 			</swiper-item>
@@ -15,7 +15,8 @@
 					<view class="left" @click="toPages('instroduce')">
 						<view class="top">
 							<view class="name">{{ storeInfo.name }}</view>
-							<view class="bind" v-if="!isBind"><button @click.stop="bindStore" type="primary" class="bg-blue cu-btn sm">绑定</button></view>
+							<view class="bind" v-if="!isBind"><button @click.stop="bindStore(true)" type="primary"
+									class="bg-blue cu-btn sm">绑定</button></view>
 						</view>
 						<view class="bottom" v-if="introduction && introduction.length < 25">{{ introduction }}</view>
 						<view class="bottom" v-if="storeInfo.address" @click.stop="getCurrentLocation">
@@ -62,7 +63,8 @@
 						<text class="title">健康记录</text>
 					</view> -->
 				</view>
-				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name" desc="goods_desc"></goods-list>
+				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
+					desc="goods_desc"></goods-list>
 				<view class="introduction news" v-if="noticeList.length > 0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
@@ -85,7 +87,8 @@
 					</view>
 					<view class="content">
 						<view class="depart-box">
-							<button class="depart-item cu-btn bg-blue sm margin-right-xs" v-for="item in deptList" @click="toDeptDetail(item)">{{ item.dept_name }}</button>
+							<button class="depart-item cu-btn bg-blue sm margin-right-xs" v-for="item in deptList"
+								@click="toDeptDetail(item)">{{ item.dept_name }}</button>
 						</view>
 					</view>
 				</view>
@@ -99,7 +102,8 @@
 					<view class="content">
 						<view class="group-box">
 							<view class="group-item" v-for="item in groupList" @click="toGroup(item)">
-								<image class="image" :src="getImagePath(item.icon)" mode="aspectFit" v-if="item.icon"></image>
+								<image class="image" :src="getImagePath(item.icon)" mode="aspectFit" v-if="item.icon">
+								</image>
 								<text class=" image cuIcon-group_fill text-grey" v-else></text>
 								<view class="label">{{ item.name }}</view>
 							</view>
@@ -113,11 +117,13 @@
 					<view class="content">
 						<view class="professor-box">
 							<view class="professor-item" v-for="item in doctorList" @click="toDocotrDetail(item)">
-								<image class="img" :src="getImagePath(item.profile_url) ? getImagePath(item.profile_url) : '../static/img/doctor_default.jpg'"
-								 mode="aspectFit"></image>
+								<image class="img"
+									:src="getImagePath(item.profile_url) ? getImagePath(item.profile_url) : '../static/img/doctor_default.jpg'"
+									mode="aspectFit"></image>
 								<view class="doc-info">
 									<view class="top">
-										<text class="doc-name">{{ item.person_name ? item.person_name : item.nick_name || '' }}</text>
+										<text
+											class="doc-name">{{ item.person_name ? item.person_name : item.nick_name || '' }}</text>
 									</view>
 									<view class="center">
 										<view class="depart-name">科室：{{ item.deptName || '-' }}</view>
@@ -191,7 +197,8 @@
 			},
 			staffList() {
 				// 工作人员
-				return this.storeUserList.filter(item => item.user_role.indexOf('工作人员') !== -1 || item.user_role === '药房人员')
+				return this.storeUserList.filter(item => item.user_role.indexOf('工作人员') !== -1 || item.user_role ===
+					'药房人员')
 			},
 			doctorList() {
 				// 大夫列表
@@ -208,7 +215,8 @@
 				}
 			},
 			introduction() {
-				if (!this.fullIntro && this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction.length > 80) {
+				if (!this.fullIntro && this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction
+					.length > 80) {
 					return this.storeInfo.introduction.slice(0, 80) + '...';
 				} else {
 					return this.storeInfo.introduction;
@@ -240,24 +248,16 @@
 								"display": false,
 								value: this.userInfo.userno
 							},
-							// {
-							// 	"column": "doctor_no",
-							// 	"display": false,
-							// 	"value": "PB2020092209440043"
-							// }, 
-							// {
-							// 	"column": "doctor_name",
-							// 	"display": false,
-							// 	"value": "贾琦"
-							// },
 							{
 								"column": "store_no",
 								"display": false,
 								"value": this.storeNo
 							}
 						]
-						url = '/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' + JSON.stringify(
-							fieldsCond)
+						url =
+							'/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' +
+							JSON.stringify(
+								fieldsCond)
 						break;
 					case 2:
 						url =
@@ -314,7 +314,8 @@
 			toArticle(e) {
 				if (e.content_no) {
 					uni.navigateTo({
-						url: '/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=' + e.content_no
+						url: '/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=' + e
+							.content_no
 					});
 				}
 			},
@@ -424,7 +425,8 @@
 					if (Array.isArray(res)) {
 						this.swiperList = res.reduce((pre, cur) => {
 							if (cur.fileurl) {
-								cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+								cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni
+									.getStorageSync('bx_auth_ticket');
 								this.getImageInfo({
 									url: cur.url
 								}).then(picInfo => {
@@ -476,6 +478,9 @@
 			},
 			selectUserList() {
 				let req = {
+					page: {
+						rownumber: 99999
+					},
 					"serviceName": "srvhealth_store_user_select",
 					"colNames": ["*"],
 					"condition": [{
@@ -500,7 +505,7 @@
 					}
 				})
 			},
-			bindStore(nullRole) {
+			async bindStore(nullRole) {
 				// 将当前登录用户添加到店铺用户列表，角色为用户
 				let req = [{
 					"serviceName": "srvhealth_store_user_add",
@@ -515,19 +520,24 @@
 						"user_account": this.userInfo.userno,
 						"nick_name": this.userInfo.nick_name,
 						"profile_url": this.userInfo.profile_url,
+						user_image: this.userInfo.user_image,
 						"sex": this.userInfo.sex,
-						"user_role": nullRole ? null : "用户"
+						"user_role": nullRole ? null : "用户",
+						add_url: this.inviterInfo.add_url,
+						invite_user_no: this.inviterInfo.invite_user_no,
 					}]
 				}]
-				this.$fetch('operate', 'srvhealth_store_user_add', req, 'health').then(res => {
-					if (res.success) {
-						this.isBind = true
-						if (res.data.length > 0) {
-							this.bindUserInfo = res.data[0]
-							return this.bindUserInfo
-						}
+				if (!this.storeInfo || !this.storeInfo.no) {
+					let userInfo = await this.toAddPage()
+				}
+				let res = await this.$fetch('operate', 'srvhealth_store_user_add', req, 'health')
+				if (res.success) {
+					this.isBind = true
+					if (res.data.length > 0) {
+						this.bindUserInfo = res.data[0]
+						return this.bindUserInfo
 					}
-				})
+				}
 			},
 			async toConsult() {
 				// 在线咨询
@@ -535,9 +545,11 @@
 				if (!storeUserInfo) {
 					storeUserInfo = await this.bindStore()
 				}
-				uni.navigateTo({
-					url: `/personalPages/chat/chat?type=机构用户客服&identity=客户&storeNo=${this.storeNo}&store_user_no=${storeUserInfo.store_user_no}`
-				})
+				if (storeUserInfo.store_user_no) {
+					uni.navigateTo({
+						url: `/personalPages/chat/chat?type=机构用户客服&identity=客户&storeNo=${this.storeNo}&store_user_no=${storeUserInfo.store_user_no}`
+					})
+				}
 			},
 			makePhoneCall() {
 				uni.makePhoneCall({
@@ -598,7 +610,10 @@
 						invite_user_no: invite_user_no,
 						store_no: store_no,
 						person_no: this.userInfo.no,
-						user_role: '用户'
+						user_role: '用户',
+						"image": this.storeInfo.image,
+						"name": this.storeInfo.name,
+						"type": this.storeInfo.type
 					}]
 				}];
 				uni.showModal({
@@ -626,13 +641,11 @@
 			}
 		},
 		onShareAppMessage() {
-			// 	let path =
-			// 		`/pediaPages/hospitalOverview/hospitalOverview?store_no=${this.storeInfo.store_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
-			// 	this.userInfo.no
-			// }&share_type=bindOrganization`;
 			let path =
-				`/pediaPages/hospitalOverview/hospitalOverview?from=share&invite_user_no=${this.userInfo.userno}`;
-			let title = `${this.userInfo.name}邀请您查看【${this.storeInfo.name}】`;
+				`/pediaPages/hospitalOverview/hospitalOverview?from=share&invite_user_no=${this.userInfo.userno}&share_type=bindOrganization&doctor_no=${
+					this.userInfo.no
+				}`;
+			let title = `${this.userInfo.name}邀请您关注【${this.storeInfo.name}】`;
 			let imageUrl = this.getImagePath(this.storeInfo.image);
 			this.saveSharerInfo(this.userInfo, path);
 			return {

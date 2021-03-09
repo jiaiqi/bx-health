@@ -347,36 +347,36 @@
 		},
 		onLoad(option) {
 			this.checkOptionParams(option);
-			this.toAddPage();
-			if (option.share_type === 'bindOrganization') {
-				// 绑定诊所
-				if (option.store_no && option.invite_user_no) {
-					this.getStoreUserInfo(option.store_no).then(res => {
-						this.getStoreInfo(option.store_no).then(data => {
-							if (Array.isArray(res) && res.length == 1) {
-								// 跳转到店铺详情
-								uni.redirectTo({
-									url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res[0].store_no
-									// url: '/pediaPages/StoreList/StoreList?from=list&store_no=' + res[0].store_no
-								});
-							} else if (Array.isArray(res) && res.length > 1) {
-								// 跳转到店铺列表
-								uni.switchTab({
-									url: '/pages/store/store'
-									// url: '/personalPages/StoreList/StoreList'
-								});     
-							} else { 
-								// 当前用户不在此诊所中 则添加当前用户到此诊所中
-								this.addToStore(option.store_no, option.invite_user_no); 
-							}
+			this.toAddPage().then(_=>{
+				if (option.share_type === 'bindOrganization') {
+					// 绑定诊所
+					if (option.store_no && option.invite_user_no) {
+						this.getStoreUserInfo(option.store_no).then(res => {
+							this.getStoreInfo(option.store_no).then(data => {
+								if (Array.isArray(res) && res.length == 1) {
+									// 跳转到店铺详情
+									uni.redirectTo({
+										url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res[0].store_no
+									});
+								} else if (Array.isArray(res) && res.length > 1) {
+									// 跳转到店铺列表
+									uni.switchTab({
+										url: '/pages/store/store'
+										// url: '/personalPages/StoreList/StoreList'
+									});     
+								} else { 
+									// 当前用户不在此诊所中 则添加当前用户到此诊所中
+									this.addToStore(option.store_no, option.invite_user_no); 
+								}
+							});
 						});
-					});
+					}
+				} else if (option.store_no && option.from === 'list') {
+					// 从我的店铺列表中跳转
+					this.getStoreInfo(option.store_no);
+					this.getStoreUserInfo(option.store_no);
 				}
-			} else if (option.store_no && option.from === 'list') {
-				// 从我的店铺列表中跳转
-				this.getStoreInfo(option.store_no);
-				this.getStoreUserInfo(option.store_no);
-			}
+			})
 		}
 	};
 </script>

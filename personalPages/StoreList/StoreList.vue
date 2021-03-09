@@ -146,7 +146,7 @@ export default {
 			// 邀请加入组织机构
 			if (e.target.dataset.data && e.target.dataset.data.id) {
 				let data = e.target.dataset.data;
-				path = `/pediaPages/hospitalOverview/hospitalOverview?store_no=${data.store_no}&from=share&invite_user_no=${this.userInfo.userno}&&doctor_no=${
+				path = `/pediaPages/hospitalOverview/hospitalOverview?store_no=${data.store_no}&from=share&invite_user_no=${this.userInfo.userno}&doctor_no=${
 					this.userInfo.no
 				}&share_type=bindOrganization`;
 				title = `${this.userInfo.name}邀请您加入【${data.name}】`;
