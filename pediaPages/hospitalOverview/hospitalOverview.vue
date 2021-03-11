@@ -10,12 +10,17 @@
 		<view class="page-content">
 			<view class="header-wrap" v-if="storeInfo && storeInfo.id">
 				<view class="hospital-top">
-					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
-					<view class="logo" v-else>{{ storeInfo.name.slice(0, 1) }}</view>
-					<view class="home-btn shadow-blur" @click="setHomePage">
-						<view class="cuIcon-home cu-btn bg-white "> <text
-								class="margin-left-xs">{{userInfo&&userInfo.add_store_no===storeNo?'取消设为首页':'设为首页'}}</text>
-						</view>
+					<!-- 					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
+					<view class="logo" v-else>{{ storeInfo.name.slice(0, 1) }}</view> -->
+					<view class="home-btn" @click="setHomePage">
+						<!-- <button class="cuIcon-home cu-btn bg-cyan"> -->
+						<button class="cuIcon-home cu-btn  bg-cyan" v-if="userInfo&&userInfo.home_store_no!==storeNo">
+							<!-- <text class="margin-left-xs">{{userInfo&&userInfo.add_store_no===storeNo?'取消设为首页':'设为首页'}}</text> -->
+						</button>
+					</view>
+					<view class="home-btn like-btn" @click="toPages('subscsribe')" v-if="!subscsribeStatus">
+						<button class="cuIcon-notice cu-btn bg-orange">
+						</button>
 					</view>
 					<view class="left" @click="toPages('instroduce')">
 						<view class="top">
@@ -38,6 +43,7 @@
 							<text>电话</text>
 						</view>
 						<view class="right-item" @click="toConsult">
+							<view class="cu-tag badge" v-if="kefuNum">{{kefuNum}}</view>
 							<image class="image" src="../../static/icon/msg.png" mode="aspectFit"></image>
 							<text>在线咨询</text>
 						</view>
@@ -67,6 +73,7 @@
 							<text class="title">健康评测</text>
 					</view> -->
 					<view class="menu-item" @click="toPages('groupChat')" v-if="storeInfo.member_session_no">
+						<view class="cu-tag badge" v-if="storeNum">{{storeNum}}</view>
 						<text class="cuIcon-comment" style="font-size: 30px;color:#00aaff;"></text>
 						<!-- <image class="icon image" src="../static/img/在线问诊.png" mode="aspectFit"> -->
 						<text class="title">服务站群</text>
@@ -76,6 +83,7 @@
 						<text class="title">健康记录</text>
 					</view> -->
 					<view class="menu-item" v-for="item in groupList" @click="toGroup(item)">
+						<view class="cu-tag badge" v-if="item.unreadNum">{{item.unreadNum}}</view>
 						<image class="icon image" :src="getImagePath(item.icon,true)" mode="aspectFit" v-if="item.icon">
 						</image>
 						<text class="icon image cuIcon-group_fill text-grey" v-else></text>
@@ -204,7 +212,6 @@
 <script>
 	import {
 		mapState
-
 	} from 'vuex';
 	import goodsList from './goods-list.vue';
 	export default {
@@ -226,7 +233,10 @@
 				noticeList: [], // 通知公告
 				newsList: [], // 新闻
 				menuList: [],
-				queryOption: {}
+				queryOption: {},
+				kefuNum: 0,
+				storeNum: 0,
+				kefuSessionInfo: {}
 			};
 		},
 		computed: {
@@ -239,7 +249,9 @@
 			storeUserInfo() {
 				// 当前用户在店铺用户列表中的信息
 				if (this.userInfo && this.userInfo.no) {
-					return this.storeUserList.find(item => item.person_no === this.userInfo.no)
+
+					let storeUserInfo = this.storeUserList.find(item => item.person_no === this.userInfo.no)
+					return storeUserInfo
 				} else {
 					return null
 				}
@@ -277,10 +289,37 @@
 			}
 		},
 		methods: {
+			async getKefuSessionInfo() {
+				let req = {
+					"serviceName": "srvhealth_dialogue_session_select",
+					"colNames": ["*"],
+					"condition": [{
+						"colName": "session_type",
+						"ruleType": "in",
+						"value": "机构用户客服"
+					}, {
+						"colName": "store_no",
+						"ruleType": "like",
+						"value": this.storeNo
+					}, {
+						"colName": "store_user_no",
+						"ruleType": "like",
+						"value": this.storeUserInfo.store_user_no
+					}],
+					"page": {
+						"pageNo": 1,
+						"rownumber": 1
+					},
+				}
+				let res = await this.$fetch('select', 'srvhealth_dialogue_session_select', req, 'health')
+				if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+					this.kefuSessionInfo = res.data[0]
+				}
+			},
 			toPages(e) {
 				let url = '';
 				switch (e) {
-					case 'notice-setting':
+					case 'subscsribe':
 						url = '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(
 							'https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ');
 						break;
@@ -374,7 +413,10 @@
 				};
 				let res = await this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health');
 				if (Array.isArray(res.data)) {
-					this.groupList = res.data;
+					this.groupList = res.data.map(item => {
+						item.unreadNum = 0
+						return item
+					});
 				}
 			},
 			toArticle(e) {
@@ -433,7 +475,7 @@
 					// url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + e.person_no + '&store_no=' + e.store_no
 				});
 			},
-			seletGroupList() {
+			async seletGroupList() {
 				let req = {
 					condition: [{
 						colName: 'store_no',
@@ -441,11 +483,13 @@
 						value: this.storeNo
 					}]
 				};
-				this.$fetch('select', 'srvhealth_group_circle_select', req, 'health').then(res => {
-					if (Array.isArray(res.data)) {
-						this.groupList = res.data;
-					}
-				});
+				let res = await this.$fetch('select', 'srvhealth_group_circle_select', req, 'health')
+				// .then(res => {
+				if (Array.isArray(res.data)) {
+					this.groupList = res.data;
+				}
+				return res.data
+				// });
 			},
 			selectDepartList() {
 				let req = {
@@ -524,7 +568,81 @@
 					});
 				});
 			},
-			selectUserList() {
+			selectUnreadAmount() {
+				// 查找未读消息数量
+				let req = {
+					"serviceName": "srvhealth_consultation_chat_record_select",
+					"colNames": ["*"],
+					"relation_condition": {
+						"relation": "OR",
+						"data": [{
+								"relation": "AND",
+								"data": [{
+										"colName": "session_no",
+										"ruleType": "eq",
+										"value": this.storeInfo.member_session_no //店铺成员群
+									},
+									{
+										"colName": "create_time",
+										"ruleType": "ge",
+										"value": this.storeUserInfo.store_session_sign_in_time //店铺成员群
+									}
+								]
+							},
+							{
+								"relation": "AND",
+								"data": [{
+										"colName": "session_no",
+										"ruleType": "eq",
+										"value": this.storeUserInfo.kefu_session_no //机构用户客服
+									},
+									{
+										"colName": "create_time",
+										"ruleType": "ge",
+										"value": this.storeUserInfo.store_session_sign_in_time //店铺成员群
+									}
+								]
+							},
+							{
+								"relation": "AND",
+								"data": [{
+									"colName": "rcv_group_no",
+									"ruleType": "in",
+									"value": this.groupList.map(item => item.gc_no).toString()
+								}]
+							}
+						]
+					},
+					"order": [{
+						"colName": "create_time",
+						"orderType": "desc"
+					}],
+					"page": {
+						"rownumber": 999,
+						"pageNo": 1
+					}
+				}
+				this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health').then(res => {
+					if (res.success) {
+						res.data.map(item => {
+							if (item.rcv_group_no) {
+								// 群聊
+								let index = this.groupList.findIndex(gc => gc.gc_no === item.rcv_group_no)
+								if (index !== -1) {
+									let unreadNum = this.groupList[index].unreadNum ? this.groupList[index]
+										.unreadNum : 0
+									this.$set(this.groupList[index], 'unreadNum', unreadNum + 1)
+								}
+							} else if (item.session_no === this.storeUserInfo.kefu_session_no) {
+								this.kefuNum += 1
+							} else if (item.session_no === this.storeInfo.member_session_no) {
+								this.storeNum += 1
+							}
+						})
+					}
+				})
+			},
+			async selectUserList() {
 				let req = {
 					page: {
 						rownumber: 99999
@@ -537,15 +655,19 @@
 						"value": this.storeNo
 					}],
 				}
-				this.$fetch('select', 'srvhealth_store_user_select', req, 'health').then(res => {
-					if (res.success && res.data.length >= 1) {
-						if (res.data.find(item => item.store_no === this.storeNo)) {
-							this.isBind = true
-							this.bindUserInfo = res.data.find(item => item.store_no === this.storeNo)
-						}
-						this.storeUserList = res.data
+				let res = await this.$fetch('select', 'srvhealth_store_user_select', req, 'health')
+				// .then(res => {
+				if (res.success && res.data.length >= 1) {
+					if (res.data.find(item => item.store_no === this.storeNo)) {
+						this.isBind = true
+						this.bindUserInfo = res.data.find(item => item.store_no === this.storeNo)
 					}
-				})
+					this.storeUserList = res.data
+					this.storeNum = 0
+					this.kefuNum = 0
+					this.getKefuSessionInfo()
+				}
+				// })
 			},
 			async bindStore(nullRole) {
 				// 将当前登录用户添加到店铺用户列表，角色为用户
@@ -612,7 +734,7 @@
 					"data": [{
 						// "add_store_type": this.userInfo.add_store_no === this.storeNo ? '' : this
 						// 	.storeInfo.type,
-						add_store_no: this.userInfo.add_store_no === this.storeNo ? '' : this.storeNo
+						home_store_no: this.userInfo.home_store_no === this.storeNo ? '' : this.storeNo
 					}]
 				}]
 				if (!this.userInfo || !this.userInfo.no) {
@@ -623,7 +745,7 @@
 				}
 				uni.showModal({
 					title: '提示',
-					content: `请确认是否${this.userInfo.add_store_no === this.storeNo ?"取消":""}将此${this.storeInfo.type}设置为首页`,
+					content: `请确认是否${this.userInfo.home_store_no === this.storeNo ?"取消":""}将此${this.storeInfo.type}设置为首页`,
 					success(result) {
 						if (result.confirm) {
 							self.$fetch('operate', 'srvhealth_person_info_update', req, 'health').then(res => {
@@ -726,15 +848,15 @@
 				});
 			}
 		},
-		onPullDownRefresh() {
-			this.toAddPage().then(res => {
-				if (this.store_no) {
-					this.selectUserList()
-					this.selectStoreInfo();
-					this.selectDepartList();
-					this.seletGroupList();
-				}
-			})
+		async onPullDownRefresh() {
+			await this.toAddPage()
+			if (this.storeNo) {
+				await this.selectUserList()
+				await this.selectStoreInfo();
+				this.selectDepartList();
+				await this.seletGroupList();
+				this.selectUnreadAmount()
+			}
 			setTimeout(() => {
 				uni.stopPullDownRefresh()
 			}, 1000)
@@ -753,6 +875,10 @@
 				path: path
 			};
 		},
+		beforeDestroy() {
+			uni.$off('updateSessionLastLookTime')
+			uni.$off('updateStoreInfo')
+		},
 		async onLoad(option) {
 			this.queryOption = option
 			// #ifdef MP-WEIXIN
@@ -761,6 +887,12 @@
 				menus: ['shareAppMessage', 'shareTimeline']
 			});
 			// #endif
+			uni.$on('updateStoreSessionLastLookTime', (e) => {
+				this.selectUserList()
+			})
+			uni.$on('updateKefuSessionLastLookTime',e=>{
+				this.kefuSessionInfo = e
+			})
 			uni.$on('updateStoreInfo', (e) => {
 				if (e && e.store_no === this.storeNo) {
 					this.storeInfo = e
@@ -774,7 +906,7 @@
 			let res = await this.toAddPage()
 
 			// this.toAddPage().then(res => {
-			
+
 			if (res === 'fail') {
 				return;
 			}
@@ -797,10 +929,11 @@
 			}
 			if (option.store_no) {
 				this.storeNo = option.store_no;
-				this.selectUserList()
-				this.selectStoreInfo();
+				await this.selectUserList()
+				await this.selectStoreInfo();
 				this.selectDepartList();
-				this.seletGroupList();
+				await this.seletGroupList();
+				this.selectUnreadAmount()
 			}
 			// });
 		}
@@ -826,7 +959,7 @@
 			display: flex;
 			margin-bottom: 20rpx;
 			position: relative;
-			padding-top: 40rpx;
+			padding-top: 20rpx;
 			flex-wrap: wrap;
 
 			.instroduce {
@@ -842,8 +975,18 @@
 				text-align: center;
 				position: absolute;
 				height: 30px;
-				top: -30px;
-				left: 0px;
+				top: -32px;
+				right: 0px;
+
+				.cu-btn {
+					border-radius: 20px 0 0 20px;
+					font-size: 20px;
+					font-weight: 300;
+				}
+
+				&.like-btn {
+					top: -70px;
+				}
 			}
 
 			.logo {
@@ -866,7 +1009,7 @@
 				flex-direction: column;
 				flex: 1;
 				position: relative;
-				top: -20rpx;
+				// top: -20rpx;
 
 				&::after {
 					position: absolute;
@@ -930,6 +1073,8 @@
 				display: flex;
 				justify-content: center;
 				align-items: center;
+				position: relative;
+				top: -10px;
 
 				// transform: rotate(10deg);
 				.right-item {
@@ -937,6 +1082,7 @@
 					flex-direction: column;
 					align-items: center;
 					font-size: 12px;
+					position: relative;
 				}
 
 				.image {
@@ -965,6 +1111,7 @@
 				margin-left: 5px;
 				padding: 30rpx 20rpx;
 				margin-bottom: 10px;
+				position: relative;
 
 				&:nth-child(4n+1) {
 					margin-left: 0;

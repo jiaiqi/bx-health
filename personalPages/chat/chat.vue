@@ -6,7 +6,8 @@
 		<view class="util-bar" v-if="(groupInfo && groupInfo.gc_no)||sessionType==='店铺机构全员'">
 			<view class="util-item " @click="toPages('group-member')">
 				<view class="icon"><text class="cuIcon-friend "></text></view>
-				<text class="label">成员<text v-if="storeInfo&&storeInfo.user_count">({{storeInfo.user_count}})</text></text>
+				<text class="label">成员<text
+						v-if="storeInfo&&storeInfo.user_count">({{storeInfo.user_count}})</text></text>
 			</view>
 			<view class="util-item " @click="toPages('group-util')">
 				<view class="icon"><text class="cuIcon-repair "></text></view>
@@ -49,6 +50,7 @@
 				storeNo: '', // 机构编号
 				store_user_no: '', // 客服会话 发起人的店铺用户编号
 				storeInfo: {},
+				storeUserInfo: {}, // 当前登录用户在店铺成员列表中的信息
 				groupNo: '', //群组编号
 				row_no: '', // 一对一会话 用户关系编码
 				identity: '',
@@ -240,7 +242,23 @@
 				return this.sessionInfo
 			},
 			getStoreUser() {
-				// 店铺全员群聊 查找店铺人员列表
+				// 店铺全员群聊 查找当前帐号在店铺人员列表中的数据
+				let req = {
+					"condition": [{
+						"colName": "store_no",
+						"ruleType": "eq",
+						"value": this.storeNo
+					}, {
+						"colName": "person_no",
+						"ruleType": "eq",
+						"value": this.userInfo.no
+					}]
+				}
+				this.$fetch('select', 'srvhealth_store_user_select', req, 'health').then(res => {
+					if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+						this.storeUserInfo = res.data[0]
+					}
+				})
 			},
 			updateSessionNo() {
 				let req = []
@@ -276,6 +294,24 @@
 						}]
 						break;
 					case '机构用户客服':
+						// serviceName = 'srvhealth_store_user_update'
+						// req = [{
+						// 	"serviceName": serviceName,
+						// 	"condition": [{
+						// 			"colName": "store_no",
+						// 			"ruleType": "eq",
+						// 			"value": this.storeNo
+						// 		},
+						// 		{
+						// 			"colName": "person_no",
+						// 			"ruleType": "eq",
+						// 			"value": this.userInfo.no
+						// 		}
+						// 	],
+						// 	"data": [{
+						// 		"kefu_session_no": this.session_no
+						// 	}]
+						// }]
 						break;
 					case '用户间':
 						serviceName = 'srvhealth_person_relation_update'
@@ -368,6 +404,7 @@
 				if (cond.length > 0) {
 					let sessionInfo = await this.getSession(cond)
 					if (sessionInfo && sessionInfo.session_no) {
+						this.updateSessionNo()
 						return
 					}
 				}
@@ -384,7 +421,55 @@
 					}
 				})
 			},
+			updateKefuSessionLastLookTime(e) {
+				// 更新用户最后查看客服会话时间
+				let req = [{
+					"serviceName": "srvhealth_dialogue_session_update",
+					"condition": [{
+						"colName": "session_no",
+						"ruleType": "eq",
+						"value": this.session_no
+					}],
+					"data": [{
+						kefu_session_user_time: e && e.create_time ? e.create_time : this.formateDate('',
+							'DateTime')
+					}]
+				}]
+				this.$fetch('operate', 'srvhealth_dialogue_session_update', req, 'health').then(res => {
+					if (Array.isArray(res.data) && res.data.length > 0) {
+						uni.$emit('updateKefuSessionLastLookTime', res.data[0])
+					}
+				})
+			},
+			updateStoreSessionLastLookTime(e) {
+				// 更新用户最后查看店铺成员群会话时间
+				let req = [{
+					"serviceName": "srvhealth_store_user_update",
+					"condition": [{
+							"colName": "store_no",
+							"ruleType": "eq",
+							"value": this.storeNo
+						},
+						{
+							"colName": "person_no",
+							"ruleType": "eq",
+							"value": this.userInfo.no
+						}
+					],
+					"data": [{
+						store_session_sign_in_time: e && e.create_time ? e.create_time : this.formateDate(
+							'',
+							'DateTime')
+					}]
+				}]
+				this.$fetch('operate', 'srvhealth_store_user_update', req, 'health').then(res => {
+					if (Array.isArray(res.data) && res.data.length > 0) {
+						uni.$emit('updateStoreSessionLastLookTime', res.data[0])
+					}
+				})
+			},
 			updateLastLookTime(e) {
+				// 更新群组圈子最后查看时间
 				if (this.groupInfo && this.pg_no) {
 					let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_update', 'operate');
 					let req = [{
@@ -405,7 +490,14 @@
 			},
 		},
 		beforeDestroy() {
-			this.updateLastLookTime(this.lastMessage);
+			if (this.sessionType === '机构用户客服') {
+				this.updateKefuSessionLastLookTime(this.lastMessage)
+			} else if (this.sessionType === '店铺机构全员') {
+				this.updateStoreSessionLastLookTime(this.lastMessage)
+			} else if(this.groupInfo && this.pg_no){
+				// 更新群组圈子最后查看时间
+				this.updateLastLookTime(this.lastMessage);
+			}
 		},
 		onLoad(option) {
 			if (option.type) {
@@ -420,6 +512,7 @@
 			if (option.storeNo) {
 				this.storeNo = option.storeNo
 				this.getStore()
+				this.getStoreUser()
 			}
 			if (this.session_no) {
 				// 已有会话编号 查找会话信息

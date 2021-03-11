@@ -25,8 +25,8 @@
 				<view :id="`person-chat-item${item.id}`" v-for="(item, index) in recordList" :key="item.id"
 					class="person-chat-item"
 					:class="item.sender_account === currentUserInfo.userno&&identity==item.identity? 'person-chat-item-my' : ''">
-					<view class="send-time" v-if="showSendTime(item, index)">
-						{{ formateDate(item.create_time, 'normal') }}
+					<view class="send-time" v-show="showSendTime(item, index)">
+						{{showSendTime(item, index)? formateDate(item.create_time, 'normal'):'' }}
 					</view>
 					<view
 						v-if="item.sender_account != currentUserInfo.userno||(identity==='客服'&&item.identity==='客户')||(identity==='客户'&&item.identity==='客服')"
@@ -823,6 +823,7 @@
 					});
 					console.log('点击上传文档----');
 				} else if (type === 'wx_word') {
+					// #ifdef MP-WEIXIN
 					wx.chooseMessageFile({
 						count: 1,
 						type: 'file',
@@ -864,6 +865,7 @@
 							}
 						}
 					});
+					// #endif
 				} else if (type === 'video') {
 					let reqHeader = {
 						bx_auth_ticket: uni.getStorageSync('bx_auth_ticket'),
@@ -1290,6 +1292,7 @@
 				this.recordList.push(data)
 				this.toBottom()
 				let res = await this.$http.post(url, req);
+				this.toBottom()
 				uni.hideLoading();
 				this.isAll = false;
 				this.pageInfo.pageNo = 1;
@@ -1908,15 +1911,15 @@
 				}
 
 				&.top-height {
-					height: calc(100vh - var(--window-top) - 55px - 40px);
+					height: calc(100vh - var(--window-top) - 55px - 41px);
 
 					&.showLayer {
-						height: calc(100vh - var(--window-top) - 55px - 40px - 230px);
+						height: calc(100vh - var(--window-top) - 55px - 41px - 230px);
 					}
 				}
 
 				&.showLayer {
-					height: calc(100vh - var(--window-top) - 40px - 230px);
+					height: calc(100vh - var(--window-top) - 41px - 230px);
 				}
 
 				&.showKeyboard {
@@ -1927,10 +1930,10 @@
 					}
 
 					&.top-height {
-						height: calc(100vh - var(--keyboard-height) - var(--window-top) - 40px - 55px);
+						height: calc(100vh - var(--keyboard-height) - var(--window-top) - 41px - 55px);
 
 						&.showLayer {
-							height: calc(100vh - var(--keyboard-height) - var(--window-top) - 40px - 55px - 230px);
+							height: calc(100vh - var(--keyboard-height) - var(--window-top) - 41px - 55px - 230px);
 						}
 					}
 				}
