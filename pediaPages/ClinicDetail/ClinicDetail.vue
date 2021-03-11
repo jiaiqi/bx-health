@@ -44,7 +44,7 @@
 				<view class="content">
 					<view class="professor-box">
 						<view class="professor-item" v-for="item in professorList" :key="item.docCode">
-							<image class="img" src="../static/img/doctor_default.jpg" mode="aspectFit"></image>
+							<image class="img" src="../static/img/doctor_default.png" mode="aspectFit"></image>
 							<view class="doc-info">
 								<view class="top">
 									<text class="doc-name">{{ item.docName }}</text>
@@ -66,7 +66,7 @@
 				</view>
 				<view class="content grid-layout">
 					<view class="group-item" v-for="item in 4">
-						<view class="icon"><image src="../static/img/doctor_default.jpg" mode="aspectFit" class="image"></image></view>
+						<view class="icon"><image src="../static/img/doctor_default.png" mode="aspectFit" class="image"></image></view>
 						<view class="content">
 							<view class="top"><view class="name">xx圈</view></view>
 						</view>

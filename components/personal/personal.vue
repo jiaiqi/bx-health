@@ -731,6 +731,10 @@
 				path: path
 			};
 		},
+		onShow() {
+			 // 检测是否已关注公众号
+			this.checkSubscribeStatus()
+		},
 		async created() {
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({

@@ -150,7 +150,7 @@ export default {
 			if (res.success === true && res.data.length > 0) {
 				let orderData = res.data[0];
 				if (orderData.order_no) {
-					debugger;
+					;
 					// if (orderData.order_no.length > 24 && orderData.order_no.indexOf('RT') !== -1) {
 					uni.navigateTo({
 						url: '/personalPages/payOrder/payOrder?order_no=' + orderData.order_no
@@ -180,11 +180,11 @@ export default {
 				signType: 'MD5',
 				paySign: res.paySign,
 				success(res) {
-					debugger;
+					;
 					// 支付成功
 				},
 				fail(res) {
-					debugger;
+					;
 				}
 			});
 		},

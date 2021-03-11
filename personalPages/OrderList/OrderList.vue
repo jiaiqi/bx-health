@@ -412,7 +412,7 @@ export default {
 						let req = [{ serviceName: 'srvhealth_store_order_delete', condition: [{ colName: 'id', ruleType: 'in', value: e.id }] }];
 						self.$fetch('operate', 'srvhealth_store_order_delete', req, 'health').then(result => {
 							console.log(result);
-							debugger;
+							;
 							uni.startPullDownRefresh();
 						});
 					}
@@ -485,7 +485,7 @@ export default {
 				this.loadStatus.splice(idx, 1, 'loading');
 			} else if (this.loadStatus[idx] === 'noMore') {
 				console.log(this.loadStatus);
-				debugger;
+				;
 				return;
 			}
 			if (idx === 0) {

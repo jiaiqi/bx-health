@@ -22,7 +22,7 @@
 					<view class="goods-item" v-for="goods in orderInfo.goodsList">
 						<image
 							class="goods-image"
-							:src="goods.goods_image ? getImagePath(goods.goods_image) : goods.image ? getImagePath(goods.image) : '../static/doctor_default.jpg'"
+							:src="goods.goods_image ? getImagePath(goods.goods_image) : goods.image ? getImagePath(goods.image) : '../static/doctor_default.png'"
 							mode=""
 						></image>
 						<view class="content">
@@ -117,7 +117,7 @@ export default {
 				});
 			}
 			this.$fetch('operate', 'srvhealth_store_order_update', req, 'health').then(res => {
-				debugger;
+				;
 			});
 		},
 		chooseAddress() {
@@ -214,7 +214,7 @@ export default {
 					]
 				}
 			];
-			debugger
+			
 			this.$fetch('operate', 'srvhealth_store_order_add', req, 'health').then(res => {
 				if (res.success && Array.isArray(res.data) && res.data.length > 0) {
 					console.log(res.data[0]);

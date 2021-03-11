@@ -233,7 +233,7 @@ export default {
 		},
 		/*跳转至商铺详情*/
 		toShopDetail(item) {
-			debugger;
+			;
 			uni.navigateTo({
 				url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.restaurant_no
 			});

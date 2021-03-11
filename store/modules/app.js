@@ -22,7 +22,7 @@ const state = {
 	backUrl: "", //当前页面的上一级页面
 	authSetting: {}, //微信授权信息
 	authUserInfo: getItem('authUserInfo') ? getItem('authUserInfo') : {}, //微信授权信息
-	authBoxDisplay: getItem('authBoxDisplay') ? getItem('authBoxDisplay') : '',
+	authBoxDisplay: getItem('authBoxDisplay') ? getItem('authBoxDisplay') : false,
 	sickItem: "",
 	symptomArr: [],
 	doctorInfo: {},

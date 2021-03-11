@@ -1003,7 +1003,7 @@ export default {
 				value: 0
 			};
 			let dietList = this.deepClone(this.dietRecord);
-			// debugger;
+			// ;
 			if (Array.isArray(dietList) && dietList.length > 0) {
 				dietList.forEach(item => {
 					energyData.value += item[energyData.key];

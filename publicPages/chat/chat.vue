@@ -754,7 +754,7 @@ export default {
 					name: 'file',
 					success: e => {
 						if (e.statusCode === 200) {
-							debugger;
+							;
 						}
 					}
 				});
@@ -779,7 +779,7 @@ export default {
 			};
 			// 发送消息
 			this.screenMsg(msg);
-			debugger;
+			;
 			this.sendMessage(msg);
 			// // 定时器模拟对方回复,三秒
 			// setTimeout(() => {

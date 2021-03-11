@@ -149,7 +149,7 @@ export default {
 			let unitList = [];
 			let self = this;
 			let basicUnit = this.deepClone(this.dietInfo);
-			debugger
+			
 			if (basicUnit.unit !== 'g') {
 			// if (basicUnit.unit !== 'g' && basicUnit.unit.indexOf('g') !== -1) {
 				basicUnit.unit = 'g';

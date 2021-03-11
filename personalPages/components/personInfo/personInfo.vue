@@ -336,7 +336,7 @@ export default {
 			}
 		},
 		navPages(type = 'history', item = {}) {
-			debugger;
+			;
 			if (type === 'history') {
 				uni.navigateTo({
 					url: '/archivesPages/archives-history/archives-history?isAll=true&customer_no=' + this.customer_no

@@ -425,7 +425,7 @@ export default {
 		checkUnit(currentUnit) {
 			// 切换单位
 			// let currentUnit = this.unitList[index];
-			// debugger
+			// 
 			if (currentUnit.unit === 'g') {
 				this.dietInfo.unit_energy = currentUnit.unit_energy;
 			} else {

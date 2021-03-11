@@ -71,7 +71,7 @@ export default {
 	},
 	methods: {
 		addSuccess() {
-			debugger;
+			;
 			uni.$emit('addDrug');
 			this.hideModal();
 			uni.navigateBack();

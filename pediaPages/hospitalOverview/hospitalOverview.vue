@@ -1,6 +1,6 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
-	<view class="page-wrap" :class="{ onlyCurrentPage: onlyCurrentPage }">
+	<view class="page-wrap" :class="{ onlyCurrentPage: onlyCurrentPage&&false}" v-if="!authBoxDisplay">
 		<swiper class="screen-swiper item-box square-dot" easing-function="linear" :indicator-dots="true"
 			:circular="true" :autoplay="true" interval="5000" duration="500" height="300">
 			<swiper-item v-for="(item, index) in swiperList" :key="item.url" @click.stop="toPreviewImage(item.url)">
@@ -12,6 +12,11 @@
 				<view class="hospital-top">
 					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
 					<view class="logo" v-else>{{ storeInfo.name.slice(0, 1) }}</view>
+					<view class="home-btn shadow-blur" @click="setHomePage">
+						<view class="cuIcon-home cu-btn bg-white "> <text
+								class="margin-left-xs">{{userInfo&&userInfo.add_store_no===storeNo?'取消设为首页':'设为首页'}}</text>
+						</view>
+					</view>
 					<view class="left" @click="toPages('instroduce')">
 						<view class="top">
 							<view class="name">{{ storeInfo.name }}</view>
@@ -22,7 +27,8 @@
 						<view class="bottom" v-if="storeInfo.address" @click.stop="getCurrentLocation">
 							<view class="address">
 								<text class="content">{{ storeInfo.address }}</text>
-								<text class="cuIcon-locationfill text-blue margin-left-xs"></text>
+								<text class="cuIcon-locationfill text-blue margin-left-xs"
+									style="font-size: 20px;"></text>
 							</view>
 						</view>
 					</view>
@@ -36,32 +42,49 @@
 							<text>在线咨询</text>
 						</view>
 					</view>
+					<view class="instroduce">
+						<view v-html="storeInfo.introduction"></view>
+					</view>
 				</view>
 				<view class="menu-list">
 					<view class="menu-item" @click="toPages('food')" v-if="storeInfo.type === '健康服务'">
 						<u-icon name="yinshi" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
 						<text class="title">食物库</text>
 					</view>
-					<view class="menu-item" @click="toPages(1)" v-if="storeInfo.type !== '健康服务'">
+					<!-- 			<view class="menu-item" @click="toPages(1)" v-if="storeInfo.type !== '健康服务'">
 						<u-icon name="guahaowenzhen" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
-						<text class="title">就诊登记</text>
-					</view>
-					<view class="menu-item" @click="toPages(2)">
-						<u-icon name="zhengzhuang" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
-						<text class="title">症状自检</text>
-					</view>
-					<view class="menu-item" @click="toPages(3)">
-						<u-icon name="zhenduan" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
-						<text class="title">健康评测</text>
-					</view>
+						<image class="icon image" src="../static/img/挂号问诊.png" mode="aspectFit">
+							<text class="title">就诊登记</text>
+					</view> -->
+					<!-- 		<view class="menu-item" @click="toPages(2)">
+						<image class="icon image" src="../static/img/问诊体检.png" mode="aspectFit">
+							<u-icon name="zhengzhuang" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
+							<text class="title">症状自检</text>
+					</view> -->
+					<!-- 	<view class="menu-item" @click="toPages(3)">
+						<image class="icon image" src="../static/img/检验报告.png" mode="aspectFit">
+							<u-icon name="zhenduan" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
+							<text class="title">健康评测</text>
+					</view> -->
 					<view class="menu-item" @click="toPages('groupChat')" v-if="storeInfo.member_session_no">
 						<text class="cuIcon-comment" style="font-size: 30px;color:#00aaff;"></text>
-						<text class="title">店铺群聊</text>
+						<!-- <image class="icon image" src="../static/img/在线问诊.png" mode="aspectFit"> -->
+						<text class="title">服务站群</text>
 					</view>
 					<!-- 			<view class="menu-item" @click="toPages(4)">
 						<u-icon name="jilu" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
 						<text class="title">健康记录</text>
 					</view> -->
+					<view class="menu-item" v-for="item in groupList" @click="toGroup(item)">
+						<image class="icon image" :src="getImagePath(item.icon,true)" mode="aspectFit" v-if="item.icon">
+						</image>
+						<text class="icon image cuIcon-group_fill text-grey" v-else></text>
+						<view class="label">{{ item.name }}</view>
+					</view>
+					<view class="menu-item" @click="toPages('health-manager')">
+						<u-icon name="setting" size="60" color="#00aaff"></u-icon>
+						<view class="label">健康管理</view>
+					</view>
 				</view>
 				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
 					desc="goods_desc"></goods-list>
@@ -71,10 +94,19 @@
 						<text class="">通知公告</text>
 					</view>
 					<view class="content news-list">
-						<view class="news-item" v-for="item in noticeList" @click="toArticle(item)">
-							<text class="cuIcon-mail text-orange margin-right-xs"></text>
-							<text class="title-text">{{ item.title }}</text>
-							<text class="date">{{ formateDate(item.create_time) }}</text>
+						<view class="news-item none-image" :class="{
+								'layout-right-image':item.cover_pic_style==='右侧',
+								'layout-left-image':item.cover_pic_style==='左侧',
+								'layout-center-single-image':item.cover_pic_style==='下一',
+								'layout-center-multi-image':item.cover_pic_style==='下三'
+								}" v-for="item in noticeList" @click="toArticle(item)">
+							<!-- <text class="cuIcon-mail text-orange margin-right-xs"></text> -->
+							<image class="image-icon" :src="getImagePath(item.icon_image)" v-if="item.icon_image">
+							</image>
+							<view class="content-box">
+								<text class="title-text">{{ item.title }}</text>
+								<text class="date">{{ formateDate(item.create_time) }}</text>
+							</view>
 						</view>
 					</view>
 				</view>
@@ -92,7 +124,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&groupList.length>0">
+				<!-- <view class="introduction" v-if="storeInfo.type !== '健康服务'&&groupList.length>0">
 					<view class="title">
 						<view>
 							<text class="cuIcon-titles text-blue"></text>
@@ -109,7 +141,7 @@
 							</view>
 						</view>
 					</view>
-				</view>
+				</view> -->
 				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&doctorList.length>0">
 					<view class="title">
 						<view class="">专家团队</view>
@@ -118,7 +150,7 @@
 						<view class="professor-box">
 							<view class="professor-item" v-for="item in doctorList" @click="toDocotrDetail(item)">
 								<image class="img"
-									:src="getImagePath(item.profile_url) ? getImagePath(item.profile_url) : '../static/img/doctor_default.jpg'"
+									:src="getImagePath(item.profile_url) ? getImagePath(item.profile_url) : '../static/img/doctor_default.png'"
 									mode="aspectFit"></image>
 								<view class="doc-info">
 									<view class="top">
@@ -134,13 +166,13 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction news" v-if="storeInfo.type !== '健康服务'&&noticeList.length>0">
+				<view class="introduction news" v-if="storeInfo.type !== '健康服务'&&newsList.length>0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
-						<text class="">医院新闻</text>
+						<text class="">新闻</text>
 					</view>
 					<view class="content news-list">
-						<view class="news-item" v-for="item in noticeList" @click="toArticle(item)">
+						<view class="news-item" v-for="item in newsList" @click="toArticle(item)">
 							<text class="cuIcon-title"></text>
 							<text class="title-text">{{ item.title }}</text>
 							<text class="date">{{ formateDate(item.create_time) }}</text>
@@ -149,22 +181,30 @@
 				</view>
 			</view>
 		</view>
-		<view class="bottom-layer" v-if="onlyCurrentPage === true">
-			<view class="bottom-button" @click="toStorePage">
+		<!-- 		<view class="bottom-layer" v-if="onlyCurrentPage === true">
+					<view class="bottom-button" @click="toStorePage">
 				<text class="cuIcon-home icon"></text>
 				<view class="label">小程序主页</view>
+			</view>
+			<view class="bottom-button" @click="toPages('notice-setting')">
+				<text class="cuIcon-notice icon"></text>
+				<view class="label">通知设置</view>
+				<view class="badge" :class="{'bg-green':subscsribeStatus,'bg-orange':!subscsribeStatus}">
+				</view>
 			</view>
 			<view class="bottom-button" @click="toPages('personal')">
 				<text class="cuIcon-people icon"></text>
 				<view class="label">我的</view>
 			</view>
-		</view>
+		</view> -->
 	</view>
+	<bx-auth v-else-if="authBoxDisplay" @getuserinfo="getuserinfo"></bx-auth>
 </template>
 
 <script>
 	import {
 		mapState
+
 	} from 'vuex';
 	import goodsList from './goods-list.vue';
 	export default {
@@ -183,14 +223,27 @@
 				storeUserList: [],
 				deptList: [], //科室
 				groupList: [], // 关联圈子
-				noticeList: [],
+				noticeList: [], // 通知公告
+				newsList: [], // 新闻
+				menuList: [],
+				queryOption: {}
 			};
 		},
 		computed: {
 			...mapState({
 				userInfo: state => state.user.userInfo,
-				inviterInfo: state => state.app.inviterInfo
+				inviterInfo: state => state.app.inviterInfo,
+				subscsribeStatus: state => state.app.subscsribeStatus, //是否关注公众号
+				authBoxDisplay: state => state.app.authBoxDisplay //授权访问用户信息
 			}),
+			storeUserInfo() {
+				// 当前用户在店铺用户列表中的信息
+				if (this.userInfo && this.userInfo.no) {
+					return this.storeUserList.find(item => item.person_no === this.userInfo.no)
+				} else {
+					return null
+				}
+			},
 			customerList() {
 				// 客服列表
 				return this.storeUserList.filter(item => item.user_role.indexOf('客服') !== -1)
@@ -227,6 +280,13 @@
 			toPages(e) {
 				let url = '';
 				switch (e) {
+					case 'notice-setting':
+						url = '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(
+							'https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ');
+						break;
+					case 'health-manager':
+						url = '/pages/pedia/pedia'
+						break;
 					case 'food':
 						url =
 							'/otherPages/dietSelect/dietSelect?condType={"type":"food","serviceName":"srvhealth_diet_contents_select","colName":"name","imgCol":"image","wordKey":{"title":"name","unit":"unit","energy":"unit_energy"},"pagetType":"detail"}';
@@ -271,9 +331,10 @@
 						// 	break;
 					case 'groupChat':
 						if (this.storeInfo.member_session_no) {
-							url = '/personalPages/chat/chat?type=店铺机构全员&session_no=' + this.storeInfo.member_session_no;
+							url =
+								`/personalPages/chat/chat?type=店铺机构全员&session_no=${this.storeInfo.member_session_no}&storeNo=${this.storeNo}`;
 						} else {
-							url = '/personalPages/chat/chat?type=店铺机构全员&storeNo=' + this.storeNo
+							// url = '/personalPages/chat/chat?type=店铺机构全员&storeNo=' + this.storeNo
 						}
 						break;
 					case 'personal':
@@ -285,7 +346,12 @@
 				}
 				if (url) {
 					uni.navigateTo({
-						url: url
+						url: url,
+						fail() {
+							uni.switchTab({
+								url: url
+							})
+						}
 					});
 				}
 			},
@@ -329,17 +395,21 @@
 				};
 				this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(res => {
 					if (res.success && res.data.length > 0) {
-						let data = res.data[0];
 						let req = {
 							condition: [{
 								colName: 'no',
-								ruleType: 'eq',
-								value: data.no
+								ruleType: 'in',
+								value: res.data.map(item => item.no).toString()
 							}]
 						};
+						let types = res.data.reduce((pre, cur) => {
+							pre[cur.category_type] = cur.no
+							return pre
+						}, {})
 						this.$fetch('select', 'srvdaq_cms_content_select', req, 'daq').then(res => {
 							if (res.success) {
-								this.noticeList = res.data;
+								this.newsList = res.data.filter(item => item.no === types['新闻'])
+								this.noticeList = res.data.filter(item => item.no === types['通知公告'])
 							}
 						});
 					}
@@ -405,20 +475,6 @@
 					}
 				});
 			},
-			setPicSize(content, max = 750) {
-				// 让图片最长边等于设置的最大长度，短边等比例缩小，图片控件真实改变，区别于aspectFit方式。
-				if (this.max) {
-					max = this.max
-				}
-				let maxW = uni.upx2px(max); //max是定义消息图片最大宽度
-				let maxH = uni.upx2px(max); //max是定义消息图片最大高度
-				if (content.w > maxW || content.h > maxH) {
-					let scale = content.w / content.h;
-					content.w = scale > 1 ? maxW : maxH * scale;
-					content.h = scale > 1 ? maxW / scale : maxH;
-				}
-				return content;
-			},
 			async getSwiperList(e) {
 				if (e.image) {
 					let res = await this.getFilePath(e.image);
@@ -427,14 +483,6 @@
 							if (cur.fileurl) {
 								cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni
 									.getStorageSync('bx_auth_ticket');
-								this.getImageInfo({
-									url: cur.url
-								}).then(picInfo => {
-									let res = this.setPicSize(picInfo);
-									if (res.w && res.h) {
-										this.$set(cur, 'imgHeight', Number(res.h.toFixed(2)))
-									}
-								})
 							}
 							pre.push(cur);
 							return pre;
@@ -484,16 +532,10 @@
 					"serviceName": "srvhealth_store_user_select",
 					"colNames": ["*"],
 					"condition": [{
-							"colName": "store_no",
-							"ruleType": "eq",
-							"value": this.storeNo
-						},
-						// {
-						// 	colName: "person_no",
-						// 	ruleType: "eq",
-						// 	value: this.userInfo.no
-						// }
-					],
+						"colName": "store_no",
+						"ruleType": "eq",
+						"value": this.storeNo
+					}],
 				}
 				this.$fetch('select', 'srvhealth_store_user_select', req, 'health').then(res => {
 					if (res.success && res.data.length >= 1) {
@@ -507,6 +549,9 @@
 			},
 			async bindStore(nullRole) {
 				// 将当前登录用户添加到店铺用户列表，角色为用户
+				if (!this.storeInfo || !this.storeInfo.no) {
+					let userInfo = await this.toAddPage()
+				}
 				let req = [{
 					"serviceName": "srvhealth_store_user_add",
 					"condition": [],
@@ -527,9 +572,6 @@
 						invite_user_no: this.inviterInfo.invite_user_no,
 					}]
 				}]
-				if (!this.storeInfo || !this.storeInfo.no) {
-					let userInfo = await this.toAddPage()
-				}
 				let res = await this.$fetch('operate', 'srvhealth_store_user_add', req, 'health')
 				if (res.success) {
 					this.isBind = true
@@ -537,6 +579,8 @@
 						this.bindUserInfo = res.data[0]
 						return this.bindUserInfo
 					}
+				} else {
+					return res
 				}
 			},
 			async toConsult() {
@@ -545,7 +589,7 @@
 				if (!storeUserInfo) {
 					storeUserInfo = await this.bindStore()
 				}
-				if (storeUserInfo.store_user_no) {
+				if (storeUserInfo && storeUserInfo.store_user_no) {
 					uni.navigateTo({
 						url: `/personalPages/chat/chat?type=机构用户客服&identity=客户&storeNo=${this.storeNo}&store_user_no=${storeUserInfo.store_user_no}`
 					})
@@ -555,6 +599,45 @@
 				uni.makePhoneCall({
 					phoneNumber: this.storeInfo.telephone ? this.storeInfo.telephone : '10086'
 				});
+			},
+			async setHomePage() {
+				let self = this
+				let req = [{
+					"serviceName": "srvhealth_person_info_update",
+					"condition": [{
+						"colName": "no",
+						"ruleType": "eq",
+						"value": this.userInfo.no
+					}],
+					"data": [{
+						// "add_store_type": this.userInfo.add_store_no === this.storeNo ? '' : this
+						// 	.storeInfo.type,
+						add_store_no: this.userInfo.add_store_no === this.storeNo ? '' : this.storeNo
+					}]
+				}]
+				if (!this.userInfo || !this.userInfo.no) {
+					await this.toAddPage()
+				}
+				if (!this.storeInfo || !this.storeInfo.store_no) {
+					await this.selectStoreInfo()
+				}
+				uni.showModal({
+					title: '提示',
+					content: `请确认是否${this.userInfo.add_store_no === this.storeNo ?"取消":""}将此${this.storeInfo.type}设置为首页`,
+					success(result) {
+						if (result.confirm) {
+							self.$fetch('operate', 'srvhealth_person_info_update', req, 'health').then(res => {
+								if (res.success && res.data.length > 0 && res.data[0].no === self
+									.userInfo.no) {
+									uni.showToast({
+										title: '设置成功'
+									})
+									self.$store.commit('SET_USERINFO', res.data[0])
+								}
+							})
+						}
+					}
+				})
 			},
 			getCurrentLocation() {
 				let latitude = 34.219329;
@@ -595,6 +678,9 @@
 			async addToStore(store_no, invite_user_no) {
 				// 添加用户到单位
 				let self = this;
+				if (!this.userInfo || !this.userInfo.no) {
+					await this.toAddPage()
+				}
 				let url = this.getServiceUrl('health', 'srvhealth_store_user_add', 'operate');
 				let req = [{
 					serviceName: 'srvhealth_store_user_add',
@@ -640,9 +726,22 @@
 				});
 			}
 		},
+		onPullDownRefresh() {
+			this.toAddPage().then(res => {
+				if (this.store_no) {
+					this.selectUserList()
+					this.selectStoreInfo();
+					this.selectDepartList();
+					this.seletGroupList();
+				}
+			})
+			setTimeout(() => {
+				uni.stopPullDownRefresh()
+			}, 1000)
+		},
 		onShareAppMessage() {
 			let path =
-				`/pediaPages/hospitalOverview/hospitalOverview?from=share&invite_user_no=${this.userInfo.userno}&share_type=bindOrganization&doctor_no=${
+				`/pediaPages/hospitalOverview/hospitalOverview?from=share&store_no=${this.storeNo}&invite_user_no=${this.userInfo.userno}&share_type=bindOrganization&doctor_no=${
 					this.userInfo.no
 				}`;
 			let title = `${this.userInfo.name}邀请您关注【${this.storeInfo.name}】`;
@@ -655,45 +754,55 @@
 			};
 		},
 		async onLoad(option) {
-			uni.$on('updateStoreInfo', (e) => {
-				if (e && e.store_no === this.storeNo) {
-					this.storeInfo = e
-				}
-			})
+			this.queryOption = option
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
 				withShareTicket: true,
 				menus: ['shareAppMessage', 'shareTimeline']
 			});
 			// #endif
+			uni.$on('updateStoreInfo', (e) => {
+				if (e && e.store_no === this.storeNo) {
+					this.storeInfo = e
+				}
+			})
 			this.checkOptionParams(option);
-			this.toAddPage().then(res => {
-				if (res === 'fail') {
-					return;
-				}
-				if (option.share_type === 'bindOrganization' && option.store_no && option.invite_user_no) {
-					// 绑定诊所
-					// 查找店铺用户列表
-					this.storeNo = option.store_no;
-					this.selectStoreInfo().then(res => {
-						this.getStoreUserInfo(option.store_no).then(res => {
-							if (Array.isArray(res) && res.length >= 1) {
-								// 店铺用户列表中已存在此用户
-							} else {
-								// 当前用户不在此诊所中 则添加当前用户到此诊所中
-								this.addToStore(option.store_no, option.invite_user_no);
-							}
-						});
+			if (this.authBoxDisplay) {
+				// 未授权
+				return
+			}
+			let res = await this.toAddPage()
+
+			// this.toAddPage().then(res => {
+			
+			if (res === 'fail') {
+				return;
+			}
+			if (option.share_type === 'bindOrganization' && option.store_no && option
+				.invite_user_no) {
+				// 绑定诊所
+				// 查找店铺用户列表
+				this.storeNo = option.store_no;
+				this.selectStoreInfo().then(res => {
+					this.getStoreUserInfo(option.store_no).then(res => {
+						if (Array.isArray(res) && res.length >= 1) {
+							// 店铺用户列表中已存在此用户
+						} else {
+							// 当前用户不在此诊所中 则添加当前用户到此诊所中
+							this.addToStore(option.store_no, option
+								.invite_user_no);
+						}
 					});
-				}
-				if (option.store_no) {
-					this.storeNo = option.store_no;
-					this.selectUserList()
-					this.selectStoreInfo();
-					this.selectDepartList();
-					this.seletGroupList();
-				}
-			});
+				});
+			}
+			if (option.store_no) {
+				this.storeNo = option.store_no;
+				this.selectUserList()
+				this.selectStoreInfo();
+				this.selectDepartList();
+				this.seletGroupList();
+			}
+			// });
 		}
 	};
 </script>
@@ -716,16 +825,40 @@
 			padding: 30rpx 28rpx;
 			display: flex;
 			margin-bottom: 20rpx;
+			position: relative;
+			padding-top: 40rpx;
+			flex-wrap: wrap;
+
+			.instroduce {
+				width: 100%;
+				margin-top: 10px;
+				background-color: #f8f8f8;
+				border-radius: 10rpx;
+				padding: 20rpx;
+			}
+
+			.home-btn {
+				font-weight: bold;
+				text-align: center;
+				position: absolute;
+				height: 30px;
+				top: -30px;
+				left: 0px;
+			}
 
 			.logo {
-				width: 100rpx;
-				height: 100rpx;
-				border-radius: 50%;
+				width: 120rpx;
+				height: 120rpx;
+				border-radius: 20rpx;
 				margin-right: 20rpx;
-				font-size: 30px;
+				font-size: 60rpx;
 				font-weight: bold;
 				line-height: 100rpx;
 				text-align: center;
+				position: absolute;
+				top: -80rpx;
+				right: 0;
+				border: 4rpx solid #fff;
 			}
 
 			.left {
@@ -733,6 +866,7 @@
 				flex-direction: column;
 				flex: 1;
 				position: relative;
+				top: -20rpx;
 
 				&::after {
 					position: absolute;
@@ -777,13 +911,14 @@
 					.address {
 						width: 100%;
 						display: flex;
+						align-items: center;
 
 						.content {
 							flex: 1;
-							max-width: 330rpx;
+							max-width: 400rpx;
 							overflow: hidden;
 							text-overflow: ellipsis;
-							white-space: nowrap;
+							// white-space: nowrap;
 						}
 					}
 				}
@@ -836,17 +971,15 @@
 				}
 
 				.icon {
-					width: 100rpx;
-					height: 100rpx;
-					border-radius: 50%;
+					width: 30px;
+					height: 30px;
 					font-size: 30px;
 					text-align: center;
 					line-height: 100rpx;
-					// border: 1px solid #f1f1f1;
-					box-shadow: -1px -1px 15px 1px rgba(5, 34, 75, 0.18);
 				}
 
-				.title {
+				.title,
+				.label {
 					margin-top: 30rpx;
 					font-size: 14px;
 				}
@@ -871,7 +1004,7 @@
 				.news-item {
 					display: flex;
 					padding: 20rpx 0;
-					border-bottom: 1rpx dotted #f1f1f1;
+					border-bottom: 1rpx solid #f1f1f1;
 					align-items: center;
 
 					.title-text {
@@ -881,10 +1014,73 @@
 						white-space: nowrap;
 					}
 
-					.date {
+					.content-box {
 						flex: 1;
-						text-align: right;
+						display: flex;
+						flex-direction: column;
+					}
+
+					.date {
 						color: #ccc;
+					}
+
+					&.none-image {
+						// 无图
+						flex-direction: column;
+						align-items: flex-start;
+
+						.title-text {
+							font-size: 16px;
+							width: 100%;
+							white-space: normal;
+							margin-bottom: 10px;
+						}
+
+						.date {
+							font-size: 12px;
+						}
+					}
+
+					&.layout-right-image,
+					&.layout-left-image {
+						// 左图
+						flex-direction: row;
+						flex-wrap: wrap;
+
+						.content-box {
+							min-height: 150rpx;
+						}
+
+						.image-icon {
+							width: 200rpx;
+							height: 150rpx;
+							border-radius: 5px;
+						}
+
+						.title-text {
+							margin-left: 20rpx;
+							width: calc(100% - 250rpx);
+							flex: 1;
+						}
+
+						.date {
+							margin-left: 20rpx;
+						}
+					}
+
+					&.layout-right-image {
+						// 右图
+						flex-direction: row-reverse;
+
+						.title-text {
+							margin-left: 0;
+							width: calc(100% - 250rpx);
+							flex: 1;
+						}
+
+						.date {
+							margin-left: 0;
+						}
 					}
 				}
 			}
@@ -1025,6 +1221,7 @@
 		.bottom-button {
 			flex: 1;
 			text-align: center;
+			position: relative;
 
 			&+.bottom-button {
 				border-left: 1px solid #f1f1f1;
@@ -1032,6 +1229,15 @@
 
 			&:active {
 				background-color: #f1f1f1;
+			}
+
+			.badge {
+				position: absolute;
+				left: 10px;
+				top: 0;
+				border-radius: 50%;
+				width: 20px;
+				height: 20px;
 			}
 
 			.icon {

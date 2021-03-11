@@ -375,13 +375,13 @@ export default {
 							num = parseFloat(num.toFixed(1));
 							return num;
 						});
-						debugger;
+						;
 						break;
 					case '当前食物':
 						obj.data = eleArr.map(ele => {
 							let cur = this.deepClone(ele);
 							let ratio = 1;
-							debugger
+							
 							if (currentDiet.unit_weight_g > 1) {
 								// if (currentDiet.unit.indexOf('g') !== -1 && currentDiet.unit_weight_g > 1) {
 								ratio = currentDiet.unit_weight_g / 100;

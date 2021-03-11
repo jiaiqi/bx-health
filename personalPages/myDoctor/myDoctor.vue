@@ -155,7 +155,7 @@
 						console.log('条码内容：' + res.result);
 						if (res.result && res.result.indexOf('PB') !== -1) {
 							// 进行绑定
-							debugger;
+							;
 							if (res.result.indexOf('https://wx2.100xsys.cn/mpwx/') !== -1) {
 								let result = res.result.split('https://wx2.100xsys.cn/mpwx/')[1];
 								self.qrcodeParams = result;

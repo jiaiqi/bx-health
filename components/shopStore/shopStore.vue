@@ -1,7 +1,8 @@
 <template>
 	<view class="store-wrap" v-if="isLogin">
 		<view class="cu-bar justify-start bg-white">
-			<view class="action border-title margin-right" v-for="(item, index) in sortList" @click="tapTitItem(item, index)">
+			<view class="action border-title margin-right" v-for="(item, index) in sortList"
+				@click="tapTitItem(item, index)">
 				<text class="text-xl" :class="{ 'text-bold': sortIndex == index }">{{ item.tit }}</text>
 				<text class="bg-blue" style="width:1rem" v-if="sortIndex == index"></text>
 			</view>
@@ -17,8 +18,8 @@
 		<view class="filtrate-item-wrap">
 			<view class="filtrate-item">
 				<view style="display: flex;  flex-flow: wrap;">
-					<view @click="chooseMenu(cate)" v-for="(cate, index) in classify" :key="cate.label" :class="{ 'cate-active': currentType === cate.label }"
-					 class="filtrate-item-right">
+					<view @click="chooseMenu(cate)" v-for="(cate, index) in classify" :key="cate.label"
+						:class="{ 'cate-active': currentType === cate.label }" class="filtrate-item-right">
 						<text>{{ cate.label }}</text>
 					</view>
 				</view>
@@ -33,12 +34,11 @@
 		</view>
 		<view class="store-box" v-if="storeList && current_tit.type === 'find'">
 			<sPullScroll ref="pullScroll" heightStyle="calc(100vh-620upx)" :pullDown="pullDown" :pullUp="loadData"
-			 :enablePullDown="true" :enablePullUp="true" :top="340" :fixed="true" :bottom="0" finishText="我是有底线的...">
+				:enablePullDown="true" :enablePullUp="true" :top="340" :fixed="true" :bottom="0" finishText="我是有底线的...">
 				<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in storeList" :key="i">
 					<view class="container top-box">
 						<view class="left">
-							<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
-							<image v-else :src="store.imgurl" mode="aspectFill"></image>
+							<image :src="store.imgurl" mode="aspectFill"></image>
 						</view>
 						<view class="right">
 							<text class="tit">{{ store.name ? store.name : '' }}</text>
@@ -60,14 +60,13 @@
 				</view>
 			</sPullScroll>
 		</view>
-		<view class=" store-box" v-else-if="current_tit.type === 'shop'">
+		<view class="store-box" v-else-if="current_tit.type === 'shop'">
 			<sPullScroll ref="pullScroll" heightStyle="calc(100vh-620upx)" :pullDown="pullDown" :pullUp="loadData"
-			 :enablePullDown="true" :enablePullUp="true" :top="340" :fixed="true" :bottom="0" finishText="我是有底线的...">
+				:enablePullDown="true" :enablePullUp="true" :top="340" :fixed="true" :bottom="0" finishText="我是有底线的...">
 				<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in myStoreList" :key="i">
 					<view class="container top-box">
 						<view class="left">
-							<image v-if="!store.image" src="http://imgs.1op.cn/i/hxshop/goods/14.jpg" mode="aspectFill"></image>
-							<image v-else :src="store.imgurl" mode="aspectFill"></image>
+							<image :src="store.imgurl" mode="aspectFill"></image>
 						</view>
 						<view class="right">
 							<text class="tit">{{ store.name }}</text>
@@ -84,10 +83,6 @@
 								<text>地址:</text>
 								<text>{{ store.address ? store.address : '暂无地址' }}</text>
 							</view>
-							<!-- 	<view class="del-shop">
-								<text @click.stop="del(store)">删除</text>
-								<text @click.stop="amend(store)">修改</text>
-							</view> -->
 						</view>
 					</view>
 				</view>
@@ -100,12 +95,17 @@
 <script>
 	//引入测试数据
 	import {
-		vuex
-	} from 'vue';
+		mapState
+	} from 'vuex'
 	import sPullScroll from '@/components/s-pull-scroll';
 	export default {
 		components: {
 			sPullScroll
+		},
+		computed: {
+			...mapState({
+				userInfo: state => state.user.userInfo
+			})
 		},
 		data() {
 			return {
@@ -149,7 +149,6 @@
 						label: '健康服务',
 						value: '健康服务'
 					}
-					// { label: '其他', value: '其他' }
 				],
 				currentType: '全部',
 				isLogin: false, //是否已经登录
@@ -195,7 +194,6 @@
 			this.onRefresh();
 			this.getShopList();
 		},
-
 		methods: {
 			chooseMenu(e) {
 				if (e && e.label) {
@@ -228,7 +226,8 @@
 				if (this.current_tit.type === 'find') {
 					this.getShopList();
 				} else if (this.current_tit.type === 'shop') {
-					this.getMyShopList();
+					// this.getMyShopList();
+					this.getCurUserStore()
 				}
 			},
 			amend(item) {
@@ -270,7 +269,8 @@
 				let rea = await self.$http.post(url, req);
 				if (rea.data.resultCode === 'SUCCESS') {
 					// self.getFoodsList()
-					self.getMyShopList();
+					// self.getMyShopList();
+					self.getCurUserStore()
 				} else {
 					uni.showToast({
 						title: rea.data.resultMessage,
@@ -282,7 +282,8 @@
 				if (this.current_tit.type === 'find') {
 					this.getShopList('search', this.searchVal);
 				} else if (this.current_tit.type === 'shop') {
-					this.getMyShopList('search', this.searchVal);
+					// this.getMyShopList('search', this.searchVal);
+					self.getCurUserStore('search', this.searchVal)
 				}
 			},
 			/* 点击顶部切换商铺和我得商铺列表**/
@@ -301,7 +302,8 @@
 					});
 				} else {
 					uni.navigateTo({
-						url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item.store_no
+						url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item
+							.store_no
 					});
 				}
 			},
@@ -364,7 +366,8 @@
 						console.log('商户列表-----', res.data.data);
 						res.data.data.forEach(item => {
 							if (item.image) {
-								let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
+								let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni
+									.getStorageSync('bx_auth_ticket') +
 									'&thumbnailType=fwsu_100';
 								this.$set(item, 'imgurl', urls);
 							}
@@ -373,7 +376,62 @@
 					}
 				}
 			},
-			/* 获取当前登录人得商铺**/
+			// 查找当前登录人所在店铺 
+			getCurUserStore(type = null, search_val) {
+				let self = this
+				let req = {
+					page: self.pageInfo,
+					"condition": [{
+						"colName": "person_no",
+						"ruleType": "eq",
+						"value": this.userInfo.no
+					}],
+				}
+				if (type && type === 'search') {
+					let obj = {
+						colName: 'name',
+						ruleType: 'like',
+						value: search_val
+					};
+					req.condition.push(obj);
+				}
+				if (this.currentType && this.currentType !== '全部') {
+					req.condition.push({
+						colName: 'type',
+						ruleType: 'eq',
+						value: this.currentType
+					});
+				}
+				this.$fetch('select', 'srvhealth_store_user_select', req, 'health').then(res => {
+					if (res.success) {
+						if (self.pageInfo.pageNo === 1) {
+							self.myStoreList = [];
+						}
+						self.pageInfo.total = res.page.total;
+						self.pageInfo.pageNo = res.page.pageNo;
+						let page = self.pageInfo;
+						if (page.rownumber * page.pageNo >= page.total) {
+							// finish(boolean:是否显示finishText,默认显示)
+							self.$refs.pullScroll.finish();
+						} else {
+							self.$refs.pullScroll.success();
+						}
+						console.log('我的商户列表-----', res.data);
+						res.data.forEach(item => {
+							if (item.image) {
+								let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' +
+									uni
+									.getStorageSync('bx_auth_ticket') +
+									'&thumbnailType=fwsu_100';
+								this.$set(item, 'imgurl', urls);
+							}
+						});
+						res.data = res.data.filter(item => item.name)
+						this.myStoreList = [...this.myStoreList, ...res.data];
+					}
+				})
+
+			},
 			async getMyShopList(type = null, search_val) {
 				let self = this;
 				let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
@@ -420,7 +478,8 @@
 					console.log('我的商户列表-----', res.data.data);
 					res.data.data.forEach(item => {
 						if (item.image) {
-							let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') +
+							let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni
+								.getStorageSync('bx_auth_ticket') +
 								'&thumbnailType=fwsu_100';
 							this.$set(item, 'imgurl', urls);
 						}

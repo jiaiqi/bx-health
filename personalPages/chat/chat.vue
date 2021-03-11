@@ -1,7 +1,29 @@
 <template>
 	<view>
+		<!-- 		<cu-custom :isBack="true">
+			<block slot="content">{{ pageTitle ||'' }}</block>
+		</cu-custom> -->
+		<view class="util-bar" v-if="(groupInfo && groupInfo.gc_no)||sessionType==='店铺机构全员'">
+			<view class="util-item " @click="toPages('group-member')">
+				<view class="icon"><text class="cuIcon-friend "></text></view>
+				<text class="label">成员<text v-if="storeInfo&&storeInfo.user_count">({{storeInfo.user_count}})</text></text>
+			</view>
+			<view class="util-item " @click="toPages('group-util')">
+				<view class="icon"><text class="cuIcon-repair "></text></view>
+				<text class="label">小工具</text>
+			</view>
+			<view class="util-item" @click="toPages('group-detail')">
+				<view class="icon"><text class="cuIcon-settings"></text></view>
+				<!-- <text class="label">更多</text> -->
+			</view>
+		</view>
+		<!-- 	<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
+			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
+			:storeNo="storeNo" :group-no="groupNo" v-if="session_no"></chat> -->
 		<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
-		 :groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType" :storeNo="storeNo" :group-no="groupNo" v-if="session_no"></chat>
+			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
+			:storeNo="storeNo" :topHeight="(groupInfo&&groupNo)||sessionType==='店铺机构全员'?40:0" :group-no="groupNo"
+			v-if="session_no"></chat>
 	</view>
 </template>
 
@@ -21,6 +43,7 @@
 		},
 		data() {
 			return {
+				pageTitle: "", //页面标题
 				sessionType: '', // 会话类型
 				session_no: '', // 会话编号
 				storeNo: '', // 机构编号
@@ -38,6 +61,18 @@
 			}
 		},
 		methods: {
+			toPages(type) {
+				if (this.groupInfo.gc_no) {
+					uni.navigateTo({
+						url: `../gropDetail/gropDetail?gc_no=${this.groupInfo.gc_no}&type=${type}`
+					});
+				} else {
+					uni.navigateTo({
+						url: `../gropDetail/gropDetail?sessionType=店铺机构全员&type=${type}&storeNo=${this.storeNo}`
+					});
+				}
+
+			},
 			loadMsgComplete(e) {
 				// 消息加载完毕
 				this.lastMessage = e
@@ -60,10 +95,12 @@
 					if (Array.isArray(res.data) && res.data.length > 0) {
 						this.rowInfo = res.data[0]
 						if (res.data[0].usera_person_no === this.userInfo.no) {
+							this.pageTitle = res.data[0].userb_name
 							uni.setNavigationBarTitle({
 								title: res.data[0].userb_name
 							})
 						} else {
+							this.pageTitle = res.data[0].usera_name
 							uni.setNavigationBarTitle({
 								title: res.data[0].usera_name
 							})
@@ -84,7 +121,7 @@
 					}
 				}
 				this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health').then(res => {
-					if(Array.isArray(res.data)&&res.data.length>0){
+					if (Array.isArray(res.data) && res.data.length > 0) {
 						this.storeInfo = res.data[0]
 					}
 				})
@@ -109,7 +146,7 @@
 						this.groupInfo = res.data[0]
 						this.getGroupUser()
 						if (this.groupInfo.name) {
-							debugger
+							this.pageTitle = this.groupInfo.name
 							uni.setNavigationBarTitle({
 								title: this.groupInfo.name
 							})
@@ -137,6 +174,7 @@
 					if (res.success) {
 						this.groupUser = res.data
 						if (res.data.length > 0) {
+							this.pageTitle = this.groupInfo.name + `(${res.data.length})`
 							uni.setNavigationBarTitle({
 								title: this.groupInfo.name + `(${res.data.length})`
 							})
@@ -168,19 +206,27 @@
 					this.session_no = res.data[0].session_no
 					switch (this.sessionType) {
 						case '店铺机构全员':
+							this.pageTitle = this.sessionInfo.session_name
 							uni.setNavigationBarTitle({
-								title: this.sessionInfo.store_name
+								title: this.sessionInfo.session_name
 							})
+							if (this.storeInfo && this.storeInfo.user_count) {
+								uni.setNavigationBarTitle({
+									title: `${　this.sessionInfo.session_name　}(${this.storeInfo.user_count})`
+								})
+							}
 							break;
 						case '群组圈子':
 							this.getGroup()
 							break;
 						case '机构用户客服':
 							if (this.identity === '客户') {
+								this.pageTitle = this.storeInfo.name
 								uni.setNavigationBarTitle({
 									title: this.storeInfo.name
 								})
 							} else if (this.identity === '客服') {
+								this.pageTitle = this.sessionInfo.store_user_name
 								uni.setNavigationBarTitle({
 									title: this.sessionInfo.store_user_name
 								})
@@ -192,6 +238,9 @@
 					}
 				}
 				return this.sessionInfo
+			},
+			getStoreUser() {
+				// 店铺全员群聊 查找店铺人员列表
 			},
 			updateSessionNo() {
 				let req = []
@@ -275,13 +324,15 @@
 						data.group_no = this.groupNo
 						break;
 					case '机构用户客服':
-						data.person_image_a = this.userInfo.user_image ? this.userInfo.user_image : this.userInfo.profile_url
+						data.person_image_a = this.userInfo.user_image ? this.userInfo.user_image : this.userInfo
+							.profile_url
 						data.person_name_a = this.userInfo.name
 						data.person_no_a = this.userInfo.no
 						data.store_no = this.storeNo
 						data.store_user_no = this.store_user_no
 						data.store_user_name = this.userInfo.name
-						data.store_user_image = this.userInfo.user_image ? this.userInfo.user_image : this.userInfo.profile_url
+						data.store_user_image = this.userInfo.user_image ? this.userInfo.user_image : this.userInfo
+							.profile_url
 						break;
 					case '用户间':
 						data.person_relation_no = this.row_no
@@ -344,7 +395,8 @@
 							value: this.pg_no
 						}],
 						data: [{
-							latest_sign_in_time: e && e.create_time ? e.create_time : this.formateDate('', 'DateTime')
+							latest_sign_in_time: e && e.create_time ? e.create_time : this.formateDate('',
+								'DateTime')
 						}]
 					}];
 					this.$http.post(url, req);
@@ -393,6 +445,52 @@
 	}
 </script>
 
-<style>
+<style lang="scss" scoped>
+	.util-bar {
+		// position: fixed;
+		// top: 0;
+		background-color: #f5f5f5;
+		display: flex;
+		justify-content: flex-end;
+		border-radius: 0 0 20rpx 20rpx;
+		overflow: hidden;
+		padding: 10rpx 20rpx;
+		top: 0;
+		/* #ifdef H5 */
+		top: 44px;
+		/* #endif */
+		width: 100%;
+		z-index: 2;
 
+		.util-item {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background-color: #fff;
+			border-radius: 50px;
+			padding: 5px 10px;
+
+			&+.util-item {
+				margin-left: 5px;
+				// border-left: 1rpx solid #eee;
+			}
+
+			.icon {
+				width: 40rpx;
+				height: 40rpx;
+				// border-radius: 50%;
+				color: #333;
+				line-height: 40rpx;
+				text-align: center;
+				font-size: 40rpx;
+			}
+
+			.label {
+				color: #999;
+				margin-top: 10rpx;
+				font-size: 24rpx;
+				margin-left: 5px;
+			}
+		}
+	}
 </style>

@@ -478,7 +478,7 @@
 			"pages": [{
 				"path": "hospitalOverview/hospitalOverview",
 				"style": {
-					"navigationBarBackgroundColor": "#0094ff",
+					"navigationBarBackgroundColor": "#4CBABB",
 					"navigationBarTitleText": "医院简介"
 				}
 			}, {

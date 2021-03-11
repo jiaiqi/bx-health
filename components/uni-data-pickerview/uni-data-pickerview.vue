@@ -87,7 +87,7 @@ export default {
 			this.selectedIndex = index;
 		},
 		handleNodeClick(i, j) {
-			debugger
+			
 			const node = this.dataList[i][j];
 			const { value, text } = node;
 

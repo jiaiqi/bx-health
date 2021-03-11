@@ -88,7 +88,7 @@ fly.interceptors.request.use(async (request) => {
 	if(request.url.indexOf('?openCode=')!==-1){
 		request.headers["bx_open_code"] = request.url.split('?openCode=')[1]
 		delete request.headers.bx_auth_ticket
-		debugger
+		
 	}
 	const outTime = uni.getStorageSync("expire_timestamp") //过期时间
 	const date = parseInt(new Date().getTime() / 1000)

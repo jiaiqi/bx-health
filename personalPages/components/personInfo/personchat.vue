@@ -1,13 +1,17 @@
-s<template>
+<template>
 	<view class="person-chat-wrap" :style="{
 			'--chart-height': chartHeight,
+			'--keyboard-height':keyboardHeight + 'px',
 			'--global-text-font-size': globalTextFontSize + 'px'
 		}">
-		<view class="person-chat-top" @click.stop="closeBottomPoup" :class="doctor_info&&!doctor_info.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
-			<audio v-if="currentChat.id" class="audio" @ended="playEnd" :action="audioAction" id="myMp3" style="height: 0;opacity: 0;overflow: hidden;position: absolute;top: 0;"
-			 :src="currentChat.voice_url" controls />
-			<scroll-view @scrolltoupper="loadData" :scroll-y="true" :scroll-top="scrollTop" :scroll-into-view="chatTextBottom"
-			 :scroll-with-animation="true" class="msg-list" :class="{ 'top-height': topHeight, showLayer: !isFeed && isSendLink, showKeyboard: !isSendLink && showKeyboard }">
+		<view class="person-chat-top" @click.stop="closeBottomPoup"
+			:class="doctor_info&&!doctor_info.owner_account ? 'person-chat-top-w' : 'person-chat-top-w-h'">
+			<audio v-if="currentChat.id" class="audio" @ended="playEnd" :action="audioAction" id="myMp3"
+				style="height: 0;opacity: 0;overflow: hidden;position: absolute;top: 0;" :src="currentChat.voice_url"
+				controls />
+			<scroll-view @scrolltoupper="loadData" :scroll-y="true" :scroll-top="scrollTop"
+				:scroll-into-view="chatTextBottom" :scroll-with-animation="true" class="msg-list"
+				:class="{ 'top-height': topHeight, showLayer: !isFeed && isSendLink, showKeyboard: !isSendLink && showKeyboard }">
 				<!-- 加载历史数据waitingUI -->
 				<view class="loading" v-if="isLoading">
 					<view class="spinner">
@@ -18,32 +22,46 @@ s<template>
 						<view class="rect5"></view>
 					</view>
 				</view>
-				<view :id="`person-chat-item${item.id}`" v-for="(item, index) in recordList" :key="item.id" class="person-chat-item"
-				 :class="item.sender_account === currentUserInfo.userno&&identity==item.identity? 'person-chat-item-my' : ''">
-					<view class="send-time" v-if="showSendTime(item, index)">{{ formateDate(item.create_time, 'normal') }}</view>
-					<view v-if="item.sender_account != currentUserInfo.userno||(identity!==item.identity&&identity)" class="person-chat-item-accept">
-						<view class="sender-info" v-if="(groupInfo && groupInfo.gc_no)||(identity&&item.identity)">
-							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
-							<text class="cu-tag bg-blue sm" v-if="item.identity">{{ item.identity }}</text>
+				<view :id="`person-chat-item${item.id}`" v-for="(item, index) in recordList" :key="item.id"
+					class="person-chat-item"
+					:class="item.sender_account === currentUserInfo.userno&&identity==item.identity? 'person-chat-item-my' : ''">
+					<view class="send-time" v-if="showSendTime(item, index)">
+						{{ formateDate(item.create_time, 'normal') }}
+					</view>
+					<view
+						v-if="item.sender_account != currentUserInfo.userno||(identity==='客服'&&item.identity==='客户')||(identity==='客户'&&item.identity==='客服')"
+						class="person-chat-item-accept">
+						<view class="sender-info" v-if="item.sender_name||item.sender_group_role||item.identity">
+							<text class="cu-tag bg-blue sm"
+								v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
+							<text class="cu-tag bg-blue sm"
+								v-else-if="item.identity&&item.identity!=='客户'">{{ item.identity }}</text>
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
 						</view>
 						<view class="person-chat-item-left">
-							<image :src="storeInfo.log?getImagePath(storeInfo.logo):getImagePath(storeInfo.image)" mode="aspectFill" v-if="identity==='客户'&&item.identity!==identity"></image>
-							<image :src="getImagePath(item.sender_profile_url)" mode="aspectFit" v-if="identity==='客服'&&identity!==item.identity"></image>
-							<image :src="identity==='患者'?getImagePath(rowInfo.userb_profile_url):getImagePath(rowInfo.usera_profile_url)"
-							 mode="aspectFit" v-if="!groupNo&&identity&&rowInfo&&rowInfo.row_no"></image>
-							<image :src="getSenderProfile(item) ? getSenderProfile(item) : '/static/man-profile.png'" mode="aspectFit" v-if="groupInfo && groupInfo.gc_no"></image>
+							<image :src="storeInfo.log?getImagePath(storeInfo.logo):getImagePath(storeInfo.image)"
+								mode="aspectFill" v-if="identity==='客户'&&item.identity==='客服'"></image>
+							<image :src="getImagePath(item.sender_profile_url)" mode="aspectFit"
+								v-else-if="identity==='客服'&&identity!==item.identity"></image>
+							<image
+								:src="identity==='患者'?getImagePath(rowInfo.userb_profile_url):getImagePath(rowInfo.usera_profile_url)"
+								mode="aspectFit" v-else-if="!groupNo&&identity&&rowInfo&&rowInfo.row_no"></image>
+							<image :src="getSenderProfile(item) ? getSenderProfile(item) : '/static/man-profile.png'"
+								mode="aspectFit" v-else></image>
 						</view>
-						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url && item.msg_content_type === '图片'"
-						 class="person-chat-item-right person-chat-item-right-image">
-							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url"></u-image>
+						<view @click="previewImages(item.img_url)"
+							v-if="item.image && item.img_url && item.msg_content_type === '图片'"
+							class="person-chat-item-right person-chat-item-right-image">
+							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url">
+							</u-image>
 							<!-- <chat-image :max="350" :src="item.img_url"></chat-image> -->
 						</view>
-						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
+						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
+							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
 						</view>
-						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)" class="person-chat-item-right"
-						 :class="item.msg_link ? 'person-chat-item-right-link' : ''">
+						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)"
+							class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<view class="link-left">
 								<image src="../../static/links.png" mode=""></image>
 							</view>
@@ -58,58 +76,75 @@ s<template>
 								</view>
 							</view>
 						</view>
-						<view @tap="audioPlay(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'" hover-class="contentType2-hover-class"
-						 class="content contentType2">
-							<view class="voice_icon_left-wrap" :class="{ 'play-left': currentChat && item.id === currentChat.id && currentChat.anmitionPlay }">
+						<view @tap="audioPlay(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'"
+							hover-class="contentType2-hover-class" class="content contentType2">
+							<view class="voice_icon_left-wrap"
+								:class="{ 'play-left': currentChat && item.id === currentChat.id && currentChat.anmitionPlay }">
 								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
-								<image class="voice_icon voice_icon_left" src="../../static/voice-l.png" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_left_an' : ''"></image>
+								<image class="voice_icon voice_icon_left" src="../../static/voice-l.png"
+									:class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_left_an' : ''">
+								</image>
 							</view>
 						</view>
-						<view v-else-if="item.longitude && item.latitude && item.msg_content_type === '位置'" class="map-container" @tap="openMap(item)">
+						<view v-else-if="item.longitude && item.latitude && item.msg_content_type === '位置'"
+							class="map-container" @tap="openMap(item)">
 							<view class="map-info">
 								<view class="name">{{ item.location_name }}</view>
 								<view class="address">{{ item.location_address }}</view>
 							</view>
-							<map style="width: 500rpx; height: 300rpx;" :enable-scroll="false" :enable-rotate="false" :latitude="item.latitude"
-							 :longitude="item.longitude" :markers="getCovers(item)"></map>
+							<map style="width: 500rpx; height: 300rpx;" :enable-scroll="false" :enable-rotate="false"
+								:latitude="item.latitude" :longitude="item.longitude" :markers="getCovers(item)"></map>
 						</view>
-						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
+						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'"
+							class="video_right_play">
 							<!-- <text>视频</text> -->
-							<video class="video-msg" :poster="item.image ? getImagePath(item.image, true) : ''" :style="{ width: item.videoWidth + 'px', height: item.videoHeight + 'px' }"
-							 id="myVideo" :src="item.video_url" :duration="item.attribute && item.attribute.duration ? item.attribute.duration : ''"
-							 controls></video>
+							<video class="video-msg" :poster="item.image ? getImagePath(item.image, true) : ''"
+								:style="{ width: item.videoWidth + 'px', height: item.videoHeight + 'px' }" id="myVideo"
+								:src="item.video_url"
+								:duration="item.attribute && item.attribute.duration ? item.attribute.duration : ''"
+								controls></video>
 						</view>
-						<view @click="downloadfile(item)" v-else-if="item.msg_content_type === '文件'" class="documents-wrap">
+						<view @click="downloadfile(item)" v-else-if="item.msg_content_type === '文件'"
+							class="documents-wrap">
 							<view class="documents-item">
 								<view class="documents-item-left">
 									<text>{{ item.documents_name }}</text>
 								</view>
 								<view class="documents-item-right">
-									<image v-if="item.file_type && (item.file_type == 'docx' || item.file_type == 'doc')" src="/personalPages/static/word.png"
-									 mode=""></image>
-									<image v-else-if="item.file_type && item.file_type === 'xlsx'" src="/personalPages/static/excel.png" mode=""></image>
-									<image v-else-if="item.file_type && item.file_type === 'pdf'" src="/personalPages/static/pdf.png" mode=""></image>
+									<image
+										v-if="item.file_type && (item.file_type == 'docx' || item.file_type == 'doc')"
+										src="/personalPages/static/word.png" mode=""></image>
+									<image v-else-if="item.file_type && item.file_type === 'xlsx'"
+										src="/personalPages/static/excel.png" mode=""></image>
+									<image v-else-if="item.file_type && item.file_type === 'pdf'"
+										src="/personalPages/static/pdf.png" mode=""></image>
 								</view>
 							</view>
 						</view>
 					</view>
-					<view v-else-if="item.sender_account === currentUserInfo.userno&&identity===item.identity" class="person-chat-item-send">
-						<view class="sender-info" v-if="(groupInfo && groupInfo.gc_no)||(identity&&item.identity)">
+					<view
+						v-else-if="item.sender_account === currentUserInfo.userno||(identity&&identity===item.identity)"
+						class="person-chat-item-send">
+						<view class="sender-info" v-if="item.sender_name||item.sender_group_role||item.identity">
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
-							<text class="cu-tag bg-blue sm" v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
-							<text class="cu-tag bg-blue sm" v-if="item.identity">{{ item.identity }}</text>
+							<text class="cu-tag bg-blue sm"
+								v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
+							<text class="cu-tag bg-blue sm"
+								v-else-if="item.identity&&item.identity!=='客户'">{{ item.identity }}</text>
 						</view>
-						<text class="unread" v-if="item.msg_state === '未读' &&!groupNo&& (!groupInfo || !groupInfo.gc_no)">{{ item.msg_state }}</text>
-						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url" class="person-chat-item-right person-chat-item-right-image">
-							<!-- <image :src="item.img_url" :style="{ width: item.imgWidth + 'px', height: item.imgHeight + 'px' }"></image> -->
-							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url"></u-image>
-							<!-- <chat-image :src="item.img_url"></chat-image> -->
+						<text class="unread"
+							v-if="item.msg_state === '未读' &&!groupNo&& (!groupInfo || !groupInfo.gc_no)&&sessionType!=='店铺机构全员'">{{ item.msg_state }}</text>
+						<view @click="previewImages(item.img_url)" v-if="item.image && item.img_url"
+							class="person-chat-item-right person-chat-item-right-image">
+							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url">
+							</u-image>
 						</view>
-						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
+						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
+							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text>{{ item.msg_content }}</text>
 						</view>
-						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)" class="person-chat-item-right"
-						 :class="item.msg_link ? 'person-chat-item-right-link' : ''">
+						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)"
+							class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<view class="link-left">
 								<image src="../../static/links.png" mode=""></image>
 							</view>
@@ -124,46 +159,59 @@ s<template>
 								</view>
 							</view>
 						</view>
-						<view @tap="audioPlay(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'" hover-class="contentType2-hover-class"
-						 class="content contentType2 content-type-right">
-							<view class="voice_icon_right-wrap" :class="{ 'play-right': currentChat && item.id === currentChat.id && currentChat.anmitionPlay }">
-								<image class="voice_icon voice_icon_right" src="../../static/voice-r.png" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''"></image>
+						<view @tap="audioPlay(item)" v-else-if="item.msg_link && item.msg_content_type === '语音'"
+							hover-class="contentType2-hover-class" class="content contentType2 content-type-right">
+							<view class="voice_icon_right-wrap"
+								:class="{ 'play-right': currentChat && item.id === currentChat.id && currentChat.anmitionPlay }">
+								<image class="voice_icon voice_icon_right" src="../../static/voice-r.png"
+									:class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''">
+								</image>
 								<!-- <view class="voice_icon voice_icon_right" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''"></view> -->
 								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
 							</view>
 						</view>
-						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'" class="video_right_play">
+						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'"
+							class="video_right_play">
 							<!-- <text>视频</text> -->
-							<video class="video-msg" style="width: 250px;height: 200px;" :poster="item.image ? getImagePath(item.image, true) : ''"
-							 :style="{ width: item.videoWidth + 'px', height: item.videoHeight + 'px' }" id="myVideo" :duration="item.attribute && item.attribute.duration ? item.attribute.duration : ''"
-							 :src="item.video_url" controls></video>
+							<video class="video-msg" style="width: 250px;height: 200px;"
+								:poster="item.image ? getImagePath(item.image, true) : ''"
+								:style="{ width: item.videoWidth + 'px', height: item.videoHeight + 'px' }" id="myVideo"
+								:duration="item.attribute && item.attribute.duration ? item.attribute.duration : ''"
+								:src="item.video_url" controls></video>
 							<!-- <video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video> -->
 						</view>
-						<view v-else-if="item.longitude && item.latitude && item.msg_content_type === '位置'" class="map-container" @tap="openMap(item)">
+						<view v-else-if="item.longitude && item.latitude && item.msg_content_type === '位置'"
+							class="map-container" @tap="openMap(item)">
 							<view class="map-info">
 								<view class="name">{{ item.location_name }}</view>
 								<view class="address">{{ item.location_address }}</view>
 							</view>
-							<map style="width: 500rpx; height: 300rpx;" :enable-scroll="false" :enable-rotate="false" :latitude="item.latitude"
-							 :longitude="item.longitude" :markers="getCovers(item)"></map>
+							<map style="width: 500rpx; height: 300rpx;" :enable-scroll="false" :enable-rotate="false"
+								:latitude="item.latitude" :longitude="item.longitude" :markers="getCovers(item)"></map>
 						</view>
-						<view @click="downloadfile(item)" v-else-if="item.msg_content_type === '文件'" class="documents-wrap">
+						<view @click="downloadfile(item)" v-else-if="item.msg_content_type === '文件'"
+							class="documents-wrap">
 							<view class="documents-item">
 								<view class="documents-item-left">
 									<text>{{ item.documents_name }}</text>
 								</view>
 								<view class="documents-item-right">
-									<image v-if="item.file_type && (item.file_type == 'docx' || item.file_type == 'doc')" src="/personalPages/static/word.png"
-									 mode=""></image>
-									<image v-else-if="item.file_type && item.file_type === 'xlsx'" src="/personalPages/static/excel.png" mode=""></image>
-									<image v-else-if="item.file_type && item.file_type === 'pdf'" src="/personalPages/static/pdf.png" mode=""></image>
+									<image
+										v-if="item.file_type && (item.file_type == 'docx' || item.file_type == 'doc')"
+										src="/personalPages/static/word.png" mode=""></image>
+									<image v-else-if="item.file_type && item.file_type === 'xlsx'"
+										src="/personalPages/static/excel.png" mode=""></image>
+									<image v-else-if="item.file_type && item.file_type === 'pdf'"
+										src="/personalPages/static/pdf.png" mode=""></image>
 								</view>
 							</view>
 						</view>
 						<view class="person-chat-item-left">
-							<image :src="getImagePath(storeInfo.image)" mode="aspectFill" v-if="identity==='客服'"></image>
-							<image :src="currentUserInfo.profile_url ? currentUserInfo.profile_url : '/personalPages/static/doctor_default.jpg'"
-							 mode="aspectFill" v-else></image>
+							<image :src="getImagePath(storeInfo.image)" mode="aspectFill" v-if="identity==='客服'">
+							</image>
+							<image
+								:src="currentUserInfo.profile_url ? currentUserInfo.profile_url : '/personalPages/static/doctor_default.png'"
+								mode="aspectFill" v-else></image>
 						</view>
 					</view>
 				</view>
@@ -185,19 +233,23 @@ s<template>
 		<view class="person-chat-bot" :class="{ showLayer: !isFeed && isSendLink }">
 			<view class="person-chat-bot-top">
 				<view class="person-chat-left">
-					<text class="image-icon cuIcon-sound" @click="changeVoice('keyword')" v-if="currentVoiceType === 'voice'"></text>
-					<text class="image-icon cuIcon-keyboard" @click="changeVoice('voice')" v-if="currentVoiceType === 'keyword'"></text>
-					<text v-if="currentVoiceType === 'keyword'" class="voice_title" :style="{ background: recording ? '#c7c6c6' : '#FFFFFF' }"
-					 @touchstart.stop.prevent="startVoice" @touchmove.stop.prevent="moveVoice" @touchend.stop="endVoice"
-					 @touchcancel.stop="cancelVoice">
+					<text class="image-icon cuIcon-sound" @click="changeVoice('keyword')"
+						v-if="currentVoiceType === 'voice'"></text>
+					<text class="image-icon cuIcon-keyboard" @click="changeVoice('voice')"
+						v-if="currentVoiceType === 'keyword'"></text>
+					<text v-if="currentVoiceType === 'keyword'" class="voice_title"
+						:style="{ background: recording ? '#c7c6c6' : '#FFFFFF' }" @touchstart.stop.prevent="startVoice"
+						@touchmove.stop.prevent="moveVoice" @touchend.stop="endVoice" @touchcancel.stop="cancelVoice">
 						{{ voiceTitle }}
 					</text>
-					<input :focus="onFocus" :auto-focus="onFocus" v-else v-model="chatText" confirm-hold hold-keyboard class="send-text"
-					 type="text" @blur="onBlur" @focus="onInput" @confirm="sendMessage" confirm-type="send" />
+					<input :focus="onFocus" :adjust-position="false" :auto-focus="onFocus" v-else v-model="chatText"
+						confirm-hold hold-keyboard class="send-text" type="text" @blur="onBlur" @focus="onInput"
+						@confirm="sendMessage" @keyboardheightchange="keyboardheightchange" confirm-type="send" />
 				</view>
 				<view class="person-chat-rig" :class="{ 'is-feed': isFeed }">
 					<view class="person-chat-rig-add-wrap">
-						<view @click="openLink" v-if="!isFeed" class="person-chat-rig-add"><text class="cuIcon-roundadd"></text></view>
+						<view @click="openLink" v-if="!isFeed" class="person-chat-rig-add"><text
+								class="cuIcon-roundadd"></text></view>
 					</view>
 					<text class="send" @click="sendMessage" v-if="isFeed">发送</text>
 				</view>
@@ -255,7 +307,8 @@ s<template>
 				</view>
 				<view class="padding-xl recode-poup">
 					<bx-radio-group @change="radioChange">
-						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in recodeList" :key="item.id" :name="item.activity_no ? item.activity_no : item.hdate">
+						<bx-radio class="radio" color="#2979ff" v-for="(item, i) in recodeList" :key="item.id"
+							:name="item.activity_no ? item.activity_no : item.hdate">
 							{{ item.title ? item.title : item.hdate }}
 						</bx-radio>
 					</bx-radio-group>
@@ -321,7 +374,7 @@ s<template>
 			}),
 			chartHeight() {
 				if (this.topHeight) {
-					return `calc(100vh - ${this.topHeight}px - var(--window-top) - var(--window-bottom))`;
+					return `calc(100vh  -  ${this.topHeight}px - var(--window-top) - var(--window-bottom))`;
 				} else {
 					return 'calc(100vh  - var(--window-top) - var(--window-bottom))';
 				}
@@ -343,6 +396,7 @@ s<template>
 		data() {
 			return {
 				showKeyboard: false,
+				keyboardHeight: 0,
 				videoContext: '',
 				audioAction: {
 					method: 'pause'
@@ -451,6 +505,13 @@ s<template>
 					//进入页面滚动到底部
 					this.scrollTop = 99999;
 				});
+			},
+			keyboardheightchange(e) {
+				const {
+					height,
+					duration
+				} = e
+				alert("键盘高度发生变化：" + height)
 			},
 			openMap(item) {
 				// 打开地图
@@ -731,8 +792,10 @@ s<template>
 											name: 'file',
 											success: e => {
 												if (e.statusCode === 200) {
-													let photoDataNo = JSON.parse(e.data).file_no;
-													self.sendMessageLanguageInfo('图片', photoDataNo, image);
+													let photoDataNo = JSON.parse(e
+														.data).file_no;
+													self.sendMessageLanguageInfo('图片',
+														photoDataNo, image);
 												} else {}
 											}
 										});
@@ -845,22 +908,31 @@ s<template>
 											name: 'file',
 											success: e => {
 												if (e.statusCode === 200) {
-													let imageNo = JSON.parse(e.data).file_no;
+													let imageNo = JSON.parse(e.data)
+														.file_no;
 													res.imageNo = imageNo;
 													// #ifdef MP-WEIXIN
 													uni.getVideoInfo({
 														src: res.tempFilePath,
 														success(info) {
-															info.imageNo = imageNo;
-															self.sendMessageLanguageInfo('视频', photoDataNo, info);
+															info.imageNo =
+																imageNo;
+															self.sendMessageLanguageInfo(
+																'视频',
+																photoDataNo,
+																info);
 														},
 														fail() {
-															self.sendMessageLanguageInfo('视频', photoDataNo, res);
+															self.sendMessageLanguageInfo(
+																'视频',
+																photoDataNo,
+																res);
 														}
 													});
 													// #endif
 													// #ifndef MP-WEIXIN
-													self.sendMessageLanguageInfo('视频', photoDataNo, res);
+													self.sendMessageLanguageInfo('视频',
+														photoDataNo, res);
 													// #endif
 												}
 											}
@@ -887,7 +959,8 @@ s<template>
 				if (this.currentSendType == 'question') {
 					url = `/questionnaire/index/index?formType=form&activity_no=${this.checkRadioValue}&status=进行中`;
 				} else if (this.currentSendType == 'bite') {
-					url = `/archivesPages/archives-history/archives-history?pageType=diet&chatChoseTime=` + this.checkRadioValue;
+					url = `/archivesPages/archives-history/archives-history?pageType=diet&chatChoseTime=` + this
+						.checkRadioValue;
 				}
 				this.chooseRecod = url;
 				this.sendMessageInfo();
@@ -1004,7 +1077,8 @@ s<template>
 				this.currentVoiceType = type;
 			},
 			downloadfile(item) {
-				var url = this.$api.downloadFile + item.attachment + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+				var url = this.$api.downloadFile + item.attachment + '&bx_auth_ticket=' + uni.getStorageSync(
+					'bx_auth_ticket');
 				uni.showToast({
 					title: '正在下载',
 					icon: 'none'
@@ -1071,7 +1145,8 @@ s<template>
 						sender_name: this.currentUserInfo.name,
 						sender_person_no: this.currentUserInfo.no,
 						sender_profile_url: this.currentUserInfo.profile_url,
-						sender_user_image: this.currentUserInfo.user_image ? this.currentUserInfo.user_image : this.currentUserInfo.profile_url,
+						sender_user_image: this.currentUserInfo.user_image ? this.currentUserInfo.user_image : this
+							.currentUserInfo.profile_url,
 						msg_content_type: type,
 						session_no: this.sessionNo,
 					};
@@ -1127,8 +1202,10 @@ s<template>
 						sender_name: this.currentUserInfo.name,
 						sender_profile_url: this.currentUserInfo.profile_url,
 						sender_user_image: this.currentUserInfo.user_image,
-						receiver_account: this.doctor_info.usera_no ? this.doctor_info.usera_no : this.userInfo.userno,
-						receiver_person_no: this.doctor_info.usera_person_no ? this.doctor_info.usera_person_no : this.userInfo.no,
+						receiver_account: this.doctor_info.usera_no ? this.doctor_info.usera_no : this.userInfo
+							.userno,
+						receiver_person_no: this.doctor_info.usera_person_no ? this.doctor_info.usera_person_no :
+							this.userInfo.no,
 						sender_person_no: this.currentUserInfo.no,
 						msg_content_type: type,
 						identity: this.pageType ? '患者' : '医生'
@@ -1178,7 +1255,8 @@ s<template>
 				}
 				let data = this.deepClone(req[0].data[0])
 				if (type === '图片') {
-					data.img_url = this.$api.downloadFile + data.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+					data.img_url = this.$api.downloadFile + data.image + '&bx_auth_ticket=' + uni.getStorageSync(
+						'bx_auth_ticket');
 
 					if (data.attribute) {
 						try {
@@ -1253,7 +1331,8 @@ s<template>
 						sender_name: this.currentUserInfo.name,
 						sender_person_no: this.currentUserInfo.no,
 						sender_profile_url: this.currentUserInfo.profile_url,
-						sender_user_image: this.currentUserInfo.user_image ? this.currentUserInfo.user_image : this.currentUserInfo.profile_url,
+						sender_user_image: this.currentUserInfo.user_image ? this.currentUserInfo.user_image : this
+							.currentUserInfo.profile_url,
 						msg_content_type: !this.isSendLink ? '文本' : '链接',
 						session_no: this.sessionNo
 					};
@@ -1312,8 +1391,10 @@ s<template>
 						sender_name: this.currentUserInfo.name,
 						sender_profile_url: this.currentUserInfo.profile_url,
 						sender_user_image: this.currentUserInfo.user_image,
-						receiver_account: this.doctor_info.usera_no ? this.doctor_info.usera_no : this.userInfo.userno,
-						receiver_person_no: this.doctor_info.usera_person_no ? this.doctor_info.usera_person_no : this.userInfo.no,
+						receiver_account: this.doctor_info.usera_no ? this.doctor_info.usera_no : this.userInfo
+							.userno,
+						receiver_person_no: this.doctor_info.usera_person_no ? this.doctor_info.usera_person_no :
+							this.userInfo.no,
 						sender_person_no: this.currentUserInfo.no,
 						msg_content_type: !this.isSendLink ? '文本' : '链接',
 						identity: this.pageType ? '患者' : '医生'
@@ -1346,7 +1427,8 @@ s<template>
 				if (index === 0) {
 					return true;
 				} else if (index >= 1) {
-					return item.create_time && this.formateDate(item.create_time, 'normal') !== this.formateDate(this.recordList[index -
+					return item.create_time && this.formateDate(item.create_time, 'normal') !== this.formateDate(this
+						.recordList[index -
 							1].create_time,
 						'normal');
 				}
@@ -1496,7 +1578,8 @@ s<template>
 							});
 						}
 						if (item.image) {
-							let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket');
+							let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni
+								.getStorageSync('bx_auth_ticket');
 							if (item.msg_content_type === '图片') {
 								this.$set(item, 'img_url', url);
 							}
@@ -1551,8 +1634,9 @@ s<template>
 									this.$set(item, 'videoHeight', info.height);
 								}
 							}
-							let video_url = this.$api.downloadFile + item.video + '&bx_auth_ticket=' + uni.getStorageSync(
-								'bx_auth_ticket');
+							let video_url = this.$api.downloadFile + item.video + '&bx_auth_ticket=' + uni
+								.getStorageSync(
+									'bx_auth_ticket');
 							this.$set(resData[i], 'video_url', video_url);
 						}
 					});
@@ -1605,7 +1689,7 @@ s<template>
 					}
 				}
 			},
-			setRefreshMessageTimer(second = 30 * 1000) {
+			setRefreshMessageTimer(second = 3 * 1000) {
 				// 设置定时刷新消息的定时器
 				this.refreshMessageTimer = setInterval(() => {
 					this.initMessageList('refresh')
@@ -1701,6 +1785,7 @@ s<template>
 		mounted() {
 			uni.onKeyboardHeightChange((res = {}) => {
 				console.log(res.height);
+				this.keyboardHeight = res.height
 				if (res.height > 0) {
 					this.showKeyboard = true;
 					this.isSendLink = false;
@@ -1749,7 +1834,7 @@ s<template>
 
 <style lang="scss" scoped>
 	.person-chat-wrap {
-		background-color: #eeeeee;
+		background-color: #f5f5f5;
 		overflow: hidden;
 		width: 100%;
 		height: var(--chart-height);
@@ -1766,8 +1851,10 @@ s<template>
 			position: relative;
 
 			.msg-list {
-				height: calc(100vh - var(--window-top) - 60px);
 
+				height: calc(100vh - var(--window-top) - 50px);
+
+				// height:  var(--chart-height);
 				.loading {
 					//loading动画
 					display: flex;
@@ -1821,24 +1908,41 @@ s<template>
 				}
 
 				&.top-height {
-					height: calc(100vh - var(--window-top) - 60px - 60px);
+					height: calc(100vh - var(--window-top) - 55px - 40px);
+
+					&.showLayer {
+						height: calc(100vh - var(--window-top) - 55px - 40px - 230px);
+					}
 				}
 
 				&.showLayer {
-					height: calc(100vh - var(--window-top) - 60px - 230px);
+					height: calc(100vh - var(--window-top) - 40px - 230px);
 				}
 
-				&.top-height.showLayer {
-					height: calc(100vh - var(--window-top) - 60px - 60px - 230px);
+				&.showKeyboard {
+					height: calc(100vh - var(--keyboard-height) - var(--window-top) - 55px);
+
+					&.showLayer {
+						height: calc(100vh - var(--keyboard-height) - var(--window-top) - 55px - 230px);
+					}
+
+					&.top-height {
+						height: calc(100vh - var(--keyboard-height) - var(--window-top) - 40px - 55px);
+
+						&.showLayer {
+							height: calc(100vh - var(--keyboard-height) - var(--window-top) - 40px - 55px - 230px);
+						}
+					}
 				}
 			}
 
 			.person-chat-item {
 				flex-direction: column;
 				align-items: flex-end;
+				width: 100%;
 
 				.send-time {
-					padding-top: 50rpx;
+					padding-top: 30rpx;
 					display: flex;
 					width: 100%;
 					justify-content: center;
@@ -1849,6 +1953,7 @@ s<template>
 					display: flex;
 					margin: 0rpx 10rpx 20rpx;
 					flex-wrap: wrap;
+					width: calc(100% - 20rpx);
 
 					.sender-info {
 						width: 100%;
@@ -2225,11 +2330,11 @@ s<template>
 			}
 
 			.person-chat-bot-top {
-				background-color: #f7f7f7;
+				// background-color: #f5f5f5;
 				box-shadow: 0px 1px 4px rgba(26, 26, 26, 0.2);
 				width: 100%;
 				display: flex;
-				padding: 10px 10px 15px;
+				padding: 10px;
 				align-items: center;
 
 				.person-chat-left {
@@ -2253,8 +2358,9 @@ s<template>
 						flex: 1;
 						width: 100%;
 						background: #fff;
-						border-radius: 10rpx;
+						border-radius: 100px;
 						font-size: var(--global-text-font-size);
+						text-indent: 10px;
 					}
 
 					.is-feed {
@@ -2423,14 +2529,14 @@ s<template>
 			background-color: #fff;
 			background-image: url(../../static/voice-r.jpg);
 			margin-left: 10rpx;
-			margin-right: 10rpx;
+			margin-right: 20rpx;
 		}
 
 		.voice_icon_left {
 			background-image: url(../../static/voice%20L.jpg);
 			background-color: #000000;
 			margin-right: 10rpx;
-			margin-left: 10rpx;
+			margin-left: 20rpx;
 		}
 
 		.voice_icon_right_an {

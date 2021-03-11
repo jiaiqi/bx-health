@@ -70,6 +70,7 @@ const wxVerifyLogin = async (dontCheckAuth=false) => {
 	const userInfo = await getUserInfo(dontCheckAuth)
 	if ((!userInfo || !userInfo.response)&&!dontCheckAuth) {
 		// 只有有获取微信用户信息权限的才能继续登录
+		store.commit('SET_AUTH_USERINFO', false)
 		return false
 	}
 	// #endif
@@ -87,6 +88,7 @@ const wxVerifyLogin = async (dontCheckAuth=false) => {
 			serviceName: 'srvwx_app_login_verify'
 		}]
 		let res = await http.post(url, req)
+		
 		if (res.data.resultCode === 'SUCCESS') {
 			// 登录成功
 			uni.setStorageSync('isLogin', true);

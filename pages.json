@@ -281,7 +281,9 @@
 				{
 					"path": "chat/chat",
 					"style": {
-						"navigationBarTitleText": "",
+						// "navigationStyle":"custom",
+						"navigationBarBackgroundColor":"#fff",
+						"navigationBarTextStyle":"black",
 						"enablePullDownRefresh": false
 					}
 
@@ -385,6 +387,7 @@
 			"pages": [{
 					"path": "hospitalOverview/hospitalOverview",
 					"style": {
+						"enablePullDownRefresh":true,
 						"navigationBarBackgroundColor": "#fff",
 						"navigationBarTextStyle": "black",
 						"navigationBarTitleText": "简介"
@@ -630,7 +633,7 @@
 			{
 				"name": "邀请新用户加入诊所",
 				"path": "pediaPages/hospitalOverview/hospitalOverview",
-				"query": "store_no=S20210204015&from=share&invite_user_no=jiaqi&&doctor_no=jiaqi&share_type=bindOrganization"
+				"query": "store_no=S20210227032&from=share&invite_user_no=jiaqi&&doctor_no=jiaqi&share_type=bindOrganization"
 			}
 		]
 	}

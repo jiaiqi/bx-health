@@ -3,7 +3,7 @@
 		<!-- <lx-calendar :show-arrow="false" class="calendar"></lx-calendar> -->
 		<view class="professor-box">
 			<view class="professor-item" @click="toDoctorDetail">
-				<image class="img" :src="getImagePath(professorInfo.profile_url) ? getImagePath(professorInfo.profile_url) : '../static/img/doctor_default.jpg'"
+				<image class="img" :src="getImagePath(professorInfo.profile_url) ? getImagePath(professorInfo.profile_url) : '../static/img/doctor_default.png'"
 				 mode="aspectFit"></image>
 				<view class="doc-info">
 					<view class="top">

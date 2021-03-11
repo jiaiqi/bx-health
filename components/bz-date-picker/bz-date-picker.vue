@@ -321,7 +321,7 @@ export default {
 		change(e) {
 			// console.log(JSON.parse(JSON.stringify(e)))
 			const value = [...e.detail.value];
-			debugger
+			
 			this.valueArr = this.verifyValue(value);
 			const isEq = value.toString() === this.valueArr.toString();
 

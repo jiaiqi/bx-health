@@ -110,7 +110,7 @@ export default {
 						}
 					}
 				} else {
-					debugger;
+					;
 					let viewTemp = {};
 					if (e.service_name === 'srvhealth_plan_schedule_select') {
 						// 方案计划
