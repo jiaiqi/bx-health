@@ -1246,11 +1246,6 @@ export default {
 					uni.setStorageSync('current_user_info', res.data.data[0]);
 					uni.setStorageSync('current_user', res.data.data[0].name);
 					this.userInfo = res.data.data[0];
-					if (!item.profile_url) {
-						if (this.wxUserInfo.headimgurl) {
-							this.updateUserInfo();
-						}
-					}
 					this.$store.commit('SET_USERINFO', res.data.data[0]);
 				}
 				if (this.vuex_userInfo && this.vuex_userInfo.requirement) {

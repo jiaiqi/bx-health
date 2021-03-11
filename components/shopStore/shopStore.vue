@@ -186,6 +186,7 @@
 			};
 		},
 		async created() {
+			this.toAddPage()
 			let self = this;
 			uni.$on('loginStatusChange', result => {
 				self.isLogin = result;
@@ -340,15 +341,17 @@
 				}
 				let res = await this.$http.post(url, req);
 				if (res.data.resultCode === '0011') {
-					this.isLogin = false;
-					const result = await wx.login();
-					if (result.code) {
-						this.code = result.code;
-						await this.wxLogin({
-							code: result.code
-						});
-						this.isLogin = true;
-					}
+					self.$refs.pullScroll.success();
+					this.toAddPage()
+					// this.isLogin = false;
+					// const result = await wx.login();
+					// if (result.code) {
+					// 	this.code = result.code;
+					// 	await this.wxLogin({
+					// 		code: result.code
+					// 	});
+					// 	this.isLogin = true;
+					// }
 				} else {
 					if (self.pageInfo.pageNo === 1) {
 						self.storeList = [];
