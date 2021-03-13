@@ -73,7 +73,7 @@
 								</view>
 								<view class="menu-item" @click="toPages('vaccine-order')">
 									<u-icon name="order" size="60" color="#00aaff"></u-icon>
-									<view class="label">疫苗预约</view>
+									<view class="label">我的预约</view>
 								</view>
 								<view class="menu-item" @click="toPages('food')" v-if="storeInfo.type === '健康服务'">
 									<u-icon name="yinshi" custom-prefix="custom-icon" size="60" color="#00aaff">
