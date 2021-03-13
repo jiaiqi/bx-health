@@ -179,13 +179,12 @@
 			}
 		}
 		.form-item-content_value {
-			line-height: 1.4em;
 			min-height: 1.4em;
 			position: relative;
-			height: 100%;
 			font: inherit;
 			display: flex;
 			flex: 1;
+			align-items: center;
 			.textarea-content {
 				width: 100%;
 				background-color: #f1f1f1;
@@ -231,7 +230,7 @@
 					}
 				}
 				.value {
-					width: 400rpx;
+					max-width: 400rpx;
 					text-overflow: ellipsis;
 					overflow: hidden;
 					white-space: nowrap;

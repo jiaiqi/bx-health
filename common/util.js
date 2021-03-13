@@ -1563,11 +1563,10 @@ export default {
 		Vue.prototype.selectBasicUserInfo = async () => {
 			let userInfo = store.state.user.userInfo
 			if (userInfo && userInfo.no) {
-				// #ifdef MP-WEIXIN
 				if (userInfo.home_store_no && !store.state.app.hasIntoHospital) {
-					// 有add_store 未进入过医院主页
+					// 有home_store 未进入过医院主页
 					// let pageInfo = Vue.prototype.getShareParams()
-					if (['诊所', '医院', '健康服务'].includes(userInfo.add_store_type) && userInfo.home_store_no) {
+					if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
@@ -1578,7 +1577,7 @@ export default {
 								store.commit('SET_INTO_HOSPITAL_STATUS', true)
 							}
 						})
-					} else if (userInfo.add_store_type === '饭馆' && userInfo.home_store_no) {
+					} else if (userInfo.home_store_type === '饭馆' && userInfo.home_store_no) {
 						// 通过分享餐馆主页加入的用户
 						uni.redirectTo({
 							url: '/otherPages/shop/shopHome?type=find&store_no=' + userInfo
@@ -1590,7 +1589,6 @@ export default {
 						})
 					}
 				}
-				// #endif
 				return store.state.user.userInfo
 			}
 			const user_no = uni.getStorageSync('login_user_info').user_no
@@ -1627,10 +1625,10 @@ export default {
 				uni.setStorageSync('current_user', res.data.data[0].name);
 				// #ifdef MP-WEIXIN
 				if (res.data.data[0].home_store_no && !store.state.app.hasIntoHospital) {
-					// 有add_store 此次打开小程序未进入过医院/餐馆主页
+					// 有home_store 此次打开小程序未进入过医院/餐馆主页
 					let pageInfo = Vue.prototype.getShareParams()
 					if (['诊所', '医院', '健康服务'].includes(store.state
-							.user.userInfo.add_store_type)) {
+							.user.userInfo.home_store_type)) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
@@ -1642,7 +1640,7 @@ export default {
 							}
 						})
 					} else if ((['饭馆'].includes(store.state
-								.user.userInfo.add_store_type) && store.state.user
+								.user.userInfo.home_store_type) && store.state.user
 							.userInfo.home_store_no)) {
 						// 通过分享饭馆主页加入的用户
 						uni.redirectTo({

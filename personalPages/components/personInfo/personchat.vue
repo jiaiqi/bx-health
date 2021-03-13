@@ -242,9 +242,10 @@
 						@touchmove.stop.prevent="moveVoice" @touchend.stop="endVoice" @touchcancel.stop="cancelVoice">
 						{{ voiceTitle }}
 					</text>
-					<input :focus="onFocus" :adjust-position="false" :auto-focus="onFocus" v-else v-model="chatText"
+					<textarea :focus="onFocus" :adjust-position="false" :auto-focus="onFocus" v-else v-model="chatText"
 						confirm-hold hold-keyboard class="send-text" type="text" @blur="onBlur" @focus="onInput"
-						@confirm="sendMessage" @keyboardheightchange="keyboardheightchange" confirm-type="send" />
+						maxlength="-1" @confirm="sendMessage" @keyboardheightchange="keyboardheightchange"
+						confirm-type="send" />
 				</view>
 				<view class="person-chat-rig" :class="{ 'is-feed': isFeed }">
 					<view class="person-chat-rig-add-wrap">
@@ -1999,7 +2000,8 @@
 
 					.person-chat-item-right {
 						min-width: 16%;
-						max-width: 80%;
+						// max-width: 80%;
+						max-width: calc(100% - 220rpx);
 						background: #fff;
 						border-radius: 10rpx;
 						padding: 5px 10px;
@@ -2173,7 +2175,7 @@
 
 					.person-chat-item-right {
 						min-width: 15%;
-						max-width: 80%;
+						max-width: calc(100% - 220rpx);
 						word-wrap: break-word;
 						background-color: #12b7f5;
 						color: #fff;
@@ -2355,6 +2357,7 @@
 					}
 
 					.send-text {
+						line-height:66rpx;
 						height: 70rpx;
 						padding: 2px 10rpx;
 						transition: all 0.5s ease-out;
