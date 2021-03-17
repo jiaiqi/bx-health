@@ -27,7 +27,7 @@
 			:searchWords="searchVal"
 			:searchColumn="keyColumn"
 			:tempWord="tempWord"
-			:rownumber="10"
+			:rownumber="20"
 			:showFootBtn="showFootBtn"
 			@click-list-item="clickItem"
 			@list-change="listChange"
@@ -99,6 +99,9 @@ export default {
 	},
 
 	onLoad(option) {
+		if(option.hideFootBtn){
+			this.showFootBtn = false
+		}
 		let query = {};
 		// #ifdef H5
 		this.listTop = 0;
@@ -166,7 +169,7 @@ export default {
 				//TODO handle the exception
 			}
 		}
-
+		
 		if (query.tempWord) {
 			this.tempWord = JSON.parse(query.tempWord);
 		}

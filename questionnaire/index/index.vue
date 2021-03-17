@@ -76,7 +76,7 @@
 					remark: '', //欢迎语
 					end_remark: '' //结束语
 				},
-				userInfo: {}, // 登录用户信息
+				// userInfo: {}, // 登录用户信息
 				wxUserInfo: {}, // 微信用户信息
 				questionData: {},
 				fill_batch_no: '', //活动批次编号
@@ -432,7 +432,13 @@
 										if (item.column === items.item_no) {
 											if (item.item_type_attr && item.item_type_attr
 												.radioType === 'multi') {
-												item.value = items.option_data;
+												item.value = items.option_data?items.option_data.toString():'';
+												item.options = item.options.map(op=>{
+													if(item.value.indexOf(op.value)!==-1 ){
+														op.checked = true
+													}
+													return op
+												})
 											} else {
 												item.value = items.option_data[0];
 											}
@@ -467,6 +473,7 @@
 									.value) : 0;
 							}
 						});
+						debugger
 						this.configCols = configCols;
 						this.getUserInfo();
 					} else if (res.data.resultCode === '0011') {

@@ -444,6 +444,13 @@ export default {
 						page: res.data.page,
 						data: res.data.data
 					}
+				} else if (optionType === "multi") {
+					if(Array.isArray(res.data.data)){
+						return {
+							success: true,
+							data: res.data.data
+						}
+					}
 				} else {
 					// update|add|delete
 					if (
@@ -1833,7 +1840,8 @@ export default {
 			let req = [{
 				"serviceName": "srvhealth_person_info_add",
 				"data": [{
-					"nick_name": wxUserInfo ? wxUserInfo.nickname.replace(/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : "",
+					"nick_name": wxUserInfo ? wxUserInfo.nickname.replace(
+						/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : "",
 					"userno": user_no,
 					"name": wxUserInfo ? wxUserInfo.nickname : "",
 					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
@@ -1853,7 +1861,7 @@ export default {
 				}
 				if (inviterInfo.add_store_no) {
 					req[0].data[0].add_store_no = inviterInfo.add_store_no
-					req[0].data[0].home_store_no = inviterInfo.home_store_no
+					req[0].data[0].home_store_no = inviterInfo.add_store_no
 				}
 			} catch (e) {}
 			if (store.state.user.userInfo && store.state.user.userInfo.no) {

@@ -380,6 +380,10 @@
 									display: false
 								},
 								{
+									column: 'home_store_no',
+									display: false
+								},
+								{
 									column: 'create_time',
 									display: false
 								},

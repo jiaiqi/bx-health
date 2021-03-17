@@ -18,7 +18,7 @@
 			<view class="manager-box">
 				<view class="box-item" v-for="item in list" @click="clickGrid(item.type)">
 					<view class="box-item-content">
-						<text class="cu-tag badge" v-if="item.unread">{{item.unread}}</text>
+						<text class="cu-tag badge" v-if="item.num">{{item.num}}</text>
 						<view class="cu-tag amount text-blue" v-if="storeInfo[item.type]">
 							{{ storeInfo[item.type] | overDisplay }}
 						</view>
@@ -80,7 +80,19 @@
 						icon: 'message',
 						color: 'red',
 						type: 'message',
-						unread: 0
+						num: 0
+					},
+					{
+						label: '疫苗库存',
+						icon: 'list',
+						color: 'green',
+						type: 'vaccine_stocks'
+					},
+					{
+						label: '预约列表',
+						icon: 'list',
+						color: 'blue',
+						type: 'vaccination_appointment'
 					},
 					{
 						label: '店铺设置',
@@ -102,7 +114,7 @@
 			list() {
 				return this.gridList.map(item => {
 					if (item.type === 'message') {
-						item.unread = this.unreadNum
+						item.num = this.unreadNum
 					}
 					return item
 				})
@@ -122,7 +134,14 @@
 						"value": this.storeNo
 					}],
 					colNames: ["kefu_session_user_time", "kefu_session_store_time", "store_person_no",
-						"kefu_session_store_time", "session_no"
+						"kefu_session_store_time", "session_no","kefu_user_unread_msg"
+					],
+					group:[
+						{
+							"colName": "kefu_user_unread_msg",
+									"type": "sum", // 总条数
+									'aliasName':'unread'
+						}
 					],
 					"page": {
 						"pageNo": 1,
@@ -130,55 +149,64 @@
 					}
 				}
 				this.$fetch('select', 'srvhealth_dialogue_session_select', req, 'health').then(res => {
-					if (res.success) {
-						this.sessionList = res.data
-						this.getUserUnread()
+					if (res.success && Array.isArray(res.data) && res.data.length>0) {
+						this.unreadNum = res.data[0].unread
+						// this.sessionList = res.data
+						// this.getUserUnread()
 					}
 				})
 			},
 			getUserUnread() {
 				// 查找用户咨询记录中未读数量
-				let sessionList = this.sessionList
+				this.unreadNum  = this.sessionList.reduce((pre,cur)=>{
+					if(cur.kefu_user_unread_msg){
+						pre+=Number(cur.kefu_user_unread_msg)
+					}
+					return pre
+				},0)
+				
+				// 
+				debugger
 				if (!sessionList || !Array.isArray(sessionList)) {
 					return
 				}
-				let condition = sessionList.map(item => {
-					return {
-						"relation": "AND",
-						"data": [{
-								"colName": "session_no",
-								"ruleType": "eq",
-								"value": item.session_no
-							},
-							{
-								"colName": "create_time",
-								"ruleType": "gt",
-								"value": item.kefu_session_store_time
-							}
-						]
-					}
-				})
-				let req = {
-					"serviceName": "srvhealth_consultation_chat_record_select",
-					"colNames": ["*"],
-					"order": [{
-						"colName": "create_time",
-						"orderType": "desc"
-					}],
-					"relation_condition": {
-						"relation": "OR",
-						"data": condition
-					},
-					"page": {
-						"rownumber": 1,
-						"pageNo": 1
-					}
-				}
-				this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health').then(res => {
-					if (res.success && res.page && res.page.total) {
-						this.unreadNum = res.page.total
-					}
-				})
+				// let condition = sessionList.map(item => {
+				// 	return {
+				// 		"relation": "AND",
+				// 		"data": [{
+				// 				"colName": "session_no",
+				// 				"ruleType": "eq",
+				// 				"value": item.session_no
+				// 			},
+				// 			{
+				// 				"colName": "create_time",
+				// 				"ruleType": "gt",
+				// 				"value": item.kefu_session_store_time
+				// 			}
+				// 		]
+				// 	}
+				// })
+				// let req = {
+				// 	"serviceName": "srvhealth_consultation_chat_record_select",
+				// 	"colNames": ["*"],
+				// 	"order": [{
+				// 		"colName": "create_time",
+				// 		"orderType": "desc"
+				// 	}],
+				// 	"relation_condition": {
+				// 		"relation": "OR",
+				// 		"data": condition
+				// 	},
+				// 	"page": {
+				// 		"rownumber": 1,
+				// 		"pageNo": 1
+				// 	}
+				// }
+				// this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health').then(res => {
+				// 	if (res.success && res.page && res.page.total) {
+				// 		this.unreadNum = res.page.total
+				// 	}
+				// })
 			},
 			makePhoneCall() {
 				uni.makePhoneCall({
@@ -256,13 +284,38 @@
 					case 'user_count':
 						viewTemp = {
 							title: 'person_name',
-							// tip: 'sex',
 							img: 'profile_url',
-							// footer: 'user_role'
 						};
 						url =
-							`/publicPages/list/list?pageType=list&serviceName=srvhealth_store_user_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
+							`/publicPages/list/list?pageType=list&hideFootBtn=true&serviceName=srvhealth_store_user_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
 						break;
+					case 'vaccination_appointment':
+						// 预约列表
+						viewTemp = {
+							title: 'appoint_name',
+							tip: 'svs_name',
+							// img: 'profile_url',
+							price: 'app_count',
+							footer: 'app_desc'
+						};
+						url =
+							`/publicPages/list/list?pageType=list&serviceName=srvhealth_store_vaccination_appointment_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`
+						break;
+
+					case 'vaccine_stocks':
+						// 疫苗库存
+						viewTemp = {
+							title: 'vaccine_drug_name',
+							tip: 'usage',
+							// img: 'profile_url',
+							price: 'stock_count',
+							footer: 'remark'
+						};
+						url =
+							`/publicPages/list/list?pageType=list&serviceName=srvhealth_store_vaccine_stocks_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`
+						break;
+
+
 				}
 
 				if (url) {
@@ -345,7 +398,22 @@
 				}
 			}
 		},
+		onPullDownRefresh() {
+			if (this.storeNo) {
+				this.getStoreInfo();
+				this.getStoreSession()
+			}
+			setTimeout(() => {
+				uni.stopPullDownRefresh()
+			}, 1000)
+		},
 		onLoad(option) {
+			uni.$on('updateKefuSessionLastLookTime', () => {
+				if (this.storeNo) {
+					this.getStoreInfo();
+					this.getStoreSession()
+				}
+			})
 			if (option.store_no) {
 				this.storeNo = option.store_no;
 				this.getStoreInfo();

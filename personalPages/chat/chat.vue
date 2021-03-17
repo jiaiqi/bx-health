@@ -1,8 +1,5 @@
 <template>
 	<view>
-		<!-- 		<cu-custom :isBack="true">
-			<block slot="content">{{ pageTitle ||'' }}</block>
-		</cu-custom> -->
 		<view class="util-bar" v-if="(groupInfo && groupInfo.gc_no)||sessionType==='店铺机构全员'">
 			<view class="util-item " @click="toPages('group-member')">
 				<view class="icon"><text class="cuIcon-friend "></text></view>
@@ -15,12 +12,8 @@
 			</view>
 			<view class="util-item" @click="toPages('group-detail')">
 				<view class="icon"><text class="cuIcon-settings"></text></view>
-				<!-- <text class="label">更多</text> -->
 			</view>
 		</view>
-		<!-- 	<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
-			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
-			:storeNo="storeNo" :group-no="groupNo" v-if="session_no"></chat> -->
 		<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
 			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
 			:storeNo="storeNo" :topHeight="(groupInfo&&groupNo)||sessionType==='店铺机构全员'?40:0" :group-no="groupNo"
@@ -430,11 +423,21 @@
 						"ruleType": "eq",
 						"value": this.session_no
 					}],
-					"data": [{
+					"data": []
+				}]
+				if (this.identity === '客服') {
+					// 客服最后查看会话时间
+					req[0].data[0] = {
+						kefu_session_store_time: e && e.create_time ? e.create_time : this.formateDate('',
+							'DateTime')
+					}
+				} else {
+					// 客户最后查看会话时间
+					req[0].data[0] = {
 						kefu_session_user_time: e && e.create_time ? e.create_time : this.formateDate('',
 							'DateTime')
-					}]
-				}]
+					}
+				}
 				this.$fetch('operate', 'srvhealth_dialogue_session_update', req, 'health').then(res => {
 					if (Array.isArray(res.data) && res.data.length > 0) {
 						uni.$emit('updateKefuSessionLastLookTime', res.data[0])
@@ -494,7 +497,7 @@
 				this.updateKefuSessionLastLookTime(this.lastMessage)
 			} else if (this.sessionType === '店铺机构全员') {
 				this.updateStoreSessionLastLookTime(this.lastMessage)
-			} else if(this.groupInfo && this.pg_no){
+			} else if (this.groupInfo && this.pg_no) {
 				// 更新群组圈子最后查看时间
 				this.updateLastLookTime(this.lastMessage);
 			}

@@ -510,7 +510,7 @@ export default {
 	.grid-layout {
 		padding: 20rpx 10rpx;
 		display: grid;
-		grid-template-columns: repeat(3, calc(33.33% - 7rpx));
+		grid-template-columns: repeat(4, calc(25% - 10rpx));
 		grid-row-gap: 10rpx;
 		grid-column-gap: 10rpx;
 	}

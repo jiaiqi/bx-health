@@ -341,17 +341,10 @@
 				}
 				let res = await this.$http.post(url, req);
 				if (res.data.resultCode === '0011') {
-					self.$refs.pullScroll.success();
+					this.$nextTick(() => {
+						this.$refs.pullScroll.success();
+					});
 					this.toAddPage()
-					// this.isLogin = false;
-					// const result = await wx.login();
-					// if (result.code) {
-					// 	this.code = result.code;
-					// 	await this.wxLogin({
-					// 		code: result.code
-					// 	});
-					// 	this.isLogin = true;
-					// }
 				} else {
 					if (self.pageInfo.pageNo === 1) {
 						self.storeList = [];
@@ -361,9 +354,13 @@
 					let page = self.pageInfo;
 					if (page.rownumber * page.pageNo >= page.total) {
 						// finish(boolean:是否显示finishText,默认显示)
-						self.$refs.pullScroll.finish();
+						this.$nextTick(() => {
+							self.$refs.pullScroll.finish();
+						});
 					} else {
-						self.$refs.pullScroll.success();
+						this.$nextTick(() => {
+							self.$refs.pullScroll.success();
+						});
 					}
 					if (res.data.state === 'SUCCESS') {
 						console.log('商户列表-----', res.data.data);
@@ -415,9 +412,13 @@
 						let page = self.pageInfo;
 						if (page.rownumber * page.pageNo >= page.total) {
 							// finish(boolean:是否显示finishText,默认显示)
-							self.$refs.pullScroll.finish();
+							this.$nextTick(() => {
+								self.$refs.pullScroll.finish();
+							});
 						} else {
-							self.$refs.pullScroll.success();
+							this.$nextTick(() => {
+								self.$refs.pullScroll.success();
+							});
 						}
 						console.log('我的商户列表-----', res.data);
 						res.data.forEach(item => {
@@ -473,9 +474,13 @@
 				let page = self.pageInfo;
 				if (page.rownumber * page.pageNo >= page.total) {
 					// finish(boolean:是否显示finishText,默认显示)
-					self.$refs.pullScroll.finish();
+					this.$nextTick(() => {
+						self.$refs.pullScroll.finish();
+					});
 				} else {
-					self.$refs.pullScroll.success();
+					this.$nextTick(() => {
+						self.$refs.pullScroll.success();
+					});
 				}
 				if (res.data.state === 'SUCCESS') {
 					console.log('我的商户列表-----', res.data.data);

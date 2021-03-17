@@ -92,8 +92,9 @@
 								<view class="name">{{ item.location_name }}</view>
 								<view class="address">{{ item.location_address }}</view>
 							</view>
-							<map style="width: 500rpx; height: 300rpx;" :enable-scroll="false" :enable-rotate="false"
-								:latitude="item.latitude" :longitude="item.longitude" :markers="getCovers(item)"></map>
+							<map @tap="openMap(item)" @markertap="openMap(item)" style="width: 500rpx; height: 300rpx;"
+								:enable-zoom="false" :enable-scroll="false" :latitude="item.latitude"
+								:longitude="item.longitude" :markers="getCovers(item)"></map>
 						</view>
 						<view @tap="openVideo(item)" v-else-if="item.video && item.msg_content_type === '视频'"
 							class="video_right_play">
@@ -141,7 +142,7 @@
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
 							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
-							<text>{{ item.msg_content }}</text>
+							{{ item.msg_content }}
 						</view>
 						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)"
 							class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
@@ -186,8 +187,9 @@
 								<view class="name">{{ item.location_name }}</view>
 								<view class="address">{{ item.location_address }}</view>
 							</view>
-							<map style="width: 500rpx; height: 300rpx;" :enable-scroll="false" :enable-rotate="false"
-								:latitude="item.latitude" :longitude="item.longitude" :markers="getCovers(item)"></map>
+							<map style="width: 500rpx; height: 300rpx;" :enable-zoom="false" :enable-scroll="false"
+								:latitude="item.latitude" :longitude="item.longitude" @tap="openMap(item)"
+								@markertap="openMap(item)" :markers="getCovers(item)"></map>
 						</view>
 						<view @click="downloadfile(item)" v-else-if="item.msg_content_type === '文件'"
 							class="documents-wrap">
@@ -459,6 +461,9 @@
 			},
 			getCovers(item) {
 				return [{
+					id: item.id,
+					width: '25px',
+					height: '25px',
 					latitude: item.latitude,
 					longitude: item.longitude,
 					iconPath: '/static/icon_position.png'
@@ -1071,6 +1076,13 @@
 			},
 			sendMessage() {
 				// 点击发送按钮 组装消息并发送
+				if (!this.chatText) {
+					uni.showToast({
+						title: '消息不能为空',
+						icon: 'none'
+					})
+					return
+				}
 				this.sendMessageInfo();
 				this.chatText = '';
 				this.isSendLink = false;
@@ -1120,9 +1132,18 @@
 			/*点击发送后添加图片或语音数据**/
 			async sendMessageLanguageInfo(type, value, info) {
 				console.log('type----sendMessageLanguageInfo', type);
-				let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
+				let serviceName = 'srvhealth_consultation_chat_record_add'
+				if (this.sessionType === '机构用户客服') {
+					debugger
+					if (this.identity === '客户') {
+						serviceName = 'srvhealth_consultation_chat_record_kefu_user_add'
+					} else {
+						serviceName = 'srvhealth_consultation_chat_record_kefu_kefu_add'
+					}
+				}
+				let url = this.getServiceUrl('health', serviceName, 'operate');
 				let req = [{
-					serviceName: 'srvhealth_consultation_chat_record_add',
+					serviceName: serviceName,
 					colNames: ['*'],
 					data: []
 				}];
@@ -1307,9 +1328,17 @@
 			},
 			async sendMessageInfo(obj) {
 				// 发送消息
-				let url = this.getServiceUrl('health', 'srvhealth_consultation_chat_record_add', 'operate');
+				let serviceName = 'srvhealth_consultation_chat_record_add'
+				if (this.sessionType === '机构用户客服') {
+					if (this.identity === '客户') {
+						serviceName = 'srvhealth_consultation_chat_record_kefu_user_add'
+					} else {
+						serviceName = 'srvhealth_consultation_chat_record_kefu_kefu_add'
+					}
+				}
+				let url = this.getServiceUrl('health', serviceName, 'operate');
 				let req = [{
-					serviceName: 'srvhealth_consultation_chat_record_add',
+					serviceName: serviceName,
 					colNames: ['*'],
 					data: []
 				}];
@@ -1340,9 +1369,6 @@
 						msg_content_type: !this.isSendLink ? '文本' : '链接',
 						session_no: this.sessionNo
 					};
-					// if(this.sessionType==='机构用户客服'){
-					// 	// storeNo
-					// }
 					if (this.rowInfo && this.rowInfo.row_no) {
 						let targetUserinfo = {}
 						if (this.identity === '患者') {
@@ -1411,7 +1437,7 @@
 				}
 				this.recordList.push(req[0].data[0])
 				this.toBottom()
-				this.$fetch('operate', 'srvhealth_consultation_chat_record_add', req, 'health').then(res => {
+				this.$fetch('operate', serviceName, req, 'health').then(res => {
 					this.isAll = false;
 					this.initMessageList('refresh');
 				})
@@ -1672,14 +1698,6 @@
 						}
 					}, []);
 					this.recordList = this._SortJson(resData);
-					// if (this.customer_no) {
-					// 	let recordList = this.recordList.filter((item) => {
-					// 		if (item.sender_person_no === this.customer_no && item.msg_state === '未读') {
-					// 			return true
-					// 		}
-					// 	})
-					// 	this.updateMessageInfo(recordList)
-					// }
 					if (this.identity) {
 						let recordList = this.recordList.filter((item) => {
 							if (item.identity !== this.identity && item.msg_state === '未读') {
@@ -1724,11 +1742,6 @@
 					this.$http.post(url, req).then(res => {
 						if (res.data.state === 'SUCCESS') {
 							uni.$emit('updateUnread')
-							// this.recordList.map((item) => {
-							// if (item.sender_person_no === this.customer_no && item.msg_state === '未读') {
-							// 	this.$set(item, 'msg_state', '已读')
-							// }
-							// })
 						}
 					})
 				}
@@ -2122,6 +2135,7 @@
 					margin: 0 10rpx 20rpx;
 					justify-content: flex-end;
 					min-width: 40%;
+					max-width: 100%;
 					flex-wrap: wrap;
 
 					.sender-info {
@@ -2175,7 +2189,7 @@
 
 					.person-chat-item-right {
 						min-width: 15%;
-						max-width: calc(100% - 220rpx);
+						max-width: calc(100vw - 240rpx);
 						word-wrap: break-word;
 						background-color: #12b7f5;
 						color: #fff;
@@ -2357,7 +2371,7 @@
 					}
 
 					.send-text {
-						line-height:66rpx;
+						line-height: 66rpx;
 						height: 70rpx;
 						padding: 2px 10rpx;
 						transition: all 0.5s ease-out;

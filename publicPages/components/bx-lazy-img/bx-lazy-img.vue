@@ -24,10 +24,8 @@ export default {
 			imageElements: []
 		};
 	},
-	created() {},
 	mounted() {
 		let self = this;
-		// self.imageLazy()
 	},
 	methods: {
 		throttle(fn, delay = 15, mustRun = 30) {

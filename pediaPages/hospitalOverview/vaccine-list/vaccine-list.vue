@@ -21,10 +21,13 @@
 					</view>
 
 					<view class="button-box">
-						<view class="cu-tag bg-orange round" v-if="item.persons_count===1">
-							{{item.stock_count?'随时到店':'待到货'}}
+						<view class="cu-tag bg-cyan round" v-if="item.persons_count===1&&item.stock_count">
+							随时到店
 						</view>
-						<view  class="cu-tag bg-cyan round " @click="showModal(item)"
+						<view class="cu-tag bg-orange round" v-if="item.persons_count===1&&!item.stock_count">
+							待到货
+						</view>
+						<view  class="cu-tag bg-olive round " @click="showModal(item)"
 							v-if="item.persons_count!==1">预约<text
 								v-if="item.to_appointment_count">({{item.to_appointment_count}})</text> </view>
 					</view>

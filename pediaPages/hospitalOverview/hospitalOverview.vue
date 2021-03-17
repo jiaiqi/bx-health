@@ -126,7 +126,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&doctorList.length>0">
+				<!-- <view class="introduction" v-if="storeInfo.type !== '健康服务'&&doctorList.length>0">
 					<view class="title">
 						<view class="">专家团队</view>
 					</view>
@@ -149,7 +149,7 @@
 							</view>
 						</view>
 					</view>
-				</view>
+				</view> -->
 				<view class="introduction news" v-if="storeInfo.type !== '健康服务'&&newsList.length>0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
@@ -189,6 +189,7 @@
 	import {
 		mapState
 	} from 'vuex';
+	import mixin from './mixin.js'
 	import {
 		getKefuSession,
 		getGroupListUser,
@@ -203,6 +204,7 @@
 			vaccineList,
 			businessHandle
 		},
+		mixins: [mixin],
 		data() {
 			return {
 				isBind: false, //当前用户是否绑定此诊所
@@ -212,15 +214,12 @@
 				storeNo: '',
 				fullIntro: false,
 				storeInfo: {},
-				storeUserList: [],
+				// storeUserList: [],
 				deptList: [], //科室
-				groupList: [], // 关联圈子
 				noticeList: [], // 通知公告
 				newsList: [], // 新闻
 				menuList: [],
 				queryOption: {},
-				kefuNum: 0, // 客服咨询会话未读数
-				storeNum: 0, // 店铺全员会话未读数
 				kefuSessionInfo: {},
 				vaccineList: [], // 可预约疫苗列表
 			};
@@ -320,19 +319,20 @@
 					return pre
 				}, [])
 			},
-			customerList() {
-				// 客服列表
-				return this.storeUserList.filter(item => item.user_role.indexOf('客服') !== -1)
-			},
-			staffList() {
-				// 工作人员
-				return this.storeUserList.filter(item => item.user_role.indexOf('工作人员') !== -1 || item.user_role ===
-					'药房人员')
-			},
-			doctorList() {
-				// 大夫列表
-				return this.storeUserList.filter(item => item.user_role === '大夫')
-			},
+			// customerList() {
+			// 	// 客服列表
+			// 	return this.storeUserList.filter(item => item && item.user_role && item.user_role.indexOf('客服') !== -1)
+			// },
+			// staffList() {
+			// 	// 工作人员
+			// 	return this.storeUserList.filter(item => item && item.user_role && (item.user_role.indexOf('工作人员') !== -
+			// 		1 || item.user_role ===
+			// 		'药房人员'))
+			// },
+			// doctorList() {
+			// 	// 大夫列表
+			// 	return this.storeUserList.filter(item => item.user_role === '大夫')
+			// },
 			onlyCurrentPage() {
 				let pageStack = getCurrentPages();
 				if (Array.isArray(pageStack) && pageStack.length > 1) {
@@ -532,106 +532,121 @@
 					this.groupList = res
 				}
 			},
-			async selectUserList() {
-				let userList = await getUserList(this.storeNo)
-				if (userList) {
-					let isBind = userList.find(item => item.person_no === this.userInfo.no)
-					if (isBind && isBind.person_no) {
-						this.isBind = true
-						this.bindUserInfo = isBind
-					}
-					this.storeUserList = userList
-					this.storeNum = 0
-					this.kefuNum = 0
+			// async selectUserList() {
+			// 	let userList = await getUserList(this.storeNo)
+			// 	debugger
+			// 	if (userList) {
+			// 		let isBind = userList.find(item => item.person_no === this.userInfo.no)
+			// 		if (isBind && isBind.person_no) {
+			// 			this.isBind = true
+			// 			this.bindUserInfo = isBind
+			// 		}
+			// 		this.storeUserList = userList
+			// 		this.storeNum = 0
+			// 		this.kefuNum = 0
+			// 	}
+			// },
+			async selectBindUser() {
+				let condition = [{
+					colName: 'person_no',
+					ruleType: 'eq',
+					value: this.userInfo.no
+				}]
+				let userList = await getUserList(this.storeNo, condition)
+				let isBind = userList.find(item => item.person_no === this.userInfo.no)
+				if (isBind && isBind.person_no) {
+					this.isBind = true
+					this.bindUserInfo = isBind
 				}
+				this.storeNum = 0
+				this.kefuNum = 0
 			},
-			selectUnreadAmount() {
-				// 查找未读消息数量
-				let req = {
-					"serviceName": "srvhealth_consultation_chat_record_select",
-					"colNames": ["*"],
-					"relation_condition": {
-						"relation": "OR",
-						"data": [{
-								"relation": "AND",
-								"data": [{
-										"colName": "session_no",
-										"ruleType": "eq",
-										"value": this.storeInfo.member_session_no //店铺成员群
-									},
-									{
-										"colName": "create_time",
-										"ruleType": "gt",
-										"value": this.bindUserInfo.store_session_sign_in_time
-									}
-								]
-							},
-							{
-								"relation": "AND",
-								"data": [{
-										"colName": "session_no",
-										"ruleType": "eq",
-										"value": this.kefuSessionInfo.session_no //机构用户客服
-									},
-									{
-										"colName": "create_time",
-										"ruleType": "gt",
-										"value": this.kefuSessionInfo.kefu_session_user_time
-									}
-								]
-							}
-						]
-					},
-					"order": [{
-						"colName": "create_time",
-						"orderType": "desc"
-					}],
-					"page": {
-						"rownumber": 999,
-						"pageNo": 1
-					}
-				}
-				this.groupList.forEach(item => {
-					let result = {
-						"relation": "AND",
-						"data": [{
-							"colName": "rcv_group_no",
-							"ruleType": "eq",
-							"value": item.gc_no
-						}]
-					}
-					if (item.latest_sign_in_time) {
-						result.data.push({
-							"colName": "create_time",
-							"ruleType": "gt",
-							"value": item.latest_sign_in_time
-						})
-					}
-					req.relation_condition.data.push(result)
-				})
-				// req.relation_condition.data.push()
-				this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health').then(res => {
-					if (res.success) {
-						res.data.map(item => {
-							if (item.rcv_group_no) {
-								// 群聊
-								let index = this.groupList.findIndex(gc => gc.gc_no === item.rcv_group_no)
-								if (index !== -1) {
-									let unreadNum = this.groupList[index].unreadNum ? this.groupList[index]
-										.unreadNum : 0
-									this.$set(this.groupList[index], 'unreadNum', unreadNum + 1)
-								}
-							} else if (item.session_no === this.bindUserInfo.kefu_session_no) {
-								// 机构全员
-								this.kefuNum += 1
-							} else if (item.session_no === this.kefuSessionInfo.session_no) {
-								// 机构客服
-								this.storeNum += 1
-							}
-						})
-					}
-				})
-			},
+			// selectUnreadAmount() {
+			// 	// 查找未读消息数量
+			// 	let req = {
+			// 		"serviceName": "srvhealth_consultation_chat_record_select",
+			// 		"colNames": ["*"],
+			// 		"relation_condition": {
+			// 			"relation": "OR",
+			// 			"data": [{
+			// 					"relation": "AND",
+			// 					"data": [{
+			// 							"colName": "session_no",
+			// 							"ruleType": "eq",
+			// 							"value": this.storeInfo.member_session_no //店铺成员群
+			// 						},
+			// 						{
+			// 							"colName": "create_time",
+			// 							"ruleType": "gt",
+			// 							"value": this.bindUserInfo.store_session_sign_in_time
+			// 						}
+			// 					]
+			// 				},
+			// 				{
+			// 					"relation": "AND",
+			// 					"data": [{
+			// 							"colName": "session_no",
+			// 							"ruleType": "eq",
+			// 							"value": this.kefuSessionInfo.session_no //机构用户客服
+			// 						},
+			// 						{
+			// 							"colName": "create_time",
+			// 							"ruleType": "gt",
+			// 							"value": this.kefuSessionInfo.kefu_session_user_time
+			// 						}
+			// 					]
+			// 				}
+			// 			]
+			// 		},
+			// 		"order": [{
+			// 			"colName": "create_time",
+			// 			"orderType": "desc"
+			// 		}],
+			// 		"page": {
+			// 			"rownumber": 999,
+			// 			"pageNo": 1
+			// 		}
+			// 	}
+			// 	this.groupList.forEach(item => {
+			// 		let result = {
+			// 			"relation": "AND",
+			// 			"data": [{
+			// 				"colName": "rcv_group_no",
+			// 				"ruleType": "eq",
+			// 				"value": item.gc_no
+			// 			}]
+			// 		}
+			// 		if (item.latest_sign_in_time) {
+			// 			result.data.push({
+			// 				"colName": "create_time",
+			// 				"ruleType": "gt",
+			// 				"value": item.latest_sign_in_time
+			// 			})
+			// 		}
+			// 		req.relation_condition.data.push(result)
+			// 	})
+			// 	this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health').then(res => {
+			// 		if (res.success) {
+			// 			res.data.map(item => {
+			// 				if (item.rcv_group_no) {
+			// 					// 群聊
+			// 					let index = this.groupList.findIndex(gc => gc.gc_no === item.rcv_group_no)
+			// 					if (index !== -1) {
+			// 						let unreadNum = this.groupList[index].unreadNum ? this.groupList[index]
+			// 							.unreadNum : 0
+			// 						this.$set(this.groupList[index], 'unreadNum', unreadNum + 1)
+			// 					}
+			// 				} else if (item.session_no === this.bindUserInfo.kefu_session_no) {
+			// 					// 机构全员
+			// 					this.kefuNum += 1
+			// 				} else if (item.session_no === this.kefuSessionInfo.session_no) {
+			// 					// 机构客服
+			// 					this.storeNum += 1
+			// 				}
+			// 			})
+			// 		}
+			// 	})
+			// },
 			selectDepartList() {
 				let req = {
 					condition: [{
@@ -881,17 +896,20 @@
 						}
 					}
 				});
-			}
+			},
+			async initPage() {
+				await this.toAddPage()
+				if (this.storeNo) {
+					await this.selectBindUser()
+					await this.selectStoreInfo();
+					await this.seletGroupList();
+					await this.getKefuSessionInfo()
+					this.selectUnreadAmount()
+				}
+			},
 		},
-		async onPullDownRefresh() {
-			await this.toAddPage()
-			if (this.storeNo) {
-				await this.selectUserList()
-				await this.selectStoreInfo();
-				await this.seletGroupList();
-				await this.getKefuSessionInfo()
-				this.selectUnreadAmount()
-			}
+		onPullDownRefresh() {
+			this.initPage()
 			setTimeout(() => {
 				uni.stopPullDownRefresh()
 			}, 1000)
@@ -923,10 +941,15 @@
 			});
 			// #endif
 			uni.$on('updateStoreSessionLastLookTime', (e) => {
-				this.selectUserList()
+				this.selectBindUser()
+				this.selectUnreadAmount()
 			})
 			uni.$on('updateKefuSessionLastLookTime', e => {
 				this.kefuSessionInfo = e
+				this.selectUnreadAmount()
+			})
+			uni.$on('updateUnread', e => {
+				this.selectUnreadAmount()
 			})
 			uni.$on('updateStoreInfo', (e) => {
 				if (e && e.store_no === this.storeNo) {
@@ -939,13 +962,9 @@
 				return
 			}
 			let res = await this.toAddPage()
-
-			// this.toAddPage().then(res => {
-
 			if (res === 'fail') {
 				return;
 			}
-			debugger
 			if (option.q) {
 				let text = decodeURIComponent(option.q);
 				if (text.indexOf('https://wx2.100xsys.cn/mpwx/shareClinic/') !== -1) {
@@ -979,13 +998,8 @@
 			}
 			if (option.store_no && this.userInfo.no) {
 				this.storeNo = option.store_no;
-				await this.selectUserList()
-				await this.selectStoreInfo();
-				await this.getKefuSessionInfo()
-				await this.seletGroupList();
-				this.selectUnreadAmount()
+				this.initPage()
 			}
-			// });
 		}
 	};
 </script>

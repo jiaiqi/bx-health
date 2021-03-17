@@ -114,8 +114,9 @@ const getGroupListUser = async (storeNo, personNo) => {
 /**
  * @description 查找店铺用户列表
  * @param {string} storeNo 店铺编码 
+ * @param {array} condition 其他条件  
  */
-const getUserList = async (storeNo) => {
+const getUserList = async (storeNo,condition) => {
 	let req = {
 		page: {
 			rownumber: 99999
@@ -125,6 +126,9 @@ const getUserList = async (storeNo) => {
 			"ruleType": "eq",
 			"value": storeNo
 		}],
+	}
+	if(condition){
+		req.condition = [...req.condition,...condition]
 	}
 	let res = await $fetch('select', 'srvhealth_store_user_select', req, 'health')
 	if (res.success && res.data.length > 0) {

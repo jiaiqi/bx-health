@@ -117,7 +117,7 @@
 				loadmoreMemeber: 'more', //more,loading,noMore
 				memberPage: {
 					total: 0,
-					rownumber: 10,
+					rownumber: 30,
 					pageNo: 0
 				},
 				showQrCode: false,
@@ -268,9 +268,9 @@
 						this.loadmoreMemeber = 'more';
 					}
 					if (res.data.data.length > 0) {
-						this.storeInfo = res.data.data[0]
+						// this.storeInfo = res.data.data[0]
 						uni.setNavigationBarTitle({
-							title: `${this.storeInfo.name}成员`
+							title: `群成员`
 						})
 					}
 					return res.data.data;
