@@ -6,14 +6,14 @@
 
 				<view class="cu-avatar lg" v-if="!item.store_user_image">
 					<text class="cuIcon-profilefill"></text>
-					<view class="cu-tag badge" v-if="item.kefu_user_unread_msg">
-						{{item.kefu_user_unread_msg}}
+					<view class="cu-tag badge" v-if="item.kefu_kefu_unread_msg">
+						{{item.kefu_kefu_unread_msg}}
 					</view>
 				</view>
 				<view class="cu-avatar  lg" v-if="item.store_user_image"
 					:style="[{backgroundImage:'url('+getImagePath(item.store_user_image)+')'}]">
-					<view class="cu-tag badge" v-if="item.kefu_user_unread_msg">
-						{{item.kefu_user_unread_msg}}
+					<view class="cu-tag badge" v-if="item.kefu_kefu_unread_msg">
+						{{item.kefu_kefu_unread_msg}}
 					</view>
 				</view>
 				<view class="content">
@@ -33,7 +33,7 @@
 				storeNo: '',
 				sessionList: [],
 				page: {
-					pageNo: 0,
+					pageNo: 1,
 					rownumber: 30,
 					total: 0
 				},
@@ -60,12 +60,13 @@
 						"value": this.storeNo
 					}],
 					"page": {
-						"pageNo": this.page.pageNo + 1,
+						"pageNo": this.page.pageNo,
 						"rownumber": this.page.rownumber
 					}
 				}
 				this.$fetch('select', 'srvhealth_dialogue_session_select', req, 'health').then(res => {
 					if (res.success) {
+						debugger
 						if (isMore) {
 							this.sessionList = [...this.sessionList, ...res.data];
 						} else {

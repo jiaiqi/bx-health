@@ -1,13 +1,14 @@
 <template>
 	<view class="chat-group">
 		<view class="tab-view">
-			<view class="tab-item" :class="{ 'active-tab': index == TabCur }" v-for="(item, index) in tabList" :key="index" @tap="tabSelect"
-			 :data-id="index">{{ item.label }}</view>
+			<view class="tab-item" :class="{ 'active-tab': index == TabCur }" v-for="(item, index) in tabList"
+				:key="index" @tap="tabSelect" :data-id="index">{{ item.label }}</view>
 		</view>
 		<view class="group-list" v-if="TabCur === 0">
 			<view class="group-item" v-for="item in groupList" :key="item.gc_no" @click="toChat(item)">
 				<view class="icon" @click.stop="toChat(item)">
-					<image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit" class="image"></image>
+					<image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit"
+						class="image"></image>
 				</view>
 				<view class="content">
 					<view class="top">
@@ -26,14 +27,16 @@
 		<view class="cu-bar search bg-white" v-if="TabCur === 1">
 			<view class="search-form round">
 				<text class="cuIcon-search"></text>
-				<input :adjust-position="false" type="text" placeholder="搜索圈子" confirm-type="search" v-model="keywords" @blur="InputBlur" />
+				<input :adjust-position="false" type="text" placeholder="搜索圈子" confirm-type="search" v-model="keywords"
+					@blur="InputBlur" />
 			</view>
 			<view class="action"><button class="cu-btn bg-green shadow-blur round">搜索</button></view>
 		</view>
 		<view class="group-list grid" v-if="TabCur === 1">
 			<view class="group-item" v-for="item in otherGroup" :key="item.gc_no" @click="toPages('group-info', item)">
 				<view class="icon">
-					<image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit" class="image"></image>
+					<image :src="item.icon ? getImagePath(item.icon) : '../static/chat-active.png'" mode="aspectFit"
+						class="image"></image>
 				</view>
 				<view class="content">
 					<view class="top">
@@ -280,6 +283,10 @@
 							colName: 'gc_no',
 							ruleType: 'in',
 							value: no
+						}, {
+							"colName": "circle_visible",
+							"ruleType": "ne",
+							"value": '不开放',
 						}]
 					};
 					if (cond) {
@@ -322,7 +329,8 @@
 						this.groupList = this.groupList.map(item => {
 							res.data.data.map(info => {
 								if (info.rcv_group_no === item.gc_no) {
-									if (!item.lastChatTime || item.lastChatTime < info.create_time) {
+									if (!item.lastChatTime || item.lastChatTime < info
+										.create_time) {
 										// 最新一条消息
 										item.lastChatState = info.msg_state;
 										item.lastChatTime = info.create_time;

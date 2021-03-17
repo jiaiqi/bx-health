@@ -16,10 +16,6 @@
 						<button class="cuIcon-home cu-btn  bg-cyan" v-if="userInfo&&userInfo.home_store_no!==storeNo">
 						</button>
 					</view>
-					<!-- 		<view class="home-btn like-btn" @click="toPages('subscsribe')" v-if="!subscsribeStatus">
-						<button class="cuIcon-notice cu-btn bg-orange">
-						</button>
-					</view> -->
 					<view class="left" @click="toPages('instroduce')">
 						<view class="top">
 							<view class="name">{{ storeInfo.name }}</view>
@@ -253,7 +249,7 @@
 					list.unshift({
 						icon: 'cuIcon-comment',
 						iconType: 'font',
-						label: '服务站群',
+						label: this.storeInfo.member_session_name ? this.storeInfo.member_session_name : '公开咨询',
 						eventType: 'toPage',
 						type: 'groupChat',
 						num: this.storeNum,
@@ -532,20 +528,6 @@
 					this.groupList = res
 				}
 			},
-			// async selectUserList() {
-			// 	let userList = await getUserList(this.storeNo)
-			// 	debugger
-			// 	if (userList) {
-			// 		let isBind = userList.find(item => item.person_no === this.userInfo.no)
-			// 		if (isBind && isBind.person_no) {
-			// 			this.isBind = true
-			// 			this.bindUserInfo = isBind
-			// 		}
-			// 		this.storeUserList = userList
-			// 		this.storeNum = 0
-			// 		this.kefuNum = 0
-			// 	}
-			// },
 			async selectBindUser() {
 				let condition = [{
 					colName: 'person_no',
@@ -553,100 +535,16 @@
 					value: this.userInfo.no
 				}]
 				let userList = await getUserList(this.storeNo, condition)
-				let isBind = userList.find(item => item.person_no === this.userInfo.no)
-				if (isBind && isBind.person_no) {
-					this.isBind = true
-					this.bindUserInfo = isBind
+				if (Array.isArray(userList)) {
+					let isBind = userList.find(item => item.person_no === this.userInfo.no)
+					if (isBind && isBind.person_no) {
+						this.isBind = true
+						this.bindUserInfo = isBind
+					}
+					this.storeNum = 0
+					this.kefuNum = 0
 				}
-				this.storeNum = 0
-				this.kefuNum = 0
 			},
-			// selectUnreadAmount() {
-			// 	// 查找未读消息数量
-			// 	let req = {
-			// 		"serviceName": "srvhealth_consultation_chat_record_select",
-			// 		"colNames": ["*"],
-			// 		"relation_condition": {
-			// 			"relation": "OR",
-			// 			"data": [{
-			// 					"relation": "AND",
-			// 					"data": [{
-			// 							"colName": "session_no",
-			// 							"ruleType": "eq",
-			// 							"value": this.storeInfo.member_session_no //店铺成员群
-			// 						},
-			// 						{
-			// 							"colName": "create_time",
-			// 							"ruleType": "gt",
-			// 							"value": this.bindUserInfo.store_session_sign_in_time
-			// 						}
-			// 					]
-			// 				},
-			// 				{
-			// 					"relation": "AND",
-			// 					"data": [{
-			// 							"colName": "session_no",
-			// 							"ruleType": "eq",
-			// 							"value": this.kefuSessionInfo.session_no //机构用户客服
-			// 						},
-			// 						{
-			// 							"colName": "create_time",
-			// 							"ruleType": "gt",
-			// 							"value": this.kefuSessionInfo.kefu_session_user_time
-			// 						}
-			// 					]
-			// 				}
-			// 			]
-			// 		},
-			// 		"order": [{
-			// 			"colName": "create_time",
-			// 			"orderType": "desc"
-			// 		}],
-			// 		"page": {
-			// 			"rownumber": 999,
-			// 			"pageNo": 1
-			// 		}
-			// 	}
-			// 	this.groupList.forEach(item => {
-			// 		let result = {
-			// 			"relation": "AND",
-			// 			"data": [{
-			// 				"colName": "rcv_group_no",
-			// 				"ruleType": "eq",
-			// 				"value": item.gc_no
-			// 			}]
-			// 		}
-			// 		if (item.latest_sign_in_time) {
-			// 			result.data.push({
-			// 				"colName": "create_time",
-			// 				"ruleType": "gt",
-			// 				"value": item.latest_sign_in_time
-			// 			})
-			// 		}
-			// 		req.relation_condition.data.push(result)
-			// 	})
-			// 	this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health').then(res => {
-			// 		if (res.success) {
-			// 			res.data.map(item => {
-			// 				if (item.rcv_group_no) {
-			// 					// 群聊
-			// 					let index = this.groupList.findIndex(gc => gc.gc_no === item.rcv_group_no)
-			// 					if (index !== -1) {
-			// 						let unreadNum = this.groupList[index].unreadNum ? this.groupList[index]
-			// 							.unreadNum : 0
-			// 						this.$set(this.groupList[index], 'unreadNum', unreadNum + 1)
-			// 					}
-			// 				} else if (item.session_no === this.bindUserInfo.kefu_session_no) {
-			// 					// 机构全员
-			// 					this.kefuNum += 1
-			// 				} else if (item.session_no === this.kefuSessionInfo.session_no) {
-			// 					// 机构客服
-			// 					this.storeNum += 1
-			// 				}
-			// 			})
-			// 		}
-			// 	})
-			// },
 			selectDepartList() {
 				let req = {
 					condition: [{
@@ -739,7 +637,7 @@
 						"profile_url": this.userInfo.profile_url,
 						user_image: this.userInfo.user_image,
 						"sex": this.userInfo.sex,
-						"user_role": nullRole ? null : "用户",
+						"user_role": "用户",
 						add_url: this.inviterInfo.add_url,
 						invite_user_no: this.inviterInfo.invite_user_no,
 					}]
@@ -781,8 +679,6 @@
 						"value": this.userInfo.no
 					}],
 					"data": [{
-						// "add_store_type": this.userInfo.add_store_no === this.storeNo ? '' : this
-						// 	.storeInfo.type,
 						home_store_no: this.userInfo.home_store_no === this.storeNo ? '' : this.storeNo
 					}]
 				}]
@@ -956,6 +852,28 @@
 					this.storeInfo = e
 				}
 			})
+			if (option.q) {
+				let text = decodeURIComponent(option.q);
+				if (text.indexOf('https://wx2.100xsys.cn/mpwx/shareClinic/') !== -1) {
+					let result = text.split('https://wx2.100xsys.cn/mpwx/shareClinic/')[1];
+					if (result.split('/').length >= 2) {
+						option.store_no = result.split('/')[0];
+						option.invite_user_no = result.split('/')[1];
+						option.share_type = 'bindOrganization'
+					}
+				}
+			}
+			if (option.q) {
+				let text = decodeURIComponent(option.q);
+				if (text.indexOf('https://wx2.100xsys.cn/shareClinic/') !== -1) {
+					let result = text.split('https://wx2.100xsys.cn/shareClinic/')[1];
+					if (result.split('/').length >= 2) {
+						option.store_no = result.split('/')[0];
+						option.invite_user_no = result.split('/')[1];
+						option.share_type = 'bindOrganization'
+					}
+				}
+			}
 			this.checkOptionParams(option);
 			if (this.authBoxDisplay) {
 				// 未授权
@@ -965,20 +883,7 @@
 			if (res === 'fail') {
 				return;
 			}
-			if (option.q) {
-				let text = decodeURIComponent(option.q);
-				if (text.indexOf('https://wx2.100xsys.cn/mpwx/shareClinic/') !== -1) {
-					let result = text.split('https://wx2.100xsys.cn/mpwx/shareClinic/')[1];
-					option.store_no = result;
-				}
-			}
-			if (option.q) {
-				let text = decodeURIComponent(option.q);
-				if (text.indexOf('https://wx2.100xsys.cn/shareClinic/') !== -1) {
-					let result = text.split('https://wx2.100xsys.cn/shareClinic/')[1];
-					option.store_no = result;
-				}
-			}
+
 			if (option.share_type === 'bindOrganization' && option.store_no && option
 				.invite_user_no) {
 				// 绑定诊所

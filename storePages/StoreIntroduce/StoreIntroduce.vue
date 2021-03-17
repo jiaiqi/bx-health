@@ -30,6 +30,9 @@
 </template>
 
 <script>
+	import {
+		mapState
+	} from 'vuex'
 	export default {
 		data() {
 			return {
@@ -41,18 +44,16 @@
 				qrcodePath: ""
 			}
 		},
+		computed: {
+			...mapState({
+				userInfo: state => state.user.userInfo
+			})
+		},
 		onLoad(option) {
-			if (option.q) {
-				let text = decodeURIComponent(option.q);
-				if (text.indexOf('https://wx2.100xsys.cn/mpwx/shareClinic/') !== -1) {
-					let result = text.split('https://wx2.100xsys.cn/mpwx/shareClinic/')[1];
-					option.store_no = result;
-				}
-			}
 			if (option.store_no) {
 				this.storeNo = option.store_no
 				this.selectStoreInfo()
-				this.qrCodeText = `https://wx2.100xsys.cn/mpwx/shareClinic/${option.store_no}`
+				this.qrCodeText = `https://wx2.100xsys.cn/mpwx/shareClinic/${option.store_no}/${this.userInfo.no}`
 			}
 		},
 		methods: {
@@ -178,7 +179,7 @@
 		background-color: #fff;
 		display: flex;
 		align-items: center;
-		
+
 		.info {
 			flex: 1;
 			padding: 20rpx;

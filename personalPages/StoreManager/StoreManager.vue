@@ -133,12 +133,11 @@
 						"ruleType": "eq",
 						"value": this.storeNo
 					}],
-					colNames: ["kefu_session_user_time", "kefu_session_store_time", "store_person_no",
-						"kefu_session_store_time", "session_no","kefu_user_unread_msg"
+					colNames: [ "store_person_no", "session_no","kefu_kefu_unread_msg"
 					],
 					group:[
 						{
-							"colName": "kefu_user_unread_msg",
+							"colName": "kefu_kefu_unread_msg",
 									"type": "sum", // 总条数
 									'aliasName':'unread'
 						}
@@ -151,62 +150,8 @@
 				this.$fetch('select', 'srvhealth_dialogue_session_select', req, 'health').then(res => {
 					if (res.success && Array.isArray(res.data) && res.data.length>0) {
 						this.unreadNum = res.data[0].unread
-						// this.sessionList = res.data
-						// this.getUserUnread()
 					}
 				})
-			},
-			getUserUnread() {
-				// 查找用户咨询记录中未读数量
-				this.unreadNum  = this.sessionList.reduce((pre,cur)=>{
-					if(cur.kefu_user_unread_msg){
-						pre+=Number(cur.kefu_user_unread_msg)
-					}
-					return pre
-				},0)
-				
-				// 
-				debugger
-				if (!sessionList || !Array.isArray(sessionList)) {
-					return
-				}
-				// let condition = sessionList.map(item => {
-				// 	return {
-				// 		"relation": "AND",
-				// 		"data": [{
-				// 				"colName": "session_no",
-				// 				"ruleType": "eq",
-				// 				"value": item.session_no
-				// 			},
-				// 			{
-				// 				"colName": "create_time",
-				// 				"ruleType": "gt",
-				// 				"value": item.kefu_session_store_time
-				// 			}
-				// 		]
-				// 	}
-				// })
-				// let req = {
-				// 	"serviceName": "srvhealth_consultation_chat_record_select",
-				// 	"colNames": ["*"],
-				// 	"order": [{
-				// 		"colName": "create_time",
-				// 		"orderType": "desc"
-				// 	}],
-				// 	"relation_condition": {
-				// 		"relation": "OR",
-				// 		"data": condition
-				// 	},
-				// 	"page": {
-				// 		"rownumber": 1,
-				// 		"pageNo": 1
-				// 	}
-				// }
-				// this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health').then(res => {
-				// 	if (res.success && res.page && res.page.total) {
-				// 		this.unreadNum = res.page.total
-				// 	}
-				// })
 			},
 			makePhoneCall() {
 				uni.makePhoneCall({

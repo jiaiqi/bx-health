@@ -64,7 +64,13 @@ const getStoreUser = async (storeNo, personNo) => {
  */
 const getGroupList = async (storeNo) => {
 	let req = {
-		condition: [{
+		condition: [
+			{
+				"colName": "circle_visible",
+				"ruleType": "ne",
+				"value": '不开放',
+			},
+			{
 			colName: 'store_no',
 			ruleType: 'eq',
 			value: storeNo
@@ -90,7 +96,8 @@ const getGroupListUser = async (storeNo, personNo) => {
 				"colName": "gc_no",
 				"ruleType": "in",
 				"value": groupNoList.toString(),
-			}, {
+			},
+			{
 				"colName": "person_no",
 				"value": personNo,
 				"ruleType": "eq"

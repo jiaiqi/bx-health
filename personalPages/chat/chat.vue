@@ -1,11 +1,11 @@
 <template>
 	<view>
 		<view class="util-bar" v-if="(groupInfo && groupInfo.gc_no)||sessionType==='店铺机构全员'">
-			<view class="util-item " @click="toPages('group-member')">
+	<!-- 		<view class="util-item " @click="toPages('group-member')">
 				<view class="icon"><text class="cuIcon-friend "></text></view>
-				<text class="label">成员<text
+							<text class="label">成员<text
 						v-if="storeInfo&&storeInfo.user_count">({{storeInfo.user_count}})</text></text>
-			</view>
+			</view> -->
 			<view class="util-item " @click="toPages('group-util')">
 				<view class="icon"><text class="cuIcon-repair "></text></view>
 				<text class="label">小工具</text>
@@ -169,10 +169,19 @@
 					if (res.success) {
 						this.groupUser = res.data
 						if (res.data.length > 0) {
-							this.pageTitle = this.groupInfo.name + `(${res.data.length})`
-							uni.setNavigationBarTitle({
-								title: this.groupInfo.name + `(${res.data.length})`
-							})
+							debugger
+							if (this.groupInfo && this.groupInfo.name) {
+								this.pageTitle = this.groupInfo.name + `(${res.data.length})`
+								uni.setNavigationBarTitle({
+									title: this.groupInfo.name + `(${res.data.length})`
+								})
+							} else if (this.storeInfo && this.storeInfo.name) {
+								this.pageTitle = this.storeInfo.name + `(${this.storeInfo.user_count})`
+								uni.setNavigationBarTitle({
+									title: this.storeInfo.name + `(${this.storeInfo.user_count})`
+								})
+							}
+
 						}
 					}
 				})
@@ -201,13 +210,15 @@
 					this.session_no = res.data[0].session_no
 					switch (this.sessionType) {
 						case '店铺机构全员':
-							this.pageTitle = this.sessionInfo.session_name
+							this.pageTitle = this.sessionInfo.session_name ? this.sessionInfo.session_name : this
+								.storeInfo.name
 							uni.setNavigationBarTitle({
-								title: this.sessionInfo.session_name
+								title: this.sessionInfo.session_name ? this.sessionInfo.session_name : this
+									.storeInfo.name
 							})
 							if (this.storeInfo && this.storeInfo.user_count) {
 								uni.setNavigationBarTitle({
-									title: `${　this.sessionInfo.session_name　}(${this.storeInfo.user_count})`
+									title: `${　this.sessionInfo.session_name?this.sessionInfo.session_name:this.storeInfo.name　}(${this.storeInfo.user_count})`
 								})
 							}
 							break;
@@ -428,13 +439,13 @@
 				if (this.identity === '客服') {
 					// 客服最后查看会话时间
 					req[0].data[0] = {
-						kefu_session_store_time: e && e.create_time ? e.create_time : this.formateDate('',
+						kefu_kefu_last_time: e && e.create_time ? e.create_time : this.formateDate('',
 							'DateTime')
 					}
 				} else {
 					// 客户最后查看会话时间
 					req[0].data[0] = {
-						kefu_session_user_time: e && e.create_time ? e.create_time : this.formateDate('',
+						kefu_user_last_time: e && e.create_time ? e.create_time : this.formateDate('',
 							'DateTime')
 					}
 				}

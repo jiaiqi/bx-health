@@ -445,7 +445,7 @@ export default {
 						data: res.data.data
 					}
 				} else if (optionType === "multi") {
-					if(Array.isArray(res.data.data)){
+					if (Array.isArray(res.data.data)) {
 						return {
 							success: true,
 							data: res.data.data
@@ -1843,7 +1843,8 @@ export default {
 					"nick_name": wxUserInfo ? wxUserInfo.nickname.replace(
 						/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : "",
 					"userno": user_no,
-					"name": wxUserInfo ? wxUserInfo.nickname : "",
+					"name": wxUserInfo ? wxUserInfo.nickname.replace(
+						/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : "",
 					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
 					"user_image": wxUserInfo ? wxUserInfo.headimgurl : "",
 					"sex": sex ? sex : null,
