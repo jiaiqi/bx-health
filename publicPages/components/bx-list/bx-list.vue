@@ -151,6 +151,9 @@ export default {
 				if (!this.viewTemp.tip && !this.viewTemp.img && !this.viewTemp.price && !this.viewTemp.footer && this.viewTemp.title) {
 					return true;
 				} else {
+					if(!this.viewTemp.tip && this.viewTemp.img && !this.viewTemp.price && !this.viewTemp.footer && this.viewTemp.title){
+						return true
+					}
 					return false;
 				}
 			} else {

@@ -1565,6 +1565,8 @@ export default {
 			if (userInfo && userInfo.no) {
 				if (userInfo.home_store_no && !store.state.app.hasIntoHospital) {
 					// 有home_store 未进入过医院主页
+					let pageInfo = Vue.prototype.getShareParams()
+					// console.log(store.state.app.inviterInfo)
 					// let pageInfo = Vue.prototype.getShareParams()
 					if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no) {
 						// 通过分享医院主页加入的用户
@@ -1627,6 +1629,8 @@ export default {
 				if (res.data.data[0].home_store_no && !store.state.app.hasIntoHospital) {
 					// 有home_store 此次打开小程序未进入过医院/餐馆主页
 					let pageInfo = Vue.prototype.getShareParams()
+					// console.log(store.state.app.inviterInfo)
+					// debugger
 					if (['诊所', '医院', '健康服务'].includes(store.state
 							.user.userInfo.home_store_type)) {
 						// 通过分享医院主页加入的用户
@@ -1798,19 +1802,43 @@ export default {
 			} catch (e) {
 				//TODO handle the exception
 			}
-
+			let sex = ''
+			if (wxUserInfo && wxUserInfo.sex) {
+				switch (wxUserInfo.sex) {
+					case 0:
+						sex = ''
+						break;
+					case 1:
+						sex = '男'
+						break;
+					case 2:
+						sex = '女'
+						break;
+				}
+			}
+			if (wxUserInfo && wxUserInfo.gender) {
+				switch (wxUserInfo.gender) {
+					case 0:
+						sex = ''
+						break;
+					case 1:
+						sex = '男'
+						break;
+					case 2:
+						sex = '女'
+						break;
+				}
+			}
 			let url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_add', 'add')
 			let req = [{
 				"serviceName": "srvhealth_person_info_add",
 				"data": [{
-					"nick_name": wxUserInfo ? wxUserInfo.nickname : "",
+					"nick_name": wxUserInfo ? wxUserInfo.nickname.replace(/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : "",
 					"userno": user_no,
 					"name": wxUserInfo ? wxUserInfo.nickname : "",
 					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
 					"user_image": wxUserInfo ? wxUserInfo.headimgurl : "",
-					"sex": wxUserInfo ? (wxUserInfo.sex === 0 ? "男" : wxUserInfo
-						.sex === 1 ?
-						"女" : null) : null,
+					"sex": sex ? sex : null,
 					"is_main": "是",
 					"font_size": "中"
 				}]

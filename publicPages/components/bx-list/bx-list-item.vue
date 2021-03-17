@@ -325,7 +325,7 @@ export default {
 		.main-image {
 			width: 220upx;
 			height: 220upx;
-			border-radius: 5upx;
+			border-radius: 5upx 5rpx;
 			margin-right: 20upx;
 			border-radius: 10rpx;
 			overflow: hidden;
@@ -478,16 +478,28 @@ export default {
 }
 
 .list-item-wrap.grid-layout-item {
-	margin: 0;
+	margin:10rpx 0 0;
 	padding: 0;
 	border-radius: 20rpx;
 	box-shadow: 6px 5px 13px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 	overflow: hidden;
+	display: flex;
+	flex-direction: column;
 	/deep/ .list-item {
 		margin: 0;
 		padding: 0;
+		display: flex;
+		flex-direction: column;
+		.main-image {
+			width: 100%!important;
+			border-radius: 5rpx 5rpx 0 0 !important;
+			margin: 0;
+			border-radius: 10rpx;
+			overflow: hidden;
+			flex: 1;
+		}
 		.content-box {
-			min-height: 150rpx;
+			min-height: 50rpx;
 			display: flex;
 			flex-direction: column;
 			.title {
@@ -495,7 +507,7 @@ export default {
 				width: 100%;
 				font-size: 32rpx;
 				flex: 1;
-				padding: 20rpx;
+				padding: 10rpx;
 			}
 			.footer {
 				align-items: flex-end;

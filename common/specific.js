@@ -245,7 +245,7 @@ export default {
 				}]
 			}];
 			if (nickname) {
-				req[0].data[0].nick_name = nickname
+				req[0].data[0].nick_name = nickname.replace(/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "");
 			}
 			let res = await Vue.prototype.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {

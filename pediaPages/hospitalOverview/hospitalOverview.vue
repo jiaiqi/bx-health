@@ -10,18 +10,16 @@
 		<view class="page-content">
 			<view class="header-wrap" v-if="storeInfo && storeInfo.id">
 				<view class="hospital-top">
-					<!-- 					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
-					<view class="logo" v-else>{{ storeInfo.name.slice(0, 1) }}</view> -->
+					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
+					<view class="logo" v-else>{{ storeInfo.name.slice(0, 1) }}</view>
 					<view class="home-btn" @click="setHomePage">
-						<!-- <button class="cuIcon-home cu-btn bg-cyan"> -->
 						<button class="cuIcon-home cu-btn  bg-cyan" v-if="userInfo&&userInfo.home_store_no!==storeNo">
-							<!-- <text class="margin-left-xs">{{userInfo&&userInfo.add_store_no===storeNo?'取消设为首页':'设为首页'}}</text> -->
 						</button>
 					</view>
-					<view class="home-btn like-btn" @click="toPages('subscsribe')" v-if="!subscsribeStatus">
+					<!-- 		<view class="home-btn like-btn" @click="toPages('subscsribe')" v-if="!subscsribeStatus">
 						<button class="cuIcon-notice cu-btn bg-orange">
 						</button>
-					</view>
+					</view> -->
 					<view class="left" @click="toPages('instroduce')">
 						<view class="top">
 							<view class="name">{{ storeInfo.name }}</view>
@@ -29,13 +27,17 @@
 									class="bg-blue cu-btn sm">绑定</button></view>
 						</view>
 						<view class="bottom" v-if="introduction && introduction.length < 25">{{ introduction }}</view>
-						<view class="bottom" v-if="storeInfo.address" @click.stop="getCurrentLocation">
+						<view class="bottom" v-if="storeInfo.address">
 							<view class="address">
 								<text class="content">{{ storeInfo.address }}</text>
-								<text class="cuIcon-locationfill text-blue margin-left-xs"
-									style="font-size: 20px;"></text>
+								<text @click.stop="getCurrentLocation"
+									class="cuIcon-locationfill text-blue margin-left-xs"
+									style="font-size: 30px;"></text>
 							</view>
 						</view>
+					</view>
+					<view class="instroduce" @click="toPages('instroduce')">
+						<view v-html="storeInfo.introduction"></view>
 					</view>
 					<view class="right">
 						<view class="right-item" @click="makePhoneCall">
@@ -43,94 +45,51 @@
 							<text>电话</text>
 						</view>
 						<view class="right-item" @click="toConsult">
-							<view class="cu-tag badge" v-if="kefuNum">{{kefuNum}}</view>
-							<image class="image" src="../../static/icon/msg.png" mode="aspectFit"></image>
+							<view class="image-box">
+								<view class="cu-tag badge" v-if="kefuNum">{{kefuNum}}</view>
+								<image class="image" src="../../static/icon/msg.png" mode="aspectFit"></image>
+							</view>
 							<text>在线咨询</text>
 						</view>
-					</view>
-					<view class="instroduce">
-						<view v-html="storeInfo.introduction"></view>
+						<!-- <view class="right-item" @click="setHomePage" v-if="userInfo&&userInfo.home_store_no!==storeNo">
+							<view class="image cuIcon-home"></view>
+							<text>设为主页</text>
+						</view>
+						<view class="right-item" @click="toPages('subscsribe')" v-if="!subscsribeStatus">
+							<view class="image cuIcon-notice"></view>
+							<text>通知设置</text>
+						</view> -->
 					</view>
 				</view>
 				<view class="menu-list">
 					<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
 						:indicator-dots="true" :autoplay="false">
-						<swiper-item>
+						<swiper-item v-for="swiperItem in mainMenuList">
 							<view class="swiper-item">
-								<view class="menu-item" @click="toPages('groupChat')"
-									v-if="storeInfo.member_session_no">
-									<view class="cu-tag badge" v-if="storeNum">{{storeNum}}</view>
-									<text class="cuIcon-comment" style="font-size: 30px;color:#00aaff;"></text>
-									<text class="title">服务站群</text>
-								</view>
-								<view class="menu-item" v-for="item in groupList" @click="toGroup(item)">
-									<view class="cu-tag badge" v-if="item.unreadNum">{{item.unreadNum}}</view>
-									<image class="icon image" :src="getImagePath(item.icon,true)" mode="aspectFit"
-										v-if="item.icon">
-									</image>
-									<text class="icon image cuIcon-group_fill text-grey" v-else></text>
-									<view class="label">{{ item.name }}</view>
-								</view>
-								<view class="menu-item" @click="toPages('vaccine-order')">
-									<u-icon name="order" size="60" color="#00aaff"></u-icon>
-									<view class="label">我的预约</view>
-								</view>
-								<view class="menu-item" @click="toPages('food')" v-if="storeInfo.type === '健康服务'">
-									<u-icon name="yinshi" custom-prefix="custom-icon" size="60" color="#00aaff">
+								<view class="menu-item"
+									@click="item.eventType==='toPage'?toPages(item.type):toGroup(item.type)"
+									v-for="item in swiperItem">
+									<view class="cu-tag badge" v-if="item.num">{{item.num||''}}</view>
+									<u-icon :name="item.icon" size="60" color="#00aaff"
+										v-if="item.iconType==='uicon'&&!item.custonIcon">
 									</u-icon>
-									<text class="title">食物库</text>
-								</view>
-							</view>
-						</swiper-item>
-						<swiper-item>
-							<view class="swiper-item">
-								<view class="menu-item" @click="toPages('health-manager')">
-									<u-icon name="setting" size="60" color="#00aaff"></u-icon>
-									<view class="label">健康管理</view>
+									<u-icon custom-prefix="custom-icon" :name="item.icon" size="60" color="#00aaff"
+										v-else-if="item.iconType==='uicon'&&item.custonIcon">
+									</u-icon>
+									<image class="icon image" :src="item.icon" mode="aspectFit"
+										v-if="item.iconType==='image'">
+										<text :class="item.icon" style="font-size: 30px;color:#00aaff;"
+											v-if="item.iconType==='font'"></text>
+										<text class="title">{{item.label}}</text>
 								</view>
 							</view>
 						</swiper-item>
 					</swiper>
-
-					<!-- 			<view class="menu-item" @click="toPages(1)" v-if="storeInfo.type !== '健康服务'">
-						<u-icon name="guahaowenzhen" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
-						<image class="icon image" src="../static/img/挂号问诊.png" mode="aspectFit">
-							<text class="title">就诊登记</text>
-					</view> -->
-					<!-- 		<view class="menu-item" @click="toPages(2)">
-						<image class="icon image" src="../static/img/问诊体检.png" mode="aspectFit">
-							<u-icon name="zhengzhuang" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
-							<text class="title">症状自检</text>
-					</view> -->
-					<!-- 	<view class="menu-item" @click="toPages(3)">
-						<image class="icon image" src="../static/img/检验报告.png" mode="aspectFit">
-							<u-icon name="zhenduan" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
-							<text class="title">健康评测</text>
-					</view> -->
-
-					<!-- 			<view class="menu-item" @click="toPages(4)">
-						<u-icon name="jilu" custom-prefix="custom-icon" size="60" color="#00aaff"></u-icon>
-						<text class="title">健康记录</text>
-					</view> -->
-					<!-- 		<view class="menu-item" v-for="item in groupList" @click="toGroup(item)">
-						<view class="cu-tag badge" v-if="item.unreadNum">{{item.unreadNum}}</view>
-						<image class="icon image" :src="getImagePath(item.icon,true)" mode="aspectFit" v-if="item.icon">
-						</image>
-						<text class="icon image cuIcon-group_fill text-grey" v-else></text>
-						<view class="label">{{ item.name }}</view>
-					</view>
-					<view class="menu-item" @click="toPages('vaccine-order')">
-						<u-icon name="order" size="60" color="#00aaff"></u-icon>
-						<view class="label">疫苗预约</view>
-					</view>
-					<view class="menu-item" @click="toPages('health-manager')">
-						<u-icon name="setting" size="60" color="#00aaff"></u-icon>
-						<view class="label">健康管理</view>
-					</view> -->
 				</view>
 				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
 					desc="goods_desc"></goods-list>
-				<vaccine-list :vaccineList="vaccineList"></vaccine-list>
+				<vaccine-list v-if="storeNo==='S20210227032'"></vaccine-list>
+				<business-handle :storeNo="storeNo"></business-handle>
 				<view class="introduction news" v-if="noticeList.length > 0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
@@ -167,24 +126,6 @@
 						</view>
 					</view>
 				</view>
-				<!-- <view class="introduction" v-if="storeInfo.type !== '健康服务'&&groupList.length>0">
-					<view class="title">
-						<view>
-							<text class="cuIcon-titles text-blue"></text>
-							关联圈子
-						</view>
-					</view>
-					<view class="content">
-						<view class="group-box">
-							<view class="group-item" v-for="item in groupList" @click="toGroup(item)">
-								<image class="image" :src="getImagePath(item.icon)" mode="aspectFit" v-if="item.icon">
-								</image>
-								<text class=" image cuIcon-group_fill text-grey" v-else></text>
-								<view class="label">{{ item.name }}</view>
-							</view>
-						</view>
-					</view>
-				</view> -->
 				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&doctorList.length>0">
 					<view class="title">
 						<view class="">专家团队</view>
@@ -251,15 +192,16 @@
 	import {
 		getKefuSession,
 		getGroupListUser,
-		getUserList,
-		getVaccineList
+		getUserList
 	} from './getData.js'
 	import goodsList from './goods-list.vue';
 	import vaccineList from './vaccine-list/vaccine-list.vue'
+	import businessHandle from './business-handle/business-handle.vue'
 	export default {
 		components: {
 			goodsList,
-			vaccineList
+			vaccineList,
+			businessHandle
 		},
 		data() {
 			return {
@@ -285,11 +227,99 @@
 		},
 		computed: {
 			...mapState({
+				wxUserInfo: state => state.user.wxUserInfo,
 				userInfo: state => state.user.userInfo,
 				inviterInfo: state => state.app.inviterInfo,
 				subscsribeStatus: state => state.app.subscsribeStatus, //是否关注公众号
 				authBoxDisplay: state => state.app.authBoxDisplay //授权访问用户信息
 			}),
+			mainMenuList() {
+				// 大按钮列表
+				let list = []
+				if (Array.isArray(this.groupList)) {
+					let groupList = this.groupList.map(item => {
+						return {
+							icon: this.getImagePath(item.icon, true),
+							iconType: 'image',
+							label: item.name,
+							eventType: 'toGroup',
+							type: item.gc_no,
+							num: item.unreadNum,
+							unreadNum: item.unreadNum
+						}
+					})
+					list = [...list, ...groupList]
+				}
+				if (this.storeInfo && this.storeInfo.member_session_no) {
+					list.unshift({
+						icon: 'cuIcon-comment',
+						iconType: 'font',
+						label: '服务站群',
+						eventType: 'toPage',
+						type: 'groupChat',
+						num: this.storeNum,
+					})
+				}
+				if (!this.subscsribeStatus) {
+					list.unshift({
+						icon: 'cuIcon-notice text-orange',
+						iconType: 'font',
+						label: '通知设置',
+						eventType: 'toPage',
+						type: 'subscsribe',
+						num: '请设置'
+					})
+				}
+				if (this.storeNo === 'S20210227032') {
+					list.push({
+						icon: 'order',
+						iconType: 'uicon',
+						label: '我的预约',
+						eventType: 'toPage',
+						type: 'vaccine-order'
+					})
+				}
+				if (this.storeInfo && this.storeInfo.type === '健康服务') {
+					list.push({
+						icon: 'yinshi',
+						custonIcon: true,
+						iconType: 'uicon',
+						label: '食物库',
+						eventType: 'toPage',
+						type: 'food'
+					})
+				}
+				if (this.bindUserInfo && this.bindUserInfo.user_role && (this.bindUserInfo.user_role.indexOf('工作人员') !== -
+						1 || this.bindUserInfo.user_role.indexOf('管理员') !== -1)) {
+					list.push({
+						icon: 'cuIcon-shop',
+						iconType: 'font',
+						label: '管理入口',
+						eventType: 'toPage',
+						type: 'manager'
+					})
+				}
+				list.push({
+					icon: 'setting',
+					iconType: 'uicon',
+					label: '健康管理',
+					eventType: 'toPage',
+					type: 'health-manager'
+				})
+
+				return list.reduce((pre, item) => {
+					if (pre.length === 0) {
+						pre = [
+							[item]
+						]
+					} else if (pre[pre.length - 1].length >= 4) {
+						pre.push([item])
+					} else {
+						pre[pre.length - 1].push(item)
+					}
+					return pre
+				}, [])
+			},
 			customerList() {
 				// 客服列表
 				return this.storeUserList.filter(item => item.user_role.indexOf('客服') !== -1)
@@ -323,9 +353,12 @@
 			}
 		},
 		methods: {
-			toPages(e) {
+			toPages(e, info) {
 				let url = '';
 				switch (e) {
+					case 'manager':
+						url = `/personalPages/StoreManager/StoreManager?store_no=${this.storeNo}`
+						break;
 					case 'vaccine-order':
 						url = '/storePages/VaccineOrder/VaccineOrder'
 						break;
@@ -432,8 +465,7 @@
 			toArticle(e) {
 				if (e.content_no) {
 					uni.navigateTo({
-						url: '/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=' + e
-							.content_no
+						url: `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=${e.content_no}&store_no=${this.storeNo}`
 					});
 				}
 			},
@@ -469,7 +501,7 @@
 			},
 			async toGroup(e) {
 				uni.navigateTo({
-					url: `/personalPages/gropDetail/gropDetail?gc_no=${e.gc_no}&pb_no=${this.userInfo.no}&type=group-detail&from=store-detail`
+					url: `/personalPages/gropDetail/gropDetail?gc_no=${e}&pb_no=${this.userInfo.no}&type=group-detail&from=store-detail`
 				});
 			},
 			toDeptDetail(e) {
@@ -485,10 +517,7 @@
 					// url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + e.person_no + '&store_no=' + e.store_no
 				});
 			},
-			async getVaccineList() {
-				// 查找可预约疫苗列表
-				this.vaccineList = await getVaccineList()
-			},
+
 			async getKefuSessionInfo() {
 				// 查找在线客服对应会话信息
 				let res = await getKefuSession(this.storeNo, this.userInfo.no)
@@ -521,16 +550,6 @@
 				let req = {
 					"serviceName": "srvhealth_consultation_chat_record_select",
 					"colNames": ["*"],
-					// group: [
-					// 	{
-					// 		"colName": "session_no",
-					// 		"type": "by"
-					// 	},
-					// 	{
-					// 		"colName": "id",
-					// 		"type": "count"
-					// 	}
-					// ],
 					"relation_condition": {
 						"relation": "OR",
 						"data": [{
@@ -542,7 +561,7 @@
 									},
 									{
 										"colName": "create_time",
-										"ruleType": "ge",
+										"ruleType": "gt",
 										"value": this.bindUserInfo.store_session_sign_in_time
 									}
 								]
@@ -556,7 +575,7 @@
 									},
 									{
 										"colName": "create_time",
-										"ruleType": "ge",
+										"ruleType": "gt",
 										"value": this.kefuSessionInfo.kefu_session_user_time
 									}
 								]
@@ -584,7 +603,7 @@
 					if (item.latest_sign_in_time) {
 						result.data.push({
 							"colName": "create_time",
-							"ruleType": "ge",
+							"ruleType": "gt",
 							"value": item.latest_sign_in_time
 						})
 					}
@@ -700,7 +719,8 @@
 						"person_no": this.userInfo.no,
 						"person_name": this.userInfo.name,
 						"user_account": this.userInfo.userno,
-						"nick_name": this.userInfo.nick_name,
+						"nick_name": this.userInfo.nick_name ? this.userInfo.nick_name.replace(
+							/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : '',
 						"profile_url": this.userInfo.profile_url,
 						user_image: this.userInfo.user_image,
 						"sex": this.userInfo.sex,
@@ -822,7 +842,8 @@
 					serviceName: 'srvhealth_store_user_add',
 					condition: [],
 					data: [{
-						nick_name: this.userInfo.nick_name,
+						nick_name: this.userInfo.nick_name ? this.userInfo.nick_name.replace(
+							/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : '',
 						profile_url: this.userInfo.profile_url,
 						sex: this.userInfo.sex,
 						user_account: this.userInfo.userno,
@@ -924,6 +945,21 @@
 			if (res === 'fail') {
 				return;
 			}
+			debugger
+			if (option.q) {
+				let text = decodeURIComponent(option.q);
+				if (text.indexOf('https://wx2.100xsys.cn/mpwx/shareClinic/') !== -1) {
+					let result = text.split('https://wx2.100xsys.cn/mpwx/shareClinic/')[1];
+					option.store_no = result;
+				}
+			}
+			if (option.q) {
+				let text = decodeURIComponent(option.q);
+				if (text.indexOf('https://wx2.100xsys.cn/shareClinic/') !== -1) {
+					let result = text.split('https://wx2.100xsys.cn/shareClinic/')[1];
+					option.store_no = result;
+				}
+			}
 			if (option.share_type === 'bindOrganization' && option.store_no && option
 				.invite_user_no) {
 				// 绑定诊所
@@ -943,10 +979,6 @@
 			}
 			if (option.store_no && this.userInfo.no) {
 				this.storeNo = option.store_no;
-				if (option.store_no === 'S20210227032') {
-					// 金地西沣公元卫生服务站 查找可预约疫苗
-					this.getVaccineList()
-				}
 				await this.selectUserList()
 				await this.selectStoreInfo();
 				await this.getKefuSessionInfo()
@@ -958,6 +990,6 @@
 	};
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 	@import './style.scss';
 </style>

@@ -189,14 +189,6 @@ export default {
 			}
 			this.getListV2();
 		} else {
-			// uni.showToast({
-			// 	title:"无效页面",
-			// 	icon:"Error"
-			// })
-			// setTimeout(()=>{
-			// 	uni.hideToast()
-			// 	uni.navigateBack()
-			// },2000)
 		}
 	},
 	methods: {

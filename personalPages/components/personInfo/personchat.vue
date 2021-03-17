@@ -512,7 +512,7 @@
 					height,
 					duration
 				} = e
-				alert("键盘高度发生变化：" + height)
+				// alert("键盘高度发生变化：" + height)
 			},
 			openMap(item) {
 				// 打开地图

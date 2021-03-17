@@ -107,6 +107,7 @@
 				},
 				gc_no: '', // 群组编码
 				storeNo: '', // 店铺编码
+				storeInfo: {},
 				joined: true, //当前登录用户是否已加入此圈子
 				type: 'group-detail',
 				qrCodeSize: uni.upx2px(500),
@@ -130,7 +131,6 @@
 			})
 		},
 		methods: {
-
 			async selectPersonInGroup() {
 				// 查找当前登录用户有没有在此圈子用户列表中
 				let req = {
@@ -145,7 +145,6 @@
 					}]
 				};
 				let res = await this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health');
-
 				if (Array.isArray(res.data) && res.data.length > 0) {
 					this.joined = true;
 					if (this.from === 'store-detail') {
@@ -159,6 +158,7 @@
 			},
 			async joinGroup() {
 				// 加入圈子
+				let self = this
 				let url = this.getServiceUrl('health', 'srvhealth_person_group_circle_add', 'operate');
 				let req = [{
 					serviceName: 'srvhealth_person_group_circle_add',
@@ -178,12 +178,12 @@
 				if (res.success && res.data.length > 0) {
 					uni.showModal({
 						title: '提示',
-						content: '您已成功加入' + this.groupInfo.name,
+						content: '您已成功加入' + self.groupInfo.name,
 						showCancel: false,
 						success(result) {
 							if (result.confirm) {
 								uni.redirectTo({
-									url: `/personalPages/chat/chat?type=群组圈子&groupNo=${this.gc_no}&pg_no=${res.data[0].pg_no}&group_role=用户`
+									url: `/personalPages/chat/chat?type=群组圈子&groupNo=${self.gc_no}&pg_no=${res.data[0].pg_no}&group_role=用户`
 								});
 								// uni.redirectTo({
 								// 	url: '/personalPages/chatGroup/chatGroup'
@@ -247,16 +247,10 @@
 				};
 				if (this.sessionType === '店铺机构全员' && this.storeNo) {
 					req.condition = [{
-							colName: 'store_no',
-							ruleType: 'eq',
-							value: this.storeNo
-						},
-						// {
-						// 	colName: 'person_no',
-						// 	ruleType: 'notnull',
-						// 	value: ''
-						// },
-					]
+						colName: 'store_no',
+						ruleType: 'eq',
+						value: this.storeNo
+					}]
 				}
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
@@ -272,6 +266,12 @@
 						this.loadmoreMemeber = 'noMore';
 					} else {
 						this.loadmoreMemeber = 'more';
+					}
+					if (res.data.data.length > 0) {
+						this.storeInfo = res.data.data[0]
+						uni.setNavigationBarTitle({
+							title: `${this.storeInfo.name}成员`
+						})
 					}
 					return res.data.data;
 				}
@@ -341,20 +341,21 @@
 			if (option.from) {
 				this.from = option.from;
 			}
-
+			if (option.type) {
+				this.type = option.type;
+			}
 			if (option.sessionType) {
 				this.sessionType = option.sessionType
-				this.type = option.type;
 				if (option.storeNo) {
 					this.storeNo = option.storeNo
 					if (this.type === 'group-member') {
 						this.selectGroupMember();
+
 					}
 				}
 			}
 			if (option.gc_no && option.type) {
 				this.gc_no = option.gc_no;
-				this.type = option.type;
 				this.selectPersonInGroup();
 				this.selectGroupInfo();
 				if (this.type === 'group-member') {
@@ -456,10 +457,15 @@
 				}
 
 				.label {
+					width: 100%;
 					height: 50rpx;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
 					line-height: 50rpx;
 					padding-top: 10rpx;
 					font-size: 24rpx;
+					text-align: center;
 				}
 			}
 		}

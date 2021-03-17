@@ -483,6 +483,7 @@
 			"pages": [{
 				"path": "StoreIntroduce/StoreIntroduce",
 				"style": {
+					"navigationStyle":"custom",
 					"navigationBarTitleText": "详情",
 					"navigationBarBackgroundColor": "#fff",
 					"navigationBarTextStyle": "black",

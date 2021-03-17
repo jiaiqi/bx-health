@@ -1,28 +1,15 @@
 <template>
 	<view>
 		<scroll-view scroll-y="true">
-			<view class="cu-list menu-avatar">
-				<view class="cu-item" :class="modalName=='move-box-'+ index?'move-cur':''" v-for="(item,index) in sessionList" :key="item.session_no"
-				 @touchstart="ListTouchStart" @touchmove="ListTouchMove" @touchend="ListTouchEnd" :data-target="'move-box-' + index"
-				 @click="toChat(item)">
-					<view class="cu-avatar round lg" v-if="!item.store_user_image">
+			<view class="cu-list">
+				<view class="cu-item" v-for="(item,index) in sessionList" :key="item.session_no" @click="toChat(item)">
+					<view class="cu-avatar lg" v-if="!item.store_user_image">
 						<text class="cuIcon-profilefill"></text>
 					</view>
-					<view class="cu-avatar round lg" v-if="item.store_user_image" :style="[{backgroundImage:'url('+getImagePath(item.store_user_image)+')'}]"></view>
+					<view class="cu-avatar  lg" v-if="item.store_user_image"
+						:style="[{backgroundImage:'url('+getImagePath(item.store_user_image)+')'}]"></view>
 					<view class="content">
-						<view class="text-grey">{{item.store_user_name||''}}</view>
-						<view class="text-gray text-sm">
-							<!-- <text class="cuIcon-infofill text-red  margin-right-xs"></text> -->
-							<!-- <text>							 消息未送达</text> -->
-						</view>
-					</view>
-					<view class="action">
-						<view class="text-grey text-xs">{{formateDate(item.last_msg_time, 'normal') }}</view>
-						<view class="cu-tag round bg-grey sm">{{item.msg_count}}</view>
-					</view>
-					<view class="move">
-						<view class="bg-grey">置顶</view>
-						<view class="bg-red">删除</view>
+						<view class="text-black">{{item.store_user_name||''}}</view>
 					</view>
 				</view>
 			</view>
@@ -34,8 +21,6 @@
 	export default {
 		data() {
 			return {
-				modalName: '',
-				listTouchStart: 0,
 				storeNo: '',
 				sessionList: []
 			};
@@ -67,28 +52,81 @@
 				this.$fetch('select', 'srvhealth_dialogue_session_select', req, 'health').then(res => {
 					if (res.success) {
 						this.sessionList = res.data
+						this.getUserUnread()
 					}
 				})
 			},
-			// ListTouch触摸开始
-			ListTouchStart(e) {
-				this.listTouchStart = e.touches[0].pageX
-			},
-
-			// ListTouch计算方向
-			ListTouchMove(e) {
-				this.listTouchDirection = e.touches[0].pageX - this.listTouchStart > 0 ? 'right' : 'left'
-			},
-
-			// ListTouch计算滚动
-			ListTouchEnd(e) {
-				if (this.listTouchDirection == 'left') {
-					this.modalName = e.currentTarget.dataset.target
-				} else {
-					this.modalName = null
+			getUserUnread() {
+				// 查找用户咨询记录中未读数量
+				let sessionList = this.sessionList
+				if (!sessionList || !Array.isArray(sessionList)) {
+					return
 				}
-				this.listTouchDirection = null
-			}
+				let condition = sessionList.map(item => {
+					return {
+						"relation": "AND",
+						"data": [{
+								"colName": "session_no",
+								"ruleType": "eq",
+								"value": item.session_no
+							},
+							{
+								"colName": "create_time",
+								"ruleType": "gt",
+								"value": item.kefu_session_store_time
+							}
+						]
+					}
+				})
+				let req = {
+					"serviceName": "srvhealth_consultation_chat_record_select",
+					"colNames": ["*"],
+					"order": [{
+						"colName": "create_time",
+						"orderType": "desc"
+					}],
+					group:[
+						{
+								"colName": "session_no",
+									"type": "by", 
+									"aliasName":"xxx"   
+						},
+						{
+								"colName": "sender_person_no",
+									"type": "by", 
+						},
+						{
+								"colName": "sender_profile_url",
+									"type": "by", 
+						},
+						// {
+						// 		"colName": "sender_user_image",
+						// 			"type": "by", 
+						// },
+						{
+							"colName": "id",
+								"type": "count", 
+								"aliasName":"amount"   // 别名
+						}
+					],
+					"relation_condition": {
+						"relation": "OR",
+						"data": condition
+					},
+					"page": {
+						"rownumber": 999,
+						"pageNo": 1
+					}
+				}
+				this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health').then(res => {
+					if (res.success && res.page) {
+						debugger
+						let data = res.data.reduce((pre,cur)=>{
+							
+						})
+					}
+				})
+			},
 		},
 		onLoad(option) {
 			if (option.storeNo) {
@@ -110,6 +148,25 @@
 	}
 </script>
 
-<style lang="scss">
-
+<style lang="scss" scoped>
+.cu-list{
+	display: flex;
+	flex-wrap: wrap;
+	padding: 20rpx 0;
+	.cu-item{
+		width: 25%;
+		margin-bottom: 10rpx;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		.content{
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+			width: 90%;
+			text-align: center;
+		}
+	}
+}
 </style>

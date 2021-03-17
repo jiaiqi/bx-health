@@ -3,6 +3,7 @@
 			height: calc(100vh - var(--window-top) - 50px);
 			overflow: scroll;
 		}
+		
 		/deep/ swiper.rectangle-dot{
 			.wx-swiper-dot,.a-swiper-dot,.uni-swiper-dot{
 				width: 30upx;
@@ -20,7 +21,7 @@
 		background-repeat: no-repeat;
 		.hospital-top {
 			background-color: #fff;
-			padding: 30rpx 28rpx;
+			padding: 30rpx 28rpx 0;
 			display: flex;
 			margin-bottom: 20rpx;
 			position: relative;
@@ -28,11 +29,18 @@
 			flex-wrap: wrap;
 
 			.instroduce {
-				width: 100%;
-				margin-top: 10px;
+				width: 65%;
 				background-color: #f8f8f8;
 				border-radius: 10rpx;
-				padding: 20rpx;
+				padding:10rpx 20rpx;
+				margin:20rpx  0 ;
+				flex: 1;
+				max-height: 140rpx;
+				word-break: break-all;
+				display: -webkit-box;
+				-webkit-line-clamp:3; /**指定行数*/
+				-webkit-box-orient: vertical;
+				overflow: hidden;
 			}
 
 			.home-btn {
@@ -63,44 +71,30 @@
 				font-weight: bold;
 				line-height: 100rpx;
 				text-align: center;
-				position: absolute;
-				top: -80rpx;
-				right: 0;
+				// position: absolute;
 				border: 4rpx solid #fff;
 			}
 
 			.left {
 				display: flex;
 				flex-direction: column;
-				flex: 1;
-				position: relative;
-				// top: -20rpx;
-
-				&::after {
-					position: absolute;
-					right: 0;
-					top: 10%;
-					height: 80%;
-					content: '';
-					width: 1px;
-					background-color: #f1f1f1;
-				}
-
+				width: calc(100% - 150rpx);
 				.top {
 					display: flex;
 					justify-content: space-between;
 					padding-right: 20rpx;
-
 					.name {
+						width: 500rpx;
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: wrap;
 						font-size: 32rpx;
 						color: #333;
 						font-weight: bold;
 						flex: 1;
 					}
-
 					.tags {
 						display: flex;
-
 						.tag {
 							display: inline-block;
 							margin-left: 10rpx;
@@ -120,10 +114,12 @@
 						width: 100%;
 						display: flex;
 						align-items: center;
-
+						.cuIcon-locationfill{
+							position: relative;
+							top: -20px;
+						}
 						.content {
 							flex: 1;
-							max-width: 400rpx;
 							overflow: hidden;
 							text-overflow: ellipsis;
 							// white-space: nowrap;
@@ -133,15 +129,12 @@
 			}
 
 			.right {
-				margin-left: 20rpx;
-				// width: 100rpx;
 				display: flex;
-				justify-content: center;
+				justify-content: flex-end;
 				align-items: center;
 				position: relative;
 				top: -5px;
-
-				// transform: rotate(10deg);
+				margin-left: 20rpx;
 				.right-item {
 					display: flex;
 					flex-direction: column;
@@ -149,10 +142,17 @@
 					font-size: 12px;
 					position: relative;
 				}
-
+				.image-box{
+					position: relative;
+				}
 				.image {
-					width: 40px;
-					height: 40px;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					width: 50px;
+					height: 50px;
+					font-size: 20px;
+					color: #00aaff;
 					padding: 5px;
 				}
 			}
@@ -199,7 +199,7 @@
 
 				.title,
 				.label {
-					margin-top: 30rpx;
+					margin-top: 10rpx;
 					font-size: 14px;
 				}
 			}
@@ -211,7 +211,7 @@
 			padding: 20rpx;
 			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 			margin-bottom: 20rpx;
-
+			
 			.title {
 				font-size: 28rpx;
 				font-weight: 700;

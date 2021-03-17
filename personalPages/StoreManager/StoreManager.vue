@@ -16,11 +16,15 @@
 		<view class="manager-view">
 			<text class="text-grey title">管理</text>
 			<view class="manager-box">
-				<view class="box-item" v-for="item in gridList" @click="clickGrid(item.type)">
+				<view class="box-item" v-for="item in list" @click="clickGrid(item.type)">
 					<view class="box-item-content">
-						<view class="cu-tag amount text-blue" v-if="storeInfo[item.type]">{{ storeInfo[item.type] | overDisplay }}</view>
+						<text class="cu-tag badge" v-if="item.unread">{{item.unread}}</text>
+						<view class="cu-tag amount text-blue" v-if="storeInfo[item.type]">
+							{{ storeInfo[item.type] | overDisplay }}
+						</view>
 						<image src="../static/links.png" class="icon" mode="" v-if="!item.icon"></image>
-						<text class="icon" v-else :class="['cuIcon-' + item.icon, item.color ? 'text-' + item.color : '']"></text>
+						<text class="icon" v-else
+							:class="['cuIcon-' + item.icon, item.color ? 'text-' + item.color : '']"></text>
 						<view class="label">{{ item.label }}</view>
 					</view>
 				</view>
@@ -47,12 +51,6 @@
 						color: 'yellow',
 						type: 'order_count'
 					},
-					// {
-					// 	label: '预约列表',
-					// 	icon: 'peoplelist',
-					// 	color: 'green',
-					// 	type: 'person_order_count'
-					// },
 					{
 						label: '就诊列表',
 						icon: 'peoplelist',
@@ -65,10 +63,6 @@
 						color: 'blue',
 						type: 'paln_count'
 					},
-					// {
-					// 	label: '药品库存',
-					// 	icon:'shop'
-					// },
 					{
 						label: '排班列表',
 						icon: 'sort',
@@ -85,7 +79,8 @@
 						label: '用户咨询记录',
 						icon: 'message',
 						color: 'red',
-						type: 'message'
+						type: 'message',
+						unread: 0
 					},
 					{
 						label: '店铺设置',
@@ -93,15 +88,98 @@
 						color: 'blue',
 						type: 'setting'
 					}
-				]
+				],
+				sessionList: [],
+				unreadNum: 0
 			};
 		},
 		filters: {
 			overDisplay: function(value) {
-				return value < 100 ? value : '99+';
+				return value < 999 ? value : '99+';
+			}
+		},
+		computed: {
+			list() {
+				return this.gridList.map(item => {
+					if (item.type === 'message') {
+						item.unread = this.unreadNum
+					}
+					return item
+				})
 			}
 		},
 		methods: {
+			getStoreSession() {
+				// 查找此店铺的客服会话列表
+				let req = {
+					"condition": [{
+						"colName": "session_type",
+						"ruleType": "in",
+						"value": "机构用户客服"
+					}, {
+						"colName": "store_no",
+						"ruleType": "eq",
+						"value": this.storeNo
+					}],
+					colNames: ["kefu_session_user_time", "kefu_session_store_time", "store_person_no",
+						"kefu_session_store_time", "session_no"
+					],
+					"page": {
+						"pageNo": 1,
+						"rownumber": 20
+					}
+				}
+				this.$fetch('select', 'srvhealth_dialogue_session_select', req, 'health').then(res => {
+					if (res.success) {
+						this.sessionList = res.data
+						this.getUserUnread()
+					}
+				})
+			},
+			getUserUnread() {
+				// 查找用户咨询记录中未读数量
+				let sessionList = this.sessionList
+				if (!sessionList || !Array.isArray(sessionList)) {
+					return
+				}
+				let condition = sessionList.map(item => {
+					return {
+						"relation": "AND",
+						"data": [{
+								"colName": "session_no",
+								"ruleType": "eq",
+								"value": item.session_no
+							},
+							{
+								"colName": "create_time",
+								"ruleType": "gt",
+								"value": item.kefu_session_store_time
+							}
+						]
+					}
+				})
+				let req = {
+					"serviceName": "srvhealth_consultation_chat_record_select",
+					"colNames": ["*"],
+					"order": [{
+						"colName": "create_time",
+						"orderType": "desc"
+					}],
+					"relation_condition": {
+						"relation": "OR",
+						"data": condition
+					},
+					"page": {
+						"rownumber": 1,
+						"pageNo": 1
+					}
+				}
+				this.$fetch('select', 'srvhealth_consultation_chat_record_select', req, 'health').then(res => {
+					if (res.success && res.page && res.page.total) {
+						this.unreadNum = res.page.total
+					}
+				})
+			},
 			makePhoneCall() {
 				uni.makePhoneCall({
 					phoneNumber: this.storeInfo.telephone //仅为示例
@@ -178,9 +256,9 @@
 					case 'user_count':
 						viewTemp = {
 							title: 'person_name',
-							tip: 'sex',
+							// tip: 'sex',
 							img: 'profile_url',
-							footer: 'user_role'
+							// footer: 'user_role'
 						};
 						url =
 							`/publicPages/list/list?pageType=list&serviceName=srvhealth_store_user_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
@@ -247,8 +325,9 @@
 					}
 				];
 				uni.navigateTo({
-					url: '/publicPages/newForm/newForm?serviceName=srvhealth_store_mgmt_select&type=detail&fieldsCond=' + JSON.stringify(
-						fieldsCond)
+					url: '/publicPages/newForm/newForm?serviceName=srvhealth_store_mgmt_select&type=detail&fieldsCond=' +
+						JSON.stringify(
+							fieldsCond)
 				});
 			},
 			async getStoreInfo() {
@@ -270,6 +349,7 @@
 			if (option.store_no) {
 				this.storeNo = option.store_no;
 				this.getStoreInfo();
+				this.getStoreSession()
 			}
 		}
 	};
@@ -283,8 +363,6 @@
 		display: flex;
 
 		.store-name {
-			// display: flex;
-			// align-items: flex-start;
 			margin-left: 20rpx;
 			flex-wrap: wrap;
 
@@ -318,7 +396,7 @@
 	.logo {
 		width: 120rpx;
 		height: 120rpx;
-		border-radius: 50%;
+		border-radius: 20rpx;
 		border: 1px solid #f1f1f1;
 	}
 
@@ -338,13 +416,10 @@
 			width: 33.33%;
 			box-sizing: border-box;
 			border: 1px solid #f1f1f1;
-			// display: inline-flex;
-			// flex-direction: column;
-			// justify-content: center;
-			// align-items: center;
 			background-color: #fff;
 
 			.box-item-content {
+				position: relative;
 				position: relative;
 				display: flex;
 				flex-direction: column;

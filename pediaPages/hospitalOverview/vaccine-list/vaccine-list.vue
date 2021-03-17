@@ -2,20 +2,31 @@
 	<view class="vaccine-list">
 		<view class="vaccine-title">
 			<text class="cuIcon-titles text-blue"></text>
-			<text> 疫苗预约</text>
+			<text>疫苗预约</text>
 		</view>
 		<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
 			:indicator-dots="true" :autoplay="false">
-			<swiper-item v-for="(item,index) in list" :key="index" class="swiper-item">
-				<view class="vaccine-item">
+			<swiper-item v-for="(child,index) in list" :key="index" class="swiper-item">
+				<view class="vaccine-item" v-for="item in child">
 					<view class="title">
-						{{item.label}}
+						{{item.vaccine_drug_name}}
 					</view>
-					<view class="desc">
-						{{item.desc}}
+					<view class="margin-left line-blue"
+						v-if="item.persons_count===1&&item.stock_count&&item.stock_count<5">
+						<!-- [库存：{{item.stock_count||'0'}}] -->
+						库存较少
 					</view>
+					<view class="margin-left text-grey" v-if="item.persons_count!==1">
+						(需要预约)
+					</view>
+
 					<view class="button-box">
-						<button type="primary" class="cu-btn bg-cyan" @click="showModal(item)">预约</button>
+						<view class="cu-tag bg-orange round" v-if="item.persons_count===1">
+							{{item.stock_count?'随时到店':'待到货'}}
+						</view>
+						<view  class="cu-tag bg-cyan round " @click="showModal(item)"
+							v-if="item.persons_count!==1">预约<text
+								v-if="item.to_appointment_count">({{item.to_appointment_count}})</text> </view>
 					</view>
 				</view>
 			</swiper-item>
@@ -32,11 +43,11 @@
 					</view>
 					<view class="date-area">
 						<view class="date-item" :class="{'line-cyan':selectedVaccine.sa_no===radio.sa_no}"
-							v-for="radio in curVac.data" :key="radio.sa_no" @click="selectItem(radio)">
+							v-for="radio in timeArr" :key="radio.sa_no" @click="selectItem(radio)">
 							{{formateDate(radio.app_date,'MM-DD')}}
 							{{formateDate(radio.app_date+' '+ radio.app_time_start,'hh:mm')}} -
 							{{formateDate(radio.app_date+' '+ radio.app_time_end,'hh:mm')}}
-							<text v-if="radio.app_count" class="cu-tag badge">{{radio.app_count}}</text>
+							<text v-if="radio.app_count" class="cu-tag badge">{{radio.app_count||''}}</text>
 						</view>
 					</view>
 					<view class="from-box">
@@ -70,7 +81,7 @@
 							</view>
 						</view>
 						<view class="form-item" :class="{active:activeField==='appoint_remark'}">
-							<textarea v-model="formModel.appoint_remark" placeholder="预约说明" class="value textarea"/>
+							<textarea v-model="formModel.appoint_remark" placeholder="预约说明" class="value textarea" />
 						</view>
 					</view>
 					<view class="button-box center">
@@ -87,6 +98,9 @@
 	import {
 		mapState
 	} from 'vuex'
+	import {
+		getVaccineList
+	} from '../getData.js'
 	export default {
 		computed: {
 			...mapState({
@@ -105,20 +119,34 @@
 					customer_phone: '',
 					appoint_remark: ''
 				},
+				timeArr: [],
+				vaccineList: [],
 				curVac: {
 					data: []
 				}
 			}
 		},
-		props: {
-			vaccineList: {
-				type: [Object, Array]
-			},
-		},
-		mounted() {
-			this.list = this.getList()
+		created() {
+			this.getVaccineList()
 		},
 		methods: {
+			async getVaccineList() {
+				// 查找可预约疫苗列表
+				this.vaccineList = await getVaccineList()
+				// this.list = this.getList()
+				this.list = this.vaccineList.reduce((pre, item) => {
+					if (pre.length === 0) {
+						pre = [
+							[item]
+						]
+					} else if (pre[pre.length - 1].length >= 5) {
+						pre.push([item])
+					} else {
+						pre[pre.length - 1].push(item)
+					}
+					return pre
+				}, [])
+			},
 			toOrderList() {
 				uni.navigateTo({
 					url: '/storePages/VaccineOrder/VaccineOrder'
@@ -174,9 +202,27 @@
 			DateChange(e) {
 				this.formModel.customer_birth_day = e.detail.value
 			},
+			async selectTimeArr(e) {
+				let req = {
+					"condition": [{
+						"colName": "svs_no",
+						"ruleType": "eq",
+						"value": e.vs_no
+					}],
+					"page": {
+						"pageNo": 1,
+						"rownumber": 20
+					},
+				}
+				let res = await this.$fetch('select', 'srvhealth_store_vaccination_appointment_select', req, 'health')
+				if (res.success) {
+					this.timeArr = res.data
+					this.modalName = 'vaccine'
+				}
+
+			},
 			showModal(e) {
-				this.curVac = e
-				this.modalName = 'vaccine'
+				this.selectTimeArr(e)
 			},
 			hideModal() {
 				this.curVac = {}
@@ -212,12 +258,17 @@
 	}
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+	/deep/ swiper.rectangle-dot {
+		height: 200px;
+	}
+
 	.vaccine-list {
 		display: flex;
 		flex-direction: column;
 		margin-bottom: 20rpx;
 		background-color: #fff;
+
 	}
 
 	.vaccine-title {
@@ -226,8 +277,14 @@
 
 	.button-box {
 		margin: 0;
-		margin-top: 20rpx;
+		padding: 4rpx 0;
 		justify-content: flex-end;
+		flex: 1;
+		.cu-tag,
+		.cu-btn {
+			min-width: 150rpx;
+			font-size: 14px ;
+		}
 
 		&.center {
 			justify-content: center;
@@ -236,32 +293,29 @@
 		}
 
 		.cu-btn {
-			width: 30%;
-
 			&+.cu-btn {
 				margin-left: 20px;
 			}
 		}
 	}
 
-	.swiper-item {
-		display: flex;
-		flex-direction: column;
-	}
-
 	.vaccine-item {
-		background-color: #fff;
-		min-height: 100rpx;
-		padding: 20rpx;
-		flex: 1;
+		// min-height: 100rpx;
+		padding: 5rpx 20rpx;
+		margin-bottom: 10rpx;
 		display: flex;
-		flex-direction: column;
+		align-items: center;
+		flex-wrap: wrap;
+		border-bottom: 1rpx solid #f1f1f1;
+
+		&:first-child {
+			border-top: 1rpx solid #f1f1f1;
+			margin-top: 10px;
+		}
 
 		.title {
 			font-size: 16px;
-			font-weight: bold;
-			text-align: center;
-			margin-bottom: 10px;
+			text-align: left;
 		}
 
 		.desc {
@@ -297,6 +351,7 @@
 			display: flex;
 			flex-direction: column;
 			text-align: left;
+			margin-bottom: 20px;
 
 			.form-title {
 				text-indent: 20px;

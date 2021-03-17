@@ -131,7 +131,7 @@ export default {
 							person_no: this.userInfo.no,
 							person_name: this.userInfo.name,
 							user_account: this.userInfo.userno,
-							nick_name: this.userInfo.nick_name,
+							nick_name: this.userInfo.nick_name?this.userInfo.nick_name.replace(/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, ""):'',
 							sex: this.userInfo.sex,
 							pay_state: '待支付',
 							child_data_list: [

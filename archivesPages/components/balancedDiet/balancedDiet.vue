@@ -2617,7 +2617,7 @@ export default {
 			this.loginUserInfo = userInfo;
 			this.getBaseInfo();
 		} else {
-			alert('未发现登录用户信息');
+			// alert('未发现登录用户信息');
 		}
 	}
 };
