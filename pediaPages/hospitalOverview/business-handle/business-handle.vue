@@ -51,8 +51,15 @@
 		methods: {
 			toQuest(e) {
 				if (e.daq_survey_activity_no) {
+					let params = {
+						// to: `/archivesPages/report/report?serviceName=srvhealth_examination_report_add&type=add`, //提交后要跳转的页面
+						// idCol: 'report_daq_survey_activity_no', // 跳转时携带的参数
+						// buttonLabel: '下一步',
+						emptyValue: true, //清空值
+						// fieldsCond: fieldsCond
+					};
 					uni.navigateTo({
-						url: `/questionnaire/index/index?formType=form&activity_no=${e.daq_survey_activity_no}&status=进行中`
+						url: `/questionnaire/index/index?formType=form&params=${encodeURIComponent(JSON.stringify(params))}&activity_no=${e.daq_survey_activity_no}&status=进行中`
 					})
 				}
 			},
@@ -89,6 +96,8 @@
 	}
 
 	.vaccine-title {
+		font-weight: bold;
+		font-size: 16px;
 		padding: 20rpx 20rpx 0;
 	}
 

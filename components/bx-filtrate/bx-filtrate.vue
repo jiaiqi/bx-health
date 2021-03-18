@@ -154,7 +154,6 @@ export default {
 		}
 	},
 	mounted() {
-		// this.getFoodsList()
 		if (this.menuAgList) {
 			this.copyData = this.deepClone(this.menuAgList);
 		}
@@ -671,11 +670,13 @@ export default {
 			self.pageInfo.total = res.data.page.total;
 			self.pageInfo.pageNo = res.data.page.pageNo;
 			let page = self.pageInfo;
-			if (page.rownumber * page.pageNo >= page.total) {
-				// finish(boolean:是否显示finishText,默认显示)
-				self.$refs.pullScroll.finish();
-			} else {
-				self.$refs.pullScroll.success();
+			if(self.$refs.pullScroll){
+				if (page.rownumber * page.pageNo >= page.total) {
+					// finish(boolean:是否显示finishText,默认显示)
+					self.$refs.pullScroll.finish();
+				} else {
+					self.$refs.pullScroll.success();
+				}
 			}
 			let data = res.data.data;
 			if (data.length > 0) {

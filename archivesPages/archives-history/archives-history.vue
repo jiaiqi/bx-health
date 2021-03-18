@@ -265,7 +265,6 @@
 
 <script>
 import uniEcCharts from '@/components/uni-ec-canvas/uni-echart.vue'
-import energyListWrap from './totalEnergyList.js'
 import dietList from '@/archivesPages/components/balancedDiet/balancedDiet'
 import dayjs from '@/static/js/dayjs.min.js'
 import { mapState } from 'vuex'

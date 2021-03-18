@@ -89,7 +89,7 @@
 				<view class="introduction news" v-if="noticeList.length > 0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
-						<text class="">通知公告</text>
+						<text class="text-bold " style="font-size: 16px;">通知公告</text>
 					</view>
 					<view class="content news-list">
 						<view class="news-item none-image" :class="{
@@ -632,8 +632,9 @@
 						"person_no": this.userInfo.no,
 						"person_name": this.userInfo.name,
 						"user_account": this.userInfo.userno,
-						"nick_name": this.userInfo.nick_name ? this.userInfo.nick_name.replace(
-							/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : '',
+						"nick_name": this.userInfo && this.userInfo.nick_name ? this.userInfo.nick_name
+							.replace(
+								/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : '',
 						"profile_url": this.userInfo.profile_url,
 						user_image: this.userInfo.user_image,
 						"sex": this.userInfo.sex,
@@ -860,6 +861,7 @@
 						option.store_no = result.split('/')[0];
 						option.invite_user_no = result.split('/')[1];
 						option.share_type = 'bindOrganization'
+						option.from = 'share'
 					}
 				}
 			}
@@ -871,10 +873,13 @@
 						option.store_no = result.split('/')[0];
 						option.invite_user_no = result.split('/')[1];
 						option.share_type = 'bindOrganization'
+						option.from = 'share'
+					
 					}
 				}
 			}
 			this.checkOptionParams(option);
+			
 			if (this.authBoxDisplay) {
 				// 未授权
 				return
@@ -883,7 +888,6 @@
 			if (res === 'fail') {
 				return;
 			}
-
 			if (option.share_type === 'bindOrganization' && option.store_no && option
 				.invite_user_no) {
 				// 绑定诊所

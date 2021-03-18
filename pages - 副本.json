@@ -182,14 +182,6 @@
 					}
 				},
 				{
-					"path": "myDoctor/doctorChat",
-					"style": {
-						"navigationBarBackgroundColor": "#fff",
-						"navigationBarTextStyle": "black",
-						"navigationBarTitleText": "聊天列表",
-						"enablePullDownRefresh": false
-					}
-				}, {
 					"path": "userList/userList",
 					"style": {
 						"navigationBarTitleText": "用户管理",
@@ -267,7 +259,7 @@
 					"path": "StoreManager/StoreManager",
 					"style": {
 						"navigationBarTitleText": "店铺管理",
-						"enablePullDownRefresh": false
+						"enablePullDownRefresh": true
 					}
 				},
 				// {
@@ -282,8 +274,8 @@
 					"path": "chat/chat",
 					"style": {
 						// "navigationStyle":"custom",
-						"navigationBarBackgroundColor":"#fff",
-						"navigationBarTextStyle":"black",
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
 						"enablePullDownRefresh": false
 					}
 
@@ -387,10 +379,10 @@
 			"pages": [{
 					"path": "hospitalOverview/hospitalOverview",
 					"style": {
-						"enablePullDownRefresh":true,
+						"enablePullDownRefresh": true,
 						"navigationBarBackgroundColor": "#fff",
 						"navigationBarTextStyle": "black",
-						"navigationBarTitleText": "简介"
+						"navigationBarTitleText": "机构首页"
 					}
 				}, {
 					"path": "HospitalList/HospitalList",
@@ -483,6 +475,7 @@
 			"pages": [{
 				"path": "StoreIntroduce/StoreIntroduce",
 				"style": {
+					"navigationStyle":"custom",
 					"navigationBarTitleText": "详情",
 					"navigationBarBackgroundColor": "#fff",
 					"navigationBarTextStyle": "black",
@@ -502,6 +495,12 @@
 					"enablePullDownRefresh": false
 				}
 
+			}, {
+				"path": "VaccineOrder/VaccineOrder",
+				"style": {
+					"navigationBarTitleText": "疫苗预约",
+					"enablePullDownRefresh": true
+				}
 			}]
 		},
 		{
@@ -627,7 +626,7 @@
 			},
 			{
 				"name": "聊天页面",
-				"path": "personalPages/myDoctor/doctorChat",
+				"path": "personalPages/chat/chat",
 				"query": "no=PB2020092209440043&groupInfo=%7B%22store_no%22%3Anull%2C%22icon%22%3A%2220210107172215427100%22%2C%22name%22%3A%22%E7%A7%91%E5%AD%A6%E5%87%8F%E8%84%82%22%2C%22id%22%3A4%2C%22gc_no%22%3A%22GC202101071722180004%22%2C%22attend_approve%22%3A%22%E5%90%A6%22%2C%22group_role%22%3A%22%E7%94%A8%E6%88%B7%22%2C%22latest_sign_in_time%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22pg_no%22%3A%22PG202101211816220025%22%2C%22lastChatState%22%3A%22%E6%9C%AA%E8%AF%BB%22%2C%22lastChatTime%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22lastChatText%22%3A%22%5B%E5%9B%BE%E7%89%87%5D%22%7D"
 			},
 			{

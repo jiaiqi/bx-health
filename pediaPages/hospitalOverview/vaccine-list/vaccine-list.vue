@@ -27,13 +27,56 @@
 						<view class="cu-tag bg-orange round" v-if="item.persons_count===1&&!item.stock_count">
 							待到货
 						</view>
-						<view  class="cu-tag bg-olive round " @click="showModal(item)"
-							v-if="item.persons_count!==1">预约<text
-								v-if="item.to_appointment_count">({{item.to_appointment_count}})</text> </view>
+						<view class="cu-tag bg-olive round " @click="showModal(item)" v-if="item.persons_count!==1">
+							预约<text v-if="item.to_appointment_count">({{item.to_appointment_count}})</text> </view>
 					</view>
 				</view>
 			</swiper-item>
 		</swiper>
+		<view class="cu-modal" :class="{'show':modalName==='realname'}" @click="hideModal" @touchmove.prevent>
+			<view class="cu-dialog" @click.stop>
+				<!-- 实名登记信息 -->
+				<view class="modal-title text-bold text-cyan bg-white">
+					请先完善实名信息
+				</view>
+				<form class="realname-form">
+					<view class="cu-form-group">
+						<view class="title">姓名</view>
+						<input placeholder="请输入您的真实姓名" name="input" v-model="formModel.customer_name"></input>
+					</view>
+					<view class="cu-form-group">
+						<view class="title">身份证号</view>
+						<input placeholder="请输入您的身份证号" name="input" type="idcard" v-model="formModel.id_no"></input>
+					</view>
+					<view class="cu-form-group">
+						<view class="title">出生日期</view>
+						<picker mode="date" v-model="formModel.customer_birth_day" start="1930-09-01" end="2022-09-01"
+							@change="DateChange">
+							<view class="picker">
+								{{formModel.customer_birth_day||'请选择'}}
+							</view>
+						</picker>
+					</view>
+					<view class="cu-form-group">
+						<view class="title">手机号码</view>
+						<input placeholder="请输入您的手机号码" name="input" type="number"
+							v-model="formModel.customer_phone"></input>
+						<!-- <input placeholder="请先点击获取手机号按钮" name="input" type="number"></input>
+							<view class="cu-capsule radius">
+								<button class="cu-tag bg-blue" type="primary" open-type="getPhoneNumber" @getphonenumber="decryptPhoneNumber">
+									获取手机号
+								</button>
+							</view> -->
+					</view>
+				</form>
+				<view class="bg-white tip text-red" v-if="tip">
+					{{tip}}
+				</view>
+				<view class="button-box">
+					<button type="primary" class="cu-btn bg-blue" @click="updateUserInfo">确定</button>
+				</view>
+			</view>
+		</view>
 		<view class="cu-modal bottom-modal" :class="{'show':modalName==='vaccine'}" @click="hideModal"
 			@touchmove.prevent>
 			<view class="cu-dialog" @click.stop>
@@ -108,7 +151,29 @@
 		computed: {
 			...mapState({
 				userInfo: state => state.user.userInfo
-			})
+			}),
+			getRealnameField() {
+				// 实名登记字段
+				let fields = [{
+						column: 'name',
+						label: '姓名'
+					},
+					{
+						column: 'id_no',
+						label: '身份证号'
+					},
+					{
+						column: 'phone',
+						label: '电话'
+					},
+					{
+						column: 'phone_xcx',
+						label: '小程序电话'
+					}
+
+				]
+				return fields
+			}
 		},
 		data() {
 			return {
@@ -117,6 +182,7 @@
 				list: [],
 				activeField: '',
 				formModel: {
+					id_no: '',
 					customer_name: "",
 					customer_birth_day: "",
 					customer_phone: '',
@@ -124,15 +190,76 @@
 				},
 				timeArr: [],
 				vaccineList: [],
+				curVaccine: {},
 				curVac: {
 					data: []
-				}
+				},
+				tip: ''
 			}
 		},
 		created() {
 			this.getVaccineList()
 		},
+		mounted() {
+			this.formModel.customer_name = this.userInfo.name
+			this.formModel.customer_phone = this.userInfo.phone
+			this.formModel.customer_birth_day = this.userInfo.birthday
+		},
 		methods: {
+			showRealNameModal() {
+				this.modalName = 'realname'
+			},
+			async updateUserInfo() {
+				let data = {}
+				if (!this.formModel.customer_name || !this.formModel.customer_phone || !this.formModel
+					.customer_birth_day || !this.formModel.id_no) {
+					this.tip = '请确认所有实名信息已填写完整'
+					return
+				}
+				this.tip = ''
+				if (!this.userInfo.id_no) {
+					data.id_no = this.formModel.id_no
+				}
+				if (!this.userInfo.phone) {
+					data.phone = this.formModel.customer_phone
+				}
+				if (!this.userInfo.phone_xcx) {
+					data.phone_xcx = this.formModel.customer_phone
+				}
+				if (!this.userInfo.birthday) {
+					data.birthday = this.formModel.customer_birth_day
+				}
+				if (this.formModel.customer_name) {
+					data.name = this.formModel.customer_name
+				}
+				let req = [{
+					"serviceName": "srvhealth_person_info_update",
+					"condition": [{
+						"colName": "no",
+						"ruleType": "eq",
+						"value": this.userInfo.no
+					}],
+					"data": [data]
+				}]
+				let res = await this.$fetch('operate', 'srvhealth_person_info_update', req, 'health')
+				if (res.success) {
+					this.selectTimeArr(this.curVaccine)
+				}
+			},
+			async decryptPhoneNumber(e) {
+				// 解密手机号信息
+				if (e.detail && e.detail.errMsg && e.detail.errMsg.indexOf('ok') !== -1) {
+					let req = [{
+						data: [{
+							encryptedData: e.detail.encryptedData,
+							signature: e.detail.iv
+						}],
+						serviceName: 'srvwx_app_data_decrypt'
+					}]
+					let res = await this.$fetch('operate', 'srvwx_app_data_decrypt', req, 'wx');
+				}
+
+			},
 			async getVaccineList() {
 				// 查找可预约疫苗列表
 				this.vaccineList = await getVaccineList()
@@ -225,7 +352,12 @@
 
 			},
 			showModal(e) {
-				this.selectTimeArr(e)
+				this.curVaccine = e
+				if (this.userInfo && (!this.userInfo.id_no || !this.userInfo.phone)) {
+					this.showRealNameModal()
+				} else {
+					this.selectTimeArr(e)
+				}
 			},
 			hideModal() {
 				this.curVac = {}
@@ -275,6 +407,8 @@
 	}
 
 	.vaccine-title {
+		font-weight: bold;
+		font-size: 16px;
 		padding: 20rpx 20rpx 0;
 	}
 
@@ -283,10 +417,11 @@
 		padding: 4rpx 0;
 		justify-content: flex-end;
 		flex: 1;
+
 		.cu-tag,
 		.cu-btn {
 			min-width: 150rpx;
-			font-size: 14px ;
+			font-size: 14px;
 		}
 
 		&.center {
@@ -298,6 +433,25 @@
 		.cu-btn {
 			&+.cu-btn {
 				margin-left: 20px;
+			}
+		}
+	}
+
+	.cu-modal {
+		z-index: 100;
+
+		.tip {
+			text-align: center;
+			padding: 10px;
+		}
+
+		.button-box {
+			justify-content: center;
+			text-align: center;
+			padding: 20rpx;
+
+			.cu-btn {
+				min-width: 45%;
 			}
 		}
 	}
@@ -326,8 +480,15 @@
 		}
 	}
 
-	.cu-modal {
-		z-index: 100;
+
+
+	.cu-form-group .title {
+		min-width: calc(4em + 15px);
+	}
+
+	.cu-form-group uni-picker .picker {
+		text-align: left;
+		line-height: 40px;
 	}
 
 	.order-info {
@@ -339,15 +500,6 @@
 
 		.cu-form-group {
 			min-height: 40px;
-		}
-
-		.cu-form-group .title {
-			min-width: calc(4em + 15px);
-		}
-
-		.cu-form-group uni-picker .picker {
-			text-align: left;
-			line-height: 40px;
 		}
 
 		.from-box {
@@ -428,6 +580,22 @@
 
 			&:nth-child(2n) {
 				margin-left: 10px;
+			}
+		}
+	}
+
+	.modal-title {
+		font-weight: bold;
+		padding: 20rpx;
+		font-size: 16px;
+	}
+
+	.realname-form {
+		text-align: left;
+
+		.cu-form-group {
+			.title {
+				min-width: 150rpx;
 			}
 		}
 	}

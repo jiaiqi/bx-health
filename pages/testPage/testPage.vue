@@ -25,7 +25,6 @@
 </template>
 
 <script>
-// import dataPicker from '@/components/cascader/cascaderSelector.vue';
 export default {
 	components: {
 		// dataPicker

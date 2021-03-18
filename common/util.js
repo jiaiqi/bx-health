@@ -1767,6 +1767,7 @@ export default {
 		}
 		Vue.prototype.toAddPage = async () => {
 			// 获取用户信息
+			
 			let isLogin = await Vue.prototype.wxVerifyLogin()
 
 			if (!isLogin) {

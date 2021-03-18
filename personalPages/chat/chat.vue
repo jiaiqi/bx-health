@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<view class="util-bar" v-if="(groupInfo && groupInfo.gc_no)||sessionType==='店铺机构全员'">
-	<!-- 		<view class="util-item " @click="toPages('group-member')">
+			<!-- 		<view class="util-item " @click="toPages('group-member')">
 				<view class="icon"><text class="cuIcon-friend "></text></view>
 							<text class="label">成员<text
 						v-if="storeInfo&&storeInfo.user_count">({{storeInfo.user_count}})</text></text>
@@ -16,7 +16,7 @@
 		</view>
 		<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
 			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
-			:storeNo="storeNo" :topHeight="(groupInfo&&groupNo)||sessionType==='店铺机构全员'?40:0" :group-no="groupNo"
+			:storeNo="storeNo" :topHeight="(groupInfo&&groupNo)||sessionType==='店铺机构全员'?42:0" :group-no="groupNo"
 			v-if="session_no"></chat>
 	</view>
 </template>
@@ -71,6 +71,14 @@
 			loadMsgComplete(e) {
 				// 消息加载完毕
 				this.lastMessage = e
+				if (this.sessionType === '机构用户客服') {
+					this.updateKefuSessionLastLookTime(this.lastMessage)
+				} else if (this.sessionType === '店铺机构全员') {
+					this.updateStoreSessionLastLookTime(this.lastMessage)
+				} else if (this.groupInfo && this.pg_no) {
+					// 更新群组圈子最后查看时间
+					this.updateLastLookTime(this.lastMessage);
+				}
 			},
 			getRow() {
 				let req = {
@@ -169,7 +177,6 @@
 					if (res.success) {
 						this.groupUser = res.data
 						if (res.data.length > 0) {
-							debugger
 							if (this.groupInfo && this.groupInfo.name) {
 								this.pageTitle = this.groupInfo.name + `(${res.data.length})`
 								uni.setNavigationBarTitle({

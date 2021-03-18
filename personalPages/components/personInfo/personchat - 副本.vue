@@ -1,7 +1,7 @@
 <template>
 	<view class="person-chat-wrap" :style="{
 			'--chart-height': chartHeight,
-			'--keyboard-height':keyboardHeight + 'px',
+			'--keyboard-height': keyboardHeight + 'px',
 			'--global-text-font-size': globalTextFontSize + 'px'
 		}">
 		<view class="person-chat-top" @click.stop="closeBottomPoup"
@@ -38,7 +38,7 @@
 								v-else-if="item.identity&&item.identity!=='客户'">{{ item.identity }}</text>
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
 						</view>
-						<view class="person-chat-item-left">
+						<view class="person-chat-item-left" @longpress="sendToSomeOne(item)">
 							<image :src="storeInfo.log?getImagePath(storeInfo.logo):getImagePath(storeInfo.image)"
 								mode="aspectFill" v-if="identity==='客户'&&item.identity==='客服'"></image>
 							<image :src="getImagePath(item.sender_profile_url)" mode="aspectFit"
@@ -54,11 +54,10 @@
 							class="person-chat-item-right person-chat-item-right-image">
 							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url">
 							</u-image>
-							<!-- <chat-image :max="350" :src="item.img_url"></chat-image> -->
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
 							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
-							<text>{{ item.msg_content }}</text>
+							<text user-select selectable space="nbsp">{{ item.msg_content }}</text>
 						</view>
 						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)"
 							class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
@@ -142,7 +141,7 @@
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
 							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
-							{{ item.msg_content }}
+							<text user-select selectable space="nbsp">{{ item.msg_content }}</text>
 						</view>
 						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)"
 							class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
@@ -167,7 +166,6 @@
 								<image class="voice_icon voice_icon_right" src="../../static/voice-r.png"
 									:class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''">
 								</image>
-								<!-- <view class="voice_icon voice_icon_right" :class="currentChat && item.id === currentChat.id && currentChat.anmitionPlay ? 'voice_icon_right_an' : ''"></view> -->
 								<view class="">{{ item.voice_time ? item.voice_time : '' }}</view>
 							</view>
 						</view>
@@ -179,7 +177,6 @@
 								:style="{ width: item.videoWidth + 'px', height: item.videoHeight + 'px' }" id="myVideo"
 								:duration="item.attribute && item.attribute.duration ? item.attribute.duration : ''"
 								:src="item.video_url" controls></video>
-							<!-- <video style="width: 250px;height: 200px;" id="myVideo" :src="item.video_url" controls></video> -->
 						</view>
 						<view v-else-if="item.longitude && item.latitude && item.msg_content_type === '位置'"
 							class="map-container" @tap="openMap(item)">
@@ -217,7 +214,7 @@
 						</view>
 					</view>
 				</view>
-				<!-- <view class="chart-bottom" v-if="isArray(recordList)" :id="'chart-bottom' + recordList.length"></view> -->
+				<view class="chart-bottom" v-if="isArray(recordList)" :id="'chart-bottom' + recordList.length"></view>
 			</scroll-view>
 			<view class="voice_an" v-if="recording">
 				<view class="voice_an_icon">
@@ -244,9 +241,10 @@
 						@touchmove.stop.prevent="moveVoice" @touchend.stop="endVoice" @touchcancel.stop="cancelVoice">
 						{{ voiceTitle }}
 					</text>
-					<textarea :focus="onFocus" :adjust-position="false" :show-confirm-bar="false" v-else
-						v-model="chatText" confirm-hold :hold-keyboard="false" auto-blur class="send-text" type="text"
-						@blur="onBlur" @focus="onInput" maxlength="-1" @confirm="sendMessage" confirm-type="send" />
+					<textarea :focus="onFocus" fixed :show-confirm-bar="true" :adjust-position="false"
+						:auto-focus="false" v-else v-model="chatText" confirm-hold hold-keyboard class="send-text"
+						type="text" @blur="onBlur" @focus="onInput" maxlength="-1" @confirm="sendMessage"
+						@keyboardheightchange="keyboardheightchange" confirm-type="send" />
 				</view>
 				<view class="person-chat-rig" :class="{ 'is-feed': isFeed }">
 					<view class="person-chat-rig-add-wrap">
@@ -376,7 +374,7 @@
 			}),
 			chartHeight() {
 				if (this.topHeight) {
-					return `calc(100vh   - ${this.topHeight}px - var(--window-top) - var(--window-bottom))`;
+					return `calc(100vh  -  ${this.topHeight}px - var(--window-top) - var(--window-bottom))`;
 				} else {
 					return 'calc(100vh  - var(--window-top) - var(--window-bottom))';
 				}
@@ -397,9 +395,8 @@
 		},
 		data() {
 			return {
-				holdKeyboard: true, //focus时，点击页面的时候不收起键盘
 				showKeyboard: false,
-				keyboardHeight: 0,
+				keyboardHeight: 300,
 				videoContext: '',
 				audioAction: {
 					method: 'pause'
@@ -447,6 +444,12 @@
 		},
 
 		methods: {
+			sendToSomeOne(e) {
+				this.onFocus = true
+				if (!this.chatText || this.chatText && this.chatText.indexOf(`@${e.sender_name} `) === -1) {
+					this.chatText += `@${e.sender_name} `
+				}
+			},
 			//处理图片尺寸，如果不处理宽高，新进入页面加载图片时候会闪
 			setPicSize(content) {
 				// 让图片最长边等于设置的最大长度，短边等比例缩小，图片控件真实改变，区别于aspectFit方式。
@@ -504,24 +507,28 @@
 				});
 			},
 			onBlur() {
-				this.showKeyboard = false;
-				// 隐藏键盘
-				uni.showToast({
-					title: '隐藏键盘',
-					icon: 'none'
-				})
 				uni.hideKeyboard();
-				this.toBottom()
+				this.showKeyboard = false;
+				setTimeout(() => {
+					this.toBottom()
+				}, 200)
 			},
 			onInput(e) {
-				this.toBottom()
+				this.showKeyboard = true;
+				this.isSendLink = false;
+				setTimeout(() => {
+					this.toBottom()
+				}, 200)
 			},
 			keyboardheightchange(e) {
-				const {
-					height,
-					duration
-				} = e
-				// alert("键盘高度发生变化：" + height)
+				const height = e.height
+				// console.log("键盘高度发生变化：" + height)
+				if (height && height > 0) {
+					this.keyboardHeight = height
+					this.showKeyboard = true;
+					this.isSendLink = false;
+					this.toBottom()
+				}
 			},
 			openMap(item) {
 				// 打开地图
@@ -1061,15 +1068,15 @@
 			},
 			/*打开发送链接弹窗**/
 			openLink() {
-				this.onFocus = false;
-				this.showKeyboard = false;
 				if (this.isSendLink) {
 					this.isSendLink = false;
-					// this.onFocus = true;
+					this.onFocus = true;
 					return;
 				}
-				uni.hideKeyboard();
 				this.isSendLink = true;
+				this.showKeyboard = false;
+				this.onFocus = false;
+				uni.hideKeyboard();
 				this.$nextTick(function() {
 					//滚动到底部
 					this.toBottom()
@@ -1139,6 +1146,7 @@
 				console.log('type----sendMessageLanguageInfo', type);
 				let serviceName = 'srvhealth_consultation_chat_record_add'
 				if (this.sessionType === '机构用户客服') {
+					debugger
 					if (this.identity === '客户') {
 						serviceName = 'srvhealth_consultation_chat_record_kefu_user_add'
 					} else {
@@ -1316,15 +1324,12 @@
 				data.msg_content_type = type
 				data.id = this.recordList.length > 0 ? (this.recordList[this.recordList.length - 1].id + 999) : 99
 				this.recordList.push(data)
-				this.toBottom()
 				let res = await this.$http.post(url, req);
+				this.toBottom()
 				uni.hideLoading();
 				this.isAll = false;
 				this.pageInfo.pageNo = 1;
 				this.initMessageList('refresh');
-				setTimeout(() => {
-					this.toBottom()
-				}, 200)
 			},
 			/*查询文件**/
 			async getFileNo(no) {
@@ -1445,9 +1450,7 @@
 				this.$fetch('operate', serviceName, req, 'health').then(res => {
 					this.isAll = false;
 					this.initMessageList('refresh');
-					setTimeout(() => {
-						this.toBottom()
-					}, 200)
+					this.toBottom()
 				})
 			},
 			_SortJson(json) {
@@ -1698,7 +1701,6 @@
 						resData = resData;
 					} else {
 						resData = [...resData, ...this.recordList];
-
 					}
 					resData = resData.reduce((pre, cur) => {
 						if (Array.isArray(pre) && !pre.find(item => item.id === cur.id)) {
@@ -1717,11 +1719,6 @@
 					}
 					if (this.pageInfo.pageNo * this.pageInfo.rownumber >= res.data.page.total) {
 						this.isAll = true;
-					}
-					if (type !== 'refresh') {
-						setTimeout(() => {
-							this.toBottom()
-						}, 100)
 					}
 				}
 			},
@@ -1802,10 +1799,9 @@
 			toBottom() {
 				this.chatTextBottom = '';
 				this.$nextTick(() => {
-					if (Array.isArray(this.recordList) && this.recordList.length > 0) {
-						this.scrollTop = this.recordList.length * 200 + 999999;
-						this.chatTextBottom = 'person-chat-item' + this.recordList[this.recordList.length -
-							1].id;
+					if (Array.isArray(this.recordList)) {
+						this.chatTextBottom = 'chart-bottom' + this.recordList.length;
+						this.scrollTop = this.recordList.length * 100 + 999999;
 					}
 				});
 			}
@@ -1816,15 +1812,13 @@
 		},
 		mounted() {
 			uni.onKeyboardHeightChange((res = {}) => {
-				console.log(res.height);
+				console.log('键盘高度发生变化:', res.height);
 				this.keyboardHeight = res.height
 				if (res.height > 0) {
 					this.showKeyboard = true;
 					this.isSendLink = false;
+					this.toBottom()
 				}
-				this.$nextTick(() => {
-					this.scrollTop = 999999;
-				});
 			});
 			this.Recorder = uni.getRecorderManager();
 			this.Recorder.onStart(e => {
@@ -1844,7 +1838,7 @@
 					//进入页面滚动到底部
 					this.toBottom()
 				});
-			}, 500)
+			}, 100)
 		},
 		created() {
 			if (this.customer_no) {
@@ -1884,7 +1878,7 @@
 
 			.msg-list {
 
-				height: calc(100vh - var(--window-top) - 55px);
+				height: calc(100vh - var(--window-top) - 60px);
 
 				.loading {
 					//loading动画
@@ -1939,10 +1933,10 @@
 				}
 
 				&.top-height {
-					height: calc(100vh - var(--window-top) - 55px - 42px);
+					height: calc(100vh - var(--window-top) - 60px - 42px);
 
 					&.showLayer {
-						height: calc(100vh - var(--window-top) - 55px - 42px - 230px);
+						height: calc(100vh - var(--window-top) - 60px - 42px - 230px);
 					}
 				}
 
@@ -1951,17 +1945,17 @@
 				}
 
 				&.showKeyboard {
-					height: calc(100vh - var(--keyboard-height) - var(--window-top) - 55px);
+					height: calc(100vh - var(--keyboard-height) - var(--window-top) - 60px);
 
 					&.showLayer {
-						height: calc(100vh - var(--keyboard-height) - var(--window-top) - 55px - 230px);
+						height: calc(100vh - var(--keyboard-height) - var(--window-top) - 60px - 230px);
 					}
 
 					&.top-height {
-						height: calc(100vh - var(--keyboard-height) - var(--window-top) - 42px - 55px);
+						height: calc(100vh - var(--keyboard-height) - var(--window-top) - 42px - 60px);
 
 						&.showLayer {
-							height: calc(100vh - var(--keyboard-height) - var(--window-top) - 42px - 55px - 230px);
+							height: calc(100vh - var(--keyboard-height) - var(--window-top) - 42px - 60px - 230px);
 						}
 					}
 				}
@@ -2363,6 +2357,8 @@
 			}
 
 			.person-chat-bot-top {
+				// background-color: #f5f5f5;
+				height: 60px;
 				box-shadow: 0px 1px 4px rgba(26, 26, 26, 0.2);
 				width: 100%;
 				display: flex;
@@ -2385,7 +2381,7 @@
 
 					.send-text {
 						line-height: 66rpx;
-						height: 70rpx;
+						height: 66rpx;
 						padding: 2px 10rpx;
 						transition: all 0.5s ease-out;
 						flex: 1;
@@ -2552,7 +2548,6 @@
 				width: 32rpx;
 				height: 32rpx;
 				border-radius: 100%;
-				// position: absolute;
 				position: relative;
 				box-sizing: border-box;
 			}
@@ -2655,7 +2650,7 @@
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -55%);
-		background-color: rgba(42, 42, 42, 0.7);
+		background-color: rgba(41, 41, 41, 0.7);
 		color: white;
 		display: flex;
 		flex-direction: column;

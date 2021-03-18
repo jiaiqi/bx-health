@@ -42,7 +42,7 @@
 				v-else-if="fieldData.type === 'checkbox'">
 				<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox">
 					<checkbox color="#2979ff" :value="item" :disabled="fieldData.disabled ? fieldData.disabled : false"
-						:checked="fieldData.value.indexOf(item) !== -1" />
+						:checked="isChecked(item)" />
 					<text style="flex: 1;" class="text">{{ item }}</text>
 				</label>
 			</checkbox-group>
@@ -50,9 +50,10 @@
 				class="form-item-content_value checkbox-group" v-else-if="fieldData.type === 'checkboxFk'"
 				:disabled="fieldData.disabled ? fieldData.disabled : false">
 				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options"
-					:checked="fieldData.value.indexOf(item.value) !== -1" :name="item.label">{{ item.label }}
+					:key="item.value" :name="item.label">{{ item.label }}
 				</bx-checkbox>
 			</bx-checkbox-group>
+		
 			<view class="form-item-content_value" v-else-if="popupFieldTypeList.includes(fieldData.type)">
 				<view
 					v-if="(setOptionList.length < 15 && fieldData.type === 'Set') || (selectorData.length < 5 && fieldData.type === 'Selector')">
@@ -387,6 +388,16 @@
 			}
 		},
 		methods: {
+			checkboxChange(e){
+				debugger
+			},
+			isChecked(val){
+				if(this.fieldData&&this.fieldData.value&&this.fieldData.value.indexOf(val)!==-1){
+					return true
+				}else {
+					return false
+				}
+			},
 			saveRichText(e) {
 				if (e.isSave) {
 					if (e.type === 'textarea') {
@@ -652,14 +663,14 @@
 					self.fieldData.option_list_v2.conditions.length > 0) {
 					let condition = self.deepClone(self.fieldData.option_list_v2.conditions);
 					condition = condition.map(item => {
-						if (item.value.indexOf('data.') !== -1) {
+						if (item.value&&item.value.indexOf('data.') !== -1) {
 							let colName = item.value.slice(item.value.indexOf('data.') + 5);
 							if (fieldModelsData[colName]) {
 								item.value = fieldModelsData[colName];
 							}
-						} else if (item.value.indexOf('top.user.user_no') !== -1) {
+						} else if (item.value&&item.value.indexOf('top.user.user_no') !== -1) {
 							item.value = uni.getStorageSync('login_user_info').user_no;
-						} else if (item.value.indexOf("'") === 0 && item.value.lastIndexOf("'") === item.value
+						} else if (item.value&&item.value.indexOf("'") === 0 && item.value.lastIndexOf("'") === item.value
 							.length - 1) {
 							item.value = item.value.replace(/\'/gi, '');
 						}

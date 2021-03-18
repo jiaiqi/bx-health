@@ -413,6 +413,7 @@
 						this.activity_no = data.activity_no;
 						let configCols = [];
 						data.item_data.forEach(item => {
+							debugger
 							configCols.push(this.getConfig(item));
 						});
 						if (data.logo) {
@@ -428,6 +429,10 @@
 									if (this.formType === 'detail') {
 										item.disabled = true;
 									}
+									item.options = item.options.map(op=>{
+										op.checked = false
+										return op
+									})
 									data.user_data.forEach(items => {
 										if (item.column === items.item_no) {
 											if (item.item_type_attr && item.item_type_attr
@@ -473,7 +478,6 @@
 									.value) : 0;
 							}
 						});
-						debugger
 						this.configCols = configCols;
 						this.getUserInfo();
 					} else if (res.data.resultCode === '0011') {
@@ -610,6 +614,7 @@
 							item.color = '#0bc99d';
 							item.value = item.option_value;
 							item.showimg = false;
+							item.checked = false
 							item.label = item.option_value;
 							if (item.option_view_no) {
 								item.serialChar = item.option_view_no;

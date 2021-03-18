@@ -108,7 +108,6 @@
 import Thetable from '../components/Thetable/Thetable.vue';
 import symFrom from '../components/bx-sym-from/bx-sym-from.vue';
 import cascaderSelector from '@/components/cascader-selector/cascader-selector.vue'
-// import dataPicker from '@/components/cascader/cascaderSelector.vue'
 export default {
 	components: {
 		Thetable,

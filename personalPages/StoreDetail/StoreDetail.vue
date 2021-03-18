@@ -318,15 +318,7 @@
 				if (res.data.state === 'SUCCESS') {
 					uni.showModal({
 						title: '提示',
-						content: `您已成功加入【${this.storeInfo.name}】`,
-						success(res) {
-							if (res.confirm) {
-								// 跳转到店铺详情
-								// uni.navigateTo({
-								// 	url: '/pediaPages/ClinicDetail/ClinicDetail?store_no=' + store_no
-								// });
-							}
-						}
+						content: `您已成功加入【${this.storeInfo.name}】`
 					});
 				}
 			}

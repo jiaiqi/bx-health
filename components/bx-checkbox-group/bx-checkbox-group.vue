@@ -134,6 +134,7 @@ export default {
 			} else {
 				this.onMax = false;
 			}
+			debugger
 			this.$emit('change', values);
 			this.$emit('input', values.toString());
 		}
