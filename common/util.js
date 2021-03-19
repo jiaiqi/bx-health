@@ -464,7 +464,14 @@ export default {
 							success: true,
 							data: res.data.response[0].response.effect_data
 						}
-					}
+					}else if(Array.isArray(res.data.response) &&
+						res.data.response.length > 0 &&
+						res.data.response[0].response  ){
+							return {
+								success: true,
+								data: 	res.data.response[0].response 
+							}
+						}
 				}
 			} else {
 				let result = {
@@ -1048,19 +1055,22 @@ export default {
 					return true
 				}
 			}
-		// 获取图片路径
-		Vue.prototype.getFilePath = async function(e) {
+		/**
+		 * @description 根据file_no查找文件列表
+		 * @param {String} file_no - 文件编号
+		 */
+		Vue.prototype.getFilePath = async function(file_no) {
 			let url = Vue.prototype.getServiceUrl('file', 'srvfile_attachment_select', 'select')
 			let req = {
 				"serviceName": "srvfile_attachment_select",
 				"colNames": ["*"],
 				"condition": [{
 					"colName": "file_no",
-					"value": e,
+					"value": file_no,
 					"ruleType": "eq",
 				}]
 			}
-			if (e) {
+			if (file_no) {
 				let response = await _http.post(url, req);
 				console.log('srvfile_attachment_select', response);
 				if (response.data.state === 'SUCCESS' && response.data.data.length > 0) {
@@ -2002,6 +2012,9 @@ export default {
 				// #endif
 			})
 		}
+		/**
+		 * @description 获取图片信息
+		 */
 		Vue.prototype.getImageInfo = (item) => {
 			return new Promise((resolve, reject) => {
 				wx.getImageInfo({

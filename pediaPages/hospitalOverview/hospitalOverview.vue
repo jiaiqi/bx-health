@@ -291,6 +291,7 @@
 						iconType: 'font',
 						label: '管理入口',
 						eventType: 'toPage',
+						num: this.storeInfo && this.storeInfo.kefu_unread_msg ? this.storeInfo.kefu_unread_msg : 0,
 						type: 'manager'
 					})
 				}
@@ -874,12 +875,12 @@
 						option.invite_user_no = result.split('/')[1];
 						option.share_type = 'bindOrganization'
 						option.from = 'share'
-					
+
 					}
 				}
 			}
 			this.checkOptionParams(option);
-			
+
 			if (this.authBoxDisplay) {
 				// 未授权
 				return

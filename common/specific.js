@@ -65,25 +65,25 @@ export default {
 					}
 				]
 			}
-			if(prepay_id){
+			if (prepay_id) {
 				let res = await _http.post(url, req)
 				if (res.data.state === 'SUCCESS') {
 					if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 						store.commit('SET_PAY_PARAMS', res.data.data[0])
 						return res.data.data[0]
-					}else{
+					} else {
 						uni.showModal({
-							title:'提示',
-							content:JSON.stringify(res.data),
-							showCancel:false
+							title: '提示',
+							content: JSON.stringify(res.data),
+							showCancel: false
 						})
 					}
 				}
-			}else{
+			} else {
 				uni.showModal({
-					title:'提示',
-					content:'未知prepay_id',
-					showCancel:false
+					title: '提示',
+					content: '未知prepay_id',
+					showCancel: false
 				})
 			}
 		}
@@ -135,7 +135,7 @@ export default {
 
 		Vue.prototype.checkOptionParams = (option) => {
 			// option中如果有邀请信息 则存储到vuex
-			if (option.share_type) {
+			if (option&&option.share_type) {
 				store.commit('SET_SHARE_TYPE', option.share_type)
 			}
 			if (option.doctor_no && option.store_no) {
@@ -149,20 +149,20 @@ export default {
 					doctor_no: option.doctor_no,
 				})
 			}
-			if (option.from === 'share' && option.invite_user_no) {
-				let pageInfo = Vue.prototype.getShareParams()
+			let pageInfo = Vue.prototype.getShareParams()
+			if (pageInfo&&pageInfo.add_url) {
 				if (pageInfo && pageInfo.add_url) {
 					store.commit('SET_INVITER_INFO', {
 						add_url: pageInfo.add_url,
-						invite_user_no: option.invite_user_no
+						invite_user_no: option.invite_user_no || 'jiaqi'
 					});
 				}
 				if (pageInfo && pageInfo.add_url && option.store_no) {
 					store.commit('SET_INVITER_INFO', {
 						add_store_no: option.store_no,
-						home_store_no:option.store_no,
+						home_store_no: option.store_no,
 						add_url: pageInfo.add_url,
-						invite_user_no: option.invite_user_no
+						invite_user_no: option.invite_user_no||'jiaqi'
 					});
 				}
 			}
@@ -202,7 +202,8 @@ export default {
 					ruleType: 'in',
 					value: basicDietList.map(item => item.diet_contents_no).toString()
 				}];
-				let mix = await Vue.prototype.getFoodType(condition1, 'srvhealth_mixed_food_nutrition_contents_select');
+				let mix = await Vue.prototype.getFoodType(condition1,
+					'srvhealth_mixed_food_nutrition_contents_select');
 				let basic = await Vue.prototype.getFoodType(condition2);
 				let foodType = [...mix, ...basic];
 				return foodType;

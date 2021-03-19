@@ -16,12 +16,13 @@
 		},
 		onLaunch(options) {
 			this.checkUpdate()
+			this.checkOptionParams(options)
 			console.log("launch", options)
 			// #ifdef MP-WEIXIN
 			uni.onMemoryWarning(function() {
 				uni.showModal({
 					title: '警告',
-					content: 'onMemoryWarningReceive,内存不足'
+					content: 'onMemoryWarningReceive-内存不足'
 				});
 			});
 			// #endif
@@ -77,6 +78,11 @@
 
 				updateManager.onUpdateFailed(function(res) {
 					// 新的版本下载失败
+					uni.showModal({
+						title: '更新提示',
+						content: '版本更新失败,请检查网络状态',
+						showCancel:false
+					});
 				});
 			},
 			async selectMyGroup() {

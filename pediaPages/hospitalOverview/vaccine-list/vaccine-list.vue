@@ -7,7 +7,7 @@
 		<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
 			:indicator-dots="true" :autoplay="false">
 			<swiper-item v-for="(child,index) in list" :key="index" class="swiper-item">
-				<view class="vaccine-item" v-for="item in child">
+				<view class="vaccine-item" v-for="item in child" @click="showInfo(item)">
 					<view class="title">
 						{{item.vaccine_drug_name}}
 					</view>
@@ -33,6 +33,26 @@
 				</view>
 			</swiper-item>
 		</swiper>
+		<view class="cu-modal" :class="{'show':modalName==='vaccine-info'}" @click="hideModal" @touchmove.prevent>
+			<view class="cu-dialog" @click.stop>
+				<view class="vaccine-info">
+					<view class="vaccine-name cuIcon-titles" v-if="vaccineInfo.vaccine_drug_name">
+						{{vaccineInfo.vaccine_drug_name}}
+					</view>
+					<view class="vaccine-info" v-if="vaccineInfo.usage">
+						<view class="label">用法:</view>
+						<view class="value">
+							{{vaccineInfo.usage}}
+						</view>
+					</view>
+					<view class="image-box" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)">
+						<image :src="item" mode="aspectFit" class="remark-pic" v-for="item in imagesUrl" :key="item"
+							@click="toPreviewImage(item)">
+						</image>
+					</view>
+				</view>
+			</view>
+		</view>
 		<view class="cu-modal" :class="{'show':modalName==='realname'}" @click="hideModal" @touchmove.prevent>
 			<view class="cu-dialog" @click.stop>
 				<!-- 实名登记信息 -->
@@ -52,21 +72,21 @@
 						<view class="title">出生日期</view>
 						<picker mode="date" v-model="formModel.customer_birth_day" start="1930-09-01" end="2022-09-01"
 							@change="DateChange">
-							<view class="picker">
+							<view class="picker birthday">
 								{{formModel.customer_birth_day||'请选择'}}
 							</view>
 						</picker>
 					</view>
 					<view class="cu-form-group">
 						<view class="title">手机号码</view>
-						<input placeholder="请输入您的手机号码" name="input" type="number"
-							v-model="formModel.customer_phone"></input>
-						<!-- <input placeholder="请先点击获取手机号按钮" name="input" type="number"></input>
-							<view class="cu-capsule radius">
-								<button class="cu-tag bg-blue" type="primary" open-type="getPhoneNumber" @getphonenumber="decryptPhoneNumber">
-									获取手机号
-								</button>
-							</view> -->
+						<input placeholder="请先授权获取手机号" name="input" type="number" v-model="formModel.customer_phone"
+							:disabled="!formModel.phone_xcx"></input>
+						<view class="cu-capsule radius" v-if="!formModel.phone_xcx">
+							<button class="cu-tag bg-blue" type="primary" open-type="getPhoneNumber"
+								@getphonenumber="decryptPhoneNumber">
+								获取手机号
+							</button>
+						</view>
 					</view>
 				</form>
 				<view class="bg-white tip text-red" v-if="tip">
@@ -148,41 +168,22 @@
 		getVaccineList
 	} from '../getData.js'
 	export default {
+		name: "VaccineList", //疫苗预约列表
 		computed: {
 			...mapState({
 				userInfo: state => state.user.userInfo
-			}),
-			getRealnameField() {
-				// 实名登记字段
-				let fields = [{
-						column: 'name',
-						label: '姓名'
-					},
-					{
-						column: 'id_no',
-						label: '身份证号'
-					},
-					{
-						column: 'phone',
-						label: '电话'
-					},
-					{
-						column: 'phone_xcx',
-						label: '小程序电话'
-					}
-
-				]
-				return fields
-			}
+			})
 		},
 		data() {
 			return {
 				modalName: '',
 				selectedVaccine: {},
 				list: [],
+
 				activeField: '',
 				formModel: {
 					id_no: '',
+					phone_xcx: '',
 					customer_name: "",
 					customer_birth_day: "",
 					customer_phone: '',
@@ -190,7 +191,8 @@
 				},
 				timeArr: [],
 				vaccineList: [],
-				curVaccine: {},
+				imagesUrl: [],
+				vaccineInfo: {}, // 疫苗信息
 				curVac: {
 					data: []
 				},
@@ -204,9 +206,29 @@
 			this.formModel.customer_name = this.userInfo.name
 			this.formModel.customer_phone = this.userInfo.phone
 			this.formModel.customer_birth_day = this.userInfo.birthday
+			this.formModel.phone_xcx = this.userInfo.phone_xcx
 		},
 		methods: {
+			async showInfo(e) {
+				this.vaccineInfo = e
+				if (e.remark_pic) {
+					this.imagesUrl = [];
+					let images = await this.getFilePath(e.remark_pic)
+					if (Array.isArray(images)) {
+						for (let i = 0; i < images.length; i++) {
+							const url =
+								`${this.$api.getFilePath}${images[i].fileurl}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`;
+							this.imagesUrl.push(url);
+						}
+					}
+				}
+				this.modalName = 'vaccine-info'
+			},
 			showRealNameModal() {
+				this.formModel.customer_name = this.userInfo.name
+				this.formModel.customer_phone = this.userInfo.phone
+				this.formModel.customer_birth_day = this.userInfo.birthday
+				this.formModel.phone_xcx = this.userInfo.phone_xcx
 				this.modalName = 'realname'
 			},
 			async updateUserInfo() {
@@ -224,7 +246,7 @@
 					data.phone = this.formModel.customer_phone
 				}
 				if (!this.userInfo.phone_xcx) {
-					data.phone_xcx = this.formModel.customer_phone
+					data.phone_xcx = this.formModel.phone_xcx
 				}
 				if (!this.userInfo.birthday) {
 					data.birthday = this.formModel.customer_birth_day
@@ -243,7 +265,10 @@
 				}]
 				let res = await this.$fetch('operate', 'srvhealth_person_info_update', req, 'health')
 				if (res.success) {
-					this.selectTimeArr(this.curVaccine)
+					if (Array.isArray(res.data) && res.data.length > 0) {
+						this.$store.commit('SET_USERINFO', res.data[0])
+					}
+					this.selectTimeArr(this.vaccineInfo)
 				}
 			},
 			async decryptPhoneNumber(e) {
@@ -257,8 +282,21 @@
 						serviceName: 'srvwx_app_data_decrypt'
 					}]
 					let res = await this.$fetch('operate', 'srvwx_app_data_decrypt', req, 'wx');
+					if (res.success && typeof res.data === 'object' && !Array.isArray(res.data)) {
+						if (res.data.phoneNumber) {
+							this.formModel.phone_xcx = res.data.phoneNumber
+							if (!this.formModel.customer_phone) {
+								this.formModel.customer_phone = res.data.phoneNumber
+							}
+						} else {
+							uni.showModal({
+								title: '未知错误',
+								content: res.data ? JSON.stringify(res.data) : '',
+								showCancel: false
+							})
+						}
+					}
 				}
-
 			},
 			async getVaccineList() {
 				// 查找可预约疫苗列表
@@ -352,14 +390,15 @@
 
 			},
 			showModal(e) {
-				this.curVaccine = e
-				if (this.userInfo && (!this.userInfo.id_no || !this.userInfo.phone)) {
+				this.vaccineInfo = e
+				if (this.userInfo && (!this.userInfo.id_no || !this.userInfo.phone || !this.userInfo.phone_xcx)) {
 					this.showRealNameModal()
 				} else {
 					this.selectTimeArr(e)
 				}
 			},
 			hideModal() {
+				this.vaccineInfo = {}
 				this.curVac = {}
 				this.selectedVaccine = {}
 				this.modalName = ''
@@ -440,6 +479,36 @@
 	.cu-modal {
 		z-index: 100;
 
+		.vaccine-info {
+			padding: 20rpx;
+			background-color: #fff;
+			max-height: 80vh;
+			overflow: scroll;
+			.vaccine-name{
+				font-weight: bold;
+				text-align: left;
+			}
+			.vaccine-info{
+				display: flex;
+				padding: 0;
+				padding: 10rpx;
+				.label{
+					color: #666;
+					margin-right: 20rpx;
+				}
+			}
+			.image-box {	
+				border-radius: 20rpx;
+				overflow: hidden;
+				display: flex;
+				justify-content: center;
+				.remark-pic{
+					width: 300rpx;
+					margin-right: 10rpx;
+				}
+			}
+		}
+
 		.tip {
 			text-align: center;
 			padding: 10px;
@@ -481,6 +550,9 @@
 	}
 
 
+	.birthday {
+		text-align: left !important;
+	}
 
 	.cu-form-group .title {
 		min-width: calc(4em + 15px);
