@@ -1255,7 +1255,7 @@ export default {
 				return false
 			}
 		}
-		Vue.prototype.onButtonRequest = function(e) {
+		Vue.prototype.onButtonRequest = function(e,appName) {
 			let btn, row, condition, defaultVal
 			if (e && Vue.prototype.iObject(e) && e.hasOwnProperty("button")) {
 				btn = e.button
@@ -1305,7 +1305,7 @@ export default {
 											"condition": params.condition
 										}]
 										Vue.prototype.onRequest("delete", params.serviceName,
-											req).then((res) => {
+											req,appName).then((res) => {
 											if (res.data.state === "SUCCESS") {
 												resolve(res.data)
 											} else {
@@ -1384,7 +1384,7 @@ export default {
 							break;
 						case "delete":
 							return new Promise((resolve, reject) => {
-								Vue.prototype.onButtonRequest(e).then((res) => {
+								Vue.prototype.onButtonRequest(e,appName).then((res) => {
 									if (res) {
 										resolve(res)
 									} else {
