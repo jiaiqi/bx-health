@@ -267,9 +267,11 @@
 								}
 								return;
 							}
-							let url = `/publicPages/newForm/newForm?type=add&serviceName=${item.service_name.replace('_select', '_add')}&fieldsCond=${encodeURIComponent(
-							JSON.stringify(fieldsCond)
-						)}`;
+							let url = `/publicPages/newForm/newForm?type=add&serviceName=${item.service_name.replace('_select', '_add')}&fieldsCond=${
+							JSON.stringify(fieldsCond)}`;
+							if (this.appName) {
+								url += `&appName=${this.appName}`
+							}
 							uni.navigateTo({
 								url: url
 							});
@@ -301,7 +303,7 @@
 						row: e
 					};
 					try {
-						this.onButtonToUrl(req,this.appName).then(res => {
+						this.onButtonToUrl(req, this.appName).then(res => {
 							console.log('clickItem :', res);
 							let {
 								row,
@@ -434,7 +436,7 @@
 						});
 					}
 				} else {
-					this.onButtonToUrl(data,this.appName).then(res => {
+					this.onButtonToUrl(data, this.appName).then(res => {
 						if (data.button && data.button.button_type === 'delete') {
 							if (res.state === 'SUCCESS') {
 								this.$refs.bxList.onRefresh();
@@ -499,7 +501,7 @@
 									// { column: 'info_no', value: this.vuex_userInfo.no, condition: [{ colName: 'no', ruleType: 'eq', value: this.vuex_userInfo.no }] },
 									// { column: 'user_account', value: this.vuex_userInfo.userno }
 								];
-						
+
 								let condition = data?.button?.operate_params?.condition
 								let defaultVal = data?.button?.operate_params?.data
 								if (Array.isArray(defaultVal) && defaultVal.length > 0) {
@@ -524,9 +526,9 @@
 								let url =
 									`/publicPages/newForm/newForm?service=${data.button.service}&serviceName=${data.button.service_name}&type=${data.button.servcie_type}&fieldsCond=` +
 									encodeURIComponent(JSON.stringify(fieldsCond));
-									if (this.appName) {
-										url += `&appName=${this.appName}`
-									}
+								if (this.appName) {
+									url += `&appName=${this.appName}`
+								}
 								uni.navigateTo({
 									url: url
 								});
