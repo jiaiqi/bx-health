@@ -226,7 +226,7 @@ export default {
 					fieldInfo.options = item.option_list_v2
 				} else if (item.col_type === "MultilineText" || item.col_type === 'longtext') {
 					fieldInfo.type = "textarea"
-				} else if (item.col_type === 'snote') {
+				} else if (item.col_type === 'snote'||item.col_type==='Note') {
 					fieldInfo.type = "RichText"
 				} else if (item.col_type === "Money" || item.col_type === "Float") {
 					fieldInfo.type = "digit"
@@ -464,14 +464,14 @@ export default {
 							success: true,
 							data: res.data.response[0].response.effect_data
 						}
-					}else if(Array.isArray(res.data.response) &&
+					} else if (Array.isArray(res.data.response) &&
 						res.data.response.length > 0 &&
-						res.data.response[0].response  ){
-							return {
-								success: true,
-								data: 	res.data.response[0].response 
-							}
+						res.data.response[0].response) {
+						return {
+							success: true,
+							data: res.data.response[0].response
 						}
+					}
 				}
 			} else {
 				let result = {
@@ -1339,7 +1339,7 @@ export default {
 		 * 按钮跳转的统一处理
 		 * 
 		 */
-		Vue.prototype.onButtonToUrl = function(e) {
+		Vue.prototype.onButtonToUrl = function(e, appName) {
 			console.log("onButtonToUrl", e)
 			let btn, row, condition, defaultVal
 			if (e && Vue.prototype.iObject(e)) {
@@ -1366,9 +1366,10 @@ export default {
 									display: false
 								}]
 								let url =
-									`/publicPages/newForm/newForm?type=update&serviceName=${btn.service_name}&fieldsCond=${encodeURIComponent(
-									JSON.stringify(fieldsCond)
-								)}`;
+									`/publicPages/newForm/newForm?type=update&serviceName=${btn.service_name}&fieldsCond=${JSON.stringify(fieldsCond)}`;
+								if (appName) {
+									url += `&appName=${appName}`
+								}
 								uni.navigateTo({
 									url: url
 								})
@@ -1439,24 +1440,18 @@ export default {
 								}
 							}
 							return new Promise((resolve, reject) => {
-								let fieldsCond = [{
-									column: 'id',
-									value: row.id,
-									display: false
-								}]
-								let url =
-									`/publicPages/newForm/newForm?type=detail&serviceName=${btn.service_name}&fieldsCond=${encodeURIComponent(
-									JSON.stringify(fieldsCond)
-								)}`;
-								uni.navigateTo({
-									url: url
-								})
 								resolve(e)
 							})
 							//代码块
 							break;
 						case "delete":
 							//代码块
+							break;
+						case "customize":
+							//自定义按钮
+							return new Promise((resolve, reject) => {
+								resolve(btn)
+							})
 							break;
 						case "add":
 							//代码块
@@ -1777,7 +1772,7 @@ export default {
 		}
 		Vue.prototype.toAddPage = async () => {
 			// 获取用户信息
-			
+
 			let isLogin = await Vue.prototype.wxVerifyLogin()
 
 			if (!isLogin) {

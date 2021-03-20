@@ -27,6 +27,8 @@
 		},
 		data() {
 			return {
+				appName: '',
+				service: '', //自定义按钮的服务
 				serviceName: '',
 				srvType: 'add', // 表单信息 add | update  | select |list | detail
 				use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
@@ -35,6 +37,7 @@
 					_formButtons: []
 				},
 				fields: [],
+				hideColumn: [], // 不显示的字段 
 				condition: [],
 				fieldsCond: [],
 				params: {},
@@ -197,8 +200,16 @@
 						url: `${this.params.to}?${this.params.idCol}=${this.params.submitData[this.params.idCol]}`
 					});
 				} else {
+					let url =
+						`/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(JSON.stringify(this.fieldsCond))}`
+					if (Array.isArray(this.hideColumn) && this.hideColumn.length > 0) {
+						url += `&hideColumn=${JSON.stringify(this.hideColumn)}`
+					}
+					if(this.appName){
+						url += `&appName=${this.appName}`
+					}
 					uni.redirectTo({
-						url: `/publicPages/newForm/newForm?type=${type}&serviceName=${this.getServiceName(this.serviceName)}&fieldsCond=${encodeURIComponent(JSON.stringify(this.fieldsCond))}`
+						url: url
 					});
 				}
 			},
@@ -280,8 +291,8 @@
 										value: self.params.defaultVal.id
 									}];
 								}
-								let app = uni.getStorageSync('activeApp');
-								let url = this.getServiceUrl(app, e.service_name, 'add');
+								let app = self.appName || uni.getStorageSync('activeApp');
+								let url = self.getServiceUrl(app, e.service_name, 'add');
 								if (!Array.isArray(req[0].condition) || req[0].condition.length === 0) {
 									uni.showToast({
 										title: '参数错误，请刷新重试',
@@ -289,8 +300,7 @@
 									});
 									return;
 								}
-								let res = await this.onRequest('update', e.service_name, req);
-
+								let res = await this.onRequest('update', e.service_name, req,app);
 								if (res.data.state === 'SUCCESS') {
 									if (
 										Array.isArray(res.data.response) &&
@@ -352,6 +362,12 @@
 											}
 										}
 									});
+								} else {
+									uni.showToast({
+										title: res.data.resultMessage,
+										mask: false,
+										icon: 'none'
+									});
 								}
 								this.isOnButton = false;
 							}
@@ -370,7 +386,7 @@
 								serviceName: e.service_name,
 								data: [data]
 							}];
-							let app = uni.getStorageSync('activeApp');
+							let app = this.appName || uni.getStorageSync('activeApp');
 							let url = this.getServiceUrl(app, e.service_name, 'add');
 							let res = await this.$http.post(url, req);
 							if (res.data.state === 'SUCCESS') {
@@ -414,6 +430,12 @@
 											}
 										}
 									}
+								});
+							} else {
+								uni.showToast({
+									title: res.data.resultMessage,
+									mask: false,
+									icon: 'none'
 								});
 							}
 							this.isOnButton = false;
@@ -523,7 +545,7 @@
 				});
 			},
 			async getFieldsModel(srv) {
-				let app = uni.getStorageSync('activeApp');
+				let app = this.appName || uni.getStorageSync('activeApp');
 				let serviceName = this.getServiceName(srv);
 				let url = this.getServiceUrl(app, serviceName, 'select');
 				let req = {
@@ -551,16 +573,22 @@
 			async getDefaultVal() {
 				if (this.use_type === 'detail' || this.use_type === 'update') {
 					let serviceName = this.serviceName.replace('_update', '_select').replace('_add', '_select');
+					if (this.service) {
+						serviceName = this.service
+					}
 					let condition = this.fieldsCond
 						.filter(item => item.value)
 						.map(item => {
 							return {
 								colName: item.column,
-								ruleType: 'like',
+								ruleType: item.column === 'id' ? "eq" : 'like',
 								value: item.value
 							};
 						});
-					let app = uni.getStorageSync('activeApp');
+					if (condition.find(item => item.colName === 'id')) {
+						condition = condition.filter(item => item.colName === 'id')
+					}
+					let app = this.appName || uni.getStorageSync('activeApp');
 					let url = this.getServiceUrl(app, serviceName, 'select');
 					let req = {
 						serviceName: serviceName,
@@ -582,11 +610,12 @@
 				}
 			},
 			async getFieldsV2() {
-				let app = uni.getStorageSync('activeApp');
-				let colVs = await this.getServiceV2(this.serviceName, this.srvType, this.use_type, app);
-				let defaultVal = this.defaultVal;
-				this.colsV2Data = colVs;
-				colVs = this.deepClone(colVs);
+				let self = this
+				let app = this.appName || uni.getStorageSync('activeApp');
+				let colVs = await self.getServiceV2(self.serviceName, self.srvType, self.use_type, app);
+				let defaultVal = self.defaultVal;
+				self.colsV2Data = colVs;
+				colVs = self.deepClone(colVs);
 				if (colVs.service_view_name) {
 					uni.setNavigationBarTitle({
 						title: colVs.service_view_name
@@ -595,22 +624,22 @@
 				switch (colVs.use_type) {
 					case 'update':
 					case 'detail':
-						defaultVal = this.defaultVal && this.defaultVal.id ? this.defaultVal : await this
+						defaultVal = self.defaultVal && self.defaultVal.id ? self.defaultVal : await self
 							.getDefaultVal();
-						let fields = this.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : this.params
+						let fields = self.setFieldsDefaultVal(colVs._fieldInfo, defaultVal ? defaultVal : self.params
 							.defaultVal);
 						if (!fields) {
 							return;
 						}
-						this.fields = fields.map(field => {
+						self.fields = fields.map(field => {
 							if (field.type === 'Set' && Array.isArray(field.option_list_v2)) {
 								field.option_list_v2 = field.option_list_v2.map(item => {
 									item.checked = false;
 									return item;
 								});
 							}
-							if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
-								this.fieldsCond.forEach(item => {
+							if (Array.isArray(self.fieldsCond) && self.fieldsCond.length > 0) {
+								self.fieldsCond.forEach(item => {
 									if (item.column === field.column) {
 										if (item.hasOwnProperty('display')) {
 											field.display = item.display;
@@ -630,19 +659,19 @@
 								});
 							}
 							return field;
-						});
+						}).filter(item => !self.hideColumn.includes(item.column))
 						break;
 					case 'add':
-						this.fields = colVs._fieldInfo.map(field => {
+						self.fields = colVs._fieldInfo.map(field => {
 							if (field.type === 'Set' && Array.isArray(field.option_list_v2)) {
 								field.option_list_v2 = field.option_list_v2.map(item => {
 									item.checked = false;
 									return item;
 								});
 							}
-							if (this.defaultCondition && Array.isArray(this.defaultCondition) && colVs
+							if (self.defaultCondition && Array.isArray(self.defaultCondition) && colVs
 								._fieldInfo && Array.isArray(colVs._fieldInfo)) {
-								this.defaultCondition.forEach(cond => {
+								self.defaultCondition.forEach(cond => {
 									colVs._fieldInfo.forEach(field => {
 										if (cond.colName === field.column) {
 											field['value'] = cond['value'];
@@ -651,8 +680,8 @@
 									});
 								});
 							}
-							if (Array.isArray(this.fieldsCond) && this.fieldsCond.length > 0) {
-								this.fieldsCond.forEach(item => {
+							if (Array.isArray(self.fieldsCond) && self.fieldsCond.length > 0) {
+								self.fieldsCond.forEach(item => {
 									if (item.column === field.column) {
 										if (item.hasOwnProperty('display')) {
 											field.display = item.display;
@@ -672,7 +701,7 @@
 								});
 							}
 							return field;
-						});
+						}).filter(item => !self.hideColumn.includes(item.column))
 						break;
 				}
 			},
@@ -748,6 +777,12 @@
 			if (destApp) {
 				uni.setStorageSync('activeApp', destApp);
 			}
+			if (option.appName) {
+				this.appName = option.appName
+			}
+			if (option.hideColumn) {
+				this.hideColumn = JSON.parse(option.hideColumn)
+			}
 			if (option.afterSubmit) {
 				this.afterSubmit = option.afterSubmit
 			}
@@ -759,6 +794,9 @@
 			}
 			if (option.params) {
 				this.params = JSON.parse(decodeURIComponent(option.params));
+			}
+			if (option.service) {
+				this.service = option.service
 			}
 			if (option.successTip) {
 				this.successTip = option.successTip

@@ -66,7 +66,6 @@
 				}
 				this.$fetch('select', 'srvhealth_dialogue_session_select', req, 'health').then(res => {
 					if (res.success) {
-						debugger
 						if (isMore) {
 							this.sessionList = [...this.sessionList, ...res.data];
 						} else {

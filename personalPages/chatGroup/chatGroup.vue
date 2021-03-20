@@ -44,14 +44,14 @@
 					</view>
 				</view>
 			</view>
-			<view class="group-item" @click="toPages('create-group')">
+			<!-- 		<view class="group-item" @click="toPages('create-group')">
 				<view class="icon cuIcon-add"></view>
 				<view class="content">
 					<view class="top">
 						<view class="name">创建圈子</view>
 					</view>
 				</view>
-			</view>
+			</view> -->
 		</view>
 	</view>
 </template>
@@ -167,7 +167,12 @@
 						}
 					});
 				} else if (type === 'create-group') {
-					let url = `/publicPages/newForm/newForm?serviceName=srvhealth_group_circle_select&type=add`;
+					let fieldsCond = [{
+						column: 'circle_visible',
+						value: '不开放'
+					}]
+					let url =
+						`/publicPages/newForm/newForm?serviceName=srvhealth_group_circle_select&type=add&fieldsCond=${JSON.stringify(fieldsCond)}`;
 					uni.navigateTo({
 						url: url
 					});
@@ -242,6 +247,10 @@
 					colName: 'gc_no',
 					ruleType: 'notin',
 					value: this.groupList.map(item => item.gc_no).toString()
+				}, {
+					"colName": "circle_visible",
+					"ruleType": "ne",
+					"value": '不开放',
 				}];
 				if (condition) {
 					cond = [...cond, ...condition];

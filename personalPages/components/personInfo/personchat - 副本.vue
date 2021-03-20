@@ -1146,7 +1146,6 @@
 				console.log('type----sendMessageLanguageInfo', type);
 				let serviceName = 'srvhealth_consultation_chat_record_add'
 				if (this.sessionType === '机构用户客服') {
-					debugger
 					if (this.identity === '客户') {
 						serviceName = 'srvhealth_consultation_chat_record_kefu_user_add'
 					} else {

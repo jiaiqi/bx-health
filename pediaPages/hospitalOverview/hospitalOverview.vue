@@ -801,7 +801,7 @@
 					await this.selectBindUser()
 					await this.selectStoreInfo();
 					await this.seletGroupList();
-					await this.getKefuSessionInfo()
+					// await this.getKefuSessionInfo()
 					this.selectUnreadAmount()
 				}
 			},
@@ -847,7 +847,7 @@
 				this.selectUnreadAmount()
 			})
 			uni.$on('updateUnread', e => {
-				this.selectUnreadAmount()
+				this.initPage()
 			})
 			uni.$on('updateStoreInfo', (e) => {
 				if (e && e.store_no === this.storeNo) {
@@ -880,7 +880,6 @@
 				}
 			}
 			this.checkOptionParams(option);
-
 			if (this.authBoxDisplay) {
 				// 未授权
 				return

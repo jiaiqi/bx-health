@@ -20,7 +20,7 @@
 					@tap="previewImage(item, 'Image')" data-target="Image" :src="item"></image>
 			</view>
 			<view class="form-item-content_detail rich-text" v-html="field.value"
-				v-else-if="pageType === 'detail' && (field.type === 'snote' || field.type === 'Note')"></view>
+				v-else-if="pageType === 'detail' && (field.type === 'snote' || field.type === 'Note'||field.type==='RichText')"></view>
 			<view class="form-item-content_detail text" v-else-if="pageType === 'detail'">
 				{{ fieldData.value | formalText }}</view>
 			<!-- detail-详情-end -->
@@ -101,7 +101,8 @@
 			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'RichText'"
 				@click="showModal('RichEditor')">
 				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
-				<view class="value" v-else>{{ fieldData.value | html2text }}</view>
+				<view class="value rich-text" v-else >点击进行编辑</view>
+				<!-- <view class="value rich-text" v-else v-html="fieldData.value">{{ fieldData.value | html2text }}</view> -->
 			</view>
 			<input class="form-item-content_value" @blur="onBlur" :adjust-position="false" :type="fieldData.type"
 				:placeholder="'请输入'" @input="onInput"
@@ -227,6 +228,7 @@
 					.replace(/<[^>]+?>/g, '')
 					.replace(/\s+/g, ' ')
 					.replace(/ /g, ' ')
+					.replace(/&nbsp;/g,' ')
 					.replace(/>/g, ' ');
 			},
 			formalText(val) {
@@ -306,6 +308,9 @@
 				}
 				if ((this.fieldData.type === 'textarea' || this.fieldData.type === 'images') && (this.fieldData.value ||
 						this.pageType !== 'detail')) {
+					result = '100%';
+				}
+				if(this.fieldData.type==='RichText'){
 					result = '100%';
 				}
 				return result;
@@ -388,9 +393,6 @@
 			}
 		},
 		methods: {
-			checkboxChange(e){
-				debugger
-			},
 			isChecked(val){
 				if(this.fieldData&&this.fieldData.value&&this.fieldData.value.indexOf(val)!==-1){
 					return true

@@ -1,8 +1,8 @@
 <template>
 	<view>
 		<view class="head">
-			<image :src="getImagePath(storeInfo.image)" class="logo" mode="aspectFill"></image>
-			<view class="store-name">
+			<image :src="getImagePath(storeInfo.image)" class="logo" mode="aspectFill" @click="toStoreDetail"></image>
+			<view class="store-name" @click="toStoreDetail">
 				<view class="name">{{ storeInfo.name }}</view>
 				<view class="address" v-if="storeInfo.address" @click="openLocation">
 					{{ storeInfo.address }}
@@ -30,6 +30,20 @@
 				</view>
 			</view>
 		</view>
+		<view class="cu-modal" :class="{show:modalName ==='selectColumn'}" @click="hideModal">
+			<view class="cu-dialog" @click.stop="">
+				<view class="cu-bar bg-white margin-top">
+					<view class="action">
+						<text class="cuIcon-title text-orange "></text> 
+						<text>请选择</text>
+					</view>
+					<view class="action">
+						<button class="cu-btn bg-green shadow" @tap="showModal" data-target="DialogModal1">Dialog</button>
+						<button class="cu-btn bg-blue shadow margin-left" @tap="showModal" data-target="DialogModal2">Dialog</button>
+					</view>
+				</view>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -38,6 +52,7 @@
 		data() {
 			return {
 				storeInfo: {},
+				modalName:'',
 				storeNo: '',
 				gridList: [{
 						label: '店铺商品',
@@ -95,6 +110,12 @@
 						type: 'vaccination_appointment'
 					},
 					{
+						label: '公告管理',
+						icon: 'read',
+						color: 'orange',
+						type: 'notice'
+					},
+					{
 						label: '店铺设置',
 						icon: 'settings',
 						color: 'blue',
@@ -102,7 +123,9 @@
 					}
 				],
 				sessionList: [],
-				unreadNum: 0
+				unreadNum: 0,
+				websiteDetail: {}, //店铺关联站点信息
+				websiteColumn:[], //站点栏目
 			};
 		},
 		filters: {
@@ -121,6 +144,45 @@
 			}
 		},
 		methods: {
+			getWebsiteColumn(no) {
+				let req = {
+					"serviceName": "srvdaq_cms_category_select",
+					"colNames": ["*"],
+					"condition": [{
+						"colName": "website_no",
+						"ruleType": "eq",
+						"value": no
+					}],
+					"page": {
+						"pageNo": 1,
+						"rownumber": 2
+					},
+				}
+				this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(res => {
+					if (res.success && res.data.length > 0) {
+						this.websiteColumn = res.data
+					}
+				})
+			},
+			goNoticeList(){
+				let viewTemp = {
+					tip: 'content_status',
+					// price: 'current_price',
+					footer: 'content',
+					title: 'title',
+					img: 'icon_image'
+				};
+				let cond = [{colName: "no", ruleType: "like", value: "LM202103100033"}]
+				let url =
+					`/publicPages/list/list?pageType=list&appName=daq&serviceName=srvdaq_cms_content_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
+				// let url = '/storePages/NewsList/NewsList?no=LM202103100033'
+				uni.navigateTo({
+					url:url
+				})
+			},
+			toStoreDetail() {
+				uni.navigateBack()
+			},
 			getStoreSession() {
 				// 查找此店铺的客服会话列表
 				let req = {
@@ -133,22 +195,19 @@
 						"ruleType": "eq",
 						"value": this.storeNo
 					}],
-					colNames: [ "store_person_no", "session_no","kefu_kefu_unread_msg"
-					],
-					group:[
-						{
-							"colName": "kefu_kefu_unread_msg",
-									"type": "sum", // 总条数
-									'aliasName':'unread'
-						}
-					],
+					colNames: ["store_person_no", "session_no", "kefu_kefu_unread_msg"],
+					group: [{
+						"colName": "kefu_kefu_unread_msg",
+						"type": "sum", // 总条数
+						'aliasName': 'unread'
+					}],
 					"page": {
 						"pageNo": 1,
 						"rownumber": 20
 					}
 				}
 				this.$fetch('select', 'srvhealth_dialogue_session_select', req, 'health').then(res => {
-					if (res.success && Array.isArray(res.data) && res.data.length>0) {
+					if (res.success && Array.isArray(res.data) && res.data.length > 0) {
 						this.unreadNum = res.data[0].unread
 					}
 				})
@@ -175,6 +234,7 @@
 					ruleType: 'eq',
 					value: this.storeNo
 				}];
+				let labels = []
 				let viewTemp = {};
 				switch (type) {
 					case 'setting':
@@ -243,10 +303,17 @@
 							price: 'app_count',
 							footer: 'app_desc'
 						};
-						url =
-							`/publicPages/list/list?pageType=list&serviceName=srvhealth_store_vaccination_appointment_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`
+						labels = ['app_count'],
+							url =
+							`/publicPages/list/list?pageType=list&label=${JSON.stringify(labels)}&serviceName=srvhealth_store_vaccination_appointment_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`
 						break;
-
+					case 'notice':
+						// 通知公告管理
+						// this.modalName = 'selectColumn'
+						if(this.storeNo==='S20210227032'){
+							this.goNoticeList()
+						}
+						break;
 					case 'vaccine_stocks':
 						// 疫苗库存
 						viewTemp = {
@@ -256,8 +323,9 @@
 							price: 'stock_count',
 							footer: 'remark'
 						};
+						labels = ['stock_count']
 						url =
-							`/publicPages/list/list?pageType=list&serviceName=srvhealth_store_vaccine_stocks_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`
+							`/publicPages/list/list?pageType=list&label=${JSON.stringify(labels)}&serviceName=srvhealth_store_vaccine_stocks_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`
 						break;
 
 
@@ -268,6 +336,9 @@
 						url: url
 					});
 				}
+			},
+			hideModal(){
+				this.modalName = ''
 			},
 			toDetail(e) {
 				let fieldsCond = [{
@@ -338,31 +409,35 @@
 				};
 				let storeInfo = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health');
 				if (storeInfo.success && Array.isArray(storeInfo.data) && storeInfo.data.length > 0) {
-					storeInfo = storeInfo.data[0];
-					this.storeInfo = storeInfo;
+					// storeInfo = storeInfo.data[0];
+					this.unreadNum = storeInfo.data[0].kefu_unread_msg
+					this.storeInfo = storeInfo.data[0];
 				}
 			}
 		},
 		onPullDownRefresh() {
 			if (this.storeNo) {
 				this.getStoreInfo();
-				this.getStoreSession()
+				// this.getStoreSession()
 			}
 			setTimeout(() => {
 				uni.stopPullDownRefresh()
 			}, 1000)
 		},
+		beforeDestroy() {
+			uni.$emit('updateUnread')
+		},
 		onLoad(option) {
 			uni.$on('updateKefuSessionLastLookTime', () => {
 				if (this.storeNo) {
 					this.getStoreInfo();
-					this.getStoreSession()
+					// this.getStoreSession()
 				}
 			})
 			if (option.store_no) {
 				this.storeNo = option.store_no;
 				this.getStoreInfo();
-				this.getStoreSession()
+				// this.getStoreSession()
 			}
 		}
 	};

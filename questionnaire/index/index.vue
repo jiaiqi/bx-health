@@ -413,7 +413,6 @@
 						this.activity_no = data.activity_no;
 						let configCols = [];
 						data.item_data.forEach(item => {
-							debugger
 							configCols.push(this.getConfig(item));
 						});
 						if (data.logo) {

@@ -495,7 +495,16 @@
 					"navigationBarTitleText": "疫苗预约",
 					"enablePullDownRefresh": true
 				}
-			}]
+			}    ,{
+                    "path" : "NewsList/NewsList",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "publicPages",

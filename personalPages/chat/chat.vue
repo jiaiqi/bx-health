@@ -513,6 +513,7 @@
 		beforeDestroy() {
 			if (this.sessionType === '机构用户客服') {
 				this.updateKefuSessionLastLookTime(this.lastMessage)
+				uni.$emit("updateUnread")
 			} else if (this.sessionType === '店铺机构全员') {
 				this.updateStoreSessionLastLookTime(this.lastMessage)
 			} else if (this.groupInfo && this.pg_no) {

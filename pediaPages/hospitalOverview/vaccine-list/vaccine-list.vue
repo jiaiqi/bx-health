@@ -39,6 +39,9 @@
 					<view class="vaccine-name cuIcon-titles" v-if="vaccineInfo.vaccine_drug_name">
 						{{vaccineInfo.vaccine_drug_name}}
 					</view>
+					<view class="tips">
+						点击照片查看详情
+					</view>
 					<view class="vaccine-info" v-if="vaccineInfo.usage">
 						<view class="label">用法:</view>
 						<view class="value">
@@ -46,8 +49,8 @@
 						</view>
 					</view>
 					<view class="image-box" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)">
-						<image :src="item" mode="aspectFit" class="remark-pic" v-for="item in imagesUrl" :key="item"
-							@click="toPreviewImage(item)">
+						<image :src="item.smallUrl" mode="aspectFit" class="remark-pic" v-for="item in imagesUrl"
+							:key="item" @click="toPreviewImage(item.originUrl)">
 						</image>
 					</view>
 				</view>
@@ -216,9 +219,11 @@
 					let images = await this.getFilePath(e.remark_pic)
 					if (Array.isArray(images)) {
 						for (let i = 0; i < images.length; i++) {
-							const url =
-								`${this.$api.getFilePath}${images[i].fileurl}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`;
-							this.imagesUrl.push(url);
+							const obj = {
+								originUrl: `${this.$api.getFilePath}${images[i].fileurl}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`,
+								smallUrl: `${this.$api.getFilePath}${images[i].fileurl}&thumbnailType=fwsu_100&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`
+							}
+							this.imagesUrl.push(obj);
 						}
 					}
 				}
@@ -484,25 +489,34 @@
 			background-color: #fff;
 			max-height: 80vh;
 			overflow: scroll;
-			.vaccine-name{
+
+			.vaccine-name {
 				font-weight: bold;
 				text-align: left;
 			}
-			.vaccine-info{
+			.tips{
+				text-align: left;
+				font-size: 12px;
+				color: #333;
+			}
+			.vaccine-info {
 				display: flex;
 				padding: 0;
 				padding: 10rpx;
-				.label{
+
+				.label {
 					color: #666;
 					margin-right: 20rpx;
 				}
 			}
-			.image-box {	
+
+			.image-box {
 				border-radius: 20rpx;
 				overflow: hidden;
 				display: flex;
 				justify-content: center;
-				.remark-pic{
+
+				.remark-pic {
 					width: 300rpx;
 					margin-right: 10rpx;
 				}

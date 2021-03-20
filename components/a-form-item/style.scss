@@ -177,6 +177,11 @@
 			&.text {
 				overflow: scroll;
 			}
+			&.rich-text{
+				background-color: #f1f1f1;
+				padding: 10rpx;
+				border-radius: 10rpx;
+			}
 		}
 		.form-item-content_value {
 			min-height: 1.4em;
@@ -234,6 +239,17 @@
 					text-overflow: ellipsis;
 					overflow: hidden;
 					white-space: nowrap;
+					&.rich-text{
+						max-width: 600rpx;
+						width: 100%!important;
+						background-color: #F1F1F1;
+						min-height: 200rpx;
+						border-radius: 10rpx;
+						word-break: break-all;
+						display: -webkit-box;
+						-webkit-line-clamp: 4; /**指定行数*/
+						-webkit-box-orient: vertical;
+					}
 				}
 				&:active {
 					background-color: #f1f1f1;

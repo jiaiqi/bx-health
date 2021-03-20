@@ -75,10 +75,13 @@
 				</view>
 			</view>
 			<view class="content-box flex-twice" v-else>
-				<view class="title" v-if="goodsData.title" @click="listItemClick">{{ goodsData.title }}</view>
-				<view class="title-tip" v-if="goodsData.tip" @click="listItemClick">{{ goodsData.tip }}</view>
+				<view class="title" v-if="goodsData.title" @click="listItemClick">{{ goodsData.title|html2text}}</view>
+				<view class="title-tip" v-if="goodsData.tip" @click="listItemClick">{{ goodsData.tip|html2text }}</view>
 				<view class="content" v-if="goodsData.price" @click="listItemClick">
 					<view class="numbers">
+						<text class="label" v-if="showLabel['price']">
+							{{showLabel['price']}}:
+						</text>
 						<text class="unit"
 							v-if="!isNaN(Number(goodsData.price)) && viewTemp.price.indexOf('price') !== -1">￥</text>
 						{{ goodsData.price }}
@@ -86,7 +89,7 @@
 					<view class="tags"></view>
 				</view>
 				<view class="footer">
-					<text class="foot-name" v-if="goodsData.footer" @click="listItemClick">{{ goodsData.footer }}</text>
+					<text class="foot-name" v-if="goodsData.footer" @click="listItemClick">{{ goodsData.footer|html2text }}</text>
 					<view class="foot-button" v-if="showFootBtn">
 						<view class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
 							v-for="item in rowButton" :key="item.id" @click="footBtnClick(item)">
@@ -103,10 +106,28 @@
 <script>
 	export default {
 		name: 'ListItem',
+		filters: {
+			html2text: function(value) {
+				return value
+					.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi, '')
+					.replace(/<[^>]+?>/g, '')
+					.replace(/\s+/g, ' ')
+					.replace(/ /g, ' ')
+					.replace(/&nbsp;/g, ' ')
+					.replace(/>/g, ' ');
+			},
+		},
 		data() {
 			return {
 				picUrl: '',
 				goodsData: {
+					title: '',
+					tip: '',
+					img: '',
+					price: '',
+					footer: ''
+				},
+				showLabel: {
 					title: '',
 					tip: '',
 					img: '',
@@ -262,6 +283,9 @@
 			layout: {
 				type: String, //布局 normal-普通列表 grid-宫格
 				default: 'normal'
+			},
+			labels: { //要显示label的字段
+				type: Array
 			}
 		},
 		watch: {
@@ -283,6 +307,16 @@
 				deep: true,
 				immediate: true,
 				handler(newValue, oldValue) {
+					if (Array.isArray(this.labels) && this.labels.length > 0 && Array.isArray(this.srv_cols)) {
+						let col = this.srv_cols.find(item => this.labels.includes(item.columns))
+						if (col && col.columns) {
+							Object.keys(this.viewTemp).forEach(key => {
+								if (this.viewTemp[key] === col.columns) {
+									this.showLabel[key] = col.label
+								}
+							})
+						}
+					}
 					if (newValue[this.viewTemp.img]) {
 						this.goodsData.img = this.getImagePath(newValue[this.viewTemp.img]);
 					}
@@ -387,12 +421,16 @@
 				}
 
 				.content {
-
 					.numbers {
 						color: #e93b3d;
 						line-height: 40upx;
 						margin-top: 20upx;
 						font-size: 36upx;
+
+						.label {
+							color: #333;
+							font-size: 14px;
+						}
 					}
 
 					.unit {
@@ -449,6 +487,9 @@
 						display: inline-block;
 						padding-right: 28upx;
 						line-height: 44upx;
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: nowrap;
 
 						&::after {
 							content: '';
