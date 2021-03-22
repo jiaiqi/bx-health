@@ -106,6 +106,7 @@
 			</view>
 			<input type="text"
 			@input="onInput"
+			placeholder="请输入"
 			@blur="onBlur" :adjust-position="false" 
 			 :maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
 			 v-model="fieldData.value" :disabled="fieldData.disabled ? fieldData.disabled : false" v-else-if="fieldData.type ==='text'"/>
