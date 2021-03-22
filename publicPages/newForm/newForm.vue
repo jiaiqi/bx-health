@@ -75,6 +75,7 @@
 					ruleType: 'eq',
 					value: formData[e.foreign_key.referenced_column_name]
 				}];
+				debugger
 				if (e.foreign_key && e.foreign_key.referenced_column_name && formData[e.foreign_key
 						.referenced_column_name]) {
 					if (e.foreign_key.more_config && e.foreign_key.more_config.targetType) {
@@ -174,6 +175,14 @@
 								title: 'general_name',
 								tip: 'take_times',
 								footer: 'remind_time'
+							};
+						}
+						if (e.service_name === 'srvhealth_store_vaccination_appoint_record_select') {
+							// 疫苗预约记录
+							viewTemp = {
+								title: 'customer_name',
+								img: 'person_image',
+								// footer: 'customer_name'
 							};
 						}
 						uni.navigateTo({

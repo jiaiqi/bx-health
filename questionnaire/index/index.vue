@@ -709,6 +709,7 @@
 				`/questionnaire/index/index?formType=form&activity_no=${this.activity_no}&status=进行中`;
 			this.saveSharerInfo(this.userInfo, path);
 			return {
+				title:this.formData.title,
 				path: path
 			};
 		},

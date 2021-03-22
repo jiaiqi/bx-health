@@ -1,8 +1,13 @@
 <template>
 	<view class="list-item-wrap bg-white" :class="{ 'grid-layout-item': layout === 'grid' }">
 		<view class="list-item flex" v-if="viewType === 'normal'">
-			<image :src="getImagePath(itemData[viewTemp['img']])" @click.stop="listItemClick" mode="aspectFill"
-				class="main-image" v-if="itemData[viewTemp['img']]"></image>
+			<view class="main-image" v-if="itemData[viewTemp['img']]">
+				<image class="image" :src="getImagePath(itemData[viewTemp['img']])" @click.stop="listItemClick"
+					mode="aspectFill"></image>
+			</view>
+			<view class="main-image" v-else-if="viewTemp['img']">
+				<text class="cuIcon-people text"></text>
+			</view>
 			<view class="content-box flex-twice" v-if="listType === 'proc' && pageType === 'proc'">
 				<view class="content-header">
 					<view class="title" @click="listItemClick">{{ itemData[viewTemp.title] }}</view>
@@ -76,7 +81,12 @@
 			</view>
 			<view class="content-box flex-twice" v-else>
 				<view class="title" v-if="goodsData.title" @click="listItemClick">{{ goodsData.title|html2text}}</view>
-				<view class="title-tip" v-if="goodsData.tip" @click="listItemClick">{{ goodsData.tip|html2text }}</view>
+				<view class="title-tip" v-if="goodsData.tip" @click="listItemClick">
+					<text class="label" v-if="showLabel['tip']">
+						{{showLabel['tip']}}:
+					</text>
+					{{ goodsData.tip|html2text }}
+				</view>
 				<view class="content" v-if="goodsData.price" @click="listItemClick">
 					<view class="numbers">
 						<text class="label" v-if="showLabel['price']">
@@ -89,7 +99,8 @@
 					<view class="tags"></view>
 				</view>
 				<view class="footer">
-					<text class="foot-name" v-if="goodsData.footer" @click="listItemClick">{{ goodsData.footer|html2text }}</text>
+					<text class="foot-name" v-if="goodsData.footer"
+						@click="listItemClick">{{ goodsData.footer|html2text }}</text>
 					<view class="foot-button" v-if="showFootBtn">
 						<view class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
 							v-for="item in rowButton" :key="item.id" @click="footBtnClick(item)">
@@ -323,8 +334,22 @@
 					if (newValue[this.viewTemp.title]) {
 						this.goodsData.title = newValue[this.viewTemp.title];
 					}
-					if (newValue[this.viewTemp.tip]) {
-						this.goodsData.tip = newValue[this.viewTemp.tip];
+					if (Array.isArray(this.viewTemp.tip)) {
+						this.goodsData.tip = this.viewTemp.tip.reduce((pre, cur) => {
+							let val = cur
+							if (![':', ' ', '', '-'].includes(cur) && newValue[cur]) {
+								val = newValue[cur]
+							}
+							if (pre) {
+								return pre + ' ' + val
+							} else {
+								return val
+							}
+						}, '')
+					} else {
+						if (newValue[this.viewTemp.tip]) {
+							this.goodsData.tip = newValue[this.viewTemp.tip];
+						}
 					}
 					if (newValue[this.viewTemp.price]) {
 						this.goodsData.price = newValue[this.viewTemp.price];
@@ -351,6 +376,8 @@
 			padding: 10upx;
 			box-sizing: border-box;
 
+
+
 			.main-image {
 				width: 220upx;
 				height: 220upx;
@@ -359,6 +386,16 @@
 				border-radius: 10rpx;
 				overflow: hidden;
 				flex: 1;
+				text-align: center;
+
+				.text {
+					font-size: 85px;
+				}
+
+				.image {
+					width: 100%;
+					height: 100%;
+				}
 			}
 
 			.content-box {
@@ -367,7 +404,7 @@
 				max-width: 100%;
 				flex: 2;
 				overflow: hidden;
-				color: #999;
+				color: #666;
 
 				.title {
 					width: 60%;
@@ -533,11 +570,15 @@
 	.list-item-wrap.grid-layout-item {
 		margin: 10rpx 0 0;
 		padding: 0;
-		border-radius: 20rpx;
+		border-radius: 10rpx;
 		box-shadow: 6px 5px 13px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
+
+		.cu-btn.sm {
+			padding: 0 2px;
+		}
 
 		/deep/ .list-item {
 			margin: 0;
@@ -551,8 +592,13 @@
 				margin: 0;
 				border-radius: 10rpx;
 				overflow: hidden;
-				flex: 1;
-				height: calc(90vw / 4);
+				height: 185rpx;
+				border-bottom: 1rpx solid #f1f1f1;
+
+				// font-size: calc(90vw / 4);
+				.text {
+					font-size: 85px;
+				}
 			}
 
 			.content-box {

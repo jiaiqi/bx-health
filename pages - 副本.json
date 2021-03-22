@@ -390,14 +390,8 @@
 						"navigationBarTitleText": "列表",
 						"enablePullDownRefresh": true
 					}
-				}, {
-					"path": "ClinicDetail/ClinicDetail",
-					"style": {
-						"navigationBarBackgroundColor": "#ffffff",
-						"navigationBarTextStyle": "black",
-						"enablePullDownRefresh": false
-					}
-				}, {
+				},
+				{
 					"path": "department/department",
 					"style": {
 						"navigationBarTitleText": "科室介绍",
@@ -501,7 +495,16 @@
 					"navigationBarTitleText": "疫苗预约",
 					"enablePullDownRefresh": true
 				}
-			}]
+			}    ,{
+                    "path" : "NewsList/NewsList",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "publicPages",

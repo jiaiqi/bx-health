@@ -27,7 +27,8 @@
 						<view class="cu-tag bg-orange round" v-if="item.persons_count===1&&!item.stock_count">
 							待到货
 						</view>
-						<view class="cu-tag bg-olive round " @click="showModal(item)" v-if="item.persons_count!==1">
+						<view class="cu-tag bg-olive round " @click.stop="showModal(item)"
+							v-if="item.persons_count!==1">
 							预约<text v-if="item.to_appointment_count">({{item.to_appointment_count}})</text> </view>
 					</view>
 				</view>
@@ -50,7 +51,7 @@
 					</view>
 					<view class="image-box" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)">
 						<image :src="item.smallUrl" mode="aspectFit" class="remark-pic" v-for="item in imagesUrl"
-							:key="item" @click="toPreviewImage(item.originUrl)">
+							:key="item.smallUrl" @click="toPreviewImage(item.originUrl)">
 						</image>
 					</view>
 				</view>
@@ -82,8 +83,9 @@
 					</view>
 					<view class="cu-form-group">
 						<view class="title">手机号码</view>
+						<text v-if="!formModel.phone_xcx">点击右侧按钮授权获取手机号</text>
 						<input placeholder="请先授权获取手机号" name="input" type="number" v-model="formModel.customer_phone"
-							:disabled="!formModel.phone_xcx"></input>
+							:disabled="!formModel.phone_xcx" v-else></input>
 						<view class="cu-capsule radius" v-if="!formModel.phone_xcx">
 							<button class="cu-tag bg-blue" type="primary" open-type="getPhoneNumber"
 								@getphonenumber="decryptPhoneNumber">
@@ -150,7 +152,8 @@
 							</view>
 						</view>
 						<view class="form-item" :class="{active:activeField==='appoint_remark'}">
-							<textarea v-model="formModel.appoint_remark" placeholder="预约说明" class="value textarea" />
+							<textarea v-model="formModel.appoint_remark" placeholder="预约说明" class="value textarea"
+								:adjust-position="false" :fixed="true" :show-confirm-bar="false" />
 						</view>
 					</view>
 					<view class="button-box center">
@@ -233,42 +236,43 @@
 				this.formModel.customer_name = this.userInfo.name
 				this.formModel.customer_phone = this.userInfo.phone
 				this.formModel.customer_birth_day = this.userInfo.birthday
+				this.formModel.id_no = this.userInfo.id_no
 				this.formModel.phone_xcx = this.userInfo.phone_xcx
 				this.modalName = 'realname'
 			},
 			async updateUserInfo() {
 				let data = {}
 				if (!this.formModel.customer_name || !this.formModel.customer_phone || !this.formModel
-					.customer_birth_day || !this.formModel.id_no) {
+					.customer_birth_day || !this.formModel.id_no || !this.formModel.phone_xcx) {
 					this.tip = '请确认所有实名信息已填写完整'
 					return
 				}
 				this.tip = ''
-				if (!this.userInfo.id_no) {
+				if (!this.userInfo.id_no || this.formModel.id_no) {
 					data.id_no = this.formModel.id_no
 				}
-				if (!this.userInfo.phone) {
+				if (!this.userInfo.phone || this.formModel.customer_phone) {
 					data.phone = this.formModel.customer_phone
 				}
-				if (!this.userInfo.phone_xcx) {
+				if (!this.userInfo.phone_xcx || this.formModel.phone_xcx) {
 					data.phone_xcx = this.formModel.phone_xcx
 				}
-				if (!this.userInfo.birthday) {
+				if (!this.userInfo.birthday || this.formModel.customer_birth_day) {
 					data.birthday = this.formModel.customer_birth_day
 				}
-				if (this.formModel.customer_name) {
+				if (this.formModel.customer_name || this.formModel.customer_name) {
 					data.name = this.formModel.customer_name
 				}
 				let req = [{
-					"serviceName": "srvhealth_person_info_update",
+					"serviceName": "srvhealth_person_info_real_identity_update",
 					"condition": [{
-						"colName": "no",
+						"colName": "id",
 						"ruleType": "eq",
-						"value": this.userInfo.no
+						"value": this.userInfo.id
 					}],
 					"data": [data]
 				}]
-				let res = await this.$fetch('operate', 'srvhealth_person_info_update', req, 'health')
+				let res = await this.$fetch('operate', 'srvhealth_person_info_real_identity_update', req, 'health')
 				if (res.success) {
 					if (Array.isArray(res.data) && res.data.length > 0) {
 						this.$store.commit('SET_USERINFO', res.data[0])
@@ -290,9 +294,9 @@
 					if (res.success && typeof res.data === 'object' && !Array.isArray(res.data)) {
 						if (res.data.phoneNumber) {
 							this.formModel.phone_xcx = res.data.phoneNumber
-							if (!this.formModel.customer_phone) {
-								this.formModel.customer_phone = res.data.phoneNumber
-							}
+							// if (!this.formModel.customer_phone) {
+							this.formModel.customer_phone = res.data.phoneNumber
+							// }
 						} else {
 							uni.showModal({
 								title: '未知错误',
@@ -494,11 +498,13 @@
 				font-weight: bold;
 				text-align: left;
 			}
-			.tips{
+
+			.tips {
 				text-align: left;
 				font-size: 12px;
 				color: #333;
 			}
+
 			.vaccine-info {
 				display: flex;
 				padding: 0;
@@ -638,8 +644,11 @@
 					border-bottom: 1px solid #f1f1f1;
 					text-indent: 20px;
 
+					.text-area {}
+
 					&.textarea {
-						width: 100%;
+						margin: 0 20rpx;
+						min-height: 100rpx;
 						text-indent: 20px;
 						background-color: #f1f1f1;
 						border-radius: 10px;

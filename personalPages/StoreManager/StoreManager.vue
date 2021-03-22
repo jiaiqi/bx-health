@@ -104,7 +104,7 @@
 						type: 'vaccine_stocks'
 					},
 					{
-						label: '预约列表',
+						label: '可预约列表',
 						icon: 'list',
 						color: 'blue',
 						type: 'vaccination_appointment'
@@ -298,7 +298,7 @@
 						// 预约列表
 						viewTemp = {
 							title: 'appoint_name',
-							tip: 'svs_name',
+							tip: ['预约日期：','app_date',' ','app_time_start','-','app_time_end'],
 							// img: 'profile_url',
 							price: 'app_count',
 							footer: 'app_desc'

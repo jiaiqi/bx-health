@@ -321,13 +321,11 @@
 										fieldsCond = [...fieldsCond, ...otherFieldsCond]
 									}
 								}
-
 								let url =
 									`/publicPages/newForm/newForm?type=detail&serviceName=${button.service_name}&fieldsCond=${JSON.stringify(fieldsCond)}`
 								if (otherParams.hideColumn) {
 									url += `&hideColumn=${JSON.stringify(otherParams.hideColumn)}`
 								}
-
 								uni.navigateTo({
 									url: url
 								})
@@ -342,9 +340,7 @@
 			},
 			handleSpecialClickEvent(e) {
 				// 处理特殊的点击事件参数
-				let result = {
-
-				}
+				let result = {}
 				if (e && e.button && e.button.service_name) {
 					switch (e.button.service_name) {
 						case "srvhealth_store_user_select":
@@ -357,13 +353,23 @@
 								'store_session_user_unread_msg', 'add_url', 'create_time', 'create_user_disp'
 							]
 							break;
+						case 'srvhealth_store_vaccination_appointment_select':
+							result.hideColumn = ['sa_no', 'store_no', 'svs_no', 'svs_name', 'create_time', 'create_user',
+								'create_user_disp', 'modify_user', 'modify_user_disp', 'modify_time'
+							];
+							break;
+						case 'srvhealth_store_vaccine_stocks_select':
+							result.hideColumn = ['vs_no', 'store_no', 'drug_classify_no', 'create_time', 'create_user',
+								'create_user_disp', 'modify_user', 'modify_user_disp', 'modify_time'
+							]
+							break;
 					}
 				}
 				return result
 			},
 			async clickFootBtn(data) {
-				let buttonInfo = data.button;
-				let rowData = data.row;
+				let buttonInfo = this.deepClone(data.button);
+				let rowData = this.deepClone(data.row);
 				if (buttonInfo.operate_params && typeof buttonInfo.operate_params === 'string') {
 					try {
 						buttonInfo.operate_params = JSON.parse(buttonInfo.operate_params);
@@ -408,19 +414,136 @@
 								this.$refs.bxList.onRefresh();
 							}
 						} else if (buttonInfo.operate_type === '更新弹出') {
-							let params = {
-								type: buttonInfo.servcie_type,
-								serviceName: buttonInfo.operate_service,
-								defaultVal: {}
-							};
-							uni.navigateTo({
-								url: '/pages/public/formPage/formPage?serviceName=' +
-									buttonInfo.operate_service +
-									'&type=' +
-									buttonInfo.servcie_type +
-									'&cond=' +
-									decodeURIComponent(JSON.stringify(buttonInfo.operate_params.condition))
-							});
+							// let params = {
+							// 	type: buttonInfo.servcie_type,
+							// 	serviceName: buttonInfo.operate_service,
+							// 	defaultVal: {}
+							// };
+							// uni.navigateTo({
+							// 	url: '/pages/public/formPage/formPage?serviceName=' +
+							// 		buttonInfo.operate_service +
+							// 		'&type=' +
+							// 		buttonInfo.servcie_type +
+							// 		'&cond=' +
+							// 		decodeURIComponent(JSON.stringify(buttonInfo.operate_params.condition))
+							// });
+
+							// 自定义按钮
+							let moreConfig = buttonInfo.more_config;
+							if (moreConfig && typeof moreConfig === 'string') {
+								try {
+									moreConfig = JSON.parse(moreConfig);
+								} catch (e) {
+									//TODO handle the exception
+									console.log(e);
+								}
+							}
+							if (buttonInfo.servcie_type === 'add') {
+								let params = {
+									type: 'add',
+									serviceName: buttonInfo.service_name,
+									defaultVal: data.row,
+									eventOrigin: buttonInfo
+								};
+								uni.navigateTo({
+									url: '/pages/public/formPage/formPage?params=' + JSON.stringify(
+										params)
+								});
+							} else if (buttonInfo.servcie_type === 'select') {
+								let params = {
+									type: 'select',
+									serviceName: buttonInfo.service_name,
+									defaultVal: data.row,
+									eventOrigin: buttonInfo
+								};
+								if (buttonInfo.operate_params && Array.isArray(buttonInfo.operate_params
+										.condition)) {
+									let viewTemp = {};
+									if (buttonInfo.service_name ===
+										'srvhealth_store_vaccination_appoint_record_select') {
+										viewTemp = {
+											title: 'customer_name',
+											img: 'person_image',
+										}
+									}
+									uni.navigateTo({
+										url: '/publicPages/list/list?pageType=list&serviceName=' +
+											buttonInfo.service_name +
+											'&cond=' +
+											JSON.stringify(buttonInfo.operate_params.condition) +
+											'&viewTemp=' +
+											JSON.stringify(viewTemp)
+									});
+									return
+								}
+							} else if (buttonInfo.servcie_type === 'update') {
+								let params = {
+									type: 'update',
+									serviceName: buttonInfo.service_name,
+									defaultVal: data.row,
+									eventOrigin: buttonInfo
+								};
+								let fieldsCond = [];
+								let condition = buttonInfo.operate_params.condition
+								let defaultVal = buttonInfo.operate_params.data
+								if (Array.isArray(defaultVal) && defaultVal.length > 0) {
+									let obj = defaultVal[0]
+									if (this.iObject(obj)) {
+										Object.keys(obj).forEach(key => {
+											fieldsCond.push({
+												column: key,
+												value: obj[key]
+											})
+										})
+									}
+								}
+								if (Array.isArray(condition) && condition.length > 0) {
+									condition.forEach(cond => {
+										fieldsCond.push({
+											column: cond.colName,
+											value: cond.value
+										})
+									})
+								}
+								let otherParams = this.handleSpecialClickEvent(data)
+								if (otherParams && otherParams.otherFieldsCond) {
+									if (Array.isArray(otherFieldsCond)) {
+										fieldsCond = [...fieldsCond, ...otherFieldsCond]
+									}
+								}
+								let url =
+									`/publicPages/newForm/newForm?service=${buttonInfo.service}&serviceName=${buttonInfo.service_name}&type=${buttonInfo.servcie_type}&fieldsCond=` +
+									encodeURIComponent(JSON.stringify(fieldsCond));
+								if (this.appName) {
+									url += `&appName=${this.appName}`
+								}
+								if (otherParams && otherParams.hideColumn) {
+									url += `&hideColumn=${JSON.stringify(otherParams.hideColumn)}`
+								}
+								uni.navigateTo({
+									url: url
+								});
+								return
+							}
+						} else if (buttonInfo.operate_type === '列表跳转') {
+							if (buttonInfo.operate_params && Array.isArray(buttonInfo.operate_params
+									.condition)) {
+								let viewTemp = {};
+								if (buttonInfo.service_name ===
+									'srvhealth_store_vaccination_appoint_record_select') {
+									viewTemp = {
+										title: 'customer_name',
+										footer: 'customer_phone',
+										tip: 'customer_birth_day',
+										img: 'person_image',
+									}
+								}
+								let labels = ['customer_birth_day']
+								uni.navigateTo({
+									url: `/publicPages/list/list?pageType=list&label=${JSON.stringify(labels)}&serviceName=${buttonInfo.service_name}&cond=${	JSON.stringify(buttonInfo.operate_params.condition) }&viewTemp=${JSON.stringify(viewTemp)}`
+								});
+							}
+							return
 						}
 					} catch (e) {
 						console.error(e);
@@ -463,6 +586,7 @@
 								url: url
 							});
 						} else if (data.button && data.button.button_type === 'customize') {
+							// 自定义按钮
 							let moreConfig = data.button.more_config;
 							if (moreConfig && typeof moreConfig === 'string') {
 								try {
@@ -490,6 +614,25 @@
 									defaultVal: data.row,
 									eventOrigin: data.button
 								};
+								if (data.button.operate_params && Array.isArray(data.button.operate_params
+										.condition)) {
+									let viewTemp = {};
+									if (data.button.service_name ===
+										'srvhealth_store_vaccination_appoint_record_select') {
+										viewTemp = {
+											title: 'customer_name',
+											img: 'person_image',
+										}
+									}
+									uni.navigateTo({
+										url: '/publicPages/list/list?pageType=list&serviceName=' +
+											data.button.service_name +
+											'&cond=' +
+											JSON.stringify(data.button.operate_params.condition) +
+											'&viewTemp=' +
+											JSON.stringify(viewTemp)
+									});
+								}
 							} else if (data.button.servcie_type === 'update') {
 								let params = {
 									type: 'update',
@@ -497,11 +640,7 @@
 									defaultVal: data.row,
 									eventOrigin: data.button
 								};
-								let fieldsCond = [
-									// { column: 'info_no', value: this.vuex_userInfo.no, condition: [{ colName: 'no', ruleType: 'eq', value: this.vuex_userInfo.no }] },
-									// { column: 'user_account', value: this.vuex_userInfo.userno }
-								];
-
+								let fieldsCond = [];
 								let condition = data?.button?.operate_params?.condition
 								let defaultVal = data?.button?.operate_params?.data
 								if (Array.isArray(defaultVal) && defaultVal.length > 0) {
@@ -523,11 +662,20 @@
 										})
 									})
 								}
+								let otherParams = this.handleSpecialClickEvent(res)
+								if (otherParams && otherParams.otherFieldsCond) {
+									if (Array.isArray(otherFieldsCond)) {
+										fieldsCond = [...fieldsCond, ...otherFieldsCond]
+									}
+								}
 								let url =
 									`/publicPages/newForm/newForm?service=${data.button.service}&serviceName=${data.button.service_name}&type=${data.button.servcie_type}&fieldsCond=` +
 									encodeURIComponent(JSON.stringify(fieldsCond));
 								if (this.appName) {
 									url += `&appName=${this.appName}`
+								}
+								if (otherParams && otherParams.hideColumn) {
+									url += `&hideColumn=${JSON.stringify(otherParams.hideColumn)}`
 								}
 								uni.navigateTo({
 									url: url

@@ -101,11 +101,13 @@
 			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'RichText'"
 				@click="showModal('RichEditor')">
 				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
-				<view class="value rich-text" v-else >点击进行编辑</view>
+				<!-- <view class="value rich-text" v-else >点击进行编辑</view> -->
+				<rich-text  :nodes="fieldData.value" class="value rich-text" v-else></rich-text>
 				<!-- <view class="value rich-text" v-else v-html="fieldData.value">{{ fieldData.value | html2text }}</view> -->
 			</view>
 			<input type="text"
 			@input="onInput"
+			placeholder="请输入"
 			@blur="onBlur" :adjust-position="false" 
 			 :maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
 			 v-model="fieldData.value" :disabled="fieldData.disabled ? fieldData.disabled : false" v-else-if="fieldData.type ==='text'"/>

@@ -243,10 +243,13 @@
 						max-width: 600rpx;
 						width: 100%!important;
 						background-color: #F1F1F1;
-						min-height: 200rpx;
+						min-height: 100rpx;
+						max-height: 200rpx;
+						overflow: hidden;
 						border-radius: 10rpx;
 						word-break: break-all;
 						display: -webkit-box;
+						white-space: pre-wrap;
 						-webkit-line-clamp: 4; /**指定行数*/
 						-webkit-box-orient: vertical;
 					}

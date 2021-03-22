@@ -89,6 +89,7 @@
 			}`;
 			this.saveSharerInfo(this.userInfo, path);
 			return {
+				title: this.articleData.title,
 				path: path
 			};
 		},

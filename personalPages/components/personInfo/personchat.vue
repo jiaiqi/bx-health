@@ -38,7 +38,7 @@
 								v-else-if="item.identity&&item.identity!=='客户'">{{ item.identity }}</text>
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
 						</view>
-						<view class="person-chat-item-left">
+						<view class="person-chat-item-left" @longpress="remindSomeone(item)">
 							<image :src="storeInfo.log?getImagePath(storeInfo.logo):getImagePath(storeInfo.image)"
 								mode="aspectFill" v-if="identity==='客户'&&item.identity==='客服'"></image>
 							<image :src="getImagePath(item.sender_profile_url)" mode="aspectFit"
@@ -58,7 +58,9 @@
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
 							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
-							<text>{{ item.msg_content }}</text>
+							<text class="remind-someone"
+								v-if="item.attribute&&item.attribute.type&&item.attribute.type==='remindPerson'">@{{item.attribute.name}}</text>
+							<text user-select selectable space="nbsp">{{ item.msg_content }}</text>
 						</view>
 						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)"
 							class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
@@ -142,7 +144,9 @@
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
 							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
-							{{ item.msg_content }}
+							<text class="remind-someone"
+								v-if="item.attribute&&item.attribute.type&&item.attribute.type==='remindPerson'">@{{item.attribute.name}}</text>
+							<text user-select selectable space="nbsp">{{ item.msg_content }}</text>
 						</view>
 						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)"
 							class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
@@ -208,7 +212,7 @@
 								</view>
 							</view>
 						</view>
-						<view class="person-chat-item-left">
+						<view class="person-chat-item-left" @longpress="remindSomeone(item)">
 							<image :src="getImagePath(storeInfo.image)" mode="aspectFill" v-if="identity==='客服'">
 							</image>
 							<image
@@ -244,9 +248,15 @@
 						@touchmove.stop.prevent="moveVoice" @touchend.stop="endVoice" @touchcancel.stop="cancelVoice">
 						{{ voiceTitle }}
 					</text>
-					<textarea :focus="onFocus" :adjust-position="false" :show-confirm-bar="false" v-else
-						v-model="chatText" confirm-hold :hold-keyboard="false" auto-blur class="send-text" type="text"
-						@blur="onBlur" @focus="onInput" maxlength="-1" @confirm="sendMessage" confirm-type="send" />
+					<view class="send-text" v-else>
+						<text class="remind-one" @click="clearRemind"
+							v-if="remindPerson&&remindPerson.no"><text>@{{remindPerson.name}}</text> <text
+								class="cuIcon-close"></text> </text>
+						<textarea :focus="onFocus" class="send-value" :adjust-position="false" :show-confirm-bar="false"
+							v-model="chatText" confirm-hold :hold-keyboard="true" auto-blur type="text" @blur="onBlur"
+							@focus="onInput" @input="onValueChange" maxlength="-1" @confirm="sendMessage"
+							confirm-type="send" />
+					</view>
 				</view>
 				<view class="person-chat-rig" :class="{ 'is-feed': isFeed }">
 					<view class="person-chat-rig-add-wrap">
@@ -374,6 +384,13 @@
 				globalTextFontSize: state => state.app['globalTextFontSize'],
 				currentUserInfo: state => state.user.userInfo
 			}),
+			inputText() {
+				if (this.remindPerson && this.remindPerson.no && this.remindPerson.name) {
+					return {
+
+					}
+				}
+			},
 			chartHeight() {
 				if (this.topHeight) {
 					return `calc(100vh   - ${this.topHeight}px - var(--window-top) - var(--window-bottom))`;
@@ -442,11 +459,26 @@
 				isLoading: false,
 				isAll: false,
 				currentChat: {},
+				remindPerson: {}, // 被@人的userInfo
 				refreshMessageTimer: null // 定时刷新消息的定时器
 			};
 		},
 
 		methods: {
+			clearRemind() {
+				// 清除@人员信息
+				this.remindPerson = {}
+			},
+			remindSomeone(e) {
+				// 长按头像@某人
+				this.remindPerson = {
+					type: 'remindPerson',
+					no: e.sender_person_no,
+					name: e.sender_name,
+					profile_url: e.sender_profile_url,
+					user_image: e.sender_user_image
+				}
+			},
 			//处理图片尺寸，如果不处理宽高，新进入页面加载图片时候会闪
 			setPicSize(content) {
 				// 让图片最长边等于设置的最大长度，短边等比例缩小，图片控件真实改变，区别于aspectFit方式。
@@ -507,11 +539,17 @@
 				this.showKeyboard = false;
 				// 隐藏键盘
 				uni.showToast({
-					title: '隐藏键盘',
+					title: '- 隐藏键盘 -',
 					icon: 'none'
 				})
 				uni.hideKeyboard();
 				this.toBottom()
+			},
+			onValueChange(e) {
+				// let val = e.detail.value
+				// if(!val&&this.remindPerson&&this.remindPerson.no){
+				// 	this.remindPerson = {}
+				// }
 			},
 			onInput(e) {
 				this.toBottom()
@@ -1036,8 +1074,8 @@
 					app = 'daq';
 				} else if (this.currentSendType === 'bite') {
 					app = 'health';
-					(serviceName = 'srvhealth_diet_record_select'),
-					(req = {
+					serviceName = 'srvhealth_diet_record_select';
+					req = {
 						serviceName: serviceName,
 						colNames: ['*'],
 						condition: [{
@@ -1049,7 +1087,7 @@
 							colName: 'create_time',
 							orderType: 'desc'
 						}]
-					});
+					};
 				}
 				let url = this.getServiceUrl(app, serviceName, 'select');
 				let res = await this.$http.post(url, req);
@@ -1061,6 +1099,10 @@
 			},
 			/*打开发送链接弹窗**/
 			openLink() {
+				// 隐藏键盘
+				uni.hideKeyboard();
+				this.toBottom()
+				this.onFocus = true;
 				this.onFocus = false;
 				this.showKeyboard = false;
 				if (this.isSendLink) {
@@ -1068,7 +1110,6 @@
 					// this.onFocus = true;
 					return;
 				}
-				uni.hideKeyboard();
 				this.isSendLink = true;
 				this.$nextTick(function() {
 					//滚动到底部
@@ -1166,6 +1207,10 @@
 						msg_content_type: type,
 						identity: this.groupInfo.group_role
 					};
+					if (this.remindPerson && this.remindPerson.no) {
+						req[0].data[0].receiver_person_no = this.remindPerson.no
+						req[0].data[0].attribute = JSON.stringify(this.remindPerson)
+					}
 				} else if (this.pageType === 'session') {
 					// 会话聊天
 					req[0].data[0] = {
@@ -1199,15 +1244,19 @@
 								identity: this.identity ? this.identity : '医生'
 							}
 						}
-						req[0].data[0].receiver_account = targetUserinfo.userno,
-							req[0].data[0].receiver_person_no = targetUserinfo.person_no,
-							req[0].data[0].identity = targetUserinfo.identity
+						req[0].data[0].receiver_account = targetUserinfo.userno;
+						req[0].data[0].receiver_person_no = targetUserinfo.person_no;
+						req[0].data[0].identity = targetUserinfo.identity
 					}
 					if (this.groupNo) {
 						req[0].data[0].rcv_group_no = this.groupNo
 					}
 					if (this.identity) {
 						req[0].data[0].identity = this.identity
+					}
+					if (this.remindPerson && this.remindPerson.no) {
+						req[0].data[0].receiver_person_no = this.remindPerson.no
+						req[0].data[0].attribute = JSON.stringify(this.remindPerson)
 					}
 					if (!this.sessionNo) {
 						uni.showModal({
@@ -1319,6 +1368,9 @@
 				this.toBottom()
 				let res = await this.$http.post(url, req);
 				uni.hideLoading();
+				if (this.remindPerson && this.remindPerson.no) {
+					this.remindPerson = {}
+				}
 				this.isAll = false;
 				this.pageInfo.pageNo = 1;
 				this.initMessageList('refresh');
@@ -1357,12 +1409,16 @@
 						sender_user_image: this.currentUserInfo.user_image,
 						sender_group_role: this.groupInfo.group_role,
 						rcv_group_no: this.groupInfo.gc_no,
-						receiver_account: this.groupInfo.gc_no,
-						receiver_person_no: this.groupInfo.gc_no,
+						// receiver_account: this.groupInfo.gc_no,
+						// receiver_person_no: this.groupInfo.gc_no,
 						sender_person_no: this.currentUserInfo.no,
 						msg_content_type: !this.isSendLink ? '文本' : '链接',
 						identity: this.groupInfo.group_role
 					};
+					if (this.remindPerson && this.remindPerson.no) {
+						req[0].data[0].receiver_person_no = this.remindPerson.no
+						req[0].data[0].attribute = JSON.stringify(this.remindPerson)
+					}
 				} else if (this.pageType === 'session') {
 					// 会话聊天
 					req[0].data[0] = {
@@ -1396,15 +1452,19 @@
 								identity: '医生'
 							}
 						}
-						req[0].data[0].receiver_account = targetUserinfo.userno,
-							req[0].data[0].receiver_person_no = targetUserinfo.person_no,
-							req[0].data[0].identity = targetUserinfo.identity
+						req[0].data[0].receiver_account = targetUserinfo.userno;
+						req[0].data[0].receiver_person_no = targetUserinfo.person_no;
+						req[0].data[0].identity = targetUserinfo.identity
 					}
 					if (this.groupNo) {
 						req[0].data[0].rcv_group_no = this.groupNo
 					}
 					if (this.identity) {
 						req[0].data[0].identity = this.identity
+					}
+					if (this.remindPerson && this.remindPerson.no) {
+						req[0].data[0].receiver_person_no = this.remindPerson.no
+						req[0].data[0].attribute = JSON.stringify(this.remindPerson)
 					}
 					if (!this.sessionNo) {
 						uni.showModal({
@@ -1444,6 +1504,9 @@
 				this.recordList.push(req[0].data[0])
 				this.$fetch('operate', serviceName, req, 'health').then(res => {
 					this.isAll = false;
+					if (this.remindPerson && this.remindPerson.no) {
+						this.remindPerson = {}
+					}
 					this.initMessageList('refresh');
 					setTimeout(() => {
 						this.toBottom()
@@ -1615,19 +1678,19 @@
 								}
 							});
 						}
+						if (item.attribute) {
+							try {
+								item.attribute = JSON.parse(item.attribute);
+								this.$set(item, 'attribute', item.attribute);
+							} catch (e) {
+								//TODO handle the exception
+							}
+						}
 						if (item.image) {
 							let url = this.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni
 								.getStorageSync('bx_auth_ticket');
 							if (item.msg_content_type === '图片') {
 								this.$set(item, 'img_url', url);
-							}
-							if (item.attribute) {
-								try {
-									item.attribute = JSON.parse(item.attribute);
-									this.$set(item, 'attribute', item.attribute);
-								} catch (e) {
-									//TODO handle the exception
-								}
 							}
 							if (item.attribute && item.attribute.width && item.attribute.height) {
 								let info = this.setImgSize(item.attribute);
@@ -1719,9 +1782,9 @@
 						this.isAll = true;
 					}
 					if (type !== 'refresh') {
-						setTimeout(() => {
-							this.toBottom()
-						}, 100)
+						// setTimeout(() => {
+						// 	this.toBottom()
+						// }, 100)
 					}
 				}
 			},
@@ -1971,6 +2034,7 @@
 				flex-direction: column;
 				align-items: flex-end;
 				width: 100%;
+				padding: 0px 10rpx 20rpx;
 
 				.send-time {
 					padding-top: 30rpx;
@@ -1982,9 +2046,8 @@
 
 				.person-chat-item-accept {
 					display: flex;
-					margin: 0rpx 10rpx 20rpx;
 					flex-wrap: wrap;
-					width: calc(100% - 20rpx);
+					width: 100%;
 
 					.sender-info {
 						width: 100%;
@@ -2215,6 +2278,10 @@
 						display: flex;
 						align-items: center;
 
+						.remind-someone {
+							font-size: 12px;
+						}
+
 						.link-left {
 							margin-right: 16rpx;
 
@@ -2384,7 +2451,8 @@
 					}
 
 					.send-text {
-						line-height: 66rpx;
+						display: flex;
+						line-height: 70rpx;
 						height: 70rpx;
 						padding: 2px 10rpx;
 						transition: all 0.5s ease-out;
@@ -2393,7 +2461,30 @@
 						background: #fff;
 						border-radius: 100px;
 						font-size: var(--global-text-font-size);
-						text-indent: 10px;
+					
+						
+						.remind-one {
+							border-radius: 10rpx;
+							line-height: 70rpx;
+							font-size: 14px;
+							position: relative;
+							background-color: #f1f1f1;
+							padding: 0 20rpx;
+
+							.cuIcon-close {
+								position: absolute;
+								top: -10px;
+								right: 0;
+								font-size: 12px;
+							}
+						}
+
+						.send-value {
+							width: auto;
+							flex: 1;
+							line-height: 70rpx;
+							height: 70rpx;
+						}
 					}
 
 					.is-feed {

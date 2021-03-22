@@ -631,7 +631,9 @@
 						"image": this.storeInfo.image,
 						"type": this.storeInfo.type,
 						"person_no": this.userInfo.no,
-						"person_name": this.userInfo.name,
+						"person_name": this.userInfo && this.userInfo.name ? this.userInfo.name
+							.replace(
+								/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : '',
 						"user_account": this.userInfo.userno,
 						"nick_name": this.userInfo && this.userInfo.nick_name ? this.userInfo.nick_name
 							.replace(
@@ -811,6 +813,10 @@
 			setTimeout(() => {
 				uni.stopPullDownRefresh()
 			}, 1000)
+		},
+		onShow() {
+			// 检测是否已关注公众号
+			this.checkSubscribeStatus()
 		},
 		onShareAppMessage() {
 			let path =
