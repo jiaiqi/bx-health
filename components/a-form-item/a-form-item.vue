@@ -104,13 +104,18 @@
 				<view class="value rich-text" v-else >点击进行编辑</view>
 				<!-- <view class="value rich-text" v-else v-html="fieldData.value">{{ fieldData.value | html2text }}</view> -->
 			</view>
+			<input type="text"
+			@input="onInput"
+			@blur="onBlur" :adjust-position="false" 
+			 :maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
+			 v-model="fieldData.value" :disabled="fieldData.disabled ? fieldData.disabled : false" v-else-if="fieldData.type ==='text'"/>
 			<input class="form-item-content_value" @blur="onBlur" :adjust-position="false" :type="fieldData.type"
-				:placeholder="'请输入'" @input="onInput"
+				 @input="onInput"
 				:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
 				:max="fieldData.item_type_attr && fieldData.item_type_attr.max ? fieldData.item_type_attr.max : 999"
 				:min="fieldData.item_type_attr && fieldData.item_type_attr.min ? fieldData.item_type_attr.min : 0"
 				v-model.number="fieldData.value" :disabled="fieldData.disabled ? fieldData.disabled : false"
-				v-else-if="((fieldData.type === 'number' || fieldData.type === 'digit') && !fieldData.max) || fieldData.type === 'text'" />
+				v-else-if="(fieldData.type === 'number' || fieldData.type === 'digit') && !fieldData.max" />
 			<view class="form-item-content_value slider"
 				v-else-if="(fieldData.type === 'number' || fieldData.type === 'digit') && fieldData.max">
 				<view class="operate" hover-class="active" @click="numberChange('minus')"
