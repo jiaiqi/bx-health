@@ -37,22 +37,29 @@
 		<view class="cu-modal" :class="{'show':modalName==='vaccine-info'}" @click="hideModal" @touchmove.prevent>
 			<view class="cu-dialog" @click.stop>
 				<view class="vaccine-info">
-					<view class="vaccine-name cuIcon-titles" v-if="vaccineInfo.vaccine_drug_name">
+					<view class="vaccine-name" v-if="vaccineInfo.vaccine_drug_name">
 						{{vaccineInfo.vaccine_drug_name}}
 					</view>
-					<view class="tips">
-						点击照片查看详情
-					</view>
+
 					<view class="vaccine-info" v-if="vaccineInfo.usage">
 						<view class="label">用法:</view>
 						<view class="value">
 							{{vaccineInfo.usage}}
 						</view>
 					</view>
+					<view class="vaccine-info" v-if="vaccineInfo.remark">
+						<view class="label">说明:</view>
+						<view class="value">
+							{{vaccineInfo.remark}}
+						</view>
+					</view>
 					<view class="image-box" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)">
 						<image :src="item.smallUrl" mode="aspectFit" class="remark-pic" v-for="item in imagesUrl"
 							:key="item.smallUrl" @click="toPreviewImage(item.originUrl)">
 						</image>
+					</view>
+					<view class="tips">
+						点击照片查看详情
 					</view>
 				</view>
 			</view>
@@ -83,7 +90,7 @@
 					</view>
 					<view class="cu-form-group">
 						<view class="title">手机号码</view>
-						<text v-if="!formModel.phone_xcx">点击右侧按钮授权获取手机号</text>
+						<text v-if="!formModel.phone_xcx">点击右侧按钮获取手机号</text>
 						<input placeholder="请先授权获取手机号" name="input" type="number" v-model="formModel.customer_phone"
 							:disabled="!formModel.phone_xcx" v-else></input>
 						<view class="cu-capsule radius" v-if="!formModel.phone_xcx">
@@ -185,7 +192,6 @@
 				modalName: '',
 				selectedVaccine: {},
 				list: [],
-
 				activeField: '',
 				formModel: {
 					id_no: '',
@@ -282,7 +288,9 @@
 			},
 			async decryptPhoneNumber(e) {
 				// 解密手机号信息
+				let self = this
 				if (e.detail && e.detail.errMsg && e.detail.errMsg.indexOf('ok') !== -1) {
+					let url = this.getServiceUrl('wx', 'srvwx_app_data_decrypt', 'operate')
 					let req = [{
 						data: [{
 							encryptedData: e.detail.encryptedData,
@@ -290,20 +298,37 @@
 						}],
 						serviceName: 'srvwx_app_data_decrypt'
 					}]
-					let res = await this.$fetch('operate', 'srvwx_app_data_decrypt', req, 'wx');
-					if (res.success && typeof res.data === 'object' && !Array.isArray(res.data)) {
-						if (res.data.phoneNumber) {
-							this.formModel.phone_xcx = res.data.phoneNumber
-							// if (!this.formModel.customer_phone) {
-							this.formModel.customer_phone = res.data.phoneNumber
-							// }
-						} else {
-							uni.showModal({
-								title: '未知错误',
-								content: res.data ? JSON.stringify(res.data) : '',
-								showCancel: false
-							})
-						}
+					let res = await this.$http.post(url, req);
+					if (res.data.resultCode === 'SUCCESS' && Array.isArray(res.data.response) && res.data.response
+						.length > 0 && res.data.response[0].response && res.data.response[0].response.phoneNumber) {
+						this.formModel.phone_xcx = res.data.response[0].response.phoneNumber
+						this.formModel.customer_phone = res.data.response[0].response.phoneNumber
+					} else {
+						// #ifdef MP-WEIXIN
+						wx.checkSession({
+							fail(err){
+								// session_key 已经失效， 需要重新执行登录流程
+								wx.login({
+									success(result) {
+										if (result.code) {
+											self.wxLogin({
+												code: result.code
+											}).then(_ => {
+												self.decryptPhoneNumber(e)
+											})
+										}
+									}
+								})
+							}
+						})
+						// #endif
+						// if (res.data.resultCode === 'FAILURE') {
+						// 	uni.showModal({
+						// 		title: '提示',
+						// 		content: res.data.resultMessage + (res.data.serviceInfo || ''),
+						// 		showCancel: false
+						// 	})
+						// }
 					}
 				}
 			},
@@ -496,11 +521,12 @@
 
 			.vaccine-name {
 				font-weight: bold;
-				text-align: left;
+				text-align: center;
 			}
 
 			.tips {
-				text-align: left;
+
+				text-align: center;
 				font-size: 12px;
 				color: #333;
 			}
@@ -513,6 +539,12 @@
 				.label {
 					color: #666;
 					margin-right: 20rpx;
+					min-width: 100rpx;
+				}
+
+				.value {
+					flex: 1;
+					text-align: left;
 				}
 			}
 

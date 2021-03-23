@@ -81,7 +81,7 @@
 					uni.showModal({
 						title: '更新提示',
 						content: '版本更新失败,请检查网络状态',
-						showCancel:false
+						showCancel: false
 					});
 				});
 			},
@@ -237,39 +237,39 @@
 		},
 		onShow: async function(options) {
 			console.log("onShow", options)
-			let userNo = uni.getStorageSync('current_user_info');
-			if (userNo.userno) {
-				let groupUnread = await this.selectMyGroup();
-				this.getDoctorRecod(userNo.userno).then(length => {
-					if (groupUnread) {
-						length += groupUnread;
-					}
-					if (!length && length !== 0) {
-						length = 0;
-					}
-					if (length > 99) {
-						length = '99+';
-					} else {
-						length = `${length}`;
-					}
-					if (length != 0) {
-						uni.setTabBarBadge({
-							index: 3,
-							text: length,
-							success: e => {
-								console.log('success---', e);
-							},
-							fail: fails => {
-								console.log('fails----', fails);
-							}
-						});
-					} else {
-						uni.removeTabBarBadge({
-							index: 3
-						});
-					}
-				});
-			}
+			// let userNo = uni.getStorageSync('current_user_info');
+			// if (userNo.userno) {
+			// 	let groupUnread = await this.selectMyGroup();
+			// 	this.getDoctorRecod(userNo.userno).then(length => {
+			// 		if (groupUnread) {
+			// 			length += groupUnread;
+			// 		}
+			// 		if (!length && length !== 0) {
+			// 			length = 0;
+			// 		}
+			// 		if (length > 99) {
+			// 			length = '99+';
+			// 		} else {
+			// 			length = `${length}`;
+			// 		}
+			// 		if (length != 0) {
+			// 			uni.setTabBarBadge({
+			// 				index: 3,
+			// 				text: length,
+			// 				success: e => {
+			// 					console.log('success---', e);
+			// 				},
+			// 				fail: fails => {
+			// 					console.log('fails----', fails);
+			// 				}
+			// 			});
+			// 		} else {
+			// 			uni.removeTabBarBadge({
+			// 				index: 3
+			// 			});
+			// 		}
+			// 	});
+			// }
 			if (this.$api.singleApp) {
 				uni.setStorageSync('activeApp', this.$api.appName);
 			}

@@ -194,7 +194,7 @@
 				width: 100%;
 				background-color: #f1f1f1;
 				border-radius: 10rpx;
-				min-height: 150rpx;
+				height: 150rpx;
 				padding: 20rpx;
 			}
 			&.slider {
@@ -266,9 +266,28 @@
 				word-break: keep-all;
 				pointer-events: none;
 				padding: 0 10rpx;
+				width: 100%;
+				min-height: 100rpx;
+				border-radius: 10rpx;
+				padding: 10rpx 20rpx;
+				background-color: #f1f1f1;
 			}
 			.value {
 				padding: 0 10rpx;
+				&.rich-text{
+					max-width: 600rpx;
+					width: 100%!important;
+					background-color: #F1F1F1;
+					min-height: 100rpx;
+					max-height: 200rpx;
+					overflow: hidden;
+					border-radius: 10rpx;
+					word-break: break-all;
+					display: -webkit-box;
+					white-space: pre-wrap;
+					-webkit-line-clamp: 4; /**指定行数*/
+					-webkit-box-orient: vertical;
+				}
 			}
 		}
 	}
@@ -280,10 +299,12 @@
 		font-size: 40rpx;
 	}
 	.tree-selector {
-		height: calc(90vh - var(--window-top) - var(--window-bottom));
+		min-height: 300rpx;
+		max-height: calc(90vh - var(--window-top) - var(--window-bottom));
+		overflow-y: scroll;
 		display: flex;
 		flex-direction: column;
-		margin-top: 20rpx;
+		padding: 20rpx 10rpx 0;
 		.content {
 			flex: 1;
 			background-color: #fff;

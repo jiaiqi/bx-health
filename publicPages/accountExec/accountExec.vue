@@ -102,6 +102,9 @@ export default {
 		};
 	},
 	onShow() {
+		// #ifdef MP-WEIXIN
+		// this.getWxCode();
+		// #endif
 		// #ifdef H5
 		if (navigator.userAgent.indexOf('iPhone') !== -1) {
 			let linkUrl = window.location + '';
@@ -112,9 +115,6 @@ export default {
 	onLoad(option) {
 		this.judgeClientEnviroment();
 		let self = this;
-		// #ifdef MP-WEIXIN
-		this.getWxCode();
-		// #endif
 		if (uni.getStorageSync('isLogin')) {
 			console.log('已登录，不进行初始化授权', uni.getStorageSync('isLogin'));
 			// #ifdef H5
@@ -303,18 +303,10 @@ export default {
 				}
 			});
 		},
-		async getWxCode() {
-			const result = await wx.login();
-			if (result.code) {
-				this.code = result.code;
-			}
-		},
-
 		async saveWxUser(e) {
 			// 静默登录(验证登录)
 			const self = this;
 			const isWeixinClient = this.isWeixinClient();
-			// self.getUserInfo();
 			if (isWeixinClient) {
 				const url = this.getServiceUrl('wx', 'srvwx_app_login_verify', 'operate');
 				// #ifdef MP-WEIXIN

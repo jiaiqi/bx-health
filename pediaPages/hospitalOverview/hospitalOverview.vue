@@ -47,14 +47,6 @@
 							</view>
 							<text>在线咨询</text>
 						</view>
-						<!-- <view class="right-item" @click="setHomePage" v-if="userInfo&&userInfo.home_store_no!==storeNo">
-							<view class="image cuIcon-home"></view>
-							<text>设为主页</text>
-						</view>
-						<view class="right-item" @click="toPages('subscsribe')" v-if="!subscsribeStatus">
-							<view class="image cuIcon-notice"></view>
-							<text>通知设置</text>
-						</view> -->
 					</view>
 				</view>
 				<view class="menu-list">
@@ -161,24 +153,8 @@
 				</view>
 			</view>
 		</view>
-		<!-- 		<view class="bottom-layer" v-if="onlyCurrentPage === true">
-					<view class="bottom-button" @click="toStorePage">
-				<text class="cuIcon-home icon"></text>
-				<view class="label">小程序主页</view>
-			</view>
-			<view class="bottom-button" @click="toPages('notice-setting')">
-				<text class="cuIcon-notice icon"></text>
-				<view class="label">通知设置</view>
-				<view class="badge" :class="{'bg-green':subscsribeStatus,'bg-orange':!subscsribeStatus}">
-				</view>
-			</view>
-			<view class="bottom-button" @click="toPages('personal')">
-				<text class="cuIcon-people icon"></text>
-				<view class="label">我的</view>
-			</view>
-		</view> -->
 	</view>
-	<bx-auth v-else-if="authBoxDisplay" @getuserinfo="getuserinfo"></bx-auth>
+	<bx-auth v-else @getuserinfo="getuserinfo"></bx-auth>
 </template>
 
 <script>
@@ -350,6 +326,29 @@
 			}
 		},
 		methods: {
+			async getuserinfo(e) {
+				// #ifdef MP-WEIXIN
+				const user = e.mp.detail;
+				if (user && user.userInfo) {
+					let rawData = {
+						nickname: user.userInfo.nickName,
+						sex: user.userInfo.gender,
+						country: user.userInfo.country,
+						province: user.userInfo.province,
+						city: user.userInfo.city,
+						headimgurl: user.userInfo.avatarUrl
+					};
+					this.setWxUserInfo(rawData);
+					this.$store.commit('SET_WX_USERINFO', rawData);
+					this.$store.commit('SET_AUTH_SETTING', {
+						type: 'userInfo',
+						value: true
+					});
+					this.$store.commit('SET_AUTH_USERINFO', true);
+					this.toAddPage();
+				}
+				// #endif
+			},
 			toPages(e, info) {
 				let url = '';
 				switch (e) {
@@ -405,9 +404,6 @@
 					case 3:
 						url = '/archivesPages/healthCompose/healthCompose';
 						break;
-						// case 4:
-						// 	url = '/personalPages/HealthRecord/HealthRecord';
-						// 	break;
 					case 'groupChat':
 						if (this.storeInfo.member_session_no) {
 							url =
@@ -462,7 +458,7 @@
 			toArticle(e) {
 				if (e.content_no) {
 					uni.navigateTo({
-						url: `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=${e.content_no}&store_no=${this.storeNo}`
+						url: `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=${e.content_no}&store_no=${this.storeNo}&store_name=${this.storeInfo.name}`
 					});
 				}
 			},
@@ -659,7 +655,7 @@
 			},
 			async toConsult() {
 				// 在线咨询
-				if (!this.bindUserInfo) {
+				if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
 					this.bindUserInfo = await this.bindStore()
 				}
 				if (this.bindUserInfo && this.bindUserInfo.store_user_no) {
@@ -800,11 +796,17 @@
 			async initPage() {
 				await this.toAddPage()
 				if (this.storeNo) {
+					console.log(`storeNo:${this.storeNo}`)
 					await this.selectBindUser()
 					await this.selectStoreInfo();
 					await this.seletGroupList();
 					// await this.getKefuSessionInfo()
 					this.selectUnreadAmount()
+				} else {
+					uni.showToast({
+						title: '未发现store_no',
+						icon: 'none'
+					})
 				}
 			},
 		},
@@ -815,8 +817,19 @@
 			}, 1000)
 		},
 		onShow() {
-			// 检测是否已关注公众号
-			this.checkSubscribeStatus()
+			if (!this.subscsribeStatus) {
+				// 检测是否已关注公众号
+				this.checkSubscribeStatus()
+			}
+			if (this.storeNo) {
+				if (this.userInfo && this.userInfo.no) {
+					uni.startPullDownRefresh()
+				} else {
+					this.toAddPage().then(_ => {
+						uni.startPullDownRefresh()
+					})
+				}
+			}
 		},
 		onShareAppMessage() {
 			let path =
@@ -888,6 +901,20 @@
 			this.checkOptionParams(option);
 			if (this.authBoxDisplay) {
 				// 未授权
+				// #ifdef MP-WEIXIN
+				let res = await wx.getSetting();
+				if (!res.authSetting['scope.userInfo']) {
+					this.$store.commit('SET_AUTH_SETTING', {
+						type: 'userInfo',
+						value: false
+					});
+					this.$store.commit('SET_AUTH_USERINFO', false);
+					// 没有获取用户信息授权
+					return;
+				} else {
+					this.$store.commit('SET_AUTH_USERINFO', true);
+				}
+				// #endif
 				return
 			}
 			let res = await this.toAddPage()

@@ -252,9 +252,9 @@
 						<text class="remind-one" @click="clearRemind"
 							v-if="remindPerson&&remindPerson.no"><text>@{{remindPerson.name}}</text> <text
 								class="cuIcon-close"></text> </text>
-						<textarea :focus="onFocus" class="send-value" :adjust-position="false" :show-confirm-bar="false"
-							v-model="chatText" confirm-hold :hold-keyboard="true" auto-blur type="text" @blur="onBlur"
-							@focus="onInput" @input="onValueChange" maxlength="-1" @confirm="sendMessage"
+						<textarea class="send-value" :adjust-position="false" :show-confirm-bar="true"
+							v-model="chatText"  :hold-keyboard="true" auto-blur type="text" @blur="onBlur"
+							@focus="onInput" maxlength="-1" @confirm="sendMessage"
 							confirm-type="send" />
 					</view>
 				</view>
@@ -425,7 +425,6 @@
 				checkRadioValue: '',
 				chatText: '',
 				isSendLink: false,
-				onFocus: false,
 				showBottom: false,
 				currentSendType: '',
 				current_type: 'world',
@@ -529,7 +528,7 @@
 			},
 			/*关闭底部选择按钮**/
 			closeBottomPoup() {
-				uni.hideKeyboard();
+				this.hideKeyboard()
 				this.showKeyboard = false;
 				this.$nextTick(function() {
 					this.isSendLink = false;
@@ -538,21 +537,16 @@
 			onBlur() {
 				this.showKeyboard = false;
 				// 隐藏键盘
-				uni.showToast({
-					title: '- 隐藏键盘 -',
-					icon: 'none'
-				})
-				uni.hideKeyboard();
+				// uni.showToast({
+				// 	title: '- 隐藏键盘 -',
+				// 	icon: 'none'
+				// })
+				// uni.hideKeyboard();
 				this.toBottom()
-			},
-			onValueChange(e) {
-				// let val = e.detail.value
-				// if(!val&&this.remindPerson&&this.remindPerson.no){
-				// 	this.remindPerson = {}
-				// }
 			},
 			onInput(e) {
 				this.toBottom()
+				this.isSendLink = false;
 			},
 			keyboardheightchange(e) {
 				const {
@@ -563,6 +557,7 @@
 			},
 			openMap(item) {
 				// 打开地图
+				this.isSendLink = false;
 				uni.openLocation({
 					latitude: Number(item.latitude),
 					longitude: Number(item.longitude),
@@ -1101,20 +1096,15 @@
 			openLink() {
 				// 隐藏键盘
 				uni.hideKeyboard();
-				this.toBottom()
-				this.onFocus = true;
-				this.onFocus = false;
+				this.isSendLink = !this.isSendLink
 				this.showKeyboard = false;
-				if (this.isSendLink) {
-					this.isSendLink = false;
-					// this.onFocus = true;
-					return;
-				}
-				this.isSendLink = true;
 				this.$nextTick(function() {
 					//滚动到底部
 					this.toBottom()
 				});
+			},
+			hideKeyboard: function(event) {
+				uni.hideKeyboard();
 			},
 			/*切换文字或者链接**/
 			changeType(type) {
@@ -2421,7 +2411,7 @@
 		}
 
 		.person-chat-bot {
-			height: 60px;
+			height: 55px;
 			width: 100%;
 			transition: all 0.5s ease;
 
@@ -2454,15 +2444,15 @@
 						display: flex;
 						line-height: 70rpx;
 						height: 70rpx;
-						padding: 2px 10rpx;
+						padding: 2px 20rpx;
 						transition: all 0.5s ease-out;
 						flex: 1;
 						width: 100%;
 						background: #fff;
 						border-radius: 100px;
 						font-size: var(--global-text-font-size);
-					
-						
+
+
 						.remind-one {
 							border-radius: 10rpx;
 							line-height: 70rpx;

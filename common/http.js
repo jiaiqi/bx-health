@@ -52,8 +52,10 @@ let ignoreServiceName = (url) => {
 fly.interceptors.request.use(async (request) => {
 	//给所有请求添加自定义header
 	console.log("request: ", request)
-	if (request.url && request.url.indexOf('srvwx_app_login_verify') == -1 && request.url.indexOf('rvuser_login') == -1) {
-		if (Vue.prototype.$store && Vue.prototype.$store.getters && Vue.prototype.$store.getters.isLogin === false) {
+	if (request.url && request.url.indexOf('srvwx_app_login_verify') == -1 && request.url.indexOf(
+			'rvuser_login') == -1) {
+		if (Vue.prototype.$store && Vue.prototype.$store.getters && Vue.prototype.$store.getters.isLogin ===
+			false) {
 			// request.cancel = true
 			// #ifdef H5
 			uni.navigateTo({
@@ -87,7 +89,7 @@ fly.interceptors.request.use(async (request) => {
 		request.headers["requrl"] = window.location.pathname + window.location.search
 	}
 	let bxAuthTicket = uni.getStorageSync("bx_auth_ticket")
-	if(store.state.app.bx_auth_ticket){
+	if (store.state.app.bx_auth_ticket) {
 		bxAuthTicket = store.state.app.bx_auth_ticket
 	}
 	if (api.onTicket) {
@@ -99,6 +101,8 @@ fly.interceptors.request.use(async (request) => {
 	}
 	const outTime = uni.getStorageSync("expire_timestamp") //过期时间
 	const date = parseInt(new Date().getTime() / 1000)
+	
+
 	if (outTime) {
 		const isExpired = outTime < date
 		console.log('登录是否过期:', isExpired, '\n过期时间:', FormateDate(new Date(outTime * 1000)), outTime, date)

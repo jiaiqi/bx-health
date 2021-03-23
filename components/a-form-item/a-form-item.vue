@@ -15,14 +15,16 @@
 			:class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }">
 			<!-- detail-详情-start -->
 			<view class="form-item_image" v-if="pageType === 'detail' && fieldData.type === 'images'">
-				<image class="form-item-content_detail image" v-if="fieldData.type === 'images'"
-					v-for="(item, index) in imagesUrl" :key="index" style="padding: 5upx;"
-					@tap="previewImage(item, 'Image')" data-target="Image" :src="item"></image>
+				<image class="form-item-content_detail image" v-for="(item, index) in imagesUrl" :key="index"
+					style="padding: 5upx;" @tap="previewImage(item, 'Image')" data-target="Image" :src="item"></image>
 			</view>
-			<view class="form-item-content_detail rich-text" v-html="field.value"
-				v-else-if="pageType === 'detail' && (field.type === 'snote' || field.type === 'Note'||field.type==='RichText')"></view>
+			<view class="form-item-content_detail rich-text"
+				v-else-if="pageType === 'detail' && (field.type === 'snote' || field.type === 'Note'||field.type==='RichText')">
+				<rich-text :nodes="field.value" class="value rich-text"></rich-text>
+			</view>
 			<view class="form-item-content_detail text" v-else-if="pageType === 'detail'">
-				{{ fieldData.value | formalText }}</view>
+				{{ fieldData.value | formalText }}
+			</view>
 			<!-- detail-详情-end -->
 			<!-- form-item-start -->
 			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value"
@@ -49,18 +51,19 @@
 			<bx-checkbox-group :mode="optionMode" v-model="fieldData.value"
 				class="form-item-content_value checkbox-group" v-else-if="fieldData.type === 'checkboxFk'"
 				:disabled="fieldData.disabled ? fieldData.disabled : false">
-				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options"
-					:key="item.value" :name="item.label">{{ item.label }}
+				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options" :key="item.value"
+					:name="item.label">{{ item.label }}
 				</bx-checkbox>
 			</bx-checkbox-group>
-		
+
 			<view class="form-item-content_value" v-else-if="popupFieldTypeList.includes(fieldData.type)">
 				<view
 					v-if="(setOptionList.length < 15 && fieldData.type === 'Set') || (selectorData.length < 5 && fieldData.type === 'Selector')">
 					<bx-checkbox-group v-if="fieldData.type === 'Set'" class="form-item-content_value checkbox-group"
 						v-model="fieldData.value" mode="button">
 						<bx-checkbox v-for="item in setOptionList" :name="item.value" v-model="item.checked">
-							{{ item.label }}</bx-checkbox>
+							{{ item.label }}
+						</bx-checkbox>
 					</bx-checkbox-group>
 					<bx-radio-group v-if="fieldData.type === 'Selector'" class="form-item-content_value radio-group"
 						v-model="fieldData.value" mode="button" @change="pickerChange">
@@ -70,7 +73,8 @@
 				<view v-else @click="openModal(fieldData.type)">
 					<text class="place-holder" v-if="!fieldData.value">请选择</text>
 					<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">
-						{{ fieldData.value.toString() }}</view>
+						{{ fieldData.value.toString() }}
+					</view>
 					<view class="value hidden" v-else-if="fieldData.value">{{ fieldData.value }}</view>
 					<text class="value hidden" v-else>{{ fkFieldLabel ? fkFieldLabel : '' }}</text>
 				</view>
@@ -85,10 +89,9 @@
 					</view>
 				</picker>
 			</view>
-
 			<view class="form-item-content_value textarea" v-else-if="fieldData.type === 'textarea'">
-				<textarea class="textarea-content" :adjust-position="false" :show-confirm-bar="false"
-					v-model="fieldData.value" :placeholder="'请输入'"></textarea>
+				<textarea class="textarea-content" :adjust-position="false" :show-confirm-bar="true"
+					v-model="fieldData.value" :placeholder="'开始输入'"></textarea>
 			</view>
 			<view class="form-item-content_value location"
 				v-else-if="fieldData.type === 'addr' || fieldData.type === 'location'" @click="getLocation">
@@ -98,21 +101,17 @@
 				<button class="bg-white cu-btn"
 					@click="showModal('voice')">{{ fieldData.value ? '点击查看录音' : '点击添加录音' }}</button>
 			</view>
-			<view class="form-item-content_value picker" v-else-if="fieldData.type === 'RichText'"
+			<view class="form-item-content_value" v-else-if="fieldData.type === 'RichText'"
 				@click="showModal('RichEditor')">
-				<text class="place-holder" v-if="!fieldData.value">点击输入</text>
-				<!-- <view class="value rich-text" v-else >点击进行编辑</view> -->
-				<rich-text  :nodes="fieldData.value" class="value rich-text" v-else></rich-text>
-				<!-- <view class="value rich-text" v-else v-html="fieldData.value">{{ fieldData.value | html2text }}</view> -->
+				<view class="place-holder" v-if="!fieldData.value">开始输入</view>
+				<rich-text :nodes="fieldData.value" class="value rich-text" v-else></rich-text>
 			</view>
-			<input type="text"
-			@input="onInput"
-			placeholder="请输入"
-			@blur="onBlur" :adjust-position="false" 
-			 :maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
-			 v-model="fieldData.value" :disabled="fieldData.disabled ? fieldData.disabled : false" v-else-if="fieldData.type ==='text'"/>
+			<input type="text" @input="onInput" placeholder="请输入" @blur="onBlur" :adjust-position="false"
+				:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
+				v-model="fieldData.value" :disabled="fieldData.disabled ? fieldData.disabled : false"
+				v-else-if="fieldData.type ==='text'" />
 			<input class="form-item-content_value" @blur="onBlur" :adjust-position="false" :type="fieldData.type"
-				 @input="onInput"
+				@input="onInput"
 				:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
 				:max="fieldData.item_type_attr && fieldData.item_type_attr.max ? fieldData.item_type_attr.max : 999"
 				:min="fieldData.item_type_attr && fieldData.item_type_attr.min ? fieldData.item_type_attr.min : 0"
@@ -146,16 +145,16 @@
 				<jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor" />
 			</view>
 		</view>
-		<view class="cu-modal" :class="{ show: modalName === 'TextArea' }" @click="hideModal">
-			<view class="cu-dialog" @tap.stop="">
+		<!-- 		<view class="cu-modal" :class="{ show: modalName === 'TextArea' }" @click.stop="hideModal">
+			<view class="cu-dialog" @tap.stop="" v-if="modalName === 'TextArea'">
 				<textarea class="textarea" :adjust-position="false" v-model="fieldData.value"
-					:placeholder="'请输入'"></textarea>
+					:placeholder="'请输入文字'"></textarea>
 				<view class="button-box">
 					<view class="cu-btn button bg-cyan" @click="saveRichText({ isSave: true, type: 'textarea' })">确定
 					</view>
 				</view>
 			</view>
-		</view>
+		</view> -->
 		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'TreeSelector' }" @tap="hideModal">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="tree-selector cascader" v-if="modalName === 'TreeSelector'">
@@ -164,8 +163,8 @@
 				</view>
 			</view>
 		</view>
-		<view class="cu-modal bottom-modal"
-			:class="{ show: modalName === 'Selector' || modalName === 'MultiSelector' }">
+		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'Selector' || modalName === 'MultiSelector' }"
+			@click="hideModal">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="tree-selector">
 					<view class="content">
@@ -235,7 +234,7 @@
 					.replace(/<[^>]+?>/g, '')
 					.replace(/\s+/g, ' ')
 					.replace(/ /g, ' ')
-					.replace(/&nbsp;/g,' ')
+					.replace(/&nbsp;/g, ' ')
 					.replace(/>/g, ' ');
 			},
 			formalText(val) {
@@ -317,7 +316,7 @@
 						this.pageType !== 'detail')) {
 					result = '100%';
 				}
-				if(this.fieldData.type==='RichText'){
+				if (this.fieldData.type === 'RichText') {
 					result = '100%';
 				}
 				return result;
@@ -400,10 +399,10 @@
 			}
 		},
 		methods: {
-			isChecked(val){
-				if(this.fieldData&&this.fieldData.value&&this.fieldData.value.indexOf(val)!==-1){
+			isChecked(val) {
+				if (this.fieldData && this.fieldData.value && this.fieldData.value.indexOf(val) !== -1) {
 					return true
-				}else {
+				} else {
 					return false
 				}
 			},
@@ -508,11 +507,11 @@
 			},
 			showModal(name) {
 				this.modalName = name;
-				this.$nextTick(function() {
-					if (name === 'TextArea') {
-						// this.focusTextArea = true;
-					}
-				});
+				// this.$nextTick(function() {
+				// 	if (name === 'TextArea') {
+				// 		// this.focusTextArea = true;
+				// 	}
+				// });
 			},
 			hideModal() {
 				this.modalName = '';
@@ -672,14 +671,15 @@
 					self.fieldData.option_list_v2.conditions.length > 0) {
 					let condition = self.deepClone(self.fieldData.option_list_v2.conditions);
 					condition = condition.map(item => {
-						if (item.value&&item.value.indexOf('data.') !== -1) {
+						if (item.value && item.value.indexOf('data.') !== -1) {
 							let colName = item.value.slice(item.value.indexOf('data.') + 5);
 							if (fieldModelsData[colName]) {
 								item.value = fieldModelsData[colName];
 							}
-						} else if (item.value&&item.value.indexOf('top.user.user_no') !== -1) {
+						} else if (item.value && item.value.indexOf('top.user.user_no') !== -1) {
 							item.value = uni.getStorageSync('login_user_info').user_no;
-						} else if (item.value&&item.value.indexOf("'") === 0 && item.value.lastIndexOf("'") === item.value
+						} else if (item.value && item.value.indexOf("'") === 0 && item.value.lastIndexOf(
+								"'") === item.value
 							.length - 1) {
 							item.value = item.value.replace(/\'/gi, '');
 						}
@@ -727,7 +727,7 @@
 							.option_list_v2);
 						if (res.data.page && res.data.page.pageNo > 1) {
 							let data = self.treeReform(res.data.data, 'parent_no', 'no', self.fieldData
-							.option_list_v2);
+								.option_list_v2);
 							self.selectorData = [...self.selectorData, ...data];
 						}
 						self.selectorData = self.selectorData.map((item, index) => {
@@ -879,7 +879,7 @@
 			getValid() {
 				if (this.fieldData.isRequire && this.fieldData.value) {
 					if (this.fieldData.hasOwnProperty('_validators') && this.fieldData._validators.hasOwnProperty(
-						'isType') && typeof this.fieldData._validators.isType === 'function') {
+							'isType') && typeof this.fieldData._validators.isType === 'function') {
 						this.fieldData.valid = this.fieldData._validators.isType(this.fieldData.value);
 						this.valid.valid = true;
 					} else {

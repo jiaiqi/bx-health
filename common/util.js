@@ -1337,7 +1337,6 @@ export default {
 		}
 		/**
 		 * 按钮跳转的统一处理
-		 * 
 		 */
 		Vue.prototype.onButtonToUrl = function(e, appName) {
 			console.log("onButtonToUrl", e)
@@ -1369,6 +1368,10 @@ export default {
 									`/publicPages/newForm/newForm?type=update&serviceName=${btn.service_name}&fieldsCond=${JSON.stringify(fieldsCond)}`;
 								if (appName) {
 									url += `&appName=${appName}`
+								}
+								if(btn.service_name==='srvdaq_cms_content_update'){
+									let hideColumn = ['no']
+									url +=　`&hideColumn=${JSON.stringify(hideColumn)}`
 								}
 								uni.navigateTo({
 									url: url
@@ -1411,6 +1414,9 @@ export default {
 									`/publicPages/newForm/newForm?type=detail&serviceName=${btn.service_name}&fieldsCond=${encodeURIComponent(
 									JSON.stringify(fieldsCond)
 								)}`;
+								if (appName) {
+									url += `&appName=${appName}`
+								}
 								uni.navigateTo({
 									url: url
 								})

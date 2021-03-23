@@ -5,12 +5,6 @@
 			<view class="label text-bold">百想健康</view>
 		</view>
 		<view class="tips">{{ tips }}</view>
-		<!-- 	<view class="text-bold text">
-			申请获取以下权限
-		</view>
-		<view class="margin-tb-sm text">
-			获取你的公开信息（昵称、头像等）
-		</view> -->
 		<!-- <button type="primary" class="cu-btn bg-green" lang="zh_CN" :open-type="openType" @getuserinfo="getuserinfo">微信授权用户信息</button> -->
 		<button type="primary" class="cu-btn bg-green button" lang="zh_CN" @click="toAuthPage">打开授权页面</button>
 	</view>
@@ -53,7 +47,6 @@
 		height: calc(100vh - var(--window-top) - var(--window-bottom));
 		z-index: 1001;
 		display: flex;
-		// justify-content: center;
 		align-items: center;
 		flex-direction: column;
 		background-color: #fff;

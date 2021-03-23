@@ -1,13 +1,17 @@
 <template>
 	<view class="form" :style="{
 			'--global-text-font-size': globalTextFontSize + 'px',
-			'--global-label-font-size': globalLabelFontSize + 'px'
+			'--page-height':pageHeight
 		}">
-		<a-form v-if="colsV2Data && isArray(fields)" :fields="fields" :pageType="srvType" :formType="use_type"
-			ref="bxForm" @value-blur="valueChange"></a-form>
+		<scroll-view scroll-y="true">
+			<view>
+				<a-form v-if="colsV2Data && isArray(fields)" :fields="fields" :pageType="srvType" :formType="use_type"
+					ref="bxForm" @value-blur="valueChange"></a-form>
+			</view>
+		</scroll-view>
 		<view class="button-box">
 			<button class="cu-btn bg-blue" type="primary" v-if="isArray(fields) && fields.length > 0"
-				v-for="btn in colsV2Data._formButtons" @click="onButton(btn)">
+				v-for="(btn,btnIndex) in colsV2Data._formButtons" :key="btnIndex" @click="onButton(btn)">
 				{{ btn.button_name }}
 			</button>
 		</view>
@@ -46,6 +50,8 @@
 				successTip: '添加成功',
 				afterSubmit: 'detail', // 提交后的操作 detail-跳转到表单详情，back-返回上一页面
 				submitAction: '', //提交后要进行的emit操作
+				keyboardHeight: 0,
+				pageHeight: `calc(100vh - var(--window-top) - var(--window-bottom))`
 			};
 		},
 		computed: {
@@ -75,7 +81,6 @@
 					ruleType: 'eq',
 					value: formData[e.foreign_key.referenced_column_name]
 				}];
-				debugger
 				if (e.foreign_key && e.foreign_key.referenced_column_name && formData[e.foreign_key
 						.referenced_column_name]) {
 					if (e.foreign_key.more_config && e.foreign_key.more_config.targetType) {
@@ -214,7 +219,7 @@
 					if (Array.isArray(this.hideColumn) && this.hideColumn.length > 0) {
 						url += `&hideColumn=${JSON.stringify(this.hideColumn)}`
 					}
-					if(this.appName){
+					if (this.appName) {
 						url += `&appName=${this.appName}`
 					}
 					uni.redirectTo({
@@ -309,7 +314,7 @@
 									});
 									return;
 								}
-								let res = await this.onRequest('update', e.service_name, req,app);
+								let res = await this.onRequest('update', e.service_name, req, app);
 								if (res.data.state === 'SUCCESS') {
 									if (
 										Array.isArray(res.data.response) &&
@@ -367,7 +372,8 @@
 												}
 												uni.navigateBack()
 											} else {
-												self.toPages('detail');
+												uni.navigateBack()
+												// self.toPages('detail');
 											}
 										}
 									});
@@ -777,9 +783,26 @@
 						content: `您已成功加入【${storeInfo.name}】`
 					});
 				}
-			}
+			},
+			
+		},
+		onHide() {
+			uni.offKeyboardHeightChange(function() {})
+		},
+		beforeDestroy() {
+			uni.offKeyboardHeightChange(function() {})
 		},
 		async onLoad(option) {
+			uni.onKeyboardHeightChange(res => {
+				console.log(res.height)
+				if (res.height) {
+					this.pageHeight =
+						`calc(100vh - ${res.height}px - var(--window-top) - var(--window-bottom))`
+				} else {
+					this.pageHeight = `calc(100vh - var(--window-top) - var(--window-bottom))`
+				}
+				this.keyboardHeight = res.height
+			})
 			await this.toAddPage();
 			this.checkOptionParams(option);
 			const destApp = option.destApp;
@@ -815,7 +838,6 @@
 			}
 			// srvType: 'add', // 表单信息 add | update  | select |list | detail
 			// use_type: 'add', // detail | proclist | list | treelist | detaillist | selectlist | addchildlist | updatechildlist | procdetaillist | add | update
-
 			if (option.type) {
 				if (option.type.indexOf(',') !== -1) {
 					option.type = option.type.split(',')[0];
@@ -880,9 +902,7 @@
 							return item;
 						});
 					}
-					// this.fieldsCond = fieldsCond.ma
 				} catch (e) {
-					//TODO handle the exception
 					console.warn(e);
 				}
 			}
@@ -892,13 +912,16 @@
 	};
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+	// page{
+	// 	background-color: #fff;
+	// }
 	.form {
 		width: 100%;
 		background-color: #fff;
-		min-height: calc(100vh - var(--window-top) - var(--window-bottom));
+		height: var(--page-height);
+		overflow-y: scroll;
 
-		// overflow: scroll;
 		.button-box {
 			width: 100%;
 			display: flex;

@@ -326,6 +326,18 @@
 								if (otherParams.hideColumn) {
 									url += `&hideColumn=${JSON.stringify(otherParams.hideColumn)}`
 								}
+								if (this.appName) {
+									url += `&appName=${this.appName}`
+								}
+								if(button.service_name === 'srvdaq_cms_content_select'){
+									debugger
+									if (e.content_no) {
+										uni.navigateTo({
+											url: `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=${e.content_no}`
+										});
+									}
+									return 
+								}
 								uni.navigateTo({
 									url: url
 								})
@@ -362,6 +374,9 @@
 							result.hideColumn = ['vs_no', 'store_no', 'drug_classify_no', 'create_time', 'create_user',
 								'create_user_disp', 'modify_user', 'modify_user_disp', 'modify_time'
 							]
+							break;
+						case 'srvdaq_cms_content_update': //新闻公告编辑
+							result.hideColumn = ['no']
 							break;
 					}
 				}

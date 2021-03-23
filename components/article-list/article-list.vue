@@ -12,7 +12,7 @@
 						'layout-left-image':item.cover_pic_style==='左侧',
 						'layout-center-single-image':item.cover_pic_style==='下一',
 						'layout-center-multi-image':item.cover_pic_style==='下三'
-						}" v-for="item in list" @click="toDetail(item)">
+						}" v-for="item in list" @click="toDetail(item)" :key="item.content_no">
 				<image class="image-icon" :src="getImagePath(item.icon_image)" v-if="item.icon_image">
 				</image>
 				<view class="content-box">

@@ -3,7 +3,7 @@
 			'--global-text-font-size': globalTextFontSize + 'px',
 			'--global-label-font-size': globalLabelFontSize + 'px'
 		}">
-		<view class="page-item" v-for="pageItem in pageItemList" :class="{
+		<view class="page-item" v-for="(pageItem,pageIndex) in pageItemList" :key="pageItem.item_no" :class="{
 				'swiper-view': pageItem.div_type === 'carousel',
 				'menu-view': pageItem.div_type === 'buttons',
 				'tab-list-view': pageItem.div_type === 'tablist'
@@ -11,7 +11,7 @@
 			<view class="page-slide" v-if="pageItem.div_type === 'carousel'">
 				<swiper class="screen-swiper item-box square-dot" easing-function="linear" :height="300"
 					:indicator-dots="true" :circular="true" :autoplay="true" interval="5000" duration="500">
-					<swiper-item v-for="(item, index) in pageItem.carousel" @click="toSwiperDetail(item)">
+					<swiper-item v-for="(item, index) in pageItem.carousel" :key="item.carousel_no" @click="toSwiperDetail(item)">
 						<image :src="getImagePath(item.carousel_image, true)"></image>
 					</swiper-item>
 				</swiper>
@@ -50,7 +50,7 @@
 					:class="{ 'low-height': pageItem.buttons && pageItem.buttons.length > 0 && pageItem.buttons[0].buttons && pageItem.buttons[0].buttons.length <= 4 }"
 					v-if="(pageItem.buttons && pageItem.buttons.length === 1) || !pageItem.buttons || pageItem.buttons.length === 0">
 					<view class="swiper-item" v-for="(swiperItem, swiperIndex) in pageItem.buttons" :key="swiperIndex">
-						<view @click="skip(btn)" class="swiper-button" v-for="btn in swiperItem.buttons"
+						<view @click="skip(btn)" class="swiper-button" v-for="(btn,btnIndex) in swiperItem.buttons"
 							:key="btn.button_no">
 							<image class="image" :src="getMenuImagePath(btn)"></image>
 							<text class="btn-name">{{ btn.dest_menu_no }}</text>

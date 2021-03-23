@@ -167,7 +167,6 @@
 			goNoticeList(){
 				let viewTemp = {
 					tip: 'content_status',
-					// price: 'current_price',
 					footer: 'content',
 					title: 'title',
 					img: 'icon_image'
@@ -175,7 +174,6 @@
 				let cond = [{colName: "no", ruleType: "like", value: "LM202103100033"}]
 				let url =
 					`/publicPages/list/list?pageType=list&appName=daq&serviceName=srvdaq_cms_content_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
-				// let url = '/storePages/NewsList/NewsList?no=LM202103100033'
 				uni.navigateTo({
 					url:url
 				})

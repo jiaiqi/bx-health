@@ -262,18 +262,9 @@
 						"enablePullDownRefresh": true
 					}
 				},
-				// {
-				// 	"path": "HealthRecord/HealthRecord",
-				// 	"style": {
-				// 		"navigationBarTitleText": "",
-				// 		"enablePullDownRefresh": false
-				// 	}
-
-				// }, 
 				{
 					"path": "chat/chat",
 					"style": {
-						// "navigationStyle":"custom",
 						"navigationBarBackgroundColor": "#fff",
 						"navigationBarTextStyle": "black",
 						"enablePullDownRefresh": false
@@ -314,13 +305,6 @@
 						"navigationBarTitleText": "营养素详情"
 					}
 				},
-				// {
-				// 	"path": "symptomSelect/symptomSelect",
-				// 	"style": {
-				// 		"navigationBarTitleText": "症状选择",
-				// 		"navigationStyle": "custom"
-				// 	}
-				// },
 				{
 					"path": "symptomSelect/symptomSelect2",
 					"style": {
@@ -469,7 +453,7 @@
 			"pages": [{
 				"path": "StoreIntroduce/StoreIntroduce",
 				"style": {
-					"navigationStyle":"custom",
+					"navigationStyle": "custom",
 					"navigationBarTitleText": "详情",
 					"navigationBarBackgroundColor": "#fff",
 					"navigationBarTextStyle": "black",
@@ -488,23 +472,13 @@
 					"navigationBarTitleText": "",
 					"enablePullDownRefresh": false
 				}
-
 			}, {
 				"path": "VaccineOrder/VaccineOrder",
 				"style": {
 					"navigationBarTitleText": "疫苗预约",
 					"enablePullDownRefresh": true
 				}
-			}    ,{
-                    "path" : "NewsList/NewsList",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-            ]
+			}]
 		},
 		{
 			"root": "publicPages",
@@ -526,13 +500,6 @@
 						"enablePullDownRefresh": false
 					}
 				},
-				// {
-				// 	"path": "mapPage/mapPage",
-				// 	"style": {
-				// 		"enablePullDownRefresh": false,
-				// 		"navigationBarTitleText": "位置选择"
-				// 	}
-				// }, 
 				{
 					"path": "newForm/newForm",
 					"style": {
@@ -540,15 +507,6 @@
 						"enablePullDownRefresh": false
 					}
 				},
-				// {
-				// 	"path": "chat/chat",
-				// 	"style": {
-				// 		"navigationBarTitleText": "聊天室",
-				// 		"navigationBarTextStyle": "black",
-				// 		"navigationBarBackgroundColor": "#fff",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// },
 				{
 					"path": "article/article",
 					"style": {

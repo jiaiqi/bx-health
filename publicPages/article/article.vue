@@ -35,7 +35,9 @@
 				articleData: {},
 				content_no: '',
 				cate_name: '',
-				serviceName: 'srvdaq_cms_content_select'
+				serviceName: 'srvdaq_cms_content_select',
+				storeName: '',
+				storeNo: ''
 			};
 		},
 		methods: {
@@ -85,11 +87,10 @@
 		onShareAppMessage() {
 			let path =
 				`/publicPages/article/article?from=share&store_no=${this.storeNo}&content_no=${this.content_no}&invite_user_no=${this.userInfo.userno}&share_type=bindOrganization&doctor_no=${
-				this.userInfo.no
-			}`;
+				this.userInfo.no }`;
 			this.saveSharerInfo(this.userInfo, path);
 			return {
-				title: this.articleData.title,
+				title: this.storeName || this.articleData.title,
 				path: path
 			};
 		},
@@ -105,6 +106,9 @@
 			}
 			if (option.store_no) {
 				this.storeNo = option.store_no
+			}
+			if (option.store_name) {
+				this.storeName = option.store_name
 			}
 			if (option.cate_name) {
 				this.cate_name = option.cate_name;

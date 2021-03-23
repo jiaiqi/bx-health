@@ -37,12 +37,10 @@
 			<view class="setting-layer-mask" v-if="showSettingLayer" @click="showSetting"></view>
 			<view class="setting-layer" v-if="showSettingLayer">
 				<view class="single" @click="release(true)">
-					<!-- <jinIcon class="icon" type="&#xe639;"></jinIcon> -->
 					<view>保存</view>
 					<text class="cuIcon-check margin-left-xs"></text>
 				</view>
 				<view class="single" @click="release(false)">
-					<!-- <jinIcon class="icon" type="&#xe655;"></jinIcon> -->
 					<view>取消</view>
 					<text class="cuIcon-close margin-left-xs"></text>
 				</view>
@@ -275,10 +273,11 @@ export default {
 .ql-container {
 	line-height: 160%;
 	font-size: 34rpx;
-	height: 80vh;
+	max-height: 60vh;
+	min-height: 200px;
 	padding: 20rpx 10rpx;
 	overflow: scroll;
-	/* height: auto; */
+	height: auto;
 	margin: 0 auto;
 	background-color: #f8f8f8;
 }

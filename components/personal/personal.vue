@@ -115,13 +115,13 @@
 						tag: 'hzMessage',
 						messageAmount: 0
 					},
-					{
-						label: '圈子',
-						type: "group",
-						icon: 'link',
-						tag: 'groupMsgUnreadAmount',
-						messageAmount: 0
-					},
+					// {
+					// 	label: '圈子',
+					// 	type: "group",
+					// 	icon: 'link',
+					// 	tag: 'groupMsgUnreadAmount',
+					// 	messageAmount: 0
+					// },
 					{
 						label: '单位',
 						type: "mineStore",
