@@ -1,6 +1,6 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
-	<view class="page-wrap" :class="{ onlyCurrentPage: onlyCurrentPage&&false}" v-if="!authBoxDisplay">
+	<view class="page-wrap" v-if="!authBoxDisplay">
 		<swiper class="screen-swiper item-box rectangle-dot" easing-function="linear" :indicator-dots="true"
 			:circular="true" :autoplay="true" interval="5000" duration="500" height="300">
 			<swiper-item v-for="(item, index) in swiperList" :key="item.url" @click.stop="toPreviewImage(item.url)">
@@ -795,6 +795,30 @@
 			},
 			async initPage() {
 				await this.toAddPage()
+				if (this.authBoxDisplay) {
+					// 未授权
+					// #ifdef MP-WEIXIN
+					let res = await wx.getSetting();
+					if (!res.authSetting['scope.userInfo']) {
+						this.$store.commit('SET_AUTH_SETTING', {
+							type: 'userInfo',
+							value: false
+						});
+						uni.showToast({
+							title:'未授权获取用户信息',
+							icon:'none'
+						})
+						// this.$store.commit('SET_AUTH_USERINFO', false);
+						// 没有获取用户信息授权
+					} else {
+						this.$store.commit('SET_AUTH_USERINFO', true);
+					}
+					// #endif
+				}
+				uni.showToast({
+					title:'初始化数据',
+					icon:'none'
+				})
 				if (this.storeNo) {
 					console.log(`storeNo:${this.storeNo}`)
 					await this.selectBindUser()
@@ -909,23 +933,7 @@
 				}
 			}
 			this.checkOptionParams(option);
-			if (this.authBoxDisplay) {
-				// 未授权
-				// #ifdef MP-WEIXIN
-				let res = await wx.getSetting();
-				if (!res.authSetting['scope.userInfo']) {
-					this.$store.commit('SET_AUTH_SETTING', {
-						type: 'userInfo',
-						value: false
-					});
-					this.$store.commit('SET_AUTH_USERINFO', false);
-					// 没有获取用户信息授权
-					return;
-				} else {
-					this.$store.commit('SET_AUTH_USERINFO', true);
-				}
-				// #endif
-			}
+			await this.toAddPage()
 			if (option.share_type === 'bindOrganization' && option.store_no && option
 				.invite_user_no) {
 				// 绑定诊所
@@ -943,7 +951,11 @@
 					});
 				});
 			}
-			if (option.store_no && this.userInfo.no) {
+			if (option.store_no) {
+				uni.showToast({
+					title:'店铺编号：'+option.store_no,
+					icon:'none'
+				})
 				this.storeNo = option.store_no;
 				this.initPage()
 			}
