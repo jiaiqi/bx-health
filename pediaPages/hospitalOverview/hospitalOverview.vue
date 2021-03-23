@@ -816,7 +816,17 @@
 				uni.stopPullDownRefresh()
 			}, 1000)
 		},
-		onShow() {
+		async onShow() {
+			if (this.authBoxDisplay) {
+				// 未授权
+				// #ifdef MP-WEIXIN
+				let res = await wx.getSetting();
+				if (res.authSetting['scope.userInfo']) {
+					this.$store.commit('SET_AUTH_USERINFO', true);
+					// 没有获取用户信息授权
+				}
+				// #endif
+			}
 			if (!this.subscsribeStatus) {
 				// 检测是否已关注公众号
 				this.checkSubscribeStatus()
@@ -915,11 +925,6 @@
 					this.$store.commit('SET_AUTH_USERINFO', true);
 				}
 				// #endif
-				return
-			}
-			let res = await this.toAddPage()
-			if (res === 'fail') {
-				return;
 			}
 			if (option.share_type === 'bindOrganization' && option.store_no && option
 				.invite_user_no) {

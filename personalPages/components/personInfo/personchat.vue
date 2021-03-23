@@ -2416,7 +2416,7 @@
 			transition: all 0.5s ease;
 
 			&.showLayer {
-				height: 290px;
+				height: 285px;
 			}
 
 			.person-chat-bot-top {
