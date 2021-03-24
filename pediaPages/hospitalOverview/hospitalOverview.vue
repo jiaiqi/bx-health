@@ -599,8 +599,15 @@
 						rownumber: 1
 					},
 				};
+				uni.showToast({
+					title:'开始查找机构信息',
+					icon:"none"
+				})
 				let res = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health')
 				if (Array.isArray(res.data) && res.data.length > 0) {
+					uni.showToast({
+						title:'已查找到机构信息'
+					})
 					this.storeInfo = res.data[0];
 					if (this.storeInfo.type === '健康服务') {
 						this.getGoodsListData();
@@ -610,6 +617,11 @@
 						title: this.storeInfo.name
 					});
 					this.getNotice();
+				}else{
+					uni.showToast({
+						title:'未查找到机构信息',
+						icon:'none'
+					})
 				}
 				this.selectDepartList();
 			},
