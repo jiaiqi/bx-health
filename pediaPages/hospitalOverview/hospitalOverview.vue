@@ -8,24 +8,25 @@
 			</swiper-item>
 		</swiper>
 		<view class="page-content">
-			<view class="header-wrap" v-if="storeInfo && storeInfo.id">
+			<view class="header-wrap" v-if="storeNo">
 				<view class="hospital-top">
 					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
-					<view class="logo" v-else>{{ storeInfo.name.slice(0, 1) }}</view>
+					<view class="logo" v-else-if="storeInfo.name">{{ storeInfo.name.slice(0, 1) }}</view>
+					<view class="logo" v-else-if="!storeInfo.name">机构名称</view>
 					<view class="home-btn" @click="setHomePage">
 						<button class="cuIcon-home cu-btn  bg-cyan" v-if="userInfo&&userInfo.home_store_no!==storeNo">
 						</button>
 					</view>
 					<view class="left" @click="toPages('instroduce')">
 						<view class="top">
-							<view class="name">{{ storeInfo.name }}</view>
+							<view class="name">{{ storeInfo.name ||'机构名称'}}</view>
 							<view class="bind" v-if="!isBind"><button @click.stop="bindStore(true)" type="primary"
 									class="bg-blue cu-btn sm">绑定</button></view>
 						</view>
 						<view class="bottom" v-if="introduction && introduction.length < 25">{{ introduction }}</view>
 						<view class="bottom" v-if="storeInfo.address">
 							<view class="address">
-								<text class="content">{{ storeInfo.address }}</text>
+								<text class="content">{{ storeInfo.address||'机构地址' }}</text>
 								<text @click.stop="getCurrentLocation"
 									class="cuIcon-locationfill text-blue margin-left-xs"
 									style="font-size: 30px;"></text>
@@ -52,11 +53,11 @@
 				<view class="menu-list">
 					<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
 						:indicator-dots="true" :autoplay="false">
-						<swiper-item v-for="swiperItem in mainMenuList">
+						<swiper-item v-for="(swiperItem,swiperIndex) in mainMenuList" :key="swiperIndex">
 							<view class="swiper-item">
 								<view class="menu-item"
 									@click="item.eventType==='toPage'?toPages(item.type):toGroup(item.type)"
-									v-for="item in swiperItem">
+									v-for="(item,index) in swiperItem" :key="index">
 									<view class="cu-tag badge" v-if="item.num">{{item.num||''}}</view>
 									<u-icon :name="item.icon" size="60" color="#00aaff"
 										v-if="item.iconType==='uicon'&&!item.custonIcon">
@@ -89,7 +90,7 @@
 								'layout-left-image':item.cover_pic_style==='左侧',
 								'layout-center-single-image':item.cover_pic_style==='下一',
 								'layout-center-multi-image':item.cover_pic_style==='下三'
-								}" v-for="item in noticeList" @click="toArticle(item)">
+								}" v-for="(item,noticeIndex) in noticeList" :key="noticeIndex" @click="toArticle(item)">
 							<!-- <text class="cuIcon-mail text-orange margin-right-xs"></text> -->
 							<image class="image-icon" :src="getImagePath(item.icon_image)" v-if="item.icon_image">
 							</image>
@@ -109,7 +110,7 @@
 					</view>
 					<view class="content">
 						<view class="depart-box">
-							<button class="depart-item cu-btn bg-blue sm margin-right-xs" v-for="item in deptList"
+							<button class="depart-item cu-btn bg-blue sm margin-right-xs" :key="deptIndex" v-for="(item,deptIndex) in deptList"
 								@click="toDeptDetail(item)">{{ item.dept_name }}</button>
 						</view>
 					</view>
@@ -144,7 +145,7 @@
 						<text class="">新闻</text>
 					</view>
 					<view class="content news-list">
-						<view class="news-item" v-for="item in newsList" @click="toArticle(item)">
+						<view class="news-item" v-for="(item,index) in newsList" :key="index" @click="toArticle(item)">
 							<text class="cuIcon-title"></text>
 							<text class="title-text">{{ item.title }}</text>
 							<text class="date">{{ formateDate(item.create_time) }}</text>
@@ -808,9 +809,12 @@
 							title:'未授权获取用户信息',
 							icon:'none'
 						})
-						// this.$store.commit('SET_AUTH_USERINFO', false);
 						// 没有获取用户信息授权
 					} else {
+						uni.showToast({
+							title:'已授权获取用户信息',
+							icon:'none'
+						})
 						this.$store.commit('SET_AUTH_USERINFO', true);
 					}
 					// #endif
@@ -820,9 +824,13 @@
 					icon:'none'
 				})
 				if (this.storeNo) {
+					uni.showToast({
+						title:'初始化数据',
+						icon:'none'
+					})
 					console.log(`storeNo:${this.storeNo}`)
-					await this.selectBindUser()
 					await this.selectStoreInfo();
+					await this.selectBindUser()
 					await this.seletGroupList();
 					// await this.getKefuSessionInfo()
 					this.selectUnreadAmount()
