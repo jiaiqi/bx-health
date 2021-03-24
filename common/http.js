@@ -101,7 +101,28 @@ fly.interceptors.request.use(async (request) => {
 	}
 	const outTime = uni.getStorageSync("expire_timestamp") //过期时间
 	const date = parseInt(new Date().getTime() / 1000)
-	
+	// if (request.url && request.url !== 'srvwx_app_login_verify') {
+	// 	// #ifdef MP-WEIXIN
+	// 	try {
+	// 		let sessionStatus = await wx.checkSession()
+	// 	} catch (err) {
+	// 		// session_key 已经失效 需要重新执行登录流程
+	// 		if (err) {
+	// 			uni.showToast({
+	// 				title: err,
+	// 				icon: false
+	// 			})
+	// 		}
+	// 		let result = await wx.login()
+	// 		if (result.code) {
+	// 			await Vue.prototype.wxLogin({
+	// 				code: result.code
+	// 			})
+	// 		}
+	// 	}
+	// 	// #endif
+	// }
+
 
 	if (outTime) {
 		const isExpired = outTime < date

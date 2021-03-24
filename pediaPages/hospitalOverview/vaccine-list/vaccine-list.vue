@@ -91,8 +91,10 @@
 					<view class="cu-form-group">
 						<view class="title">手机号码</view>
 						<text v-if="!formModel.phone_xcx">点击右侧按钮获取手机号</text>
+						<!-- 				<input placeholder="请先授权获取手机号" name="input" type="number" v-model="formModel.customer_phone"
+							:disabled="!formModel.phone_xcx" v-else></input> -->
 						<input placeholder="请先授权获取手机号" name="input" type="number" v-model="formModel.customer_phone"
-							:disabled="!formModel.phone_xcx" v-else></input>
+							v-else></input>
 						<view class="cu-capsule radius" v-if="!formModel.phone_xcx">
 							<button class="cu-tag bg-blue" type="primary" open-type="getPhoneNumber"
 								@getphonenumber="decryptPhoneNumber">
@@ -249,7 +251,8 @@
 			async updateUserInfo() {
 				let data = {}
 				if (!this.formModel.customer_name || !this.formModel.customer_phone || !this.formModel
-					.customer_birth_day || !this.formModel.id_no || !this.formModel.phone_xcx) {
+					.customer_birth_day || !this.formModel.id_no) {
+					//  || !this.formModel.phone_xcx 暂不校验是否填写小程序手机号
 					this.tip = '请确认所有实名信息已填写完整'
 					return
 				}
@@ -289,6 +292,24 @@
 			async decryptPhoneNumber(e) {
 				// 解密手机号信息
 				let self = this
+				try {
+					let sessionStatus = await wx.checkSession()
+				} catch (err) {
+					// session_key 已经失效， 需要重新执行登录流程
+					if (err) {
+						uni.showToast({
+							title: err,
+							icon: false
+						})
+					}
+					let result = await wx.login()
+					if (result.code) {
+						await self.wxLogin({
+							code: result.code
+						})
+					}
+				}
+				
 				if (e.detail && e.detail.errMsg && e.detail.errMsg.indexOf('ok') !== -1) {
 					let url = this.getServiceUrl('wx', 'srvwx_app_data_decrypt', 'operate')
 					let req = [{
@@ -304,31 +325,22 @@
 						this.formModel.phone_xcx = res.data.response[0].response.phoneNumber
 						this.formModel.customer_phone = res.data.response[0].response.phoneNumber
 					} else {
-						// #ifdef MP-WEIXIN
-						wx.checkSession({
-							fail(err){
-								// session_key 已经失效， 需要重新执行登录流程
-								wx.login({
-									success(result) {
-										if (result.code) {
-											self.wxLogin({
-												code: result.code
-											}).then(_ => {
-												self.decryptPhoneNumber(e)
-											})
-										}
-									}
-								})
-							}
-						})
-						// #endif
-						// if (res.data.resultCode === 'FAILURE') {
-						// 	uni.showModal({
-						// 		title: '提示',
-						// 		content: res.data.resultMessage + (res.data.serviceInfo || ''),
-						// 		showCancel: false
-						// 	})
-						// }
+						// wx.checkSession({
+						// 	fail(err) {
+						// 		// session_key 已经失效， 需要重新执行登录流程
+						// 		wx.login({
+						// 			success(result) {
+						// 				if (result.code) {
+						// 					self.wxLogin({
+						// 						code: result.code
+						// 					}).then(_ => {
+						// 						self.decryptPhoneNumber(e)
+						// 					})
+						// 				}
+						// 			}
+						// 		})
+						// 	}
+						// })
 					}
 				}
 			},

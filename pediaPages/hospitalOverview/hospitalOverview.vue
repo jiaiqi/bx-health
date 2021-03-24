@@ -8,11 +8,10 @@
 			</swiper-item>
 		</swiper>
 		<view class="page-content">
-			<view class="header-wrap" v-if="storeNo">
+			<view class="header-wrap" v-if="storeNo&&storeInfo&&storeInfo.id">
 				<view class="hospital-top">
 					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
 					<view class="logo" v-else-if="storeInfo.name">{{ storeInfo.name.slice(0, 1) }}</view>
-					<view class="logo" v-else-if="!storeInfo.name">机构名称</view>
 					<view class="home-btn" @click="setHomePage">
 						<button class="cuIcon-home cu-btn  bg-cyan" v-if="userInfo&&userInfo.home_store_no!==storeNo">
 						</button>
@@ -91,7 +90,6 @@
 								'layout-center-single-image':item.cover_pic_style==='下一',
 								'layout-center-multi-image':item.cover_pic_style==='下三'
 								}" v-for="(item,noticeIndex) in noticeList" :key="noticeIndex" @click="toArticle(item)">
-							<!-- <text class="cuIcon-mail text-orange margin-right-xs"></text> -->
 							<image class="image-icon" :src="getImagePath(item.icon_image)" v-if="item.icon_image">
 							</image>
 							<view class="content-box">
@@ -110,35 +108,12 @@
 					</view>
 					<view class="content">
 						<view class="depart-box">
-							<button class="depart-item cu-btn bg-blue sm margin-right-xs" :key="deptIndex" v-for="(item,deptIndex) in deptList"
+							<button class="depart-item cu-btn bg-blue sm margin-right-xs" :key="deptIndex"
+								v-for="(item,deptIndex) in deptList"
 								@click="toDeptDetail(item)">{{ item.dept_name }}</button>
 						</view>
 					</view>
 				</view>
-				<!-- <view class="introduction" v-if="storeInfo.type !== '健康服务'&&doctorList.length>0">
-					<view class="title">
-						<view class="">专家团队</view>
-					</view>
-					<view class="content">
-						<view class="professor-box">
-							<view class="professor-item" v-for="item in doctorList" @click="toDocotrDetail(item)">
-								<image class="img"
-									:src="getImagePath(item.profile_url) ? getImagePath(item.profile_url) : '../static/img/doctor_default.png'"
-									mode="aspectFit"></image>
-								<view class="doc-info">
-									<view class="top">
-										<text
-											class="doc-name">{{ item.person_name ? item.person_name : item.nick_name || '' }}</text>
-									</view>
-									<view class="center">
-										<view class="depart-name">科室：{{ item.deptName || '-' }}</view>
-									</view>
-									<view class="bottom">{{ item.staff_introduction || '暂无介绍' }}</view>
-								</view>
-							</view>
-						</view>
-					</view>
-				</view> -->
 				<view class="introduction news" v-if="storeInfo.type !== '健康服务'&&newsList.length>0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
@@ -279,42 +254,19 @@
 					eventType: 'toPage',
 					type: 'health-manager'
 				})
-
-				return list.reduce((pre, item) => {
-					if (pre.length === 0) {
-						pre = [
-							[item]
-						]
-					} else if (pre[pre.length - 1].length >= 4) {
-						pre.push([item])
-					} else {
-						pre[pre.length - 1].push(item)
-					}
-					return pre
-				}, [])
-			},
-			// customerList() {
-			// 	// 客服列表
-			// 	return this.storeUserList.filter(item => item && item.user_role && item.user_role.indexOf('客服') !== -1)
-			// },
-			// staffList() {
-			// 	// 工作人员
-			// 	return this.storeUserList.filter(item => item && item.user_role && (item.user_role.indexOf('工作人员') !== -
-			// 		1 || item.user_role ===
-			// 		'药房人员'))
-			// },
-			// doctorList() {
-			// 	// 大夫列表
-			// 	return this.storeUserList.filter(item => item.user_role === '大夫')
-			// },
-			onlyCurrentPage() {
-				let pageStack = getCurrentPages();
-				if (Array.isArray(pageStack) && pageStack.length > 1) {
-					let currentPage = pageStack[pageStack.length - 1];
-					this.$store.commit('SET_CURRENT_PAGE', currentPage.route);
-					return false;
-				} else if (Array.isArray(pageStack) && pageStack.length === 1) {
-					return true;
+				if (Array.isArray(list)) {
+					return list.reduce((pre, item) => {
+						if (pre.length === 0) {
+							pre = [
+								[item]
+							]
+						} else if (pre[pre.length - 1].length >= 4) {
+							pre.push([item])
+						} else {
+							pre[pre.length - 1].push(item)
+						}
+						return pre
+					}, [])
 				}
 			},
 			introduction() {
@@ -599,15 +551,8 @@
 						rownumber: 1
 					},
 				};
-				uni.showToast({
-					title:'开始查找机构信息',
-					icon:"none"
-				})
 				let res = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health')
 				if (Array.isArray(res.data) && res.data.length > 0) {
-					uni.showToast({
-						title:'已查找到机构信息'
-					})
 					this.storeInfo = res.data[0];
 					if (this.storeInfo.type === '健康服务') {
 						this.getGoodsListData();
@@ -617,10 +562,11 @@
 						title: this.storeInfo.name
 					});
 					this.getNotice();
-				}else{
-					uni.showToast({
-						title:'未查找到机构信息',
-						icon:'none'
+				} else {
+					uni.showModal({
+						title: '未查找到机构信息',
+						content: `${res?JSON.stringify(res):''}  storeNo为${this.storeNo}`,
+						showCancel: false
 					})
 				}
 				this.selectDepartList();
@@ -818,28 +764,16 @@
 							value: false
 						});
 						uni.showToast({
-							title:'未授权获取用户信息',
-							icon:'none'
+							title: '未授权获取用户信息',
+							icon: 'none'
 						})
 						// 没有获取用户信息授权
 					} else {
-						uni.showToast({
-							title:'已授权获取用户信息',
-							icon:'none'
-						})
 						this.$store.commit('SET_AUTH_USERINFO', true);
 					}
 					// #endif
 				}
-				uni.showToast({
-					title:'初始化数据',
-					icon:'none'
-				})
 				if (this.storeNo) {
-					uni.showToast({
-						title:'初始化数据',
-						icon:'none'
-					})
 					console.log(`storeNo:${this.storeNo}`)
 					await this.selectStoreInfo();
 					await this.selectBindUser()
@@ -972,10 +906,6 @@
 				});
 			}
 			if (option.store_no) {
-				uni.showToast({
-					title:'店铺编号：'+option.store_no,
-					icon:'none'
-				})
 				this.storeNo = option.store_no;
 				this.initPage()
 			}

@@ -252,18 +252,18 @@
 						<text class="remind-one" @click="clearRemind"
 							v-if="remindPerson&&remindPerson.no"><text>@{{remindPerson.name}}</text> <text
 								class="cuIcon-close"></text> </text>
-						<textarea class="send-value" :adjust-position="false" :show-confirm-bar="true"
-							v-model="chatText"  :hold-keyboard="true" auto-blur type="text" @blur="onBlur"
-							@focus="onInput" maxlength="-1" @confirm="sendMessage"
-							confirm-type="send" />
+						<textarea class="send-value" :adjust-position="false" :show-confirm-bar="false"
+							v-model="chatText" :hold-keyboard="false" type="text" @blur="onBlur" @focus="onInput"
+							maxlength="-1" @confirm="sendMessage" confirm-type="send" />
+						<!-- <text class="send cu-btn bg-blue sm" @touchend.prevent="sendMessage" v-if="isFeed">发送</text> -->
 					</view>
 				</view>
 				<view class="person-chat-rig" :class="{ 'is-feed': isFeed }">
 					<view class="person-chat-rig-add-wrap">
 						<view @click="openLink" v-if="!isFeed" class="person-chat-rig-add"><text
 								class="cuIcon-roundadd"></text></view>
+						<text class="send" @touchend.prevent="sendMessage" v-if="isFeed">发送</text>
 					</view>
-					<text class="send" @click="sendMessage" v-if="isFeed">发送</text>
 				</view>
 			</view>
 			<view class="person-chat-bot-bot" :class="{ showLayer: isSendLink && !showKeyboard }">
@@ -414,6 +414,7 @@
 		},
 		data() {
 			return {
+				focusInput: false,
 				holdKeyboard: true, //focus时，点击页面的时候不收起键盘
 				showKeyboard: false,
 				keyboardHeight: 0,
@@ -537,11 +538,6 @@
 			onBlur() {
 				this.showKeyboard = false;
 				// 隐藏键盘
-				// uni.showToast({
-				// 	title: '- 隐藏键盘 -',
-				// 	icon: 'none'
-				// })
-				// uni.hideKeyboard();
 				this.toBottom()
 			},
 			onInput(e) {
@@ -1095,6 +1091,7 @@
 			/*打开发送链接弹窗**/
 			openLink() {
 				// 隐藏键盘
+				// this.focusInput = false
 				uni.hideKeyboard();
 				this.isSendLink = !this.isSendLink
 				this.showKeyboard = false;
@@ -1104,6 +1101,7 @@
 				});
 			},
 			hideKeyboard: function(event) {
+				// this.focusInput = false
 				uni.hideKeyboard();
 			},
 			/*切换文字或者链接**/
@@ -1112,6 +1110,7 @@
 			},
 			sendMessage() {
 				// 点击发送按钮 组装消息并发送
+				// this.focusInput = false
 				if (!this.chatText) {
 					uni.showToast({
 						title: '消息不能为空',
@@ -1119,9 +1118,13 @@
 					})
 					return
 				}
+				// this.focusInput = true
 				this.sendMessageInfo();
 				this.chatText = '';
 				this.isSendLink = false;
+				setTimeout(() => {
+					this.toBottom()
+				}, 200)
 			},
 			changeVoice(type) {
 				console.log('----------', type);
@@ -1865,6 +1868,7 @@
 		},
 		beforeDestroy() {
 			clearInterval(this.refreshMessageTimer);
+			// this.focusInput = false
 			uni.hideKeyboard();
 		},
 		mounted() {

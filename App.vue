@@ -73,7 +73,6 @@
 							}
 						}
 					});
-
 				});
 
 				updateManager.onUpdateFailed(function(res) {
