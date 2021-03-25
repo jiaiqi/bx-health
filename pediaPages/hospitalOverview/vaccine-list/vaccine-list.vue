@@ -7,7 +7,7 @@
 		<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
 			:indicator-dots="true" :autoplay="false">
 			<swiper-item v-for="(child,index) in list" :key="index" class="swiper-item">
-				<view class="vaccine-item" v-for="item in child" @click="showInfo(item)">
+				<view class="vaccine-item" v-for="(item,itemIndex) in child" :key="itemIndex" @click="showInfo(item)">
 					<view class="title">
 						{{item.vaccine_drug_name}}
 					</view>
@@ -122,11 +122,13 @@
 						</view>
 					</view>
 					<view class="date-area">
-						<view class="date-item" :class="{'line-cyan':selectedVaccine.sa_no===radio.sa_no}"
+						<view class="date-item"
+							:class="{'line-cyan':selectedVaccine.sa_no===radio.sa_no,disabled:disabledTime(radio)}"
 							v-for="radio in timeArr" :key="radio.sa_no" @click="selectItem(radio)">
 							{{formateDate(radio.app_date,'MM-DD')}}
-							{{formateDate(radio.app_date+' '+ radio.app_time_start,'hh:mm')}} -
-							{{formateDate(radio.app_date+' '+ radio.app_time_end,'hh:mm')}}
+							{{radio.app_time_start?radio.app_time_start.slice(0,5):''}}
+							-
+							{{radio.app_time_end?radio.app_time_end.slice(0,5):''}}
 							<text v-if="radio.app_count" class="cu-tag badge">{{radio.app_count||''}}</text>
 						</view>
 					</view>
@@ -216,13 +218,17 @@
 		created() {
 			this.getVaccineList()
 		},
-		mounted() {
-			this.formModel.customer_name = this.userInfo.name
-			this.formModel.customer_phone = this.userInfo.phone
-			this.formModel.customer_birth_day = this.userInfo.birthday
-			this.formModel.phone_xcx = this.userInfo.phone_xcx
-		},
 		methods: {
+			disabledTime(e) {
+				// 判断是否过期 已过期则禁用
+				let time = new Date(e.app_date + ' ' + e.app_time_start)
+				let now = new Date()
+				if (time.getTime() < now.getTime()) {
+					return true
+				} else {
+					return false
+				}
+			},
 			async showInfo(e) {
 				this.vaccineInfo = e
 				if (e.remark_pic) {
@@ -309,7 +315,7 @@
 						})
 					}
 				}
-				
+
 				if (e.detail && e.detail.errMsg && e.detail.errMsg.indexOf('ok') !== -1) {
 					let url = this.getServiceUrl('wx', 'srvwx_app_data_decrypt', 'operate')
 					let req = [{
@@ -419,9 +425,19 @@
 			async selectTimeArr(e) {
 				let req = {
 					"condition": [{
-						"colName": "svs_no",
-						"ruleType": "eq",
-						"value": e.vs_no
+							"colName": "svs_no",
+							"ruleType": "eq",
+							"value": e.vs_no
+						},
+						{
+							"colName": "app_date",
+							"ruleType": "gt",
+							"value": this.formateDate()
+						}
+					],
+					order: [{
+						colName: "app_date",
+						orderType: "asc"
 					}],
 					"page": {
 						"pageNo": 1,
@@ -431,6 +447,10 @@
 				let res = await this.$fetch('select', 'srvhealth_store_vaccination_appointment_select', req, 'health')
 				if (res.success) {
 					this.timeArr = res.data
+					this.formModel.customer_name = this.userInfo.name || ''
+					this.formModel.customer_phone = this.userInfo.phone || ''
+					this.formModel.customer_birth_day = this.userInfo.birthday || ''
+					this.formModel.phone_xcx = this.userInfo.phone_xcx || ''
 					this.modalName = 'vaccine'
 				}
 
@@ -459,6 +479,13 @@
 				this.activeField = ''
 			},
 			selectItem(e) {
+				if (this.disabledTime(e)) {
+					uni.showToast({
+						title: '已过期,不可预约',
+						icon: 'none'
+					})
+					return
+				}
 				this.selectedVaccine = e
 			},
 			getList() {
@@ -709,7 +736,8 @@
 		flex-wrap: wrap;
 
 		.date-item {
-			display: inline-block;
+			display: flex;
+			justify-content: center;
 			padding: 5px 15px;
 			border-radius: 5px;
 			background-color: #f1f1f1;
@@ -719,6 +747,12 @@
 
 			&:nth-child(2n) {
 				margin-left: 10px;
+			}
+
+			&.disabled {
+				// pointer-events: none;
+				// cursor: default;
+				opacity: 0.6;
 			}
 		}
 	}

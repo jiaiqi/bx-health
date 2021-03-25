@@ -683,7 +683,8 @@
 				}
 			},
 			async updateUnreadAmount(){
-				let amount = await this.selectMyGroup();
+				let amount = 0;
+				// let amount = await this.selectMyGroup();
 				this.getDoctorAllRecod(this.userInfo.userno).then(r => {
 					if (amount) {
 						r += amount;

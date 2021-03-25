@@ -5,8 +5,8 @@
 			<text>业务办理</text>
 		</view>
 		<view class="news-list">
-			<view class="news-item" :class="{'layout-right-image':item.biz_icon}" v-for="item in list"
-				@click="toQuest(item)">
+			<view class="news-item" :class="{'layout-right-image':item.biz_icon}" v-for="(item,index) in list"
+				:key="index" @click="toQuest(item)">
 				<image class="image-icon" :src="getImagePath(item.biz_icon)" v-if="item.biz_icon">
 				</image>
 				<view class="content-box">

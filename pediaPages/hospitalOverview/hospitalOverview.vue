@@ -78,6 +78,7 @@
 					desc="goods_desc"></goods-list>
 				<vaccine-list v-if="storeNo==='S20210227032'"></vaccine-list>
 				<business-handle :storeNo="storeNo"></business-handle>
+				<staff-manage :storeNo="storeNo"></staff-manage>
 				<view class="introduction news" v-if="noticeList.length > 0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
@@ -146,11 +147,13 @@
 	import goodsList from './goods-list.vue';
 	import vaccineList from './vaccine-list/vaccine-list.vue'
 	import businessHandle from './business-handle/business-handle.vue'
+	import staffManage from './staff-manage/staff-manage.vue'
 	export default {
 		components: {
 			goodsList,
 			vaccineList,
-			businessHandle
+			businessHandle,
+			staffManage
 		},
 		mixins: [mixin],
 		data() {
@@ -217,6 +220,18 @@
 						num: '请设置'
 					})
 				}
+
+				if (this.bindUserInfo && this.bindUserInfo.user_role && (this.bindUserInfo.user_role.indexOf('工作人员') !== -
+						1 || this.bindUserInfo.user_role.indexOf('管理员') !== -1)) {
+					list.push({
+						icon: 'cuIcon-shop',
+						iconType: 'font',
+						label: '管理入口',
+						eventType: 'toPage',
+						num: this.storeInfo && this.storeInfo.kefu_unread_msg ? this.storeInfo.kefu_unread_msg : 0,
+						type: 'manager'
+					})
+				}
 				if (this.storeNo === 'S20210227032') {
 					list.push({
 						icon: 'order',
@@ -234,17 +249,6 @@
 						label: '食物库',
 						eventType: 'toPage',
 						type: 'food'
-					})
-				}
-				if (this.bindUserInfo && this.bindUserInfo.user_role && (this.bindUserInfo.user_role.indexOf('工作人员') !== -
-						1 || this.bindUserInfo.user_role.indexOf('管理员') !== -1)) {
-					list.push({
-						icon: 'cuIcon-shop',
-						iconType: 'font',
-						label: '管理入口',
-						eventType: 'toPage',
-						num: this.storeInfo && this.storeInfo.kefu_unread_msg ? this.storeInfo.kefu_unread_msg : 0,
-						type: 'manager'
 					})
 				}
 				list.push({
@@ -781,10 +785,10 @@
 					// await this.getKefuSessionInfo()
 					this.selectUnreadAmount()
 				} else {
-					uni.showToast({
-						title: '未发现store_no',
-						icon: 'none'
-					})
+					// uni.showToast({
+					// 	title: '未发现store_no',
+					// 	icon: 'none'
+					// })
 				}
 			},
 		},

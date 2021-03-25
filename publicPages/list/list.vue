@@ -329,14 +329,14 @@
 								if (this.appName) {
 									url += `&appName=${this.appName}`
 								}
-								if(button.service_name === 'srvdaq_cms_content_select'){
+								if (button.service_name === 'srvdaq_cms_content_select') {
 									debugger
 									if (e.content_no) {
 										uni.navigateTo({
 											url: `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=${e.content_no}`
 										});
 									}
-									return 
+									return
 								}
 								uni.navigateTo({
 									url: url
@@ -696,6 +696,26 @@
 									url: url
 								});
 							}
+						} else if (data.button && data.button.button_type === 'duplicate') {
+							let fieldsCond = []
+							Object.keys(data.row).forEach(key => {
+								if (!['id', 'modify_user_disp', 'modify_user', 'modify_time',
+										'create_user_disp', 'create_user', 'create_time'
+									].includes(key)) {
+									fieldsCond.push({
+										column: key,
+										value: data.row[key],
+									})
+								}
+							})
+							let url =
+								`/publicPages/newForm/newForm?serviceName=${data.button.service_name}&type=add&fieldsCond=${JSON.stringify(fieldsCond)}`;
+							if (this.appName) {
+								url += `&appName=${this.appName}`
+							}
+							uni.navigateTo({
+								url: url
+							});
 						} else if (data.button.servcie_type === 'add') {
 							let params = {
 								type: 'add',

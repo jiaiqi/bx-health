@@ -199,6 +199,10 @@
 
 				.title,
 				.label {
+					// display: flex;
+					// align-items: flex-end;
+					text-align: center;
+					min-height: 70rpx;
 					margin-top: 10rpx;
 					font-size: 14px;
 				}

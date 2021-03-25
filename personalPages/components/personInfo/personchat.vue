@@ -916,11 +916,20 @@
 						app_no: 'health',
 						columns: 'video'
 					};
-					uni.chooseVideo({
+					uni.chooseMedia({
+						// uni.chooseVideo({
 						count: 1,
+						mediaType: ['video'],
 						sourceType: ['camera', 'album'],
 						success: function(res) {
 							let src = res.tempFilePath;
+							let imgPath = res.thumbTempFilePath
+							// chooseMedia返回数据
+							if (Array.isArray(res.tempFiles) && res.tempFiles.length > 0) {
+								res = res.tempFiles[0]
+								src = res.tempFilePath
+								imgPath = res.thumbTempFilePath
+							}
 							// 1. 上传视频文件res.tempFilePath、2.上传视频缩略图res.thumbTempFilePath
 							uni.showLoading({
 								title: '发送中...'
@@ -941,43 +950,50 @@
 											app_no: 'health',
 											columns: 'image'
 										};
-										uni.uploadFile({
-											url: self.$api.upload,
-											header: reqHeader,
-											formData: formData,
-											filePath: res.thumbTempFilePath,
-											name: 'file',
-											success: e => {
-												if (e.statusCode === 200) {
-													let imageNo = JSON.parse(e.data)
-														.file_no;
-													res.imageNo = imageNo;
-													// #ifdef MP-WEIXIN
-													uni.getVideoInfo({
-														src: res.tempFilePath,
-														success(info) {
-															info.imageNo =
-																imageNo;
-															self.sendMessageLanguageInfo(
-																'视频',
-																photoDataNo,
-																info);
-														},
-														fail() {
-															self.sendMessageLanguageInfo(
-																'视频',
-																photoDataNo,
-																res);
-														}
-													});
-													// #endif
-													// #ifndef MP-WEIXIN
+										if (imgPath) {
+											uni.uploadFile({
+												url: self.$api.upload,
+												header: reqHeader,
+												formData: formData,
+												filePath: imgPath,
+												name: 'file',
+												success: imgRes => {
+													if (imgRes.statusCode === 200) {
+														let imageNo = JSON.parse(imgRes
+																.data)
+															.file_no;
+														res.imageNo = imageNo;
+														// #ifdef MP-WEIXIN
+														uni.getVideoInfo({
+															src: res
+																.tempFilePath,
+															success(info) {
+																info.imageNo =
+																	imageNo;
+																self.sendMessageLanguageInfo(
+																	'视频',
+																	photoDataNo,
+																	info);
+															},
+															fail() {
+																self.sendMessageLanguageInfo(
+																	'视频',
+																	photoDataNo,
+																	res);
+															}
+														});
+														// #endif
+													}
+												},
+												fail: (err) => {
 													self.sendMessageLanguageInfo('视频',
 														photoDataNo, res);
-													// #endif
 												}
-											}
-										});
+											});
+										} else {
+											self.sendMessageLanguageInfo('视频', photoDataNo, res);
+										}
+
 										// self.sendMessageLanguageInfo('视频', photoDataNo,res);
 									} else {}
 								}
@@ -1170,6 +1186,7 @@
 			},
 			/*点击发送后添加图片或语音数据**/
 			async sendMessageLanguageInfo(type, value, info) {
+
 				console.log('type----sendMessageLanguageInfo', type);
 				let serviceName = 'srvhealth_consultation_chat_record_add'
 				if (this.sessionType === '机构用户客服') {
@@ -1295,6 +1312,7 @@
 				} else if (type === '文件') {
 					req[0].data[0].attachment = value;
 				} else if (type === '视频') {
+					debugger
 					req[0].data[0].video = value;
 					req[0].data[0].image = info.imageNo;
 					try {
@@ -1845,7 +1863,7 @@
 					})
 					uni.setStorageSync('current_patient', this.userInfo);
 					this.initMessageList('refresh');
-					this.setRefreshMessageTimer()
+					// this.setRefreshMessageTimer()
 					return res.data.data[0];
 				} else {
 					uni.setStorageSync('current_patient', '');
@@ -1910,11 +1928,11 @@
 			} else if (this.groupInfo && this.groupInfo.gc_no) {
 				// 圈子聊天
 				this.initMessageList('refresh').then(_ => {
-					this.setRefreshMessageTimer()
+					// this.setRefreshMessageTimer()
 				});
 			} else if (this.sessionNo) {
 				this.initMessageList('refresh').then(_ => {
-					this.setRefreshMessageTimer()
+					// this.setRefreshMessageTimer()
 				});
 			}
 		}
@@ -2417,7 +2435,6 @@
 		.person-chat-bot {
 			height: 55px;
 			width: 100%;
-			transition: all 0.5s ease;
 
 			&.showLayer {
 				height: 285px;
@@ -2523,7 +2540,7 @@
 				flex-wrap: wrap;
 
 				&.showLayer {
-					height: 230px;
+					height: 225px;
 				}
 
 				.person-chat-bot-bot-item {

@@ -152,7 +152,7 @@
 								//普通列表显示行按钮
 								//流程列表点击跳转到流程详情
 								rowButton = rowButton.filter(
-									item => ['customize', 'edit', 'delete', 'procdetail', 'deleteproc'].includes(item
+									item => ['duplicate','customize', 'edit', 'delete', 'procdetail', 'deleteproc'].includes(item
 										.button_type)
 								);
 							}

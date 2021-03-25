@@ -12,7 +12,7 @@
 	"uni-app": {
 		"scripts": {
 			"h5-weixin": {
-				"title": "微信服务号",
+				"title": "运行到Chrome",
 				"BROWSER": "Chrome",
 				"env": {
 					"UNI_PLATFORM": "h5"
@@ -22,7 +22,7 @@
 				}
 			},
 			"mp-dingtalk": {
-				"title": "微信小程序",
+				"title": "运行到微信小程序",
 				"env": {
 					"UNI_PLATFORM": "mp-weixin"
 				}

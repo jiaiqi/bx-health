@@ -11,7 +11,7 @@
 			@show-more="showMore"
 			:showSelect="showSelect"
 			:column="srvInfo.column"
-			:showCol="srvInfo.showCol"
+			:showCol="srvInfo.showCol||srvInfo.key_disp_col"
 			:isShowMore="isShowMore"
 			:lineDataDefault="lineDataDefault"
 		></cascader>

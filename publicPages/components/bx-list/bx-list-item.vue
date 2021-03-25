@@ -6,7 +6,7 @@
 					mode="aspectFill"></image>
 			</view>
 			<view class="main-image" v-else-if="viewTemp['img']">
-				<text class="cuIcon-people text"></text>
+				<text class="cuIcon-pic text"></text>
 			</view>
 			<view class="content-box flex-twice" v-if="listType === 'proc' && pageType === 'proc'">
 				<view class="content-header">
@@ -87,14 +87,16 @@
 					</text>
 					{{ goodsData.tip|html2text }}
 				</view>
-				<view class="content" v-if="goodsData.price" @click="listItemClick">
-					<view class="numbers">
+				<view class="content" @click="listItemClick">
+					<view class="numbers" v-if="viewTemp&&viewTemp.price">
 						<text class="label" v-if="showLabel['price']">
 							{{showLabel['price']}}:
 						</text>
 						<text class="unit"
-							v-if="!isNaN(Number(goodsData.price)) && viewTemp.price.indexOf('price') !== -1">￥</text>
-						{{ goodsData.price }}
+							v-if="!isNaN(Number(goodsData.price)) &&viewTemp.price&& viewTemp.price.indexOf('price') !== -1">￥</text>
+						<text v-if="viewTemp.price">
+							{{ goodsData.price||0 }}
+						</text>
 					</view>
 					<view class="tags"></view>
 				</view>
@@ -387,9 +389,11 @@
 				overflow: hidden;
 				flex: 1;
 				text-align: center;
-
+				border: 1px solid #f1f1f1;
 				.text {
-					font-size: 85px;
+					font-size: 50px;
+					line-height: 220upx;
+					font-weight: 200;
 				}
 
 				.image {
