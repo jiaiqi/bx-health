@@ -1,7 +1,6 @@
 <template>
 	<view class="page-wrap" :style="{
-			'--global-text-font-size': globalTextFontSize + 'px',
-			'--global-label-font-size': globalLabelFontSize + 'px'
+			'--global-text-font-size': globalTextFontSize + 'px'
 		}">
 		<view class="page-item" v-for="(pageItem,pageIndex) in pageItemList" :key="pageItem.item_no" :class="{
 				'swiper-view': pageItem.div_type === 'carousel',
@@ -11,7 +10,8 @@
 			<view class="page-slide" v-if="pageItem.div_type === 'carousel'">
 				<swiper class="screen-swiper item-box square-dot" easing-function="linear" :height="300"
 					:indicator-dots="true" :circular="true" :autoplay="true" interval="5000" duration="500">
-					<swiper-item v-for="(item, index) in pageItem.carousel" :key="item.carousel_no" @click="toSwiperDetail(item)">
+					<swiper-item v-for="(item, index) in pageItem.carousel" :key="item.carousel_no"
+						@click="toSwiperDetail(item)">
 						<image :src="getImagePath(item.carousel_image, true)"></image>
 					</swiper-item>
 				</swiper>
@@ -37,10 +37,10 @@
 					<view class="store-name" v-if="pageItem.storeInfo.name">
 						{{pageItem.storeInfo.name||''}}
 					</view>
-					<view class="store-address" @tap.stop.prevent="openLocation(pageItem.storeInfo)"
-						v-if="pageItem.storeInfo.address">
+					<view class="store-address" v-if="pageItem.storeInfo.address">
 						<text> {{pageItem.storeInfo.address||''}}</text>
-						<text class="margin-left-xs cuIcon-locationfill text-blue "></text>
+						<text class="margin-left-xs cuIcon-locationfill text-blue "
+							@tap.stop.prevent="openLocation(pageItem.storeInfo)"></text>
 					</view>
 				</view>
 			</view>
@@ -154,7 +154,8 @@
 			toStoreHome(e) {
 				if (e.store_no) {
 					uni.redirectTo({
-						url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + e.store_no
+						url: '/pages/home/home?store_no=' + e.store_no
+						// url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + e.store_no
 					})
 				}
 			},
@@ -423,7 +424,7 @@
 		box-sizing: border-box;
 		background-color: #fff;
 		min-height: 100vh;
-		font-size: var(--global-label-font-size);
+		font-size: var(--global-text-font-size);
 
 		.status_bar {
 			height: var(--status-bar-height);
@@ -479,10 +480,12 @@
 		.page-item {
 			border-radius: 20rpx;
 			overflow: hidden;
+
 			.item-box {
 				border-radius: 10rpx;
 				min-height: 100rpx;
 			}
+
 			.page-menu {
 				width: 100%;
 				display: flex;

@@ -328,7 +328,7 @@ export default {
 	box-sizing: border-box;
 	background-color: #fff;
 	min-height: 100vh;
-	font-size: var(--global-label-font-size);
+	font-size: var(--global-text-font-size);
 	.status_bar {
 		height: var(--status-bar-height);
 		width: 100%;

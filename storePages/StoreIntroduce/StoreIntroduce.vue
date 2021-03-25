@@ -53,7 +53,8 @@
 			if (option.store_no) {
 				this.storeNo = option.store_no
 				this.selectStoreInfo()
-				this.qrCodeText = `https://wx2.100xsys.cn/mpwx/shareClinic/${option.store_no}/${this.userInfo.no}`
+				this.qrCodeText = `https://wx2.100xsys.cn/home/${option.store_no}`
+				// this.qrCodeText = `https://wx2.100xsys.cn/shareClinic/${option.store_no}`
 			}
 		},
 		methods: {

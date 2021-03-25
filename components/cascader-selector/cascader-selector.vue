@@ -10,7 +10,7 @@
 			@line-click="clickLine"
 			@show-more="showMore"
 			:showSelect="showSelect"
-			:column="srvInfo.column"
+			:column="srvInfo.column||srvInfo.refed_col"
 			:showCol="srvInfo.showCol||srvInfo.key_disp_col"
 			:isShowMore="isShowMore"
 			:lineDataDefault="lineDataDefault"
@@ -157,6 +157,7 @@ export default {
 		clickTag(e) {
 			this.currentClick = e;
 			this.current_no = e.no;
+			debugger
 			if (this.srvInfo.isTree === false) {
 				this.$emit('getCascaderValue', e, 'sure');
 				this.areaList = [];

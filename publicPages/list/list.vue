@@ -7,10 +7,13 @@
 					<input @focus="searchBarFocus" @blur="serachBarBlur" :adjust-position="false" type="text"
 						v-model="searchVal" :placeholder="placeholder" confirm-type="search" />
 				</view>
-				<view class="action"><button class="cu-btn bg-blue shadow-blur round" @click="toSearch">搜索</button>
+				<view class="action">
+					<button class="cu-btn bg-blue shadow-blur round" @click="toSearch"><text class="cuIcon-search"></text></button>
+					<button class="cu-btn bg-blue shadow-blur round margin-left-xs" @click="clickAddButton" v-if="showAdd"><text class="cuIcon-add"></text></button>
 				</view>
 			</view>
 			<view style="height: 100upx;width: 100%;"></view>
+			
 		</view>
 		<bx-list ref="bxList" :serviceName="serviceName" :condition="condition" :relation_condition="relation_condition"
 			:pageType="pageType" :listType="'list'" :labels="labels" :srvApp="appName"
@@ -19,9 +22,9 @@
 			:searchWords="searchVal" :searchColumn="keyColumn" :tempWord="tempWord" :rownumber="20"
 			:showFootBtn="showFootBtn" @click-list-item="clickItem" @list-change="listChange"
 			@clickFootBtn="clickFootBtn" @loadEnd="loadEnd"></bx-list>
-		<view class="public-button-box">
+<!-- 		<view class="public-button-box">
 			<view class="add-button" @click="clickAddButton" v-if="showAdd"></view>
-		</view>
+		</view> -->
 	</view>
 </template>
 
@@ -383,6 +386,7 @@
 				return result
 			},
 			async clickFootBtn(data) {
+				let self  = this
 				let buttonInfo = this.deepClone(data.button);
 				let rowData = this.deepClone(data.row);
 				if (buttonInfo.operate_params && typeof buttonInfo.operate_params === 'string') {
@@ -656,6 +660,15 @@
 									eventOrigin: data.button
 								};
 								let fieldsCond = [];
+								if (Array.isArray(this.condition)) {
+									fieldsCond = this.condition.map(item => {
+										return {
+											column: item.colName,
+											value: item.value,
+											display: false
+										};
+									});
+								}
 								let condition = data?.button?.operate_params?.condition
 								let defaultVal = data?.button?.operate_params?.data
 								if (Array.isArray(defaultVal) && defaultVal.length > 0) {
@@ -698,6 +711,15 @@
 							}
 						} else if (data.button && data.button.button_type === 'duplicate') {
 							let fieldsCond = []
+							if (Array.isArray(self.condition)) {
+								self.condition.forEach(item=>{
+									fieldsCond.push({
+										column: item.colName,
+										value: item.value,
+										display: false
+									})
+								})
+							}
 							Object.keys(data.row).forEach(key => {
 								if (!['id', 'modify_user_disp', 'modify_user', 'modify_time',
 										'create_user_disp', 'create_user', 'create_time'
@@ -708,10 +730,11 @@
 									})
 								}
 							})
+							
 							let url =
 								`/publicPages/newForm/newForm?serviceName=${data.button.service_name}&type=add&fieldsCond=${JSON.stringify(fieldsCond)}`;
-							if (this.appName) {
-								url += `&appName=${this.appName}`
+							if (self.appName) {
+								url += `&appName=${self.appName}`
 							}
 							uni.navigateTo({
 								url: url

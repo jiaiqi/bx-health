@@ -57,7 +57,7 @@
 			</bx-checkbox-group>
 
 			<view class="form-item-content_value" v-else-if="popupFieldTypeList.includes(fieldData.type)">
-				<view
+				<!-- 		<view
 					v-if="(setOptionList.length < 15 && fieldData.type === 'Set') || (selectorData.length < 5 && fieldData.type === 'Selector')">
 					<bx-checkbox-group v-if="fieldData.type === 'Set'" class="form-item-content_value checkbox-group"
 						v-model="fieldData.value" mode="button">
@@ -69,8 +69,9 @@
 						v-model="fieldData.value" mode="button" @change="pickerChange">
 						<bx-radio v-for="item in selectorData" :name="item.value">{{ item.label }}</bx-radio>
 					</bx-radio-group>
-				</view>
-				<view v-else @click="openModal(fieldData.type)">
+				</view> -->
+				<view @click="openModal(fieldData.type)">
+					<!-- <view v-else @click="openModal(fieldData.type)"> -->
 					<text class="place-holder" v-if="!fieldData.value">请选择</text>
 					<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">
 						{{ fieldData.value.toString() }}
@@ -103,15 +104,16 @@
 			</view>
 			<view class="form-item-content_value" v-else-if="fieldData.type === 'RichText'"
 				@click="showModal('RichEditor')">
-				<view class="place-holder" v-if="!fieldData.value">开始输入</view>
+				<view class="place-holder picker" v-if="!fieldData.value">开始输入</view>
 				<rich-text :nodes="fieldData.value" class="value rich-text" v-else></rich-text>
 			</view>
-			<input type="text" @input="onInput" placeholder="请输入" @blur="onBlur" :adjust-position="false"
+			<input type="text" @input="onInput" placeholder="请输入" @blur="onBlur" :hold-keyboard="false"
+				:adjust-position="false"
 				:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
 				v-model="fieldData.value" :disabled="fieldData.disabled ? fieldData.disabled : false"
 				v-else-if="fieldData.type ==='text'" />
 			<input class="form-item-content_value" @blur="onBlur" :adjust-position="false" :type="fieldData.type"
-				@input="onInput"
+				@input="onInput" :hold-keyboard="false"
 				:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
 				:max="fieldData.item_type_attr && fieldData.item_type_attr.max ? fieldData.item_type_attr.max : 999"
 				:min="fieldData.item_type_attr && fieldData.item_type_attr.min ? fieldData.item_type_attr.min : 0"
@@ -171,10 +173,11 @@
 						<view class="cu-bar search bg-white"
 							v-if="modalName === 'Selector' && fieldData.showSearch !== false">
 							<view class="search-form round" v>
-								<text class="cuIcon-search"></text>
+								<!-- <text class="cuIcon-search"></text> -->
 								<input @input="searchFKDataWithKey" :adjust-position="false" type="text"
 									placeholder="搜索" confirm-type="search" />
 							</view>
+							<text class="cu-btn cuIcon-refresh line-blue shadow round" @click="getSelectorData(null,null,null)"></text>
 						</view>
 						<bx-checkbox-group v-if="modalName === 'MultiSelector'"
 							class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
@@ -500,7 +503,8 @@
 						console.log('经度：' + res.longitude);
 						self.$emit('chooseLocation', res);
 						self.fieldData.value = res.address;
-						self.onInput();
+						// self.onInput();
+						self.onBlur()
 						self.getDefVal();
 					}
 				});
@@ -570,7 +574,8 @@
 				if (this.fieldData.value !== '' && this.fieldData.value !== null && this.fieldData.value !== undefined) {
 					this.uploadFormData['file_no'] = this.fieldData.value;
 				}
-				this.onInput();
+				// this.onInput();
+				this.onBlur()
 				this.getDefVal();
 			},
 			deleteImage(e) {
@@ -585,11 +590,12 @@
 					this.fieldData['colData'] = e;
 				}
 				this.hideModal();
-				this.onInput();
+				// this.onInput();
+				this.onBlur()
 				this.getDefVal();
 			},
 			searchFKDataWithKey(e) {
-				if (e.detail.value) {
+				if (e && e.detail && e.detail.value) {
 					let option = this.fieldData.option_list_v2;
 					let relation_condition = {
 						relation: 'OR',
@@ -619,10 +625,13 @@
 						});
 					}
 					this.getSelectorData(null, null, relation_condition);
+				} else {
+					this.getSelectorData();
 				}
 			},
 			radioChange(e) {
-				this.onInput();
+				// this.onInput();
+				this.onBlur()
 			},
 			pickerChange(e) {
 				if (this.fieldData.type === 'Selector') {
@@ -630,7 +639,8 @@
 					this.fkFieldLabel = optionData.label;
 					this.fieldData['colData'] = optionData;
 					this.hideModal();
-					this.onInput();
+					this.onBlur()
+					// this.onInput();
 				}
 			},
 			async getSelectorData(cond, serv, relation_condition) {
@@ -805,12 +815,14 @@
 			onBlur() {
 				// 输入框失去焦点 进行校验
 				console.log('on-blur');
+				this.getValid();
+				this.$emit('on-value-change', this.fieldData);
 			},
 			onInput() {
 				// input事件
 				console.log('on-input');
-				this.getValid();
-				this.$emit('on-value-change', this.fieldData);
+				// this.getValid();
+				// this.$emit('on-value-change', this.fieldData);
 			},
 			//录音开始UI效果
 			recordBegin(e) {
@@ -955,7 +967,7 @@
 			});
 			if (self.fieldData && self.fieldData.type === 'Selector') {
 				let cond = null;
-				if (this.fieldData.value && this.fieldData.option_list_v2.refed_col) {
+				if (this.fieldData.value && this.fieldData.option_list_v2.refed_col && this.formType !== 'add') {
 					cond = [{
 						colName: this.fieldData.option_list_v2.refed_col,
 						value: this.fieldData.value,

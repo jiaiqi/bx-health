@@ -260,20 +260,20 @@
 				}
 			}
 			.place-holder {
+				
 				color: grey;
-				overflow: hidden;
-				text-overflow: clip;
-				word-break: keep-all;
-				pointer-events: none;
-				padding: 0 10rpx;
 				width: 100%;
-				min-height: 100rpx;
 				border-radius: 10rpx;
-				padding: 10rpx 20rpx;
-				background-color: #f1f1f1;
+				&.picker{
+					background-color: #f1f1f1;
+					min-height: 100rpx;
+					overflow: hidden;
+					text-overflow: clip;
+					word-break: keep-all;
+					pointer-events: none;
+				}
 			}
 			.value {
-				padding: 0 10rpx;
 				&.rich-text{
 					max-width: 600rpx;
 					width: 100%!important;

@@ -1586,28 +1586,29 @@ export default {
 					let pageInfo = Vue.prototype.getShareParams()
 					// console.log(store.state.app.inviterInfo)
 					// let pageInfo = Vue.prototype.getShareParams()
-					if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no) {
-						// 通过分享医院主页加入的用户
-						uni.redirectTo({
-							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
-								.state
-								.user.userInfo.home_store_no,
-							success() {
-								// 标记 已进入过医院主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					} else if (userInfo.home_store_type === '饭馆' && userInfo.home_store_no) {
-						// 通过分享餐馆主页加入的用户
-						uni.redirectTo({
-							url: '/otherPages/shop/shopHome?type=find&store_no=' + userInfo
-								.home_store_no,
-							success() {
-								// 标记 已进入过餐馆主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					}
+					// 暂时去掉
+					// if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no) {
+					// 	// 通过分享医院主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
+					// 			.state
+					// 			.user.userInfo.home_store_no,
+					// 		success() {
+					// 			// 标记 已进入过医院主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// } else if (userInfo.home_store_type === '饭馆' && userInfo.home_store_no) {
+					// 	// 通过分享餐馆主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + userInfo
+					// 			.home_store_no,
+					// 		success() {
+					// 			// 标记 已进入过餐馆主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// }
 				}
 				return store.state.user.userInfo
 			}
@@ -1649,32 +1650,33 @@ export default {
 					let pageInfo = Vue.prototype.getShareParams()
 					// console.log(store.state.app.inviterInfo)
 					// debugger
-					if (['诊所', '医院', '健康服务'].includes(store.state
-							.user.userInfo.home_store_type)) {
-						// 通过分享医院主页加入的用户
-						uni.redirectTo({
-							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
-								.data
-								.data[0].home_store_no,
-							success() {
-								// 标记 已进入过医院主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					} else if ((['饭馆'].includes(store.state
-								.user.userInfo.home_store_type) && store.state.user
-							.userInfo.home_store_no)) {
-						// 通过分享饭馆主页加入的用户
-						uni.redirectTo({
-							url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state
-								.user
-								.userInfo.home_store_no,
-							success() {
-								// 标记 已进入过餐馆主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					}
+					// 暂时去掉
+					// if (['诊所', '医院', '健康服务'].includes(store.state
+					// 		.user.userInfo.home_store_type)) {
+					// 	// 通过分享医院主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
+					// 			.data
+					// 			.data[0].home_store_no,
+					// 		success() {
+					// 			// 标记 已进入过医院主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// } else if ((['饭馆'].includes(store.state
+					// 			.user.userInfo.home_store_type) && store.state.user
+					// 		.userInfo.home_store_no)) {
+					// 	// 通过分享饭馆主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state
+					// 			.user
+					// 			.userInfo.home_store_no,
+					// 		success() {
+					// 			// 标记 已进入过餐馆主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// }
 				}
 				// #endif
 				return true
