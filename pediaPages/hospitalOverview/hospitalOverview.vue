@@ -78,7 +78,7 @@
 					desc="goods_desc"></goods-list>
 				<vaccine-list v-if="storeNo==='S20210227032'" ref='vaccineList'></vaccine-list>
 				<business-handle :storeNo="storeNo"></business-handle>
-				<staff-manage :storeNo="storeNo"></staff-manage>
+				<!-- <staff-manage :storeNo="storeNo"></staff-manage> -->
 				<view class="introduction news" v-if="noticeList.length > 0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
