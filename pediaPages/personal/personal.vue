@@ -26,7 +26,12 @@ export default {
 				uni.navigateBack({});
 			} else {
 				uni.switchTab({
-					url: '/pages/pedia/pedia'
+					url: '/pages/pedia/pedia',
+					fail() {
+						uni.redirectTo({
+							url: '/pages/pedia/pedia'
+						})
+					}
 				});
 			}
 		}

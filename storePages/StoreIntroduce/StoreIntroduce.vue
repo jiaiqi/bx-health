@@ -39,7 +39,7 @@
 				swiperList: [],
 				storeNo: '',
 				storeInfo: {},
-				qrCodeText: '123',
+				qrCodeText: '',
 				codeSize: uni.upx2px(700),
 				qrcodePath: ""
 			}

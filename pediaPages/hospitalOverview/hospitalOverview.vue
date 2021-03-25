@@ -76,7 +76,7 @@
 				</view>
 				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
 					desc="goods_desc"></goods-list>
-				<vaccine-list v-if="storeNo==='S20210227032'"></vaccine-list>
+				<vaccine-list v-if="storeNo==='S20210227032'" ref='vaccineList'></vaccine-list>
 				<business-handle :storeNo="storeNo"></business-handle>
 				<staff-manage :storeNo="storeNo"></staff-manage>
 				<view class="introduction news" v-if="noticeList.length > 0">
@@ -396,7 +396,12 @@
 			},
 			toStorePage() {
 				uni.switchTab({
-					url: '/pages/store/store'
+					url: '/pages/store/store',
+					fail() {
+						uni.redirectTo({
+							url:'/pages/store/store'
+						})
+					}
 				});
 			},
 			async selectPersonInGroup(group_no) {
@@ -789,6 +794,9 @@
 				}
 				if (this.storeNo) {
 					console.log(`storeNo:${this.storeNo}`)
+					if(this.$refs.vaccineList){
+						this.$refs.vaccineList.getVaccineList()
+					}
 					await this.selectStoreInfo();
 					await this.selectBindUser()
 					await this.seletGroupList();
@@ -853,6 +861,7 @@
 		},
 		async onLoad(option) {
 			this.queryOption = option
+
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
 				withShareTicket: true,
@@ -877,6 +886,19 @@
 			})
 			if (option.q) {
 				let text = decodeURIComponent(option.q);
+				if (text.indexOf('https://wx2.100xsys.cn/home/') !== -1) {
+					let result = text.split('https://wx2.100xsys.cn/home/')[1];
+					if (result.split('/').length >= 2) {
+						option.store_no = result.split('/')[0];
+						option.invite_user_no = result.split('/')[1];
+						option.share_type = 'bindOrganization'
+						option.from = 'share'
+					} else if (result.split('/').length === 1) {
+						option.store_no = result.split('/')[0];
+						option.share_type = 'bindOrganization'
+						option.from = 'share'
+					}
+				}
 				if (text.indexOf('https://wx2.100xsys.cn/mpwx/shareClinic/') !== -1) {
 					let result = text.split('https://wx2.100xsys.cn/mpwx/shareClinic/')[1];
 					if (result.split('/').length >= 2) {
@@ -884,15 +906,12 @@
 						option.invite_user_no = result.split('/')[1];
 						option.share_type = 'bindOrganization'
 						option.from = 'share'
-					}else if(result.split('/').length ===  1){
+					} else if (result.split('/').length === 1) {
 						option.store_no = result.split('/')[0];
 						option.share_type = 'bindOrganization'
 						option.from = 'share'
 					}
 				}
-			}
-			if (option.q) {
-				let text = decodeURIComponent(option.q);
 				if (text.indexOf('https://wx2.100xsys.cn/shareClinic/') !== -1) {
 					let result = text.split('https://wx2.100xsys.cn/shareClinic/')[1];
 					if (result.split('/').length >= 2) {
@@ -900,15 +919,25 @@
 						option.invite_user_no = result.split('/')[1];
 						option.share_type = 'bindOrganization'
 						option.from = 'share'
-					}else if(result.split('/').length ===  1){
+					} else if (result.split('/').length === 1) {
 						option.store_no = result.split('/')[0];
 						option.share_type = 'bindOrganization'
 						option.from = 'share'
 					}
 				}
 			}
+
 			this.checkOptionParams(option);
 			await this.toAddPage()
+
+			if (!option.store_no) {
+				if (this.userInfo && this.userInfo.home_store_no) {
+					option.store_no = this.userInfo.home_store_no
+				} else {
+					option.store_no = 'S20210204016'
+				}
+			}
+
 			if (option.share_type === 'bindOrganization' && option.store_no && option
 				.invite_user_no && !authBoxDisplay) {
 				// 绑定诊所

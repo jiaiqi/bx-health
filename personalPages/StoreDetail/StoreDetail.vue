@@ -353,8 +353,13 @@
 								} else if (Array.isArray(res) && res.length > 1) {
 									// 跳转到店铺列表
 									uni.switchTab({
-										url: '/pages/store/store'
-										// url: '/personalPages/StoreList/StoreList'
+										url: '/pages/store/store',
+										fail() {
+											uni.redirectTo({
+												url: '/pages/store/store'
+											})
+										}
+										
 									});     
 								} else { 
 									// 当前用户不在此诊所中 则添加当前用户到此诊所中

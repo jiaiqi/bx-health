@@ -4,7 +4,7 @@
 			"style": {
 				"navigationBarTitleText": "加载中...",
 				"enablePullDownRefresh": true,
-				"navigationStyle":"custom",
+				// "navigationStyle":"custom",
 				"navigationBarBackgroundColor": "#fff",
 				"navigationBarTextStyle": "black"
 			}
@@ -463,7 +463,7 @@
 			"pages": [{
 				"path": "StoreIntroduce/StoreIntroduce",
 				"style": {
-					"navigationStyle": "custom",
+					// "navigationStyle": "custom",
 					"navigationBarTitleText": "详情",
 					"navigationBarBackgroundColor": "#fff",
 					"navigationBarTextStyle": "black",

@@ -22,7 +22,12 @@ export default {
 	methods: {
 		toHome() {
 			uni.switchTab({
-				url: '/pages/pedia/pedia'
+				url: '/pages/pedia/pedia',
+				fail() {
+					uni.redirectTo({
+						url: '/pages/pedia/pedia'
+					})
+				}
 			});
 		},
 		toDetail() {

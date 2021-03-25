@@ -396,7 +396,12 @@
 			},
 			toStorePage() {
 				uni.switchTab({
-					url: '/pages/store/store'
+					url: '/pages/store/store',
+					fail() {
+						uni.redirectTo({
+							url:'/pages/store/store'
+						})
+					}
 				});
 			},
 			async selectPersonInGroup(group_no) {

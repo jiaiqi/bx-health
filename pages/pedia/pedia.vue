@@ -190,7 +190,12 @@
 				}
 				if (dest_page && typeof dest_page === 'string' && dest_page.indexOf('/pages/') !== -1) {
 					uni.switchTab({
-						url: dest_page
+						url: dest_page,
+						fail() {
+							uni.redirectTo({
+								url: dest_page
+							})
+						}
 					});
 				} else {
 					uni.navigateTo({

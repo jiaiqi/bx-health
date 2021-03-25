@@ -166,6 +166,7 @@
 										uni.showToast({
 											title: '修改成功'
 										})
+										self.getVaccineRecord()
 									}
 								})
 							}

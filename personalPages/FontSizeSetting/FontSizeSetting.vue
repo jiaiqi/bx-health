@@ -96,7 +96,12 @@ export default {
 							success(res) {
 								if (res.confirm) {
 									uni.switchTab({
-										url: '/pages/personal/personal'
+										url: '/pages/personal/personal',
+										fail() {
+											uni.redirectTo({
+												url: '/pages/personal/personal'
+											})
+										}
 									});
 								}
 							}

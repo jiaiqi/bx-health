@@ -73,7 +73,12 @@ export default {
 						success(res) {
 							if (res.confirm) {
 								uni.switchTab({
-									url: '/pages/archives/archives'
+									url: '/pages/archives/archives',
+									fail() {
+										uni.redirectTo({
+											url:'/pages/archives/archives'
+										})
+									}
 								});
 							}
 						}

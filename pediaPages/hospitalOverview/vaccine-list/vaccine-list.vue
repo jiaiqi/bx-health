@@ -1,5 +1,5 @@
 <template>
-	<view class="vaccine-list">
+	<view class="vaccine-list" v-if="vaccineList&&vaccineList.length>0">
 		<view class="vaccine-title">
 			<text class="cuIcon-titles text-blue"></text>
 			<text>疫苗预约</text>
@@ -216,7 +216,9 @@
 			}
 		},
 		created() {
-			this.getVaccineList()
+			if (!this.vaccineList || this.vaccineList.length === 0) {
+				this.getVaccineList()
+			}
 		},
 		methods: {
 			disabledTime(e) {

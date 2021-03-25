@@ -2316,16 +2316,6 @@ export default {
 			}
 			return res.data.data;
 		},
-		backToHome() {
-			uni.switchTab({
-				url: '/pages/home/home',
-				fail() {
-					uni.navigateTo({
-						url: '/archivesPages/old-home/old-home'
-					});
-				}
-			});
-		},
 		clickSportRecordItem(item) {
 			this.showEditModal = true;
 			this.currentRecord = this.deepClone(item);
