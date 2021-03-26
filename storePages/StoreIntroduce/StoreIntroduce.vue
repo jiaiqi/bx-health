@@ -54,8 +54,12 @@
 				this.storeNo = option.store_no
 				this.selectStoreInfo()
 				// this.qrCodeText = `https://wx2.100xsys.cn/home/${option.store_no}`
-				this.qrCodeText = `https://wx2.100xsys.cn/shareClinic/${option.store_no}/jiaqi`
-				// this.qrCodeText = `https://wx2.100xsys.cn/shareClinic/${option.store_no}`
+				if(this.userInfo&&this.userInfo.userno){
+					this.qrCodeText = `https://wx2.100xsys.cn/shareClinic/${option.store_no}/${this.userInfo.userno}`
+				}else{
+					this.qrCodeText = `https://wx2.100xsys.cn/shareClinic/${option.store_no}`
+				}
+				// this.qrCodeText = `https://wx2.100xsys.cn/shareClinic/${option.store_no}/jiaqi`
 			}
 		},
 		methods: {
