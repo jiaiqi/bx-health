@@ -19,6 +19,7 @@
 		background-size: cover;
 		background-position: top center;
 		background-repeat: no-repeat;
+		background-color: #f1f1f1;
 		.hospital-top {
 			background-color: #fff;
 			padding: 30rpx 28rpx 0;
@@ -221,6 +222,12 @@
 				font-weight: 700;
 				padding: 10rpx 0;
 				color: rgb(48, 49, 51);
+				display: flex;
+				justify-content: space-between;
+				border-bottom:1rpx solid #f1f1f1;
+				.cuIcon-right{
+					font-weight:200;
+				}
 			}
 
 			.news-list {

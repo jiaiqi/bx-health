@@ -1,8 +1,10 @@
 <template>
 	<view class="vaccine-list" v-if="storeNo&&list.length>0">
 		<view class="vaccine-title">
-			<text class="cuIcon-titles text-blue"></text>
-			<text>业务办理</text>
+			<view class="title">
+				<text class="cuIcon-titles text-blue"></text>
+				<text>业务办理</text>
+			</view>
 		</view>
 		<view class="news-list">
 			<view class="news-item" :class="{'layout-right-image':item.biz_icon}" v-for="(item,index) in list"
@@ -99,6 +101,10 @@
 		font-weight: bold;
 		font-size: 16px;
 		padding: 20rpx 20rpx 0;
+		.title{
+			padding-bottom: 10rpx;
+			border-bottom: 1rpx solid #f1f1f1;
+		}
 	}
 
 	.news-list {

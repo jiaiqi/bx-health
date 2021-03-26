@@ -74,6 +74,7 @@
 		},
 		methods: {
 			toChildServiceList(e) {
+				debugger
 				let data = this.deepClone(e);
 				let formData = this.params.defaultVal;
 				let condition = [{
@@ -134,6 +135,7 @@
 						}
 					} else {
 						let viewTemp = {};
+						let label = []
 						if (e.service_name === 'srvhealth_plan_schedule_select') {
 							// 方案计划
 							viewTemp = {
@@ -190,13 +192,33 @@
 								// footer: 'customer_name'
 							};
 						}
+						if (e.service_name === 'srvhealth_store_vaccination_appointment_select') {
+							// 疫苗接种预约列表
+							viewTemp = {
+								title: 'app_date',
+								price: 'app_count',
+								footer: 'app_desc'
+							};
+							label = ['app_date','app_count','app_desc']
+						}
+						if(e.service_name==='srvhealth_store_vaccination_program_select'){
+							// 疫苗接种计划列表
+							viewTemp = {
+								title: 'vaccine_stock_name',
+								tip:'vaccine_type',
+								price: 'vaccinate_index'
+							};
+							label = ['vaccine_stock_name','vaccine_type','vaccinate_index']
+						}
 						uni.navigateTo({
 							url: '/publicPages/list/list?pageType=list&serviceName=' +
 								e.service_name +
+								'&label=' +
+								JSON.stringify(label) +
 								'&cond=' +
 								JSON.stringify(condition) +
 								'&viewTemp=' +
-								encodeURIComponent(JSON.stringify(viewTemp))
+								JSON.stringify(viewTemp)
 						});
 					}
 				} else {
@@ -784,7 +806,7 @@
 					});
 				}
 			},
-			
+
 		},
 		onHide() {
 			uni.offKeyboardHeightChange(function() {})

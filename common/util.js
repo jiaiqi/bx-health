@@ -226,7 +226,7 @@ export default {
 					fieldInfo.options = item.option_list_v2
 				} else if (item.col_type === "MultilineText" || item.col_type === 'longtext') {
 					fieldInfo.type = "textarea"
-				} else if (item.col_type === 'snote'||item.col_type==='Note') {
+				} else if (item.col_type === 'snote' || item.col_type === 'Note') {
 					fieldInfo.type = "RichText"
 				} else if (item.col_type === "Money" || item.col_type === "Float") {
 					fieldInfo.type = "digit"
@@ -1193,13 +1193,10 @@ export default {
 		Vue.prototype.getDecodeUrl = function(e) {
 			if (Vue.prototype.isInvalid(e)) {
 				let url = decodeURIComponent(e)
-				console.log('getDecodeUrl 01', url)
-				if (url.indexOf("%") !== -1) {
-					console.log('getDecodeUrl 02', url)
+				if (url && url.indexOf("%") !== -1) {
 					url = decodeURIComponent(e)
-					Vue.prototype.getDecodeUrl(url)
+					return Vue.prototype.getDecodeUrl(url)
 				} else {
-					console.log('getDecodeUrl 03', url)
 					return url
 				}
 			} else {
@@ -1255,7 +1252,7 @@ export default {
 				return false
 			}
 		}
-		Vue.prototype.onButtonRequest = function(e,appName) {
+		Vue.prototype.onButtonRequest = function(e, appName) {
 			let btn, row, condition, defaultVal
 			if (e && Vue.prototype.iObject(e) && e.hasOwnProperty("button")) {
 				btn = e.button
@@ -1305,7 +1302,7 @@ export default {
 											"condition": params.condition
 										}]
 										Vue.prototype.onRequest("delete", params.serviceName,
-											req,appName).then((res) => {
+											req, appName).then((res) => {
 											if (res.data.state === "SUCCESS") {
 												resolve(res.data)
 											} else {
@@ -1369,9 +1366,9 @@ export default {
 								if (appName) {
 									url += `&appName=${appName}`
 								}
-								if(btn.service_name==='srvdaq_cms_content_update'){
+								if (btn.service_name === 'srvdaq_cms_content_update') {
 									let hideColumn = ['no']
-									url +=　`&hideColumn=${JSON.stringify(hideColumn)}`
+									url += `&hideColumn=${JSON.stringify(hideColumn)}`
 								}
 								uni.navigateTo({
 									url: url
@@ -1387,7 +1384,7 @@ export default {
 							break;
 						case "delete":
 							return new Promise((resolve, reject) => {
-								Vue.prototype.onButtonRequest(e,appName).then((res) => {
+								Vue.prototype.onButtonRequest(e, appName).then((res) => {
 									if (res) {
 										resolve(res)
 									} else {
@@ -1587,28 +1584,28 @@ export default {
 					// console.log(store.state.app.inviterInfo)
 					// let pageInfo = Vue.prototype.getShareParams()
 					// 暂时去掉
-					// if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no) {
-					// 	// 通过分享医院主页加入的用户
-					// 	uni.redirectTo({
-					// 		url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
-					// 			.state
-					// 			.user.userInfo.home_store_no,
-					// 		success() {
-					// 			// 标记 已进入过医院主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// } else if (userInfo.home_store_type === '饭馆' && userInfo.home_store_no) {
-					// 	// 通过分享餐馆主页加入的用户
-					// 	uni.redirectTo({
-					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + userInfo
-					// 			.home_store_no,
-					// 		success() {
-					// 			// 标记 已进入过餐馆主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// }
+					if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no) {
+						// 通过分享医院主页加入的用户
+						uni.redirectTo({
+							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
+								.state
+								.user.userInfo.home_store_no,
+							success() {
+								// 标记 已进入过医院主页
+								store.commit('SET_INTO_HOSPITAL_STATUS', true)
+							}
+						})
+					} else if (userInfo.home_store_type === '饭馆' && userInfo.home_store_no) {
+						// 通过分享餐馆主页加入的用户
+						uni.redirectTo({
+							url: '/otherPages/shop/shopHome?type=find&store_no=' + userInfo
+								.home_store_no,
+							success() {
+								// 标记 已进入过餐馆主页
+								store.commit('SET_INTO_HOSPITAL_STATUS', true)
+							}
+						})
+					}
 				}
 				return store.state.user.userInfo
 			}
@@ -1651,32 +1648,32 @@ export default {
 					// console.log(store.state.app.inviterInfo)
 					// debugger
 					// 暂时去掉
-					// if (['诊所', '医院', '健康服务'].includes(store.state
-					// 		.user.userInfo.home_store_type)) {
-					// 	// 通过分享医院主页加入的用户
-					// 	uni.redirectTo({
-					// 		url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
-					// 			.data
-					// 			.data[0].home_store_no,
-					// 		success() {
-					// 			// 标记 已进入过医院主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// } else if ((['饭馆'].includes(store.state
-					// 			.user.userInfo.home_store_type) && store.state.user
-					// 		.userInfo.home_store_no)) {
-					// 	// 通过分享饭馆主页加入的用户
-					// 	uni.redirectTo({
-					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state
-					// 			.user
-					// 			.userInfo.home_store_no,
-					// 		success() {
-					// 			// 标记 已进入过餐馆主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// }
+					if (['诊所', '医院', '健康服务'].includes(store.state
+							.user.userInfo.home_store_type)) {
+						// 通过分享医院主页加入的用户
+						uni.redirectTo({
+							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
+								.data
+								.data[0].home_store_no,
+							success() {
+								// 标记 已进入过医院主页
+								store.commit('SET_INTO_HOSPITAL_STATUS', true)
+							}
+						})
+					} else if ((['饭馆'].includes(store.state
+								.user.userInfo.home_store_type) && store.state.user
+							.userInfo.home_store_no)) {
+						// 通过分享饭馆主页加入的用户
+						uni.redirectTo({
+							url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state
+								.user
+								.userInfo.home_store_no,
+							success() {
+								// 标记 已进入过餐馆主页
+								store.commit('SET_INTO_HOSPITAL_STATUS', true)
+							}
+						})
+					}
 				}
 				// #endif
 				return true
@@ -1780,13 +1777,12 @@ export default {
 		}
 		Vue.prototype.toAddPage = async () => {
 			// 获取用户信息
-
+			console.log(store.state.app.authBoxDisplay)
+			debugger
 			let isLogin = await Vue.prototype.wxVerifyLogin()
-
-			if (!isLogin) {
-				return 'fail'
-			}
-
+			// if (!isLogin) {
+			// 	return 'fail'
+			// }
 			let data = await Vue.prototype.selectBasicUserInfo()
 			if (data) {
 				// 已有用户信息
@@ -1797,21 +1793,25 @@ export default {
 					let result = await Vue.prototype.bindDoctorInfo(store.state.app.doctorInfo
 						.no)
 				}
+				store.commit('SET_REGIST_STATUS', false)
 				return true
 			}
-			if (store.state.app.areRegistering) {
-				// 有一个注册请求正在进行中
-				return false
-			}
-			store.commit('SET_REGIST_STATUS', true)
 			let wxUserInfo = ''
 			if (store && store.state && store.state.user) {
 				wxUserInfo = store.state.user.wxUserInfo
 			}
-
 			if ((wxUserInfo && !wxUserInfo.nickname) || !wxUserInfo) {
 				// 未授权获取用户信息
+				console.log(store.state.app.authBoxDisplay)
+
 				store.commit('SET_AUTH_USERINFO', false)
+				debugger
+			
+				// 未授权不进行注册
+			}
+			if (store.state.app.authBoxDisplay) {
+				store.commit('SET_REGIST_STATUS', false)
+				return
 			}
 			let login_user_info = uni.getStorageSync('login_user_info')
 			let user_no = uni.getStorageSync('login_user_info').user_no
@@ -1854,10 +1854,11 @@ export default {
 			let req = [{
 				"serviceName": "srvhealth_person_info_add",
 				"data": [{
-					"nick_name": wxUserInfo ? wxUserInfo.nickname.replace(
-						/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : "",
+					"nick_name": wxUserInfo && wxUserInfo.nickname ? wxUserInfo.nickname
+						.replace(
+							/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : "",
 					"userno": user_no,
-					"name": wxUserInfo ? wxUserInfo.nickname.replace(
+					"name": wxUserInfo && wxUserInfo.nickname ? wxUserInfo.nickname.replace(
 						/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : "",
 					"profile_url": wxUserInfo ? wxUserInfo.headimgurl : "",
 					"user_image": wxUserInfo ? wxUserInfo.headimgurl : "",
@@ -1882,6 +1883,12 @@ export default {
 			if (store.state.user.userInfo && store.state.user.userInfo.no) {
 				return store.state.user.userInfo
 			}
+			if (store.state.app.areRegistering) {
+				// 有一个注册请求正在进行中
+				debugger
+				return false
+			}
+			store.commit('SET_REGIST_STATUS', true)
 			let res = await _http.post(url, req)
 			store.commit('SET_REGIST_STATUS', false)
 			if (res.data && res.data.resultCode === "SUCCESS") {

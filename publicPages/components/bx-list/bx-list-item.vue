@@ -80,7 +80,12 @@
 				</view>
 			</view>
 			<view class="content-box flex-twice" v-else>
-				<view class="title" v-if="goodsData.title" @click="listItemClick">{{ goodsData.title|html2text}}</view>
+				<view class="title" v-if="goodsData.title" @click="listItemClick">
+					<text class="label" v-if="showLabel['title']">
+						{{showLabel['title']}}:
+					</text>
+					{{ goodsData.title|html2text}}
+				</view>
 				<view class="title-tip" v-if="goodsData.tip" @click="listItemClick">
 					<text class="label" v-if="showLabel['tip']">
 						{{showLabel['tip']}}:
@@ -101,8 +106,11 @@
 					<view class="tags"></view>
 				</view>
 				<view class="footer">
-					<text class="foot-name" v-if="goodsData.footer"
-						@click="listItemClick">{{ goodsData.footer|html2text }}</text>
+					<text class="foot-name" v-if="goodsData.footer" @click="listItemClick">
+						<text class="label" v-if="showLabel['footer']">
+							{{showLabel['footer']}}:
+						</text>
+						{{ goodsData.footer|html2text }}</text>
 					<view class="foot-button" v-if="showFootBtn">
 						<view class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
 							v-for="item in rowButton" :key="item.id" @click="footBtnClick(item)">
@@ -121,13 +129,17 @@
 		name: 'ListItem',
 		filters: {
 			html2text: function(value) {
-				return value
-					.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi, '')
-					.replace(/<[^>]+?>/g, '')
-					.replace(/\s+/g, ' ')
-					.replace(/ /g, ' ')
-					.replace(/&nbsp;/g, ' ')
-					.replace(/>/g, ' ');
+				if (value && typeof value === 'string') {
+					return value
+						.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi, '')
+						.replace(/<[^>]+?>/g, '')
+						.replace(/\s+/g, ' ')
+						.replace(/ /g, ' ')
+						.replace(/&nbsp;/g, ' ')
+						.replace(/>/g, ' ');
+				} else {
+					return value || ''
+				}
 			},
 		},
 		data() {
@@ -320,17 +332,20 @@
 				deep: true,
 				immediate: true,
 				handler(newValue, oldValue) {
+					let self = this
 					if (Array.isArray(this.labels) && this.labels.length > 0 && Array.isArray(this.srv_cols)) {
-						let col = this.srv_cols.find(item => this.labels.includes(item.columns))
-						if (col && col.columns) {
-							Object.keys(this.viewTemp).forEach(key => {
-								if (this.viewTemp[key] === col.columns) {
-									this.showLabel[key] = col.label
-								}
-							})
-						}
+						let cols = self.srv_cols.filter(item => self.labels.includes(item.columns))
+						cols.forEach(col => {
+							if (col && col.columns) {
+								Object.keys(self.viewTemp).forEach(key => {
+									if (self.viewTemp[key] === col.columns) {
+										self.showLabel[key] = col.label
+									}
+								})
+							}
+						})
 					}
-					if (newValue[this.viewTemp.img]) {
+					if (newValue[self.viewTemp.img]) {
 						this.goodsData.img = this.getImagePath(newValue[this.viewTemp.img]);
 					}
 					if (newValue[this.viewTemp.title]) {
@@ -390,6 +405,7 @@
 				flex: 1;
 				text-align: center;
 				border: 1px solid #f1f1f1;
+
 				.text {
 					font-size: 50px;
 					line-height: 220upx;
@@ -555,7 +571,7 @@
 						display: flex;
 						font-size: 40upx;
 						justify-content: flex-end;
-
+						flex-wrap: wrap;
 						.cu-btn {
 							margin-right: 20upx;
 						}

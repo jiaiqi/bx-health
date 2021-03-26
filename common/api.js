@@ -15,8 +15,8 @@ let remoteAddress = {
 	// homePath:"/pages/public/homePage/homePage?website_no=WS2020031216030001",
 	isThirdParty: true, // 是否必须第三方认证登录
 	thirdPartyType: ['WeChat'], // 第三方类型
-	homePath:"/pages/home/home", // 首页路径， 配置完整路径
-	// homePath: "/pages/pedia/pedia", // 首页路径，配置完整路径
+	// homePath:"/pages/home/home", // 首页路径， 配置完整路径
+	homePath: "/pages/pedia/pedia", // 首页路径，配置完整路径
 }
 let ENV = {
 	backEndAddress: "https://login.100xsys.cn", //后台管理系统地址

@@ -33,7 +33,8 @@ const getUserInfo = async () => {
 	let infoRes = await uni.getUserInfo({
 		provider: 'weixin'
 	})
-	if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg === 'getUserInfo:ok' &&
+	if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg ===
+		'getUserInfo:ok' &&
 		infoRes[1].userInfo) {
 		let rawData = {
 			nickname: infoRes[1].userInfo.nickName,
@@ -65,18 +66,17 @@ const getUserInfo = async () => {
 }
 
 // 小程序验证登陆
-const wxVerifyLogin = async (dontCheckAuth=false) => {
+const wxVerifyLogin = async (dontCheckAuth = false) => {
 	// #ifdef MP-WEIXIN
-	const userInfo = await getUserInfo(dontCheckAuth)
-	if ((!userInfo || !userInfo.response)&&!dontCheckAuth) {
+	const userInfo = await getUserInfo()
+	if ((!userInfo || !userInfo.response)) {
 		// 只有有获取微信用户信息权限的才能继续登录
 		store.commit('SET_AUTH_USERINFO', false)
-		return false
+		// return false
 	}
-	// #endif
-	if (store.state.app.isLogin) {
-		return true
-	}
+	// if (store.state.app.isLogin) {
+	// 	return true
+	// }
 	const result = await wx.login();
 	if (result.code) {
 		let url = '/wx/operate/srvwx_app_login_verify'
@@ -88,7 +88,7 @@ const wxVerifyLogin = async (dontCheckAuth=false) => {
 			serviceName: 'srvwx_app_login_verify'
 		}]
 		let res = await http.post(url, req)
-		
+
 		if (res.data.resultCode === 'SUCCESS') {
 			// 登录成功
 			uni.setStorageSync('isLogin', true);
@@ -110,6 +110,7 @@ const wxVerifyLogin = async (dontCheckAuth=false) => {
 			return true
 		}
 	}
+	// #endif
 }
 
 // 小程序开户登录

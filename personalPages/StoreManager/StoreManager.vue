@@ -1,5 +1,5 @@
 <template>
-	<view>
+	<view class="page-wrap">
 		<view class="head">
 			<image :src="getImagePath(storeInfo.image)" class="logo" mode="aspectFill" @click="toStoreDetail"></image>
 			<view class="store-name" @click="toStoreDetail">
@@ -16,7 +16,7 @@
 		<view class="manager-view">
 			<text class="text-grey title">管理</text>
 			<view class="manager-box">
-				<view class="box-item" v-for="item in list" @click="clickGrid(item.type)">
+				<view class="box-item" v-for="item in list" @click="clickGrid(item)">
 					<view class="box-item-content">
 						<text class="cu-tag badge" v-if="item.num">{{item.num}}</text>
 						<view class="cu-tag amount text-blue" v-if="storeInfo[item.type]">
@@ -34,12 +34,14 @@
 			<view class="cu-dialog" @click.stop="">
 				<view class="cu-bar bg-white margin-top">
 					<view class="action">
-						<text class="cuIcon-title text-orange "></text> 
+						<text class="cuIcon-title text-orange "></text>
 						<text>请选择</text>
 					</view>
 					<view class="action">
-						<button class="cu-btn bg-green shadow" @tap="showModal" data-target="DialogModal1">Dialog</button>
-						<button class="cu-btn bg-blue shadow margin-left" @tap="showModal" data-target="DialogModal2">Dialog</button>
+						<button class="cu-btn bg-green shadow" @tap="showModal"
+							data-target="DialogModal1">Dialog</button>
+						<button class="cu-btn bg-blue shadow margin-left" @tap="showModal"
+							data-target="DialogModal2">Dialog</button>
 					</view>
 				</view>
 			</view>
@@ -52,7 +54,7 @@
 		data() {
 			return {
 				storeInfo: {},
-				modalName:'',
+				modalName: '',
 				storeNo: '',
 				gridList: [{
 						label: '店铺商品',
@@ -109,12 +111,18 @@
 						color: 'blue',
 						type: 'vaccination_appointment'
 					},
-					{
-						label: '公告管理',
-						icon: 'read',
-						color: 'orange',
-						type: 'notice'
-					},
+					// {
+					// 	label: '公告管理',
+					// 	icon: 'read',
+					// 	color: 'orange',
+					// 	type: 'notice'
+					// },
+					// {
+					// 	label: '业务管理',
+					// 	icon: 'read',
+					// 	color: 'blue',
+					// 	type: 'business'
+					// },
 					{
 						label: '店铺设置',
 						icon: 'settings',
@@ -125,7 +133,7 @@
 				sessionList: [],
 				unreadNum: 0,
 				websiteDetail: {}, //店铺关联站点信息
-				websiteColumn:[], //站点栏目
+				websiteColumn: [], //站点栏目
 			};
 		},
 		filters: {
@@ -164,22 +172,63 @@
 					}
 				})
 			},
-			goNoticeList(){
+			goNoticeList(item) {
 				let viewTemp = {
 					tip: 'content_status',
 					footer: 'content',
 					title: 'title',
 					img: 'icon_image'
 				};
-				let cond = [{colName: "no", ruleType: "like", value: "LM202103100033"}]
+				let cond = [{
+					colName: "no",
+					ruleType: "like",
+					value: item.no
+				}]
 				let url =
 					`/publicPages/list/list?pageType=list&appName=daq&serviceName=srvdaq_cms_content_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
 				uni.navigateTo({
-					url:url
+					url: url
 				})
 			},
 			toStoreDetail() {
 				uni.navigateBack()
+			},
+			getStoreArticleColumns(){
+				// 查找此店铺关联的文章栏目
+					let req = {
+						condition: [{
+								colName: 'website_no',
+								ruleType: 'eq',
+								value: this.storeInfo.website_no
+							},
+							{
+								colName: 'is_leaf',
+								ruleType: 'eq',
+								value: '是'
+							}
+						]
+					};
+					this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(cate => {
+						if (cate.success && cate.data.length > 0) {
+							let types = cate.data.reduce((pre, cur) => {
+								let obj = {
+									name: cur.cate_name,
+									no: cur.no,
+									icon: 'read',
+									color: 'blue',
+									type: 'article-list'
+								}
+								pre.push(obj)
+								return pre
+							}, [])
+							if(types.length>0){
+								types.forEach(type=>{
+									type.label = type.name + '管理'
+									this.gridList.push(type)
+								})
+							}
+						}
+					});
 			},
 			getStoreSession() {
 				// 查找此店铺的客服会话列表
@@ -225,13 +274,14 @@
 					});
 				}
 			},
-			clickGrid(type) {
+			clickGrid(item) {
 				let url = '';
 				let cond = [{
 					colName: 'store_no',
 					ruleType: 'eq',
 					value: this.storeNo
 				}];
+				let {type} = item
 				let labels = []
 				let viewTemp = {};
 				switch (type) {
@@ -296,21 +346,28 @@
 						// 预约列表
 						viewTemp = {
 							title: 'appoint_name',
-							tip: ['预约日期：','app_date',' ','app_time_start','-','app_time_end'],
+							tip: ['预约日期：', 'app_date', ' ', 'app_time_start', '-', 'app_time_end'],
 							// img: 'profile_url',
 							price: 'app_count',
 							footer: 'app_desc'
 						};
-						labels = ['app_count'],
+						labels = ['app_count', 'app_desc'],
 							url =
 							`/publicPages/list/list?pageType=list&label=${JSON.stringify(labels)}&serviceName=srvhealth_store_vaccination_appointment_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`
 						break;
 					case 'notice':
 						// 通知公告管理
 						// this.modalName = 'selectColumn'
-						if(this.storeNo==='S20210227032'){
+						if (this.storeNo === 'S20210227032') {
 							this.goNoticeList()
 						}
+						break;
+					case 'article-list':
+						// 通知公告管理
+						// this.modalName = 'selectColumn'
+						// if (this.storeNo === 'S20210227032') {
+							this.goNoticeList(item)
+						// }
 						break;
 					case 'vaccine_stocks':
 						// 疫苗库存
@@ -321,7 +378,7 @@
 							price: 'stock_count',
 							footer: 'remark'
 						};
-						labels = ['stock_count']
+						labels = ['stock_count', 'remark']
 						url =
 							`/publicPages/list/list?pageType=list&label=${JSON.stringify(labels)}&serviceName=srvhealth_store_vaccine_stocks_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`
 						break;
@@ -335,7 +392,7 @@
 					});
 				}
 			},
-			hideModal(){
+			hideModal() {
 				this.modalName = ''
 			},
 			toDetail(e) {
@@ -410,6 +467,7 @@
 					// storeInfo = storeInfo.data[0];
 					this.unreadNum = storeInfo.data[0].kefu_unread_msg
 					this.storeInfo = storeInfo.data[0];
+					this.getStoreArticleColumns()
 				}
 			}
 		},
@@ -442,6 +500,10 @@
 </script>
 
 <style lang="scss" scoped>
+	.page-wrap {
+		background-color: #f1f1f1;
+	}
+
 	.head {
 		margin-top: 20rpx;
 		background-color: #fff;
@@ -496,6 +558,7 @@
 	.manager-box {
 		display: flex;
 		flex-wrap: wrap;
+		background-color: #fff;
 
 		.box-item {
 			padding: 20rpx;

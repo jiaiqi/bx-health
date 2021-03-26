@@ -939,7 +939,7 @@
 			}
 
 			if (option.share_type === 'bindOrganization' && option.store_no && option
-				.invite_user_no && !authBoxDisplay) {
+				.invite_user_no && !this.authBoxDisplay) {
 				// 绑定诊所
 				// 查找店铺用户列表
 				this.storeNo = option.store_no;

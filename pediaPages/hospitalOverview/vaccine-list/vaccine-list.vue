@@ -19,8 +19,7 @@
 					<view class="margin-left text-grey" v-if="item.persons_count!==1">
 						(需要预约)
 					</view>
-
-					<view class="button-box">
+					<view class="button-box" @click.stop>
 						<view class="cu-tag bg-cyan round" v-if="item.persons_count===1&&item.stock_count">
 							随时到店
 						</view>
@@ -29,7 +28,10 @@
 						</view>
 						<view class="cu-tag bg-olive round " @click.stop="showModal(item)"
 							v-if="item.persons_count!==1">
-							预约<text v-if="item.to_appointment_count">({{item.to_appointment_count}})</text> </view>
+							预约
+							<!-- <text v-if="item.to_appointment_count">({{item.to_appointment_count}})</text> -->
+
+						</view>
 					</view>
 				</view>
 			</swiper-item>
@@ -184,6 +186,7 @@
 	import {
 		getVaccineList
 	} from '../getData.js'
+	import dayjs from '@/static/js/dayjs.min.js'
 	export default {
 		name: "VaccineList", //疫苗预约列表
 		computed: {
@@ -433,8 +436,13 @@
 						},
 						{
 							"colName": "app_date",
-							"ruleType": "gt",
+							"ruleType": "ge",
 							"value": this.formateDate()
+						},
+						{
+							"colName": "app_date",
+							"ruleType": "lt",
+							value: dayjs().add(3, 'day').format('YYYY-MM-DD')
 						}
 					],
 					order: [{

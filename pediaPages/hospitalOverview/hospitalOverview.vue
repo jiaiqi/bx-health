@@ -77,29 +77,9 @@
 				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
 					desc="goods_desc"></goods-list>
 				<vaccine-list v-if="storeNo==='S20210227032'" ref='vaccineList'></vaccine-list>
-				<business-handle :storeNo="storeNo"></business-handle>
+				<!-- <business-handle :storeNo="storeNo"></business-handle> -->
 				<!-- <staff-manage :storeNo="storeNo"></staff-manage> -->
-				<view class="introduction news" v-if="noticeList.length > 0">
-					<view class="title">
-						<text class="cuIcon-titles text-blue"></text>
-						<text class="text-bold " style="font-size: 16px;">通知公告</text>
-					</view>
-					<view class="content news-list">
-						<view class="news-item none-image" :class="{
-								'layout-right-image':item.cover_pic_style==='右侧',
-								'layout-left-image':item.cover_pic_style==='左侧',
-								'layout-center-single-image':item.cover_pic_style==='下一',
-								'layout-center-multi-image':item.cover_pic_style==='下三'
-								}" v-for="(item,noticeIndex) in noticeList" :key="noticeIndex" @click="toArticle(item)">
-							<image class="image-icon" :src="getImagePath(item.icon_image)" v-if="item.icon_image">
-							</image>
-							<view class="content-box">
-								<text class="title-text">{{ item.title }}</text>
-								<text class="date">{{ formateDate(item.create_time) }}</text>
-							</view>
-						</view>
-					</view>
-				</view>
+				<news-list :website_no="storeInfo&&storeInfo.website_no" ref="newsList" :storeInfo="storeInfo"></news-list>
 				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&deptList.length>0">
 					<view class="title">
 						<view>
@@ -115,7 +95,7 @@
 						</view>
 					</view>
 				</view>
-				<view class="introduction news" v-if="storeInfo.type !== '健康服务'&&newsList.length>0">
+				<!-- 				<view class="introduction news" v-if="storeInfo.type !== '健康服务'&&newsList.length>0">
 					<view class="title">
 						<text class="cuIcon-titles text-blue"></text>
 						<text class="">新闻</text>
@@ -127,7 +107,7 @@
 							<text class="date">{{ formateDate(item.create_time) }}</text>
 						</view>
 					</view>
-				</view>
+				</view> -->
 			</view>
 		</view>
 	</view>
@@ -146,14 +126,16 @@
 	} from './getData.js'
 	import goodsList from './goods-list.vue';
 	import vaccineList from './vaccine-list/vaccine-list.vue'
-	import businessHandle from './business-handle/business-handle.vue'
+	import newsList from './news-list/news-list.vue'
+	// import businessHandle from './business-handle/business-handle.vue'
 	import staffManage from './staff-manage/staff-manage.vue'
 	export default {
 		components: {
 			goodsList,
 			vaccineList,
-			businessHandle,
-			staffManage
+			// businessHandle,
+			staffManage,
+			newsList
 		},
 		mixins: [mixin],
 		data() {
@@ -170,7 +152,6 @@
 				noticeList: [], // 通知公告
 				newsList: [], // 新闻
 				menuList: [],
-				queryOption: {},
 				kefuSessionInfo: {},
 				vaccineList: [], // 可预约疫苗列表
 			};
@@ -399,7 +380,7 @@
 					url: '/pages/store/store',
 					fail() {
 						uni.redirectTo({
-							url:'/pages/store/store'
+							url: '/pages/store/store'
 						})
 					}
 				});
@@ -431,30 +412,63 @@
 			getNotice() {
 				let req = {
 					condition: [{
-						colName: 'website_no',
-						ruleType: 'eq',
-						value: this.storeInfo.website_no
-					}]
+							colName: 'website_no',
+							ruleType: 'eq',
+							value: this.storeInfo.website_no
+						},
+						{
+							colName: 'is_leaf',
+							ruleType: 'eq',
+							value: '是'
+						}
+					]
 				};
-				this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(res => {
-					if (res.success && res.data.length > 0) {
-						let req = {
-							condition: [{
-								colName: 'no',
-								ruleType: 'in',
-								value: res.data.map(item => item.no).toString()
-							}]
-						};
-						let types = res.data.reduce((pre, cur) => {
-							pre[cur.category_type] = cur.no
-							return pre
-						}, {})
-						this.$fetch('select', 'srvdaq_cms_content_select', req, 'daq').then(res => {
-							if (res.success) {
-								this.newsList = res.data.filter(item => item.no === types['新闻'])
-								this.noticeList = res.data.filter(item => item.no === types['通知公告'])
+				this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(cate => {
+					if (cate.success && cate.data.length > 0) {
+						let types = cate.data.reduce((pre, cur) => {
+							let obj = {
+								name: cur.cate_name,
+								no: cur.no,
+								list: []
 							}
-						});
+							pre.push(obj)
+							return pre
+						}, [])
+						this.noticeList = types
+						let req = []
+						if (types.length > 0) {
+							types.forEach(type => {
+								let obj = {
+									//查询请求1
+									colNames: ["*"],
+									condition: [{
+										colName: 'no',
+										ruleType: 'eq',
+										value: type.no
+									}],
+									order: [{
+										colName: "create_time",
+										orderType: "desc"
+									}],
+									page: {
+										pageNo: 1,
+										rownumber: 3
+									},
+									serviceName: "srvdaq_cms_content_select"
+								}
+								req.push(obj)
+							})
+						}
+						this.$fetch('multi', 'select', req, 'daq').then(res => {
+							if (res.success) {
+								res.data.forEach((item, key) => {
+									if (item.state === "SUCCESS") {
+										types[key].list = item.data
+										this.$set(this.noticeList, key, types[key])
+									}
+								})
+							}
+						})
 					}
 				});
 			},
@@ -556,7 +570,7 @@
 					}
 				}
 			},
-			async selectStoreInfo() {
+			async selectStoreInfo(times = 0) {
 				let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
 				let req = {
 					condition: [{
@@ -579,13 +593,26 @@
 					uni.setNavigationBarTitle({
 						title: this.storeInfo.name
 					});
-					this.getNotice();
+					// this.getNotice();
 				} else {
-					uni.showModal({
-						title: '未查找到机构信息',
-						content: `${res?JSON.stringify(res):''}  storeNo为${this.storeNo}`,
-						showCancel: false
-					})
+					if (res && res.code === '0011') {
+						const result = await wx.login();
+						if (result.code) {
+							await Vue.prototype.wxLogin({
+								code: result.code
+							});
+							times++
+							if (times < 3) {
+								this.selectStoreInfo(times)
+							}
+						}
+					} else {
+						uni.showModal({
+							title: '未查找到机构信息',
+							content: `${res?JSON.stringify(res):''}  storeNo为${this.storeNo}`,
+							showCancel: false
+						})
+					}
 				}
 				this.selectDepartList();
 			},
@@ -725,6 +752,9 @@
 				if (!this.userInfo || !this.userInfo.no) {
 					await this.toAddPage()
 				}
+				if (this.authBoxDisplay) {
+					return
+				}
 				let url = this.getServiceUrl('health', 'srvhealth_store_user_add', 'operate');
 				let req = [{
 					serviceName: 'srvhealth_store_user_add',
@@ -794,13 +824,17 @@
 				}
 				if (this.storeNo) {
 					console.log(`storeNo:${this.storeNo}`)
-					if(this.$refs.vaccineList){
-						this.$refs.vaccineList.getVaccineList()
-					}
+
 					await this.selectStoreInfo();
 					await this.selectBindUser()
 					await this.seletGroupList();
 					// await this.getKefuSessionInfo()
+					if (this.$refs.vaccineList) {
+						this.$refs.vaccineList.getVaccineList()
+					}
+					if (this.$refs.newsList) {
+						this.$refs.newsList.getNotice()
+					}
 					this.selectUnreadAmount()
 				} else {
 					// uni.showToast({
@@ -860,8 +894,6 @@
 			uni.$off('updateStoreInfo')
 		},
 		async onLoad(option) {
-			this.queryOption = option
-
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
 				withShareTicket: true,
@@ -885,8 +917,9 @@
 				}
 			})
 			if (option.q) {
-				let text = decodeURIComponent(option.q);
-				if (text.indexOf('https://wx2.100xsys.cn/home/') !== -1) {
+				// let text = decodeURIComponent(option.q);
+				let text = this.getDecodeUrl(option.q);
+				if (text && text.indexOf('https://wx2.100xsys.cn/home/') !== -1) {
 					let result = text.split('https://wx2.100xsys.cn/home/')[1];
 					if (result.split('/').length >= 2) {
 						option.store_no = result.split('/')[0];
@@ -899,7 +932,7 @@
 						option.from = 'share'
 					}
 				}
-				if (text.indexOf('https://wx2.100xsys.cn/mpwx/shareClinic/') !== -1) {
+				if (text && text.indexOf('https://wx2.100xsys.cn/mpwx/shareClinic/') !== -1) {
 					let result = text.split('https://wx2.100xsys.cn/mpwx/shareClinic/')[1];
 					if (result.split('/').length >= 2) {
 						option.store_no = result.split('/')[0];
@@ -912,7 +945,7 @@
 						option.from = 'share'
 					}
 				}
-				if (text.indexOf('https://wx2.100xsys.cn/shareClinic/') !== -1) {
+				if (text && text.indexOf('https://wx2.100xsys.cn/shareClinic/') !== -1) {
 					let result = text.split('https://wx2.100xsys.cn/shareClinic/')[1];
 					if (result.split('/').length >= 2) {
 						option.store_no = result.split('/')[0];
@@ -937,11 +970,14 @@
 					option.store_no = 'S20210204016'
 				}
 			}
-
+			if (this.authBoxDisplay) {
+				return //未授权
+			}
 			if (option.share_type === 'bindOrganization' && option.store_no && option
-				.invite_user_no && !authBoxDisplay) {
+				.invite_user_no && !this.authBoxDisplay) {
 				// 绑定诊所
 				// 查找店铺用户列表
+				debugger
 				this.storeNo = option.store_no;
 				this.selectStoreInfo().then(res => {
 					this.getStoreUserInfo(option.store_no).then(res => {

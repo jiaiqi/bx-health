@@ -209,74 +209,27 @@
 				this.modalName = 'editInfo'
 				this.curVac = this.deepClone(e)
 			},
-			// toDetail(e) {
-			// 	let item = this.vaccineList[e]
-			// 	item.showDetail = !item.showDetail
-			// 	this.$set(this.vaccineList, e, item)
-			// },
-			toOrder(e) {
-				// 跳转到疫苗预约表单
-				let fieldsCond = [{
-						column: 'sa_no',
-						display: false,
-						value: e.sa_no
-					},
-					{
-						column: 'appoint_name',
-						display: false,
-						value: e.appoint_name
-					},
-					{
-						column: 'app_date',
-						display: false,
-						value: e.app_date
-					},
-					{
-						column: 'app_time_start',
-						display: false,
-						value: e.app_time_start
-					},
-					{
-						column: 'app_time_end',
-						display: false,
-						value: e.app_time_end
-					},
-					{
-						column: 'person_no',
-						display: false,
-						value: this.userInfo.no
-					},
-					{
-						column: 'person_user_no',
-						display: false,
-						value: this.userInfo.userno
-					},
-					{
-						column: 'person_name',
-						display: false,
-						value: this.userInfo.name
-					},
-					{
-						column: 'person_image',
-						display: false,
-						value: this.userInfo.user_image || this.userInfo.profile_url
-					}
-				];
-				uni.navigateTo({
-					url: `/publicPages/newForm/newForm?afterSubmit=back&submitAction=vaccineSuccess&serviceName=srvhealth_store_vaccination_appoint_record_add&successTip=已成功提交预约&type=add&fieldsCond=${JSON.stringify(fieldsCond)}`
-				})
-			},
 			async getVaccineRecord(saList) {
 				// 查找已预约疫苗列表
 				let req = {
 					"condition": [{
-						"colName": "person_no",
-						"ruleType": "eq",
-						"value": this.userInfo.no
+							"colName": "person_no",
+							"ruleType": "eq",
+							"value": this.userInfo.no
+						},
+						{
+							"colName": "app_date",
+							"ruleType": "ge",
+							"value": this.formateDate()
+						}
+					],
+					order: [{
+						"colName": "app_date",
+						"orderType": "asc" // asc升序  desc降序
 					}],
 					"page": {
 						"pageNo": 1,
-						"rownumber": 99999
+						"rownumber": 50
 					},
 				}
 				let res = await this.$fetch('select', 'srvhealth_store_vaccination_appoint_record_select', req,
@@ -332,8 +285,7 @@
 			uni.$on('vaccineSuccess', () => {
 				this.getVaccineRecord()
 				setTimeout(() => {
-					uni.startPullDownRefresh({
-					})
+					uni.startPullDownRefresh({})
 				}, 200)
 			})
 			this.getVaccineRecord()

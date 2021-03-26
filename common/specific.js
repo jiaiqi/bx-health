@@ -150,6 +150,7 @@ export default {
 				})
 			}
 			let pageInfo = Vue.prototype.getShareParams()
+			debugger
 			if (pageInfo && pageInfo.add_url) {
 				if (option.store_no) {
 					store.commit('SET_INVITER_INFO', {
@@ -177,6 +178,7 @@ export default {
 				let pageStack = getCurrentPages()
 				if (Array.isArray(pageStack) && pageStack.length >= 1) {
 					let currentPage = pageStack[pageStack.length - 1]
+					debugger
 					store.commit('SET_CURRENT_PAGE', currentPage.route)
 					return {
 						add_url: currentPage.$page.fullPath ? currentPage.$page.fullPath.slice(0, 400) : '未知页面',

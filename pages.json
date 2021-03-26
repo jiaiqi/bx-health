@@ -1,14 +1,15 @@
 {
-	"pages": [{
-			"path": "pages/home/home",
-			"style": {
-				"navigationBarTitleText": "加载中...",
-				"enablePullDownRefresh": true,
-				// "navigationStyle":"custom",
-				"navigationBarBackgroundColor": "#fff",
-				"navigationBarTextStyle": "black"
-			}
-		},
+	"pages": [
+		// {
+		// 	"path": "pages/home/home",
+		// 	"style": {
+		// 		"navigationBarTitleText": "加载中...",
+		// 		"enablePullDownRefresh": true,
+		// 		// "navigationStyle":"custom",
+		// 		"navigationBarBackgroundColor": "#fff",
+		// 		"navigationBarTextStyle": "black"
+		// 	}
+		// },
 		{
 			"path": "pages/pedia/pedia",
 			"style": {
@@ -375,7 +376,7 @@
 						"enablePullDownRefresh": true,
 						"navigationBarBackgroundColor": "#fff",
 						"navigationBarTextStyle": "black",
-						"navigationBarTitleText": "机构首页"
+						"navigationBarTitleText": "加载中..."
 					}
 				},
 				{
@@ -524,46 +525,49 @@
 						"enablePullDownRefresh": false
 					}
 				}
-			]
+			    ,{
+                    "path" : "articleList/articleList",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		}
 	],
-	// "tabBar": {
-	// 	"color": "#999", //文字颜色
-	// 	"selectedColor": "#facc31", //选中时文字颜色
-	// 	"borderStyle": "black",
-	// 	"backgroundColor": "#ffffff",
-	// 	"list": [{
-	// 			"pagePath": "pages/pedia/pedia", //页面路径
-	// 			"iconPath": "/static/icon/baodian.png", //图标路径
-	// 			"selectedIconPath": "static/icon/baodian_selected.png", //选中状态图标路径
-	// 			"text": "宝典" //显示文字
-	// 		},
-	// 		{
-	// 			"pagePath": "pages/archives/archives",
-	// 			"iconPath": "/static/icon/geren.png",
-	// 			"selectedIconPath": "static/icon/geren_selected.png",
-	// 			"text": "个人"
-	// 		},
-	// 		{
-	// 			"pagePath": "pages/hospitalOverview/hospitalOverview",
-	// 			"iconPath": "/static/icon/shenghuo.png",
-	// 			"selectedIconPath": "static/icon/shenghuo_selected.png",
-	// 			"text": "机构"
-	// 		},
-	// 		// {
-	// 		// 	"pagePath": "pages/store/store",
-	// 		// 	"iconPath": "/static/icon/shenghuo.png",
-	// 		// 	"selectedIconPath": "static/icon/shenghuo_selected.png",
-	// 		// 	"text": "生活"
-	// 		// },
-	// 		{
-	// 			"pagePath": "pages/personal/personal",
-	// 			"iconPath": "/static/icon/wode.png",
-	// 			"selectedIconPath": "static/icon/wode_selected.png",
-	// 			"text": "我的"
-	// 		}
-	// 	]
-	// },
+	"tabBar": {
+		"color": "#999", //文字颜色
+		"selectedColor": "#facc31", //选中时文字颜色
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [{
+				"pagePath": "pages/pedia/pedia", //页面路径
+				"iconPath": "/static/icon/baodian.png", //图标路径
+				"selectedIconPath": "static/icon/baodian_selected.png", //选中状态图标路径
+				"text": "宝典" //显示文字
+			},
+			{
+				"pagePath": "pages/archives/archives",
+				"iconPath": "/static/icon/geren.png",
+				"selectedIconPath": "static/icon/geren_selected.png",
+				"text": "个人"
+			},
+			{
+				"pagePath": "pages/store/store",
+				"iconPath": "/static/icon/shenghuo.png",
+				"selectedIconPath": "static/icon/shenghuo_selected.png",
+				"text": "生活"
+			},
+			{
+				"pagePath": "pages/personal/personal",
+				"iconPath": "/static/icon/wode.png",
+				"selectedIconPath": "static/icon/wode_selected.png",
+				"text": "我的"
+			}
+		]
+	},
 	"easycom": {
 		"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue"
 	},
@@ -610,6 +614,11 @@
 				"name": "邀请新用户加入诊所",
 				"path": "pediaPages/hospitalOverview/hospitalOverview",
 				"query": "store_no=S20210227032&from=share&invite_user_no=jiaqi&&doctor_no=jiaqi&share_type=bindOrganization"
+			},
+			{
+				"name": "邀请新用户加入诊所",
+				"path": "pediaPages/hospitalOverview/hospitalOverview",
+				"query": "q=https%3A%2F%2Fwx2.100xsys.cn%2Fmpwx%2FshareClinic%2FS20210227032%2FPB2020092209440043"
 			}
 		]
 	}

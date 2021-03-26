@@ -8,12 +8,14 @@
 						v-model="searchVal" :placeholder="placeholder" confirm-type="search" />
 				</view>
 				<view class="action">
-					<button class="cu-btn bg-blue shadow-blur round" @click="toSearch"><text class="cuIcon-search"></text></button>
-					<button class="cu-btn bg-blue shadow-blur round margin-left-xs" @click="clickAddButton" v-if="showAdd"><text class="cuIcon-add"></text></button>
+					<button class="cu-btn bg-blue shadow-blur round" @click="toSearch"><text
+							class="cuIcon-search"></text></button>
+					<button class="cu-btn bg-blue shadow-blur round margin-left-xs" @click="clickAddButton"
+						v-if="showAdd"><text class="cuIcon-add"></text></button>
 				</view>
 			</view>
 			<view style="height: 100upx;width: 100%;"></view>
-			
+
 		</view>
 		<bx-list ref="bxList" :serviceName="serviceName" :condition="condition" :relation_condition="relation_condition"
 			:pageType="pageType" :listType="'list'" :labels="labels" :srvApp="appName"
@@ -22,7 +24,7 @@
 			:searchWords="searchVal" :searchColumn="keyColumn" :tempWord="tempWord" :rownumber="20"
 			:showFootBtn="showFootBtn" @click-list-item="clickItem" @list-change="listChange"
 			@clickFootBtn="clickFootBtn" @loadEnd="loadEnd"></bx-list>
-<!-- 		<view class="public-button-box">
+		<!-- 		<view class="public-button-box">
 			<view class="add-button" @click="clickAddButton" v-if="showAdd"></view>
 		</view> -->
 	</view>
@@ -30,6 +32,7 @@
 
 <script>
 	import bxList from '../components/bx-list/bx-list.vue';
+	import dayjs from '@/static/js/dayjs.min.js'
 	import {
 		mapState
 	} from 'vuex';
@@ -386,7 +389,8 @@
 				return result
 			},
 			async clickFootBtn(data) {
-				let self  = this
+				let self = this
+				debugger
 				let buttonInfo = this.deepClone(data.button);
 				let rowData = this.deepClone(data.row);
 				if (buttonInfo.operate_params && typeof buttonInfo.operate_params === 'string') {
@@ -548,6 +552,7 @@
 							if (buttonInfo.operate_params && Array.isArray(buttonInfo.operate_params
 									.condition)) {
 								let viewTemp = {};
+								let condition = []
 								if (buttonInfo.service_name ===
 									'srvhealth_store_vaccination_appoint_record_select') {
 									viewTemp = {
@@ -556,8 +561,22 @@
 										tip: 'customer_birth_day',
 										img: 'person_image',
 									}
+								} else if (buttonInfo.service_name ===
+									'srvhealth_store_vaccination_appointment_select') {
+									// 预约列表
+									viewTemp = {
+										title: 'app_date',
+										footer: 'app_desc',
+										price:'app_count',
+										tip: 'appoint_name',
+									}
+									// condition = [{
+									// 	colName:'app_date',
+									// 	ruleType:'ge',
+										
+									// }]
 								}
-								let labels = ['customer_birth_day']
+								let labels = ['customer_birth_day', 'app_date','app_count','app_desc']
 								uni.navigateTo({
 									url: `/publicPages/list/list?pageType=list&label=${JSON.stringify(labels)}&serviceName=${buttonInfo.service_name}&cond=${	JSON.stringify(buttonInfo.operate_params.condition) }&viewTemp=${JSON.stringify(viewTemp)}`
 								});
@@ -606,6 +625,7 @@
 							});
 						} else if (data.button && data.button.button_type === 'customize') {
 							// 自定义按钮
+							debugger
 							let moreConfig = data.button.more_config;
 							if (moreConfig && typeof moreConfig === 'string') {
 								try {
@@ -712,7 +732,7 @@
 						} else if (data.button && data.button.button_type === 'duplicate') {
 							let fieldsCond = []
 							if (Array.isArray(self.condition)) {
-								self.condition.forEach(item=>{
+								self.condition.forEach(item => {
 									fieldsCond.push({
 										column: item.colName,
 										value: item.value,
@@ -730,7 +750,7 @@
 									})
 								}
 							})
-							
+
 							let url =
 								`/publicPages/newForm/newForm?serviceName=${data.button.service_name}&type=add&fieldsCond=${JSON.stringify(fieldsCond)}`;
 							if (self.appName) {
@@ -812,6 +832,12 @@
 <style lang="scss">
 	.search-bar {
 		// height: 100px;
+		.action{
+			margin-right: 20rpx;
+			.cu-btn{
+				font-size: 40rpx;
+			}
+		}
 	}
 
 	.add-button {

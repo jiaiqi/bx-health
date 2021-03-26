@@ -154,8 +154,8 @@
 			toStoreHome(e) {
 				if (e.store_no) {
 					uni.redirectTo({
-						url: '/pages/home/home?store_no=' + e.store_no
-						// url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + e.store_no
+						// url: '/pages/home/home?store_no=' + e.store_no
+						url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + e.store_no
 					})
 				}
 			},

@@ -143,7 +143,7 @@ fly.interceptors.request.use(async (request) => {
 })
 //添加响应拦截器，响应拦截器会在then/catch处理之前执行
 fly.interceptors.response.use(
-	(res) => {
+	async (res) => {
 		store.commit('SET_XHR_NUM', store.state.app.xhrNum - 1)
 		console.log(store.state.app.xhrNum)
 		if (store.state.app.xhrNum === 0) {
@@ -157,56 +157,62 @@ fly.interceptors.response.use(
 				Vue.prototype.$store.commit('SET_LOGIN_STATE', false)
 			}
 			// 后端返回 无效登录时，需要进行的跳转处理
-			if (uni.getStorageSync("isLogin")) {
-				// 登录状态记录 为 true 时暂时不处理
-				uni.showToast({
-					title: "用户异常，请退出后，清理缓存重试"
-				})
-			} else {
-				// 确认未登录时再进行自动跳转到登录页面
-				let requestUrl = decodeURIComponent(res.request.headers.requrl)
-				if (requestUrl) {
-					console.log('请求失败::', requestUrl)
-					if (requestUrl && requestUrl !== '/' && requestUrl.indexOf("code") ===
-						-1 && requestUrl.indexOf('/accountExec/accountExec') === -1) {
-						//  过滤无效的url
-						let index = requestUrl.indexOf('/pages/')
-						requestUrl = requestUrl.slice(index)
-						uni.setStorageSync("backUrl", requestUrl)
-					}
-					try {
-						console.log("backUrl:", requestUrl, encodeURIComponent(requestUrl))
-						// #ifdef H5
-						uni.navigateTo({
-							url: '/publicPages/accountExec/accountExec'
-						});
-						// #endif
-						// #ifdef MP-WEIXIN
-						wx.login({
-							success(res) {
-								if (res.code) {
-									//发起网络请求
-									Vue.prototype.wxLogin({
-										code: res.code
-									});
-								} else {
-									console.log('登录失败！' + res.errMsg)
-								}
-							}
-						})
-						// #endif
-					} catch (e) {
-						console.error('请求失败', e)
-						//TODO handle the exception
-					}
-				} else {
+			// if (uni.getStorageSync("isLogin")) {
+			// 	// 登录状态记录 为 true 时暂时不处理
+			// 	uni.showToast({
+			// 		title: "用户异常，请退出后，清理缓存重试"
+			// 	})
+			// } else {
+			// 确认未登录时再进行自动跳转到登录页面
+			let requestUrl = decodeURIComponent(res.request.headers.requrl)
+			if (requestUrl) {
+				console.log('请求失败::', requestUrl)
+				if (requestUrl && requestUrl !== '/' && requestUrl.indexOf("code") ===
+					-1 && requestUrl.indexOf('/accountExec/accountExec') === -1) {
+					//  过滤无效的url
+					let index = requestUrl.indexOf('/pages/')
+					requestUrl = requestUrl.slice(index)
+					uni.setStorageSync("backUrl", requestUrl)
+				}
+				try {
+					console.log("backUrl:", requestUrl, encodeURIComponent(requestUrl))
 					// #ifdef H5
 					uni.navigateTo({
 						url: '/publicPages/accountExec/accountExec'
-					})
+					});
 					// #endif
+					// #ifdef MP-WEIXIN
+					const result = await wx.login();
+					if (result.code) {
+						await Vue.prototype.wxLogin({
+							code: result.code
+						});
+					}
+					// wx.login({
+					// 	success(res) {
+					// 		if (res.code) {
+					// 			//发起网络请求
+					// 			Vue.prototype.wxLogin({
+					// 				code: res.code
+					// 			});
+					// 		} else {
+					// 			console.log('登录失败！' + res.errMsg)
+					// 		}
+					// 	}
+					// })
+					// #endif
+				} catch (e) {
+					console.error('请求失败', e)
+					//TODO handle the exception
 				}
+			} else {
+				// #ifdef H5
+				uni.navigateTo({
+					url: '/publicPages/accountExec/accountExec'
+				})
+				// #endif
 			}
+			// }
 		} else if (res.data.resultCode === '0000' && res.data.state === 'FAILURE') {
 			// 没有访问权限
 			uni.setStorageSync('isLogin', false)

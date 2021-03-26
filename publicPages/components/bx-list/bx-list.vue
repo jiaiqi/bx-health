@@ -151,8 +151,9 @@
 							if (this.pageType !== 'proc') {
 								//普通列表显示行按钮
 								//流程列表点击跳转到流程详情
+								 // ['duplicate','customize', 'edit', 'delete', 'procdetail', 'deleteproc']
 								rowButton = rowButton.filter(
-									item => ['duplicate','customize', 'edit', 'delete', 'procdetail', 'deleteproc'].includes(item
+									item => ['duplicate','customize', 'edit', 'delete','procdetail'].includes(item
 										.button_type)
 								);
 							}
