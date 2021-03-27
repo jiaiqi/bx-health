@@ -1312,7 +1312,6 @@
 				} else if (type === '文件') {
 					req[0].data[0].attachment = value;
 				} else if (type === '视频') {
-					debugger
 					req[0].data[0].video = value;
 					req[0].data[0].image = info.imageNo;
 					try {

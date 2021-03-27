@@ -1778,7 +1778,6 @@ export default {
 		Vue.prototype.toAddPage = async () => {
 			// 获取用户信息
 			console.log(store.state.app.authBoxDisplay)
-			debugger
 			let isLogin = await Vue.prototype.wxVerifyLogin()
 			// if (!isLogin) {
 			// 	return 'fail'
@@ -1803,10 +1802,7 @@ export default {
 			if ((wxUserInfo && !wxUserInfo.nickname) || !wxUserInfo) {
 				// 未授权获取用户信息
 				console.log(store.state.app.authBoxDisplay)
-
 				store.commit('SET_AUTH_USERINFO', false)
-				debugger
-			
 				// 未授权不进行注册
 			}
 			if (store.state.app.authBoxDisplay) {
@@ -1885,7 +1881,6 @@ export default {
 			}
 			if (store.state.app.areRegistering) {
 				// 有一个注册请求正在进行中
-				debugger
 				return false
 			}
 			store.commit('SET_REGIST_STATUS', true)

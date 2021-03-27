@@ -1,21 +1,41 @@
 <template>
 	<view class="article-wrap">
+		<view class="hospital-top" v-if="storeInfo&&storeInfo.store_no" @click="toStore">
+			<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
+			<view class="logo" v-else-if="storeInfo.name">{{ storeInfo.name.slice(0, 1) }}</view>
+			<view class="left">
+				<view class="top">
+					<view class="name">{{ storeInfo.name ||'机构名称'}}</view>
+				</view>
+				<view class="bottom" v-if="storeInfo.address">
+					<text class="address">{{ storeInfo.address||'机构地址' }}</text>
+				</view>
+			</view>
+		</view>
+		<view class="head-image" v-if="articleData.icon_image&&articleData.cover_pic_style==='下一'">
+			<image class="image" :src="getImagePath(articleData.icon_image,true)" mode="aspectFill"></image>
+		</view>
 		<view class="header">
 			<view class="title" v-if="articleData.title">{{ articleData.title }}</view>
 			<view class="title" v-if="articleData.name">{{ articleData.name }}</view>
 		</view>
-		<view class="create-time">{{ articleData.create_time }}</view>
+		<view class="create-time"><text class="store-name" @click="toStore"
+				v-if="storeInfo&&storeInfo.store_no&&storeInfo.name">{{storeInfo.name}}</text>
+			<text>{{ this.formateDate(articleData.create_time) }}</text></view>
 
-		<view class="content" v-if="articleData.content">
-			<view class=""
+		<view class="content">
+			<!-- <view class="content" v-if="articleData.content"> -->
+
+			<rich-text :nodes="richTextNodes" space="nbsp"></rich-text>
+			<!-- 		<view class=""
 				v-html="JSON.parse(JSON.stringify(articleData.content).replace(/\<img/gi, '<img width=100% height=100%'))">
-			</view>
+			</view> -->
 		</view>
-		<view class="content" v-if="articleData.introduce">
+		<!-- 	<view class="content" v-if="articleData.introduce">
 			<view class=""
 				v-html="JSON.parse(JSON.stringify(articleData.introduce).replace(/\<img/gi, '<img width=100% height=100%'))">
 			</view>
-		</view>
+		</view> -->
 		<view class="footer"></view>
 	</view>
 </template>
@@ -24,11 +44,21 @@
 	import {
 		mapState
 	} from 'vuex'
+	import parseHtml from '@/static/js/html-parser.js'
 	export default {
 		computed: {
 			...mapState({
 				userInfo: state => state.user.userInfo
-			})
+			}),
+			richTextNodes() {
+				if (this.articleData) {
+					if (this.articleData.content && typeof this.articleData.content === 'string') {
+						return parseHtml(this.articleData.content.replace(/\<img/gi, '<img width=100% height=100%'))
+					} else if (this.articleData.introduce && typeof this.articleData.content === 'introduce') {
+						return parseHtml(this.articleData.introduce.replace(/\<img/gi, '<img width=100% height=100%'))
+					}
+				}
+			}
 		},
 		data() {
 			return {
@@ -37,10 +67,16 @@
 				cate_name: '',
 				serviceName: 'srvdaq_cms_content_select',
 				storeName: '',
-				storeNo: ''
+				storeNo: '',
+				storeInfo: {}
 			};
 		},
 		methods: {
+			toStore() {
+				uni.navigateTo({
+					url: `/pediaPages/hospitalOverview/hospitalOverview?store_no=${this.storeInfo.store_no}`
+				})
+			},
 			getArticleData() {
 				let app = 'daq';
 				let url = this.getServiceUrl(app, this.serviceName, 'select');
@@ -82,15 +118,58 @@
 						});
 					}
 				});
-			}
+			},
+			async selectStoreInfo(times = 0) {
+				let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
+				let req = {
+					condition: [{
+						colName: 'store_no',
+						ruleType: 'eq',
+						value: this.storeNo
+					}],
+					page: {
+						pageNo: 1,
+						rownumber: 1
+					},
+				};
+				let res = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health')
+				if (Array.isArray(res.data) && res.data.length > 0) {
+					this.storeInfo = res.data[0];
+					// this.getSwiperList(this.storeInfo);
+				} else {
+					if (res && res.code === '0011') {
+						const result = await wx.login();
+						if (result.code) {
+							await Vue.prototype.wxLogin({
+								code: result.code
+							});
+							times++
+							if (times < 3) {
+								this.selectStoreInfo(times)
+							}
+						}
+					} else {
+						uni.showModal({
+							title: '未查找到机构信息',
+							content: `${res?JSON.stringify(res):''}  storeNo为${this.storeNo}`,
+							showCancel: false
+						})
+					}
+				}
+			},
 		},
 		onShareAppMessage() {
 			let path =
-				`/publicPages/article/article?from=share&store_no=${this.storeNo}&content_no=${this.content_no}&invite_user_no=${this.userInfo.userno}&share_type=bindOrganization&doctor_no=${
-				this.userInfo.no }`;
+				`/publicPages/article/article?from=share&content_no=${this.content_no}&share_type=shareArticle`;
+			if (this.storeNo) {
+				path += `&store_no=${this.storeNo}`
+			}
+			if (this.userInfo && this.userInfo.userno) {
+				path += `&invite_user_no=${this.userInfo.userno}`
+			}
 			this.saveSharerInfo(this.userInfo, path);
 			return {
-				title: this.storeName || this.articleData.title,
+				title: this.storeName || this.storeInfo.name || this.articleData.title,
 				path: path
 			};
 		},
@@ -106,6 +185,7 @@
 			}
 			if (option.store_no) {
 				this.storeNo = option.store_no
+				this.selectStoreInfo()
 			}
 			if (option.store_name) {
 				this.storeName = option.store_name
@@ -137,6 +217,16 @@
 		padding: 20upx 20upx 40upx;
 		min-height: 100vh;
 
+		.head-image {
+			width: 100%;
+			height: 250rpx;
+
+			.image {
+				width: 100%;
+				height: 100%;
+			}
+		}
+
 		// box-shadow: -5px -20px 5px rgba(0, 0, 100, 0.27), 1px 0px 10px rgba(0, 100, 100, 0.1) inset;
 		.header {
 			display: flex;
@@ -167,7 +257,13 @@
 
 		.create-time {
 			color: #888;
+			display: flex;
+			justify-content: space-between;
+
 			// margin: 20upx 0 0;
+			.store-name {
+				color: #3d66bc;
+			}
 		}
 
 		.content {
@@ -191,5 +287,72 @@
 				color: #999;
 			}
 		}
+	}
+
+	.hospital-top {
+		background-color: #fff;
+		display: flex;
+		margin-bottom: 20rpx;
+		position: relative;
+		padding-top: 20rpx;
+		flex-wrap: wrap;
+
+		.logo {
+			width: 120rpx;
+			height: 120rpx;
+			border-radius: 20rpx;
+			margin-right: 20rpx;
+			font-size: 60rpx;
+			font-weight: bold;
+			line-height: 100rpx;
+			text-align: center;
+			// position: absolute;
+			border: 4rpx solid #fff;
+		}
+
+		.left {
+			display: flex;
+			flex-direction: column;
+			width: calc(100% - 150rpx);
+
+			.top {
+				display: flex;
+				justify-content: space-between;
+				padding-right: 20rpx;
+
+				.name {
+					width: 500rpx;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: wrap;
+					font-size: 32rpx;
+					color: #333;
+					font-weight: bold;
+					flex: 1;
+				}
+			}
+
+			.bottom {
+				padding-top: 10rpx;
+				color: #aaa;
+
+				display: flex;
+
+				.cuIcon-locationfill {
+					position: relative;
+					top: -10px;
+				}
+
+				.address {
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					width: 100%;
+					flex: 1;
+					font-size: 14px;
+				}
+			}
+		}
+
 	}
 </style>

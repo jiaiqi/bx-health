@@ -53,7 +53,6 @@ export default {
 			this.$emit('show-more');
 		},
 		selectArea(item) {
-			debugger
 			if (!this.lineData.find(a => a[this.column] === item[this.column])) {
 				// this.lineData.push(item);
 				this.$emit('tag-click', item);

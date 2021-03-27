@@ -1,9 +1,9 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="page-wrap" v-if="!authBoxDisplay">
-		<swiper class="screen-swiper item-box rectangle-dot" easing-function="linear" :indicator-dots="true"
-			:circular="true" :autoplay="true" interval="5000" duration="500" height="300">
-			<swiper-item v-for="(item, index) in swiperList" :key="item.url" @click.stop="toPreviewImage(item.url)">
+		<swiper class="screen-swiper item-box rectangle-dot" easing-function="linear" indicator-active-color="#00aaff" :indicator-dots="true"
+			:circular="true" :autoplay="false" interval="5000" duration="500" height="300">
+			<swiper-item v-for="(item, index) in swiperList" :key="item.url"  @click.stop="toPreviewImage(item.url)">
 				<image :src="item.url" mode="scaleToFill"></image>
 			</swiper-item>
 		</swiper>
@@ -977,7 +977,6 @@
 				.invite_user_no && !this.authBoxDisplay) {
 				// 绑定诊所
 				// 查找店铺用户列表
-				debugger
 				this.storeNo = option.store_no;
 				this.selectStoreInfo().then(res => {
 					this.getStoreUserInfo(option.store_no).then(res => {

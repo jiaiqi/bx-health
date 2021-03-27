@@ -493,7 +493,7 @@
 		.grid-layout {
 			padding: 20rpx 10rpx;
 			display: grid;
-			grid-template-columns: repeat(4, calc(25% - 10rpx));
+			grid-template-columns: repeat(6, calc((100% / 6) - 10rpx));
 			grid-row-gap: 10rpx;
 			grid-column-gap: 10rpx;
 		}

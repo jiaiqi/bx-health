@@ -1,74 +1,23 @@
 <template>
-	<view class="vaccine-list" v-if="vaccineList&&vaccineList.length>0">
-		<view class="vaccine-title">
-			<view class="">
-				<text class="cuIcon-titles text-blue"></text>
-				<text>疫苗预约</text>
+	<view class="vaccine-list" :style="{'--page-height':pageHeight}">
+		<view class="vaccine-item" v-for="(item,itemIndex) in vaccineList" :key="itemIndex" @click="showInfo(item)">
+			<view class="title">
+				<text> {{item.vaccine_drug_name}}</text>
+				<text class="margin-left text-grey" v-if="item.persons_count!==1">
+					(需要预约)
+				</text>
 			</view>
-			<view class="to-more" @click="toMore()">
-				<text class="cuIcon-right text-grey" v-if="list.length>1"></text>
+			<view class="margin-left line-blue" v-if="item.persons_count===1&&item.stock_count&&item.stock_count<5">
+				库存较少
 			</view>
-		</view>
-		<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
-			:indicator-dots="true" :autoplay="false">
-			<swiper-item v-for="(child,index) in list" :key="index" class="swiper-item">
-				<view class="vaccine-item" v-for="(item,itemIndex) in child" :key="itemIndex" @click="showInfo(item)">
-					<view class="title">
-						{{item.vaccine_drug_name}}
-					</view>
-					<view class="margin-left line-blue"
-						v-if="item.persons_count===1&&item.stock_count&&item.stock_count<5">
-						<!-- [库存：{{item.stock_count||'0'}}] -->
-						库存较少
-					</view>
-					<view class="margin-left text-grey" v-if="item.persons_count!==1">
-						(需要预约)
-					</view>
-					<view class="button-box" @click.stop>
-						<view class="cu-tag bg-cyan round" v-if="item.persons_count===1&&item.stock_count">
-							随时到店
-						</view>
-						<view class="cu-tag bg-orange round" v-if="item.persons_count===1&&!item.stock_count">
-							待到货
-						</view>
-						<view class="cu-tag bg-olive round " @click.stop="showModal(item)"
-							v-if="item.persons_count!==1">
-							预约
-							<!-- <text v-if="item.to_appointment_count">({{item.to_appointment_count}})</text> -->
-
-						</view>
-					</view>
-				</view>
-			</swiper-item>
-		</swiper>
-		<view class="cu-modal" :class="{'show':modalName==='vaccine-info'}" @click="hideModal" @touchmove.prevent>
-			<view class="cu-dialog" @click.stop>
-				<view class="vaccine-info">
-					<view class="vaccine-name" v-if="vaccineInfo.vaccine_drug_name">
-						{{vaccineInfo.vaccine_drug_name}}
-					</view>
-
-					<view class="vaccine-info" v-if="vaccineInfo.usage">
-						<view class="label">用法:</view>
-						<view class="value">
-							{{vaccineInfo.usage}}
-						</view>
-					</view>
-					<view class="vaccine-info" v-if="vaccineInfo.remark">
-						<view class="label">说明:</view>
-						<view class="value">
-							{{vaccineInfo.remark}}
-						</view>
-					</view>
-					<view class="image-box" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)">
-						<image :src="item.smallUrl" mode="aspectFit" class="remark-pic" v-for="item in imagesUrl"
-							:key="item.smallUrl" @click="toPreviewImage(item.originUrl)">
-						</image>
-					</view>
-					<view class="tips">
-						点击照片查看详情
-					</view>
-				</view>
+			<view class="cu-tag bg-cyan round" v-if="item.persons_count===1&&item.stock_count">
+				随时到店
+			</view>
+			<view class="cu-tag bg-orange round" v-if="item.persons_count===1&&!item.stock_count">
+				待到货
+			</view>
+			<view class="cu-tag bg-olive round " @click.stop="showModal(item)" v-if="item.persons_count!==1">
+				预约
 			</view>
 		</view>
 		<view class="cu-modal" :class="{'show':modalName==='realname'}" @click="hideModal" @touchmove.prevent>
@@ -175,12 +124,18 @@
 						</view>
 					</view>
 					<view class="button-box center">
-						<button class="cu-btn bg-grey" @click="toOrderList">我的预约</button>
+						<button class="cu-btn bg-grey margin-right-xs" @click="toOrderList">我的预约</button>
 						<button type="primary" class="cu-btn bg-blue center" @click="submitOrder">提交预约</button>
 					</view>
 				</view>
 			</view>
 		</view>
+		<view class="" style="margin-top:30vh;" v-if="loadStatus==='noMore'&&vaccineList.length===0">
+			<u-empty text="数据为空" mode="list">
+			</u-empty>
+		</view>
+		<uni-load-more :status="loadStatus"
+			v-if="loadStatus!=='noMore'||(loadStatus==='noMore'&&vaccineList.length!==0)"></uni-load-more>
 	</view>
 </template>
 
@@ -188,37 +143,19 @@
 	import {
 		mapState
 	} from 'vuex'
-	import {
-		getVaccineList
-	} from '../getData.js'
+
 	import dayjs from '@/static/js/dayjs.min.js'
 	export default {
-		name: "VaccineList", //疫苗预约列表
-		computed: {
-			...mapState({
-				userInfo: state => state.user.userInfo
-			}),
-			list() {
-				if (Array.isArray(this.vaccineList) && this.vaccineList.length > 0) {
-					return this.vaccineList.reduce((pre, item) => {
-						if (pre.length === 0) {
-							pre = [
-								[item]
-							]
-						} else if (pre[pre.length - 1].length >= 5) {
-							pre.push([item])
-						} else {
-							pre[pre.length - 1].push(item)
-						}
-						return pre
-					}, [])
-				} else {
-					return []
-				}
-			}
-		},
 		data() {
 			return {
+				vaccineList: [],
+				condition: [], // 查询条件
+				loadStatus: 'noMore', //more,loading,noMore
+				page: {
+					pageNo: 1,
+					rownumber: 15,
+					total: 0
+				},
 				modalName: '',
 				selectedVaccine: {},
 				activeField: '',
@@ -231,7 +168,6 @@
 					appoint_remark: ''
 				},
 				timeArr: [],
-				vaccineList: [],
 				imagesUrl: [],
 				vaccineInfo: {}, // 疫苗信息
 				curVac: {
@@ -240,151 +176,27 @@
 				tip: ''
 			}
 		},
-		created() {
-			if (!this.vaccineList || this.vaccineList.length === 0) {
-				this.getVaccineList()
-			}
+		computed: {
+			pageHeight() {
+				return 'calc(100vh - var(--window-top) - var(--window-bottom))'
+			},
+			...mapState({
+				userInfo: state => state.user.userInfo
+			})
 		},
+
 		methods: {
-			toMore() {
-				uni.navigateTo({
-					url: '/storePages/VaccineList/VaccineList'
+			hideModal() {
+				this.vaccineInfo = {}
+				this.curVac = {}
+				this.selectedVaccine = {}
+				this.modalName = ''
+				Object.keys(this.formModel).forEach(key => {
+					this.formModel[key] = ''
 				})
 			},
-			disabledTime(e) {
-				// 判断是否过期 已过期则禁用
-				let time = new Date(e.app_date + ' ' + e.app_time_start)
-				let now = new Date()
-				if (time.getTime() < now.getTime()) {
-					return true
-				} else {
-					return false
-				}
-			},
-			async showInfo(e) {
-				this.vaccineInfo = e
-				if (e.remark_pic) {
-					this.imagesUrl = [];
-					let images = await this.getFilePath(e.remark_pic)
-					if (Array.isArray(images)) {
-						for (let i = 0; i < images.length; i++) {
-							const obj = {
-								originUrl: `${this.$api.getFilePath}${images[i].fileurl}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`,
-								smallUrl: `${this.$api.getFilePath}${images[i].fileurl}&thumbnailType=fwsu_100&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`
-							}
-							this.imagesUrl.push(obj);
-						}
-					}
-				}
-				this.modalName = 'vaccine-info'
-			},
-			showRealNameModal() {
-				this.formModel.customer_name = this.userInfo.name
-				this.formModel.customer_phone = this.userInfo.phone
-				this.formModel.customer_birth_day = this.userInfo.birthday
-				this.formModel.id_no = this.userInfo.id_no
-				this.formModel.phone_xcx = this.userInfo.phone_xcx
-				this.modalName = 'realname'
-			},
-			async updateUserInfo() {
-				let data = {}
-				if (!this.formModel.customer_name || !this.formModel.customer_phone || !this.formModel
-					.customer_birth_day || !this.formModel.id_no) {
-					//  || !this.formModel.phone_xcx 暂不校验是否填写小程序手机号
-					this.tip = '请确认所有实名信息已填写完整'
-					return
-				}
-				this.tip = ''
-				if (!this.userInfo.id_no || this.formModel.id_no) {
-					data.id_no = this.formModel.id_no
-				}
-				if (!this.userInfo.phone || this.formModel.customer_phone) {
-					data.phone = this.formModel.customer_phone
-				}
-				if (!this.userInfo.phone_xcx || this.formModel.phone_xcx) {
-					data.phone_xcx = this.formModel.phone_xcx
-				}
-				if (!this.userInfo.birthday || this.formModel.customer_birth_day) {
-					data.birthday = this.formModel.customer_birth_day
-				}
-				if (this.formModel.customer_name || this.formModel.customer_name) {
-					data.name = this.formModel.customer_name
-				}
-				let req = [{
-					"serviceName": "srvhealth_person_info_real_identity_update",
-					"condition": [{
-						"colName": "id",
-						"ruleType": "eq",
-						"value": this.userInfo.id
-					}],
-					"data": [data]
-				}]
-				let res = await this.$fetch('operate', 'srvhealth_person_info_real_identity_update', req, 'health')
-				if (res.success) {
-					if (Array.isArray(res.data) && res.data.length > 0) {
-						this.$store.commit('SET_USERINFO', res.data[0])
-					}
-					this.selectTimeArr(this.vaccineInfo)
-				}
-			},
-			async decryptPhoneNumber(e) {
-				// 解密手机号信息
-				let self = this
-				try {
-					let sessionStatus = await wx.checkSession()
-				} catch (err) {
-					// session_key 已经失效， 需要重新执行登录流程
-					if (err) {
-						uni.showToast({
-							title: err,
-							icon: false
-						})
-					}
-					let result = await wx.login()
-					if (result.code) {
-						await self.wxLogin({
-							code: result.code
-						})
-					}
-				}
-
-				if (e.detail && e.detail.errMsg && e.detail.errMsg.indexOf('ok') !== -1) {
-					let url = this.getServiceUrl('wx', 'srvwx_app_data_decrypt', 'operate')
-					let req = [{
-						data: [{
-							encryptedData: e.detail.encryptedData,
-							signature: e.detail.iv
-						}],
-						serviceName: 'srvwx_app_data_decrypt'
-					}]
-					let res = await this.$http.post(url, req);
-					if (res.data.resultCode === 'SUCCESS' && Array.isArray(res.data.response) && res.data.response
-						.length > 0 && res.data.response[0].response && res.data.response[0].response.phoneNumber) {
-						this.formModel.phone_xcx = res.data.response[0].response.phoneNumber
-						this.formModel.customer_phone = res.data.response[0].response.phoneNumber
-					} else {
-						// wx.checkSession({
-						// 	fail(err) {
-						// 		// session_key 已经失效， 需要重新执行登录流程
-						// 		wx.login({
-						// 			success(result) {
-						// 				if (result.code) {
-						// 					self.wxLogin({
-						// 						code: result.code
-						// 					}).then(_ => {
-						// 						self.decryptPhoneNumber(e)
-						// 					})
-						// 				}
-						// 			}
-						// 		})
-						// 	}
-						// })
-					}
-				}
-			},
-			async getVaccineList() {
-				// 查找可预约疫苗列表
-				this.vaccineList = await getVaccineList()
+			onFocus(e) {
+				this.activeField = e
 			},
 			toOrderList() {
 				uni.navigateTo({
@@ -441,6 +253,75 @@
 			DateChange(e) {
 				this.formModel.customer_birth_day = e.detail.value
 			},
+			onBlur() {
+				this.activeField = ''
+			},
+			selectItem(e) {
+				if (this.disabledTime(e)) {
+					uni.showToast({
+						title: '已过期,不可预约',
+						icon: 'none'
+					})
+					return
+				}
+				this.selectedVaccine = e
+			},
+			disabledTime(e) {
+				// 判断是否过期 已过期则禁用
+				let time = new Date(e.app_date + ' ' + e.app_time_start)
+				let now = new Date()
+				if (time.getTime() < now.getTime()) {
+					return true
+				} else {
+					return false
+				}
+			},
+			async getVaccineList(type = 'refresh') {
+				// 查找可预约疫苗列表
+				if (type === 'refresh') {
+					this.page.pageNo = 1
+				}
+				let req = {
+					"page": {
+						"pageNo": this.page.pageNo,
+						"rownumber": this.page.rownumber
+					},
+				}
+				let res = await this.$fetch('select', 'srvhealth_store_vaccine_stocks_select', req, 'health')
+				if (res.success) {
+					if (type === 'refresh') {
+						this.vaccineList = res.data
+					} else {
+						this.vaccineList = [...this.vaccineList, ...res.data]
+					}
+					if (res.page) {
+						if (res.page.total > res.page.rownumber * res.page.pageNo) {
+							this.loadStatus = 'more'
+							this.page.pageNo++
+						} else {
+							this.loadStatus = 'noMore'
+						}
+					}
+				}
+				return this.vaccineList
+			},
+			async showInfo(e) {
+				this.vaccineInfo = e
+				if (e.remark_pic) {
+					this.imagesUrl = [];
+					let images = await this.getFilePath(e.remark_pic)
+					if (Array.isArray(images)) {
+						for (let i = 0; i < images.length; i++) {
+							const obj = {
+								originUrl: `${this.$api.getFilePath}${images[i].fileurl}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`,
+								smallUrl: `${this.$api.getFilePath}${images[i].fileurl}&thumbnailType=fwsu_100&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`
+							}
+							this.imagesUrl.push(obj);
+						}
+					}
+				}
+				this.modalName = 'vaccine-info'
+			},
 			async selectTimeArr(e) {
 				let req = {
 					"condition": [{
@@ -477,7 +358,14 @@
 					this.formModel.phone_xcx = this.userInfo.phone_xcx || ''
 					this.modalName = 'vaccine'
 				}
-
+			},
+			showRealNameModal() {
+				this.formModel.customer_name = this.userInfo.name
+				this.formModel.customer_phone = this.userInfo.phone
+				this.formModel.customer_birth_day = this.userInfo.birthday
+				this.formModel.id_no = this.userInfo.id_no
+				this.formModel.phone_xcx = this.userInfo.phone_xcx
+				this.modalName = 'realname'
 			},
 			showModal(e) {
 				this.vaccineInfo = e
@@ -487,97 +375,55 @@
 					this.selectTimeArr(e)
 				}
 			},
-			hideModal() {
-				this.vaccineInfo = {}
-				this.curVac = {}
-				this.selectedVaccine = {}
-				this.modalName = ''
-				Object.keys(this.formModel).forEach(key => {
-					this.formModel[key] = ''
-				})
-			},
-			onFocus(e) {
-				this.activeField = e
-			},
-			onBlur() {
-				this.activeField = ''
-			},
-			selectItem(e) {
-				if (this.disabledTime(e)) {
-					uni.showToast({
-						title: '已过期,不可预约',
-						icon: 'none'
-					})
-					return
-				}
-				this.selectedVaccine = e
-			},
-			getList() {
-				let list = []
-				for (let key in this.vaccineList) {
-					let obj = this.vaccineList[key]
-					obj.selected = ''
-					obj.data = this.vaccineList[key].data.map(item => {
-						item.checked = false
-						return item
-					})
-					list.push(obj)
-				}
-				return list
+		},
+		created() {
+			this.getVaccineList()
+		},
+		onReachBottom() {
+			if (this.loadStatus !== 'noMore') {
+				this.getVaccineList('loadmore')
 			}
+		},
+		onPullDownRefresh() {
+			this.getVaccineList().then(_ => {
+				uni.stopPullDownRefresh()
+			})
 		}
 	}
 </script>
 
-<style lang="scss" scoped>
-	/deep/ swiper.rectangle-dot {
-		height: 200px;
-	}
-
+<style scoped lang="scss">
 	.vaccine-list {
 		display: flex;
 		flex-direction: column;
 		margin-bottom: 20rpx;
 		background-color: #fff;
+		min-height: var(--page-height);
 
-	}
-
-	.vaccine-title {
-		display: flex;
-		justify-content: space-between;
-		font-weight: bold;
-		font-size: 16px;
-		padding: 20rpx 20rpx 0;
-
-		.to-more {
-			font-weight: normal;
-			width: 100rpx;
+		.vaccine-item {
+			padding: 20rpx;
+			margin-bottom: 10rpx;
 			display: flex;
-			justify-content: flex-end;
 			align-items: center;
-		}
-	}
+			border-bottom: 1rpx solid #f1f1f1;
+			justify-content: space-between;
+			// min-height: calc(var(--page-height) / 5);
 
-	.button-box {
-		margin: 0;
-		padding: 4rpx 0;
-		justify-content: flex-end;
-		flex: 1;
+			.title {
+				display: flex;
+				flex-wrap: wrap;
+				font-size: 16px;
+				text-align: left;
+				padding-right: 20rpx;
+			}
 
-		.cu-tag,
-		.cu-btn {
-			min-width: 150rpx;
-			font-size: 14px;
-		}
+			.cu-tag {
+				min-width: 150rpx;
+				font-size: 14px;
+			}
 
-		&.center {
-			justify-content: center;
-			margin-bottom: 20px;
-		}
-
-		.cu-btn {
-			&+.cu-btn {
-				margin-left: 20px;
+			.desc {
+				flex: 1;
 			}
 		}
 	}
@@ -649,42 +495,21 @@
 		}
 	}
 
-	.vaccine-item {
-		padding: 5rpx 20rpx;
-		margin-bottom: 10rpx;
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		border-bottom: 1rpx solid #f1f1f1;
-
-		&:first-child {
-			border-top: 1rpx solid #f1f1f1;
-			margin-top: 10px;
-		}
-
-		.title {
-			display: inline-block;
-			font-size: 16px;
-			text-align: left;
-		}
-
-		.desc {
-			flex: 1;
-		}
-	}
-
-
 	.birthday {
 		text-align: left !important;
 	}
 
-	.cu-form-group .title {
-		min-width: calc(4em + 15px);
-	}
-
-	.cu-form-group uni-picker .picker {
+	.cu-form-group {
 		text-align: left;
-		line-height: 40px;
+
+		.title {
+			min-width: calc(4em + 15px);
+		}
+
+		uni-picker .picker {
+			text-align: left;
+			line-height: 40px;
+		}
 	}
 
 	.order-info {
@@ -786,22 +611,6 @@
 				// pointer-events: none;
 				// cursor: default;
 				opacity: 0.6;
-			}
-		}
-	}
-
-	.modal-title {
-		font-weight: bold;
-		padding: 20rpx;
-		font-size: 16px;
-	}
-
-	.realname-form {
-		text-align: left;
-
-		.cu-form-group {
-			.title {
-				min-width: 150rpx;
 			}
 		}
 	}

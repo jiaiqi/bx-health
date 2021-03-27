@@ -612,28 +612,25 @@
 				margin: 0;
 				border-radius: 10rpx;
 				overflow: hidden;
-				height: 185rpx;
+				height: 100rpx;
 				border-bottom: 1rpx solid #f1f1f1;
-
-				// font-size: calc(90vw / 4);
 				.text {
 					font-size: 85px;
 				}
 			}
 
 			.content-box {
-				min-height: 50rpx;
+				min-height:30rpx;
 				display: flex;
-				flex-direction: column;
-
+				flex-wrap: wrap;
 				.title {
 					margin: 0;
 					width: 100%;
-					font-size: 32rpx;
+					font-size: 24rpx;
 					flex: 1;
-					padding: 10rpx;
+					padding:4rpx 8rpx;
+					font-weight: normal;
 				}
-
 				.footer {
 					align-items: flex-end;
 					justify-content: flex-end;

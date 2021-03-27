@@ -240,6 +240,7 @@
 					overflow: hidden;
 					white-space: nowrap;
 					&.rich-text{
+						padding: 10px;
 						max-width: 600rpx;
 						width: 100%!important;
 						background-color: #F1F1F1;
@@ -275,7 +276,8 @@
 			}
 			.value {
 				&.rich-text{
-					max-width: 600rpx;
+					padding: 10px;
+					// max-width: 600rpx;
 					width: 100%!important;
 					background-color: #F1F1F1;
 					min-height: 100rpx;

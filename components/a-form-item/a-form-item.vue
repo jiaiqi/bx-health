@@ -104,7 +104,7 @@
 			</view>
 			<view class="form-item-content_value" v-else-if="fieldData.type === 'RichText'"
 				@click="showModal('RichEditor')">
-				<view class="place-holder picker" v-if="!fieldData.value">开始输入</view>
+				<view class="value rich-text" v-if="!fieldData.value">开始输入</view>
 				<rich-text :nodes="fieldData.value" class="value rich-text" v-else></rich-text>
 			</view>
 			<input type="text" @input="onInput" placeholder="请输入" @blur="onBlur" :hold-keyboard="false"

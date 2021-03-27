@@ -59,7 +59,6 @@
 				}else{
 					this.qrCodeText = `https://wx2.100xsys.cn/shareClinic/${option.store_no}`
 				}
-				// this.qrCodeText = `https://wx2.100xsys.cn/shareClinic/${option.store_no}/jiaqi`
 			}
 		},
 		methods: {

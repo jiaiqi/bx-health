@@ -157,7 +157,6 @@ export default {
 		clickTag(e) {
 			this.currentClick = e;
 			this.current_no = e.no;
-			debugger
 			if (this.srvInfo.isTree === false) {
 				this.$emit('getCascaderValue', e, 'sure');
 				this.areaList = [];

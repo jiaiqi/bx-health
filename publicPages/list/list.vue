@@ -21,7 +21,7 @@
 			:pageType="pageType" :listType="'list'" :labels="labels" :srvApp="appName"
 			:rowButtons="listConfig && listConfig.rowButton ? listConfig.rowButton : []" :showTab="false"
 			:viewTemp="viewTemp" :listConfig="listConfig" :showButton="showRowButton" :fixed="true" :top="listTop"
-			:searchWords="searchVal" :searchColumn="keyColumn" :tempWord="tempWord" :rownumber="20"
+			:searchWords="searchVal" :searchColumn="keyColumn" :tempWord="tempWord" :rownumber="42"
 			:showFootBtn="showFootBtn" @click-list-item="clickItem" @list-change="listChange"
 			@clickFootBtn="clickFootBtn" @loadEnd="loadEnd"></bx-list>
 		<!-- 		<view class="public-button-box">
@@ -336,7 +336,6 @@
 									url += `&appName=${this.appName}`
 								}
 								if (button.service_name === 'srvdaq_cms_content_select') {
-									debugger
 									if (e.content_no) {
 										uni.navigateTo({
 											url: `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=${e.content_no}`
@@ -390,7 +389,6 @@
 			},
 			async clickFootBtn(data) {
 				let self = this
-				debugger
 				let buttonInfo = this.deepClone(data.button);
 				let rowData = this.deepClone(data.row);
 				if (buttonInfo.operate_params && typeof buttonInfo.operate_params === 'string') {
@@ -625,7 +623,6 @@
 							});
 						} else if (data.button && data.button.button_type === 'customize') {
 							// 自定义按钮
-							debugger
 							let moreConfig = data.button.more_config;
 							if (moreConfig && typeof moreConfig === 'string') {
 								try {

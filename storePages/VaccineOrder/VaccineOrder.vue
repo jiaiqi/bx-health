@@ -54,8 +54,6 @@
 						</view>
 					</view>
 					<view class="button-box">
-						<!-- 	<button class="cu-btn animation-slide-right" @click="toDetail(index)"
-							v-if="item.isSubscribe">{{item.showDetail?"收起":"查看"}}预约信息</button> -->
 						<button class="cu-btn bg-red margin-right" @click="cancel(item)"><text
 								class="cuIcon-delete margin-right-xs"></text> 取消预约</button>
 						<button type="primary" class="cu-btn bg-blue " @click="edit(item)"><text
@@ -101,6 +99,10 @@
 				</view>
 			</view>
 		</view>
+		<view class="" style="margin-top:30vh;" v-if="loadStatus==='noMore'&&vaccineList.length===0">
+			<u-empty text="数据为空" mode="list">
+			</u-empty>
+		</view>
 	</view>
 </template>
 
@@ -115,6 +117,7 @@
 				vaccineRecord: [], //疫苗预约记录
 				modalName: '',
 				curVac: {},
+				loadStatus: 'more',
 				page: {
 					rownumber: 10,
 					total: 0,
@@ -209,7 +212,7 @@
 				this.modalName = 'editInfo'
 				this.curVac = this.deepClone(e)
 			},
-			async getVaccineRecord(saList) {
+			async getVaccineRecord(type = 'refresh') {
 				// 查找已预约疫苗列表
 				let req = {
 					"condition": [{
@@ -228,53 +231,33 @@
 						"orderType": "asc" // asc升序  desc降序
 					}],
 					"page": {
-						"pageNo": 1,
-						"rownumber": 50
+						"pageNo": this.page.pageNo,
+						"rownumber": this.page.rownumber
 					},
 				}
 				let res = await this.$fetch('select', 'srvhealth_store_vaccination_appoint_record_select', req,
 					'health')
 				if (res.success) {
-					this.vaccineList = res.data
-					return res.data
-				}
-			},
-			async getVaccineList() {
-				// 查找疫苗列表
-				let req = {
-					"condition": [{
-						"colName": "app_date",
-						"ruleType": "ge",
-						"value": this.formateDate('', 'date')
-					}],
-					"page": {
-						"pageNo": this.page.pageNo,
-						"rownumber": this.page.rownumber
-					},
-				}
-				let res = await this.$fetch('select', 'srvhealth_store_vaccination_appointment_select', req, 'health')
-				if (res.success) {
-					let saList = res.data.map(item => item.sa_no)
-					if (saList.length > 0) {
-						let vaccineRecord = await this.getVaccineRecord(saList)
-						this.vaccineList = res.data.map(item => {
-							let info = vaccineRecord.find(record => item.sa_no === record.sa_no)
-							if (info) {
-								// 已预约此疫苗
-								item.isSubscribe = true
-								item.detail = info
-							} else {
-								item.isSubscribe = false
-							}
-							item.showDetail = false
-							return item
-						})
-					} else {
+					if (type === 'refresh') {
 						this.vaccineList = res.data
+					} else {
+						this.vaccineList = [...this.vaccineList, ...res.data]
 					}
-					return this.vaccineList
+					if (res.page) {
+						if (res.page.total > res.page.rownumber * res.page.pageNo) {
+							this.loadStatus = 'more'
+							this.page.pageNo++
+						} else {
+							this.loadStatus = 'noMore'
+						}
+					}
 				}
 			},
+		},
+		onReachBottom() {
+			if (this.loadStatus !== 'noMore') {
+				this.getVaccineRecord('loadmore')
+			}
 		},
 		onPullDownRefresh() {
 			this.getVaccineRecord().then(_ => {
@@ -298,7 +281,6 @@
 
 	.page-wrap {
 		min-height: calc(100vh - var(--window-bottom) - var(--window-top));
-		// background-color: #fff;
 	}
 
 	.button-box {

@@ -150,19 +150,18 @@ export default {
 				})
 			}
 			let pageInfo = Vue.prototype.getShareParams()
-			debugger
 			if (pageInfo && pageInfo.add_url) {
 				if (option.store_no) {
 					store.commit('SET_INVITER_INFO', {
 						add_store_no: option.store_no,
 						home_store_no: option.store_no,
 						add_url: pageInfo.add_url,
-						invite_user_no: option.invite_user_no||'jiaqi'
+						invite_user_no: option.invite_user_no||'undefined'
 					});
 				}else{
 					store.commit('SET_INVITER_INFO', {
 						add_url: pageInfo.add_url,
-						invite_user_no: option.invite_user_no || 'jiaqi'
+						invite_user_no: option.invite_user_no || 'undefined'
 					});
 				}
 			}
@@ -178,11 +177,10 @@ export default {
 				let pageStack = getCurrentPages()
 				if (Array.isArray(pageStack) && pageStack.length >= 1) {
 					let currentPage = pageStack[pageStack.length - 1]
-					debugger
 					store.commit('SET_CURRENT_PAGE', currentPage.route)
 					return {
 						add_url: currentPage.$page.fullPath ? currentPage.$page.fullPath.slice(0, 400) : '未知页面',
-						invite_user_no: userInfo.no ? userInfo.no : 'jiaqi'
+						invite_user_no: userInfo.no ? userInfo.no : 'undefined'
 					}
 				}
 			}

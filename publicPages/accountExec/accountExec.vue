@@ -338,7 +338,6 @@
 							return;
 						}
 						let num = getCurrentPages();
-						debugger
 						if (Array.isArray(num) && num.length === 1) {
 							if (self.previousPageUrl && self.previousPageUrl.indexOf('/accountExec') == -1) {
 								//

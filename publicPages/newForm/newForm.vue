@@ -74,7 +74,6 @@
 		},
 		methods: {
 			toChildServiceList(e) {
-				debugger
 				let data = this.deepClone(e);
 				let formData = this.params.defaultVal;
 				let condition = [{

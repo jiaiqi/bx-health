@@ -489,7 +489,16 @@
 					"navigationBarTitleText": "疫苗预约",
 					"enablePullDownRefresh": true
 				}
-			}]
+			}    ,{
+                    "path" : "VaccineList/VaccineList",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "疫苗列表",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "publicPages",
