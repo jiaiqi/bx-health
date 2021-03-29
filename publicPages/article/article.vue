@@ -19,9 +19,12 @@
 			<view class="title" v-if="articleData.title">{{ articleData.title }}</view>
 			<view class="title" v-if="articleData.name">{{ articleData.name }}</view>
 		</view>
-		<view class="create-time"><text class="store-name" @click="toStore"
-				v-if="storeInfo&&storeInfo.store_no&&storeInfo.name">{{storeInfo.name}}</text>
-			<text>{{ this.formateDate(articleData.create_time) }}</text></view>
+		<view class="create-time">
+			<!-- 		<text class="store-name" @click="toStore"
+				v-if="storeInfo&&storeInfo.store_no&&storeInfo.name">{{storeInfo.name}}</text> -->
+			<text class="store-name" @click="toStore" v-if="storeName&&storeNo">{{storeName}}</text>
+			<text>{{ this.formateDate(articleData.create_time) }}</text>
+		</view>
 
 		<view class="content">
 			<!-- <view class="content" v-if="articleData.content"> -->
@@ -73,9 +76,12 @@
 		},
 		methods: {
 			toStore() {
-				uni.navigateTo({
-					url: `/pediaPages/hospitalOverview/hospitalOverview?store_no=${this.storeInfo.store_no}`
-				})
+				if (this.storeNo) {
+					uni.navigateTo({
+						url: `/pediaPages/hospitalOverview/hospitalOverview?store_no=${this.storeNo}`
+					})
+				}
+
 			},
 			getArticleData() {
 				let app = 'daq';
@@ -119,44 +125,27 @@
 					}
 				});
 			},
-			async selectStoreInfo(times = 0) {
-				let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
-				let req = {
-					condition: [{
-						colName: 'store_no',
-						ruleType: 'eq',
-						value: this.storeNo
-					}],
-					page: {
-						pageNo: 1,
-						rownumber: 1
-					},
-				};
-				let res = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health')
-				if (Array.isArray(res.data) && res.data.length > 0) {
-					this.storeInfo = res.data[0];
-					// this.getSwiperList(this.storeInfo);
-				} else {
-					if (res && res.code === '0011') {
-						const result = await wx.login();
-						if (result.code) {
-							await Vue.prototype.wxLogin({
-								code: result.code
-							});
-							times++
-							if (times < 3) {
-								this.selectStoreInfo(times)
-							}
-						}
-					} else {
-						uni.showModal({
-							title: '未查找到机构信息',
-							content: `${res?JSON.stringify(res):''}  storeNo为${this.storeNo}`,
-							showCancel: false
-						})
-					}
-				}
-			},
+		},
+		onShareTimeline() {
+			let query =
+				`from=shareTimeline&content_no=${this.content_no}&share_type=shareArticle`;
+			if (this.storeNo) {
+				query += `&store_no=${this.storeNo}`
+			}
+			if (this.storeName) {
+				query += `&store_name=${this.storeName}`
+			}
+			if (this.cate_name) {
+				query += `&cate_name=${this.cate_name}`
+			}
+			if (this.userInfo && this.userInfo.userno) {
+				query += `&invite_user_no=${this.userInfo.userno}`
+			}
+			return {
+				title: this.articleData.title,
+				query: query
+			};
+			this.saveSharerInfo(this.userInfo, path);
 		},
 		onShareAppMessage() {
 			let path =
@@ -164,28 +153,27 @@
 			if (this.storeNo) {
 				path += `&store_no=${this.storeNo}`
 			}
+			if (this.storeName) {
+				path += `&store_name=${this.storeName}`
+			}
+			if (this.cate_name) {
+				path += `&cate_name=${this.cate_name}`
+			}
 			if (this.userInfo && this.userInfo.userno) {
 				path += `&invite_user_no=${this.userInfo.userno}`
 			}
 			this.saveSharerInfo(this.userInfo, path);
 			return {
-				title: this.storeName || this.storeInfo.name || this.articleData.title,
+				title: this.storeName || this.articleData.title,
 				path: path
 			};
 		},
 		onLoad(option) {
-			// #ifdef MP-WEIXIN
-			wx.showShareMenu({
-				withShareTicket: true,
-				menus: ['shareAppMessage', 'shareTimeline']
-			});
-			// #endif
 			if (option.article) {
 				this.articleData = JSON.parse(decodeURIComponent(option.article));
 			}
 			if (option.store_no) {
 				this.storeNo = option.store_no
-				this.selectStoreInfo()
 			}
 			if (option.store_name) {
 				this.storeName = option.store_name
@@ -200,9 +188,9 @@
 				this.content_no = decodeURIComponent(option.content_no);
 				this.getArticleData();
 			}
-			if (option.destApp) {
-				uni.setStorageSync('activeApp', option.destApp);
-			}
+			// if (option.destApp) {
+			// 	uni.setStorageSync('activeApp', option.destApp);
+			// }
 		}
 	};
 </script>

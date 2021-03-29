@@ -1,9 +1,9 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="page-wrap" v-if="!authBoxDisplay">
-		<swiper class="screen-swiper item-box rectangle-dot" easing-function="linear" indicator-active-color="#00aaff" :indicator-dots="true"
-			:circular="true" :autoplay="false" interval="5000" duration="500" height="300">
-			<swiper-item v-for="(item, index) in swiperList" :key="item.url"  @click.stop="toPreviewImage(item.url)">
+		<swiper class="screen-swiper item-box rectangle-dot" easing-function="linear" indicator-active-color="#00aaff"
+			:indicator-dots="true" :circular="true" :autoplay="true" interval="5000" duration="500" height="300">
+			<swiper-item v-for="(item, index) in swiperList" :key="item.url" @click.stop="toPreviewImage(item.url)">
 				<image :src="item.url" mode="scaleToFill"></image>
 			</swiper-item>
 		</swiper>
@@ -77,9 +77,9 @@
 				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
 					desc="goods_desc"></goods-list>
 				<vaccine-list v-if="storeNo==='S20210227032'" ref='vaccineList'></vaccine-list>
-				<!-- <business-handle :storeNo="storeNo"></business-handle> -->
-				<!-- <staff-manage :storeNo="storeNo"></staff-manage> -->
-				<news-list :website_no="storeInfo&&storeInfo.website_no" ref="newsList" :storeInfo="storeInfo"></news-list>
+				<staff-manage :storeNo="storeNo" @toDoctorDetail="toDoctorDetail"></staff-manage>
+				<news-list :website_no="storeInfo&&storeInfo.website_no" ref="newsList" :storeInfo="storeInfo">
+				</news-list>
 				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&deptList.length>0">
 					<view class="title">
 						<view>
@@ -95,19 +95,6 @@
 						</view>
 					</view>
 				</view>
-				<!-- 				<view class="introduction news" v-if="storeInfo.type !== '健康服务'&&newsList.length>0">
-					<view class="title">
-						<text class="cuIcon-titles text-blue"></text>
-						<text class="">新闻</text>
-					</view>
-					<view class="content news-list">
-						<view class="news-item" v-for="(item,index) in newsList" :key="index" @click="toArticle(item)">
-							<text class="cuIcon-title"></text>
-							<text class="title-text">{{ item.title }}</text>
-							<text class="date">{{ formateDate(item.create_time) }}</text>
-						</view>
-					</view>
-				</view> -->
 			</view>
 		</view>
 	</view>
@@ -127,13 +114,11 @@
 	import goodsList from './goods-list.vue';
 	import vaccineList from './vaccine-list/vaccine-list.vue'
 	import newsList from './news-list/news-list.vue'
-	// import businessHandle from './business-handle/business-handle.vue'
 	import staffManage from './staff-manage/staff-manage.vue'
 	export default {
 		components: {
 			goodsList,
 			vaccineList,
-			// businessHandle,
 			staffManage,
 			newsList
 		},
@@ -147,7 +132,6 @@
 				storeNo: '',
 				fullIntro: false,
 				storeInfo: {},
-				// storeUserList: [],
 				deptList: [], //科室
 				noticeList: [], // 通知公告
 				newsList: [], // 新闻
@@ -290,7 +274,6 @@
 			toPages(e, info) {
 				let url = '';
 				if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
-					// this.bindUserInfo = await this.bindStore()
 					this.addToStore()
 					return
 				}
@@ -657,6 +640,22 @@
 					return res
 				}
 			},
+			async toDoctorDetail(e) {
+				if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
+					this.bindUserInfo = await this.bindStore()
+				}
+				if (this.bindUserInfo && this.bindUserInfo.store_user_no && e.person_no && e.store_no) {
+					let url = ''
+					if (e && e.person_no && e.store_no && this.bindUserInfo.store_user_no) {
+						url =
+							`/personalPages/chat/chat?type=机构用户客服&receiver_person_no=${e.person_no}&identity=客户&storeNo=${e.store_no}&store_user_no=${this.bindUserInfo.store_user_no}`
+					}
+					// url = `/storePages/DoctorIntro/DoctorIntro?nouseRelation=true&person_no=${e.person_no}&store_no=${e.store_no}&store_user_no=${this.bindUserInfo.store_user_no}`
+					uni.navigateTo({
+						url: url
+					});
+				}
+			},
 			async toConsult() {
 				// 在线咨询
 				if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
@@ -769,7 +768,7 @@
 						person_name: this.userInfo.name,
 						add_url: this.inviterInfo.add_url,
 						invite_user_no: invite_user_no,
-						store_no: store_no,
+						store_no: this.storeNo,
 						person_no: this.userInfo.no,
 						user_role: '用户',
 						"image": this.storeInfo.image,
@@ -824,7 +823,6 @@
 				}
 				if (this.storeNo) {
 					console.log(`storeNo:${this.storeNo}`)
-
 					await this.selectStoreInfo();
 					await this.selectBindUser()
 					await this.seletGroupList();
@@ -867,7 +865,8 @@
 			}
 			if (this.storeNo) {
 				if (this.userInfo && this.userInfo.no) {
-					uni.startPullDownRefresh()
+					// uni.startPullDownRefresh()
+					this.initPage()
 				} else {
 					this.toAddPage().then(_ => {
 						uni.startPullDownRefresh()
@@ -897,7 +896,7 @@
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
 				withShareTicket: true,
-				menus: ['shareAppMessage', 'shareTimeline']
+				menus: ['shareAppMessage']
 			});
 			// #endif
 			uni.$on('updateStoreSessionLastLookTime', (e) => {
@@ -909,7 +908,7 @@
 				this.selectUnreadAmount()
 			})
 			uni.$on('updateUnread', e => {
-				this.initPage()
+				// this.initPage()
 			})
 			uni.$on('updateStoreInfo', (e) => {
 				if (e && e.store_no === this.storeNo) {

@@ -1,46 +1,45 @@
 <template>
-	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="hospital-wrap">
-		<view class="bg-view"
-			:style="{ 'background-image': `url(${topBgImg ? topBgImg : 'https://tse1-mm.cn.bing.net/th/id/OIP.pX_K8kY1FWrj9h_2YRlqBwHaEB?pid=Api&rs=1'})` }">
-		</view>
 		<view class="hospital-top">
+			<view class="leftimage">
+				<image class="image" :src="topBgImg" mode="aspectFit"></image>
+			</view>
 			<view class="left">
-				<view class="top">
-					<view class="name">{{ doctorInfo.name }}</view>
-				</view>
-				<view class="bottom">
-					<view class="introduce" v-if="doctorStoreList.length === 1&&doctorStoreList[0].staff_introduction">
-						{{ doctorStoreList[0].staff_introduction }}
-					</view>
-					<view class="introduce" v-else>
-						暂无介绍
-					</view>
+				<view class="name">{{ doctorInfo.name }}</view>
+				<view class="" v-if="storeUserInfo&&storeUserInfo.name">
+					{{storeUserInfo.name}}
 				</view>
 			</view>
-			<view class="right">
-				<!-- <text class="cuIcon-phone" @click="makePhoneCall"></text> -->
-				<image :src="topBgImg" mode="aspectFit"></image>
+			<view class="right phone" v-if="doctorInfo.phone||doctorInfo.phone_xcx">
+				<text class="cuIcon-phone" @click="makePhoneCall" v-if="doctorInfo.phone||doctorInfo.phone_xcx"></text>
 			</view>
 		</view>
-		<view class="introduction">
+		<view class="introduction" v-if="storeUserInfo.staff_introduction">
+			<view class="introduce" v-if="storeUserInfo.staff_introduction">
+				<text class="title">
+					简介：
+				</text>{{ storeUserInfo.staff_introduction||'暂无简介' }}
+			</view>
+		</view>
+		<!-- 	<view class="introduction">
 			<view class="title">
 				<text class="cuIcon-titles text-blue"></text>
 				<text class="">出诊表</text>
 			</view>
 			<uni-calendar :selected="calenderSelected" :insert="true" :lunar="true" :start-date="'2019-3-2'"
 				:end-date="'2019-5-20'"></uni-calendar>
-		</view>
-		<view class="button-area">
-			<view class="button-item" @click="toPages('seeDoctor')">
+		</view> -->
+
+		<!-- <view class="button-area"> -->
+		<!-- 			<view class="button-item" @click="toPages('seeDoctor')">
 				<button class="cu-btn bg-cyan"><text class="cuIcon-edit"></text></button>
 				<view class="button-label">就诊登记</view>
-			</view>
-			<view class="button-item" @click="toPages('toContant')">
+			</view> -->
+		<!-- <view class="button-item" @click="toPages('toContant')">
 				<button class="cu-btn bg-blue"><text class="cuIcon-comment"></text></button>
 				<view class="button-label">信息咨询</view>
-			</view>
-		</view>
+			</view> -->
+		<!-- </view> -->
 		<view class="cu-modal" :class="{ show: modalName === 'sotre-list' }">
 			<view class="cu-dialog">
 				<view class="sotre-list">
@@ -49,7 +48,7 @@
 						<view class="action" @tap="hideModal"><text class="cuIcon-close text-red"></text></view>
 					</view>
 					<view class="padding-xl">
-						<button class="cu-btn store-item bg-cyan" v-for="item in doctorStoreList"
+						<button class="cu-btn store-item bg-cyan" :key="index" v-for="(item,index) in doctorStoreList"
 							@tap="toPages('seeDoctor', item)">{{ item.name }}</button>
 					</view>
 					<view class="cu-bar bg-white justify-center">
@@ -69,6 +68,8 @@
 	export default {
 		data() {
 			return {
+				store_user_no: '',
+				doctorNo: '',
 				doctorInfo: {},
 				storeNo: '',
 				relationInfo: {},
@@ -95,7 +96,6 @@
 					}
 				],
 				doctorStoreList: [],
-				seeDoctorRecord: [],
 				modalName: ''
 			};
 		},
@@ -107,12 +107,24 @@
 					return this.getImagePath(this.doctorInfo.profile_url);
 				}
 			},
+			storeUserInfo() {
+				if (Array.isArray(this.doctorStoreList) && this.doctorStoreList.length > 0) {
+					return this.doctorStoreList[0]
+				} else {
+					return {}
+				}
+			},
 			...mapState({
 				userInfo: state => state.user.userInfo,
 				inviterInfo: state => state.app.inviterInfo
 			})
 		},
 		methods: {
+			makePhoneCall() {
+				uni.makePhoneCall({
+					phoneNumber: this.doctorInfo.phone || this.doctorInfo.phone_xcx
+				});
+			},
 			hideModal() {
 				this.modalName = '';
 			},
@@ -175,12 +187,16 @@
 							}
 							url =
 								'/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' +
-								decodeURIComponent(JSON.stringify(filedsCond));
+								JSON.stringify(filedsCond);
 						}
 						break;
 					case 'toContant':
-						url =
-							`/personalPages/myDoctor/doctorChat?no=${this.doctorInfo.no}&doctor=${encodeURIComponent(JSON.stringify(this.relationInfo))}`;
+						if (this.doctorInfo && this.doctorInfo.no) {
+							url =
+								`/personalPages/chat/chat?type=机构用户客服&receiver_person_no=${this.doctorInfo.no}&identity=客户&storeNo=${this.storeNo}&store_user_no=${this.store_user_no}`
+						}
+						// url =
+						// 	`/personalPages/myDoctor/doctorChat?no=${this.doctorInfo.no}&doctor=${encodeURIComponent(JSON.stringify(this.relationInfo))}`;
 						break;
 				}
 				if (url) {
@@ -188,24 +204,6 @@
 					uni.navigateTo({
 						url: url
 					});
-				}
-			},
-			async getSeeDoctorRecord() {
-				// 就诊记录
-				let url = this.getServiceUrl('health', 'srvhealth_see_doctor_record_select', 'select');
-				let req = {
-					serviceName: 'srvhealth_see_doctor_record_select',
-					colNames: ['*'],
-					condition: [{
-						colName: 'store_no',
-						ruleType: 'eq',
-						value: this.storeInfo.store_no
-					}]
-				};
-				let res = await this.$http.post(url, req);
-				if (Array.isArray(res.data.data)) {
-					this.seeDoctorRecord = res.data.data;
-					return res.data.data;
 				}
 			},
 			async getStoreUserInfo(no) {
@@ -232,31 +230,6 @@
 					return res.data.data;
 				}
 			},
-			async getRelationInfo() {
-				let url = this.getServiceUrl('health', 'srvhealth_person_relation_select', 'select');
-				let req = {
-					serviceName: 'srvhealth_person_relation_select',
-					colNames: ['*'],
-					condition: [{
-						colName: 'usera_person_no',
-						ruleType: 'eq',
-						value: this.doctorInfo.no
-					}, {
-						colName: 'userb_person_no',
-						ruleType: 'eq',
-						value: this.userInfo.no
-					}],
-					relation_condition: {},
-					page: null,
-					order: [],
-					draft: false,
-					query_source: 'list_page'
-				};
-				let res = await this.$http.post(url, req);
-				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
-					this.relationInfo = res.data.data[0];
-				}
-			},
 			async getDoctorInfo(no) {
 				let url = this.getServiceUrl('health', 'srvhealth_person_info_select', 'select');
 				let req = {
@@ -272,19 +245,21 @@
 				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 					this.doctorInfo = res.data.data[0];
 					this.getStoreUserInfo();
-					this.getRelationInfo();
 					return res.data.data;
 				}
 			}
 		},
-		onLoad(option) {
+		async onLoad(option) {
 			this.checkOptionParams(option);
-			this.toAddPage();
+			await this.toAddPage();
 			if (option.store_no) {
 				this.storeNo = option.store_no;
 			}
-			if (option.doctor_no) {
-				this.getDoctorInfo(option.doctor_no);
+			if (option.store_user_no) {
+				this.store_user_no = option.store_user_no
+			}
+			if (option.person_no) {
+				this.getDoctorInfo(option.person_no);
 			}
 		}
 	};

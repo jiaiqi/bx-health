@@ -2,7 +2,7 @@
 	<view class="staff-manage">
 		<view class="title">
 			<text class="cuIcon-titles text-blue"></text>
-			<text class="">大夫</text>
+			<text class="">咨询大夫</text>
 		</view>
 		<view class="content">
 			<view class="professor-box">
@@ -13,9 +13,6 @@
 							<text class="doc-name">{{ staff.nick_name || staff.person_name || '' }}</text>
 							<view class="titleDn">{{ staff.titleDn }}</view>
 						</view>
-						<!-- 		<view class="center">
-							<view class="depart-name">{{ staff.user_role }}</view>
-						</view> -->
 					</view>
 				</view>
 			</view>
@@ -58,13 +55,9 @@
 					this.staffList = res.data.data;
 				}
 			},
-			toDetail() {
-				return
-				// uni.navigateTo({
-				// 	url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + this.curStaff.person_no +
-				// 		'&store_no=' + this.curStaff
-				// 		.store_no
-				// });
+			toDetail(e) {
+				// return
+				this.$emit('toDoctorDetail',e)
 			}
 		},
 		created() {
@@ -228,6 +221,7 @@
 							overflow: hidden;
 							white-space: nowrap;
 							text-overflow: ellipsis;
+
 							.doc-name {
 								font-size: 34rpx;
 								width: 180rpx;

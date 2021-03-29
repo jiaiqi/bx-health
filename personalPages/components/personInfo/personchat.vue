@@ -377,6 +377,9 @@
 			},
 			identity: {
 				type: String //一对一会话身份 - 医生/患者
+			},
+			receiverInfo:{
+				type: Object, // 接收者信息
 			}
 		},
 		computed: {
@@ -1258,6 +1261,15 @@
 						req[0].data[0].receiver_person_no = targetUserinfo.person_no;
 						req[0].data[0].identity = targetUserinfo.identity
 					}
+					debugger
+					if(this.receiverInfo){
+						if(this.receiverInfo.person_no){
+							req[0].data[0].receiver_person_no = this.receiverInfo.person_no;
+						}
+						if(this.receiverInfo.user_account){
+							req[0].data[0].receiver_account = this.receiverInfo.user_account;
+						}
+					}
 					if (this.groupNo) {
 						req[0].data[0].rcv_group_no = this.groupNo
 					}
@@ -1465,6 +1477,14 @@
 						req[0].data[0].receiver_account = targetUserinfo.userno;
 						req[0].data[0].receiver_person_no = targetUserinfo.person_no;
 						req[0].data[0].identity = targetUserinfo.identity
+					}
+					if(this.receiverInfo){
+						if(this.receiverInfo.person_no){
+							req[0].data[0].receiver_person_no = this.receiverInfo.person_no;
+						}
+						if(this.receiverInfo.user_account){
+							req[0].data[0].receiver_account = this.receiverInfo.user_account;
+						}
 					}
 					if (this.groupNo) {
 						req[0].data[0].rcv_group_no = this.groupNo

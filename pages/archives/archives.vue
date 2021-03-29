@@ -1666,7 +1666,7 @@
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
 				withShareTicket: true,
-				menus: ['shareAppMessage', 'shareTimeline']
+				menus: ['shareAppMessage']
 			});
 			// #endif
 			uni.$on('healthTotalScoreChanged', result => {

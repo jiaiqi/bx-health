@@ -428,7 +428,7 @@
 									if (this.formType === 'detail') {
 										item.disabled = true;
 									}
-									item.options = item.options.map(op=>{
+									item.options = item.options.map(op => {
 										op.checked = false
 										return op
 									})
@@ -436,9 +436,11 @@
 										if (item.column === items.item_no) {
 											if (item.item_type_attr && item.item_type_attr
 												.radioType === 'multi') {
-												item.value = items.option_data?items.option_data.toString():'';
-												item.options = item.options.map(op=>{
-													if(item.value.indexOf(op.value)!==-1 ){
+												item.value = items.option_data ? items.option_data
+													.toString() : '';
+												item.options = item.options.map(op => {
+													if (item.value.indexOf(op.value) !== -
+														1) {
 														op.checked = true
 													}
 													return op
@@ -709,7 +711,7 @@
 				`/questionnaire/index/index?formType=form&activity_no=${this.activity_no}&status=进行中`;
 			this.saveSharerInfo(this.userInfo, path);
 			return {
-				title:this.formData.title,
+				title: this.formData.title,
 				path: path
 			};
 		},
@@ -717,7 +719,7 @@
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
 				withShareTicket: true,
-				menus: ['shareAppMessage', 'shareTimeline']
+				menus: ['shareAppMessage']
 			});
 			// #endif
 			if (option.planNo) {

@@ -193,42 +193,44 @@
 			toStoreDetail() {
 				uni.navigateBack()
 			},
-			getStoreArticleColumns(){
+			getStoreArticleColumns() {
 				// 查找此店铺关联的文章栏目
-					let req = {
-						condition: [{
-								colName: 'website_no',
-								ruleType: 'eq',
-								value: this.storeInfo.website_no
-							},
-							{
-								colName: 'is_leaf',
-								ruleType: 'eq',
-								value: '是'
-							}
-						]
-					};
-					this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(cate => {
-						if (cate.success && cate.data.length > 0) {
-							let types = cate.data.reduce((pre, cur) => {
-								let obj = {
-									name: cur.cate_name,
-									no: cur.no,
-									icon: 'read',
-									color: 'blue',
-									type: 'article-list'
-								}
-								pre.push(obj)
-								return pre
-							}, [])
-							if(types.length>0){
-								types.forEach(type=>{
-									type.label = type.name + '管理'
-									this.gridList.push(type)
-								})
-							}
+				let req = {
+					condition: [{
+							colName: 'website_no',
+							ruleType: 'eq',
+							value: this.storeInfo.website_no
+						},
+						{
+							colName: 'is_leaf',
+							ruleType: 'eq',
+							value: '是'
 						}
-					});
+					]
+				};
+				this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(cate => {
+					if (cate.success && cate.data.length > 0) {
+						let types = cate.data.reduce((pre, cur) => {
+							let obj = {
+								name: cur.cate_name,
+								no: cur.no,
+								icon: 'read',
+								color: 'blue',
+								type: 'article-list'
+							}
+							pre.push(obj)
+							return pre
+						}, [])
+						if (types.length > 0) {
+							types.forEach(type => {
+								type.label = type.name + '管理'
+								if (!this.gridList.find(item => item.no && item.no === type.no)) {
+									this.gridList.push(type)
+								}
+							})
+						}
+					}
+				});
 			},
 			getStoreSession() {
 				// 查找此店铺的客服会话列表
@@ -281,7 +283,9 @@
 					ruleType: 'eq',
 					value: this.storeNo
 				}];
-				let {type} = item
+				let {
+					type
+				} = item
 				let labels = []
 				let viewTemp = {};
 				switch (type) {
@@ -366,7 +370,7 @@
 						// 通知公告管理
 						// this.modalName = 'selectColumn'
 						// if (this.storeNo === 'S20210227032') {
-							this.goNoticeList(item)
+						this.goNoticeList(item)
 						// }
 						break;
 					case 'vaccine_stocks':

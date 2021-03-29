@@ -498,6 +498,15 @@
                 }
                 
                 }
+                ,{
+                    "path" : "DoctorIntro/DoctorIntro",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "简介",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
             ]
 		},
 		{

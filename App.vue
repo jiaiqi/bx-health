@@ -15,6 +15,9 @@
 			})
 		},
 		onLaunch(options) {
+			if (options.scene === 1154) {
+				return
+			}
 			this.checkUpdate()
 			this.checkOptionParams(options)
 			console.log("launch", options)

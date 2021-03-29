@@ -1584,7 +1584,14 @@ export default {
 					// console.log(store.state.app.inviterInfo)
 					// let pageInfo = Vue.prototype.getShareParams()
 					// 暂时去掉
-					if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no) {
+					let pageStack = getCurrentPages()
+					let currentPage = ''
+					if (Array.isArray(pageStack) && pageStack.length >= 1) {
+						currentPage = pageStack[pageStack.length - 1]?.$page?.fullPath
+					}
+					if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no && (!
+							currentPage || (currentPage && currentPage.indexOf(
+								'/pediaPages/hospitalOverview/hospitalOverview') == -1))) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
@@ -1646,10 +1653,16 @@ export default {
 					// 有home_store 此次打开小程序未进入过医院/餐馆主页
 					let pageInfo = Vue.prototype.getShareParams()
 					// console.log(store.state.app.inviterInfo)
-					// debugger
+					let pageStack = getCurrentPages()
+					let currentPage = ''
+					if (Array.isArray(pageStack) && pageStack.length >= 1) {
+						currentPage = pageStack[pageStack.length - 1]?.$page?.fullPath
+					}
 					// 暂时去掉
 					if (['诊所', '医院', '健康服务'].includes(store.state
-							.user.userInfo.home_store_type)) {
+							.user.userInfo.home_store_type) && (!currentPage || (currentPage && currentPage
+							.indexOf(
+								'/pediaPages/hospitalOverview/hospitalOverview') == -1))) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
@@ -1761,12 +1774,12 @@ export default {
 				}];
 				let res = await _http.post(url, req);
 				if (res.data.state === 'SUCCESS') {
-					uni.showModal({
-						title: '提示',
-						content: `已绑定${docInfo.name}为您的医生`,
-						showCancel: false,
-						confirmText: '知道了'
-					});
+					// uni.showModal({
+					// 	title: '提示',
+					// 	content: `已绑定${docInfo.name}为您的医生`,
+					// 	showCancel: false,
+					// 	confirmText: '知道了'
+					// });
 					return true
 				} else {
 					return false

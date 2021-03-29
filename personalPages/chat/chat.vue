@@ -1,22 +1,28 @@
 <template>
 	<view>
-		<view class="util-bar" v-if="(groupInfo && groupInfo.gc_no)||sessionType==='店铺机构全员'">
+		<view class="util-bar" v-if="(groupInfo && groupInfo.gc_no)||sessionType==='店铺机构全员'||receiver_person_no">
 			<!-- 		<view class="util-item " @click="toPages('group-member')">
 				<view class="icon"><text class="cuIcon-friend "></text></view>
 							<text class="label">成员<text
 						v-if="storeInfo&&storeInfo.user_count">({{storeInfo.user_count}})</text></text>
 			</view> -->
-			<view class="util-item " @click="toPages('group-util')">
+			<view class="util-item " @click="toPages('group-util')"
+				v-if="(groupInfo && groupInfo.gc_no)||sessionType==='店铺机构全员'">
 				<view class="icon"><text class="cuIcon-repair "></text></view>
 				<text class="label">小工具</text>
 			</view>
-			<view class="util-item" @click="toPages('group-detail')">
+			<view class="util-item" @click="toPages('doctor-info')" v-if="receiver_person_no">
+				<view class="icon"><text class="cuIcon-people "></text></view>
+				<text class="label">详细资料</text>
+			</view>
+			<view class="util-item" @click="toPages('group-detail')"
+				v-if="(groupInfo && groupInfo.gc_no)||sessionType==='店铺机构全员'">
 				<view class="icon"><text class="cuIcon-settings"></text></view>
 			</view>
 		</view>
 		<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
 			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
-			:storeNo="storeNo" :topHeight="(groupInfo&&groupNo)||sessionType==='店铺机构全员'?42:0" :group-no="groupNo"
+			:storeNo="storeNo" :topHeight="topHeight" :group-no="groupNo" :receiverInfo="receiverInfo"
 			v-if="session_no"></chat>
 	</view>
 </template>
@@ -34,6 +40,14 @@
 			...mapState({
 				userInfo: state => state.user.userInfo
 			}),
+			topHeight() {
+				if ((this.groupInfo && this.groupNo) || this.sessionType === '店铺机构全员' || (this.storeNo && this
+						.receiver_person_no)) {
+					return 42
+				} else {
+					return 0
+				}
+			}
 		},
 		data() {
 			return {
@@ -42,6 +56,11 @@
 				session_no: '', // 会话编号
 				storeNo: '', // 机构编号
 				store_user_no: '', // 客服会话 发起人的店铺用户编号
+				receiver_person_no: '', // 客服会话 - 接收者用户编号
+				receiverInfo: {
+					// 接收者信息
+
+				},
 				storeInfo: {},
 				storeUserInfo: {}, // 当前登录用户在店铺成员列表中的信息
 				groupNo: '', //群组编号
@@ -62,8 +81,17 @@
 						url: `../gropDetail/gropDetail?gc_no=${this.groupInfo.gc_no}&type=${type}`
 					});
 				} else {
+					let url = ''
+					if (type === 'doctor-info') {
+						if (this.receiver_person_no && this.storeNo && this.store_user_no) {
+							url =
+								`/storePages/DoctorIntro/DoctorIntro?nouseRelation=true&person_no=${this.receiver_person_no}&store_no=${this.storeNo}&store_user_no=${this.store_user_no}`
+						}
+					} else {
+						url = `../gropDetail/gropDetail?sessionType=店铺机构全员&type=${type}&storeNo=${this.storeNo}`
+					}
 					uni.navigateTo({
-						url: `../gropDetail/gropDetail?sessionType=店铺机构全员&type=${type}&storeNo=${this.storeNo}`
+						url: url
 					});
 				}
 
@@ -99,15 +127,12 @@
 						this.rowInfo = res.data[0]
 						if (res.data[0].usera_person_no === this.userInfo.no) {
 							this.pageTitle = res.data[0].userb_name
-							uni.setNavigationBarTitle({
-								title: res.data[0].userb_name
-							})
 						} else {
 							this.pageTitle = res.data[0].usera_name
-							uni.setNavigationBarTitle({
-								title: res.data[0].usera_name
-							})
 						}
+						uni.setNavigationBarTitle({
+							title: this.pageTitle
+						})
 					}
 				})
 			},
@@ -151,7 +176,7 @@
 						if (this.groupInfo.name) {
 							this.pageTitle = this.groupInfo.name
 							uni.setNavigationBarTitle({
-								title: this.groupInfo.name
+								title: this.pageTitle
 							})
 						}
 						if (res.data[0].session_no) {
@@ -179,16 +204,12 @@
 						if (res.data.length > 0) {
 							if (this.groupInfo && this.groupInfo.name) {
 								this.pageTitle = this.groupInfo.name + `(${res.data.length})`
-								uni.setNavigationBarTitle({
-									title: this.groupInfo.name + `(${res.data.length})`
-								})
 							} else if (this.storeInfo && this.storeInfo.name) {
 								this.pageTitle = this.storeInfo.name + `(${this.storeInfo.user_count})`
-								uni.setNavigationBarTitle({
-									title: this.storeInfo.name + `(${this.storeInfo.user_count})`
-								})
 							}
-
+							uni.setNavigationBarTitle({
+								title: this.pageTitle
+							})
 						}
 					}
 				})
@@ -217,33 +238,30 @@
 					this.session_no = res.data[0].session_no
 					switch (this.sessionType) {
 						case '店铺机构全员':
-							this.pageTitle = this.sessionInfo.session_name ? this.sessionInfo.session_name : this
+							this.pageTitle = this.sessionInfo.session_name || this
 								.storeInfo.name
-							uni.setNavigationBarTitle({
-								title: this.sessionInfo.session_name ? this.sessionInfo.session_name : this
-									.storeInfo.name
-							})
 							if (this.storeInfo && this.storeInfo.user_count) {
-								uni.setNavigationBarTitle({
-									title: `${　this.sessionInfo.session_name?this.sessionInfo.session_name:this.storeInfo.name　}(${this.storeInfo.user_count})`
-								})
+								this.pageTitle =
+									`${ this.sessionInfo.session_name||this.storeInfo.name　}(${this.storeInfo.user_count})`
 							}
+							uni.setNavigationBarTitle({
+								title: this.pageTitle
+							})
 							break;
 						case '群组圈子':
 							this.getGroup()
 							break;
 						case '机构用户客服':
 							if (this.identity === '客户') {
-								this.pageTitle = this.storeInfo.name
-								uni.setNavigationBarTitle({
-									title: this.storeInfo.name
-								})
+								if (!this.receiver_person_no) {
+									this.pageTitle = this.storeInfo.name
+								}
 							} else if (this.identity === '客服') {
 								this.pageTitle = this.sessionInfo.store_user_name
-								uni.setNavigationBarTitle({
-									title: this.sessionInfo.store_user_name
-								})
 							}
+							uni.setNavigationBarTitle({
+								title: this.pageTitle
+							})
 							break;
 						case '用户间':
 
@@ -489,6 +507,39 @@
 					}
 				})
 			},
+			getReceiverInfo() {
+				if (this.receiver_person_no && this.storeNo) {
+					let req = {
+						"serviceName": "srvhealth_store_user_select",
+						"colNames": ["*"],
+						"condition": [{
+							"colName": "person_no",
+							"ruleType": "eq",
+							"value": this.receiver_person_no
+						}, {
+							"colName": "store_no",
+							"ruleType": "eq",
+							"value": this.storeNo
+						}],
+						"page": {
+							"pageNo": 1,
+							"rownumber": 1
+						}
+					}
+					this.$fetch('select', 'srvhealth_store_user_select', req, 'health').then(res => {
+						if (res.success && res.data.length > 0) {
+							this.receiverInfo = res.data[0]
+							if (this.receiverInfo.person_name || this.receiverInfo.nick_name) {
+								uni.setNavigationBarTitle({
+									title: this.receiverInfo.person_name || this.receiverInfo.nick_name
+								})
+							}
+						} else {
+							this.receiverInfo = {}
+						}
+					})
+				}
+			},
 			updateLastLookTime(e) {
 				// 更新群组圈子最后查看时间
 				if (this.groupInfo && this.pg_no) {
@@ -535,6 +586,10 @@
 				this.storeNo = option.storeNo
 				this.getStore()
 				this.getStoreUser()
+			}
+			if (option.receiver_person_no) {
+				this.receiver_person_no = option.receiver_person_no
+				this.getReceiverInfo()
 			}
 			if (this.session_no) {
 				// 已有会话编号 查找会话信息
