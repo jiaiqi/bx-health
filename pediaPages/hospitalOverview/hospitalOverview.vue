@@ -787,7 +787,7 @@
 										title: '提示',
 										content: `您已成功加入【${self.storeInfo.name}】`
 									});
-
+									self.initPage()
 								} else {
 									uni.showModal({
 										title: '提示',

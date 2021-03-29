@@ -1877,6 +1877,7 @@
 						// 	'bx_auth_ticket');
 					}
 					this.userInfo = res.data.data[0];
+					debugger
 					uni.setNavigationBarTitle({
 						title: this.userInfo.name || this.userInfo.nick_name
 					})

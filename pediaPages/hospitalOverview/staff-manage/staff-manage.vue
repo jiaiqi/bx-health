@@ -7,10 +7,12 @@
 		<view class="content">
 			<view class="professor-box">
 				<view class="professor-item" v-for="(staff,index) in staffList" :key="index" @click="toDetail(staff)">
-					<image class="img" :src="getImagePath(staff.profile_url)" mode="aspectFit"></image>
+					<image class="img"
+						:src="staff.user_image? getImagePath(staff.user_image):getImagePath(staff.profile_url)"
+						mode="aspectFit"></image>
 					<view class="doc-info">
 						<view class="top">
-							<text class="doc-name">{{ staff.nick_name || staff.person_name || '' }}</text>
+							<text class="doc-name">{{ staff.person_name || staff.nick_name || '' }}</text>
 							<view class="titleDn">{{ staff.titleDn }}</view>
 						</view>
 					</view>
@@ -57,7 +59,7 @@
 			},
 			toDetail(e) {
 				// return
-				this.$emit('toDoctorDetail',e)
+				this.$emit('toDoctorDetail', e)
 			}
 		},
 		created() {

@@ -130,6 +130,7 @@
 						} else {
 							this.pageTitle = res.data[0].usera_name
 						}
+						debugger
 						uni.setNavigationBarTitle({
 							title: this.pageTitle
 						})
@@ -175,6 +176,7 @@
 						this.getGroupUser()
 						if (this.groupInfo.name) {
 							this.pageTitle = this.groupInfo.name
+							debugger
 							uni.setNavigationBarTitle({
 								title: this.pageTitle
 							})
@@ -207,15 +209,20 @@
 							} else if (this.storeInfo && this.storeInfo.name) {
 								this.pageTitle = this.storeInfo.name + `(${this.storeInfo.user_count})`
 							}
-							uni.setNavigationBarTitle({
-								title: this.pageTitle
-							})
+							debugger
+							if(this.pageTitle){
+								uni.setNavigationBarTitle({
+									title: this.pageTitle
+								})
+							}
+							
 						}
 					}
 				})
 			},
 			async getSession(condition) {
 				// 查找会话信息
+				let self = this
 				let req = {
 					"serviceName": "srvhealth_dialogue_session_select",
 					"colNames": ["*"],
@@ -244,24 +251,29 @@
 								this.pageTitle =
 									`${ this.sessionInfo.session_name||this.storeInfo.name　}(${this.storeInfo.user_count})`
 							}
-							uni.setNavigationBarTitle({
-								title: this.pageTitle
-							})
+							if(self.pageTitle){
+								uni.setNavigationBarTitle({
+									title: self.pageTitle
+								})
+							}
 							break;
 						case '群组圈子':
 							this.getGroup()
 							break;
 						case '机构用户客服':
-							if (this.identity === '客户') {
-								if (!this.receiver_person_no) {
-									this.pageTitle = this.storeInfo.name
+							if (self.identity === '客户') {
+								if (!self.receiver_person_no) {
+									self.pageTitle = self.storeInfo.name
 								}
-							} else if (this.identity === '客服') {
-								this.pageTitle = this.sessionInfo.store_user_name
+							} else if (self.identity === '客服') {
+								self.pageTitle = self.sessionInfo.store_user_name
 							}
-							uni.setNavigationBarTitle({
-								title: this.pageTitle
-							})
+							debugger
+							if(self.pageTitle){
+								uni.setNavigationBarTitle({
+									title: self.pageTitle
+								})
+							}
 							break;
 						case '用户间':
 
@@ -529,6 +541,8 @@
 					this.$fetch('select', 'srvhealth_store_user_select', req, 'health').then(res => {
 						if (res.success && res.data.length > 0) {
 							this.receiverInfo = res.data[0]
+							debugger
+							
 							if (this.receiverInfo.person_name || this.receiverInfo.nick_name) {
 								uni.setNavigationBarTitle({
 									title: this.receiverInfo.person_name || this.receiverInfo.nick_name

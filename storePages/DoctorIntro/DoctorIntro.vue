@@ -5,7 +5,8 @@
 				<image class="image" :src="topBgImg" mode="aspectFit"></image>
 			</view>
 			<view class="left">
-				<view class="name">{{ doctorInfo.name }}</view>
+				<view class="name" v-if="storeUserInfo&&storeUserInfo.person_name">{{ storeUserInfo.person_name ||''}}
+				</view>
 				<view class="" v-if="storeUserInfo&&storeUserInfo.name">
 					{{storeUserInfo.name}}
 				</view>
@@ -101,10 +102,10 @@
 		},
 		computed: {
 			topBgImg() {
-				if (this.doctorInfo && this.doctorInfo.user_image) {
-					return this.getImagePath(this.doctorInfo.user_image);
-				} else if (this.doctorInfo && this.doctorInfo.profile_url) {
-					return this.getImagePath(this.doctorInfo.profile_url);
+				if (this.storeUserInfo && this.storeUserInfo.user_image) {
+					return this.getImagePath(this.storeUserInfo.user_image);
+				} else if (this.storeUserInfo && this.storeUserInfo.profile_url) {
+					return this.getImagePath(this.storeUserInfo.profile_url);
 				}
 			},
 			storeUserInfo() {
@@ -214,7 +215,7 @@
 					condition: [{
 						colName: 'person_no',
 						ruleType: 'eq',
-						value: this.doctorInfo.no
+						value: this.doctorInfo.no || no
 					}]
 				};
 				if (this.storeNo) {
@@ -259,7 +260,8 @@
 				this.store_user_no = option.store_user_no
 			}
 			if (option.person_no) {
-				this.getDoctorInfo(option.person_no);
+				this.getStoreUserInfo(option.person_no)
+				// this.getDoctorInfo(option.person_no);
 			}
 		}
 	};
