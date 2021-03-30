@@ -2417,6 +2417,7 @@ button.cuIcon.lg {
 	left: 0;
 	z-index: 1110;
 	opacity: 0;
+	display: none;
 	outline: 0;
 	text-align: center;
 	-ms-transform: scale(1.185);
@@ -2437,6 +2438,7 @@ button.cuIcon.lg {
 
 .cu-modal.show {
 	opacity: 1;
+	display: block;
 	transition-duration: 0.3s;
 	-ms-transform: scale(1);
 	transform: scale(1);

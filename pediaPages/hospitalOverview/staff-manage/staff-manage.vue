@@ -225,11 +225,11 @@
 							text-overflow: ellipsis;
 
 							.doc-name {
-								font-size: 34rpx;
+								font-size: 24rpx;
 								width: 180rpx;
-								overflow: hidden;
+								// overflow: hidden;
 								white-space: nowrap;
-								text-overflow: ellipsis;
+								// text-overflow: ellipsis;
 							}
 						}
 

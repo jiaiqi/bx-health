@@ -142,21 +142,11 @@
 		<view class="icon-area" v-if="fieldData.type === 'location' || fieldData.type === 'addr'"><text
 				class="cuIcon-locationfill text-blue" @click="getLocation"></text></view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
-		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'RichEditor' }" @click="hideModal">
+		<view class="cu-modal bottom-modal" v-if="modalName === 'RichEditor'" :class="{ show: modalName === 'RichEditor' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop="">
 				<jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor" />
 			</view>
 		</view>
-		<!-- 		<view class="cu-modal" :class="{ show: modalName === 'TextArea' }" @click.stop="hideModal">
-			<view class="cu-dialog" @tap.stop="" v-if="modalName === 'TextArea'">
-				<textarea class="textarea" :adjust-position="false" v-model="fieldData.value"
-					:placeholder="'请输入文字'"></textarea>
-				<view class="button-box">
-					<view class="cu-btn button bg-cyan" @click="saveRichText({ isSave: true, type: 'textarea' })">确定
-					</view>
-				</view>
-			</view>
-		</view> -->
 		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'TreeSelector' }" @tap="hideModal">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="tree-selector cascader" v-if="modalName === 'TreeSelector'">
