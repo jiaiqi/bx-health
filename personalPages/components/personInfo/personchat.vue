@@ -1261,7 +1261,6 @@
 						req[0].data[0].receiver_person_no = targetUserinfo.person_no;
 						req[0].data[0].identity = targetUserinfo.identity
 					}
-					debugger
 					if(this.receiverInfo){
 						if(this.receiverInfo.person_no){
 							req[0].data[0].receiver_person_no = this.receiverInfo.person_no;
@@ -1877,7 +1876,6 @@
 						// 	'bx_auth_ticket');
 					}
 					this.userInfo = res.data.data[0];
-					debugger
 					uni.setNavigationBarTitle({
 						title: this.userInfo.name || this.userInfo.nick_name
 					})

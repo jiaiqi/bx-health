@@ -91,13 +91,13 @@ fly.interceptors.request.use(async (request) => {
 		request.headers["requrl"] = window.location.pathname + window.location.search
 	}
 	let bxAuthTicket = uni.getStorageSync("bx_auth_ticket")
-	if (store.state.app.bx_auth_ticket) {
-		bxAuthTicket = store.state.app.bx_auth_ticket
-	}
+	// if (store.state.app.bx_auth_ticket) {
+	// 	bxAuthTicket = store.state.app.bx_auth_ticket
+	// }
 	if (api.onTicket) {
 		request.headers["bx_auth_ticket"] = api.ticket
 	} else {
-		if (bxAuthTicket) {
+		if (bxAuthTicket&&request.url.indexOf('srvwx_app_login_verify') === -1) {
 			request.headers["bx_auth_ticket"] = bxAuthTicket
 		}
 	}

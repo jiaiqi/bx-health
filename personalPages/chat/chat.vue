@@ -130,7 +130,6 @@
 						} else {
 							this.pageTitle = res.data[0].usera_name
 						}
-						debugger
 						uni.setNavigationBarTitle({
 							title: this.pageTitle
 						})
@@ -176,7 +175,6 @@
 						this.getGroupUser()
 						if (this.groupInfo.name) {
 							this.pageTitle = this.groupInfo.name
-							debugger
 							uni.setNavigationBarTitle({
 								title: this.pageTitle
 							})
@@ -268,7 +266,6 @@
 							} else if (self.identity === '客服') {
 								self.pageTitle = self.sessionInfo.store_user_name
 							}
-							debugger
 							if(self.pageTitle){
 								uni.setNavigationBarTitle({
 									title: self.pageTitle
@@ -541,8 +538,6 @@
 					this.$fetch('select', 'srvhealth_store_user_select', req, 'health').then(res => {
 						if (res.success && res.data.length > 0) {
 							this.receiverInfo = res.data[0]
-							debugger
-							
 							if (this.receiverInfo.person_name || this.receiverInfo.nick_name) {
 								uni.setNavigationBarTitle({
 									title: this.receiverInfo.person_name || this.receiverInfo.nick_name

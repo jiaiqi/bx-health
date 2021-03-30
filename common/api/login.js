@@ -74,9 +74,9 @@ const wxVerifyLogin = async (dontCheckAuth = false) => {
 		store.commit('SET_AUTH_USERINFO', false)
 		// return false
 	}
-	// if (store.state.app.isLogin) {
-	// 	return true
-	// }
+	if (store.state.app.isLogin) {
+		return true
+	}
 	const result = await wx.login();
 	if (result.code) {
 		let url = '/wx/operate/srvwx_app_login_verify'

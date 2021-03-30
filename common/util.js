@@ -1591,7 +1591,7 @@ export default {
 					}
 					if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no && (!
 							currentPage || (currentPage && currentPage.indexOf(
-								'/pediaPages/hospitalOverview/hospitalOverview') == -1))) {
+								'/pediaPages/hospitalOverview/hospitalOverview') == -1))&&pageStack.length===1) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
@@ -1662,7 +1662,7 @@ export default {
 					if (['诊所', '医院', '健康服务'].includes(store.state
 							.user.userInfo.home_store_type) && (!currentPage || (currentPage && currentPage
 							.indexOf(
-								'/pediaPages/hospitalOverview/hospitalOverview') == -1))) {
+								'/pediaPages/hospitalOverview/hospitalOverview') == -1))&&pageStack.length===1) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
 							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
