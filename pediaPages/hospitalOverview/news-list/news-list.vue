@@ -24,9 +24,9 @@
 					<view class="content-box">
 						<text class="title-text">
 							<text>{{ item.title }}</text>
-							<text class="text-red cuIcon-hotfill" v-if="item.other_status&&item.other_status.indexOf('热门')!==-1">hot</text>
-							<text class="line-red" v-if="item.other_status&&item.other_status.indexOf('精选')!==-1">精选</text>
-							<text class="line-red" v-if="item.top_status&&item.top_status==='是'">置顶</text>
+							<text class="text-red cuIcon-hotfill" v-if="item&&item.other_status&&item.other_status==='热门'">hot</text>
+							<text class="line-red" v-if="item&&item.other_status&&item.other_status==='精选'">精选</text>
+							<text class="line-red" v-if="item&&item.top_status&&item.top_status==='是'">置顶</text>
 						</text>
 						<text class="date">{{ formateDate(item.create_time) }}</text>
 					</view>
