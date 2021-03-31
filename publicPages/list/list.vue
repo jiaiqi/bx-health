@@ -17,7 +17,7 @@
 			<view style="height: 100upx;width: 100%;"></view>
 
 		</view>
-		<bx-list ref="bxList" :serviceName="serviceName" :condition="condition" :relation_condition="relation_condition"
+		<bx-list ref="bxList" :serviceName="serviceName" :condition="condition" :order="order" :relation_condition="relation_condition"
 			:pageType="pageType" :listType="'list'" :labels="labels" :srvApp="appName"
 			:rowButtons="listConfig && listConfig.rowButton ? listConfig.rowButton : []" :showTab="false"
 			:viewTemp="viewTemp" :listConfig="listConfig" :showButton="showRowButton" :fixed="true" :top="listTop"
@@ -75,6 +75,7 @@
 					// price: 'current_price',
 					// footer: 'shop_name'
 				},
+				order:[],
 				publicButton: [],
 				searchVal: '',
 				keyColumn: '',
@@ -137,6 +138,13 @@
 			// #endif
 			if (option.hasOwnProperty('showAdd')) {
 				this.queryOption = option;
+			}
+			if(option.order){
+				try{
+					this.order = JSON.parse(option.order)
+				}catch(e){
+					//TODO handle the exception
+				}
 			}
 			if (query.viewTemp) {
 				this.viewTemp = JSON.parse(decodeURIComponent(query.viewTemp));

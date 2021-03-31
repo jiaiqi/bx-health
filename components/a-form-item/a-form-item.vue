@@ -91,7 +91,7 @@
 				</picker>
 			</view>
 			<view class="form-item-content_value textarea" v-else-if="fieldData.type === 'textarea'">
-				<textarea class="textarea-content" :adjust-position="false" :show-confirm-bar="true"
+				<textarea class="textarea-content" :adjust-position="true" :show-confirm-bar="true"
 					v-model="fieldData.value" :placeholder="'开始输入'"></textarea>
 			</view>
 			<view class="form-item-content_value location"
@@ -107,13 +107,11 @@
 				<view class="value rich-text" v-if="!fieldData.value">开始输入</view>
 				<rich-text :nodes="fieldData.value" class="value rich-text" v-else></rich-text>
 			</view>
-			<input type="text" @input="onInput" placeholder="请输入" @blur="onBlur" :hold-keyboard="false"
-				:adjust-position="false"
+			<input type="text" @input="onInput" placeholder="请输入" @blur="onBlur"
 				:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
 				v-model="fieldData.value" :disabled="fieldData.disabled ? fieldData.disabled : false"
 				v-else-if="fieldData.type ==='text'" />
-			<input class="form-item-content_value" @blur="onBlur" :adjust-position="false" :type="fieldData.type"
-				@input="onInput" :hold-keyboard="false"
+			<input class="form-item-content_value" @blur="onBlur" :type="fieldData.type" @input="onInput"
 				:maxlength="fieldData.item_type_attr && fieldData.item_type_attr.max_len ? fieldData.item_type_attr.max_len : 999"
 				:max="fieldData.item_type_attr && fieldData.item_type_attr.max ? fieldData.item_type_attr.max : 999"
 				:min="fieldData.item_type_attr && fieldData.item_type_attr.min ? fieldData.item_type_attr.min : 0"
@@ -142,9 +140,11 @@
 		<view class="icon-area" v-if="fieldData.type === 'location' || fieldData.type === 'addr'"><text
 				class="cuIcon-locationfill text-blue" @click="getLocation"></text></view>
 		<view class="valid_msg" v-show="!valid.valid">{{ valid.msg }}</view>
-		<view class="cu-modal bottom-modal" v-if="modalName === 'RichEditor'" :class="{ show: modalName === 'RichEditor' }" @click="hideModal">
+		<view class="cu-modal bottom-modal" v-if="modalName === 'RichEditor'"
+			:class="{ show: modalName === 'RichEditor' }" @click="hideModal">
 			<view class="cu-dialog" @tap.stop="">
-				<jin-edit :html="textareaValue" @editOk="saveRichText" ref="richEditor" />
+				<jin-edit :html="textareaValue" @editOk="saveRichText" :res2Url="uploadRes2Url"
+					:form-data="uploadFormData" :header="reqHeader" :uploadFileUrl="uploadUrl" ref="richEditor" />
 			</view>
 		</view>
 		<view class="cu-modal bottom-modal" :class="{ show: modalName === 'TreeSelector' }" @tap="hideModal">
@@ -164,10 +164,11 @@
 							v-if="modalName === 'Selector' && fieldData.showSearch !== false">
 							<view class="search-form round" v>
 								<!-- <text class="cuIcon-search"></text> -->
-								<input @input="searchFKDataWithKey" :adjust-position="false" type="text"
-									placeholder="搜索" confirm-type="search" />
+								<input @input="searchFKDataWithKey" type="text" placeholder="搜索"
+									confirm-type="search" />
 							</view>
-							<text class="cu-btn cuIcon-refresh line-blue shadow round" @click="getSelectorData(null,null,null)"></text>
+							<text class="cu-btn cuIcon-refresh line-blue shadow round"
+								@click="getSelectorData(null,null,null)"></text>
 						</view>
 						<bx-checkbox-group v-if="modalName === 'MultiSelector'"
 							class="form-item-content_value checkbox-group" v-model="fieldData.value" mode="button">
@@ -400,6 +401,7 @@
 				}
 			},
 			saveRichText(e) {
+				debugger
 				if (e.isSave) {
 					if (e.type === 'textarea') {
 						this.fieldData.value = this.textareaValue;
@@ -927,7 +929,8 @@
 		},
 		created() {
 			let self = this;
-			if (this.fieldData.type === 'images' || this.fieldData.type === 'voice') {
+			if (this.fieldData.type === 'images' || this.fieldData.type === 'voice' || this.fieldData.type ===
+				'RichText') {
 				this.uploadFormData = {
 					serviceName: 'srv_bxfile_service',
 					interfaceName: 'add',

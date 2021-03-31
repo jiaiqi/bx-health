@@ -198,16 +198,16 @@
 								price: 'app_count',
 								footer: 'app_desc'
 							};
-							label = ['app_date','app_count','app_desc']
+							label = ['app_date', 'app_count', 'app_desc']
 						}
-						if(e.service_name==='srvhealth_store_vaccination_program_select'){
+						if (e.service_name === 'srvhealth_store_vaccination_program_select') {
 							// 疫苗接种计划列表
 							viewTemp = {
 								title: 'vaccine_stock_name',
-								tip:'vaccine_type',
+								tip: 'vaccine_type',
 								price: 'vaccinate_index'
 							};
-							label = ['vaccine_stock_name','vaccine_type','vaccinate_index']
+							label = ['vaccine_stock_name', 'vaccine_type', 'vaccinate_index']
 						}
 						uni.navigateTo({
 							url: '/publicPages/list/list?pageType=list&serviceName=' +
@@ -652,10 +652,14 @@
 				let defaultVal = self.defaultVal;
 				self.colsV2Data = colVs;
 				colVs = self.deepClone(colVs);
-				if (colVs.service_view_name) {
+				if (colVs && colVs.service_view_name) {
 					uni.setNavigationBarTitle({
 						title: colVs.service_view_name
 					});
+				} else {
+					if(!colVs){
+						return
+					}
 				}
 				switch (colVs.use_type) {
 					case 'update':

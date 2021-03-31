@@ -158,7 +158,7 @@
 			orderAmountChange(e) {
 				if (Array.isArray(e) && e.length > 0) {
 					this.orderMsgNum = e.reduce((pre, cur) => {
-						if (cur.amount) {
+						if (cur&&cur.amount) {
 							pre += cur.amount
 						}
 						return pre

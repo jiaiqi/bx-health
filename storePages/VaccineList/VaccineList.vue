@@ -186,6 +186,61 @@
 		},
 
 		methods: {
+			async decryptPhoneNumber(e) {
+				// 解密手机号信息
+				let self = this
+				try {
+					let sessionStatus = await wx.checkSession()
+				} catch (err) {
+					// session_key 已经失效， 需要重新执行登录流程
+					if (err) {
+						uni.showToast({
+							title: err,
+							icon: false
+						})
+					}
+					let result = await wx.login()
+					if (result.code) {
+						await self.wxLogin({
+							code: result.code
+						})
+					}
+				}
+			
+				if (e.detail && e.detail.errMsg && e.detail.errMsg.indexOf('ok') !== -1) {
+					let url = this.getServiceUrl('wx', 'srvwx_app_data_decrypt', 'operate')
+					let req = [{
+						data: [{
+							encryptedData: e.detail.encryptedData,
+							signature: e.detail.iv
+						}],
+						serviceName: 'srvwx_app_data_decrypt'
+					}]
+					let res = await this.$http.post(url, req);
+					if (res.data.resultCode === 'SUCCESS' && Array.isArray(res.data.response) && res.data.response
+						.length > 0 && res.data.response[0].response && res.data.response[0].response.phoneNumber) {
+						this.formModel.phone_xcx = res.data.response[0].response.phoneNumber
+						this.formModel.customer_phone = res.data.response[0].response.phoneNumber
+					} else {
+						// wx.checkSession({
+						// 	fail(err) {
+						// 		// session_key 已经失效， 需要重新执行登录流程
+						// 		wx.login({
+						// 			success(result) {
+						// 				if (result.code) {
+						// 					self.wxLogin({
+						// 						code: result.code
+						// 					}).then(_ => {
+						// 						self.decryptPhoneNumber(e)
+						// 					})
+						// 				}
+						// 			}
+						// 		})
+						// 	}
+						// })
+					}
+				}
+			},
 			hideModal() {
 				this.vaccineInfo = {}
 				this.curVac = {}

@@ -821,6 +821,10 @@
 					}
 					// #endif
 				}
+				if (!this.subscsribeStatus) {
+					// 检测是否已关注公众号
+					this.checkSubscribeStatus()
+				}
 				if (this.storeNo) {
 					console.log(`storeNo:${this.storeNo}`)
 					await this.selectStoreInfo();

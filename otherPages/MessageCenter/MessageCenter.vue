@@ -1,11 +1,15 @@
 <template>
 	<view>
-		<!-- <scroll-view scroll-y="true"> -->
 		<view class="cu-list">
 			<view class="cu-item" v-for="(item,index) in sessionList" :key="item.session_no" @click="toChat(item)">
-
-				<view class="cu-avatar lg" v-if="!item.store_user_image">
+				<view class="cu-avatar lg" v-if="!item.store_user_image&&!item.store_user_profile">
 					<text class="cuIcon-profilefill"></text>
+					<view class="cu-tag badge" v-if="item.kefu_kefu_unread_msg">
+						{{item.kefu_kefu_unread_msg}}
+					</view>
+				</view>
+				<view class="cu-avatar  lg" v-if="item.store_user_profile"
+					:style="[{backgroundImage:'url('+getImagePath(item.store_user_profile)+')'}]">
 					<view class="cu-tag badge" v-if="item.kefu_kefu_unread_msg">
 						{{item.kefu_kefu_unread_msg}}
 					</view>
@@ -21,7 +25,6 @@
 				</view>
 			</view>
 		</view>
-		<!-- </scroll-view> -->
 		<!-- <uni-load-more :status="more"></uni-load-more> -->
 	</view>
 </template>

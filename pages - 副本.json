@@ -1,5 +1,16 @@
 {
-	"pages": [{
+	"pages": [
+		// {
+		// 	"path": "pages/home/home",
+		// 	"style": {
+		// 		"navigationBarTitleText": "加载中...",
+		// 		"enablePullDownRefresh": true,
+		// 		// "navigationStyle":"custom",
+		// 		"navigationBarBackgroundColor": "#fff",
+		// 		"navigationBarTextStyle": "black"
+		// 	}
+		// },
+		{
 			"path": "pages/pedia/pedia",
 			"style": {
 				"navigationBarTitleText": "健康宝典",
@@ -21,17 +32,16 @@
 				"navigationBarBackgroundColor": "#0bc99d"
 			}
 		},
-
 		{
 			"path": "pages/personal/personal",
 			"style": {
 				"navigationBarTitleText": "个人中心",
 				"enablePullDownRefresh": true
 			}
-		}, {
+		}
+		, {
 			"path": "pages/customIndex/customIndex",
 			"style": {
-				"navigationBarTitleText": "",
 				"enablePullDownRefresh": false
 			}
 		}
@@ -366,9 +376,10 @@
 						"enablePullDownRefresh": true,
 						"navigationBarBackgroundColor": "#fff",
 						"navigationBarTextStyle": "black",
-						"navigationBarTitleText": "机构首页"
+						"navigationBarTitleText": "加载中..."
 					}
-				}, {
+				},
+				{
 					"path": "HospitalList/HospitalList",
 					"style": {
 						"navigationBarTitleText": "列表",
@@ -453,7 +464,7 @@
 			"pages": [{
 				"path": "StoreIntroduce/StoreIntroduce",
 				"style": {
-					"navigationStyle": "custom",
+					// "navigationStyle": "custom",
 					"navigationBarTitleText": "详情",
 					"navigationBarBackgroundColor": "#fff",
 					"navigationBarTextStyle": "black",
@@ -478,7 +489,25 @@
 					"navigationBarTitleText": "疫苗预约",
 					"enablePullDownRefresh": true
 				}
-			}]
+			}    ,{
+                    "path" : "VaccineList/VaccineList",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "疫苗列表",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+                ,{
+                    "path" : "DoctorIntro/DoctorIntro",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "简介",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 		},
 		{
 			"root": "publicPages",
@@ -514,7 +543,16 @@
 						"enablePullDownRefresh": false
 					}
 				}
-			]
+			    ,{
+                    "path" : "articleList/articleList",
+                    "style" :                                                                                    
+                {
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": true
+                }
+                
+                }
+            ]
 		}
 	],
 	"tabBar": {
@@ -594,6 +632,11 @@
 				"name": "邀请新用户加入诊所",
 				"path": "pediaPages/hospitalOverview/hospitalOverview",
 				"query": "store_no=S20210227032&from=share&invite_user_no=jiaqi&&doctor_no=jiaqi&share_type=bindOrganization"
+			},
+			{
+				"name": "邀请新用户加入诊所",
+				"path": "pediaPages/hospitalOverview/hospitalOverview",
+				"query": "q=https%3A%2F%2Fwx2.100xsys.cn%2Fmpwx%2FshareClinic%2FS20210227032%2FPB2020092209440043"
 			}
 		]
 	}

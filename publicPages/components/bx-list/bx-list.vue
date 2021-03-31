@@ -151,9 +151,9 @@
 							if (this.pageType !== 'proc') {
 								//普通列表显示行按钮
 								//流程列表点击跳转到流程详情
-								 // ['duplicate','customize', 'edit', 'delete', 'procdetail', 'deleteproc']
+								// ['duplicate','customize', 'edit', 'delete', 'procdetail', 'deleteproc']
 								rowButton = rowButton.filter(
-									item => ['duplicate','customize', 'edit', 'delete','procdetail'].includes(item
+									item => ['duplicate', 'customize', 'edit', 'delete', 'procdetail'].includes(item
 										.button_type)
 								);
 							}
@@ -338,7 +338,7 @@
 			async getListData(cond, proc_data_type, i) {
 				let serviceName = this.serviceName;
 				let app = uni.getStorageSync('activeApp');
-				let url = this.getServiceUrl(this.srvApp||app, serviceName, 'select');
+				let url = this.getServiceUrl(this.srvApp || app, serviceName, 'select');
 				let req = {
 					serviceName: serviceName,
 					colNames: ['*'],

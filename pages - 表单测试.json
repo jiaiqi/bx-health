@@ -157,48 +157,51 @@
 		// },
 		{
 			"root": "personalPages",
-			"pages": [{
-					"path": "myDoctor/myDoctor",
-					"style": {
-						"navigationBarTitleText": "我的管理者",
-						"enablePullDownRefresh": true
-					}
-				},
+			"pages": [
+				// {
+				// 	"path": "myDoctor/myDoctor",
+				// 	"style": {
+				// 		"navigationBarTitleText": "我的管理者",
+				// 		"enablePullDownRefresh": true
+				// 	}
+				// },
+				// {
+				// 	"path": "nameCard/nameCard",
+				// 	"style": {
+				// 		"navigationBarTitleText": "二维码名片",
+				// 		"enablePullDownRefresh": false
+				// 	}
+				// },
+				// {
+				// 	"path": "patientsInfo/patientsInfo",
+				// 	"style": {
+				// 		"navigationBarTitleText": "患者信息",
+				// 		"enablePullDownRefresh": false,
+				// 		"navigationStyle": "custom"
+				// 	}
+				// },
+				// {
+				// 	"path": "userList/userList",
+				// 	"style": {
+				// 		"navigationBarTitleText": "用户管理",
+				// 		"enablePullDownRefresh": false,
+				// 		"navigationStyle": "custom"
+				// 	}
+				// }, 
+				// {
+				// 	"path": "tagManagement/tagManagement",
+				// 	"style": {
+				// 		"navigationBarTitleText": "标签管理",
+				// 		"enablePullDownRefresh": true
+				// 	}
+				// }, {
+				// 	"path": "FontSizeSetting/FontSizeSetting",
+				// 	"style": {
+				// 		"navigationBarTitleText": "字体大小",
+				// 		"enablePullDownRefresh": false
+				// 	}
+				// }, 
 				{
-					"path": "nameCard/nameCard",
-					"style": {
-						"navigationBarTitleText": "二维码名片",
-						"enablePullDownRefresh": false
-					}
-				},
-				{
-					"path": "patientsInfo/patientsInfo",
-					"style": {
-						"navigationBarTitleText": "患者信息",
-						"enablePullDownRefresh": false,
-						"navigationStyle": "custom"
-					}
-				},
-				{
-					"path": "userList/userList",
-					"style": {
-						"navigationBarTitleText": "用户管理",
-						"enablePullDownRefresh": false,
-						"navigationStyle": "custom"
-					}
-				}, {
-					"path": "tagManagement/tagManagement",
-					"style": {
-						"navigationBarTitleText": "标签管理",
-						"enablePullDownRefresh": true
-					}
-				}, {
-					"path": "FontSizeSetting/FontSizeSetting",
-					"style": {
-						"navigationBarTitleText": "字体大小",
-						"enablePullDownRefresh": false
-					}
-				}, {
 					"path": "chatGroup/chatGroup",
 					"style": {
 						"navigationBarTitleText": "圈子",
@@ -231,28 +234,28 @@
 						"enablePullDownRefresh": false
 					}
 				},
-				{
-					"path": "OrderList/OrderList",
-					"style": {
-						"navigationBarTitleText": "",
-						"enablePullDownRefresh": true
-					}
-				}, {
-					"path": "payOrder/payOrder",
-					"style": {
-						"navigationBarTitleText": "确认订单",
-						"enablePullDownRefresh": false,
-						"navigationBarBackgroundColor": "#F1F1F1",
-						"navigationBarTextStyle": "black"
-					}
-				}, {
-					"path": "successPay/successPay",
-					"style": {
-						"navigationBarTextStyle": "black",
-						"enablePullDownRefresh": false,
-						"navigationBarBackgroundColor": "#fff"
-					}
-				},
+				// {
+				// 	"path": "OrderList/OrderList",
+				// 	"style": {
+				// 		"navigationBarTitleText": "",
+				// 		"enablePullDownRefresh": true
+				// 	}
+				// }, {
+				// 	"path": "payOrder/payOrder",
+				// 	"style": {
+				// 		"navigationBarTitleText": "确认订单",
+				// 		"enablePullDownRefresh": false,
+				// 		"navigationBarBackgroundColor": "#F1F1F1",
+				// 		"navigationBarTextStyle": "black"
+				// 	}
+				// }, {
+				// 	"path": "successPay/successPay",
+				// 	"style": {
+				// 		"navigationBarTextStyle": "black",
+				// 		"enablePullDownRefresh": false,
+				// 		"navigationBarBackgroundColor": "#fff"
+				// 	}
+				// },
 				{
 					"path": "StoreManager/StoreManager",
 					"style": {
@@ -494,12 +497,6 @@
 				"path": "VaccineOrder/VaccineOrder",
 				"style": {
 					"navigationBarTitleText": "疫苗预约",
-					"enablePullDownRefresh": true
-				}
-			}, {
-				"path": "NewsList/NewsList",
-				"style": {
-					"navigationBarTitleText": "",
 					"enablePullDownRefresh": true
 				}
 			}]

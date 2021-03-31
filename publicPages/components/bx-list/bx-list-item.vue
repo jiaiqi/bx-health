@@ -393,11 +393,9 @@
 			padding: 10upx;
 			box-sizing: border-box;
 
-
-
 			.main-image {
-				width: 220upx;
-				height: 220upx;
+				width: 220rpx;
+				height: 220rpx;
 				border-radius: 5upx 5rpx;
 				margin-right: 20upx;
 				border-radius: 10rpx;
@@ -612,19 +610,22 @@
 				margin: 0;
 				border-radius: 10rpx;
 				overflow: hidden;
-				height: 100rpx;
+				height: 100rpx !important;
 				border-bottom: 1rpx solid #f1f1f1;
+				flex: auto;
 				.text {
-					font-size: 85px;
+					font-size: 85rpx;
+					line-height: 100rpx;
 				}
 			}
 
 			.content-box {
-				min-height:30rpx;
+				min-height:50rpx;
 				display: flex;
 				flex-wrap: wrap;
 				.title {
 					margin: 0;
+					text-overflow:clip ;
 					width: 100%;
 					font-size: 24rpx;
 					flex: 1;

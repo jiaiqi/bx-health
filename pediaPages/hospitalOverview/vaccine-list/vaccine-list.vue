@@ -199,7 +199,7 @@
 				userInfo: state => state.user.userInfo
 			}),
 			list() {
-				if (Array.isArray(this.vaccineList) && this.vaccineList.length > 0) {
+				if (this.vaccineList&&Array.isArray(this.vaccineList) && this.vaccineList.length > 0) {
 					return this.vaccineList.reduce((pre, item) => {
 						if (pre.length === 0) {
 							pre = [

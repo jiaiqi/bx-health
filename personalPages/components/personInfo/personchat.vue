@@ -58,9 +58,8 @@
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
 							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
-							<text class="remind-someone"
-								v-if="item.attribute&&item.attribute.type&&item.attribute.type==='remindPerson'">@{{item.attribute.name}}</text>
-							<text user-select selectable space="nbsp">{{ item.msg_content }}</text>
+							<text user-select selectable space="nbsp"><text class="remind-someone"
+									v-if="item.attribute&&item.attribute.type&&item.attribute.type==='remindPerson'">@{{item.attribute.name}}</text>{{ item.msg_content }}</text>
 						</view>
 						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)"
 							class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
@@ -236,7 +235,8 @@
 				<view class="text">{{ voiceIconText }}</view>
 			</view>
 		</view>
-		<view class="person-chat-bot" :class="{ showLayer: !isFeed && isSendLink }">
+		<view class="person-chat-bot" :class="{ showLayer: !isFeed && isSendLink ,'ban-send':banSend}">
+			<view v-if="banSend" class="band-tip">您已被管理员禁言,请联系管理员解除禁言</view>
 			<view class="person-chat-bot-top">
 				<view class="person-chat-left">
 					<text class="image-icon cuIcon-sound" @click="changeVoice('keyword')"
@@ -378,8 +378,12 @@
 			identity: {
 				type: String //一对一会话身份 - 医生/患者
 			},
-			receiverInfo:{
+			receiverInfo: {
 				type: Object, // 接收者信息
+			},
+			banSend:{
+				type:[Boolean,String], //是否禁言
+				default:false
 			}
 		},
 		computed: {
@@ -1261,11 +1265,11 @@
 						req[0].data[0].receiver_person_no = targetUserinfo.person_no;
 						req[0].data[0].identity = targetUserinfo.identity
 					}
-					if(this.receiverInfo){
-						if(this.receiverInfo.person_no){
+					if (this.receiverInfo) {
+						if (this.receiverInfo.person_no) {
 							req[0].data[0].receiver_person_no = this.receiverInfo.person_no;
 						}
-						if(this.receiverInfo.user_account){
+						if (this.receiverInfo.user_account) {
 							req[0].data[0].receiver_account = this.receiverInfo.user_account;
 						}
 					}
@@ -1477,11 +1481,11 @@
 						req[0].data[0].receiver_person_no = targetUserinfo.person_no;
 						req[0].data[0].identity = targetUserinfo.identity
 					}
-					if(this.receiverInfo){
-						if(this.receiverInfo.person_no){
+					if (this.receiverInfo) {
+						if (this.receiverInfo.person_no) {
 							req[0].data[0].receiver_person_no = this.receiverInfo.person_no;
 						}
-						if(this.receiverInfo.user_account){
+						if (this.receiverInfo.user_account) {
 							req[0].data[0].receiver_account = this.receiverInfo.user_account;
 						}
 					}
@@ -1908,6 +1912,15 @@
 			uni.hideKeyboard();
 		},
 		mounted() {
+			// if (this.receiverInfo && this.receiverInfo.person_no && this.receiverInfo.person_name) {
+			// 	this.remindPerson = {
+			// 		type: 'remindPerson',
+			// 		no: this.receiverInfo.person_no,
+			// 		name: this.receiverInfo.person_name,
+			// 		profile_url: this.receiverInfo.profile_url,
+			// 		user_image: this.receiverInfo.user_image
+			// 	}
+			// }
 			uni.onKeyboardHeightChange((res = {}) => {
 				console.log(res.height);
 				this.keyboardHeight = res.height
@@ -1974,6 +1987,14 @@
 
 		.person-chat-top {
 			position: relative;
+
+			.remind-someone {
+				// @某人
+				// font-size: 12px;
+				font-style: italic;
+				// background-color: #f1f1f1;
+				margin-right: 20rpx;
+			}
 
 			.msg-list {
 
@@ -2130,7 +2151,7 @@
 						font-family: '微软雅黑', 'Courier New', Courier, monospace;
 						font-size: var(--global-text-font-size);
 						position: relative;
-						display: flex;
+						// display: flex;
 						align-items: center;
 						box-shadow: 2px 1px 2px rgba(26, 26, 26, 0.2);
 
@@ -2305,12 +2326,8 @@
 						padding: 5px 10px;
 						font-size: var(--global-text-font-size);
 						position: relative;
-						display: flex;
-						align-items: center;
-
-						.remind-someone {
-							font-size: 12px;
-						}
+						// display: flex;
+						// align-items: center;
 
 						.link-left {
 							margin-right: 16rpx;
@@ -2453,7 +2470,20 @@
 		.person-chat-bot {
 			height: 55px;
 			width: 100%;
-
+			&.ban-send{
+				// pointer-events: none;
+				opacity: 0.5;
+				position: relative;
+				.band-tip{
+					z-index: 5;
+					padding:10rpx 0 20rpx;
+					text-align: center;
+					position: absolute;
+					top: 15px;
+					right: 0;
+					left: 0;
+				}
+			}
 			&.showLayer {
 				height: 285px;
 			}

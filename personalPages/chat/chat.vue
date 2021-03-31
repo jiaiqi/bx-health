@@ -23,6 +23,7 @@
 		<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
 			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
 			:storeNo="storeNo" :topHeight="topHeight" :group-no="groupNo" :receiverInfo="receiverInfo"
+			:banSend="banSend"
 			v-if="session_no"></chat>
 	</view>
 </template>
@@ -37,6 +38,14 @@
 			chat
 		},
 		computed: {
+			banSend(){
+				// 是否禁言
+				if(this.storeUserInfo&&this.storeUserInfo.ban_send==='是'&&this.sessionType==='店铺机构全员'){
+					return true
+				}else{
+					return false
+				}
+			},
 			...mapState({
 				userInfo: state => state.user.userInfo
 			}),

@@ -22,7 +22,12 @@
 						v-if="item.icon_image">
 					</image>
 					<view class="content-box">
-						<text class="title-text">{{ item.title }}</text>
+						<text class="title-text">
+							<text>{{ item.title }}</text>
+							<text class="text-red cuIcon-hotfill" v-if="item.other_status&&item.other_status.indexOf('热门')!==-1">hot</text>
+							<text class="line-red" v-if="item.other_status&&item.other_status.indexOf('精选')!==-1">精选</text>
+							<text class="line-red" v-if="item.top_status&&item.top_status==='是'">置顶</text>
+						</text>
 						<text class="date">{{ formateDate(item.create_time) }}</text>
 					</view>
 				</view>
@@ -47,14 +52,14 @@
 			},
 		},
 		methods: {
-			toMore(e){
-				if(e.no){
+			toMore(e) {
+				if (e.no) {
 					let url = `/publicPages/articleList/articleList?cateNo=${e.no}`
-					if(e.name){
+					if (e.name) {
 						url += `&cate_name=${e.name}`
 					}
 					uni.navigateTo({
-						url:url
+						url: url
 					})
 				}
 			},
@@ -65,7 +70,7 @@
 					if (this.storeInfo && this.storeInfo.name) {
 						url += `&store_name=${this.storeInfo.name}`
 					}
-					if(this.storeInfo.store_no){
+					if (this.storeInfo.store_no) {
 						url += `&store_no=${this.storeInfo.store_no}`
 					}
 					uni.navigateTo({
@@ -75,6 +80,7 @@
 			},
 			getNotice() {
 				let req = {
+
 					condition: [{
 							colName: 'website_no',
 							ruleType: 'eq',
@@ -117,6 +123,12 @@
 										}
 									],
 									order: [{
+										colName: "top_status",
+										orderType: "desc"
+									}, {
+										colName: "other_status",
+										orderType: "desc"
+									}, {
 										colName: "create_time",
 										orderType: "desc"
 									}],
@@ -192,6 +204,24 @@
 					text-overflow: ellipsis;
 					white-space: nowrap;
 					font-size: 32rpx;
+					padding-bottom: 20rpx;
+					.text-red {
+						display: inline-block;
+						margin-left: 10rpx;
+						font-size: 24rpx;
+						position: relative;
+						top: -10rpx;
+						font-weight: bold;
+					}
+
+					.line-red {
+						border-radius: 5px;
+						margin-left: 10rpx;
+						padding: 2px 4px;
+						font-size: 12px;
+						font-weight: bold;
+						border: 1rpx solid #e54d42;
+					}
 				}
 
 				.content-box {
@@ -218,7 +248,6 @@
 						font-size: 16px;
 						width: 100%;
 						white-space: normal;
-						margin-bottom: 10px;
 					}
 
 					.date {
@@ -235,6 +264,7 @@
 					overflow: hidden;
 					box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 					margin-bottom: 20rpx;
+
 					.image-icon {
 						width: 100%;
 						height: 200rpx;

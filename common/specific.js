@@ -230,7 +230,11 @@ export default {
 			}
 			return res.data.data ? res.data.data : [];
 		}
-		Vue.prototype.updateUserProfile = async (profile_url, user_no, nickname) => {
+		
+		// Vue.prototype.updatePersonInfo = async (person_no,nick_name,profile_url)=>{
+			
+		// }
+		Vue.prototype.updateUserProfile = async (profile_url, person_no, nickname) => {
 			// 更新用户微信头像
 			// 若传了昵称则同时更新用户昵称
 			const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
@@ -239,7 +243,7 @@ export default {
 				condition: [{
 					colName: 'no',
 					ruleType: 'eq',
-					value: user_no
+					value: person_no
 				}],
 				data: [{
 					profile_url: profile_url
