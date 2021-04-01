@@ -352,15 +352,17 @@
 					self.pageInfo.total = res.data.page.total;
 					self.pageInfo.pageNo = res.data.page.pageNo;
 					let page = self.pageInfo;
-					if (page.rownumber * page.pageNo >= page.total) {
-						// finish(boolean:是否显示finishText,默认显示)
-						this.$nextTick(() => {
-							self.$refs.pullScroll.finish();
-						});
-					} else {
-						this.$nextTick(() => {
-							self.$refs.pullScroll.success();
-						});
+					if(self.$refs.pullScroll){
+						if (page.rownumber * page.pageNo >= page.total) {
+							// finish(boolean:是否显示finishText,默认显示)
+							this.$nextTick(() => {
+								self.$refs.pullScroll.finish();
+							});
+						} else {
+							this.$nextTick(() => {
+								self.$refs.pullScroll.success();
+							});
+						}
 					}
 					if (res.data.state === 'SUCCESS') {
 						console.log('商户列表-----', res.data.data);

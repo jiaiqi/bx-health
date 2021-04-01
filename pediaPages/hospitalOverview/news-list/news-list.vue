@@ -24,7 +24,8 @@
 					<view class="content-box">
 						<text class="title-text">
 							<text>{{ item.title }}</text>
-							<text class="text-red cuIcon-hotfill" v-if="item&&item.other_status&&item.other_status==='热门'">hot</text>
+							<text class="text-red cuIcon-hotfill"
+								v-if="item&&item.other_status&&item.other_status==='热门'">hot</text>
 							<text class="line-red" v-if="item&&item.other_status&&item.other_status==='精选'">精选</text>
 							<text class="line-red" v-if="item&&item.top_status&&item.top_status==='是'">置顶</text>
 						</text>
@@ -202,9 +203,10 @@
 					width: 70%;
 					overflow: hidden;
 					text-overflow: ellipsis;
-					white-space: nowrap;
+					// white-space: nowrap;
 					font-size: 32rpx;
 					padding-bottom: 20rpx;
+
 					.text-red {
 						display: inline-block;
 						margin-left: 10rpx;

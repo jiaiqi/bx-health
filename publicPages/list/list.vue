@@ -1,32 +1,42 @@
 <template>
-	<view>
+	<view class="page-wrap">
 		<view class="search-bar" v-if="showSearchBar">
-			<view class="cu-bar search bg-white fixed">
+			<view class="bg-white cu-bar search">
 				<view class="search-form round">
 					<text class="cuIcon-search"></text>
 					<input @focus="searchBarFocus" @blur="serachBarBlur" :adjust-position="false" type="text"
 						v-model="searchVal" :placeholder="placeholder" confirm-type="search" />
 				</view>
 				<view class="action">
-					<button class="cu-btn bg-blue shadow-blur round" @click="toSearch"><text
+					<button class="cu-btn bg-blue shadow-blur round" @click="toSearch" v-if="searchVal"><text
 							class="cuIcon-search"></text></button>
+					<button class="cu-btn bg-blue shadow-blur round margin-left-xs" @click="showFilterModal"
+						v-if="listConfig&&listConfig._fieldInfo">
+						<!-- <text class="cuIcon-filter"></text> -->
+						<text class="text-sm">筛选</text>
+					</button>
 					<button class="cu-btn bg-blue shadow-blur round margin-left-xs" @click="clickAddButton"
 						v-if="showAdd"><text class="cuIcon-add"></text></button>
 				</view>
 			</view>
-			<view style="height: 100upx;width: 100%;"></view>
-
+			<!-- <view style="height: 100upx;width: 100%;"></view> -->
 		</view>
-		<bx-list ref="bxList" :serviceName="serviceName" :condition="condition" :order="order" :relation_condition="relation_condition"
-			:pageType="pageType" :listType="'list'" :labels="labels" :srvApp="appName"
-			:rowButtons="listConfig && listConfig.rowButton ? listConfig.rowButton : []" :showTab="false"
-			:viewTemp="viewTemp" :listConfig="listConfig" :showButton="showRowButton" :fixed="true" :top="listTop"
-			:searchWords="searchVal" :searchColumn="keyColumn" :tempWord="tempWord" :rownumber="42"
+		<bx-list ref="bxList" :serviceName="serviceName" :condition="condition" :order="order"
+			:relation_condition="relation_condition" :pageType="pageType" :listType="'list'" :labels="labels"
+			:srvApp="appName" :rowButtons="listConfig && listConfig.rowButton ? listConfig.rowButton : []"
+			:showTab="false" :viewTemp="viewTemp" :listConfig="listConfig" :showButton="showRowButton" :fixed="true"
+			:top="listTop" :searchWords="searchVal" :searchColumn="keyColumn" :tempWord="tempWord" :rownumber="42"
 			:showFootBtn="showFootBtn" @click-list-item="clickItem" @list-change="listChange"
 			@clickFootBtn="clickFootBtn" @loadEnd="loadEnd"></bx-list>
 		<!-- 		<view class="public-button-box">
 			<view class="add-button" @click="clickAddButton" v-if="showAdd"></view>
 		</view> -->
+		<view class="cu-modal drawer-modal" :class="{'show':showFilter}" @click.stop="hideFilter">
+			<view class="cu-dialog" @click.stop="">
+				<bx-filter v-if="listConfig&&listConfig._fieldInfo" :fieldInfo="listConfig._fieldInfo"
+					@toFilter="toFilter"></bx-filter>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -48,6 +58,7 @@
 		},
 		data() {
 			return {
+				showFilter: false, //是否显示筛选弹框
 				appName: '',
 				serviceName: '',
 				pageType: '',
@@ -66,7 +77,7 @@
 				fabHorizontal: 'left',
 				fabVertical: 'bottom',
 				fabDirection: 'horizontal',
-				listTop: 0,
+				listTop: 100,
 				showRowButton: 'true',
 				viewTemp: {
 					// title: 'name',
@@ -75,7 +86,7 @@
 					// price: 'current_price',
 					// footer: 'shop_name'
 				},
-				order:[],
+				order: [],
 				publicButton: [],
 				searchVal: '',
 				keyColumn: '',
@@ -102,7 +113,6 @@
 				this.$refs.bxList.onRefresh();
 			}
 		},
-
 		onLoad(option) {
 			if (option.hideFootBtn) {
 				this.showFootBtn = false
@@ -116,7 +126,7 @@
 			}
 			let query = {};
 			// #ifdef H5
-			this.listTop = 0;
+			// this.listTop = 0;
 			if (option.query) {
 				query = JSON.parse(decodeURIComponent(option.query));
 			} else {
@@ -139,10 +149,10 @@
 			if (option.hasOwnProperty('showAdd')) {
 				this.queryOption = option;
 			}
-			if(option.order){
-				try{
+			if (option.order) {
+				try {
 					this.order = JSON.parse(option.order)
-				}catch(e){
+				} catch (e) {
 					//TODO handle the exception
 				}
 			}
@@ -218,6 +228,30 @@
 			} else {}
 		},
 		methods: {
+			toFilter(e) {
+				this.searchVal = ''
+				this.showFilter = false;
+				if (Array.isArray(e)) {
+					let cond = e.map(item => {
+						let obj = {
+							colName: item.column,
+							ruleType: 'like',
+							value: item.value
+						}
+						if (item.col_type === 'Set') {
+							obj.ruleType = 'inset'
+						}
+						return obj
+					})
+					this.$refs.bxList.getListData(cond)
+				}
+			},
+			hideFilter() {
+				this.showFilter = false
+			},
+			showFilterModal() {
+				this.showFilter = true
+			},
 			toSearch() {
 				let keywords = this.searchVal;
 				this.$refs.bxList.toSearch();
@@ -573,16 +607,16 @@
 									viewTemp = {
 										title: 'app_date',
 										footer: 'app_desc',
-										price:'app_count',
+										price: 'app_count',
 										tip: 'appoint_name',
 									}
 									// condition = [{
 									// 	colName:'app_date',
 									// 	ruleType:'ge',
-										
+
 									// }]
 								}
-								let labels = ['customer_birth_day', 'app_date','app_count','app_desc']
+								let labels = ['customer_birth_day', 'app_date', 'app_count', 'app_desc']
 								uni.navigateTo({
 									url: `/publicPages/list/list?pageType=list&label=${JSON.stringify(labels)}&serviceName=${buttonInfo.service_name}&cond=${	JSON.stringify(buttonInfo.operate_params.condition) }&viewTemp=${JSON.stringify(viewTemp)}`
 								});
@@ -796,6 +830,14 @@
 					});
 				}
 				console.log('colVs', colVs);
+				if (colVs.more_config) {
+					try {
+						colVs.moreConfig = JSON.parse(colVs.more_config)
+					} catch (e) {
+						//TODO handle the exception
+						console.info(e)
+					}
+				}
 				this.listConfig = colVs;
 				if (this.pageType === 'proc') {
 					this.showFootBtn = false;
@@ -835,11 +877,36 @@
 </script>
 
 <style lang="scss">
+	.cu-modal {
+		z-index: 666;
+
+		&.drawer-modal {
+			.cu-dialog {
+				width: 80vw;
+			}
+		}
+	}
+
+	.page-wrap {
+		position: absolute;
+	}
+
 	.search-bar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		width: 100vw;
+
 		// height: 100px;
-		.action{
+		.search-form {
+			transition: all .5s ease-in-out;
+		}
+
+		.action {
 			margin-right: 20rpx;
-			.cu-btn{
+
+			.cu-btn {
 				font-size: 40rpx;
 			}
 		}

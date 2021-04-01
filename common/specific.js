@@ -135,7 +135,7 @@ export default {
 
 		Vue.prototype.checkOptionParams = (option) => {
 			// option中如果有邀请信息 则存储到vuex
-			if (option&&option.share_type) {
+			if (option && option.share_type) {
 				store.commit('SET_SHARE_TYPE', option.share_type)
 			}
 			if (option.doctor_no && option.store_no) {
@@ -156,9 +156,9 @@ export default {
 						add_store_no: option.store_no,
 						home_store_no: option.store_no,
 						add_url: pageInfo.add_url,
-						invite_user_no: option.invite_user_no||'undefined'
+						invite_user_no: option.invite_user_no || 'undefined'
 					});
-				}else{
+				} else {
 					store.commit('SET_INVITER_INFO', {
 						add_url: pageInfo.add_url,
 						invite_user_no: option.invite_user_no || 'undefined'
@@ -230,13 +230,14 @@ export default {
 			}
 			return res.data.data ? res.data.data : [];
 		}
-		
+
 		// Vue.prototype.updatePersonInfo = async (person_no,nick_name,profile_url)=>{
-			
+
 		// }
-		Vue.prototype.updateUserProfile = async (profile_url, person_no, nickname) => {
+		Vue.prototype.updateUserProfile = async (profile_url, person_no, nickname, sex) => {
 			// 更新用户微信头像
 			// 若传了昵称则同时更新用户昵称
+			// 若传了性别则同时更新用户性别
 			const url = Vue.prototype.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
 			const req = [{
 				serviceName: 'srvhealth_person_info_update',
@@ -252,11 +253,12 @@ export default {
 			if (nickname) {
 				req[0].data[0].nick_name = nickname.replace(/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "");
 			}
+			if (sex || sex === null) {
+				req[0].data[0].sex = sex;
+			}
+			debugger
 			let res = await Vue.prototype.$http.post(url, req);
 			if (res.data.state === 'SUCCESS') {
-				// uni.showToast({
-				// 	title: '头像更新成功！'
-				// });
 				return true
 			}
 		}

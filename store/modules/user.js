@@ -11,7 +11,8 @@ const state = {
 	userList: {}, // 当前登录账号下的用户列表
 	// userList: getItem('userList') ? getItem('userList') : {}, // 当前登录账号下的用户列表
 	patientInfo: getItem('patientInfo') ? getItem('patientInfo') : {},
-	hasSaveUserInfo: false
+	hasSaveUserInfo: false,
+	storeUserInfo: {},
 }
 
 const mutations = {
@@ -37,6 +38,9 @@ const mutations = {
 	},
 	SET_SAVE_USER_STATUS: (state, hasSaveUserInfo) => {
 		state.hasSaveUserInfo = hasSaveUserInfo
+	},
+	SET_STORE_USER: (state, storeUserInfo) => {
+		state.storeUserInfo = storeUserInfo
 	}
 }
 

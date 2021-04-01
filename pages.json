@@ -1,16 +1,5 @@
 {
-	"pages": [
-		// {
-		// 	"path": "pages/home/home",
-		// 	"style": {
-		// 		"navigationBarTitleText": "加载中...",
-		// 		"enablePullDownRefresh": true,
-		// 		// "navigationStyle":"custom",
-		// 		"navigationBarBackgroundColor": "#fff",
-		// 		"navigationBarTextStyle": "black"
-		// 	}
-		// },
-		{
+	"pages": [{
 			"path": "pages/pedia/pedia",
 			"style": {
 				"navigationBarTitleText": "健康宝典",
@@ -22,7 +11,6 @@
 			"style": {
 				"navigationBarTitleText": "健康档案",
 				"enablePullDownRefresh": true
-
 			}
 		},
 		{
@@ -38,8 +26,7 @@
 				"navigationBarTitleText": "个人中心",
 				"enablePullDownRefresh": true
 			}
-		}
-		, {
+		}, {
 			"path": "pages/customIndex/customIndex",
 			"style": {
 				"enablePullDownRefresh": false
@@ -489,25 +476,21 @@
 					"navigationBarTitleText": "疫苗预约",
 					"enablePullDownRefresh": true
 				}
-			}    ,{
-                    "path" : "VaccineList/VaccineList",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "疫苗列表",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-                ,{
-                    "path" : "DoctorIntro/DoctorIntro",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "简介",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			}, {
+				"path": "VaccineList/VaccineList",
+				"style": {
+					"navigationBarTitleText": "疫苗列表",
+					"enablePullDownRefresh": true
+				}
+
+			}, {
+				"path": "DoctorIntro/DoctorIntro",
+				"style": {
+					"navigationBarTitleText": "简介",
+					"enablePullDownRefresh": false
+				}
+
+			}]
 		},
 		{
 			"root": "publicPages",
@@ -542,17 +525,15 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
+				}, {
+					"path": "articleList/articleList",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": true
+					}
+
 				}
-			    ,{
-                    "path" : "articleList/articleList",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-            ]
+			]
 		}
 	],
 	"tabBar": {

@@ -248,6 +248,7 @@
 			}
 		},
 		methods: {
+
 			async getuserinfo(e) {
 				// #ifdef MP-WEIXIN
 				const user = e.mp.detail;
@@ -505,6 +506,7 @@
 					if (isBind && isBind.person_no) {
 						this.isBind = true
 						this.bindUserInfo = isBind
+						this.$store.commit('SET_STORE_USER', this.bindUserInfo)
 					}
 					this.storeNum = 0
 					this.kefuNum = 0
@@ -581,7 +583,7 @@
 					if (res && res.code === '0011') {
 						const result = await wx.login();
 						if (result.code) {
-							await Vue.prototype.wxLogin({
+							await this.wxLogin({
 								code: result.code
 							});
 							times++
@@ -634,6 +636,7 @@
 					this.isBind = true
 					if (res.data.length > 0) {
 						this.bindUserInfo = res.data[0]
+						this.$store.commit('SET_STORE_USER', this.bindUserInfo)
 						return this.bindUserInfo
 					}
 				} else {
@@ -643,6 +646,7 @@
 			async toDoctorDetail(e) {
 				if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
 					this.bindUserInfo = await this.bindStore()
+					this.$store.commit('SET_STORE_USER', this.bindUserInfo)
 				}
 				if (this.bindUserInfo && this.bindUserInfo.store_user_no && e.person_no && e.store_no) {
 					let url = ''
@@ -660,6 +664,7 @@
 				// 在线咨询
 				if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
 					this.bindUserInfo = await this.bindStore()
+					this.$store.commit('SET_STORE_USER', this.bindUserInfo)
 				}
 				if (this.bindUserInfo && this.bindUserInfo.store_user_no) {
 					uni.navigateTo({

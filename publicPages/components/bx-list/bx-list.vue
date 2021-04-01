@@ -17,17 +17,17 @@
 				finishText="我是有底线的...">
 				<view :class="{ 'grid-layout': onlyShowTitle }" v-if="listType === 'list'">
 					<list-item :detailList="detailList" v-for="item in listData" :key="item[rowKey]" :itemData="item"
-						:labels="labels" :viewTemp="viewTemp" :viewType="viewType" :imageNum="imageNum"
+						:labels="labels" :viewTemp="finalViewTemp" :viewType="viewType" :imageNum="imageNum"
 						:gridRowNum="gridRowNum" :rowButton="rowButton" :srv_cols="srv_cols" :listType="listType"
 						:pageType="pageType" :showFootBtn="showFootBtn" :layout="onlyShowTitle ? 'grid' : 'normal'"
 						@click-list-item="clickItem" @click-foot-btn="clickFootBtn"></list-item>
 				</view>
 				<view v-if="listType === 'proc'">
 					<list-item :detailList="detailList" v-for="(item, index) in tabList[TabCur]['data']" :key="index"
-						:labels="labels" :itemData="item" :viewTemp="viewTemp" :viewType="viewType" :imageNum="imageNum"
-						:gridRowNum="gridRowNum" :rowButton="rowButton" :srv_cols="srv_cols" :pageType="pageType"
-						:listType="listType" :showFootBtn="showFootBtn" @click-list-item="clickItem"
-						@click-foot-btn="clickFootBtn"></list-item>
+						:labels="labels" :itemData="item" :viewTemp="finalViewTemp" :viewType="viewType"
+						:imageNum="imageNum" :gridRowNum="gridRowNum" :rowButton="rowButton" :srv_cols="srv_cols"
+						:pageType="pageType" :listType="listType" :showFootBtn="showFootBtn"
+						@click-list-item="clickItem" @click-foot-btn="clickFootBtn"></list-item>
 				</view>
 			</sPullScroll>
 		</view>
@@ -110,14 +110,51 @@
 			};
 		},
 		computed: {
+			moreConfig() {
+				if (this.listConfig && this.listConfig.moreConfig) {
+					return this.listConfig.moreConfig
+				}
+			},
+			configViewTemp() {
+				// more_config中配置的字段显示关系
+				if (this.moreConfig && this.moreConfig.viewTemp) {
+					return this.moreConfig.viewTemp
+				}
+			},
+			ShowLabelColumn() {
+				// 要显示标签的字段
+				if (this.moreConfig && this.moreConfig.ShowLabelColumn) {
+					return this.moreConfig.ShowLabelColumn
+				} else if (Array.isArray(this.labels)) {
+					return this.labels
+				}
+			},
+			finalViewTemp() {
+				// 最终使用的 字段显示关系
+				if (this.configViewTemp && typeof this.configViewTemp === 'object' && Object.keys(this.configViewTemp)
+					.length > 0) {
+					return this.configViewTemp
+				} else {
+					return this.viewTemp
+				}
+			},
+			finalSearchColumn() {
+				if (this.moreConfig && this.moreConfig.searchColumn) {
+					return this.moreConfig.searchColumn
+				} else {
+					return this.searchCol
+				}
+			},
 			onlyShowTitle() {
-				if (this.viewTemp) {
-					if (!this.viewTemp.tip && !this.viewTemp.img && !this.viewTemp.price && !this.viewTemp.footer && this
-						.viewTemp.title) {
+				if (this.finalViewTemp) {
+					if (!this.finalViewTemp.tip && !this.finalViewTemp.img && !this.finalViewTemp.price && !this
+						.finalViewTemp.footer && this
+						.finalViewTemp.title) {
 						return true;
 					} else {
-						if (!this.viewTemp.tip && this.viewTemp.img && !this.viewTemp.price && !this.viewTemp.footer &&
-							this.viewTemp.title) {
+						if (!this.finalViewTemp.tip && this.finalViewTemp.img && !this.finalViewTemp.price && !this
+							.finalViewTemp.footer &&
+							this.finalViewTemp.title) {
 							return true
 						}
 						return false;
@@ -275,7 +312,7 @@
 			},
 			searchColumn: {
 				//搜索字段
-				type: String,
+				type: [String, Array],
 				default: ''
 			},
 			rowButtons: {
@@ -360,12 +397,48 @@
 					req.condition = req.condition.concat(cond);
 				}
 				let keywords = this.searchWords;
-				if (keywords) {
-					req.condition = req.condition.concat([{
-						colName: this.searchCol,
-						ruleType: 'like',
-						value: keywords
-					}]);
+				if (keywords && this.finalSearchColumn) {
+					if (typeof this.finalSearchColumn === 'string') {
+						req.condition = req.condition.concat([{
+							colName: this.finalSearchColumn,
+							ruleType: 'like',
+							value: keywords
+						}]);
+					} else if (Array.isArray(this.finalSearchColumn)) {
+						// 数组 使用relation_condition
+						if (Array.isArray(req.condition) && req.condition.length > 0) {
+							req.relation_condition = {
+								relation: "AND",
+								data: [{
+										relation: "OR",
+										data: this.finalSearchColumn.map(itme => {
+											return {
+												"colName": itme,
+												"value": keywords,
+												"ruleType": 'like'
+											}
+										})
+									},
+									{
+										relation: "AND",
+										data: this.deepClone(req.condition)
+									}
+								]
+							}
+						} else {
+							req.relation_condition = {
+								relation: "OR",
+								data: this.finalSearchColumn.map(itme => {
+									return {
+										"colName": itme,
+										"value": keywords,
+										"ruleType": 'like'
+									}
+								})
+							}
+						}
+						delete req.condition
+					}
 				}
 				let res = await this.$http.post(url, req);
 				if (res.data.state === 'SUCCESS') {

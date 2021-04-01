@@ -259,6 +259,11 @@ export default {
 					fieldInfo.type = item.col_type
 				}
 				switch (useType) {
+					case "cond":
+						fieldInfo.showExp = (item.in_cond === 1)
+						fieldInfo.display = (item.in_cond === 1)
+						fieldInfo.in_cond = item.in_cond
+						break;
 					case "add":
 						fieldInfo.showExp = (item.in_add === 1)
 						fieldInfo.display = (item.in_add === 1)
@@ -291,8 +296,9 @@ export default {
 					fieldInfo._validators = Vue.prototype.getValidators(item.validators, item
 						.validators_message)
 				fieldInfo.isRequire = fieldInfo._validators.required
-				fieldInfo.value = null //初始化ｖａｌｕｅ
-				fieldInfo._colDatas = item //保存原始ｄａｔａ
+				fieldInfo.value = null //初始化value
+				fieldInfo.in_cond = item.in_cond
+				fieldInfo._colDatas = item //保存原始data
 				return fieldInfo
 			})
 			return cols
@@ -806,6 +812,7 @@ export default {
 					store.commit('SET_WX_USERINFO', rawData);
 					store.commit('SET_AUTH_USERINFO', true)
 					await Vue.prototype.setWxUserInfo(rawData)
+					Vue.prototype.updateUserInfo()
 					return {
 						status: 'success',
 						response: resData
@@ -1105,6 +1112,7 @@ export default {
 			}
 			let userInfo = e
 			console.log("setWxUserInfo", userInfo)
+			debugger
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_basic_user_info_save', 'operate')
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
@@ -1709,7 +1717,7 @@ export default {
 					city: user.userInfo.city,
 					headimgurl: user.userInfo.avatarUrl
 				};
-				this.setWxUserInfo(rawData);
+				Vue.prototype.setWxUserInfo(rawData);
 				store.commit('SET_WX_USERINFO', rawData);
 				store.commit('SET_AUTH_SETTING', {
 					type: 'userInfo',
@@ -1792,24 +1800,18 @@ export default {
 			}
 		}
 		Vue.prototype.updateUserInfo = async () => {
-			let self = this;
 			uni.getUserInfo({
 				provider: 'weixin',
 				success: function(user) {
-					let rawData = {
-						nickname: user.userInfo.nickName,
-						sex: user.userInfo.gender,
-						country: user.userInfo.country,
-						province: user.userInfo.province,
-						city: user.userInfo.city,
-						headimgurl: user.userInfo.avatar
-					};
-					store.commit('SET_WX_USERINFO', rawData);
+					let userInfo = user.userInfo
+					let gender = userInfo.gender //性别 0：未知、1：男、2：女
+					userInfo.sex = userInfo.gender === 1 ? '男' : userInfo.gender === 2 ? '女' : null
 					let vuex_userInfo = store.state.user.userInfo
-					if (vuex_userInfo && vuex_userInfo.no && (rawData.headimgurl !== vuex_userInfo
-							.profile_url || rawData.nickname !== vuex_userInfo.nick_name)) {
-						Vue.prototype.updateUserProfile(rawData.headimgurl, vuex_userInfo.no,
-							rawData.userInfo.nickname)
+					if (vuex_userInfo && vuex_userInfo.no && (userInfo.avatarUrl !== vuex_userInfo
+							.profile_url || userInfo.nickName !== vuex_userInfo.nick_name ||
+							userInfo.sex !==  vuex_userInfo.sex)) {
+						Vue.prototype.updateUserProfile(userInfo.headimgurl, vuex_userInfo.no,
+							userInfo.nickName, userInfo.sex)
 					}
 					store.commit('SET_AUTH_USERINFO', true);
 				}

@@ -23,8 +23,7 @@
 		<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
 			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
 			:storeNo="storeNo" :topHeight="topHeight" :group-no="groupNo" :receiverInfo="receiverInfo"
-			:banSend="banSend"
-			v-if="session_no"></chat>
+			:banSend="banSend" v-if="session_no"></chat>
 	</view>
 </template>
 
@@ -38,16 +37,19 @@
 			chat
 		},
 		computed: {
-			banSend(){
+			banSend() {
 				// 是否禁言
-				if(this.storeUserInfo&&this.storeUserInfo.ban_send==='是'&&this.sessionType==='店铺机构全员'){
+				if (this.storeUserInfo && this.storeUserInfo.ban_send === '是' && this.sessionType === '店铺机构全员') {
 					return true
-				}else{
+				} else if (this.storeUser && this.storeUser.ban_send === '是' && this.sessionType === '群组圈子') {
+					return true
+				} else {
 					return false
 				}
 			},
 			...mapState({
-				userInfo: state => state.user.userInfo
+				userInfo: state => state.user.userInfo,
+				storeUser: state => state.user.storeUserInfo
 			}),
 			topHeight() {
 				if ((this.groupInfo && this.groupNo) || this.sessionType === '店铺机构全员' || (this.storeNo && this
@@ -217,12 +219,12 @@
 								this.pageTitle = this.storeInfo.name + `(${this.storeInfo.user_count})`
 							}
 							debugger
-							if(this.pageTitle){
+							if (this.pageTitle) {
 								uni.setNavigationBarTitle({
 									title: this.pageTitle
 								})
 							}
-							
+
 						}
 					}
 				})
@@ -258,7 +260,7 @@
 								this.pageTitle =
 									`${ this.sessionInfo.session_name||this.storeInfo.name　}(${this.storeInfo.user_count})`
 							}
-							if(self.pageTitle){
+							if (self.pageTitle) {
 								uni.setNavigationBarTitle({
 									title: self.pageTitle
 								})
@@ -275,7 +277,7 @@
 							} else if (self.identity === '客服') {
 								self.pageTitle = self.sessionInfo.store_user_name
 							}
-							if(self.pageTitle){
+							if (self.pageTitle) {
 								uni.setNavigationBarTitle({
 									title: self.pageTitle
 								})

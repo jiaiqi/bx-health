@@ -1991,7 +1991,8 @@
 			.remind-someone {
 				// @某人
 				// font-size: 12px;
-				font-style: italic;
+				// font-style: italic;
+				font-weight: bold;
 				// background-color: #f1f1f1;
 				margin-right: 20rpx;
 			}

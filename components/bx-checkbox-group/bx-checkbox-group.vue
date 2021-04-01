@@ -124,10 +124,11 @@ export default {
 		this.children = [];
 	},
 	methods: {
-		emitEvent() {
+		emitEvent(e) {
 			let values = [];
-			this.children.map((val, index) => {
-				if (val.value) values.push(val.name);
+			this.children = this.children.map((val, index) => {
+				if ((val.value&&val.name!==e.name)||(e.name===val.name&&e.value)) values.push(val.name);
+				return val
 			});
 			if (values.length >= this.max) {
 				this.onMax = true;

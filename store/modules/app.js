@@ -17,7 +17,7 @@ const state = {
 	globalTextFontSize: 16,
 	globalLabelFontSize: 16,
 	srvCol: [], // 组件共享的srv_col
-	isLogin: getItem('isLogin') ? getItem('isLogin') : false, //登录状态
+	isLogin: false, //登录状态
 	bx_auth_ticket: getItem('bx_auth_ticket') ? getItem('bx_auth_ticket') : "", //登录token
 	backUrl: "", //当前页面的上一级页面
 	authSetting: {}, //微信授权信息

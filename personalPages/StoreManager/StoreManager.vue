@@ -343,13 +343,15 @@
 							title: 'person_name',
 							img: 'profile_url',
 						};
-						let order = [{
-							colName: "store_remark_person_name",
-							orderType: "desc"
-						},{
-							colName: "user_role",
-							orderType: "desc"
-						}]
+						let order = [
+							// 	{
+							// 	colName: "store_remark_person_name",
+							// 	orderType: "desc"
+							// },{
+							// 	colName: "user_role",
+							// 	orderType: "desc"
+							// }
+						]
 						url =
 							`/publicPages/list/list?pageType=list&hideFootBtn=true&serviceName=srvhealth_store_user_select&order=${JSON.stringify(order)}&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
 						break;

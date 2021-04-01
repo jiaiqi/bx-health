@@ -1,4 +1,7 @@
 .cu-dialog {
+	 .form-item-content_value{
+		 padding: 0;
+	 }
 	.voice-modal {
 		padding: 20rpx;
 		display: flex;
@@ -60,7 +63,10 @@
 	background-color: #fff;
 	.form-item-content_value {
 		// width: 100%;
-		padding: 20rpx;
+		// padding: 20rpx 0;
+		.open-popup{
+			flex: 1;
+		}
 	}
 	.dialog-button {
 		display: flex;
@@ -87,7 +93,7 @@
 	flex-wrap: wrap;
 	min-height: 100rpx;
 	align-items: center;
-	// background-color: #fff;
+	text-align: left;
 	padding: 10rpx;
 	position: relative;
 	&.form-detail {
@@ -157,7 +163,7 @@
 		font-size: var(--global-text-font-size);
 		overflow: hidden;
 		&.label-top {
-			padding: 0 20rpx 20rpx;
+			padding: 0 20rpx 10rpx;
 			.form-item-content_value.checkbox-group {
 				margin-top: 10rpx;
 			}
@@ -190,6 +196,9 @@
 			display: flex;
 			flex: 1;
 			align-items: center;
+			.open-popup{
+				flex: 1;
+			}
 			.textarea-content {
 				width: 100%;
 				background-color: #f1f1f1;

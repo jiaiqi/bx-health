@@ -50,14 +50,15 @@
 			</checkbox-group>
 			<bx-checkbox-group :mode="optionMode" v-model="fieldData.value"
 				class="form-item-content_value checkbox-group" v-else-if="fieldData.type === 'checkboxFk'"
-				:disabled="fieldData.disabled ? fieldData.disabled : false">
+				:disabled="fieldData.disabled ? fieldData.disabled : false" @change="onBlur()">
 				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options" :key="item.value"
 					:name="item.label">{{ item.label }}
 				</bx-checkbox>
 			</bx-checkbox-group>
 
 			<view class="form-item-content_value" v-else-if="popupFieldTypeList.includes(fieldData.type)">
-				<!-- 		<view
+				<!-- <view class="form-item-content_value" v-else-if="popupFieldTypeList.includes(fieldData.type)"> -->
+				<view
 					v-if="(setOptionList.length < 15 && fieldData.type === 'Set') || (selectorData.length < 5 && fieldData.type === 'Selector')">
 					<bx-checkbox-group v-if="fieldData.type === 'Set'" class="form-item-content_value checkbox-group"
 						v-model="fieldData.value" mode="button">
@@ -69,9 +70,8 @@
 						v-model="fieldData.value" mode="button" @change="pickerChange">
 						<bx-radio v-for="item in selectorData" :name="item.value">{{ item.label }}</bx-radio>
 					</bx-radio-group>
-				</view> -->
-				<view @click="openModal(fieldData.type)">
-					<!-- <view v-else @click="openModal(fieldData.type)"> -->
+				</view>
+				<view @click="openModal(fieldData.type)" class="open-popup" v-else>
 					<text class="place-holder" v-if="!fieldData.value">请选择</text>
 					<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">
 						{{ fieldData.value.toString() }}
@@ -80,6 +80,16 @@
 					<text class="value hidden" v-else>{{ fkFieldLabel ? fkFieldLabel : '' }}</text>
 				</view>
 			</view>
+			<!-- 			<view class="form-item-content_value" v-else-if="popupFieldTypeList.includes(fieldData.type)">
+					<view @click="openModal(fieldData.type)" class="open-popup">
+					<text class="place-holder" v-if="!fieldData.value">请选择</text>
+					<view class="value hidden" v-else-if="fieldData.value && isArray(fieldData.value)">
+						{{ fieldData.value.toString() }}
+					</view>
+					<view class="value hidden" v-else-if="fieldData.value">{{ fieldData.value }}</view>
+					<text class="value hidden" v-else>{{ fkFieldLabel ? fkFieldLabel : '' }}</text>
+				</view>
+			</view> -->
 			<view class="form-item-content_value picker" v-else-if="pickerFieldList.includes(fieldData.type)">
 				<picker class="uni-picker" :mode="pickerMode" :end="fieldData.end" :value="fieldData.value"
 					@change="bindTimeChange">
@@ -401,7 +411,6 @@
 				}
 			},
 			saveRichText(e) {
-				debugger
 				if (e.isSave) {
 					if (e.type === 'textarea') {
 						this.fieldData.value = this.textareaValue;
@@ -804,7 +813,7 @@
 						break;
 				}
 			},
-			onBlur() {
+			onBlur(e) {
 				// 输入框失去焦点 进行校验
 				console.log('on-blur');
 				this.getValid();
