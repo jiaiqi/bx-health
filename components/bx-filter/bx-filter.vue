@@ -11,7 +11,7 @@
 					class="cuIcon-refresh margin-right-xs "></text>重置</button>
 			<button class="cu-btn bg-grey light" @click="cancel"><text
 					class="cuIcon-close margin-right-xs "></text>取消</button>
-			<button class="cu-btn bg-blue light confirm" @click="toFilter">
+			<button class="cu-btn bg-cyan light confirm" @click="toFilter" type="primary" :plain="true">
 				<text class="cuIcon-search margin-right-xs"></text>确定
 			</button>
 		</view>
@@ -75,7 +75,9 @@
 		overflow-y: hidden;
 		display: flex;
 		flex-direction: column;
-
+		padding: 20rpx 0 40rpx;
+		border-radius: 30rpx 30rpx 0 0 ;
+		background-color: #fff;
 		.view {
 			flex: 1;
 		}
@@ -92,7 +94,9 @@
 			margin: 0;
 			box-shadow: 6px 5px 13px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 			padding: 20rpx;
-
+			width: calc(100% - 40rpx);
+			margin: 20rpx;
+			border-radius: 30rpx;
 			.cu-btn {
 				// flex: 1;
 				width: 200rpx;

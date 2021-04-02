@@ -881,11 +881,8 @@
 <style lang="scss">
 	.cu-modal {
 		z-index: 666;
-
-		&.drawer-modal {
-			.cu-dialog {
-				width: 80vw;
-			}
+		.cu-dialog {
+			background-color: transparent;
 		}
 	}
 
