@@ -1,16 +1,18 @@
 <template>
 	<view class="bx-filter">
 		<view class="view">
-			
+
 		</view>
 		<view class="form-box">
-			<a-form :fields="filterCols" ref='filterForm' v-if="filterCols"></a-form>
+			<a-form :fields="filterCols" ref='filterForm' pageType="filter" v-if="filterCols"></a-form>
 		</view>
 		<view class="button-box">
 			<button class="cu-btn bg-green light" @click="reset"><text
 					class="cuIcon-refresh margin-right-xs "></text>重置</button>
-			<button class="cu-btn bg-blue light" @click="toFilter">
-				<text class="cuIcon-search margin-right-xs"></text>筛选
+			<button class="cu-btn bg-grey light" @click="cancel"><text
+					class="cuIcon-close margin-right-xs "></text>取消</button>
+			<button class="cu-btn bg-blue light confirm" @click="toFilter">
+				<text class="cuIcon-search margin-right-xs"></text>确定
 			</button>
 		</view>
 	</view>
@@ -43,6 +45,9 @@
 				})
 				this.$emit('toFilter', this.filterCols.filter(item => item.value))
 			},
+			cancel() {
+				this.$emit('cancel')
+			},
 			reset() {
 				this.filterCols = []
 				if (Array.isArray(this.fieldInfo)) {
@@ -66,27 +71,37 @@
 
 <style scoped lang="scss">
 	.bx-filter {
-		height: calc(100vh - var(--window-bottom) - var(--window-top) - 50rpx);
+		max-height: calc(100vh - var(--window-bottom) - var(--window-top) - 150rpx);
 		overflow-y: hidden;
 		display: flex;
 		flex-direction: column;
-		.view{
+
+		.view {
 			flex: 1;
 		}
+
 		.form-box {
-			max-height: calc(100vh - var(--window-bottom) - var(--window-top) - 200rpx);
+			max-height: calc(100vh - var(--window-bottom) - var(--window-top) - 300rpx);
 			overflow-y: scroll;
 		}
 
 		.button-box {
 			display: flex;
 			align-items: center;
-			height: 150rpx;
+			justify-content: space-around;
 			margin: 0;
 			box-shadow: 6px 5px 13px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+			padding: 20rpx;
 
 			.cu-btn {
-				width: 45%;
+				// flex: 1;
+				width: 200rpx;
+				&+.cu-btn {
+					// margin-left: 20rpx;
+				}
+				&.confirm{
+					// flex: 2;
+				}
 			}
 		}
 

@@ -77,7 +77,7 @@
 				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
 					desc="goods_desc"></goods-list>
 				<vaccine-list v-if="storeNo==='S20210227032'" ref='vaccineList'></vaccine-list>
-				<staff-manage :storeNo="storeNo" @toDoctorDetail="toDoctorDetail"></staff-manage>
+				<staff-manage :storeNo="storeNo" v-if="storeInfo&&storeInfo.type==='诊所'" @toDoctorDetail="toDoctorDetail"></staff-manage>
 				<news-list :website_no="storeInfo&&storeInfo.website_no" ref="newsList" :storeInfo="storeInfo">
 				</news-list>
 				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&deptList.length>0">

@@ -17,14 +17,14 @@
 				finishText="我是有底线的...">
 				<view :class="{ 'grid-layout': onlyShowTitle }" v-if="listType === 'list'">
 					<list-item :detailList="detailList" v-for="item in listData" :key="item[rowKey]" :itemData="item"
-						:labels="labels" :viewTemp="finalViewTemp" :viewType="viewType" :imageNum="imageNum"
+						:labels="ShowLabelColumn" :viewTemp="finalViewTemp" :viewType="viewType" :imageNum="imageNum"
 						:gridRowNum="gridRowNum" :rowButton="rowButton" :srv_cols="srv_cols" :listType="listType"
 						:pageType="pageType" :showFootBtn="showFootBtn" :layout="onlyShowTitle ? 'grid' : 'normal'"
 						@click-list-item="clickItem" @click-foot-btn="clickFootBtn"></list-item>
 				</view>
 				<view v-if="listType === 'proc'">
 					<list-item :detailList="detailList" v-for="(item, index) in tabList[TabCur]['data']" :key="index"
-						:labels="labels" :itemData="item" :viewTemp="finalViewTemp" :viewType="viewType"
+						:labels="ShowLabelColumn" :itemData="item" :viewTemp="finalViewTemp" :viewType="viewType"
 						:imageNum="imageNum" :gridRowNum="gridRowNum" :rowButton="rowButton" :srv_cols="srv_cols"
 						:pageType="pageType" :listType="listType" :showFootBtn="showFootBtn"
 						@click-list-item="clickItem" @click-foot-btn="clickFootBtn"></list-item>
@@ -125,6 +125,8 @@
 				// 要显示标签的字段
 				if (this.moreConfig && this.moreConfig.ShowLabelColumn) {
 					return this.moreConfig.ShowLabelColumn
+				} else if (this.moreConfig && this.moreConfig.labels) {
+					return this.moreConfig.labels
 				} else if (Array.isArray(this.labels)) {
 					return this.labels
 				}

@@ -10,16 +10,16 @@
 			</view>
 			<view class="content-box flex-twice" v-if="listType === 'proc' && pageType === 'proc'">
 				<view class="content-header">
-					<view class="title" @click="listItemClick">{{ itemData[viewTemp.title] }}</view>
-					<view class="status" v-if="itemData.proc_status" @click="listItemClick">
+					<view class="title" @click.stop="listItemClick">{{ itemData[viewTemp.title] }}</view>
+					<view class="status" v-if="itemData.proc_status" @click.stop="listItemClick">
 						<text class="bg-red text">{{ itemData.proc_status }}</text>
 					</view>
 				</view>
-				<view class="title-tip" v-if="itemData['executor_user']" @click="listItemClick">
+				<view class="title-tip" v-if="itemData['executor_user']" @click.stop="listItemClick">
 					<view class="lable">责任人：</view>
 					<view class="value">{{ itemData['executor_user'] }}</view>
 				</view>
-				<view class="content proc-content" @click="listItemClick">
+				<view class="content proc-content" @click.stop="listItemClick">
 					<view class="content-item">
 						<view class="label">创建时间：</view>
 						<view class="value">{{ itemData.create_time.slice(0, 10) }}</view>
@@ -37,7 +37,7 @@
 					<view class="footer-btn" v-if="showFootBtn">
 						<text v-if="deRowButDisplay(itemData, item) && !detailList"
 							class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
-							v-for="item in rowButton" :key="item.id" @click="footBtnClick(item)">
+							v-for="item in theRowbutton" :key="item.id" @click.stop="footBtnClick(item)">
 							{{ item.button_name }}
 						</text>
 					</view>
@@ -46,16 +46,16 @@
 			<view class="content-box flex-twice"
 				v-else-if="listType === 'list' && pageType === 'proc' && (itemData.issue_name || itemData.task_name)">
 				<view class="content-header">
-					<view class="title" @click="listItemClick">{{ itemData[viewTemp.title] }}</view>
-					<view class="status" v-if="itemData.proc_status" @click="listItemClick">
+					<view class="title" @click.stop="listItemClick">{{ itemData[viewTemp.title] }}</view>
+					<view class="status" v-if="itemData.proc_status" @click.stop="listItemClick">
 						<text class="bg-red text">{{ itemData.proc_status }}</text>
 					</view>
 				</view>
-				<view class="title-tip" v-if="itemData['executor_user']" @click="listItemClick">
+				<view class="title-tip" v-if="itemData['executor_user']" @click.stop="listItemClick">
 					<view class="lable">责任人：</view>
 					<view class="value">{{ itemData['executor_user'] }}</view>
 				</view>
-				<view class="content proc-content" @click="listItemClick">
+				<view class="content proc-content" @click.stop="listItemClick">
 					<view class="content-item">
 						<view class="label">创建时间：</view>
 						<view class="value">{{ itemData.create_time.slice(0, 10) }}</view>
@@ -73,26 +73,26 @@
 					<view class="footer-btn" v-if="showFootBtn">
 						<text v-if="deRowButDisplay(itemData, item) && !detailList"
 							class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
-							v-for="item in rowButton" :key="item.id" @click="footBtnClick(item)">
+							v-for="item in theRowbutton" :key="item.id" @click.stop="footBtnClick(item)">
 							{{ item.button_name }}
 						</text>
 					</view>
 				</view>
 			</view>
 			<view class="content-box flex-twice" v-else>
-				<view class="title" v-if="goodsData.title" @click="listItemClick">
+				<view class="title" v-if="goodsData.title" @click.stop="listItemClick">
 					<text class="label" v-if="showLabel['title']">
 						{{showLabel['title']}}:
 					</text>
 					{{ goodsData.title|html2text}}
 				</view>
-				<view class="title-tip" v-if="goodsData.tip" @click="listItemClick">
+				<view class="title-tip" v-if="goodsData.tip" @click.stop="listItemClick">
 					<text class="label" v-if="showLabel['tip']">
 						{{showLabel['tip']}}:
 					</text>
 					{{ goodsData.tip|html2text }}
 				</view>
-				<view class="content" @click="listItemClick">
+				<view class="content" @click.stop="listItemClick">
 					<view class="numbers" v-if="viewTemp&&viewTemp.price">
 						<text class="label" v-if="showLabel['price']">
 							{{showLabel['price']}}:
@@ -106,14 +106,14 @@
 					<view class="tags"></view>
 				</view>
 				<view class="footer">
-					<text class="foot-name" v-if="goodsData.footer" @click="listItemClick">
+					<text class="foot-name" v-if="goodsData.footer" @click.stop="listItemClick">
 						<text class="label" v-if="showLabel['footer']">
 							{{showLabel['footer']}}:
 						</text>
 						{{ goodsData.footer|html2text }}</text>
 					<view class="foot-button" v-if="showFootBtn">
 						<view class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
-							v-for="item in rowButton" :key="item.id" @click="footBtnClick(item)">
+							v-for="item in theRowbutton" :key="item.id" @click.stop="footBtnClick(item)">
 							<text v-if="deRowButDisplay(itemData, item) && !detailList">{{ item.button_name }}</text>
 						</view>
 						<text v-if="detailList" class="text-gray" :class="'cuIcon-more'"></text>
@@ -141,6 +141,27 @@
 					return value || ''
 				}
 			},
+		},
+		computed: {
+			theRowbutton() {
+				if (Array.isArray(this.rowButton) && this.rowButton.length > 0) {
+					return this.rowButton.filter(button => {
+						let reg = /^data\..*$/
+						if (button.disp_exps && reg.test(button.disp_exps)) {
+							let disp_exps = button.disp_exps.replace(/\'|\s/g, '')
+							let keys = disp_exps.split('data.')[1].split('==')[0]
+							let value = disp_exps.split('data.')[1].split('==')[1]
+							if (this.itemData[keys] === value) {
+								return true
+							} else {
+								return false
+							}
+						} else {
+							return true
+						}
+					})
+				}
+			}
 		},
 		data() {
 			return {
@@ -221,6 +242,17 @@
 						return false;
 					}
 				} else {
+					// let reg = /^data\..*$/ 
+					// if(button.disp_exps&&reg.test(button.disp_exps)){
+					// 	let disp_exps = button.disp_exps.replace(/\'|\s/g,'')
+					// 	let keys = disp_exps.split('data.')[1].split('==')[0]
+					// 	let value =  disp_exps.split('data.')[1].split('==')[1]
+					// 	if(item[keys]===value){
+					// 		return true
+					// 	}else {
+					// 		return false
+					// 	}
+					// }
 					return true;
 				}
 			}
@@ -570,8 +602,10 @@
 						font-size: 40upx;
 						justify-content: flex-end;
 						flex-wrap: wrap;
+
 						.cu-btn {
-							margin-right: 20upx;
+							margin-right: 10rpx;
+							margin-bottom: 10rpx;
 						}
 					}
 
@@ -613,6 +647,7 @@
 				height: 100rpx !important;
 				border-bottom: 1rpx solid #f1f1f1;
 				flex: auto;
+
 				.text {
 					font-size: 85rpx;
 					line-height: 100rpx;
@@ -620,18 +655,20 @@
 			}
 
 			.content-box {
-				min-height:50rpx;
+				min-height: 50rpx;
 				display: flex;
 				flex-wrap: wrap;
+
 				.title {
 					margin: 0;
-					text-overflow:clip ;
+					text-overflow: clip;
 					width: 100%;
 					font-size: 24rpx;
 					flex: 1;
-					padding:4rpx 8rpx;
+					padding: 4rpx 8rpx;
 					font-weight: normal;
 				}
+
 				.footer {
 					align-items: flex-end;
 					justify-content: flex-end;

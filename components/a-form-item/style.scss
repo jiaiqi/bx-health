@@ -103,7 +103,9 @@
 	&.flex-column {
 		flex-direction: column;
 		.form-item-content {
-			width: calc(100% - 40rpx);
+			width: 100%;
+			// width: calc(100% - 40rpx);
+			// width: calc(100% - 40rpx);
 		}
 	}
 	.valid_msg {
@@ -163,7 +165,7 @@
 		font-size: var(--global-text-font-size);
 		overflow: hidden;
 		&.label-top {
-			padding: 0 20rpx 10rpx;
+			// padding: 0 20rpx 10rpx;
 			.form-item-content_value.checkbox-group {
 				margin-top: 10rpx;
 			}

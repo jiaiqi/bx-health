@@ -34,7 +34,7 @@
 			</bx-radio-group>
 			<bx-radio-group class="form-item-content_value radio-group" :mode="optionMode" v-model="fieldData.value"
 				v-else-if="fieldData.type === 'radioFk'" @change="radioChange">
-				<bx-radio :iconSize="fieldData.iconSize" class="radio" color="#2979ff" v-for="item in fieldData.options"
+				<bx-radio :iconSize="fieldData.iconSize" class="radio" color="#2979ff" v-for="item in radioOptions"
 					:disabled="fieldData.disabled ? fieldData.disabled : false" :name="item.value"
 					:serial-char="item.serialChar">
 					{{ item.label }}
@@ -42,7 +42,7 @@
 			</bx-radio-group>
 			<checkbox-group name="checkbox-group" class="form-item-content_value checkbox-group"
 				v-else-if="fieldData.type === 'checkbox'">
-				<label v-for="(item, index) in fieldData.options" :key="index" class="checkbox">
+				<label v-for="(item, index) in radioOptions" :key="index" class="checkbox">
 					<checkbox color="#2979ff" :value="item" :disabled="fieldData.disabled ? fieldData.disabled : false"
 						:checked="isChecked(item)" />
 					<text style="flex: 1;" class="text">{{ item }}</text>
@@ -51,8 +51,8 @@
 			<bx-checkbox-group :mode="optionMode" v-model="fieldData.value"
 				class="form-item-content_value checkbox-group" v-else-if="fieldData.type === 'checkboxFk'"
 				:disabled="fieldData.disabled ? fieldData.disabled : false" @change="onBlur()">
-				<bx-checkbox v-model="item.checked" v-for="item in fieldData.options" :key="item.value"
-					:name="item.label">{{ item.label }}
+				<bx-checkbox v-model="item.checked" v-for="item in radioOptions" :key="item.value" :name="item.label">
+					{{ item.label }}
 				</bx-checkbox>
 			</bx-checkbox-group>
 
@@ -68,7 +68,7 @@
 					</bx-checkbox-group>
 					<bx-radio-group v-if="fieldData.type === 'Selector'" class="form-item-content_value radio-group"
 						v-model="fieldData.value" mode="button" @change="pickerChange">
-						<bx-radio v-for="item in selectorData" :name="item.value">{{ item.label }}</bx-radio>
+						<bx-radio v-for="item in radioOptions" :name="item.value">{{ item.label }}</bx-radio>
 					</bx-radio-group>
 				</view>
 				<view @click="openModal(fieldData.type)" class="open-popup" v-else>
@@ -298,6 +298,23 @@
 			}
 		},
 		computed: {
+			radioOptions() {
+				if (Array.isArray(this.fieldData.options)) {
+					if (this.pageType === 'filter') {
+						if (!this.fieldData.options.find(item => item.value === '全部')) {
+							return [...this.fieldData.options, {
+								label: '全部',
+								value: '全部',
+								checked: this.fieldData.options.find(item => item.checked) ? false : true
+							}]
+						} else {
+							return this.fieldData.options
+						}
+					} else {
+						return this.fieldData.options
+					}
+				}
+			},
 			uploadUrl() {
 				return this.$api.upload;
 			},
@@ -636,7 +653,7 @@
 			},
 			pickerChange(e) {
 				if (this.fieldData.type === 'Selector') {
-					let optionData = this.selectorData.find(item => item.value === e);
+					let optionData = this.radioOptions.find(item => item.value === e);
 					this.fkFieldLabel = optionData.label;
 					this.fieldData['colData'] = optionData;
 					this.hideModal();
@@ -919,7 +936,27 @@
 				}
 				this.$emit('on-value-change', this.fieldData);
 				return this.valid;
-			}
+			},
+			initSetOptions() {
+				this.$nextTick(function() {
+					if (Array.isArray(this.fieldData.option_list_v2)) {
+						this.setOptionList = this.fieldData.option_list_v2.map(item => {
+							item.checked = false;
+							if (this.fieldData.value && this.fieldData.value.includes(item.value)) {
+								item.checked = true;
+							}
+							return item;
+						});
+						// if (this.pageType === 'filter' && !this.setOptionList.find(item => item.value === '全部')) {
+						// 	this.setOptionList.push({
+						// 		label: '全部',
+						// 		value: '全部',
+						// 		checked: this.setOptionList.find(item => item.checked) ? false : true
+						// 	})
+						// }
+					}
+				});
+			},
 		},
 		onReady() {
 			let self = this;
@@ -957,16 +994,7 @@
 			if (this.pageType === 'detail' || this.pageType === 'update') {
 				this.getDefVal();
 			}
-			this.$nextTick(function() {
-				if (Array.isArray(this.fieldData.option_list_v2)) {
-					this.setOptionList = this.fieldData.option_list_v2.map(item => {
-						if (this.fieldData.value && this.fieldData.value.includes(item.value)) {
-							item.checked = true;
-						}
-						return item;
-					});
-				}
-			});
+			this.initSetOptions()
 			if (self.fieldData && self.fieldData.type === 'Selector') {
 				let cond = null;
 				if (this.fieldData.value && this.fieldData.option_list_v2.refed_col && this.formType !== 'add') {

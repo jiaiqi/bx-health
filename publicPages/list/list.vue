@@ -8,14 +8,14 @@
 						v-model="searchVal" :placeholder="placeholder" confirm-type="search" />
 				</view>
 				<view class="action">
-					<button class="cu-btn bg-blue shadow-blur round" @click="toSearch" v-if="searchVal"><text
+					<button class="cu-btn bg-cyan shadow-blur round" @click="toSearch" v-if="searchVal"><text
 							class="cuIcon-search"></text></button>
-					<button class="cu-btn bg-blue shadow-blur round margin-left-xs" @click="showFilterModal"
+					<button class="cu-btn bg-cyan shadow-blur round margin-left-xs" @click="showFilterModal"
 						v-if="listConfig&&listConfig._fieldInfo">
 						<!-- <text class="cuIcon-filter"></text> -->
 						<text class="text-sm">筛选</text>
 					</button>
-					<button class="cu-btn bg-blue shadow-blur round margin-left-xs" @click="clickAddButton"
+					<button class="cu-btn bg-cyan shadow-blur round margin-left-xs" @click="clickAddButton"
 						v-if="showAdd"><text class="cuIcon-add"></text></button>
 				</view>
 			</view>
@@ -31,10 +31,10 @@
 		<!-- 		<view class="public-button-box">
 			<view class="add-button" @click="clickAddButton" v-if="showAdd"></view>
 		</view> -->
-		<view class="cu-modal drawer-modal" :class="{'show':showFilter}" @click.stop="hideFilter">
+		<view class="cu-modal bottom-modal" :class="{'show':showFilter}" @click.stop="hideFilter">
 			<view class="cu-dialog" @click.stop="">
 				<bx-filter v-if="listConfig&&listConfig._fieldInfo" :fieldInfo="listConfig._fieldInfo"
-					@toFilter="toFilter"></bx-filter>
+					@toFilter="toFilter" @cancel="hideFilter"></bx-filter>
 			</view>
 		</view>
 	</view>
@@ -232,7 +232,7 @@
 				this.searchVal = ''
 				this.showFilter = false;
 				if (Array.isArray(e)) {
-					let cond = e.map(item => {
+					let cond = e.filter(item => item.value !== '全部').map(item => {
 						let obj = {
 							colName: item.column,
 							ruleType: 'like',
@@ -470,12 +470,13 @@
 								data: buttonInfo.operate_params.data
 							}];
 							let app = this.appName || uni.getStorageSync('activeApp');
-							let url = this.getServiceUrl(buttonInfo.application ? buttonInfo.application : app,
-								buttonInfo.operate_service, buttonInfo.servcie_type);
+							let url = this.getServiceUrl(buttonInfo.application || app, buttonInfo.operate_service,
+								buttonInfo.servcie_type);
 							let res = await this.$http.post(url, req);
 							if (res.data.state === 'SUCCESS') {
 								this.$refs.bxList.onRefresh();
 							}
+							return
 						} else if (buttonInfo.operate_type === '更新弹出') {
 							// let params = {
 							// 	type: buttonInfo.servcie_type,
@@ -512,6 +513,7 @@
 									url: '/pages/public/formPage/formPage?params=' + JSON.stringify(
 										params)
 								});
+								return
 							} else if (buttonInfo.servcie_type === 'select') {
 								let params = {
 									type: 'select',
@@ -908,6 +910,11 @@
 
 			.cu-btn {
 				font-size: 40rpx;
+				padding: 0 20rpx;
+
+				&.bg-cyan {
+					background-color: #0bc99d;
+				}
 			}
 		}
 	}

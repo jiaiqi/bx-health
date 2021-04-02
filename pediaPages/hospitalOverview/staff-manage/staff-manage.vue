@@ -2,7 +2,7 @@
 	<view class="staff-manage">
 		<view class="title">
 			<text class="cuIcon-titles text-blue"></text>
-			<text class="">咨询大夫</text>
+			<text class="">咨询</text>
 		</view>
 		<view class="content">
 			<view class="professor-box">

@@ -11,7 +11,13 @@
 				<image class="image-icon" :src="getImagePath(item.icon_image)" v-if="item.icon_image">
 				</image>
 				<view class="content-box">
-					<text class="title-text">{{ item.title }}</text>
+					<text class="title-text">
+						<text> {{ item.title }}</text>
+						<text class="text-red cuIcon-hotfill"
+							v-if="item&&item.other_status&&item.other_status==='热门'">hot</text>
+						<text class="line-red" v-if="item&&item.other_status&&item.other_status==='精选'">精选</text>
+						<text class="line-red" v-if="item&&item.top_status&&item.top_status==='是'">置顶</text>
+					</text>
 					<text class="date">{{ formateDate(item.create_time) }}</text>
 				</view>
 			</view>
@@ -48,6 +54,12 @@
 				let req = {
 					condition: this.condition,
 					order: [{
+						colName: "top_status",
+						orderType: "desc"
+					}, {
+						colName: "other_status",
+						orderType: "desc"
+					}, {
 						colName: "create_time",
 						orderType: "desc"
 					}],
@@ -59,7 +71,7 @@
 				}
 				this.loadStatus = 'loading'
 				let res = await this.$fetch('select', 'srvdaq_cms_content_select', req, 'daq')
-				if(res.success){
+				if (res.success) {
 					if (type === 'refresh') {
 						this.articleList = res.data
 					} else {
@@ -97,7 +109,7 @@
 			})
 		},
 		onReachBottom() {
-			if(this.loadStatus!=='noMore'){
+			if (this.loadStatus !== 'noMore') {
 				this.getListData('loadmore')
 			}
 		},
@@ -171,8 +183,26 @@
 					width: 70%;
 					overflow: hidden;
 					text-overflow: ellipsis;
-					white-space: nowrap;
+					// white-space: nowrap;
 					font-size: 32rpx;
+
+					.text-red {
+						display: inline-block;
+						margin-left: 10rpx;
+						font-size: 24rpx;
+						position: relative;
+						top: -10rpx;
+						font-weight: bold;
+					}
+
+					.line-red {
+						border-radius: 5px;
+						margin-left: 10rpx;
+						padding: 2px 4px;
+						font-size: 12px;
+						font-weight: bold;
+						border: 1rpx solid #e54d42;
+					}
 				}
 
 				.content-box {
@@ -199,7 +229,7 @@
 						font-size: 16px;
 						width: 100%;
 						white-space: normal;
-						margin-bottom: 10px;
+						padding-bottom: 10px;
 					}
 
 					.date {
@@ -216,6 +246,7 @@
 					overflow: hidden;
 					box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 					margin-bottom: 20rpx;
+
 					.image-icon {
 						width: 100%;
 						height: 200rpx;
