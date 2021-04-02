@@ -377,11 +377,26 @@
 							}
 						})
 					}
+					
 					if (newValue[self.viewTemp.img]) {
 						this.goodsData.img = this.getImagePath(newValue[this.viewTemp.img]);
 					}
-					if (newValue[this.viewTemp.title]) {
-						this.goodsData.title = newValue[this.viewTemp.title];
+					
+					if (this.viewTemp.title && this.viewTemp.title.indexOf('||') !== -1 && Array.isArray(this.viewTemp
+							.title.split('||'))) {
+						let arr = this.viewTemp.title.split('||')
+						if (arr.length > 0) {
+							arr = arr.reverse()
+							arr.forEach(key => {
+								if (newValue[key]) {
+									this.goodsData.title = newValue[key]
+								}
+							})
+						}
+					} else {
+						if (newValue[this.viewTemp.title]) {
+							this.goodsData.title = newValue[this.viewTemp.title];
+						}
 					}
 					if (Array.isArray(this.viewTemp.tip)) {
 						this.goodsData.tip = this.viewTemp.tip.reduce((pre, cur) => {

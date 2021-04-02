@@ -246,20 +246,22 @@ export default {
 					ruleType: 'eq',
 					value: person_no
 				}],
-				data: [{
-					profile_url: profile_url
-				}]
+				data: [{}]
 			}];
+			if(profile_url){
+				req[0].data[0].profile_url = profile_url;
+			}
 			if (nickname) {
 				req[0].data[0].nick_name = nickname.replace(/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "");
 			}
-			if (sex || sex === null) {
+			if (sex) {
 				req[0].data[0].sex = sex;
 			}
-			debugger
-			let res = await Vue.prototype.$http.post(url, req);
-			if (res.data.state === 'SUCCESS') {
-				return true
+			if(Object.keys(req[0].data[0]).length>0){
+				let res = await Vue.prototype.$http.post(url, req);
+				if (res.data.state === 'SUCCESS') {
+					return true
+				}
 			}
 		}
 

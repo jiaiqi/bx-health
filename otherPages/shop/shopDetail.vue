@@ -371,7 +371,7 @@ export default {
 			if (item.type === 'mine' && (!item.age || !item.sex)) {
 				uni.showModal({
 					title: '提示',
-					content: '当前没有进行登记年龄、性别和体重，是否去登记?',
+					content: '当前没有进行登记年龄、性别或体重，是否去登记?',
 					success: function(res) {
 						if (res.confirm) {
 							uni.navigateTo({

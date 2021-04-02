@@ -340,7 +340,7 @@
 						break;
 					case 'user_count':
 						viewTemp = {
-							title: 'person_name',
+							title: 'store_remark_person_name||person_name',
 							img: 'profile_url',
 						};
 						let order = [
