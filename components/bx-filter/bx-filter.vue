@@ -11,7 +11,7 @@
 					class="cuIcon-refresh margin-right-xs "></text>重置</button>
 			<button class="cu-btn bg-grey light" @click="cancel"><text
 					class="cuIcon-close margin-right-xs "></text>取消</button>
-			<button class="cu-btn bg-cyan light confirm" @click="toFilter" type="primary" :plain="true">
+			<button class="cu-btn bg-blue light confirm" @click="toFilter" type="primary">
 				<text class="cuIcon-search margin-right-xs"></text>确定
 			</button>
 		</view>
