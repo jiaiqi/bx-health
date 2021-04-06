@@ -1,4 +1,6 @@
 import http from './http.js'
+import Vue from 'vue'
+// import http from '@/common/http.js'
 import store from '@/store/index.js'
 const mpAppNo = 'APPNO20201124160702'
 // 检测是否关注公众号
@@ -29,51 +31,72 @@ const checkIsAttention = async () => {
 }
 
 // 小程序获取微信用户信息
-const getUserInfo = async () => {
-	let infoRes = await uni.getUserInfo({
-		provider: 'weixin'
-	})
-	if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg ===
-		'getUserInfo:ok' &&
-		infoRes[1].userInfo) {
-		let rawData = {
-			nickname: infoRes[1].userInfo.nickName,
-			sex: infoRes[1].userInfo.gender,
-			country: infoRes[1].userInfo.country,
-			province: infoRes[1].userInfo.province,
-			city: infoRes[1].userInfo.city,
-			headimgurl: infoRes[1].userInfo.avatarUrl,
-		};
-		store.commit('SET_WX_USERINFO', rawData);
-		store.commit('SET_AUTH_USERINFO', true)
-		return {
-			success: true,
-			userInfo: rawData,
-			response: infoRes[1]
-		};
-	} else {
-		if (store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
-			// 跳转到授权页面
-			store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
-			let pageStack = getCurrentPages()
-			if (Array.isArray(pageStack) && pageStack.length >= 1) {
-				let currentPage = pageStack[pageStack.length - 1]
-				store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
-			}
-		}
-	}
-	return false;
-}
+// const getUserInfo = async () => {
+// 	// let infoRes = await uni.getUserInfo({
+// 	// 	provider: 'weixin'
+// 	// })
+// 	let infoRes = await wx.getUserProfile({
+// 		desc: '用于完善会员资料',
+// 	})
+// 	// if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg ===
+// 	// 	'getUserInfo:ok' &&
+// 	// 	infoRes[1].userInfo) {
+// 	// 	let rawData = {
+// 	// 		nickname: infoRes[1].userInfo.nickName,
+// 	// 		sex: infoRes[1].userInfo.gender,
+// 	// 		country: infoRes[1].userInfo.country,
+// 	// 		province: infoRes[1].userInfo.province,
+// 	// 		city: infoRes[1].userInfo.city,
+// 	// 		headimgurl: infoRes[1].userInfo.avatarUrl,
+// 	// 	};
+// 	// 	store.commit('SET_WX_USERINFO', rawData);
+// 	// 	store.commit('SET_AUTH_USERINFO', true)
+// 	// 	return {
+// 	// 		success: true,
+// 	// 		userInfo: rawData,
+// 	// 		response: infoRes[1]
+// 	// 	};
+// 	// } 
+
+// 	if (infoRes && infoRes.userInfo) {
+// 		let rawData = {
+// 			nickname: infoRes.userInfo.nickName,
+// 			sex: infoRes.userInfo.gender,
+// 			country: infoRes.userInfo.country,
+// 			province: infoRes.userInfo.province,
+// 			city: infoRes.userInfo.city,
+// 			headimgurl: infoRes.userInfo.avatarUrl,
+// 		};
+// 		store.commit('SET_WX_USERINFO', rawData);
+// 		store.commit('SET_AUTH_USERINFO', true)
+// 		return {
+// 			success: true,
+// 			userInfo: rawData,
+// 			response: infoRes
+// 		};
+// 	} else {
+// 		if (store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
+// 			// 跳转到授权页面
+// 			store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
+// 			let pageStack = getCurrentPages()
+// 			if (Array.isArray(pageStack) && pageStack.length >= 1) {
+// 				let currentPage = pageStack[pageStack.length - 1]
+// 				store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
+// 			}
+// 		}
+// 	}
+// 	return false;
+// }
 
 // 小程序验证登陆
-const wxVerifyLogin = async (dontCheckAuth = false) => {
+const wxVerifyLogin = async () => {
 	// #ifdef MP-WEIXIN
-	const userInfo = await getUserInfo()
-	if ((!userInfo || !userInfo.response)) {
-		// 只有有获取微信用户信息权限的才能继续登录
-		store.commit('SET_AUTH_USERINFO', false)
-		// return false
-	}
+	// const userInfo = await getUserInfo()
+	// if ((!userInfo || !userInfo.response)) {
+	// 	// 只有有获取微信用户信息权限的才能继续登录
+	// 	store.commit('SET_AUTH_USERINFO', false)
+	// 	// return false
+	// }
 	if (store.state.app.isLogin) {
 		return true
 	}
@@ -99,11 +122,11 @@ const wxVerifyLogin = async (dontCheckAuth = false) => {
 				return await wxOpenLogin(userInfo.response, resData.bx_open_code)
 			}
 			store.commit('SET_TICKET', resData.bx_auth_ticket)
+			uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
 			if (resData && resData.login_user_info.user_no) {
 				uni.setStorageSync('login_user_info', resData.login_user_info);
 				store.commit('SET_LOGIN_USER', resData.login_user_info)
 			}
-			uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
 			if (resData && resData.login_user_info.data) {
 				uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 			}
@@ -164,9 +187,96 @@ const wxOpenLogin = async (e, openCode) => {
 	}
 }
 
+const selectPersonInfo = async () => {
+	const user_no = uni.getStorageSync('login_user_info').user_no
+	try {
+		if (store.state.user.loginUserInfo) {
+			user_no = store.state.user.loginUserInfo.user_no
+		}
+	} catch (e) {
+		//TODO handle the exception
+	}
+	let url = '/health/select/srvhealth_person_info_select'
+	let req = {
+		"serviceName": "srvhealth_person_info_select",
+		"colNames": ["*"],
+		order: [{
+			colName: 'create_time',
+			orderType: 'asc'
+		}],
+		"condition": [{
+			"colName": "create_user",
+			"ruleType": "eq",
+			"value": user_no
+		}],
+		"page": {
+			"pageNo": 1,
+			"rownumber": 2
+		},
+	}
+	let res = await http.post(url, req)
+
+	if (res.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+		store.commit('SET_USERINFO', res.data.data[0])
+		store.commit('SET_USERLIST', res.data.data)
+		uni.setStorageSync('current_user_info', res.data.data[0]);
+		uni.setStorageSync('current_user', res.data.data[0].name);
+		// #ifdef MP-WEIXIN
+		if (res.data.data[0].home_store_no && !store.state.app.hasIntoHospital) {
+			// 有home_store 此次打开小程序未进入过医院/餐馆主页
+			let pageInfo = Vue.prototype.getShareParams()
+			// console.log(store.state.app.inviterInfo)
+			let pageStack = getCurrentPages()
+			let currentPage = ''
+			if (Array.isArray(pageStack) && pageStack.length >= 1) {
+				currentPage = pageStack[pageStack.length - 1]?.$page?.fullPath
+			}
+			// 暂时去掉
+			if (['诊所', '医院', '健康服务'].includes(store.state
+					.user.userInfo.home_store_type) && (!currentPage || (currentPage && currentPage
+					.indexOf(
+						'/pediaPages/hospitalOverview/hospitalOverview') == -1 && currentPage
+					.indexOf(
+						'/personalPages/chat/chat') == -1 && currentPage.indexOf(
+						'personalPages/gropDetail/gropDetail') == -1)) && pageStack.length ===
+				1) {
+				// 通过分享医院主页加入的用户
+				uni.redirectTo({
+					url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
+						.data
+						.data[0].home_store_no,
+					success() {
+						// 标记 已进入过医院主页
+						store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					}
+				})
+			} else if ((['饭馆'].includes(store.state
+						.user.userInfo.home_store_type) && store.state.user
+					.userInfo.home_store_no)) {
+				// 通过分享饭馆主页加入的用户
+				uni.redirectTo({
+					url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state
+						.user
+						.userInfo.home_store_no,
+					success() {
+						// 标记 已进入过餐馆主页
+						store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					}
+				})
+			}
+		}
+		// #endif
+		store.commit('SET_AUTH_USERINFO', true);
+		return res.data.data[0]
+	} else {
+		// store.commit('SET_AUTH_USERINFO', false);
+		return false
+	}
+}
 
 export {
 	checkIsAttention,
 	wxVerifyLogin,
-	wxOpenLogin
+	wxOpenLogin,
+	selectPersonInfo
 }

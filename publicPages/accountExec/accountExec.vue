@@ -57,8 +57,10 @@
 						<text class="text-cyan" @click="toArticle('CT2021012816470103')">隐私政策</text>
 					</view>
 					<view class="button-box">
+						<button type="primary" class="cu-btn bg-cyan" @tap="saveWxUser"
+							v-if="canIUseGetUserProfile">同意(授权微信用户信息)</button>
 						<button type="primary" class="cu-btn bg-cyan" lang="zh_CN" open-type="getUserInfo"
-							@getuserinfo="saveWxUser" :withCredentials="false">同意(授权微信用户信息)</button>
+							@getuserinfo="saveWxUser" :withCredentials="false" v-else>同意(授权微信用户信息)</button>
 						<!-- <button class="cu-btn bg-white text-grey" @click="disagree">不同意</button> -->
 						<navigator class="cu-btn bg-grey" open-type="exit" target="miniProgram" @click="disagree">
 							不同意(退出小程序)</navigator>
@@ -94,7 +96,8 @@
 				isShowUserLogin: true,
 				client_env: uni.getStorageSync('client_env'),
 				isThirdParty: uni.getStorageSync('isThirdParty'), // 是否需要第三方认证
-				isBindUser: false
+				isBindUser: false,
+				canIUseGetUserProfile: false,
 			};
 		},
 		onShow() {
@@ -109,6 +112,9 @@
 			// #endif
 		},
 		onLoad(option) {
+			if (wx.canIUse('getUserProfile')) {
+				this.canIUseGetUserProfile = true
+			}
 			this.judgeClientEnviroment();
 			let self = this;
 			if (uni.getStorageSync('isLogin')) {
@@ -320,6 +326,28 @@
 					}
 				});
 			},
+			async getUserProfile(e) {
+				let self = this
+				// 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认
+				// 开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
+				let res = await wx.getUserProfile({
+					desc: '用于完善会员资料' // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
+				})
+				if (res.userInfo) {
+					let rawData = {
+						nickname: res.userInfo.nickName,
+						sex: res.userInfo.gender,
+						country: res.userInfo.country,
+						province: res.userInfo.province,
+						city: res.userInfo.city,
+						headimgurl: res.userInfo.avatarUrl
+					};
+					self.$store.commit('SET_WX_USERINFO', rawData);
+					this.$store.commit('SET_AUTH_USERINFO', true);
+					self.setWxUserInfo(rawData);
+					return res.userInfo
+				}
+			},
 			async saveWxUser(e) {
 				// 静默登录(验证登录)
 				const self = this;
@@ -327,7 +355,8 @@
 				if (isWeixinClient) {
 					const url = this.getServiceUrl('wx', 'srvwx_app_login_verify', 'operate');
 					// #ifdef MP-WEIXIN
-					const user = e.mp.detail;
+					// const user = e.mp.detail;
+					const user = await this.getUserProfile()
 					const result = await self.wxVerifyLogin();
 					if (result) {
 						// 登录成功，返回上一页面
@@ -420,7 +449,7 @@
 							uni.setStorageSync('isLogin', true);
 							console.log('登录成功', uni.getStorageSync('isLogin'), resData);
 							let expire_timestamp = parseInt(new Date().getTime() / 1000) + loginMsg
-							.expire_time; //过期时间的时间戳(秒)
+								.expire_time; //过期时间的时间戳(秒)
 							uni.setStorageSync('expire_time', resData.expire_time); // 有效时间
 							uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
 							uni.setStorageSync('expire_timestamp', expire_timestamp); // 过期时间
@@ -533,21 +562,21 @@
 														if (res
 															.authSetting[
 																'scope.userInfo'
-																]) {
+															]) {
 															//如果用户重新同意了授权登录
 															wx.getUserInfo({
 																success: function(
 																	res
-																	) {
+																) {
 																	uni.setStorageSync(
 																		'wxuserinfo',
 																		res
 																		.userInfo
-																		);
+																	);
 																	console
 																		.log(
 																			res
-																			);
+																		);
 																	let rawData = {
 																		nickname: res
 																			.userInfo
@@ -576,10 +605,10 @@
 																		JSON
 																		.stringify(
 																			rawData
-																			);
+																		);
 																	self.setWxUserInfo(
 																		rawData
-																		);
+																	);
 																}
 															});
 														} else {
@@ -587,7 +616,7 @@
 															console
 																.log(
 																	res
-																	);
+																);
 														}
 													},
 													fail: function() {

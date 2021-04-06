@@ -3,7 +3,10 @@
 			height: calc(100vh - var(--window-top) - 50px);
 			overflow: scroll;
 		}
-		
+		.auth-profile{
+			width: 0;
+			height: 0;
+		}
 		/deep/ swiper.rectangle-dot{
 			.wx-swiper-dot,.a-swiper-dot,.uni-swiper-dot{
 				width: 30upx;

@@ -1,7 +1,7 @@
 <template>
 	<view class="page-wrap" :style="{
 			'--global-text-font-size': globalTextFontSize + 'px'
-		}">
+		}" v-if="showPageContent">
 		<view class="page-item" v-for="(pageItem,pageIndex) in pageItemList" :key="pageItem.item_no" :class="{
 				'swiper-view': pageItem.div_type === 'carousel',
 				'menu-view': pageItem.div_type === 'buttons',
@@ -71,7 +71,6 @@
 				</swiper>
 			</view>
 			<view class="page-article" v-if="pageItem.div_type === 'tablist' && pageItem.tablist">
-				<!-- <view class="title">{{ pageItem.item_label || '' }}</view> -->
 				<article-list :config="pageItem"></article-list>
 			</view>
 		</view>
@@ -89,6 +88,9 @@
 				</view>
 			</view>
 		</view>
+	</view>
+	<view class="page-wrap loading" v-else>
+		<u-empty text="正在前往目标页面..." mode="search"></u-empty>
 	</view>
 </template>
 
@@ -112,8 +114,16 @@
 				loginUserInfo: state => state.user.loginUserInfo,
 				userInfo: state => state.user.userInfo,
 				globalTextFontSize: state => state.app['globalTextFontSize'],
-				globalLabelFontSize: state => state.app.globalLabelFontSize
-			})
+				globalLabelFontSize: state => state.app.globalLabelFontSize,
+				hasIntoHospital: state => state.app.hasIntoHospital
+			}),
+			showPageContent() {
+				if (this.userInfo.add_store_no && !this.hasIntoHospital) {
+					return false
+				} else {
+					return true
+				}
+			},
 		},
 		methods: {
 			toFeedBack() {
@@ -430,7 +440,11 @@
 		background-color: #fff;
 		min-height: 100vh;
 		font-size: var(--global-text-font-size);
-
+		&.loading{
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 		.status_bar {
 			height: var(--status-bar-height);
 			width: 100%;

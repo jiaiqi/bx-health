@@ -1,6 +1,11 @@
 import store from '@/store'
 import api from '@/common/api.js'
 import _http from '@/common/http.js'
+import {
+	checkIsAttention,
+	wxVerifyLogin,
+	selectPersonInfo
+} from '@/common/api/login.js'
 export default {
 	install(Vue, options) {
 		Vue.prototype.pageTitle = '加载中…' // 可以自定义变量
@@ -794,45 +799,45 @@ export default {
 				if (resData.login_user_info.data) {
 					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 				}
-				// 获取用户信息
-				let infoRes = await uni.getUserInfo({
-					provider: 'weixin'
-				})
-				if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg ===
-					'getUserInfo:ok' &&
-					infoRes[1].userInfo) {
-					let rawData = {
-						nickname: infoRes[1].userInfo.nickName,
-						sex: infoRes[1].userInfo.gender,
-						country: infoRes[1].userInfo.country,
-						province: infoRes[1].userInfo.province,
-						city: infoRes[1].userInfo.city,
-						headimgurl: infoRes[1].userInfo.avatarUrl
-					};
-					store.commit('SET_WX_USERINFO', rawData);
-					store.commit('SET_AUTH_USERINFO', true)
-					await Vue.prototype.setWxUserInfo(rawData)
-					Vue.prototype.updateUserInfo()
-					return {
-						status: 'success',
-						response: resData
-					};
-				} else {
-					if (store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
-						// 跳转到授权页面
-						store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
-						let pageStack = getCurrentPages()
-						if (Array.isArray(pageStack) && pageStack.length >= 1) {
-							let currentPage = pageStack[pageStack.length - 1]
-							store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
-						}
-						// 
-						// uni.reLaunch({
-						// 	url: '/publicPages/accountExec/accountExec'
-						// })
-					}
-					return false;
-				}
+				// // 获取用户信息
+				// let infoRes = await uni.getUserInfo({
+				// 	provider: 'weixin'
+				// })
+				// if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg ===
+				// 	'getUserInfo:ok' &&
+				// 	infoRes[1].userInfo) {
+				// 	let rawData = {
+				// 		nickname: infoRes[1].userInfo.nickName,
+				// 		sex: infoRes[1].userInfo.gender,
+				// 		country: infoRes[1].userInfo.country,
+				// 		province: infoRes[1].userInfo.province,
+				// 		city: infoRes[1].userInfo.city,
+				// 		headimgurl: infoRes[1].userInfo.avatarUrl
+				// 	};
+				// 	store.commit('SET_WX_USERINFO', rawData);
+				// 	store.commit('SET_AUTH_USERINFO', true)
+				// 	await Vue.prototype.setWxUserInfo(rawData)
+				// 	Vue.prototype.updateUserInfo()
+				// 	return {
+				// 		status: 'success',
+				// 		response: resData
+				// 	};
+				// } else {
+				// 	if (store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
+				// 		// 跳转到授权页面
+				// 		store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
+				// 		let pageStack = getCurrentPages()
+				// 		if (Array.isArray(pageStack) && pageStack.length >= 1) {
+				// 			let currentPage = pageStack[pageStack.length - 1]
+				// 			store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
+				// 		}
+				// 		// 
+				// 		// uni.reLaunch({
+				// 		// 	url: '/publicPages/accountExec/accountExec'
+				// 		// })
+				// 	}
+				// 	return false;
+				// }
 			} else {
 				// 登录失败，显示提示信息
 				uni.showToast({
@@ -1112,7 +1117,6 @@ export default {
 			}
 			let userInfo = e
 			console.log("setWxUserInfo", userInfo)
-			debugger
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_basic_user_info_save', 'operate')
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
@@ -1599,7 +1603,10 @@ export default {
 					}
 					if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no && (!
 							currentPage || (currentPage && currentPage.indexOf(
-								'/pediaPages/hospitalOverview/hospitalOverview') == -1)) && pageStack.length ===
+									'/pediaPages/hospitalOverview/hospitalOverview') == -1 && currentPage
+								.indexOf(
+									'/personalPages/chat/chat') == -1 && currentPage.indexOf(
+									'personalPages/gropDetail/gropDetail') == -1)) && pageStack.length ===
 						1) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
@@ -1653,6 +1660,7 @@ export default {
 				},
 			}
 			let res = await _http.post(url, req)
+
 			if (res.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
 				store.commit('SET_USERINFO', res.data.data[0])
 				store.commit('SET_USERLIST', res.data.data)
@@ -1672,7 +1680,10 @@ export default {
 					if (['诊所', '医院', '健康服务'].includes(store.state
 							.user.userInfo.home_store_type) && (!currentPage || (currentPage && currentPage
 							.indexOf(
-								'/pediaPages/hospitalOverview/hospitalOverview') == -1)) && pageStack.length ===
+								'/pediaPages/hospitalOverview/hospitalOverview') == -1 && currentPage
+							.indexOf(
+								'/personalPages/chat/chat') == -1 && currentPage.indexOf(
+								'personalPages/gropDetail/gropDetail') == -1)) && pageStack.length ===
 						1) {
 						// 通过分享医院主页加入的用户
 						uni.redirectTo({
@@ -1700,7 +1711,7 @@ export default {
 					}
 				}
 				// #endif
-				return true
+				return res.data.data[0]
 			} else {
 				return false
 			}
@@ -1799,23 +1810,31 @@ export default {
 				return false
 			}
 		}
-		Vue.prototype.updateUserInfo = async () => {
-			uni.getUserInfo({
-				provider: 'weixin',
-				success: function(user) {
-					let userInfo = user.userInfo
-					let gender = userInfo.gender //性别 0：未知、1：男、2：女
-					userInfo.sex = userInfo.gender === 1 ? '男' : userInfo.gender === 2 ? '女' : null
-					let vuex_userInfo = store.state.user.userInfo
-					if (vuex_userInfo && vuex_userInfo.no && (userInfo.avatarUrl !== vuex_userInfo
-							.profile_url || userInfo.nickName !== vuex_userInfo.nick_name ||
-							userInfo.sex !==  vuex_userInfo.sex)) {
-						Vue.prototype.updateUserProfile(userInfo.headimgurl, vuex_userInfo.no,
-							userInfo.nickName, userInfo.sex)
-					}
-					store.commit('SET_AUTH_USERINFO', true);
-				}
-			});
+		Vue.prototype.updateUserInfo = async (e) => {
+			// uni.getUserInfo({
+			// 	provider: 'weixin',
+			// 	success: function(user) {
+			let userInfo = JSON.parse(JSON.stringify(e))
+			// let userInfo = user.userInfo
+			let gender = userInfo.gender || userInfo.sex //性别 0：未知、1：男、2：女
+			userInfo.sex = gender === 1 ? '男' : gender === 2 ? '女' : null
+			let vuex_userInfo = store.state.user.userInfo
+			if (vuex_userInfo && vuex_userInfo.no && (userInfo.avatarUrl !== vuex_userInfo
+					.profile_url || userInfo.nickName !== vuex_userInfo.nick_name ||
+					userInfo.sex !== vuex_userInfo.sex)) {
+				Vue.prototype.updateUserProfile(userInfo.headimgurl, vuex_userInfo.no,
+					userInfo.nickName || userInfo.nickname, userInfo.sex)
+			}
+			store.commit('SET_AUTH_USERINFO', true);
+			// 	}
+			// });
+		}
+		Vue.prototype.initLogin = async () => {
+			// 初始化登录状态
+			// #ifdef MP-WEIXIN
+			let isLogin = await wxVerifyLogin()
+			let userInfo = await Vue.prototype.selectBasicUserInfo()
+			// #endif
 		}
 		Vue.prototype.toAddPage = async () => {
 			// 获取用户信息
@@ -1825,36 +1844,45 @@ export default {
 			// if (!isLogin) {
 			// 	return 'fail'
 			// }
-
-			let data = await Vue.prototype.selectBasicUserInfo()
-			if (data) {
-				// 已有用户信息
-				if (!store.state.app.subscsribeStatus) {
-					Vue.prototype.checkSubscribeStatus()
-				}
-				if (store.state.app.doctorInfo && store.state.app.doctorInfo.no) {
-					let result = await Vue.prototype.bindDoctorInfo(store.state.app.doctorInfo
-						.no)
-				}
-				store.commit('SET_REGIST_STATUS', false)
-				return true
-			}
 			let wxUserInfo = ''
 			if (store && store.state && store.state.user) {
 				wxUserInfo = store.state.user.wxUserInfo
 			}
-			if ((wxUserInfo && !wxUserInfo.nickname) || !wxUserInfo) {
+			if ((wxUserInfo && (!wxUserInfo.nickname || wxUserInfo.nickname === '微信用户')) || !wxUserInfo) {
 				// 未授权获取用户信息
 				console.log(store.state.app.authBoxDisplay)
 				store.commit('SET_AUTH_USERINFO', false)
+				store.commit('SET_REGIST_STATUS', false)
+				return
 				// 未授权不进行注册
+			} else {
+				store.commit('SET_AUTH_USERINFO', true)
+				if (!store.state.app.authBoxDisplay) {
+					let data = await selectPersonInfo()
+					// let data = await Vue.prototype.selectBasicUserInfo()
+					if (data && data.no && data.nick_name && data.profile_url) {
+						// 已有用户信息
+						if (!store.state.app.subscsribeStatus) {
+							Vue.prototype.checkSubscribeStatus()
+						}
+						if (store.state.app.doctorInfo && store.state.app.doctorInfo.no) {
+							let result = await Vue.prototype.bindDoctorInfo(store.state.app.doctorInfo
+								.no)
+						}
+						// 自动更新头像昵称
+						Vue.prototype.updateUserInfo(wxUserInfo)
+						store.commit('SET_REGIST_STATUS', false)
+						return true
+					}
+				}
+				// store.commit('SET_AUTH_USERINFO', true)
 			}
 			if (store.state.app.authBoxDisplay) {
+				debugger
 				store.commit('SET_REGIST_STATUS', false)
 				return
 			}
-			// 自动更新头像昵称
-			Vue.prototype.updateUserInfo()
+			debugger
 			let login_user_info = uni.getStorageSync('login_user_info')
 			let user_no = uni.getStorageSync('login_user_info').user_no
 			try {

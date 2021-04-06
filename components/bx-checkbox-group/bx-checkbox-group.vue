@@ -133,7 +133,6 @@
 					}
 					return val
 				});
-				// debugger
 				// if(values.includes('全部') && values.length>1){
 				// 	this.children = this.children.map(item=>{
 				// 		if(item.name==='全部'){

@@ -72,7 +72,6 @@ const mutations = {
 	SET_AUTH_SETTING: (state, data) => {
 		if (data.type) {
 			state.authSetting[data.type] = data.value
-			// setItem('authSetting', state.authSetting)
 			if (data.value === true) {
 				state.authBoxDisplay = false // 不显示授权组件
 			} else if (data.value === false) {
@@ -89,6 +88,10 @@ const mutations = {
 	SET_AUTH_USERINFO: (state, isAuth) => {
 		state.authUserInfo = isAuth
 		state.authBoxDisplay = !isAuth
+		if(uni.getStorageSync('client_env')==='web'){
+			state.authBoxDisplay = false
+			state.authUserInfo = true
+		}
 		setItem('authUserInfo', state.authUserInfo)
 	},
 	SET_LOGIN_STATE: (state, loginState) => {

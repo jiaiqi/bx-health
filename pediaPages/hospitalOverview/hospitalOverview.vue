@@ -1,6 +1,6 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
-	<view class="page-wrap" v-if="!authBoxDisplay">
+	<view class="page-wrap" v-if="!authBoxDisplay||client_env==='web'">
 		<swiper class="screen-swiper item-box rectangle-dot" easing-function="linear" indicator-active-color="#00aaff"
 			:indicator-dots="true" :circular="true" :autoplay="true" interval="5000" duration="500" height="300">
 			<swiper-item v-for="(item, index) in swiperList" :key="item.url" @click.stop="toPreviewImage(item.url)">
@@ -77,7 +77,8 @@
 				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
 					desc="goods_desc"></goods-list>
 				<vaccine-list v-if="storeNo==='S20210227032'" ref='vaccineList'></vaccine-list>
-				<staff-manage :storeNo="storeNo" v-if="storeInfo&&storeInfo.type==='诊所'" @toDoctorDetail="toDoctorDetail"></staff-manage>
+				<staff-manage :storeNo="storeNo" v-if="storeInfo&&storeInfo.type==='诊所'"
+					@toDoctorDetail="toDoctorDetail"></staff-manage>
 				<news-list :website_no="storeInfo&&storeInfo.website_no" ref="newsList" :storeInfo="storeInfo">
 				</news-list>
 				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&deptList.length>0">
@@ -125,6 +126,7 @@
 		mixins: [mixin],
 		data() {
 			return {
+				client_env: uni.getStorageSync('client_env'),
 				isBind: false, //当前用户是否绑定此诊所
 				bindUserInfo: {},
 				swiperList: [],
@@ -248,7 +250,6 @@
 			}
 		},
 		methods: {
-
 			async getuserinfo(e) {
 				// #ifdef MP-WEIXIN
 				const user = e.mp.detail;
@@ -274,7 +275,7 @@
 			},
 			toPages(e, info) {
 				let url = '';
-				if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
+				if ((!this.bindUserInfo || !this.bindUserInfo.store_user_no) && e !== 'health-manager') {
 					this.addToStore()
 					return
 				}
@@ -372,18 +373,33 @@
 			async selectPersonInGroup(group_no) {
 				// 查找当前登录用户有没有在此圈子用户列表中
 				let req = {
-					condition: [{
-						colName: 'store_no',
-						ruleType: 'eq',
-						value: this.storeNo
-					}]
+					condition: [
+						// 	{
+						// 	colName: 'store_no',
+						// 	ruleType: 'eq',
+						// 	value: this.storeNo
+						// },
+					]
 				};
+				if (group_no) {
+					req.condition.push({
+						colName: 'person_no',
+						ruleType: 'eq',
+						value: this.userInfo.no
+					})
+					req.condition.push({
+						// {
+						colName: 'gc_no',
+						ruleType: 'eq',
+						value: group_no
+						// },
+					})
+				} else {
+					return
+				}
 				let res = await this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health');
-				if (Array.isArray(res.data)) {
-					this.groupList = res.data.map(item => {
-						item.unreadNum = 0
-						return item
-					});
+				if (Array.isArray(res.data) && res.data.length > 0) {
+					return res.data[0]
 				}
 			},
 			toArticle(e) {
@@ -462,9 +478,18 @@
 					this.addToStore()
 					return
 				}
-				uni.navigateTo({
-					url: `/personalPages/gropDetail/gropDetail?gc_no=${e}&pb_no=${this.userInfo.no}&type=group-detail&from=store-detail`
-				});
+				let data = await this.selectPersonInGroup(e)
+				if (data && data.pg_no && data.gc_no) {
+					// 跳到聊天页面  
+					uni.navigateTo({
+						url: `/personalPages/chat/chat?type=群组圈子&groupNo=${data.gc_no}&pg_no=${data.pg_no}&group_role=${data.group_role||'用户'}`
+					});
+				} else {
+					// 跳到圈子信息页面
+					uni.navigateTo({
+						url: `/personalPages/gropDetail/gropDetail?gc_no=${e}&pb_no=${this.userInfo.no}&type=group-detail&from=store-detail`
+					});
+				}
 			},
 			toDeptDetail(e) {
 				// 跳转到科室详情
@@ -581,16 +606,21 @@
 					// this.getNotice();
 				} else {
 					if (res && res.code === '0011') {
-						const result = await wx.login();
-						if (result.code) {
-							await this.wxLogin({
-								code: result.code
-							});
-							times++
-							if (times < 3) {
-								this.selectStoreInfo(times)
-							}
+						await this.toAddPage()
+						times++
+						if (times < 3) {
+							this.selectStoreInfo(times)
 						}
+						// const result = await wx.login();
+						// if (result.code) {
+						// 	await this.wxLogin({
+						// 		code: result.code
+						// 	});
+						// 	times++
+						// 	if (times < 3) {
+						// 		this.selectStoreInfo(times)
+						// 	}
+						// }
 					} else {
 						uni.showModal({
 							title: '未查找到机构信息',
@@ -850,6 +880,14 @@
 					// })
 				}
 			},
+			async getUserProfile(e) {
+				// 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认
+				// 开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
+				let res = await wx.getUserProfile({
+					desc: '用于完善会员资料' // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
+				})
+				debugger
+			},
 		},
 		onPullDownRefresh() {
 			this.initPage()
@@ -902,6 +940,7 @@
 			uni.$off('updateStoreInfo')
 		},
 		async onLoad(option) {
+			this.$store.commit('SET_INTO_HOSPITAL_STATUS', true)
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
 				withShareTicket: true,

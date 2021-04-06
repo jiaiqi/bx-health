@@ -212,13 +212,18 @@
 				this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health').then(res => {
 					if (res.success) {
 						this.groupUser = res.data
+						if(!res.data.find(item=>item.person_no===this.userInfo.no)){
+							// 未加入当前群
+							uni.redirectTo({
+								url: `/personalPages/gropDetail/gropDetail?gc_no=${this.groupNo}&pb_no=${this.userInfo.no}&type=group-detail&from=store-detail`
+							});
+						}
 						if (res.data.length > 0) {
 							if (this.groupInfo && this.groupInfo.name) {
 								this.pageTitle = this.groupInfo.name + `(${res.data.length})`
 							} else if (this.storeInfo && this.storeInfo.name) {
 								this.pageTitle = this.storeInfo.name + `(${this.storeInfo.user_count})`
 							}
-							debugger
 							if (this.pageTitle) {
 								uni.setNavigationBarTitle({
 									title: this.pageTitle
@@ -611,6 +616,16 @@
 				this.receiver_person_no = option.receiver_person_no
 				this.getReceiverInfo()
 			}
+			
+			if (option.q) {
+				let text = decodeURIComponent(option.q);
+				if (text.indexOf('https://wx2.100xsys.cn/joinGroup/') !== -1) {
+					let result = text.split('https://wx2.100xsys.cn/joinGroup/')[1];
+					this.groupNo = result;
+					this.getGroup()
+				}
+			}
+			
 			if (this.session_no) {
 				// 已有会话编号 查找会话信息
 				this.getSession()

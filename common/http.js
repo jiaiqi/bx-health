@@ -66,12 +66,13 @@ fly.interceptors.request.use(async (request) => {
 			// #ifdef MP-WEIXIN
 			let option = wx.getLaunchOptionsSync()
 			if (option && option.scene !== 1154) {
-				const result = await wx.login();
-				if (result.code) {
-					let res = await Vue.prototype.wxLogin({
-						code: result.code
-					});
-				}
+				await Vue.prototype.toAddPage()
+				// const result = await wx.login();
+				// if (result.code) {
+				// 	let res = await Vue.prototype.wxLogin({
+				// 		code: result.code
+				// 	});
+				// }
 			}
 			// #endif
 		}
@@ -97,7 +98,7 @@ fly.interceptors.request.use(async (request) => {
 	if (api.onTicket) {
 		request.headers["bx_auth_ticket"] = api.ticket
 	} else {
-		if (bxAuthTicket&&request.url.indexOf('srvwx_app_login_verify') === -1) {
+		if (bxAuthTicket && request.url.indexOf('srvwx_app_login_verify') === -1) {
 			request.headers["bx_auth_ticket"] = bxAuthTicket
 		}
 	}

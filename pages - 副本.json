@@ -1,16 +1,5 @@
 {
-	"pages": [
-		// {
-		// 	"path": "pages/home/home",
-		// 	"style": {
-		// 		"navigationBarTitleText": "加载中...",
-		// 		"enablePullDownRefresh": true,
-		// 		// "navigationStyle":"custom",
-		// 		"navigationBarBackgroundColor": "#fff",
-		// 		"navigationBarTextStyle": "black"
-		// 	}
-		// },
-		{
+	"pages": [{
 			"path": "pages/pedia/pedia",
 			"style": {
 				"navigationBarTitleText": "健康宝典",
@@ -22,7 +11,6 @@
 			"style": {
 				"navigationBarTitleText": "健康档案",
 				"enablePullDownRefresh": true
-
 			}
 		},
 		{
@@ -38,8 +26,7 @@
 				"navigationBarTitleText": "个人中心",
 				"enablePullDownRefresh": true
 			}
-		}
-		, {
+		}, {
 			"path": "pages/customIndex/customIndex",
 			"style": {
 				"enablePullDownRefresh": false
@@ -489,25 +476,21 @@
 					"navigationBarTitleText": "疫苗预约",
 					"enablePullDownRefresh": true
 				}
-			}    ,{
-                    "path" : "VaccineList/VaccineList",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "疫苗列表",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-                ,{
-                    "path" : "DoctorIntro/DoctorIntro",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "简介",
-                    "enablePullDownRefresh": false
-                }
-                
-                }
-            ]
+			}, {
+				"path": "VaccineList/VaccineList",
+				"style": {
+					"navigationBarTitleText": "疫苗列表",
+					"enablePullDownRefresh": true
+				}
+
+			}, {
+				"path": "DoctorIntro/DoctorIntro",
+				"style": {
+					"navigationBarTitleText": "简介",
+					"enablePullDownRefresh": false
+				}
+
+			}]
 		},
 		{
 			"root": "publicPages",
@@ -542,17 +525,15 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
+				}, {
+					"path": "articleList/articleList",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": true
+					}
+
 				}
-			    ,{
-                    "path" : "articleList/articleList",
-                    "style" :                                                                                    
-                {
-                    "navigationBarTitleText": "",
-                    "enablePullDownRefresh": true
-                }
-                
-                }
-            ]
+			]
 		}
 	],
 	"tabBar": {
@@ -596,7 +577,7 @@
 		"backgroundColor": "#F8F8F8"
 	},
 	"condition": {
-		//模式配置，仅开发期间生效  55
+		//模式配置，仅开发期间生效  
 		"current": 0, //当前激活的模式(list 的索引项)  
 		"list": [{
 				"name": "绑定管理者", //模式名称  
@@ -623,10 +604,15 @@
 				"path": "archivesPages/DietDetail/DietDetail", //启动页面，必选  
 				"query": "from=share&invite_user_no=jiaqi&q=https://wx2.100xsys.cn/shareFood/FD202012141544420255/2021-01-27" //启动参数，在页面的onLoad函数里面得到  
 			},
+			// {
+			// 	"name": "聊天页面",
+			// 	"path": "personalPages/chat/chat",
+			// 	"query": "no=PB2020092209440043&groupInfo=%7B%22store_no%22%3Anull%2C%22icon%22%3A%2220210107172215427100%22%2C%22name%22%3A%22%E7%A7%91%E5%AD%A6%E5%87%8F%E8%84%82%22%2C%22id%22%3A4%2C%22gc_no%22%3A%22GC202101071722180004%22%2C%22attend_approve%22%3A%22%E5%90%A6%22%2C%22group_role%22%3A%22%E7%94%A8%E6%88%B7%22%2C%22latest_sign_in_time%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22pg_no%22%3A%22PG202101211816220025%22%2C%22lastChatState%22%3A%22%E6%9C%AA%E8%AF%BB%22%2C%22lastChatTime%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22lastChatText%22%3A%22%5B%E5%9B%BE%E7%89%87%5D%22%7D"
+			// },
 			{
 				"name": "聊天页面",
 				"path": "personalPages/chat/chat",
-				"query": "no=PB2020092209440043&groupInfo=%7B%22store_no%22%3Anull%2C%22icon%22%3A%2220210107172215427100%22%2C%22name%22%3A%22%E7%A7%91%E5%AD%A6%E5%87%8F%E8%84%82%22%2C%22id%22%3A4%2C%22gc_no%22%3A%22GC202101071722180004%22%2C%22attend_approve%22%3A%22%E5%90%A6%22%2C%22group_role%22%3A%22%E7%94%A8%E6%88%B7%22%2C%22latest_sign_in_time%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22pg_no%22%3A%22PG202101211816220025%22%2C%22lastChatState%22%3A%22%E6%9C%AA%E8%AF%BB%22%2C%22lastChatTime%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22lastChatText%22%3A%22%5B%E5%9B%BE%E7%89%87%5D%22%7D"
+				"query": "q=https%3A%2F%2Fwx2.100xsys.cn%2FjoinGroup%2FGC202104060944050002"
 			},
 			{
 				"name": "邀请新用户加入诊所",

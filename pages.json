@@ -604,10 +604,15 @@
 				"path": "archivesPages/DietDetail/DietDetail", //启动页面，必选  
 				"query": "from=share&invite_user_no=jiaqi&q=https://wx2.100xsys.cn/shareFood/FD202012141544420255/2021-01-27" //启动参数，在页面的onLoad函数里面得到  
 			},
+			// {
+			// 	"name": "聊天页面",
+			// 	"path": "personalPages/chat/chat",
+			// 	"query": "no=PB2020092209440043&groupInfo=%7B%22store_no%22%3Anull%2C%22icon%22%3A%2220210107172215427100%22%2C%22name%22%3A%22%E7%A7%91%E5%AD%A6%E5%87%8F%E8%84%82%22%2C%22id%22%3A4%2C%22gc_no%22%3A%22GC202101071722180004%22%2C%22attend_approve%22%3A%22%E5%90%A6%22%2C%22group_role%22%3A%22%E7%94%A8%E6%88%B7%22%2C%22latest_sign_in_time%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22pg_no%22%3A%22PG202101211816220025%22%2C%22lastChatState%22%3A%22%E6%9C%AA%E8%AF%BB%22%2C%22lastChatTime%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22lastChatText%22%3A%22%5B%E5%9B%BE%E7%89%87%5D%22%7D"
+			// },
 			{
 				"name": "聊天页面",
 				"path": "personalPages/chat/chat",
-				"query": "no=PB2020092209440043&groupInfo=%7B%22store_no%22%3Anull%2C%22icon%22%3A%2220210107172215427100%22%2C%22name%22%3A%22%E7%A7%91%E5%AD%A6%E5%87%8F%E8%84%82%22%2C%22id%22%3A4%2C%22gc_no%22%3A%22GC202101071722180004%22%2C%22attend_approve%22%3A%22%E5%90%A6%22%2C%22group_role%22%3A%22%E7%94%A8%E6%88%B7%22%2C%22latest_sign_in_time%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22pg_no%22%3A%22PG202101211816220025%22%2C%22lastChatState%22%3A%22%E6%9C%AA%E8%AF%BB%22%2C%22lastChatTime%22%3A%222021-01-28%2022%3A20%3A59%22%2C%22lastChatText%22%3A%22%5B%E5%9B%BE%E7%89%87%5D%22%7D"
+				"query": "q=https%3A%2F%2Fwx2.100xsys.cn%2FjoinGroup%2FGC202104060944050002"
 			},
 			{
 				"name": "邀请新用户加入诊所",
@@ -617,7 +622,7 @@
 			{
 				"name": "邀请新用户加入诊所",
 				"path": "pediaPages/hospitalOverview/hospitalOverview",
-				"query": "q=https%3A%2F%2Fwx2.100xsys.cn%2Fmpwx%2FshareClinic%2FS20210227032%2FPB2020092209440043"
+				"query": "q=https%3A%2F%2Fwx2.100xsys.cn%2Fmpwx%2FshareClinic%2FS20210227032%2Fjiaqi"
 			}
 		]
 	}

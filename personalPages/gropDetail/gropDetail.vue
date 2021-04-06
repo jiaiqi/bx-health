@@ -327,7 +327,7 @@
 		},
 		async onLoad(option) {
 			this.checkOptionParams(option);
-			this.toAddPage();
+			await this.toAddPage();
 			if (!this.userInfo || !this.userInfo.no) {
 				const result = await wx.login();
 				let userInfo = uni.getStorageSync('current_user_info');
@@ -350,7 +350,6 @@
 					this.storeNo = option.storeNo
 					if (this.type === 'group-member') {
 						this.selectGroupMember();
-
 					}
 				}
 			}
@@ -368,7 +367,9 @@
 					let result = text.split('https://wx2.100xsys.cn/joinGroup/')[1];
 					this.gc_no = result;
 					this.type = 'join-detail';
+					this.from = 'store-detail'
 					this.selectGroupInfo();
+					this.selectPersonInGroup();
 				}
 			}
 		},

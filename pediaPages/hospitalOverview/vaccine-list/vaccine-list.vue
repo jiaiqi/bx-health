@@ -255,7 +255,6 @@
 					withSubscriptions: true, //  这里设置为true,下面才会返回mainSwitch
 					success: function(res) {
 						// 调起授权界面弹窗
-						debugger
 						if (res.subscriptionsSetting.mainSwitch) { // 用户打开了订阅消息总开关
 							if (res.subscriptionsSetting.itemSettings !=
 								null) { // 用户同意总是保持是否推送消息的选择, 这里表示以后不会再拉起推送消息的授权
@@ -406,12 +405,13 @@
 							icon: false
 						})
 					}
-					let result = await wx.login()
-					if (result.code) {
-						await self.wxLogin({
-							code: result.code
-						})
-					}
+					await this.toAddPage()
+					// let result = await wx.login()
+					// if (result.code) {
+					// 	await self.wxLogin({
+					// 		code: result.code
+					// 	})
+					// }
 				}
 
 				if (e.detail && e.detail.errMsg && e.detail.errMsg.indexOf('ok') !== -1) {
@@ -691,7 +691,7 @@
 				overflow: hidden;
 				display: flex;
 				justify-content: center;
-				
+
 				.remark-pic {
 					width: 300rpx;
 					margin-right: 10rpx;
