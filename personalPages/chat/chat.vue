@@ -456,6 +456,7 @@
 					}]
 				}
 				if (cond.length > 0) {
+					debugger
 					let sessionInfo = await this.getSession(cond)
 					if (sessionInfo && sessionInfo.session_no) {
 						this.updateSessionNo()

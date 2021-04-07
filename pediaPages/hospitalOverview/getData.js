@@ -158,36 +158,6 @@ const getVaccineList = async () => {
 		return res.data
 	}
 }
-// const getVaccineList = async () => {
-// 	let req = {
-// 		"condition": [{
-// 			"colName": "app_date",
-// 			"ruleType": "ge",
-// 			"value": dayjs().format('YYYY-MM-DD')
-// 		}],
-// 		"page": {
-// 			"pageNo": 1,
-// 			"rownumber": 20
-// 		},
-// 	}
-// 	let res = await $fetch('select', 'srvhealth_store_vaccination_appointment_select', req, 'health')
-// 	if (res.success) {
-// 		let data = res.data.reduce((pre, cur) => {
-// 			if (!pre[cur.appoint_name]||!pre[cur.appoint_name].data||!Array.isArray(pre[cur.appoint_name].data)) {
-// 				pre[cur.appoint_name] = {
-// 					label:cur.appoint_name,
-// 					desc:cur.app_desc,
-// 					data:[cur]
-// 				}
-// 			} else {
-// 				pre[cur.appoint_name].data.push(cur)
-// 			}
-// 			return pre
-// 		}, {})
-// 		return data
-// 	}
-// }
-
 export {
 	getKefuSession,
 	getGroupListUser,

@@ -443,6 +443,14 @@
 						"enablePullDownRefresh": false
 					}
 
+				}, {
+					"path": "doctorIntro/doctorIntro",
+					"style": {
+						"navigationBarBackgroundColor":"#eef1f5",
+						"navigationBarTextStyle":"black",
+						// "navigationBarTitleText": "介绍",
+						"enablePullDownRefresh": false
+					}
 				}
 			]
 		},

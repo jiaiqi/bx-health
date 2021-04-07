@@ -1628,6 +1628,14 @@ export default {
 								store.commit('SET_INTO_HOSPITAL_STATUS', true)
 							}
 						})
+					} else if (userInfo.home_store_type === '医生') {
+						uni.redirectTo({
+							url: '/pediaPages/doctorIntro/doctorIntro',
+							success() {
+								// 标记 已进入过餐馆主页
+								store.commit('SET_INTO_HOSPITAL_STATUS', true)
+							}
+						})
 					}
 				}
 				return store.state.user.userInfo
@@ -1703,6 +1711,14 @@ export default {
 							url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state
 								.user
 								.userInfo.home_store_no,
+							success() {
+								// 标记 已进入过餐馆主页
+								store.commit('SET_INTO_HOSPITAL_STATUS', true)
+							}
+						})
+					} else if (userInfo.home_store_type === '医生') {
+						uni.redirectTo({
+							url: '/pediaPages/doctorIntro/doctorIntro',
 							success() {
 								// 标记 已进入过餐馆主页
 								store.commit('SET_INTO_HOSPITAL_STATUS', true)

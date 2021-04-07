@@ -6,8 +6,11 @@
 					<text class="cuIcon-titles text-blue"></text>
 					<text class="text-bold " style="font-size: 16px;">{{cate.name}}</text>
 				</view>
-				<view class="to-more" @click="toMore(cate)">
-					<text class="cuIcon-right text-grey" v-if="cate.list.length>2"></text>
+				<view class="to-more text-grey" @click="toMore(cate)" v-if="cate.list.length>=rownumber">
+					<text>
+						更多
+					</text>
+					<text class="cuIcon-right"></text>
 				</view>
 			</view>
 			<view class="content news-list">
@@ -38,6 +41,7 @@
 </template>
 
 <script>
+	// 文章列表
 	export default {
 		data() {
 			return {
@@ -45,6 +49,10 @@
 			}
 		},
 		props: {
+			rownumber: {
+				type: Number,
+				default: 3
+			},
 			storeInfo: {
 				type: Object
 			},

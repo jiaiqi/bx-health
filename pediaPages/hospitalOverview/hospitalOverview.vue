@@ -1,87 +1,19 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="page-wrap" v-if="!authBoxDisplay||client_env==='web'">
-		<swiper class="screen-swiper item-box rectangle-dot" easing-function="linear" indicator-active-color="#00aaff"
-			:indicator-dots="true" :circular="true" :autoplay="true" interval="5000" duration="500" height="300">
-			<swiper-item v-for="(item, index) in swiperList" :key="item.url" @click.stop="toPreviewImage(item.url)">
-				<image :src="item.url" mode="scaleToFill"></image>
-			</swiper-item>
-		</swiper>
-		<view class="page-content">
-			<view class="header-wrap" v-if="storeNo&&storeInfo&&storeInfo.id">
-				<view class="hospital-top">
-					<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
-					<view class="logo" v-else-if="storeInfo.name">{{ storeInfo.name.slice(0, 1) }}</view>
-					<view class="home-btn" @click="setHomePage">
-						<button class="cuIcon-home cu-btn  bg-cyan" v-if="userInfo&&userInfo.home_store_no!==storeNo">
-						</button>
-					</view>
-					<view class="left" @click="toPages('instroduce')">
-						<view class="top">
-							<view class="name">{{ storeInfo.name ||'机构名称'}}</view>
-							<view class="bind" v-if="!isBind"><button @click.stop="bindStore(true)" type="primary"
-									class="bg-blue cu-btn sm">绑定</button></view>
-						</view>
-						<view class="bottom" v-if="introduction && introduction.length < 25">{{ introduction }}</view>
-						<view class="bottom" v-if="storeInfo.address">
-							<view class="address">
-								<text class="content">{{ storeInfo.address||'机构地址' }}</text>
-								<text @click.stop="getCurrentLocation"
-									class="cuIcon-locationfill text-blue margin-left-xs"
-									style="font-size: 30px;"></text>
-							</view>
-						</view>
-					</view>
-					<view class="instroduce" @click="toPages('instroduce')">
-						<view v-html="storeInfo.introduction"></view>
-					</view>
-					<view class="right">
-						<view class="right-item" @click="makePhoneCall">
-							<image class="image" src="../../static/icon/makePhone.png" mode="aspectFit"></image>
-							<text>电话</text>
-						</view>
-						<view class="right-item" @click="toConsult">
-							<view class="image-box">
-								<view class="cu-tag badge" v-if="kefuNum">{{kefuNum}}</view>
-								<image class="image" src="../../static/icon/msg.png" mode="aspectFit"></image>
-							</view>
-							<text>在线咨询</text>
-						</view>
-					</view>
-				</view>
-				<view class="menu-list">
-					<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
-						:indicator-dots="true" :autoplay="false">
-						<swiper-item v-for="(swiperItem,swiperIndex) in mainMenuList" :key="swiperIndex">
-							<view class="swiper-item">
-								<view class="menu-item"
-									@click="item.eventType==='toPage'?toPages(item.type):toGroup(item.type)"
-									v-for="(item,index) in swiperItem" :key="index">
-									<view class="cu-tag badge" v-if="item.num">{{item.num||''}}</view>
-									<u-icon :name="item.icon" size="60" color="#00aaff"
-										v-if="item.iconType==='uicon'&&!item.custonIcon">
-									</u-icon>
-									<u-icon custom-prefix="custom-icon" :name="item.icon" size="60" color="#00aaff"
-										v-else-if="item.iconType==='uicon'&&item.custonIcon">
-									</u-icon>
-									<image class="icon image" :src="item.icon" mode="aspectFit"
-										v-if="item.iconType==='image'">
-										<text :class="item.icon" style="font-size: 30px;color:#00aaff;"
-											v-if="item.iconType==='font'"></text>
-										<text class="title">{{item.label}}</text>
-								</view>
-							</view>
-						</swiper-item>
-					</swiper>
-				</view>
-				<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
-					desc="goods_desc"></goods-list>
-				<vaccine-list v-if="storeNo==='S20210227032'" ref='vaccineList'></vaccine-list>
-				<staff-manage :storeNo="storeNo" v-if="storeInfo&&storeInfo.type==='诊所'"
-					@toDoctorDetail="toDoctorDetail"></staff-manage>
-				<news-list :website_no="storeInfo&&storeInfo.website_no" ref="newsList" :storeInfo="storeInfo">
-				</news-list>
-				<view class="introduction" v-if="storeInfo.type !== '健康服务'&&deptList.length>0">
+		<slide-list :swiperList="swiperList"></slide-list>
+		<store-info :storeInfo="storeInfo" :userInfo="userInfo" :bindUserInfo="bindUserInfo" @bindUser="bindStore"
+			v-if="storeInfo.store_no" :isBind="isBind"></store-info>
+		<button-list :mainMenuList="mainMenuList" :userInfo="userInfo" :bindUserInfo="bindUserInfo" :storeInfo="storeInfo"
+			@addToStore="addToStore"></button-list>
+		<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
+			desc="goods_desc"></goods-list>
+		<vaccine-list v-if="storeNo==='S20210227032'" ref='vaccineList'></vaccine-list>
+		<staff-manage :storeNo="storeNo" v-if="storeInfo&&storeInfo.type==='诊所'" @toDoctorDetail="toDoctorDetail">
+		</staff-manage>
+		<news-list :website_no="storeInfo&&storeInfo.website_no" ref="newsList" :storeInfo="storeInfo">
+		</news-list>
+		<!-- 	<view class="introduction" v-if="storeInfo.type !== '健康服务'&&deptList.length>0">
 					<view class="title">
 						<view>
 							<text class="cuIcon-titles text-blue"></text>
@@ -95,9 +27,7 @@
 								@click="toDeptDetail(item)">{{ item.dept_name }}</button>
 						</view>
 					</view>
-				</view>
-			</view>
-		</view>
+				</view> -->
 	</view>
 	<bx-auth v-else @getuserinfo="getuserinfo"></bx-auth>
 </template>
@@ -112,12 +42,18 @@
 		getGroupListUser,
 		getUserList
 	} from './getData.js'
-	import goodsList from './goods-list.vue';
+	import slideList from './slide-picture/slide-picture.vue'
+	import storeInfo from './store-info/store-info.vue'
+	import buttonList from './button-group/button-group.vue'
+	import goodsList from './goods-list/goods-list.vue';
 	import vaccineList from './vaccine-list/vaccine-list.vue'
 	import newsList from './news-list/news-list.vue'
 	import staffManage from './staff-manage/staff-manage.vue'
 	export default {
 		components: {
+			slideList,
+			storeInfo,
+			buttonList,
 			goodsList,
 			vaccineList,
 			staffManage,
@@ -138,6 +74,7 @@
 				noticeList: [], // 通知公告
 				newsList: [], // 新闻
 				menuList: [],
+				msgNum: 0,
 				kefuSessionInfo: {},
 				vaccineList: [], // 可预约疫苗列表
 			};
@@ -162,7 +99,6 @@
 							eventType: 'toGroup',
 							type: item.gc_no,
 							num: item.unreadNum,
-							unreadNum: item.unreadNum
 						}
 					})
 					list = [...list, ...groupList]
@@ -240,14 +176,14 @@
 					}, [])
 				}
 			},
-			introduction() {
-				if (!this.fullIntro && this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction
-					.length > 80) {
-					return this.storeInfo.introduction.slice(0, 80) + '...';
-				} else {
-					return this.storeInfo.introduction;
-				}
-			}
+			// introduction() {
+			// 	if (!this.fullIntro && this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction
+			// 		.length > 80) {
+			// 		return this.storeInfo.introduction.slice(0, 80) + '...';
+			// 	} else {
+			// 		return this.storeInfo.introduction;
+			// 	}
+			// }
 		},
 		methods: {
 			async getuserinfo(e) {
@@ -273,135 +209,32 @@
 				}
 				// #endif
 			},
-			toPages(e, info) {
-				let url = '';
-				if ((!this.bindUserInfo || !this.bindUserInfo.store_user_no) && e !== 'health-manager') {
-					this.addToStore()
-					return
-				}
-				switch (e) {
-					case 'manager':
-						url = `/personalPages/StoreManager/StoreManager?store_no=${this.storeNo}`
-						break;
-					case 'vaccine-order':
-						url = '/storePages/VaccineOrder/VaccineOrder'
-						break;
-					case 'subscsribe':
-						url = '/publicPages/webviewPage/webviewPage?webUrl=' + encodeURIComponent(
-							'https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ');
-						break;
-					case 'health-manager':
-						url = '/pages/pedia/pedia'
-						break;
-					case 'food':
-						url =
-							'/otherPages/dietSelect/dietSelect?condType={"type":"food","serviceName":"srvhealth_diet_contents_select","colName":"name","imgCol":"image","wordKey":{"title":"name","unit":"unit","energy":"unit_energy"},"pagetType":"detail"}';
-						break;
-					case 1: // 就诊登记
-						// url = '/storePages/Registration/Registration?storeNo=' + this.storeNo
-						let fieldsCond = [{
-								"column": "user_info_no",
-								"display": false
-							}, {
-								"column": "name",
-								"value": this.userInfo.name
-							}, {
-								"column": "time",
-								"value": this.formateDate('', 'date')
-							}, {
-								"column": "user_no",
-								"display": false,
-								value: this.userInfo.userno
-							},
-							{
-								"column": "store_no",
-								"display": false,
-								"value": this.storeNo
-							}
-						]
-						url =
-							'/publicPages/newForm/newForm?serviceName=srvhealth_see_doctor_record_add&type=add&fieldsCond=' +
-							JSON.stringify(
-								fieldsCond)
-						break;
-					case 2:
-						url =
-							'/otherPages/symptomSelect/symptomSelect2?term=%7B"serviceName"%3A"srvhealth_self_symptoms_select","srvApp"%3A"health","key"%3A"name","type"%3A"symptom"%7D';
-						break;
-					case 3:
-						url = '/archivesPages/healthCompose/healthCompose';
-						break;
-					case 'groupChat':
-						if (this.storeInfo.member_session_no) {
-							url =
-								`/personalPages/chat/chat?type=店铺机构全员&session_no=${this.storeInfo.member_session_no}&storeNo=${this.storeNo}`;
-						} else {
-							// url = '/personalPages/chat/chat?type=店铺机构全员&storeNo=' + this.storeNo
-						}
-						break;
-					case 'personal':
-						url = '/pediaPages/personal/personal?type=shop';
-						break;
-					case 'instroduce':
-						url = '/storePages/StoreIntroduce/StoreIntroduce?store_no=' + this.storeNo;
-						break;
-				}
-				if (url) {
-					uni.navigateTo({
-						url: url,
-						fail() {
-							uni.switchTab({
-								url: url
-							})
-						}
-					});
-				}
-			},
-			seeMore() {
-				this.fullIntro = true;
-			},
-			toStorePage() {
-				uni.switchTab({
-					url: '/pages/store/store',
-					fail() {
-						uni.redirectTo({
-							url: '/pages/store/store'
-						})
-					}
-				});
-			},
-			async selectPersonInGroup(group_no) {
-				// 查找当前登录用户有没有在此圈子用户列表中
-				let req = {
-					condition: [
-						// 	{
-						// 	colName: 'store_no',
-						// 	ruleType: 'eq',
-						// 	value: this.storeNo
-						// },
-					]
-				};
-				if (group_no) {
-					req.condition.push({
-						colName: 'person_no',
-						ruleType: 'eq',
-						value: this.userInfo.no
-					})
-					req.condition.push({
-						// {
-						colName: 'gc_no',
-						ruleType: 'eq',
-						value: group_no
-						// },
-					})
-				} else {
-					return
-				}
-				let res = await this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health');
-				if (Array.isArray(res.data) && res.data.length > 0) {
-					return res.data[0]
-				}
-			},
+			// async selectPersonInGroup(group_no) {
+			// 	// 查找当前登录用户有没有在此圈子用户列表中
+			// 	let req = {
+			// 		condition: []
+			// 	};
+			// 	if (group_no) {
+			// 		req.condition.push({
+			// 			colName: 'person_no',
+			// 			ruleType: 'eq',
+			// 			value: this.userInfo.no
+			// 		})
+			// 		req.condition.push({
+			// 			// {
+			// 			colName: 'gc_no',
+			// 			ruleType: 'eq',
+			// 			value: group_no
+			// 			// },
+			// 		})
+			// 	} else {
+			// 		return
+			// 	}
+			// 	let res = await this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health');
+			// 	if (Array.isArray(res.data) && res.data.length > 0) {
+			// 		return res.data[0]
+			// 	}
+			// },
 			toArticle(e) {
 				if (e.content_no) {
 					uni.navigateTo({
@@ -472,25 +305,6 @@
 					}
 				});
 			},
-			async toGroup(e) {
-				if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
-					// this.bindUserInfo = await this.bindStore()
-					this.addToStore()
-					return
-				}
-				let data = await this.selectPersonInGroup(e)
-				if (data && data.pg_no && data.gc_no) {
-					// 跳到聊天页面  
-					uni.navigateTo({
-						url: `/personalPages/chat/chat?type=群组圈子&groupNo=${data.gc_no}&pg_no=${data.pg_no}&group_role=${data.group_role||'用户'}`
-					});
-				} else {
-					// 跳到圈子信息页面
-					uni.navigateTo({
-						url: `/personalPages/gropDetail/gropDetail?gc_no=${e}&pb_no=${this.userInfo.no}&type=group-detail&from=store-detail`
-					});
-				}
-			},
 			toDeptDetail(e) {
 				// 跳转到科室详情
 				uni.navigateTo({
@@ -503,14 +317,6 @@
 					url: `/storePages/Registration/RegistrationDetail?storeNo=${e.store_no}&doctorNo=${e.person_no}`
 					// url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + e.person_no + '&store_no=' + e.store_no
 				});
-			},
-
-			async getKefuSessionInfo() {
-				// 查找在线客服对应会话信息
-				let res = await getKefuSession(this.storeNo, this.userInfo.no)
-				if (res) {
-					this.kefuSessionInfo = res
-				}
 			},
 			async seletGroupList() {
 				// 查找店铺关联群组
@@ -534,7 +340,7 @@
 						this.$store.commit('SET_STORE_USER', this.bindUserInfo)
 					}
 					this.storeNum = 0
-					this.kefuNum = 0
+					this.msgNum = 0
 				}
 			},
 			selectDepartList() {
@@ -861,11 +667,9 @@
 					this.checkSubscribeStatus()
 				}
 				if (this.storeNo) {
-					console.log(`storeNo:${this.storeNo}`)
 					await this.selectStoreInfo();
 					await this.selectBindUser()
 					await this.seletGroupList();
-					// await this.getKefuSessionInfo()
 					if (this.$refs.vaccineList) {
 						this.$refs.vaccineList.getVaccineList()
 					}
@@ -879,15 +683,7 @@
 					// 	icon: 'none'
 					// })
 				}
-			},
-			async getUserProfile(e) {
-				// 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认
-				// 开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
-				let res = await wx.getUserProfile({
-					desc: '用于完善会员资料' // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-				})
-				debugger
-			},
+			}
 		},
 		onPullDownRefresh() {
 			this.initPage()

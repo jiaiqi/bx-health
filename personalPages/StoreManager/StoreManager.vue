@@ -138,7 +138,8 @@
 		},
 		filters: {
 			overDisplay: function(value) {
-				return value < 999 ? value : '99+';
+				return value;
+				// return value < 999 ? value : '99+';
 			}
 		},
 		computed: {

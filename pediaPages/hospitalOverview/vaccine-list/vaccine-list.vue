@@ -5,8 +5,9 @@
 				<text class="cuIcon-titles text-blue"></text>
 				<text>疫苗预约</text>
 			</view>
-			<view class="to-more" @click="toMore()">
-				<text class="cuIcon-right text-grey" v-if="list.length>1"></text>
+			<view class="to-more text-grey" @click="toMore()" v-if="list.length>1">
+				<text>更多</text>
+				<text class="cuIcon-right "></text>
 			</view>
 		</view>
 		<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
@@ -691,10 +692,15 @@
 				overflow: hidden;
 				display: flex;
 				justify-content: center;
+				flex-wrap: wrap;
 
 				.remark-pic {
 					width: 300rpx;
 					margin-right: 10rpx;
+
+					.tips {
+						width: 100%;
+					}
 				}
 			}
 		}

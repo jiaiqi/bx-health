@@ -109,6 +109,7 @@
 		},
 		computed: {
 			...mapState({
+				env:state => state.app.env,
 				authUserInfo: state => state.app.authUserInfo,
 				subscsribeStatus: state => state.app.subscsribeStatus,
 				loginUserInfo: state => state.user.loginUserInfo,
@@ -118,7 +119,7 @@
 				hasIntoHospital: state => state.app.hasIntoHospital
 			}),
 			showPageContent() {
-				if (this.userInfo.add_store_no && !this.hasIntoHospital) {
+				if (this.userInfo.add_store_no && !this.hasIntoHospital&&this.env!=='h5') {
 					return false
 				} else {
 					return true
