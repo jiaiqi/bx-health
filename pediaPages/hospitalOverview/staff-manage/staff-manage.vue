@@ -2,7 +2,7 @@
 	<view class="staff-manage">
 		<view class="title">
 			<text class="cuIcon-titles text-blue"></text>
-			<text class="">咨询</text>
+			<text class="">{{pageItem.component_label||'咨询'}}</text>
 		</view>
 		<view class="content">
 			<view class="professor-box">
@@ -36,6 +36,9 @@
 				type: String,
 				default: ''
 			},
+			pageItem: {
+				type: Object
+			}
 		},
 		methods: {
 			async getStoreUserList() {
@@ -49,8 +52,8 @@
 						value: this.storeNo
 					}, {
 						colName: 'user_role',
-						ruleType: 'like',
-						value: '大夫'
+						ruleType: 'inset',
+						value: this.pageItem.user_role||'大夫'
 					}]
 				};
 				let res = await this.$http.post(url, req);

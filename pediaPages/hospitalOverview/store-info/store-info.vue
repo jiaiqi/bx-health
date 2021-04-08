@@ -2,7 +2,7 @@
 	<view class="store-info">
 		<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
 		<view class="logo" v-else-if="storeInfo.name">{{ storeInfo.name.slice(0, 1) }}</view>
-		<view class="home-btn" @click="setHomePage">
+		<view class="home-btn" @click="setHomePage" v-if="pageItem.show_set_home">
 			<button class="cuIcon-home cu-btn  bg-cyan" v-if="userInfo&&userInfo.home_store_no!==storeInfo.store_no">
 			</button>
 		</view>
@@ -29,7 +29,7 @@
 				<image class="image" src="../../../static/icon/makePhone.png" mode="aspectFit"></image>
 				<text>电话</text>
 			</view>
-			<view class="right-item" @click="toConsult">
+			<view class="right-item" @click="toConsult" v-if="pageItem.show_consult">
 				<view class="image-box">
 					<view class="cu-tag badge" v-if="msgNum">{{msgNum}}</view>
 					<image class="image" src="../../../static/icon/msg.png" mode="aspectFit"></image>
@@ -43,6 +43,9 @@
 <script>
 	export default {
 		props: {
+			pageItem: {
+				type: Object
+			},
 			storeInfo: {
 				type: Object
 			},
@@ -78,10 +81,35 @@
 			}
 		},
 		methods: {
+			makePhoneCall() {
+				uni.makePhoneCall({
+					phoneNumber: this.storeInfo && this.storeInfo.telephone ? this.storeInfo.telephone : '10086'
+				});
+			},
+			getCurrentLocation() {
+				let latitude = 34.219329;
+				let longitude = 108.935485;
+				uni.openLocation({
+					latitude: this.storeInfo.latitude ? Number(this.storeInfo.latitude) : latitude,
+					longitude: this.storeInfo.longitude ? Number(this.storeInfo.longitude) : longitude,
+					name: this.storeInfo.name,
+					address: this.storeInfo.address,
+					success: function() {
+						console.log('success');
+					},
+					fail(err) {
+						console.log('err', err);
+					}
+				});
+			},
+			setHomePage() {
+				this.$emit('setHomePage')
+			},
 			toPages(e, info) {
 				let url = '';
 				if ((!this.bindUserInfo || !this.bindUserInfo.store_user_no) && e !== 'health-manager') {
-					this.addToStore()
+					this.$emit('addToStore')
+					// this.addToStore()
 					return
 				}
 				switch (e) {

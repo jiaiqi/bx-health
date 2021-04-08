@@ -334,6 +334,12 @@
 					desc: '用于完善会员资料' // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
 				})
 				if (res.userInfo) {
+					return self.handleUserInfo(res)
+				}
+			},
+			async handleUserInfo(res) {
+				let self = this
+				if (typeof res === 'object' && Object.keys(res).length > 0 && res.userInfo) {
 					let rawData = {
 						nickname: res.userInfo.nickName,
 						sex: res.userInfo.gender,
@@ -343,9 +349,9 @@
 						headimgurl: res.userInfo.avatarUrl
 					};
 					self.$store.commit('SET_WX_USERINFO', rawData);
-					this.$store.commit('SET_AUTH_USERINFO', true);
-					self.setWxUserInfo(rawData);
-					return res.userInfo
+					self.$store.commit('SET_AUTH_USERINFO', true);
+					await self.setWxUserInfo(rawData);
+					return rawData
 				}
 			},
 			async saveWxUser(e) {
@@ -356,7 +362,14 @@
 					const url = this.getServiceUrl('wx', 'srvwx_app_login_verify', 'operate');
 					// #ifdef MP-WEIXIN
 					// const user = e.mp.detail;
-					const user = await this.getUserProfile()
+					let userInfo = {}
+					wx.canIUse('getUserProfile')
+					if (wx.canIUse('getUserProfile')) {
+						userInfo = await self.getUserProfile()
+					} else if (e && e.mp && e.mp.detail) {
+						userInfo = await self.handleUserInfo(e.mp.detail);
+					}
+					// const user = await this.getUserProfile()
 					const result = await self.wxVerifyLogin();
 					if (result) {
 						// 登录成功，返回上一页面

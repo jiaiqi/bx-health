@@ -17,7 +17,7 @@
 					</view>
 				</view>
 			</view>
-			<image src="../../otherPages/static/img/bj.jpg" mode="aspectFill" class="person-image"></image>
+			<image src="../static/img/ym.jpg" mode="aspectFill" class="person-image"></image>
 		</view>
 		<view class="main-intro" :class="{'show-wrap':showIntroWrap}">
 			<view class="intro-item" :class="{'show-wrap':showIntroWrap}">

@@ -259,8 +259,6 @@
 					this.session_no = res.data[0].session_no
 					switch (this.sessionType) {
 						case '店铺机构全员':
-							this.pageTitle = this.sessionInfo.session_name || this
-								.storeInfo.name
 							if (this.storeInfo && this.storeInfo.user_count) {
 								this.pageTitle =
 									`${ this.sessionInfo.session_name||this.storeInfo.name　}(${this.storeInfo.user_count})`
@@ -456,7 +454,6 @@
 					}]
 				}
 				if (cond.length > 0) {
-					debugger
 					let sessionInfo = await this.getSession(cond)
 					if (sessionInfo && sessionInfo.session_no) {
 						this.updateSessionNo()

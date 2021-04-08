@@ -2,9 +2,9 @@
 	<view class="menu-list">
 		<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
 			:indicator-dots="true" :autoplay="false">
-			<swiper-item v-for="(swiperItem,swiperIndex) in mainMenuList" :key="swiperIndex">
+			<swiper-item v-for="(swiperItem,swiperIndex) in menuList" :key="swiperIndex">
 				<view class="swiper-item">
-					<view class="menu-item" @click="item.eventType==='toPage'?toPages(item.type):toGroup(item.type)"
+					<view class="menu-item" @click="item.eventType==='toPage'?toPages(item):toGroup(item.type)"
 						v-for="(item,index) in swiperItem" :key="index">
 						<view class="cu-tag badge" v-if="item.num">{{item.num||''}}</view>
 						<u-icon :name="item.icon" size="60" color="#00aaff"
@@ -36,23 +36,216 @@
 			storeInfo: {
 				type: Object
 			},
-			userInfo:{
+			userInfo: {
 				type: Object
-			}
+			},
+			pageItem: {
+				type: Object
+			},
 		},
 		data() {
 			return {
-
+				groupList: [],
+				buttons: []
+			}
+		},
+		watch: {
+			// pageItem: {
+			// 	immediate: true,
+			// 	handler(newValue, oldValue) {
+			// 		// if (this.pageItem && this.pageItem.show_related_group === '是' && this.pageItem.type === "按钮组") {
+			// 		// 	// 查找关联群组
+			// 		// 	this.seletGroupList()
+			// 		// }
+			// 	}
+			// }
+		},
+		created() {
+			if (this.pageItem.component_no) {
+				this.getButtons()
+			}
+			if (this.pageItem && this.pageItem.show_related_group === '是' && this.pageItem.type === "按钮组") {
+				// 查找关联群组
+				this.seletGroupList()
+			}
+		},
+		computed: {
+			storeNo() {
+				return this.storeInfo && this.storeInfo.store_no ? this.storeInfo.store_no : null
+			},
+			menuList() {
+				let list = []
+				if (this.pageItem.show_subscribe) {
+					// 检测是否关注公众号
+					if (!this.$store.state?.app?.subscsribeStatus) {
+						list.push({
+							icon: 'cuIcon-notice text-orange',
+							iconType: 'font',
+							label: '通知设置',
+							eventType: 'toPage',
+							type: 'subscsribe',
+							num: '请设置'
+						})
+					}
+				}
+				if (this.storeInfo && this.storeInfo.member_session_no) {
+					list.push({
+						icon: 'cuIcon-comment',
+						iconType: 'font',
+						label: this.storeInfo.member_session_name || '公开咨询',
+						eventType: 'toPage',
+						type: 'groupChat',
+						num: this.bindUserInfo.store_session_user_unread_msg || 0,
+					})
+				}
+				if (Array.isArray(this.groupList)) {
+					let groupList = this.groupList.map(item => {
+						return {
+							icon: this.getImagePath(item.icon, true),
+							iconType: 'image',
+							label: item.name,
+							eventType: 'toGroup',
+							type: item.gc_no,
+							num: item.unreadNum || 0,
+						}
+					})
+					list = [...list, ...groupList]
+				}
+				if (this.bindUserInfo && this.bindUserInfo.user_role && (this.bindUserInfo.user_role.indexOf('工作人员') !== -
+						1 || this.bindUserInfo.user_role.indexOf('管理员') !== -1)) {
+					list.push({
+						icon: 'cuIcon-shop',
+						iconType: 'font',
+						label: '管理入口',
+						eventType: 'toPage',
+						num: this.storeInfo && this.storeInfo.kefu_unread_msg ? this.storeInfo.kefu_unread_msg : 0,
+						type: 'manager'
+					})
+				}
+				if (Array.isArray(this.buttons) && this.buttons.length > 0) {
+					this.buttons.forEach(btn => {
+						list.push({
+							navType: btn.navigate_type,
+							icon: this.getImagePath(btn.icon, true),
+							iconType: 'image',
+							label: btn.button_label,
+							eventType: 'toPage',
+							num: 0,
+							type: 'navPage',
+							url: btn.dest_page
+						})
+					})
+				}
+				if (Array.isArray(list)) {
+					return list.reduce((pre, item) => {
+						if (pre.length === 0) {
+							pre = [
+								[item]
+							]
+						} else if (pre[pre.length - 1].length >= 4) {
+							pre.push([item])
+						} else {
+							pre[pre.length - 1].push(item)
+						}
+						return pre
+					}, [])
+				}
 			}
 		},
 		methods: {
-			toPages(e, info) {
+			getButtons() {
+				let req = {
+					"serviceName": "srvhealth_page_item_buttons_select",
+					"colNames": ["*"],
+					"condition": [{
+							"colName": "item_no",
+							"ruleType": "eq",
+							"value": this.pageItem.component_no
+						},
+						// {
+						// 	"colName": "display",
+						// 	"ruleType": "ne",
+						// 	"value": '隐藏'
+						// }, {
+						// 	"colName": "display",
+						// 	"ruleType": "ne",
+						// 	"value": '否'
+						// },
+					],
+					"page": {
+						"pageNo": 1,
+						"rownumber": 99
+					},
+				}
+				this.$fetch('select', 'srvhealth_page_item_buttons_select', req, 'health').then(res => {
+					if (res.success) {
+						this.buttons = res.data
+					}
+				})
+			},
+			async getGroupList() {
+				// 查找店铺关联群组
+				let req = {
+					condition: [{
+							"colName": "circle_visible",
+							"ruleType": "ne",
+							"value": '不开放',
+						},
+						{
+							colName: 'store_no',
+							ruleType: 'eq',
+							value: this.storeNo
+						}
+					]
+				};
+				let res = await this.$fetch('select', 'srvhealth_group_circle_select', req, 'health')
+				if (res.success) {
+					return res.data
+				}
+			},
+			async seletGroupList() {
+				// 查找店铺关联群组 - 群成员信息
+				if (!this.storeNo) {
+					return
+				}
+				let groupList = await this.getGroupList()
+				if (Array.isArray(groupList) && groupList.length > 0) {
+					let groupNoList = groupList.map(item => item.gc_no)
+					let req = {
+						"condition": [{
+								"colName": "gc_no",
+								"ruleType": "in",
+								"value": groupNoList.toString(),
+							},
+							{
+								"colName": "person_no",
+								"value": this.userInfo.no,
+								"ruleType": "eq"
+							}
+						]
+					}
+					let res = await this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health')
+					if (res.success) {
+						groupList.forEach(item => {
+							let userInfo = res.data.find(data => data.gc_no === item.gc_no)
+							if (userInfo) {
+								item.userInfo = userInfo
+								item.latest_sign_in_time = userInfo.latest_sign_in_time
+								item.unreadNum = userInfo.user_unread_msg
+							}
+						})
+					}
+					this.groupList = groupList
+					return groupList
+				}
+			},
+			toPages(e) {
 				let url = '';
 				if ((!this.bindUserInfo || !this.bindUserInfo.store_user_no) && e !== 'health-manager') {
 					this.addToStore()
 					return
 				}
-				switch (e) {
+				switch (e.type) {
 					case 'manager':
 						url = `/personalPages/StoreManager/StoreManager?store_no=${this.storeInfo.store_no}`
 						break;
@@ -118,9 +311,20 @@
 					case 'instroduce':
 						url = '/storePages/StoreIntroduce/StoreIntroduce?store_no=' + this.storeInfo.store_no;
 						break;
+					case 'navPage':
+						if (e && e.url) {
+							url = e.url
+						}
+						break;
 				}
+
 				if (url) {
-					uni.navigateTo({
+					let navType = 'navigateTo'
+					if (e.navType) {
+						navType = e.navType
+					}
+
+					uni[navType]({
 						url: url,
 						fail() {
 							uni.switchTab({

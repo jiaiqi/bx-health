@@ -357,8 +357,18 @@
 		{
 			// 健康百科中的页面
 			"root": "pediaPages",
-			"pages": [{
+			"pages": [
+				{
 					"path": "hospitalOverview/hospitalOverview",
+					"style": {
+						"enablePullDownRefresh": true,
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black",
+						"navigationBarTitleText": "加载中..."
+					}
+				},
+				{
+					"path": "hospitalOverview/index",
 					"style": {
 						"enablePullDownRefresh": true,
 						"navigationBarBackgroundColor": "#fff",

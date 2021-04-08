@@ -1,5 +1,5 @@
 <template>
-	<view class="list-wrap">
+	<view class="list-wrap" v-if="articleStyle==='break'">
 		<view class="news" v-for="cate in noticeList" :key="cate.no" v-show="cate.list.length>0">
 			<view class="title">
 				<view class="">
@@ -38,6 +38,45 @@
 			</view>
 		</view>
 	</view>
+	<view class="list-wrap tab-list" v-else>
+		<scroll-view scroll-x class="bg-white nav" scroll-with-animation :scroll-left="scrollLeft">
+			<view class="cu-item" :class="index==current?'text-green cur':''" v-for="(item,index) in noticeList"
+				:key="index" @tap="changeTab(index)">
+				{{item.name}}
+			</view>
+		</scroll-view>
+
+		<view class="content news-list">
+			<view class="news-item" :class="{
+					'none-image':!item.icon_image,
+					'layout-right-image':item.icon_image,
+					'layout-left-image':item.cover_pic_style==='左侧'&&item.icon_image,
+					'layout-center-single-image':item.cover_pic_style==='下一'&&item.icon_image,
+					'layout-center-multi-image':item.cover_pic_style==='下三'&&item.icon_image
+					}" v-for="(item,noticeIndex) in list" :key="noticeIndex" @click="toArticle(item)">
+				<image mode="aspectFill" class="image-icon" :src="getImagePath(item.icon_image,true)"
+					v-if="item.icon_image">
+				</image>
+				<view class="content-box">
+					<text class="title-text">
+						<text>{{ item.title }}</text>
+						<text class="text-red cuIcon-hotfill"
+							v-if="item&&item.other_status&&item.other_status==='热门'">hot</text>
+						<text class="line-red" v-if="item&&item.other_status&&item.other_status==='精选'">精选</text>
+						<text class="line-red" v-if="item&&item.top_status&&item.top_status==='是'">置顶</text>
+					</text>
+					<text class="date">{{ formateDate(item.create_time) }}</text>
+				</view>
+			</view>
+		</view>
+		<view class="to-more text-grey text-center margin-top-xs" @click="toMore(noticeList[current])"
+			v-if="noticeList[current]&&noticeList[current].total&&noticeList[current].total>=rownumber">
+			<text>
+				更多
+			</text>
+			<text class="cuIcon-right"></text>
+		</view>
+	</view>
 </template>
 
 <script>
@@ -45,7 +84,10 @@
 	export default {
 		data() {
 			return {
-				noticeList: []
+				current: 0,
+				noticeList: [],
+				list: [],
+				scrollLeft: 0
 			}
 		},
 		props: {
@@ -59,8 +101,33 @@
 			website_no: {
 				type: String
 			},
+			cateNo: {
+				type: String
+			},
+			articleStyle: {
+				type: String
+			}
+		},
+		watch: {
+			cateNo: {
+				immediate: true,
+				handler(newValue, oldValue) {
+					if (this.cateNo) {
+						this.getTabs()
+					}
+				}
+			}
+		},
+
+		mounted() {
+
 		},
 		methods: {
+			changeTab(e) {
+				this.current = e
+				this.scrollLeft = (e - 1) * 60
+				this.list = this.noticeList[this.current] ? this.noticeList[this.current].list : []
+			},
 			toMore(e) {
 				if (e.no) {
 					let url = `/publicPages/articleList/articleList?cateNo=${e.no}`
@@ -87,9 +154,86 @@
 					});
 				}
 			},
-			getNotice() {
+			getTabs() {
 				let req = {
-
+					"serviceName": "srvdaq_cms_category_select",
+					"colNames": ["*"],
+					"condition": [{
+						"colName": "parent_no",
+						"value": this.cateNo,
+						"ruleType": "eq"
+					}],
+					"page": {
+						"pageNo": 1,
+						"rownumber": 999
+					}
+				};
+				this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(cate => {
+					if (cate.success && cate.data.length > 0) {
+						let types = cate.data.reduce((pre, cur) => {
+							let obj = {
+								name: cur.cate_name,
+								no: cur.no,
+								list: []
+							}
+							pre.push(obj)
+							return pre
+						}, [])
+						let req = []
+						if (types.length > 0) {
+							types.forEach(type => {
+								let obj = {
+									colNames: ["*"],
+									condition: [{
+											colName: 'no',
+											ruleType: 'eq',
+											value: type.no
+										},
+										{
+											colName: 'content_status',
+											ruleType: 'eq',
+											value: '发布'
+										}
+									],
+									order: [{
+										colName: "top_status",
+										orderType: "desc"
+									}, {
+										colName: "other_status",
+										orderType: "desc"
+									}, {
+										colName: "create_time",
+										orderType: "desc"
+									}],
+									page: {
+										pageNo: 1,
+										rownumber: 3
+									},
+									serviceName: "srvdaq_cms_content_select"
+								}
+								req.push(obj)
+							})
+						}
+						this.$fetch('multi', 'select', req, 'daq').then(res => {
+							if (res.success) {
+								res.data.forEach((item, index) => {
+									if (item.state === "SUCCESS") {
+										types[index].list = item.data
+										if (item.page && item.page.total) {
+											types[index].total = item.page.total
+										}
+									}
+								})
+								this.noticeList = types
+								this.changeTab(0)
+							}
+						})
+					}
+				});
+			},
+			getNotice() {
+				debugger
+				let req = {
 					condition: [{
 							colName: 'website_no',
 							ruleType: 'eq',
@@ -173,6 +317,12 @@
 		// 简介
 		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 		margin-bottom: 20rpx;
+
+		&.tab-list {
+			padding: 20rpx;
+			margin-bottom: 10px;
+			background-color: #fff;
+		}
 
 		.news {
 			padding: 20rpx;

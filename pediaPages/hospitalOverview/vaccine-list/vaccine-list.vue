@@ -664,10 +664,11 @@
 			}
 
 			.tips {
-
+				width: 100%;
 				text-align: center;
 				font-size: 12px;
-				color: #333;
+				color: #666;
+				
 			}
 
 			.vaccine-info {

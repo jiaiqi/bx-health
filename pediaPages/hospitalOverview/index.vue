@@ -1,12 +1,35 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="page-wrap" v-if="!authBoxDisplay||client_env==='web'">
-		<store-item v-for="pageItem in pageItemList" :key="pageItem.component_no" :pageItem="getConfig(pageItem)"
-			:storeInfo="storeInfo" :userInfo="userInfo" :bindUserInfo="bindUserInfo" ref="storeItem"
-			@toDoctorDetail="toDoctorDetail">
-		</store-item>
+		<slide-list :swiperList="swiperList"></slide-list>
+		<store-info :storeInfo="storeInfo" :userInfo="userInfo" :bindUserInfo="bindUserInfo" @bindUser="bindStore"
+			v-if="storeInfo.store_no" :isBind="isBind" @setHomePage="setHomePage" @addToStore="addToStore"></store-info>
+		<button-list :mainMenuList="mainMenuList" :userInfo="userInfo" :bindUserInfo="bindUserInfo"
+			:storeInfo="storeInfo" @addToStore="addToStore"></button-list>
+		<goods-list v-if="goodsListData.length > 0" :list="goodsListData" image="goods_img" name="goods_name"
+			desc="goods_desc"></goods-list>
+		<vaccine-list v-if="storeNo==='S20210227032'" ref='vaccineList'></vaccine-list>
+		<staff-manage :storeNo="storeNo" v-if="storeInfo&&storeInfo.type==='诊所'" @toDoctorDetail="toDoctorDetail">
+		</staff-manage>
+		<news-list :website_no="storeInfo&&storeInfo.website_no" ref="newsList" :storeInfo="storeInfo">
+		</news-list>
+		<!-- 	<view class="introduction" v-if="storeInfo.type !== '健康服务'&&deptList.length>0">
+					<view class="title">
+						<view>
+							<text class="cuIcon-titles text-blue"></text>
+							科室列表
+						</view>
+					</view>
+					<view class="content">
+						<view class="depart-box">
+							<button class="depart-item cu-btn bg-blue sm margin-right-xs" :key="deptIndex"
+								v-for="(item,deptIndex) in deptList"
+								@click="toDeptDetail(item)">{{ item.dept_name }}</button>
+						</view>
+					</view>
+				</view> -->
 	</view>
-	<bx-auth v-else></bx-auth>
+	<bx-auth v-else @getuserinfo="getuserinfo"></bx-auth>
 </template>
 
 <script>
@@ -19,12 +42,24 @@
 		getGroupListUser,
 		getUserList
 	} from './getData.js'
-	import StoreItem from './store-item/store-item.vue'
+	import slideList from './slide-picture/slide-picture.vue'
+	import storeInfo from './store-info/store-info.vue'
+	import buttonList from './button-group/button-group.vue'
+	import goodsList from './goods-list/goods-list.vue';
+	import vaccineList from './vaccine-list/vaccine-list.vue'
+	import newsList from './news-list/news-list.vue'
+	import staffManage from './staff-manage/staff-manage.vue'
 	export default {
 		components: {
-			StoreItem
+			slideList,
+			storeInfo,
+			buttonList,
+			goodsList,
+			vaccineList,
+			staffManage,
+			newsList
 		},
-		// mixins: [mixin],
+		mixins: [mixin],
 		data() {
 			return {
 				client_env: uni.getStorageSync('client_env'),
@@ -39,10 +74,9 @@
 				noticeList: [], // 通知公告
 				newsList: [], // 新闻
 				menuList: [],
-				// msgNum: 0,
+				msgNum: 0,
 				kefuSessionInfo: {},
 				vaccineList: [], // 可预约疫苗列表
-				pageItemList: []
 			};
 		},
 		computed: {
@@ -53,152 +87,154 @@
 				subscsribeStatus: state => state.app.subscsribeStatus, //是否关注公众号
 				authBoxDisplay: state => state.app.authBoxDisplay //授权访问用户信息
 			}),
-			// mainMenuList() {
-			// 	// 大按钮列表
-			// 	let list = []
-			// 	if (Array.isArray(this.groupList)) {
-			// 		let groupList = this.groupList.map(item => {
-			// 			return {
-			// 				icon: this.getImagePath(item.icon, true),
-			// 				iconType: 'image',
-			// 				label: item.name,
-			// 				eventType: 'toGroup',
-			// 				type: item.gc_no,
-			// 				num: item.unreadNum,
-			// 			}
-			// 		})
-			// 		list = [...list, ...groupList]
-			// 	}
-			// 	if (this.storeInfo && this.storeInfo.member_session_no) {
-			// 		list.unshift({
-			// 			icon: 'cuIcon-comment',
-			// 			iconType: 'font',
-			// 			label: this.storeInfo.member_session_name ? this.storeInfo.member_session_name : '公开咨询',
-			// 			eventType: 'toPage',
-			// 			type: 'groupChat',
-			// 			num: this.storeNum,
-			// 		})
-			// 	}
-			// 	if (!this.subscsribeStatus) {
-			// 		list.unshift({
-			// 			icon: 'cuIcon-notice text-orange',
-			// 			iconType: 'font',
-			// 			label: '通知设置',
-			// 			eventType: 'toPage',
-			// 			type: 'subscsribe',
-			// 			num: '请设置'
-			// 		})
-			// 	}
+			mainMenuList() {
+				// 大按钮列表
+				let list = []
+				if (Array.isArray(this.groupList)) {
+					let groupList = this.groupList.map(item => {
+						return {
+							icon: this.getImagePath(item.icon, true),
+							iconType: 'image',
+							label: item.name,
+							eventType: 'toGroup',
+							type: item.gc_no,
+							num: item.unreadNum,
+						}
+					})
+					list = [...list, ...groupList]
+				}
+				if (this.storeInfo && this.storeInfo.member_session_no) {
+					list.unshift({
+						icon: 'cuIcon-comment',
+						iconType: 'font',
+						label: this.storeInfo.member_session_name ? this.storeInfo.member_session_name : '公开咨询',
+						eventType: 'toPage',
+						type: 'groupChat',
+						num: this.storeNum,
+					})
+				}
+				if (!this.subscsribeStatus) {
+					list.unshift({
+						icon: 'cuIcon-notice text-orange',
+						iconType: 'font',
+						label: '通知设置',
+						eventType: 'toPage',
+						type: 'subscsribe',
+						num: '请设置'
+					})
+				}
 
-			// 	if (this.bindUserInfo && this.bindUserInfo.user_role && (this.bindUserInfo.user_role.indexOf('工作人员') !== -
-			// 			1 || this.bindUserInfo.user_role.indexOf('管理员') !== -1)) {
-			// 		list.push({
-			// 			icon: 'cuIcon-shop',
-			// 			iconType: 'font',
-			// 			label: '管理入口',
-			// 			eventType: 'toPage',
-			// 			num: this.storeInfo && this.storeInfo.kefu_unread_msg ? this.storeInfo.kefu_unread_msg : 0,
-			// 			type: 'manager'
-			// 		})
+				if (this.bindUserInfo && this.bindUserInfo.user_role && (this.bindUserInfo.user_role.indexOf('工作人员') !== -
+						1 || this.bindUserInfo.user_role.indexOf('管理员') !== -1)) {
+					list.push({
+						icon: 'cuIcon-shop',
+						iconType: 'font',
+						label: '管理入口',
+						eventType: 'toPage',
+						num: this.storeInfo && this.storeInfo.kefu_unread_msg ? this.storeInfo.kefu_unread_msg : 0,
+						type: 'manager'
+					})
+				}
+				if (this.storeNo === 'S20210227032') {
+					list.push({
+						icon: 'order',
+						iconType: 'uicon',
+						label: '我的预约',
+						eventType: 'toPage',
+						type: 'vaccine-order'
+					})
+				}
+				if (this.storeInfo && this.storeInfo.type === '健康服务') {
+					list.push({
+						icon: 'yinshi',
+						custonIcon: true,
+						iconType: 'uicon',
+						label: '食物库',
+						eventType: 'toPage',
+						type: 'food'
+					})
+				}
+				list.push({
+					icon: 'setting',
+					iconType: 'uicon',
+					label: '健康管理',
+					eventType: 'toPage',
+					type: 'health-manager'
+				})
+				if (Array.isArray(list)) {
+					return list.reduce((pre, item) => {
+						if (pre.length === 0) {
+							pre = [
+								[item]
+							]
+						} else if (pre[pre.length - 1].length >= 4) {
+							pre.push([item])
+						} else {
+							pre[pre.length - 1].push(item)
+						}
+						return pre
+					}, [])
+				}
+			},
+			// introduction() {
+			// 	if (!this.fullIntro && this.storeInfo && this.storeInfo.introduction && this.storeInfo.introduction
+			// 		.length > 80) {
+			// 		return this.storeInfo.introduction.slice(0, 80) + '...';
+			// 	} else {
+			// 		return this.storeInfo.introduction;
 			// 	}
-			// 	if (this.storeNo === 'S20210227032') {
-			// 		list.push({
-			// 			icon: 'order',
-			// 			iconType: 'uicon',
-			// 			label: '我的预约',
-			// 			eventType: 'toPage',
-			// 			type: 'vaccine-order'
-			// 		})
-			// 	}
-			// 	if (this.storeInfo && this.storeInfo.type === '健康服务') {
-			// 		list.push({
-			// 			icon: 'yinshi',
-			// 			custonIcon: true,
-			// 			iconType: 'uicon',
-			// 			label: '食物库',
-			// 			eventType: 'toPage',
-			// 			type: 'food'
-			// 		})
-			// 	}
-			// 	list.push({
-			// 		icon: 'setting',
-			// 		iconType: 'uicon',
-			// 		label: '健康管理',
-			// 		eventType: 'toPage',
-			// 		type: 'health-manager'
-			// 	})
-			// 	if (Array.isArray(list)) {
-			// 		return list.reduce((pre, item) => {
-			// 			if (pre.length === 0) {
-			// 				pre = [
-			// 					[item]
-			// 				]
-			// 			} else if (pre[pre.length - 1].length >= 4) {
-			// 				pre.push([item])
-			// 			} else {
-			// 				pre[pre.length - 1].push(item)
-			// 			}
-			// 			return pre
-			// 		}, [])
-			// 	}
-			// },
+			// }
 		},
 		methods: {
-			getConfig(pageItem) {
-				if (pageItem && pageItem.type) {
-					let type = pageItem.type
-					let keys = []
-					let config = {}
-					switch (type) {
-						case '轮播图':
-							keys = ['swiper_image', 'image_origin']
-							break;
-						case '店铺信息':
-							keys = ['show_consult', 'show_set_home']
-							break;
-						case '按钮组':
-							keys = ['show_subscribe', 'show_related_group', 'navigate_type', 'button_style',
-								'component_no']
-							break;
-						case '商品列表':
-							keys = ['row_number']
-							break;
-						case '疫苗列表':
-							keys = ['row_number']
-							break;
-						case '人员列表':
-							keys = ['user_role', 'row_number','component_label']
-							break;
-						case '文章列表':
-							keys = ['category_no', 'row_number', 'article_style']
-							break;
-					}
-					if (Array.isArray(keys) && keys.length > 0) {
-						keys.forEach(key => {
-							config[key] = pageItem[key]
-						})
-						config.type = pageItem['type']
-						return config
-					}
+			async getuserinfo(e) {
+				// #ifdef MP-WEIXIN
+				const user = e.mp.detail;
+				if (user && user.userInfo) {
+					let rawData = {
+						nickname: user.userInfo.nickName,
+						sex: user.userInfo.gender,
+						country: user.userInfo.country,
+						province: user.userInfo.province,
+						city: user.userInfo.city,
+						headimgurl: user.userInfo.avatarUrl
+					};
+					this.setWxUserInfo(rawData);
+					this.$store.commit('SET_WX_USERINFO', rawData);
+					this.$store.commit('SET_AUTH_SETTING', {
+						type: 'userInfo',
+						value: true
+					});
+					this.$store.commit('SET_AUTH_USERINFO', true);
+					this.toAddPage();
 				}
+				// #endif
 			},
-			async getPageItem() {
-				let req = {
-					"condition": [{
-						"colName": "store_no",
-						"ruleType": "eq",
-						"value": this.storeNo
-					}],
-					"order": [{
-						colName: "order_no",
-						orderType: "asc"
-					}],
-				}
-				let res = await this.$fetch('select', 'srvhealth_store_home_component_select', req, 'health')
-				if (res.success) {
-					this.pageItemList = res.data
-				}
-			},
+			// async selectPersonInGroup(group_no) {
+			// 	// 查找当前登录用户有没有在此圈子用户列表中
+			// 	let req = {
+			// 		condition: []
+			// 	};
+			// 	if (group_no) {
+			// 		req.condition.push({
+			// 			colName: 'person_no',
+			// 			ruleType: 'eq',
+			// 			value: this.userInfo.no
+			// 		})
+			// 		req.condition.push({
+			// 			// {
+			// 			colName: 'gc_no',
+			// 			ruleType: 'eq',
+			// 			value: group_no
+			// 			// },
+			// 		})
+			// 	} else {
+			// 		return
+			// 	}
+			// 	let res = await this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health');
+			// 	if (Array.isArray(res.data) && res.data.length > 0) {
+			// 		return res.data[0]
+			// 	}
+			// },
 			toArticle(e) {
 				if (e.content_no) {
 					uni.navigateTo({
@@ -303,8 +339,8 @@
 						this.bindUserInfo = isBind
 						this.$store.commit('SET_STORE_USER', this.bindUserInfo)
 					}
-					// this.storeNum = 0
-					// this.msgNum = 0
+					this.storeNum = 0
+					this.msgNum = 0
 				}
 			},
 			selectDepartList() {
@@ -631,21 +667,16 @@
 					this.checkSubscribeStatus()
 				}
 				if (this.storeNo) {
-					// this.storeInfo.store_no = null
-					this.getPageItem()
 					await this.selectStoreInfo();
 					await this.selectBindUser()
 					await this.seletGroupList();
-	// 				if (this.$refs.vaccineList) {
-	// 					this.$refs.vaccineList.getVaccineList()
-	// 				}
-					uni.$emit('updateStoreItemData')
-					// debugger
-					// if (this.$refs && this.$refs.storeItem && this.$refs.storeItem.onRefresh) {
-					// 	debugger
-					// 	this.$refs.storeItem.onRefresh()
-					// }
-					// this.selectUnreadAmount()
+					if (this.$refs.vaccineList) {
+						this.$refs.vaccineList.getVaccineList()
+					}
+					if (this.$refs.newsList) {
+						this.$refs.newsList.getNotice()
+					}
+					this.selectUnreadAmount()
 				} else {
 					// uni.showToast({
 					// 	title: '未发现store_no',
@@ -714,11 +745,11 @@
 			// #endif
 			uni.$on('updateStoreSessionLastLookTime', (e) => {
 				this.selectBindUser()
-				// this.selectUnreadAmount()
+				this.selectUnreadAmount()
 			})
 			uni.$on('updateKefuSessionLastLookTime', e => {
 				this.kefuSessionInfo = e
-				// this.selectUnreadAmount()
+				this.selectUnreadAmount()
 			})
 			uni.$on('updateUnread', e => {
 				// this.initPage()

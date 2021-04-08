@@ -2,8 +2,8 @@ const mixin = {
 	data() {
 		return {
 			groupList: [], // 关联圈子
-			kefuNum: 0, // 客服咨询会话未读数
-			storeNum: 0, // 店铺全员会话未读数
+			// kefuNum: 0, // 客服咨询会话未读数
+			// storeNum: 0, // 店铺全员会话未读数
 		}
 	},
 	methods: {
@@ -60,6 +60,7 @@ const mixin = {
 					if (data[0].state === 'SUCCESS' && Array.isArray(data[0].data) && data[0].data.length >
 						0) {
 						let storeUserInfo = data[0].data[0]
+						// 公开咨询
 						this.storeNum = storeUserInfo.store_session_user_unread_msg || 0
 					}
 					if (data[1].state === 'SUCCESS' && Array.isArray(data[1].data) && data[1].data.length >
