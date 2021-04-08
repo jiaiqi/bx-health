@@ -71,11 +71,11 @@
 			pageItem: {
 				immediate: true,
 				handler(newValue, oldValue) {
-					if (this.pageItem && this.pageItem.type === '轮播图') {
-						this.getSwiperList().then(res => {
-							this.swiperList = res
-						})
-					}
+					// if (this.pageItem && this.pageItem.type === '轮播图') {
+					// 	this.getSwiperList().then(res => {
+					// 		this.swiperList = res
+					// 	})
+					// }
 				}
 			}
 		},
@@ -90,9 +90,6 @@
 			},
 			onRefresh() {
 				if (this.pageItem) {
-					// if (this.$refs.newsList) {
-					// 	this.$refs.newsList.getNotice()
-					// }
 					switch (this.pageItem.type) {
 						case '按钮组':
 							if (this.$refs.buttonGroup && this.$refs.buttonGroup.seletGroupList) {
@@ -114,11 +111,14 @@
 								this.$refs.vaccineList.getVaccineList()
 							}
 							break;
+						case '轮播图':
+							this.getSwiperList()
+							break;
 					}
 				}
 			},
 			async getSwiperList() {
-				let image = this.pageItem.image_origin === '店铺信息' ? this.storeInfo.image : this.pageItem.swiper_image
+				let image = this.pageItem&&this.pageItem.image_origin === '店铺信息' ? this.storeInfo.image : this.pageItem.swiper_image
 				if (image) {
 					let res = await this.getFilePath(image);
 					if (Array.isArray(res)) {
@@ -130,6 +130,7 @@
 							pre.push(cur);
 							return pre;
 						}, []);
+						this.swiperList = swiperList
 						return swiperList
 					} else {
 						return []

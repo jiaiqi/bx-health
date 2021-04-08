@@ -13,10 +13,8 @@
 	import {
 		mapState
 	} from 'vuex';
-	import mixin from './mixin.js'
+	// import mixin from './mixin.js'
 	import {
-		getKefuSession,
-		getGroupListUser,
 		getUserList
 	} from './getData.js'
 	import StoreItem from './store-item/store-item.vue'
@@ -53,95 +51,6 @@
 				subscsribeStatus: state => state.app.subscsribeStatus, //是否关注公众号
 				authBoxDisplay: state => state.app.authBoxDisplay //授权访问用户信息
 			}),
-			// mainMenuList() {
-			// 	// 大按钮列表
-			// 	let list = []
-			// 	if (Array.isArray(this.groupList)) {
-			// 		let groupList = this.groupList.map(item => {
-			// 			return {
-			// 				icon: this.getImagePath(item.icon, true),
-			// 				iconType: 'image',
-			// 				label: item.name,
-			// 				eventType: 'toGroup',
-			// 				type: item.gc_no,
-			// 				num: item.unreadNum,
-			// 			}
-			// 		})
-			// 		list = [...list, ...groupList]
-			// 	}
-			// 	if (this.storeInfo && this.storeInfo.member_session_no) {
-			// 		list.unshift({
-			// 			icon: 'cuIcon-comment',
-			// 			iconType: 'font',
-			// 			label: this.storeInfo.member_session_name ? this.storeInfo.member_session_name : '公开咨询',
-			// 			eventType: 'toPage',
-			// 			type: 'groupChat',
-			// 			num: this.storeNum,
-			// 		})
-			// 	}
-			// 	if (!this.subscsribeStatus) {
-			// 		list.unshift({
-			// 			icon: 'cuIcon-notice text-orange',
-			// 			iconType: 'font',
-			// 			label: '通知设置',
-			// 			eventType: 'toPage',
-			// 			type: 'subscsribe',
-			// 			num: '请设置'
-			// 		})
-			// 	}
-
-			// 	if (this.bindUserInfo && this.bindUserInfo.user_role && (this.bindUserInfo.user_role.indexOf('工作人员') !== -
-			// 			1 || this.bindUserInfo.user_role.indexOf('管理员') !== -1)) {
-			// 		list.push({
-			// 			icon: 'cuIcon-shop',
-			// 			iconType: 'font',
-			// 			label: '管理入口',
-			// 			eventType: 'toPage',
-			// 			num: this.storeInfo && this.storeInfo.kefu_unread_msg ? this.storeInfo.kefu_unread_msg : 0,
-			// 			type: 'manager'
-			// 		})
-			// 	}
-			// 	if (this.storeNo === 'S20210227032') {
-			// 		list.push({
-			// 			icon: 'order',
-			// 			iconType: 'uicon',
-			// 			label: '我的预约',
-			// 			eventType: 'toPage',
-			// 			type: 'vaccine-order'
-			// 		})
-			// 	}
-			// 	if (this.storeInfo && this.storeInfo.type === '健康服务') {
-			// 		list.push({
-			// 			icon: 'yinshi',
-			// 			custonIcon: true,
-			// 			iconType: 'uicon',
-			// 			label: '食物库',
-			// 			eventType: 'toPage',
-			// 			type: 'food'
-			// 		})
-			// 	}
-			// 	list.push({
-			// 		icon: 'setting',
-			// 		iconType: 'uicon',
-			// 		label: '健康管理',
-			// 		eventType: 'toPage',
-			// 		type: 'health-manager'
-			// 	})
-			// 	if (Array.isArray(list)) {
-			// 		return list.reduce((pre, item) => {
-			// 			if (pre.length === 0) {
-			// 				pre = [
-			// 					[item]
-			// 				]
-			// 			} else if (pre[pre.length - 1].length >= 4) {
-			// 				pre.push([item])
-			// 			} else {
-			// 				pre[pre.length - 1].push(item)
-			// 			}
-			// 			return pre
-			// 		}, [])
-			// 	}
-			// },
 		},
 		methods: {
 			getConfig(pageItem) {
@@ -158,7 +67,8 @@
 							break;
 						case '按钮组':
 							keys = ['show_subscribe', 'show_related_group', 'navigate_type', 'button_style',
-								'component_no']
+								'component_no'
+							]
 							break;
 						case '商品列表':
 							keys = ['row_number']
@@ -167,7 +77,7 @@
 							keys = ['row_number']
 							break;
 						case '人员列表':
-							keys = ['user_role', 'row_number','component_label']
+							keys = ['user_role', 'row_number', 'component_label']
 							break;
 						case '文章列表':
 							keys = ['category_no', 'row_number', 'article_style']
@@ -199,76 +109,6 @@
 					this.pageItemList = res.data
 				}
 			},
-			toArticle(e) {
-				if (e.content_no) {
-					uni.navigateTo({
-						url: `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=${e.content_no}&store_no=${this.storeNo}&store_name=${this.storeInfo.name}`
-					});
-				}
-			},
-			getNotice() {
-				let req = {
-					condition: [{
-							colName: 'website_no',
-							ruleType: 'eq',
-							value: this.storeInfo.website_no
-						},
-						{
-							colName: 'is_leaf',
-							ruleType: 'eq',
-							value: '是'
-						}
-					]
-				};
-				this.$fetch('select', 'srvdaq_cms_category_select', req, 'daq').then(cate => {
-					if (cate.success && cate.data.length > 0) {
-						let types = cate.data.reduce((pre, cur) => {
-							let obj = {
-								name: cur.cate_name,
-								no: cur.no,
-								list: []
-							}
-							pre.push(obj)
-							return pre
-						}, [])
-						this.noticeList = types
-						let req = []
-						if (types.length > 0) {
-							types.forEach(type => {
-								let obj = {
-									//查询请求1
-									colNames: ["*"],
-									condition: [{
-										colName: 'no',
-										ruleType: 'eq',
-										value: type.no
-									}],
-									order: [{
-										colName: "create_time",
-										orderType: "desc"
-									}],
-									page: {
-										pageNo: 1,
-										rownumber: 3
-									},
-									serviceName: "srvdaq_cms_content_select"
-								}
-								req.push(obj)
-							})
-						}
-						this.$fetch('multi', 'select', req, 'daq').then(res => {
-							if (res.success) {
-								res.data.forEach((item, key) => {
-									if (item.state === "SUCCESS") {
-										types[key].list = item.data
-										this.$set(this.noticeList, key, types[key])
-									}
-								})
-							}
-						})
-					}
-				});
-			},
 			toDeptDetail(e) {
 				// 跳转到科室详情
 				uni.navigateTo({
@@ -281,13 +121,6 @@
 					url: `/storePages/Registration/RegistrationDetail?storeNo=${e.store_no}&doctorNo=${e.person_no}`
 					// url: '/personalPages/DoctorDetail/DoctorDetail?doctor_no=' + e.person_no + '&store_no=' + e.store_no
 				});
-			},
-			async seletGroupList() {
-				// 查找店铺关联群组
-				let res = await getGroupListUser(this.storeNo, this.userInfo.no)
-				if (Array.isArray(res)) {
-					this.groupList = res
-				}
 			},
 			async selectBindUser() {
 				let condition = [{
@@ -303,8 +136,6 @@
 						this.bindUserInfo = isBind
 						this.$store.commit('SET_STORE_USER', this.bindUserInfo)
 					}
-					// this.storeNum = 0
-					// this.msgNum = 0
 				}
 			},
 			selectDepartList() {
@@ -472,11 +303,6 @@
 					})
 				}
 			},
-			makePhoneCall() {
-				uni.makePhoneCall({
-					phoneNumber: this.storeInfo.telephone ? this.storeInfo.telephone : '10086'
-				});
-			},
 			async setHomePage() {
 				let self = this
 				let req = [{
@@ -513,22 +339,6 @@
 						}
 					}
 				})
-			},
-			getCurrentLocation() {
-				let latitude = 34.219329;
-				let longitude = 108.935485;
-				uni.openLocation({
-					latitude: this.storeInfo.latitude ? Number(this.storeInfo.latitude) : latitude,
-					longitude: this.storeInfo.longitude ? Number(this.storeInfo.longitude) : longitude,
-					name: this.storeInfo.name,
-					address: this.storeInfo.address,
-					success: function() {
-						console.log('success');
-					},
-					fail(err) {
-						console.log('err', err);
-					}
-				});
 			},
 			async getStoreUserInfo(no) {
 				let url = this.getServiceUrl('health', 'srvhealth_store_user_select', 'select');
@@ -635,16 +445,7 @@
 					this.getPageItem()
 					await this.selectStoreInfo();
 					await this.selectBindUser()
-					await this.seletGroupList();
-	// 				if (this.$refs.vaccineList) {
-	// 					this.$refs.vaccineList.getVaccineList()
-	// 				}
 					uni.$emit('updateStoreItemData')
-					// debugger
-					// if (this.$refs && this.$refs.storeItem && this.$refs.storeItem.onRefresh) {
-					// 	debugger
-					// 	this.$refs.storeItem.onRefresh()
-					// }
 					// this.selectUnreadAmount()
 				} else {
 					// uni.showToast({
