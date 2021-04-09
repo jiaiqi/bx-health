@@ -1,10 +1,13 @@
 <template>
 	<view class="menu-list">
-		<swiper class="swiper rectangle-dot" indicator-active-color="#00aaff" indicator-color="#ccc"
+		<swiper class="swiper"
+			:class="{'rectangle-dot':pageItem.button_style!=='grid','grid-style':pageItem.button_style==='grid'}"
+			:style="{height:swiperHeight+'px'}" indicator-active-color="#00aaff" indicator-color="#ccc"
 			:indicator-dots="true" :autoplay="false">
 			<swiper-item v-for="(swiperItem,swiperIndex) in menuList" :key="swiperIndex">
 				<view class="swiper-item">
-					<view class="menu-item" @click="item.eventType==='toPage'?toPages(item):toGroup(item.type)"
+					<view class="menu-item" :class="{'grid-style':pageItem.button_style==='grid'}"
+						@click="item.eventType==='toPage'?toPages(item):toGroup(item.type)"
 						v-for="(item,index) in swiperItem" :key="index">
 						<view class="cu-tag badge" v-if="item.num">{{item.num||''}}</view>
 						<u-icon :name="item.icon" size="60" color="#00aaff"
@@ -49,33 +52,26 @@
 				buttons: []
 			}
 		},
-		watch: {
-			// pageItem: {
-			// 	immediate: true,
-			// 	handler(newValue, oldValue) {
-			// 		// if (this.pageItem && this.pageItem.show_related_group === '是' && this.pageItem.type === "按钮组") {
-			// 		// 	// 查找关联群组
-			// 		// 	this.seletGroupList()
-			// 		// }
-			// 	}
-			// }
-		},
-		created() {
-			if (this.pageItem.component_no) {
-				this.getButtons()
-			}
-			if (this.pageItem && this.pageItem.show_related_group === '是' && this.pageItem.type === "按钮组") {
-				// 查找关联群组
-				this.seletGroupList()
-			}
-		},
 		computed: {
+			showPublic() {
+				return this.pageItem && this.pageItem.show_public_button === '是'
+			},
 			storeNo() {
 				return this.storeInfo && this.storeInfo.store_no ? this.storeInfo.store_no : null
 			},
+			swiperHeight() {
+				if (this.pageItem) {
+					let num = this.pageItem.row_number || 1
+					if (this.pageItem.button_style === 'grid') {
+						return num * 85 + 20
+					} else {
+						return num * 110 + 20
+					}
+				}
+			},
 			menuList() {
 				let list = []
-				if (this.pageItem.show_subscribe) {
+				if (this.pageItem.show_subscribe && this.showPublic) {
 					// 检测是否关注公众号
 					if (!this.$store.state?.app?.subscsribeStatus) {
 						list.push({
@@ -88,7 +84,7 @@
 						})
 					}
 				}
-				if (this.storeInfo && this.storeInfo.member_session_no) {
+				if (this.storeInfo && this.storeInfo.member_session_no && this.showPublic) {
 					list.push({
 						icon: 'cuIcon-comment',
 						iconType: 'font',
@@ -111,7 +107,8 @@
 					})
 					list = [...list, ...groupList]
 				}
-				if (this.bindUserInfo && this.bindUserInfo.user_role && (this.bindUserInfo.user_role.indexOf('工作人员') !== -
+				if (this.bindUserInfo && this.showPublic && this.bindUserInfo.user_role && (this.bindUserInfo.user_role
+						.indexOf('工作人员') !== -
 						1 || this.bindUserInfo.user_role.indexOf('管理员') !== -1)) {
 					list.push({
 						icon: 'cuIcon-shop',
@@ -136,13 +133,14 @@
 						})
 					})
 				}
+				let rownumber = this.pageItem.row_number || 1
 				if (Array.isArray(list)) {
 					return list.reduce((pre, item) => {
 						if (pre.length === 0) {
 							pre = [
 								[item]
 							]
-						} else if (pre[pre.length - 1].length >= 4) {
+						} else if (pre[pre.length - 1].length >= rownumber * 4) {
 							pre.push([item])
 						} else {
 							pre[pre.length - 1].push(item)
@@ -154,6 +152,13 @@
 		},
 		methods: {
 			getButtons() {
+				if (this.pageItem && this.showPublic && this.pageItem.show_related_group === '是' && this.pageItem.type ===
+					"按钮组") {
+					// 查找关联群组
+					this.seletGroupList()
+				}else{
+					this.groupList = []
+				}
 				let req = {
 					"serviceName": "srvhealth_page_item_buttons_select",
 					"colNames": ["*"],
@@ -397,12 +402,25 @@
 		.swiper {
 			width: 100%;
 			height: 130px;
+
+			&.grid-style {
+				::v-deep.uni-swiper-dot {
+					transition: all 0.5s;
+				}
+
+				::v-deep.uni-swiper-dot-active {
+					width: 35rpx;
+					border-radius: 10rpx;
+					height: 15rpx;
+				}
+			}
 		}
 
 		.swiper-item {
 			width: 100%;
 			display: flex;
 			padding: 20rpx 20rpx 0;
+			flex-wrap: wrap;
 		}
 
 		.menu-item {
@@ -420,6 +438,12 @@
 
 			&:nth-child(4n+1) {
 				margin-left: 0;
+			}
+
+			&.grid-style {
+				background-color: #fff;
+				padding: 0;
+				padding-top: 20rpx;
 			}
 
 			.icon {

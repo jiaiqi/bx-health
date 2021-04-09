@@ -68,6 +68,7 @@
 					<text class="date">{{ formateDate(item.create_time) }}</text>
 				</view>
 			</view>
+			<u-empty v-if="list.length===0" mode="news" text="暂无内容"></u-empty>
 		</view>
 		<view class="to-more text-grey text-center margin-top-xs" @click="toMore(noticeList[current])"
 			v-if="noticeList[current]&&noticeList[current].total&&noticeList[current].total>=rownumber">
@@ -113,7 +114,7 @@
 				immediate: true,
 				handler(newValue, oldValue) {
 					if (this.cateNo) {
-						this.getTabs()
+						// this.getTabs()
 					}
 				}
 			}
@@ -232,7 +233,6 @@
 				});
 			},
 			getNotice() {
-				debugger
 				let req = {
 					condition: [{
 							colName: 'website_no',
@@ -351,6 +351,7 @@
 		}
 
 		.news-list {
+			padding: 20rpx 0 0;
 			.news-item {
 				display: flex;
 				padding: 20rpx 0;

@@ -361,15 +361,7 @@
 				{
 					"path": "hospitalOverview/hospitalOverview",
 					"style": {
-						"enablePullDownRefresh": true,
-						"navigationBarBackgroundColor": "#fff",
-						"navigationBarTextStyle": "black",
-						"navigationBarTitleText": "加载中..."
-					}
-				},
-				{
-					"path": "hospitalOverview/index",
-					"style": {
+						"navigationStyle":"custom",
 						"enablePullDownRefresh": true,
 						"navigationBarBackgroundColor": "#fff",
 						"navigationBarTextStyle": "black",

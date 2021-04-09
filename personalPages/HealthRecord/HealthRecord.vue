@@ -648,19 +648,9 @@
 					// 有数据
 
 					this.$store.commit('SET_USERLIST', res.data.data);
-					if (uni.getStorageSync('current_user')) {
-						res.data.data.forEach(item => {
-							if (item.name === uni.getStorageSync('current_user')) {
-								uni.setStorageSync('current_user', item.name);
-								this.userInfo = item;
-								if (!item.profile_url) {
-									if (this.wxUserInfo.headimgurl) {
-										this.updateUserInfo();
-									}
-								}
-								this.$store.commit('SET_USERINFO', item);
-							}
-						});
+					let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
+					if (info&&info.no) {
+						this.$store.commit('SET_USERINFO', info);
 					} else {
 						uni.setStorageSync('current_user_info', res.data.data[0]);
 						uni.setStorageSync('current_user', res.data.data[0].name);

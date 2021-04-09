@@ -1,7 +1,7 @@
 // 引入全局mixin
 import mixin from './libs/mixin/mixin.js'
 // 引入关于是否mixin集成小程序分享的配置
-import wxshare from './libs/mixin/mpShare.js'
+// import wxshare from './libs/mixin/mpShare.js'
 // 全局挂载引入http相关请求拦截插件
 import http from './libs/request'
 
@@ -63,10 +63,7 @@ import $parent from './libs/function/$parent.js'
 // 获取sys()和os()工具方法
 // 获取设备信息，挂载到$u的sys()(system的缩写)属性中，
 // 同时把安卓和ios平台的名称"ios"和"android"挂到$u.os()中，方便取用
-import {
-	sys,
-	os
-} from './libs/function/sys.js'
+import {sys, os} from './libs/function/sys.js'
 // 防抖方法
 import debounce from './libs/function/debounce.js'
 // 节流方法
@@ -85,6 +82,7 @@ const $u = {
 	date: timeFormat, // 另名date
 	timeFrom,
 	colorGradient: colorGradient.colorGradient,
+	colorToRgba: colorGradient.colorToRgba,
 	guid,
 	color,
 	sys,
@@ -115,8 +113,11 @@ const $u = {
 	throttle,
 }
 
+// $u挂载到uni对象上
+uni.$u = $u
+
 const install = Vue => {
-	Vue.mixin(mixin)
+	Vue.mixin(mixin) 
 	if (Vue.prototype.openShare) {
 		Vue.mixin(mpShare);
 	}

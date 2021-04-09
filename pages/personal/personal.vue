@@ -39,15 +39,15 @@ export default {
 	},
 	async created() {
 		// #ifdef MP-WEIXIN
-		let res = await wx.getSetting();
-		if (!res.authSetting['scope.userInfo']) {
-			this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
-			this.$store.commit('SET_AUTH_USERINFO', false);
-			// 没有获取用户信息授权
-			return;
-		} else {
-			// this.updateUserInfo();
-		}
+		// let res = await wx.getSetting();
+		// if (!res.authSetting['scope.userInfo']) {
+		// 	this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
+		// 	this.$store.commit('SET_AUTH_USERINFO', false);
+		// 	// 没有获取用户信息授权
+		// 	return;
+		// } else {
+		// 	// this.updateUserInfo();
+		// }
 		// #endif
 	},
 	onPullDownRefresh() {

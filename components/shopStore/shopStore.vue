@@ -301,6 +301,10 @@
 					uni.navigateTo({
 						url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + item.store_no
 					});
+				}else if(item.type === '医生'){
+					uni.navigateTo({
+						url:'/pediaPages/doctorIntro/doctorIntro'
+					})
 				} else {
 					uni.navigateTo({
 						url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item

@@ -7,7 +7,8 @@
 	export default {
 		globalData: {
 			globalTextFontSize: 18,
-			globalLabelFontSize: 16
+			globalLabelFontSize: 16,
+			statusBarHeight: uni.getSystemInfoSync()['statusBarHeight'], // 获取导航栏的高度
 		},
 		computed: {
 			...mapState({

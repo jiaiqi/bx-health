@@ -1,10 +1,27 @@
 <template>
 	<!-- 简介、导航、科室列表、名医介绍、就诊通知、在线预约挂号链接 -->
 	<view class="page-wrap" v-if="!authBoxDisplay||client_env==='web'">
-		<store-item v-for="pageItem in pageItemList" :key="pageItem.component_no" :pageItem="getConfig(pageItem)"
-			:storeInfo="storeInfo" :userInfo="userInfo" :bindUserInfo="bindUserInfo" ref="storeItem"
-			@toDoctorDetail="toDoctorDetail">
+		<!-- {{storeInfo.name||'首页'}} -->
+		<u-navbar :is-back="false">
+			<view class="nav-bar" @click="openSwitchHomePage">
+				<view class="home-btn" v-if="showHomeBtn" @click.stop="goHome">
+					<text class="cuIcon-home"></text>
+				</view>
+				{{storeInfo.name||'首页'}}
+				<text class="cuIcon-unfold margin-left-xs" :class="{'show-home':showHomePageSelector}"></text>
+			</view>
+		</u-navbar>
+		<store-item v-for="pageItem in pageItemList" :goodsListData="goodsListData" :key="pageItem.component_no"
+			:pageItem="getConfig(pageItem)" :storeInfo="storeInfo" :userInfo="userInfo" :bindUserInfo="bindUserInfo"
+			ref="storeItem" @toDoctorDetail="toDoctorDetail" @toConsult="toConsult" @bindStore="bindStore">
 		</store-item>
+		<u-popup v-model="showHomePageSelector" mode="bottom">
+			<view class="store-list" v-if="storeList.length>0">
+				<view class="store-item" v-for="item in storeList" :key="item.id" @click="switchStore(item)">
+					{{item.name||''}}
+				</view>
+			</view>
+		</u-popup>
 	</view>
 	<bx-auth v-else></bx-auth>
 </template>
@@ -18,6 +35,13 @@
 		getUserList
 	} from './getData.js'
 	import StoreItem from './store-item/store-item.vue'
+	let menuButtonInfo = {
+		width: 0,
+		height: 0
+	}
+	// #ifdef MP-WEIXIN
+	menuButtonInfo = uni.getMenuButtonBoundingClientRect()
+	// #endif
 	export default {
 		components: {
 			StoreItem
@@ -25,6 +49,10 @@
 		// mixins: [mixin],
 		data() {
 			return {
+				showHomeBtn: false,
+				menuButtonInfo: menuButtonInfo,
+				showHomePageSelector: false,
+				selectVal: '',
 				client_env: uni.getStorageSync('client_env'),
 				isBind: false, //当前用户是否绑定此诊所
 				bindUserInfo: {},
@@ -40,7 +68,8 @@
 				// msgNum: 0,
 				kefuSessionInfo: {},
 				vaccineList: [], // 可预约疫苗列表
-				pageItemList: []
+				pageItemList: [],
+				storeList: [],
 			};
 		},
 		computed: {
@@ -53,6 +82,46 @@
 			}),
 		},
 		methods: {
+			switchStore(e) {
+				if (e.store_no) {
+					this.storeNo = e.store_no
+					this.initPage()
+					setTimeout(_ => {
+						this.showHomePageSelector = false
+					}, 100)
+				}
+			},
+			goHome() {
+				uni.switchTab({
+					url: '/pages/pedia/pedia'
+				})
+			},
+			async selectInStore() {
+				// 查找当前账号所在的所有店铺
+				let req = {
+					"condition": [{
+						"colName": "person_no",
+						"ruleType": "eq",
+						"value": this.userInfo.no
+					}],
+					"page": {
+						"pageNo": 1,
+						"rownumber": 10
+					},
+				}
+				let res = await this.$fetch('select', 'srvhealth_store_user_select', req, 'health')
+				if (res.success) {
+					this.storeList = res.data
+				}
+				return res
+			},
+			openSwitchHomePage() {
+				this.selectInStore().then(_ => {
+					if (Array.isArray(this.storeList) && this.storeList.length > 1) {
+						this.showHomePageSelector = !this.showHomePageSelector
+					}
+				})
+			},
 			getConfig(pageItem) {
 				if (pageItem && pageItem.type) {
 					let type = pageItem.type
@@ -67,7 +136,7 @@
 							break;
 						case '按钮组':
 							keys = ['show_subscribe', 'show_related_group', 'navigate_type', 'button_style',
-								'component_no'
+								'component_no','show_public_button','row_number'
 							]
 							break;
 						case '商品列表':
@@ -166,21 +235,21 @@
 					}
 				});
 			},
-			async getSwiperList(e) {
-				if (e.image) {
-					let res = await this.getFilePath(e.image);
-					if (Array.isArray(res)) {
-						this.swiperList = res.reduce((pre, cur) => {
-							if (cur.fileurl) {
-								cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni
-									.getStorageSync('bx_auth_ticket');
-							}
-							pre.push(cur);
-							return pre;
-						}, []);
-					}
-				}
-			},
+			// async getSwiperList(e) {
+			// 	if (e.image) {
+			// 		let res = await this.getFilePath(e.image);
+			// 		if (Array.isArray(res)) {
+			// 			this.swiperList = res.reduce((pre, cur) => {
+			// 				if (cur.fileurl) {
+			// 					cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni
+			// 						.getStorageSync('bx_auth_ticket');
+			// 				}
+			// 				pre.push(cur);
+			// 				return pre;
+			// 			}, []);
+			// 		}
+			// 	}
+			// },
 			async selectStoreInfo(times = 0) {
 				let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
 				let req = {
@@ -200,7 +269,7 @@
 					if (this.storeInfo.type === '健康服务') {
 						this.getGoodsListData();
 					}
-					this.getSwiperList(this.storeInfo);
+					// this.getSwiperList(this.storeInfo);
 					uni.setNavigationBarTitle({
 						title: this.storeInfo.name
 					});
@@ -230,7 +299,7 @@
 						})
 					}
 				}
-				this.selectDepartList();
+				// this.selectDepartList();
 			},
 
 			async bindStore() {
@@ -505,7 +574,13 @@
 			uni.$off('updateSessionLastLookTime')
 			uni.$off('updateStoreInfo')
 		},
+
 		async onLoad(option) {
+			// showHomeBtn
+			let pageInfo = getCurrentPages()
+			if (Array.isArray(pageInfo) && pageInfo.length === 1) {
+				this.showHomeBtn = true
+			}
 			this.$store.commit('SET_INTO_HOSPITAL_STATUS', true)
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
@@ -613,4 +688,46 @@
 
 <style lang="scss" scoped>
 	@import './style.scss';
+
+	/deep/ .u-flex {
+		display: flex;
+		z-index: 100000;
+	}
+
+	.cuIcon-unfold {
+		transition: all 0.5s ease;
+		display: inline-block;
+
+		&.show-home {
+			transform: rotate(90deg);
+		}
+	}
+
+	/deep/ .nav-bar {
+		display: flex;
+		// justify-content: center;
+		align-items: center;
+		padding: 0 40rpx;
+		width: 100%;
+
+		.home-btn {
+			// width: 30px;
+			// height: 30px;
+			border-radius: 50%;
+			// border: 1rpx solid #f1f1f1;
+			text-align: center;
+			line-height: 30px;
+			margin-right: 20rpx;
+			font-size: 18px;
+			color: #000;
+			font-weight: bold;
+		}
+	}
+
+	.store-list {
+		.store-item {
+			padding: 20rpx;
+			border-bottom: 1rpx solid #f1f1f1;
+		}
+	}
 </style>

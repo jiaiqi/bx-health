@@ -97,6 +97,9 @@ const wxVerifyLogin = async () => {
 	// 	store.commit('SET_AUTH_USERINFO', false)
 	// 	// return false
 	// }
+	if (store?.state?.user?.userInfo?.nick_name) {
+		store.commit('SET_AUTH_USERINFO', true)
+	}
 	if (store.state.app.isLogin) {
 		return true
 	}
@@ -215,12 +218,15 @@ const selectPersonInfo = async () => {
 		},
 	}
 	let res = await http.post(url, req)
-
+	store.commit('SET_USERINFO', res.data.data[0])
 	if (res.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-		store.commit('SET_USERINFO', res.data.data[0])
+		let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
+		if (info && info.no) {
+			store.commit('SET_USERINFO', info)
+		}
 		store.commit('SET_USERLIST', res.data.data)
-		uni.setStorageSync('current_user_info', res.data.data[0]);
-		uni.setStorageSync('current_user', res.data.data[0].name);
+		uni.setStorageSync('current_user_info', info || res.data.data[0]);
+		uni.setStorageSync('current_user', info && info.name ? info.name : res.data.data[0].name);
 		// #ifdef MP-WEIXIN
 		if (res.data.data[0].home_store_no && !store.state.app.hasIntoHospital) {
 			// 有home_store 此次打开小程序未进入过医院/餐馆主页

@@ -1532,18 +1532,9 @@ export default {
 				if (Array.isArray(res.data.data) && res.data.data.length > 0) {
 					let current_user_info = null
 					store.commit('SET_USERLIST', res.data.data);
-					if (uni.getStorageSync('current_user_info')) {
-						res.data.data.forEach(item => {
-							if (item.no === uni.getStorageSync('current_user_info').no) {
-								uni.setStorageSync('current_user_info', item);
-								current_user_info = item
-								try {
-									store.commit("SET_USERINFO", item)
-								} catch (e) {
-									//TODO handle the exception
-								}
-							}
-						});
+					let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
+					if (info&&info.no) {
+						store.commit("SET_USERINFO", info)
 					} else {
 						uni.setStorageSync('current_user_info', res.data.data[0]);
 						uni.setStorageSync('current_user', res.data.data[0].name);
@@ -1674,6 +1665,12 @@ export default {
 				store.commit('SET_USERLIST', res.data.data)
 				uni.setStorageSync('current_user_info', res.data.data[0]);
 				uni.setStorageSync('current_user', res.data.data[0].name);
+				let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
+				if(info&&info.no){
+					store.commit('SET_USERINFO', info)
+					uni.setStorageSync('current_user_info', info);
+					uni.setStorageSync('current_user', info.name);
+				}
 				// #ifdef MP-WEIXIN
 				if (res.data.data[0].home_store_no && !store.state.app.hasIntoHospital) {
 					// 有home_store 此次打开小程序未进入过医院/餐馆主页
@@ -1894,11 +1891,9 @@ export default {
 				// store.commit('SET_AUTH_USERINFO', true)
 			}
 			if (store.state.app.authBoxDisplay) {
-				debugger
 				store.commit('SET_REGIST_STATUS', false)
 				return
 			}
-			debugger
 			let login_user_info = uni.getStorageSync('login_user_info')
 			let user_no = uni.getStorageSync('login_user_info').user_no
 			try {

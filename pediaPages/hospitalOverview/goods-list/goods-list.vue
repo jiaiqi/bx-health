@@ -31,32 +31,51 @@
 export default {
 	name: 'good-list',
 	created() {
-		if (Array.isArray(this.list)) {
-			this.goodsList = this.deepClone(this.list).reduce((pre, cur) => {
-				let url = this.getImagePath(cur[this.image],true);
-				cur.url = url;
-				if (cur[this.image]) {
-					this.getImageInfo({ url: url }).then(picInfo => {
-						if (picInfo.w && picInfo.h) {
-							let res = this.setPicHeight(picInfo);
-							if (res.w && res.h) {
-								this.$set(cur, 'imgWidth', res.w);
-								this.$set(cur, 'imgHeight', res.h);
-							}
-						}
-					});
-				}
-				pre.push(cur)
-				return pre
-			}, []);
-		}
+		
 	},
 	data() {
 		return {
 			goodsList: []
 		};
 	},
+	mounted() {
+		if(this.storeNo){
+			this.getGoodsListData()
+		}
+	},
 	methods: {
+		getGoodsListData() {
+			let req = {
+				condition: [{
+					colName: 'store_no',
+					ruleType: 'eq',
+					value: this.storeNo
+				}]
+			};
+			this.$fetch('select', 'srvhealth_store_goods_select', req, 'health').then(res => {
+				if (Array.isArray(res.data)) {
+					if (Array.isArray(res.data)) {
+						this.goodsList = res.data.reduce((pre, cur) => {
+							let url = this.getImagePath(cur[this.image],true);
+							cur.url = url;
+							if (cur[this.image]) {
+								this.getImageInfo({ url: url }).then(picInfo => {
+									if (picInfo.w && picInfo.h) {
+										let res = this.setPicHeight(picInfo);
+										if (res.w && res.h) {
+											this.$set(cur, 'imgWidth', res.w);
+											this.$set(cur, 'imgHeight', res.h);
+										}
+									}
+								});
+							}
+							pre.push(cur)
+							return pre
+						}, []);
+					}
+				}
+			});
+		},
 		setPicHeight(content) {
 			let maxW = uni.upx2px(350);
 			content.h = (maxW * content.h) / content.w;
@@ -72,6 +91,9 @@ export default {
 		}
 	},
 	props: {
+		storeNo:{
+			type:String
+		},
 		list: {
 			type: Array
 		},

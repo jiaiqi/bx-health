@@ -81,6 +81,7 @@
 			}
 		},
 		methods: {
+		
 			makePhoneCall() {
 				uni.makePhoneCall({
 					phoneNumber: this.storeInfo && this.storeInfo.telephone ? this.storeInfo.telephone : '10086'
@@ -134,16 +135,17 @@
 			},
 			async toConsult() {
 				// 在线咨询
-				if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
-					this.bindUserInfo = await this.bindStore()
-					this.$store.commit('SET_STORE_USER', this.bindUserInfo)
-				}
-				if (this.bindUserInfo && this.bindUserInfo.store_user_no && this.storeInfo && this.storeInfo
-					.store_no) {
-					uni.navigateTo({
-						url: `/personalPages/chat/chat?type=机构用户客服&identity=客户&storeNo=${this.storeInfo.store_no}&store_user_no=${this.bindUserInfo.store_user_no}`
-					})
-				}
+				this.$emit('toConsult')
+				// if (!this.bindUserInfo || !this.bindUserInfo.store_user_no) {
+				// 	this.bindUserInfo = await this.bindStore()
+				// 	this.$store.commit('SET_STORE_USER', this.bindUserInfo)
+				// }
+				// if (this.bindUserInfo && this.bindUserInfo.store_user_no && this.storeInfo && this.storeInfo
+				// 	.store_no) {
+				// 	uni.navigateTo({
+				// 		url: `/personalPages/chat/chat?type=机构用户客服&identity=客户&storeNo=${this.storeInfo.store_no}&store_user_no=${this.bindUserInfo.store_user_no}`
+				// 	})
+				// }
 			},
 		}
 	}

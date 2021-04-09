@@ -1,13 +1,14 @@
 <template>
 	<view class="store-item" v-if="storeInfo&&storeInfo.store_no">
-		<slide-list :swiperList="swiperList" v-if="pageItem.type==='轮播图'"></slide-list>
+		<slide-list v-if="pageItem.type==='轮播图'" ref="swiperList" :storeInfo="storeInfo" :userInfo="userInfo"
+			:pageItem='pageItem'></slide-list>
 		<store-info :storeInfo="storeInfo" :userInfo="userInfo" :bindUserInfo="bindUserInfo" @bindUser="bindStore"
 			v-if="pageItem.type==='店铺信息'" :isBind="isBind" :pageItem='pageItem' @setHomePage="setHomePage"
-			@addToStore="addToStore"></store-info>
+			@addToStore="addToStore" @toConsult="toConsult"></store-info>
 		<button-list :pageItem="pageItem" :userInfo="userInfo" :bindUserInfo="bindUserInfo" :storeInfo="storeInfo"
 			@addToStore="addToStore" v-if="pageItem.type==='按钮组'" ref="buttonGroup"></button-list>
-		<goods-list v-if="pageItem.type==='商品列表'&&goodsListData.length > 0" :list="goodsListData" image="goods_img"
-			name="goods_name" desc="goods_desc"></goods-list>
+		<goods-list v-if="pageItem.type==='商品列表'&&goodsListData.length > 0" :storeNo="storeNo" image="goods_img"
+			name="goods_name" desc="goods_desc" ref="goodsList"></goods-list>
 		<vaccine-list v-if="pageItem.type==='疫苗列表'" ref='vaccineList'></vaccine-list>
 		<staff-manage :storeNo="storeNo" :pageItem="pageItem" v-if="pageItem.type==='人员列表'"
 			@toDoctorDetail="toDoctorDetail" ref="staffList">
@@ -53,6 +54,9 @@
 			mainMenuList: {
 				type: Array
 			},
+			goodsListData: {
+				type: Array
+			}
 		},
 		computed: {
 			storeNo() {
@@ -63,21 +67,7 @@
 			},
 		},
 		data() {
-			return {
-				swiperList: []
-			}
-		},
-		watch: {
-			pageItem: {
-				immediate: true,
-				handler(newValue, oldValue) {
-					// if (this.pageItem && this.pageItem.type === '轮播图') {
-					// 	this.getSwiperList().then(res => {
-					// 		this.swiperList = res
-					// 	})
-					// }
-				}
-			}
+			return {}
 		},
 		created() {
 			uni.$on('updateStoreItemData', () => {
@@ -85,6 +75,15 @@
 			})
 		},
 		methods: {
+			addToStore() {
+				this.$emit('addToStore')
+			},
+			toConsult() {
+				this.$emit('toConsult')
+			},
+			bindStore() {
+				this.$emit('bindStore')
+			},
 			toDoctorDetail(e) {
 				this.$emit('toDoctorDetail', e)
 			},
@@ -92,8 +91,8 @@
 				if (this.pageItem) {
 					switch (this.pageItem.type) {
 						case '按钮组':
-							if (this.$refs.buttonGroup && this.$refs.buttonGroup.seletGroupList) {
-								this.$refs.buttonGroup.seletGroupList()
+							if (this.$refs.buttonGroup && this.$refs.buttonGroup.getButtons) {
+								this.$refs.buttonGroup.getButtons()
 							}
 							break;
 						case '人员列表':
@@ -102,7 +101,7 @@
 							}
 							break;
 						case '文章列表':
-							if (this.$refs && this.$refs.articleList && this.$refs.articleList.getStoreUserList) {
+							if (this.$refs && this.$refs.articleList && this.$refs.articleList.getTabs) {
 								this.$refs.articleList.getTabs()
 							}
 							break;
@@ -112,31 +111,20 @@
 							}
 							break;
 						case '轮播图':
-							this.getSwiperList()
+							if (this.$refs && this.$refs.swiperList && this.$refs.swiperList.getSwiperList) {
+								this.$refs.swiperList.getSwiperList()
+							}
+							// this.getSwiperList()
+							break;
+						case '商品列表':
+							if (this.$refs && this.$refs.goodsList && this.$refs.goodsList.getGoodsListData) {
+								this.$refs.goodsList.getGoodsListData()
+							}
 							break;
 					}
 				}
 			},
-			async getSwiperList() {
-				let image = this.pageItem&&this.pageItem.image_origin === '店铺信息' ? this.storeInfo.image : this.pageItem.swiper_image
-				if (image) {
-					let res = await this.getFilePath(image);
-					if (Array.isArray(res)) {
-						let swiperList = res.reduce((pre, cur) => {
-							if (cur.fileurl) {
-								cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni
-									.getStorageSync('bx_auth_ticket');
-							}
-							pre.push(cur);
-							return pre;
-						}, []);
-						this.swiperList = swiperList
-						return swiperList
-					} else {
-						return []
-					}
-				}
-			},
+
 		},
 	}
 </script>

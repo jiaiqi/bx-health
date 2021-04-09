@@ -10,8 +10,42 @@
 <script>
 	export default {
 		props: {
-			swiperList: {
-				type: Array
+			pageItem: {
+				type: Object
+			},
+			storeInfo: {
+				type: Object
+			},
+			userInfo: {
+				type: Object
+			}
+		},
+		data() {
+			return {
+				swiperList: []
+			}
+		},
+		methods: {
+			async getSwiperList() {
+				let image = this.pageItem && this.pageItem.image_origin === '店铺信息' ? this.storeInfo.image : this
+					.pageItem.swiper_image
+				if (image) {
+					let res = await this.getFilePath(image);
+					if (Array.isArray(res)) {
+						let swiperList = res.reduce((pre, cur) => {
+							if (cur.fileurl) {
+								cur.url = this.$api.getFilePath + cur.fileurl + '&bx_auth_ticket=' + uni
+									.getStorageSync('bx_auth_ticket');
+							}
+							pre.push(cur);
+							return pre;
+						}, []);
+						this.swiperList = swiperList
+						return swiperList
+					} else {
+						return []
+					}
+				}
 			},
 		},
 	}

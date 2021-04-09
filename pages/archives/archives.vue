@@ -1,6 +1,6 @@
 <template>
 	<view class="health-archive-wrap"
-		v-if="(is_login && authSetting && authSetting.userInfo) || (is_login && client_env === 'h5')">
+		v-if="(is_login &&!authBoxDisplay) || (is_login && client_env === 'h5')">
 		<view class="top text-bold">
 			<view class="left">
 				<view class="avatar" @click="showUserListPopup = true">
@@ -528,6 +528,7 @@
 				this.$store.commit('SET_USERINFO', item);
 				uni.setStorageSync('current_user_info', item);
 				uni.setStorageSync('current_user', item.name);
+				uni.setStorageSync('cur_user_no', item.no);
 				this.showUserListPopup = false;
 				this.initPage();
 			},
@@ -1436,19 +1437,9 @@
 					// 有数据
 
 					this.$store.commit('SET_USERLIST', res.data.data);
-					if (uni.getStorageSync('current_user')) {
-						res.data.data.forEach(item => {
-							if (item.name === uni.getStorageSync('current_user')) {
-								uni.setStorageSync('current_user', item.name);
-								this.userInfo = item;
-								if (!item.profile_url) {
-									if (this.wxUserInfo.headimgurl) {
-										this.updateUserInfo();
-									}
-								}
-								this.$store.commit('SET_USERINFO', item);
-							}
-						});
+					let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
+					if (info&&info.no) {
+						this.$store.commit('SET_USERINFO', info);
 					} else {
 						uni.setStorageSync('current_user_info', res.data.data[0]);
 						uni.setStorageSync('current_user', res.data.data[0].name);
@@ -1498,18 +1489,18 @@
 				let self = this;
 				let userInfo = uni.getStorageSync('login_user_info');
 				// #ifdef MP-WEIXIN
-				let res = await wx.getSetting();
-				if (!res.authSetting['scope.userInfo']) {
-					this.$store.commit('SET_AUTH_SETTING', {
-						type: 'userInfo',
-						value: false
-					});
-					this.$store.commit('SET_AUTH_USERINFO', false);
-					// 没有获取用户信息授权
-					return;
-				} else {
-					this.updateUserInfo();
-				}
+				// let res = await wx.getSetting();
+				// if (!res.authSetting['scope.userInfo']) {
+				// 	this.$store.commit('SET_AUTH_SETTING', {
+				// 		type: 'userInfo',
+				// 		value: false
+				// 	});
+				// 	this.$store.commit('SET_AUTH_USERINFO', false);
+				// 	// 没有获取用户信息授权
+				// 	return;
+				// } else {
+				// 	this.updateUserInfo();
+				// }
 				// #endif
 				if (!userInfo || !uni.getStorageSync('isLogin')) {
 					// 未登录 h5跳转到登录页,小程序端进行静默登录

@@ -165,6 +165,7 @@ export default {
 				user.weight = this.info.weight;
 				user.sex = this.info.sex;
 				uni.setStorageSync('current_user_info', user);
+				uni.setStorageSync('cur_user_no', user.no);
 				this.$store.commit('SET_USERINFO', user);
 				setTimeout(() => {
 					this.cancel()

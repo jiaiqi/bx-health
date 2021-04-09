@@ -17,27 +17,43 @@
 					<view class="title">
 						{{item.vaccine_drug_name}}
 					</view>
-					<view class="margin-left line-blue"
+					<view class="margin-left margin-right text-orange" v-if="!item.stock_count||item.stock_count<1">
+						待到货
+					</view>
+					<!-- persons_count=1 - 不需要预约 -->
+					<!-- stock_count 库存 -->
+					<view class="margin-left  margin-right text-blue"
 						v-if="item.persons_count===1&&item.stock_count&&item.stock_count<5">
 						<!-- [库存：{{item.stock_count||'0'}}] -->
 						库存较少
 					</view>
-					<view class="margin-left text-grey" v-if="item.persons_count!==1">
-						(需要预约)
+					<!-- <view class="margin-left  margin-right text-cyan"
+						v-if="item.persons_count===1&&item.stock_count&&item.stock_count>0">
+						随时到店
+					</view> -->
+					<view class="margin-left  margin-right text-olive" v-if="item.persons_count!==1">
+						需要预约
 					</view>
 					<view class="button-box">
-						<view class="cu-tag bg-cyan round" v-if="item.persons_count===1&&item.stock_count">
+						<view class="cu-tag bg-cyan round"
+							v-if="item.persons_count===1&&item.stock_count&&item.stock_count>0">
 							随时到店
 						</view>
-						<view class="cu-tag bg-orange round" @click.stop="subscription"
+						<!-- 	<view class="cu-tag bg-orange round" @click.stop="subscription"
 							v-if="item.persons_count===1&&!item.stock_count">
 							待到货
-						</view>
+						</view> -->
 						<view class="cu-tag bg-olive round " @click.stop="showModal(item)"
 							v-if="item.persons_count!==1">
 							预约
-							<!-- <text v-if="item.to_appointment_count">({{item.to_appointment_count}})</text> -->
-
+						</view>
+						<!-- <view class="cu-tag bg-cyan round"
+							v-if="item.persons_count===1&&item.stock_count&&item.stock_count>0">
+							到店登记
+						</view> -->
+						<view class="cu-tag bg-orange round " @click.stop="showModal(item)"
+							v-if="!item.stock_count||item.stock_count<1">
+							到货通知
 						</view>
 					</view>
 				</view>
@@ -64,9 +80,10 @@
 					</view>
 					<view class="image-box" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)">
 						<image :src="item.smallUrl" mode="aspectFit" class="remark-pic" v-for="item in imagesUrl"
-							:key="item.smallUrl" @click="toPreviewImage(item.originUrl)">
+							:key="item.smallUrl" @tap="toPreviewImage(imagesUrl.map(e=>e.originUrl))">
 						</image>
-						<view class="tips">
+						<view class="tips" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)"
+							@tap="toPreviewImage(imagesUrl.map(e=>e.originUrl))">
 							点击照片查看详情
 						</view>
 					</view>
@@ -100,8 +117,6 @@
 					<view class="cu-form-group">
 						<view class="title">手机号码</view>
 						<text v-if="!formModel.phone_xcx">点击右侧按钮获取手机号</text>
-						<!-- 				<input placeholder="请先授权获取手机号" name="input" type="number" v-model="formModel.customer_phone"
-							:disabled="!formModel.phone_xcx" v-else></input> -->
 						<input placeholder="请先授权获取手机号" name="input" type="number" v-model="formModel.customer_phone"
 							v-else></input>
 						<view class="cu-capsule radius" v-if="!formModel.phone_xcx">
@@ -123,21 +138,51 @@
 		<view class="cu-modal bottom-modal" :class="{'show':modalName==='vaccine'}" @click="hideModal"
 			@touchmove.prevent>
 			<view class="cu-dialog" @click.stop>
-				<view class="order-info">
-					<view class="cu-bar bg-white justify-end">
-						<view class="content">请选择预约时间</view>
+				<view class="vaccine-info">
+					<view class="cu-bar bg-white justify-end vaccine-name" v-if="vaccineInfo.vaccine_drug_name">
+						<view class="content"> {{vaccineInfo.vaccine_drug_name}}</view>
 						<view class="action" @tap="hideModal">
 							<text class="cuIcon-close text-red"></text>
 						</view>
 					</view>
-					<view class="date-area">
+
+					<view class="vaccine-info" v-if="vaccineInfo.usage">
+						<view class="label">用法:</view>
+						<view class="value">
+							{{vaccineInfo.usage}}
+						</view>
+						<view class="tips" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)"
+							@tap="toPreviewImage(imagesUrl.map(e=>e.originUrl))">
+							点击查看照片说明
+						</view>
+					</view>
+					<view class="vaccine-info" v-if="vaccineInfo.remark">
+						<view class="label">说明:</view>
+						<view class="value">
+							{{vaccineInfo.remark}}
+						</view>
+					</view>
+				</view>
+				<view class="order-info">
+					<!-- 	<view class="cu-bar bg-white justify-end">
+						<view class="content">请选择预约时间</view>
+						<view class="action" @tap="hideModal">
+							<text class="cuIcon-close text-red"></text>
+						</view>
+					</view> -->
+					<view class="date-area" v-if="isArray(timeArr)&&timeArr.length>0">
+						<view class="tips">
+							请在下方选择您需要被通知的业务
+						</view>
 						<view class="date-item"
 							:class="{'line-cyan':selectedVaccine.sa_no===radio.sa_no,disabled:disabledTime(radio)}"
 							v-for="radio in timeArr" :key="radio.sa_no" @click="selectItem(radio)">
-							{{formateDate(radio.app_date,'MM-DD')}}
-							{{radio.app_time_start?radio.app_time_start.slice(0,5):''}}
-							-
-							{{radio.app_time_end?radio.app_time_end.slice(0,5):''}}
+							<text v-if="vaccineInfo.persons_count===1">{{radio.appoint_name}}</text>
+							<view v-else>{{formateDate(radio.app_date,'MM-DD')}}
+								{{radio.app_time_start?radio.app_time_start.slice(0,5):''}}
+								-
+								{{radio.app_time_end?radio.app_time_end.slice(0,5):''}}
+							</view>
 							<text v-if="radio.app_count" class="cu-tag badge">{{radio.app_count||''}}</text>
 						</view>
 					</view>
@@ -178,7 +223,9 @@
 					</view>
 					<view class="button-box center">
 						<button class="cu-btn bg-grey" @click="toOrderList">我的预约</button>
-						<button type="primary" class="cu-btn bg-blue center" @click="submitOrder">提交预约</button>
+						<button type="primary" class="cu-btn bg-blue center" @click="submitNotify"
+							v-if="vaccineInfo&&vaccineInfo.persons_count&&vaccineInfo.persons_count===1&&(vaccineInfo.stock_count<1||!vaccineInfo.stock_count)">提交</button>
+						<button type="primary" class="cu-btn bg-blue center" @click="submitOrder" v-else>提交预约</button>
 					</view>
 				</view>
 			</view>
@@ -248,7 +295,7 @@
 			}
 		},
 		methods: {
-			subscription() {
+			subscription(tip) {
 				// return
 				let tmplIds = 'fat3Nr50I5cAm0s5dBNfMSBDLJMumAUbVGHnE_am07Q'
 				// 接种疫苗提醒
@@ -262,6 +309,11 @@
 								let moIdState = res.subscriptionsSetting.itemSettings[tmplIds]; // 用户同意的消息模板id
 								if (moIdState === 'accept') {
 									console.log('接受了消息推送');
+									uni.showModal({
+										title:'提示',
+										content:tip||'已成功设置通知提醒',
+										showCancel:false
+									})
 								} else if (moIdState === 'reject') {
 									console.log("拒绝消息推送");
 								} else if (moIdState === 'ban') {
@@ -302,7 +354,6 @@
 									}
 								})
 							}
-
 						} else {
 							console.log('订阅消息未开启')
 						}
@@ -327,9 +378,8 @@
 					return false
 				}
 			},
-			async showInfo(e) {
-				this.vaccineInfo = e
-				if (e.remark_pic) {
+			async getImage(e) {
+				if (e && e.remark_pic) {
 					this.imagesUrl = [];
 					let images = await this.getFilePath(e.remark_pic)
 					if (Array.isArray(images)) {
@@ -342,6 +392,10 @@
 						}
 					}
 				}
+			},
+			async showInfo(e) {
+				this.vaccineInfo = e
+				this.getImage(e)
 				this.modalName = 'vaccine-info'
 			},
 			showRealNameModal() {
@@ -388,7 +442,13 @@
 				let res = await this.$fetch('operate', 'srvhealth_person_info_real_identity_update', req, 'health')
 				if (res.success) {
 					if (Array.isArray(res.data) && res.data.length > 0) {
-						this.$store.commit('SET_USERINFO', res.data[0])
+						let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
+						if (info && info.no) {
+							this.$store.commit('SET_USERINFO', info)
+						} else if (res.data[0].no) {
+							uni.setStorageSync('cur_user_no', res.data[0].no)
+							this.$store.commit('SET_USERINFO', res.data[0])
+						}
 					}
 					this.selectTimeArr(this.vaccineInfo)
 				}
@@ -458,15 +518,7 @@
 					url: '/storePages/VaccineOrder/VaccineOrder'
 				})
 			},
-			async submitOrder() {
-				// 提交预约信息
-				if (!this.selectedVaccine || !this.selectedVaccine.sa_no) {
-					uni.showToast({
-						title: '请选择预约时间',
-						icon: 'none'
-					})
-					return
-				}
+			async submitForm() {
 				if (!this.formModel.customer_name) {
 					uni.showToast({
 						title: '请填写就诊人姓名',
@@ -498,12 +550,40 @@
 				if (res.success) {
 					this.$emit('submit', res.data)
 					this.hideModal()
+					return
+				}
+			},
+			async submitNotify() {
+				if (!this.selectedVaccine || !this.selectedVaccine.sa_no) {
+					uni.showToast({
+						title: '请选择需要通知您的业务',
+						icon: 'none'
+					})
+					return
+				}
+				let tips = `${this.selectedVaccine.appoint_name} 设置成功`
+				this.submitForm().then(_ => {
+					// #ifdef MP-WEIXIN
+					this.subscription('已成功设置疫苗到货通知')
+					// #endif
+				})
+			},
+			async submitOrder() {
+				// 提交预约信息
+				if (!this.selectedVaccine || !this.selectedVaccine.sa_no) {
+					uni.showToast({
+						title: '请选择预约时间',
+						icon: 'none'
+					})
+					return
+				}
+				this.submitForm().then(_ => {
 					uni.showModal({
 						title: '提示',
 						content: "预约成功",
 						showCancel: false
 					})
-				}
+				})
 			},
 			DateChange(e) {
 				this.formModel.customer_birth_day = e.detail.value
@@ -535,6 +615,20 @@
 						"rownumber": 20
 					},
 				}
+				if (!e.stock_count||e.stock_count<1) {
+					req.condition = [{
+						"colName": "svs_no",
+						"ruleType": "eq",
+						"value": e.vs_no
+					},
+					{
+						"colName": "appoint_type",
+						"ruleType": "eq",
+						"value": '登记'
+					}
+					]
+					delete req.order
+				}
 				let res = await this.$fetch('select', 'srvhealth_store_vaccination_appointment_select', req, 'health')
 				if (res.success) {
 					this.timeArr = res.data
@@ -543,8 +637,8 @@
 					this.formModel.customer_birth_day = this.userInfo.birthday || ''
 					this.formModel.phone_xcx = this.userInfo.phone_xcx || ''
 					this.modalName = 'vaccine'
+					this.getImage(e)
 				}
-
 			},
 			showModal(e) {
 				this.vaccineInfo = e
@@ -668,7 +762,7 @@
 				text-align: center;
 				font-size: 12px;
 				color: #666;
-				
+				font-weight: bold;
 			}
 
 			.vaccine-info {
@@ -685,6 +779,14 @@
 				.value {
 					flex: 1;
 					text-align: left;
+				}
+
+				.tips {
+					width: auto;
+					text-align: center;
+					font-size: 12px;
+					color: #666;
+					font-weight: bold;
 				}
 			}
 
@@ -739,10 +841,16 @@
 			display: inline-block;
 			font-size: 16px;
 			text-align: left;
+			flex: 1;
 		}
 
 		.desc {
 			flex: 1;
+		}
+
+		.button-box {
+			flex: inherit;
+			// min-width: 75px;
 		}
 	}
 
@@ -766,6 +874,7 @@
 		overflow-y: scroll;
 		background-color: #fff;
 		padding: 20rpx;
+		padding-top: 0;
 
 		.cu-form-group {
 			min-height: 40px;
@@ -837,9 +946,14 @@
 	}
 
 	.date-area {
-		margin-top: 20rpx;
 		display: flex;
 		flex-wrap: wrap;
+
+		.tips {
+			width: 100%;
+			padding-bottom: 5px;
+			color: rgba($color: #39c5a9, $alpha: 1);
+		}
 
 		.date-item {
 			display: flex;
@@ -850,9 +964,16 @@
 			position: relative;
 			margin-bottom: 10px;
 			width: calc(50% - 5px);
+			transition: all 0.5s ease;
+			border: 1rpx solid transparent;
 
-			&:nth-child(2n) {
+			&:nth-child(2n+1) {
 				margin-left: 10px;
+			}
+
+			&.line-cyan {
+				border: 1rpx solid;
+				background-color: #E7FFF4;
 			}
 
 			&.disabled {

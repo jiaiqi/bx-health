@@ -523,7 +523,10 @@
 						res.data.response[0].response.effect_data.length > 0
 					) {
 						let data = res.data.response[0].response.effect_data[0];
-						this.$store.commit('SET_USERINFO', data);
+						if(data.no){
+							this.$store.commit('SET_USERINFO', data);
+							uni.setStorageSync('cur_user_no',data.no)
+						}
 					}
 					this.toAddPage();
 				} else {
