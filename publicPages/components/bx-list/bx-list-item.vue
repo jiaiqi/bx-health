@@ -106,7 +106,7 @@
 					<view class="tags"></view>
 				</view>
 				<view class="footer">
-					<text class="foot-name" v-if="goodsData.footer" @click.stop="listItemClick">
+					<text class="foot-name" v-if="goodsData.footer||goodsData.footer===0" @click.stop="listItemClick">
 						<text class="label" v-if="showLabel['footer']">
 							{{showLabel['footer']}}:
 						</text>
@@ -138,6 +138,9 @@
 						.replace(/&nbsp;/g, ' ')
 						.replace(/>/g, ' ');
 				} else {
+					if(value===0){
+						return value 
+					}
 					return value || ''
 				}
 			},
@@ -370,18 +373,24 @@
 						cols.forEach(col => {
 							if (col && col.columns) {
 								Object.keys(self.viewTemp).forEach(key => {
-									if (self.viewTemp[key] === col.columns) {
-										self.showLabel[key] = col.label
+									if (Array.isArray(self.viewTemp[key])) {
+										if (self.viewTemp[key].includes(col.columns)) {
+											self.showLabel[key] = col.label
+										}
+									} else {
+										if (self.viewTemp[key] === col.columns) {
+											self.showLabel[key] = col.label
+										}
 									}
 								})
 							}
 						})
 					}
-					
+
 					if (newValue[self.viewTemp.img]) {
 						this.goodsData.img = this.getImagePath(newValue[this.viewTemp.img]);
 					}
-					
+
 					if (this.viewTemp.title && this.viewTemp.title.indexOf('||') !== -1 && Array.isArray(this.viewTemp
 							.title.split('||'))) {
 						let arr = this.viewTemp.title.split('||')
@@ -418,9 +427,24 @@
 					if (newValue[this.viewTemp.price]) {
 						this.goodsData.price = newValue[this.viewTemp.price];
 					}
-					if (newValue[this.viewTemp.footer]) {
-						this.goodsData.footer = newValue[this.viewTemp.footer];
+					if (Array.isArray(this.viewTemp.footer)) {
+						this.goodsData.footer = this.viewTemp.footer.reduce((pre, cur) => {
+							let val = cur
+							if (![':', ' ', '', '-'].includes(cur) && newValue[cur]) {
+								val = newValue[cur]
+							}
+							if (pre) {
+								return pre + ' ' + val
+							} else {
+								return val
+							}
+						}, '')
+					} else {
+						if (newValue[this.viewTemp.footer] || newValue[this.viewTemp.footer] === 0) {
+							this.goodsData.footer = newValue[this.viewTemp.footer];
+						}
 					}
+
 				}
 			}
 		}
@@ -441,19 +465,19 @@
 			box-sizing: border-box;
 
 			.main-image {
-				width: 220rpx;
-				height: 220rpx;
+				width: 180rpx;
+				height: 180rpx;
 				border-radius: 5upx 5rpx;
 				margin-right: 20upx;
 				border-radius: 10rpx;
 				overflow: hidden;
-				flex: 1;
+				// flex: 1;
 				text-align: center;
 				border: 1px solid #f1f1f1;
 
 				.text {
 					font-size: 50px;
-					line-height: 220upx;
+					line-height: 180rpx;
 					font-weight: 200;
 				}
 
@@ -481,6 +505,7 @@
 					overflow: hidden;
 					text-overflow: ellipsis;
 					white-space: nowrap;
+					display: inline-flex;
 				}
 
 				.content-header {
@@ -520,6 +545,7 @@
 					overflow: hidden;
 					text-overflow: ellipsis;
 					white-space: nowrap;
+					display: inline-block;
 				}
 
 				.content {
@@ -577,7 +603,7 @@
 				.footer {
 					display: flex;
 					justify-content: space-between;
-					min-height: 80upx;
+					min-height: 40upx;
 					flex-direction: column;
 					overflow: hidden;
 					text-overflow: ellipsis;

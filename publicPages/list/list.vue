@@ -26,7 +26,7 @@
 			:srvApp="appName" :rowButtons="listConfig && listConfig.rowButton ? listConfig.rowButton : []"
 			:showTab="false" :viewTemp="viewTemp" :listConfig="listConfig" :showButton="showRowButton" :fixed="true"
 			:top="listTop" :searchWords="searchVal" :searchColumn="keyColumn" :tempWord="tempWord" :rownumber="42"
-			:showFootBtn="showFootBtn" @click-list-item="clickItem" @list-change="listChange"
+			:customTemp='customTemp' :showFootBtn="showFootBtn" @click-list-item="clickItem" @list-change="listChange"
 			@clickFootBtn="clickFootBtn" @loadEnd="loadEnd"></bx-list>
 		<!-- 		<view class="public-button-box">
 			<view class="add-button" @click="clickAddButton" v-if="showAdd"></view>
@@ -64,6 +64,7 @@
 				pageType: '',
 				placeholder: '输入搜索关键词',
 				listConfig: {},
+				customTemp: false, //使用代码中写的自定义字段显示配置
 				srv_cols: [],
 				condition: [],
 				relation_condition: null,
@@ -116,6 +117,9 @@
 		onLoad(option) {
 			if (option.hideFootBtn) {
 				this.showFootBtn = false
+			}
+			if (option.customTemp) {
+				this.customTemp = true
 			}
 			if (option.label) {
 				try {
@@ -881,6 +885,7 @@
 <style lang="scss">
 	.cu-modal {
 		z-index: 666;
+
 		.cu-dialog {
 			background-color: transparent;
 		}

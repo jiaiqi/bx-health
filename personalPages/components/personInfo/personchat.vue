@@ -25,12 +25,19 @@
 				<view :id="`person-chat-item${item.id}`" v-for="(item, index) in recordList" :key="item.id"
 					class="person-chat-item"
 					:class="item.sender_account === currentUserInfo.userno&&identity==item.identity? 'person-chat-item-my' : ''">
+
 					<view class="send-time" v-show="showSendTime(item, index)">
 						{{showSendTime(item, index)? formateDate(item.create_time, 'normal'):'' }}
 					</view>
 					<view
 						v-if="item.sender_account != currentUserInfo.userno||(identity==='客服'&&item.identity==='客户')||(identity==='客户'&&item.identity==='客服')"
-						class="person-chat-item-accept">
+						class="person-chat-item-accept" @longpress.stop="longPress(item)">
+						<view class="record-popover" :class="{show:item.showRecall === true}" @click.stop="">
+							<view class="pop-btn" @click="deleteRecord(item)">
+								<text class="cuIcon-repeal icon"></text>
+								<text>撤回</text>
+							</view>
+						</view>
 						<view class="sender-info" v-if="item.sender_name||item.sender_group_role||item.identity">
 							<text class="cu-tag bg-blue sm"
 								v-if="item.sender_group_role">{{ item.sender_group_role }}</text>
@@ -38,7 +45,7 @@
 								v-else-if="item.identity&&item.identity!=='客户'">{{ item.identity }}</text>
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
 						</view>
-						<view class="person-chat-item-left" @longpress="remindSomeone(item)">
+						<view class="person-chat-item-left" @longpress.stop="remindSomeone(item)">
 							<image :src="storeInfo.log?getImagePath(storeInfo.logo):getImagePath(storeInfo.image)"
 								mode="aspectFill" v-if="identity==='客户'&&item.identity==='客服'"></image>
 							<image :src="getImagePath(item.sender_profile_url)" mode="aspectFit"
@@ -126,7 +133,13 @@
 					</view>
 					<view
 						v-else-if="item.sender_account === currentUserInfo.userno||(identity&&identity===item.identity)"
-						class="person-chat-item-send">
+						class="person-chat-item-send" @longpress.stop="longPress(item)">
+						<view class="record-popover" :class="{show:item.showRecall === true}" @click.stop="">
+							<view class="pop-btn" @click="deleteRecord(item)">
+								<text class="cuIcon-repeal icon"></text>
+								<text>撤回</text>
+							</view>
+						</view>
 						<view class="sender-info" v-if="item.sender_name||item.sender_group_role||item.identity">
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
 							<text class="cu-tag bg-blue sm"
@@ -381,9 +394,12 @@
 			receiverInfo: {
 				type: Object, // 接收者信息
 			},
-			banSend:{
-				type:[Boolean,String], //是否禁言
-				default:false
+			storeUserInfo: {
+				type: Object
+			},
+			banSend: {
+				type: [Boolean, String], //是否禁言
+				default: false
 			}
 		},
 		computed: {
@@ -467,11 +483,46 @@
 				isAll: false,
 				currentChat: {},
 				remindPerson: {}, // 被@人的userInfo
-				refreshMessageTimer: null // 定时刷新消息的定时器
+				refreshMessageTimer: null, // 定时刷新消息的定时器
 			};
 		},
 
 		methods: {
+			deleteRecord(item) {
+				let req = [{
+					"serviceName": "srvhealth_consultation_chat_record_delete",
+					"condition": [{
+						"colName": "id",
+						"ruleType": "in",
+						"value": item.id
+					}]
+				}]
+				this.$fetch('operate', 'srvhealth_consultation_chat_record_delete', req, 'health').then(res => {
+					if (res.success) {
+						this.recordList.forEach((e, i) => {
+							if (item.id === e.id) {
+								this.recordList.splice(i, 1)
+							}
+						})
+						uni.showToast({
+							title: '撤回成功'
+						})
+						this.initMessageList('refresh')
+					}
+				})
+			},
+			longPress(item) {
+				if (item.sender_person_no === this.currentUserInfo.no || (this.storeUserInfo && this.storeUserInfo && this
+						.storeUserInfo.user_role && this.storeUserInfo.user_role.indexOf('管理员'))) {
+					this.recordList.forEach((e, i) => {
+						if (item.id === e.id) {
+							e['showRecall'] = !e['showRecall']
+							this.$set(this.recordList, i, e)
+						}
+					})
+					return true
+				}
+			},
 			clearRemind() {
 				// 清除@人员信息
 				this.remindPerson = {}
@@ -536,6 +587,12 @@
 			},
 			/*关闭底部选择按钮**/
 			closeBottomPoup() {
+				this.recordList.forEach((item, index) => {
+					if (item.showRecall) {
+						item.showRecall = false
+						this.$set(this.recordList, index, item)
+					}
+				})
 				this.hideKeyboard()
 				this.showKeyboard = false;
 				this.$nextTick(function() {
@@ -1798,6 +1855,7 @@
 					}
 					resData = resData.reduce((pre, cur) => {
 						if (Array.isArray(pre) && !pre.find(item => item.id === cur.id)) {
+							cur.showRecall = false
 							pre.push(cur);
 							return pre;
 						}
@@ -2100,6 +2158,48 @@
 					display: flex;
 					flex-wrap: wrap;
 					width: 100%;
+					position: relative;
+
+					.record-popover {
+						background-color: #555;
+						height: 20px;
+						position: absolute;
+						top: -35px;
+						left: calc(50% - 40px);
+						height: 50px;
+						width: 80px;
+						z-index: 2;
+						border-radius: 10rpx;
+						color: #fff;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						opacity: 0;
+
+						&.show {
+							opacity: 1;
+						}
+
+						.pop-btn {
+							display: flex;
+							flex-direction: column;
+
+							.icon {
+								transform: rotate(90deg) translateX(10rpx);
+							}
+						}
+
+						&::after {
+							position: absolute;
+							content: '';
+							width: 0;
+							height: 0;
+							border: 5px solid transparent;
+							border-top-color: #555;
+							bottom: -10px;
+							right: calc(50% - 5px);
+						}
+					}
 
 					.sender-info {
 						width: 100%;
@@ -2266,6 +2366,47 @@
 					min-width: 40%;
 					max-width: 100%;
 					flex-wrap: wrap;
+					position: relative;
+					.record-popover {
+						background-color: #555;
+						height: 20px;
+						position: absolute;
+						top: -35px;
+						left: calc(50% - 40px);
+						height: 50px;
+						width: 80px;
+						z-index: 2;
+						border-radius: 10rpx;
+						color: #fff;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						opacity: 0;
+
+						&.show {
+							opacity: 1;
+						}
+
+						.pop-btn {
+							display: flex;
+							flex-direction: column;
+
+							.icon {
+								transform: rotate(90deg) translateX(10rpx);
+							}
+						}
+
+						&::after {
+							position: absolute;
+							content: '';
+							width: 0;
+							height: 0;
+							border: 5px solid transparent;
+							border-top-color: #555;
+							bottom: -10px;
+							right: calc(50% - 5px);
+						}
+					}
 
 					.sender-info {
 						width: 100%;
@@ -2471,13 +2612,15 @@
 		.person-chat-bot {
 			height: 55px;
 			width: 100%;
-			&.ban-send{
+
+			&.ban-send {
 				// pointer-events: none;
 				opacity: 0.5;
 				position: relative;
-				.band-tip{
+
+				.band-tip {
 					z-index: 5;
-					padding:10rpx 0 20rpx;
+					padding: 10rpx 0 20rpx;
 					text-align: center;
 					position: absolute;
 					top: 15px;
@@ -2485,6 +2628,7 @@
 					left: 0;
 				}
 			}
+
 			&.showLayer {
 				height: 285px;
 			}

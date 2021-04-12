@@ -357,11 +357,10 @@
 		{
 			// 健康百科中的页面
 			"root": "pediaPages",
-			"pages": [
-				{
+			"pages": [{
 					"path": "hospitalOverview/hospitalOverview",
 					"style": {
-						"navigationStyle":"custom",
+						"navigationStyle": "custom",
 						"enablePullDownRefresh": true,
 						"navigationBarBackgroundColor": "#fff",
 						"navigationBarTextStyle": "black",
@@ -448,8 +447,8 @@
 				}, {
 					"path": "doctorIntro/doctorIntro",
 					"style": {
-						"navigationBarBackgroundColor":"#eef1f5",
-						"navigationBarTextStyle":"black",
+						"navigationBarBackgroundColor": "#eef1f5",
+						"navigationBarTextStyle": "black",
 						// "navigationBarTitleText": "介绍",
 						"enablePullDownRefresh": false
 					}

@@ -156,7 +156,7 @@
 					"按钮组") {
 					// 查找关联群组
 					this.seletGroupList()
-				}else{
+				} else {
 					this.groupList = []
 				}
 				let req = {
@@ -378,12 +378,12 @@
 				if (data && data.pg_no && data.gc_no) {
 					// 跳到聊天页面  
 					uni.navigateTo({
-						url: `/personalPages/chat/chat?type=群组圈子&groupNo=${data.gc_no}&pg_no=${data.pg_no}&group_role=${data.group_role||'用户'}`
+						url: `/personalPages/chat/chat?type=群组圈子&storeNo=${this.storeNo}&groupNo=${data.gc_no}&pg_no=${data.pg_no}&group_role=${data.group_role||'用户'}`
 					});
 				} else {
 					// 跳到圈子信息页面
 					uni.navigateTo({
-						url: `/personalPages/gropDetail/gropDetail?gc_no=${e}&pb_no=${this.userInfo.no}&type=group-detail&from=store-detail`
+						url: `/personalPages/gropDetail/gropDetail?gc_no=${e}&pb_no=${this.userInfo.no}&storeNo=${this.storeNo}&type=group-detail&from=store-detail`
 					});
 				}
 			},

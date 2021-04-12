@@ -23,7 +23,7 @@
 		<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
 			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
 			:storeNo="storeNo" :topHeight="topHeight" :group-no="groupNo" :receiverInfo="receiverInfo"
-			:banSend="banSend" v-if="session_no"></chat>
+			:banSend="banSend" v-if="session_no" :storeUserInfo='storeUserInfo'></chat>
 	</view>
 </template>
 
@@ -120,6 +120,7 @@
 				}
 			},
 			getRow() {
+				// 一对一 
 				let req = {
 					"serviceName": "srvhealth_person_relation_select",
 					"colNames": ["*"],
@@ -147,7 +148,8 @@
 					}
 				})
 			},
-			getStore() {
+			async getStore() {
+				// 查找店铺信息
 				let req = {
 					"condition": [{
 						"colName": "store_no",
@@ -159,13 +161,13 @@
 						"rownumber": 1
 					}
 				}
-				this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health').then(res => {
-					if (Array.isArray(res.data) && res.data.length > 0) {
-						this.storeInfo = res.data[0]
-					}
-				})
+				let res = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health')
+				if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+					this.storeInfo = res.data[0]
+					return this.storeInfo
+				}
 			},
-			getGroup() {
+			async getGroup() {
 				// 查找圈子信息
 				let req = {
 					"serviceName": "srvhealth_group_circle_select",
@@ -180,23 +182,22 @@
 						"rownumber": 1
 					},
 				}
-				this.$fetch('select', 'srvhealth_group_circle_select', req, 'health').then(res => {
-					if (Array.isArray(res.data) && res.data.length > 0) {
-						this.groupInfo = res.data[0]
-						this.getGroupUser()
-						if (this.groupInfo.name) {
-							this.pageTitle = this.groupInfo.name
-							uni.setNavigationBarTitle({
-								title: this.pageTitle
-							})
-						}
-						if (res.data[0].session_no) {
-							this.session_no = res.data[0].session_no
-						} else if (this.session_no) {
-							this.updateSessionNo()
-						}
+				let res = await this.$fetch('select', 'srvhealth_group_circle_select', req, 'health')
+				if (Array.isArray(res.data) && res.data.length > 0) {
+					this.groupInfo = res.data[0]
+					this.getGroupUser()
+					// if (this.groupInfo.name) {
+					// 	this.pageTitle = this.groupInfo.name
+					// 	uni.setNavigationBarTitle({
+					// 		title: this.pageTitle
+					// 	})
+					// }
+					if (res.data[0].session_no) {
+						this.session_no = res.data[0].session_no
+					} else if (this.session_no) {
+						this.updateSessionNo()
 					}
-				})
+				}
 			},
 			getGroupUser() {
 				// 查找圈子用户列表
@@ -212,7 +213,7 @@
 				this.$fetch('select', 'srvhealth_person_group_circle_select', req, 'health').then(res => {
 					if (res.success) {
 						this.groupUser = res.data
-						if(!res.data.find(item=>item.person_no===this.userInfo.no)){
+						if (!res.data.find(item => item.person_no === this.userInfo.no)) {
 							// 未加入当前群
 							uni.redirectTo({
 								url: `/personalPages/gropDetail/gropDetail?gc_no=${this.groupNo}&pb_no=${this.userInfo.no}&type=group-detail&from=store-detail`
@@ -229,7 +230,6 @@
 									title: this.pageTitle
 								})
 							}
-
 						}
 					}
 				})
@@ -255,13 +255,15 @@
 				}
 				let res = await this.$fetch('select', 'srvhealth_dialogue_session_select', req, 'health')
 				if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-					this.sessionInfo = res.data[0]
-					this.session_no = res.data[0].session_no
-					switch (this.sessionType) {
+					self.sessionInfo = res.data[0]
+					self.session_no = res.data[0].session_no
+					switch (self.sessionType) {
 						case '店铺机构全员':
-							if (this.storeInfo && this.storeInfo.user_count) {
-								this.pageTitle =
-									`${ this.sessionInfo.session_name||this.storeInfo.name　}(${this.storeInfo.user_count})`
+							if (self.storeInfo && self.storeInfo.user_count) {
+								self.pageTitle =
+									`${ self.sessionInfo.session_name||self.storeInfo.name　}(${self.storeInfo.user_count})`
+							} else {
+								debugger
 							}
 							if (self.pageTitle) {
 								uni.setNavigationBarTitle({
@@ -270,7 +272,7 @@
 							}
 							break;
 						case '群组圈子':
-							this.getGroup()
+							self.getGroup()
 							break;
 						case '机构用户客服':
 							if (self.identity === '客户') {
@@ -281,9 +283,9 @@
 								self.pageTitle = self.sessionInfo.store_user_name
 							}
 							if (self.pageTitle) {
-								uni.setNavigationBarTitle({
-									title: self.pageTitle
-								})
+								// uni.setNavigationBarTitle({
+								// 	title: self.pageTitle
+								// })
 							}
 							break;
 						case '用户间':
@@ -595,46 +597,35 @@
 				this.updateLastLookTime(this.lastMessage);
 			}
 		},
-		onLoad(option) {
+		async onLoad(option) {
 			if (option.type) {
 				this.sessionType = option.type
 			}
 			if (option.session_no) {
 				this.session_no = option.session_no
 			}
+
+			if (option.groupNo) {
+				this.groupNo = option.groupNo
+				if (option.pg_no) {
+					this.pg_no = option.pg_no
+				}
+			}
+
 			if (option.identity) {
 				this.identity = option.identity
 			}
 			if (option.storeNo) {
 				this.storeNo = option.storeNo
-				this.getStore()
-				this.getStoreUser()
+				await this.getStore()
+				await this.getStoreUser()
 			}
-			if (option.receiver_person_no) {
-				this.receiver_person_no = option.receiver_person_no
-				this.getReceiverInfo()
-			}
-			
-			if (option.q) {
-				let text = decodeURIComponent(option.q);
-				if (text.indexOf('https://wx2.100xsys.cn/joinGroup/') !== -1) {
-					let result = text.split('https://wx2.100xsys.cn/joinGroup/')[1];
-					this.groupNo = result;
-					this.getGroup()
-				}
-			}
-			
+
 			if (this.session_no) {
 				// 已有会话编号 查找会话信息
-				this.getSession()
+				await this.getSession()
 			} else {
 				// 没有会话编号 创建
-				if (option.groupNo) {
-					this.groupNo = option.groupNo
-					if (option.pg_no) {
-						this.pg_no = option.pg_no
-					}
-				}
 				if (option.row_no) {
 					this.row_no = option.row_no
 					this.getRow()
@@ -644,6 +635,24 @@
 				}
 				this.createSession()
 			}
+
+
+
+			if (option.receiver_person_no) {
+				this.receiver_person_no = option.receiver_person_no
+				await this.getReceiverInfo()
+			}
+
+			if (option.q) {
+				let text = decodeURIComponent(option.q);
+				if (text.indexOf('https://wx2.100xsys.cn/joinGroup/') !== -1) {
+					let result = text.split('https://wx2.100xsys.cn/joinGroup/')[1];
+					this.groupNo = result;
+					this.getGroup()
+				}
+			}
+
+
 		}
 	}
 </script>

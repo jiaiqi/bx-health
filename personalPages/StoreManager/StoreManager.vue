@@ -93,6 +93,12 @@
 						type: 'user_count'
 					},
 					{
+						label: '员工列表',
+						icon: 'addressbook',
+						color: 'yellow',
+						type: 'staff_count'
+					},
+					{
 						label: '用户咨询记录',
 						icon: 'message',
 						color: 'red',
@@ -342,7 +348,7 @@
 					case 'user_count':
 						viewTemp = {
 							title: 'store_remark_person_name||person_name',
-							img: 'profile_url',
+							img: 'profile_url'
 						};
 						let order = [
 							// 	{
@@ -355,6 +361,24 @@
 						]
 						url =
 							`/publicPages/list/list?pageType=list&hideFootBtn=true&serviceName=srvhealth_store_user_select&order=${JSON.stringify(order)}&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
+						break;
+					case 'staff_count':
+						viewTemp = {
+							title: 'store_remark_person_name||person_name',
+							tip: 'sex',
+							img: 'profile_url',
+							price: 'store_session_user_unread_msg',
+							footer: 'kefu_session_kefu_unread_msg'
+							// footer: [' ','user_role']
+						};
+						cond.push({
+							colName: "user_role",
+							ruleType: "inset",
+							value: "工作人员,大夫,药房人员,客服,管理员"
+						})
+						labels = ['store_session_user_unread_msg','kefu_session_kefu_unread_msg', 'user_role', 'sex'],
+							url =
+							`/publicPages/list/list?pageType=list&hideFootBtn=true&customTemp=true&label=${JSON.stringify(labels)}&serviceName=srvhealth_store_user_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
 						break;
 					case 'vaccination_appointment':
 						// 预约列表

@@ -133,7 +133,8 @@
 			},
 			finalViewTemp() {
 				// 最终使用的 字段显示关系
-				if (this.configViewTemp && typeof this.configViewTemp === 'object' && Object.keys(this.configViewTemp)
+				if (!this.customTemp && this.configViewTemp && typeof this.configViewTemp === 'object' && Object.keys(this
+						.configViewTemp)
 					.length > 0) {
 					return this.configViewTemp
 				} else {
@@ -337,6 +338,10 @@
 			},
 			labels: { //要显示label的字段
 				type: Array
+			},
+			customTemp: {
+				type: Boolean, // 强制使用本地代码中自定义的viewTemp
+				default: false
 			}
 		},
 		methods: {

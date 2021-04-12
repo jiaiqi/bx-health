@@ -2,22 +2,43 @@
 	<view class="vaccine-list" :style="{'--page-height':pageHeight}">
 		<view class="vaccine-item" v-for="(item,itemIndex) in vaccineList" :key="itemIndex" @click="showInfo(item)">
 			<view class="title">
-				<text> {{item.vaccine_drug_name}}</text>
-				<text class="margin-left text-grey" v-if="item.persons_count!==1">
+				{{item.vaccine_drug_name}}
+			</view>
+			<!-- 		<text class="margin-left text-grey" v-if="item.persons_count!==1">
 					(需要预约)
-				</text>
-			</view>
-			<view class="margin-left line-blue" v-if="item.persons_count===1&&item.stock_count&&item.stock_count<5">
-				库存较少
-			</view>
-			<view class="cu-tag bg-cyan round" v-if="item.persons_count===1&&item.stock_count">
-				随时到店
-			</view>
-			<view class="cu-tag bg-orange round" v-if="item.persons_count===1&&!item.stock_count">
+				</text> -->
+			<view class="margin-left margin-right text-orange" v-if="!item.stock_count||item.stock_count<1">
 				待到货
 			</view>
-			<view class="cu-tag bg-olive round " @click.stop="showModal(item)" v-if="item.persons_count!==1">
-				预约
+			<!-- persons_count=1 - 不需要预约 -->
+			<!-- stock_count 库存 -->
+			<view class="margin-left  margin-right text-blue"
+				v-if="item.persons_count===1&&item.stock_count&&item.stock_count<5">
+				<!-- [库存：{{item.stock_count||'0'}}] -->
+				库存较少
+			</view>
+			<view class="margin-left  margin-right text-olive" v-if="item.persons_count!==1">
+				需要预约
+			</view>
+			<view class="button-box">
+				<view class="cu-tag bg-cyan round" v-if="item.persons_count===1&&item.stock_count&&item.stock_count>0">
+					随时到店
+				</view>
+				<!-- 	<view class="cu-tag bg-orange round" @click.stop="subscription"
+					v-if="item.persons_count===1&&!item.stock_count">
+					待到货
+				</view> -->
+				<view class="cu-tag bg-olive round " @click.stop="showModal(item)" v-if="item.persons_count!==1">
+					预约
+				</view>
+				<!-- <view class="cu-tag bg-cyan round"
+					v-if="item.persons_count===1&&item.stock_count&&item.stock_count>0">
+					到店登记
+				</view> -->
+				<view class="cu-tag bg-orange round " @click.stop="showModal(item)"
+					v-if="!item.stock_count||item.stock_count<1">
+					到货通知
+				</view>
 			</view>
 		</view>
 		<view class="cu-modal" :class="{'show':modalName==='realname'}" @click="hideModal" @touchmove.prevent>
@@ -70,21 +91,52 @@
 		<view class="cu-modal bottom-modal" :class="{'show':modalName==='vaccine'}" @click="hideModal"
 			@touchmove.prevent>
 			<view class="cu-dialog" @click.stop>
-				<view class="order-info">
-					<view class="cu-bar bg-white justify-end">
-						<view class="content">请选择预约时间</view>
+				<view class="vaccine-info">
+					<view class="cu-bar bg-white justify-end vaccine-name" v-if="vaccineInfo.vaccine_drug_name">
+						<view class="content"> {{vaccineInfo.vaccine_drug_name}}</view>
 						<view class="action" @tap="hideModal">
 							<text class="cuIcon-close text-red"></text>
 						</view>
 					</view>
-					<view class="date-area">
+
+					<view class="vaccine-info" v-if="vaccineInfo.usage">
+						<view class="label">用法:</view>
+						<view class="value">
+							{{vaccineInfo.usage}}
+						</view>
+						<view class="tips" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)"
+							@tap="toPreviewImage(imagesUrl.map(e=>e.originUrl))">
+							点击查看照片说明
+						</view>
+					</view>
+					<view class="vaccine-info" v-if="vaccineInfo.remark">
+						<view class="label">说明:</view>
+						<view class="value">
+							{{vaccineInfo.remark}}
+						</view>
+					</view>
+				</view>
+				<view class="order-info">
+					<!-- 		<view class="cu-bar bg-white justify-end">
+						<view class="content">请选择预约时间</view>
+						<view class="action" @tap="hideModal">
+							<text class="cuIcon-close text-red"></text>
+						</view>
+					</view> -->
+					<view class="date-area" v-if="isArray(timeArr)&&timeArr.length>0">
+						<view class="tips">
+							{{vaccineTip}}
+						</view>
 						<view class="date-item"
 							:class="{'line-cyan':selectedVaccine.sa_no===radio.sa_no,disabled:disabledTime(radio)}"
 							v-for="radio in timeArr" :key="radio.sa_no" @click="selectItem(radio)">
-							{{formateDate(radio.app_date,'MM-DD')}}
-							{{radio.app_time_start?radio.app_time_start.slice(0,5):''}}
-							-
-							{{radio.app_time_end?radio.app_time_end.slice(0,5):''}}
+
+							<text v-if="vaccineInfo.persons_count===1">{{radio.appoint_name}}</text>
+							<view v-else>{{formateDate(radio.app_date,'MM-DD')}}
+								{{radio.app_time_start?radio.app_time_start.slice(0,5):''}}
+								-
+								{{radio.app_time_end?radio.app_time_end.slice(0,5):''}}
+							</view>
 							<text v-if="radio.app_count" class="cu-tag badge">{{radio.app_count||''}}</text>
 						</view>
 					</view>
@@ -180,6 +232,15 @@
 			pageHeight() {
 				return 'calc(100vh - var(--window-top) - var(--window-bottom))'
 			},
+			vaccineTip() {
+				if (this.vaccineInfo) {
+					if (!this.vaccineInfo.stock_count || this.vaccineInfo.stock_count < 1) {
+						return '请在下方选择您需要被通知的业务'
+					} else {
+						return '请在下方选择您预约打疫苗的时间'
+					}
+				}
+			},
 			...mapState({
 				userInfo: state => state.user.userInfo
 			})
@@ -206,7 +267,7 @@
 						})
 					}
 				}
-			
+
 				if (e.detail && e.detail.errMsg && e.detail.errMsg.indexOf('ok') !== -1) {
 					let url = this.getServiceUrl('wx', 'srvwx_app_data_decrypt', 'operate')
 					let req = [{
@@ -360,23 +421,23 @@
 				}
 				return this.vaccineList
 			},
-			async showInfo(e) {
-				this.vaccineInfo = e
-				if (e.remark_pic) {
-					this.imagesUrl = [];
-					let images = await this.getFilePath(e.remark_pic)
-					if (Array.isArray(images)) {
-						for (let i = 0; i < images.length; i++) {
-							const obj = {
-								originUrl: `${this.$api.getFilePath}${images[i].fileurl}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`,
-								smallUrl: `${this.$api.getFilePath}${images[i].fileurl}&thumbnailType=fwsu_100&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`
-							}
-							this.imagesUrl.push(obj);
-						}
-					}
-				}
-				this.modalName = 'vaccine-info'
-			},
+			// async showInfo(e) {
+			// 	this.vaccineInfo = e
+			// 	if (e.remark_pic) {
+			// 		this.imagesUrl = [];
+			// 		let images = await this.getFilePath(e.remark_pic)
+			// 		if (Array.isArray(images)) {
+			// 			for (let i = 0; i < images.length; i++) {
+			// 				const obj = {
+			// 					originUrl: `${this.$api.getFilePath}${images[i].fileurl}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`,
+			// 					smallUrl: `${this.$api.getFilePath}${images[i].fileurl}&thumbnailType=fwsu_100&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`
+			// 				}
+			// 				this.imagesUrl.push(obj);
+			// 			}
+			// 		}
+			// 	}
+			// 	this.modalName = 'vaccine-info'
+			// },
 			async selectTimeArr(e) {
 				let req = {
 					"condition": [{
@@ -404,6 +465,20 @@
 						"rownumber": 20
 					},
 				}
+				if (!e.stock_count || e.stock_count < 1) {
+					req.condition = [{
+							"colName": "svs_no",
+							"ruleType": "eq",
+							"value": e.vs_no
+						},
+						{
+							"colName": "appoint_type",
+							"ruleType": "eq",
+							"value": '登记'
+						}
+					]
+					delete req.order
+				}
 				let res = await this.$fetch('select', 'srvhealth_store_vaccination_appointment_select', req, 'health')
 				if (res.success) {
 					this.timeArr = res.data
@@ -412,7 +487,28 @@
 					this.formModel.customer_birth_day = this.userInfo.birthday || ''
 					this.formModel.phone_xcx = this.userInfo.phone_xcx || ''
 					this.modalName = 'vaccine'
+					this.getImage(e)
 				}
+			},
+			async getImage(e) {
+				if (e && e.remark_pic) {
+					this.imagesUrl = [];
+					let images = await this.getFilePath(e.remark_pic)
+					if (Array.isArray(images)) {
+						for (let i = 0; i < images.length; i++) {
+							const obj = {
+								originUrl: `${this.$api.getFilePath}${images[i].fileurl}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`,
+								smallUrl: `${this.$api.getFilePath}${images[i].fileurl}&thumbnailType=fwsu_100&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`
+							}
+							this.imagesUrl.push(obj);
+						}
+					}
+				}
+			},
+			async showInfo(e) {
+				this.vaccineInfo = e
+				this.getImage(e)
+				this.modalName = 'vaccine-info'
 			},
 			showRealNameModal() {
 				this.formModel.customer_name = this.userInfo.name
@@ -456,31 +552,39 @@
 		min-height: var(--page-height);
 
 		.vaccine-item {
-			padding: 20rpx;
+			padding: 5rpx 20rpx;
 			margin-bottom: 10rpx;
 			display: flex;
 			align-items: center;
+			flex-wrap: wrap;
 			border-bottom: 1rpx solid #f1f1f1;
-			justify-content: space-between;
-			// min-height: calc(var(--page-height) / 5);
 
-			.title {
-				display: flex;
-				flex-wrap: wrap;
-				font-size: 16px;
-				text-align: left;
-				padding-right: 20rpx;
+			&:first-child {
+				border-top: 1rpx solid #f1f1f1;
 			}
 
-			.cu-tag {
-				min-width: 150rpx;
-				font-size: 14px;
+			.title {
+				display: inline-block;
+				font-size: 16px;
+				text-align: left;
+				flex: 1;
 			}
 
 			.desc {
 				flex: 1;
 			}
+
+			.button-box {
+				flex: inherit;
+				min-width: 75px;
+				margin: 10rpx 0;
+
+				.cu-tag {
+					width: 100%;
+				}
+			}
 		}
+
 	}
 
 	.cu-modal {
@@ -491,17 +595,18 @@
 			background-color: #fff;
 			max-height: 80vh;
 			overflow: scroll;
-
+			padding-bottom: 0;
 			.vaccine-name {
 				font-weight: bold;
 				text-align: center;
 			}
 
 			.tips {
-
+				width: 100%;
 				text-align: center;
 				font-size: 12px;
-				color: #333;
+				color: #666;
+				font-weight: bold;
 			}
 
 			.vaccine-info {
@@ -519,6 +624,14 @@
 					flex: 1;
 					text-align: left;
 				}
+
+				.tips {
+					width: auto;
+					text-align: center;
+					font-size: 12px;
+					color: #666;
+					font-weight: bold;
+				}
 			}
 
 			.image-box {
@@ -526,10 +639,15 @@
 				overflow: hidden;
 				display: flex;
 				justify-content: center;
+				flex-wrap: wrap;
 
 				.remark-pic {
 					width: 300rpx;
 					margin-right: 10rpx;
+
+					.tips {
+						width: 100%;
+					}
 				}
 			}
 		}
@@ -573,7 +691,7 @@
 		overflow-y: scroll;
 		background-color: #fff;
 		padding: 20rpx;
-
+		padding-top: 0;
 		.cu-form-group {
 			min-height: 40px;
 		}
@@ -648,6 +766,12 @@
 		display: flex;
 		flex-wrap: wrap;
 
+		.tips {
+			width: 100%;
+			padding-bottom: 5px;
+			color: rgba($color: #39c5a9, $alpha: 1);
+		}
+
 		.date-item {
 			display: flex;
 			justify-content: center;
@@ -657,8 +781,10 @@
 			position: relative;
 			margin-bottom: 10px;
 			width: calc(50% - 5px);
-
-			&:nth-child(2n) {
+			transition: all 0.5s ease;
+			border: 1rpx solid transparent;
+			
+			&:nth-child(2n+1) {
 				margin-left: 10px;
 			}
 
