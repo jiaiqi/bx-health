@@ -187,7 +187,7 @@
 										-
 										{{radio.app_time_end?radio.app_time_end.slice(0,5):''}}
 									</view>
-									<view v-if="radio.app_count" class="vaccine_app_count">已约:{{radio.app_count||''}}人
+									<view v-if="radio.app_count" class="vaccine_app_count text-orange">已约:{{radio.app_count||''}}人
 									</view>
 									<!-- <text v-if="radio.app_count" class="cu-tag badge">{{radio.app_count||''}}</text> -->
 								</view>
@@ -992,7 +992,12 @@
 			transition: all 0.5s ease;
 			flex-wrap: wrap;
 			border: 1rpx solid transparent;
-
+			&.line-cyan{
+				.text-orange{
+					color: #1cbbb4;
+				}
+			}
+			
 			.vaccine_app_count {
 				width: 100%;
 				font-size: 12px;
