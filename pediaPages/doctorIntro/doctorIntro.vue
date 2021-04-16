@@ -3,7 +3,7 @@
 		<view class="top-intro">
 			<view class="person-info">
 				<view class="person-name">
-					张xx
+					{{storeInfo.name}}
 				</view>
 				<view class="sub-title">
 					<view class="sub-title-item">
@@ -21,23 +21,27 @@
 		</view>
 		<view class="main-intro" :class="{'show-wrap':showIntroWrap}">
 			<view class="intro-item" :class="{'show-wrap':showIntroWrap}">
-				<text class="label">擅长：</text>
+				<!-- <text class="label">擅长：</text>
 				<text>
 					从事各种不孕症的诊断及治疗七年。在国内外发表论文多篇。从事各种不孕症的诊断及治疗七年。在国内外发表论文多篇。
-				</text>
+				</text> -->
+				{{storeInfo.introduction}}
 			</view>
-			<view class="intro-item" :class="{'show-wrap':showIntroWrap}">
+	<!-- 		<view class="intro-item" :class="{'show-wrap':showIntroWrap}">
 				<text class="label">简介：</text>
 				<text>
 					张xx，女，主治医师，医学硕士，2008年开始从事生殖医学临床工作至今。擅长多囊卵巢综合症、盆腔炎症后遗症、复发性自然流产等不孕不育的诊断及治疗。曾参与国家自然科学基金项目，发表论文数篇。
 				</text>
-			</view>
+			</view> -->
 			<view class="show-more text-cyan" @click="showIntroWrap=!showIntroWrap">
 				<text class="text-cyan" v-if="!showIntroWrap">详细介绍</text>
 				<text class="text-cyan" v-if="showIntroWrap">收起</text>
 				<text class="cuIcon-unfold margin-left-xs" :class="{'show-wrap':showIntroWrap}"></text>
 			</view>
 		</view>
+	<!-- 	<page-item  v-for="pageItem in pageItemList" :key="pageItem.component_no"
+			:pageItem="getConfig(pageItem)" :storeInfo="storeInfo" :userInfo="userInfo" 
+			ref="storeItem"></page-item> -->
 		<view class="other-intro">
 			<view class="intro-label">
 				<text>业务办理</text>
@@ -150,25 +154,72 @@
 	import {
 		mapState
 	} from 'vuex'
+	import PageItem from '../hospitalOverview/store-item/store-item.vue'
 	export default {
 		computed: {
 			...mapState({
 				userInfo: state => state.user.userInfo
 			})
 		},
+		components: {
+			PageItem
+		},
 		data() {
 			return {
-				showIntroWrap: false
+				showIntroWrap: false,
+				storeInfo:{},
+				pageItemList:[],
+				store_no:"",
 			}
 		},
+		
 		methods: {
+			getConfig(pageItem) {
+				if (pageItem && pageItem.type) {
+					let type = pageItem.type
+					let keys = []
+					let config = {}
+					switch (type) {
+						case '轮播图':
+							keys = ['swiper_image', 'image_origin']
+							break;
+						case '店铺信息':
+							keys = ['show_consult', 'show_set_home']
+							break;
+						case '按钮组':
+							keys = ['show_subscribe', 'show_related_group', 'navigate_type', 'button_style',
+								'component_no','show_public_button','row_number'
+							]
+							break;
+						case '商品列表':
+							keys = ['row_number']
+							break;
+						case '疫苗列表':
+							keys = ['row_number']
+							break;
+						case '人员列表':
+							keys = ['user_role', 'row_number', 'component_label']
+							break;
+						case '文章列表':
+							keys = ['category_no', 'row_number', 'article_style']
+							break;
+					}
+					if (Array.isArray(keys) && keys.length > 0) {
+						keys.forEach(key => {
+							config[key] = pageItem[key]
+						})
+						config.type = pageItem['type']
+						return config
+					}
+				}
+			},
 			async selectStoreInfo(times = 0) {
 				let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
 				let req = {
 					condition: [{
 						colName: 'store_no',
 						ruleType: 'eq',
-						value: this.storeNo
+						value: this.store_no
 					}],
 					page: {
 						pageNo: 1,
@@ -178,6 +229,7 @@
 				let res = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health')
 				if (Array.isArray(res.data) && res.data.length > 0) {
 					this.storeInfo = res.data[0];
+					this.getPageItem()
 					uni.setNavigationBarTitle({
 						title: this.storeInfo.name
 					});
@@ -189,14 +241,33 @@
 							this.selectStoreInfo(times)
 						}
 					} else {
-						uni.showModal({
-							title: '未查找到机构信息',
-							content: `${res?JSON.stringify(res):''}  storeNo为${this.storeNo}`,
-							showCancel: false
-						})
+						
 					}
 				}
 			},
+			async getPageItem() {
+				let req = {
+					"condition": [{
+						"colName": "store_no",
+						"ruleType": "eq",
+						"value": this.store_no
+					}],
+					"order": [{
+						colName: "order_no",
+						orderType: "asc"
+					}],
+				}
+				let res = await this.$fetch('select', 'srvhealth_store_home_component_select', req, 'health')
+				if (res.success) {
+					this.pageItemList = res.data
+				}
+			},
+		},
+		onLoad(option) {
+			if(option.store_no){
+				this.store_no = option.store_no
+				this.selectStoreInfo()
+			}
 		},
 		onPageScroll: function(e) { //nvue暂不支持滚动监听，可用bindingx代替
 			if (e.scrollTop > 50 && e.scrollTop < 80) {
