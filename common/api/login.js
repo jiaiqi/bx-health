@@ -120,7 +120,7 @@ const wxVerifyLogin = async () => {
 			uni.setStorageSync('isLogin', true);
 			store.commit('SET_LOGIN_STATE', true)
 			let resData = res.data.response[0].response;
-			if (resData.bx_open_code) {
+			if (resData&&resData.bx_open_code) {
 				// 后端未获取到unionid 需要通过开放登录接口给后端发送wx.getUserInfo获取到的数据
 				return await wxOpenLogin(userInfo.response, resData.bx_open_code)
 			}

@@ -404,6 +404,7 @@
 		},
 		computed: {
 			...mapState({
+				subscsribeStatus: state => state.app.subscsribeStatus,
 				globalTextFontSize: state => state.app['globalTextFontSize'],
 				currentUserInfo: state => state.user.userInfo
 			}),
@@ -1966,19 +1967,27 @@
 		},
 		beforeDestroy() {
 			clearInterval(this.refreshMessageTimer);
-			// this.focusInput = false
 			uni.hideKeyboard();
 		},
 		mounted() {
-			// if (this.receiverInfo && this.receiverInfo.person_no && this.receiverInfo.person_name) {
-			// 	this.remindPerson = {
-			// 		type: 'remindPerson',
-			// 		no: this.receiverInfo.person_no,
-			// 		name: this.receiverInfo.person_name,
-			// 		profile_url: this.receiverInfo.profile_url,
-			// 		user_image: this.receiverInfo.user_image
-			// 	}
-			// }
+			uni.$on('backFromWebview', () => {
+				this.checkSubscribeStatus()
+			})
+			setTimeout(() => {
+				if (!this.subscsribeStatus) {
+					uni.showModal({
+						title: '提示',
+						content: '请关注百想助理公众号，否则无法接收到消息通知，是否跳转到公众号关注引导页面？',
+						success(res) {
+							if (res.confirm) {
+								uni.navigateTo({
+									url: `/publicPages/webviewPage/webviewPage?webUrl=${encodeURIComponent('https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ')}`
+								})
+							}
+						}
+					})
+				}
+			}, 3000)
 			uni.onKeyboardHeightChange((res = {}) => {
 				console.log(res.height);
 				this.keyboardHeight = res.height
@@ -2367,6 +2376,7 @@
 					max-width: 100%;
 					flex-wrap: wrap;
 					position: relative;
+
 					.record-popover {
 						background-color: #555;
 						height: 20px;

@@ -146,10 +146,7 @@
 				</view>
 				<scroll-view scroll-y="true">
 					<view class="order-modal">
-
 						<view class="vaccine-info">
-
-
 							<view class="vaccine-detail" v-if="vaccineInfo.usage">
 								<view class="label">用法:</view>
 								<view class="value">
@@ -187,7 +184,8 @@
 										-
 										{{radio.app_time_end?radio.app_time_end.slice(0,5):''}}
 									</view>
-									<view v-if="radio.app_count" class="vaccine_app_count text-orange">已约:{{radio.app_count||''}}人
+									<view v-if="radio.app_count" class="vaccine_app_count text-orange">
+										已约:{{radio.app_count||''}}人
 									</view>
 									<!-- <text v-if="radio.app_count" class="cu-tag badge">{{radio.app_count||''}}</text> -->
 								</view>
@@ -231,7 +229,6 @@
 
 						</view>
 					</view>
-
 				</scroll-view>
 				<view class="button-box center bg-white">
 					<button class="cu-btn bg-grey" @click="toOrderList">我的预约</button>
@@ -256,6 +253,7 @@
 		name: "VaccineList", //疫苗预约列表
 		computed: {
 			...mapState({
+				subscsribeStatus: state => state.app.subscsribeStatus,
 				userInfo: state => state.user.userInfo
 			}),
 			vaccineTip() {
@@ -309,12 +307,43 @@
 				tip: ''
 			}
 		},
+		beforeDestroy() {
+			uni.$off('backFromWebview')
+		},
 		created() {
+			uni.$on('backFromWebview', () => {
+				// 从webview返回
+				this.checkSubscribeStatus()
+			})
 			if (!this.vaccineList || this.vaccineList.length === 0) {
 				this.getVaccineList()
 			}
 		},
 		methods: {
+			mindSub() {
+				// 提醒用户关注公众号
+				return new Promise((resolve) => {
+					if (!this.subscsribeStatus) {
+						uni.showModal({
+							title: '提示',
+							content: '请关注百想助理公众号，否则无法接收到消息通知，是否跳转到公众号关注引导页面？',
+							success(res) {
+								if (res.confirm) {
+									uni.navigateTo({
+										url: `/publicPages/webviewPage/webviewPage?webUrl=${encodeURIComponent('https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ')}`
+									})
+									resolve('leave')
+								} else {
+									resolve('keep')
+								}
+							}
+						})
+					} else {
+						resolve('keep')
+					}
+				})
+
+			},
 			subscription(tip) {
 				// return
 				let tmplIds = 'fat3Nr50I5cAm0s5dBNfMSBDLJMumAUbVGHnE_am07Q'
@@ -462,7 +491,7 @@
 				let res = await this.$fetch('operate', 'srvhealth_person_info_real_identity_update', req, 'health')
 				if (res.success) {
 					if (Array.isArray(res.data) && res.data.length > 0) {
-						let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
+						let info = res.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
 						if (info && info.no) {
 							this.$store.commit('SET_USERINFO', info)
 						} else if (res.data[0].no) {
@@ -598,11 +627,25 @@
 					return
 				}
 				this.submitForm().then(_ => {
-					uni.showModal({
-						title: '提示',
-						content: "预约成功",
-						showCancel: false
-					})
+					if (this.subscsribeStatus) {
+						uni.showModal({
+							title: '提示',
+							content: "预约成功",
+							showCancel: false
+						})
+					} else {
+						uni.showModal({
+							title: '提示',
+							content: '预约成功,请关注百想助理公众号，否则无法接收到消息通知，是否跳转到公众号关注引导页面？',
+							success(res) {
+								if (res.confirm) {
+									uni.navigateTo({
+										url: `/publicPages/webviewPage/webviewPage?webUrl=${encodeURIComponent('https://mp.weixin.qq.com/s/Z9o7ZJOtrAsR2Sj7PIIgRQ')}`
+									})
+								}
+							}
+						})
+					}
 				})
 			},
 			DateChange(e) {
@@ -766,9 +809,11 @@
 
 	.cu-modal {
 		z-index: 100;
-		.cu-dialog{
+
+		.cu-dialog {
 			background-color: #fff;
 		}
+
 		.order-modal {
 			max-height: 70vh;
 		}
@@ -992,12 +1037,13 @@
 			transition: all 0.5s ease;
 			flex-wrap: wrap;
 			border: 1rpx solid transparent;
-			&.line-cyan{
-				.text-orange{
+
+			&.line-cyan {
+				.text-orange {
 					color: #1cbbb4;
 				}
 			}
-			
+
 			.vaccine_app_count {
 				width: 100%;
 				font-size: 12px;

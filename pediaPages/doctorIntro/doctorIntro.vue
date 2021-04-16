@@ -40,7 +40,7 @@
 		</view>
 		<view class="other-intro">
 			<view class="intro-label">
-				<text>医生服务</text>
+				<text>业务办理</text>
 				<!-- 		<text class="to-more">
 					<text>更多</text>
 					<text class="cuIcon-right"></text>
@@ -70,7 +70,7 @@
 		<view class="other-intro">
 			<view class="intro-label">
 				<text>
-					<text>患者评价</text>
+					<text>用户评价</text>
 					<text>（341）</text>
 				</text>
 				<text class="to-more">
@@ -147,14 +147,56 @@
 </template>
 
 <script>
+	import {
+		mapState
+	} from 'vuex'
 	export default {
+		computed: {
+			...mapState({
+				userInfo: state => state.user.userInfo
+			})
+		},
 		data() {
 			return {
 				showIntroWrap: false
 			}
 		},
 		methods: {
-
+			async selectStoreInfo(times = 0) {
+				let url = this.getServiceUrl('health', 'srvhealth_store_mgmt_select', 'select');
+				let req = {
+					condition: [{
+						colName: 'store_no',
+						ruleType: 'eq',
+						value: this.storeNo
+					}],
+					page: {
+						pageNo: 1,
+						rownumber: 1
+					},
+				};
+				let res = await this.$fetch('select', 'srvhealth_store_mgmt_select', req, 'health')
+				if (Array.isArray(res.data) && res.data.length > 0) {
+					this.storeInfo = res.data[0];
+					uni.setNavigationBarTitle({
+						title: this.storeInfo.name
+					});
+				} else {
+					if (res && res.code === '0011') {
+						await this.toAddPage()
+						times++
+						if (times < 3) {
+							this.selectStoreInfo(times)
+						}
+					} else {
+						uni.showModal({
+							title: '未查找到机构信息',
+							content: `${res?JSON.stringify(res):''}  storeNo为${this.storeNo}`,
+							showCancel: false
+						})
+					}
+				}
+			},
 		},
 		onPageScroll: function(e) { //nvue暂不支持滚动监听，可用bindingx代替
 			if (e.scrollTop > 50 && e.scrollTop < 80) {
@@ -383,20 +425,21 @@
 
 			.serve-list {
 				display: flex;
-
+				flex-wrap: wrap;
 				.serve-item {
 					display: flex;
 					flex-direction: column;
 					align-items: center;
 					border-radius: 10rpx;
-					padding: 40rpx;
+					padding: 20rpx;
+					margin-left: 20rpx;
 					border: 1rpx solid #f1f1f1;
 					box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-					flex: 1;
-					&+.serve-item {
-						margin-left: 40rpx;
+					// flex: 1;
+					width: calc(33% - 40rpx/3);
+					&:nth-child(3n+1){
+						margin-left: 0;
 					}
-
 					.serve-image {
 						width: 100rpx;
 						height: 100rpx;

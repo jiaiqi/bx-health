@@ -30,6 +30,7 @@
 							<text class="text-red cuIcon-hotfill"
 								v-if="item&&item.other_status&&item.other_status==='热门'">hot</text>
 							<text class="line-red" v-if="item&&item.other_status&&item.other_status==='精选'">精选</text>
+							<text class="line-red" v-if="item&&item.other_status&&item.other_status==='最新'">最新</text>
 							<text class="line-red" v-if="item&&item.top_status&&item.top_status==='是'">置顶</text>
 						</text>
 						<text class="date">{{ formateDate(item.create_time) }}</text>
@@ -45,7 +46,6 @@
 				{{item.name}}
 			</view>
 		</scroll-view>
-
 		<view class="content news-list">
 			<view class="news-item" :class="{
 					'none-image':!item.icon_image,
@@ -118,10 +118,6 @@
 					}
 				}
 			}
-		},
-
-		mounted() {
-
 		},
 		methods: {
 			changeTab(e) {
@@ -196,16 +192,19 @@
 											value: '发布'
 										}
 									],
-									order: [{
-										colName: "top_status",
-										orderType: "desc"
-									}, {
-										colName: "other_status",
-										orderType: "desc"
-									}, {
-										colName: "create_time",
-										orderType: "desc"
-									}],
+									order: [
+										// 	{
+										// 	colName: "top_status",
+										// 	orderType: "desc"
+										// }, {
+										// 	colName: "other_status",
+										// 	orderType: "desc"
+										// }, 
+										{
+											colName: "create_time",
+											orderType: "desc"
+										},
+									],
 									page: {
 										pageNo: 1,
 										rownumber: 3
@@ -219,7 +218,15 @@
 							if (res.success) {
 								res.data.forEach((item, index) => {
 									if (item.state === "SUCCESS") {
-										types[index].list = item.data
+										let topList = item.data.filter(item => item.top_status ===
+											'是')
+										let statusList = item.data.filter(item => !!item
+											.other_status && item.top_status !== '是')
+										let normalList = item.data.filter(item => !item
+											.other_status && item.top_status !== '是')
+										types[index].list = [...topList, ...statusList, ...
+											normalList
+										]
 										if (item.page && item.page.total) {
 											types[index].total = item.page.total
 										}
@@ -352,6 +359,7 @@
 
 		.news-list {
 			padding: 20rpx 0 0;
+
 			.news-item {
 				display: flex;
 				padding: 20rpx 0;

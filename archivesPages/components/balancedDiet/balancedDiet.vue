@@ -108,7 +108,7 @@
 									<text class="ele-item-name">{{ alone.shortName }}</text>
 									<view class="bg-white probar">
 										<view class="cu-progress progress-bar radius pro-rad">
-											<view class="pointer" :style="{ left: `${alone.value_left ? alone.value_left : 0}px` }">
+											<view class="pointer" :style="{ left: `${alone.value_left|| 0}px` }">
 												<view
 													class="after"
 													:class="{
@@ -128,7 +128,7 @@
 													width: alone.left_width ? alone.left_width + 'px' : '33%'
 												}"
 											>
-												<view class="after">{{ alone.left_width ? alone.EAR : '' }}</view>
+												<view class="after">{{ alone.left_width&&alone.EAR ? alone.EAR : '' }}</view>
 											</view>
 											<view
 												class="bg-olive regular"
@@ -1003,7 +1003,6 @@ export default {
 				value: 0
 			};
 			let dietList = this.deepClone(this.dietRecord);
-			// ;
 			if (Array.isArray(dietList) && dietList.length > 0) {
 				dietList.forEach(item => {
 					energyData.value += item[energyData.key];
@@ -1074,6 +1073,7 @@ export default {
 				}
 				return obj;
 			});
+			
 			let option = {
 				color: ['#92d050', '#f79646', '#4f81bd'],
 				// color: ['#92d050', '#00b050', '#f79646', '#4f81bd'],
@@ -1366,6 +1366,8 @@ export default {
 		getAloneLevel(alone) {
 			if (alone && alone.value) {
 				return alone.value < alone.EAR ? '不足' : alone.UL && alone.value > alone.UL ? '过多' : '正常';
+			}else{
+				return ''
 			}
 		},
 		getElementLevel(ele, val) {
@@ -2041,9 +2043,9 @@ export default {
 									re['unit_weight_g'] = currentDiet['unit_weight_g'];
 								}
 								let ratio = 1;
-								if (food['unit'] === 'g') {
-									ratio = re['unit_weight_g'] / (food['unit_amount'] ? food['unit_amount'] : food['unit_weight_g']);
-								}
+								// if (food['unit'] === 'g') {
+								// 	ratio = re['unit_weight_g'] / (food['unit_amount'] ? food['unit_amount'] : food['unit_weight_g']);
+								// }
 								food['amount'] = food['amount'] ? food['amount'] + re.amount : re.amount;
 								food['amount'] = ratio * food['amount'];
 								food['unit'] = re['unit'] ? re['unit'] : food['unit'];

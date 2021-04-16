@@ -75,6 +75,9 @@
 			})
 		},
 		methods: {
+			setHomePage(){
+				this.$emit('setHomePage')
+			},
 			addToStore() {
 				this.$emit('addToStore')
 			},

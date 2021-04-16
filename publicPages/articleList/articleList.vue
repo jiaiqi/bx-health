@@ -16,6 +16,7 @@
 						<text class="text-red cuIcon-hotfill"
 							v-if="item&&item.other_status&&item.other_status==='热门'">hot</text>
 						<text class="line-red" v-if="item&&item.other_status&&item.other_status==='精选'">精选</text>
+						<text class="line-red" v-if="item&&item.other_status&&item.other_status==='最新'">最新</text>
 						<text class="line-red" v-if="item&&item.top_status&&item.top_status==='是'">置顶</text>
 					</text>
 					<text class="date">{{ formateDate(item.create_time) }}</text>
@@ -53,16 +54,19 @@
 				}
 				let req = {
 					condition: this.condition,
-					order: [{
-						colName: "top_status",
-						orderType: "desc"
-					}, {
-						colName: "other_status",
-						orderType: "desc"
-					}, {
-						colName: "create_time",
-						orderType: "desc"
-					}],
+					order: [
+						// {
+						// 	colName: "top_status",
+						// 	orderType: "desc"
+						// }, {
+						// 	colName: "other_status",
+						// 	orderType: "desc"
+						// },
+						{
+							colName: "create_time",
+							orderType: "desc"
+						}
+					],
 					page: {
 						pageNo: this.page.pageNo,
 						rownumber: this.page.rownumber
@@ -72,11 +76,17 @@
 				this.loadStatus = 'loading'
 				let res = await this.$fetch('select', 'srvdaq_cms_content_select', req, 'daq')
 				if (res.success) {
+					let list = []
 					if (type === 'refresh') {
-						this.articleList = res.data
+						list = res.data
 					} else {
-						this.articleList = [...this.articleList, ...res.data]
+						list = [...this.articleList, ...res.data]
 					}
+					let topList = list.filter(item=>item.top_status==='是')
+					let statusList = list.filter(item=>!!item.other_status&&item.top_status!=='是')
+					let normalList =  list.filter(item=>!item.other_status&&item.top_status!=='是')
+					this.articleList = [...topList,...statusList,...normalList]
+					
 					if (res.page) {
 						if (res.page.total > res.page.rownumber * res.page.pageNo) {
 							this.loadStatus = 'more'

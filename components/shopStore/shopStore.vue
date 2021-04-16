@@ -63,7 +63,7 @@
 		<view class="store-box" v-else-if="current_tit.type === 'shop'">
 			<sPullScroll ref="pullScroll" heightStyle="calc(100vh-620upx)" :pullDown="pullDown" :pullUp="loadData"
 				:enablePullDown="true" :enablePullUp="true" :top="340" :fixed="true" :bottom="0" finishText="我是有底线的...">
-				<view @click="toShopDetail(store)" class=" item-box" v-for="(store, i) in myStoreList" :key="i">
+				<view @click.stop="toShopDetail(store)" class=" item-box" v-for="(store, i) in myStoreList" :key="i">
 					<view class="container top-box">
 						<view class="left">
 							<image :src="store.imgurl" mode="aspectFill"></image>
@@ -301,11 +301,11 @@
 					uni.navigateTo({
 						url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + item.store_no
 					});
-				}else if(item.type === '医生'){
+				} else if (item.type === '医生') {
 					uni.navigateTo({
-						url:'/pediaPages/doctorIntro/doctorIntro'
+						url: `/pediaPages/doctorIntro/doctorIntro?store_no=${item.store_no}`
 					})
-				} else {
+				} else if (item.type) {
 					uni.navigateTo({
 						url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item
 							.store_no
@@ -356,7 +356,7 @@
 					self.pageInfo.total = res.data.page.total;
 					self.pageInfo.pageNo = res.data.page.pageNo;
 					let page = self.pageInfo;
-					if(self.$refs.pullScroll){
+					if (self.$refs.pullScroll) {
 						if (page.rownumber * page.pageNo >= page.total) {
 							// finish(boolean:是否显示finishText,默认显示)
 							this.$nextTick(() => {

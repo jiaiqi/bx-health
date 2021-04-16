@@ -130,6 +130,12 @@
 					// 	type: 'business'
 					// },
 					{
+						label: '操作手册',
+						icon: 'creative',
+						color: 'yellow',
+						type: 'manual'
+					},
+					{
 						label: '店铺设置',
 						icon: 'settings',
 						color: 'blue',
@@ -299,6 +305,10 @@
 					case 'setting':
 						this.toDetail(this.storeInfo);
 						break;
+					case 'manual':
+						// 操作手册
+						url = `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=CT2021041518560002`
+						break;
 					case 'message':
 						url = '/otherPages/MessageCenter/MessageCenter?storeNo=' + this.storeNo
 						break;
@@ -376,7 +386,7 @@
 							ruleType: "inset",
 							value: "工作人员,大夫,药房人员,客服,管理员"
 						})
-						labels = ['store_session_user_unread_msg','kefu_session_kefu_unread_msg', 'user_role', 'sex'],
+						labels = ['store_session_user_unread_msg', 'kefu_session_kefu_unread_msg', 'user_role', 'sex'],
 							url =
 							`/publicPages/list/list?pageType=list&hideFootBtn=true&customTemp=true&label=${JSON.stringify(labels)}&serviceName=srvhealth_store_user_select&cond=${JSON.stringify(cond)}&viewTemp=${JSON.stringify(viewTemp)}`;
 						break;
@@ -587,9 +597,10 @@
 	}
 
 	.manager-view {
+		background-color: #fff;
 		.title {
 			display: inline-block;
-			padding: 40rpx 20rpx 20rpx;
+			padding: 20rpx 20rpx 20rpx;
 		}
 	}
 
