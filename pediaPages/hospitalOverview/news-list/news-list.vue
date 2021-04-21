@@ -201,6 +201,10 @@
 										// 	orderType: "desc"
 										// }, 
 										{
+											colName:'seq',
+											orderType: "asc"
+										},
+										{
 											colName: "create_time",
 											orderType: "desc"
 										},

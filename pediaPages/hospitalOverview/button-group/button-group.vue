@@ -10,6 +10,8 @@
 						@click="item.eventType==='toPage'?toPages(item):toGroup(item.type)"
 						v-for="(item,index) in swiperItem" :key="index">
 						<view class="cu-tag badge" v-if="item.num">{{item.num||''}}</view>
+						<view class="cu-tag badge-left" v-if="item.unbacknum">{{item.unbacknum||''}}</view>
+						<!-- <view class="cu-tag badge-left" v-if="item.unbacknum">未回复:{{item.unbacknum||''}}</view> -->
 						<u-icon :name="item.icon" size="60" color="#00aaff"
 							v-if="item.iconType==='uicon'&&!item.custonIcon">
 						</u-icon>
@@ -116,6 +118,8 @@
 						label: '管理入口',
 						eventType: 'toPage',
 						num: this.storeInfo && this.storeInfo.kefu_unread_msg ? this.storeInfo.kefu_unread_msg : 0,
+						unbacknum: this.storeInfo && this.storeInfo.kefu_unack_msg ? this.storeInfo
+							.kefu_unack_msg : null,
 						type: 'manager'
 					})
 				}
@@ -438,6 +442,21 @@
 
 			&:nth-child(4n+1) {
 				margin-left: 0;
+			}
+			.badge{
+				top: 10px;
+				right:10px;
+			}
+			.badge-left {
+				position: absolute;
+				background-color: #f37b1d;
+				border-radius: 100px;
+				top: 10px;
+				left:10px;
+				font-size: 10px;
+				padding: 0px 5px;
+				height: 14px;
+				color: #FFFFFF;
 			}
 
 			&.grid-style {

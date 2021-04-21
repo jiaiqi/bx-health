@@ -41,6 +41,37 @@
 				</view>
 			</view>
 		</view>
+		<view class="cu-modal" :class="{'show':modalName==='vaccine-info'}" @click="hideModal" @touchmove.prevent>
+			<view class="cu-dialog" @click.stop>
+				<view class="vaccine-info">
+					<view class="vaccine-name" v-if="vaccineInfo.vaccine_drug_name">
+						{{vaccineInfo.vaccine_drug_name}}
+					</view>
+		
+					<view class="vaccine-detail" v-if="vaccineInfo.usage">
+						<view class="label">用法:</view>
+						<view class="value">
+							{{vaccineInfo.usage}}
+						</view>
+					</view>
+					<view class="vaccine-detail" v-if="vaccineInfo.remark">
+						<view class="label">说明:</view>
+						<view class="value">
+							{{vaccineInfo.remark}}
+						</view>
+					</view>
+					<view class="image-box" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)">
+						<image :src="item.smallUrl" mode="aspectFit" class="remark-pic" v-for="item in imagesUrl"
+							:key="item.smallUrl" @tap="toPreviewImage(imagesUrl.map(e=>e.originUrl))">
+						</image>
+						<view class="tips" v-if="vaccineInfo.remark_pic&&isArray(imagesUrl)"
+							@tap="toPreviewImage(imagesUrl.map(e=>e.originUrl))">
+							点击照片查看详情
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
 		<view class="cu-modal" :class="{'show':modalName==='realname'}" @click="hideModal" @touchmove.prevent>
 			<view class="cu-dialog" @click.stop>
 				<!-- 实名登记信息 -->
@@ -117,12 +148,6 @@
 					</view>
 				</view>
 				<view class="order-info">
-					<!-- 		<view class="cu-bar bg-white justify-end">
-						<view class="content">请选择预约时间</view>
-						<view class="action" @tap="hideModal">
-							<text class="cuIcon-close text-red"></text>
-						</view>
-					</view> -->
 					<view class="date-area" v-if="isArray(timeArr)&&timeArr.length>0">
 						<view class="tips">
 							{{vaccineTip}}
@@ -591,11 +616,9 @@
 		z-index: 100;
 
 		.vaccine-info {
-			padding: 20rpx;
 			background-color: #fff;
-			max-height: 80vh;
 			overflow: scroll;
-			padding-bottom: 0;
+
 			.vaccine-name {
 				font-weight: bold;
 				text-align: center;
@@ -609,7 +632,7 @@
 				font-weight: bold;
 			}
 
-			.vaccine-info {
+			.vaccine-detail {
 				display: flex;
 				padding: 0;
 				padding: 10rpx;

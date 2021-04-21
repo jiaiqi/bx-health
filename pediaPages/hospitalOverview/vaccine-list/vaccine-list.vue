@@ -232,9 +232,11 @@
 				</scroll-view>
 				<view class="button-box center bg-white">
 					<button class="cu-btn bg-grey" @click="toOrderList">我的预约</button>
-					<button type="primary" class="cu-btn bg-blue center" @click="submitNotify"
+					<button type="primary" :class="{disabled:onSubmit}" class="cu-btn bg-blue center"
+						@click="submitNotify"
 						v-if="vaccineInfo&&vaccineInfo.persons_count&&vaccineInfo.persons_count===1&&(vaccineInfo.stock_count<1||!vaccineInfo.stock_count)">提交</button>
-					<button type="primary" class="cu-btn bg-blue center" @click="submitOrder" v-else>提交预约</button>
+					<button type="primary" :class="{disabled:onSubmit}" class="cu-btn bg-blue center"
+						@click="submitOrder" v-else>提交预约</button>
 				</view>
 			</view>
 		</view>
@@ -286,6 +288,7 @@
 		},
 		data() {
 			return {
+				onSubmit: false, //正在提交
 				modalName: '',
 				selectedVaccine: {},
 				activeField: '',
@@ -594,13 +597,22 @@
 						"person_image": this.userInfo.person_image || this.userInfo.profile_url
 					}]
 				}]
-				let res = await this.$fetch('operate', 'srvhealth_store_vaccination_appoint_record_add', req,
-					'health');
-				if (res.success) {
-					this.$emit('submit', res.data)
-					this.hideModal()
-					return
+				if (!this.onSubmit) {
+					this.onSubmit = true
+					let res = await this.$fetch('operate', 'srvhealth_store_vaccination_appoint_record_add', req,
+						'health');
+					this.onSubmit = false
+					if (res.success) {
+						this.$emit('submit', res.data)
+						this.hideModal()
+						return
+					}
+				} else {
+					uni.showToast({
+						title: '正在提交,请勿重复操作'
+					})
 				}
+
 			},
 			async submitNotify() {
 				if (!this.selectedVaccine || !this.selectedVaccine.sa_no) {
@@ -788,7 +800,9 @@
 		padding: 4rpx 0;
 		justify-content: flex-end;
 		flex: 1;
-
+		.disabled{
+			pointer-events: none;
+		}
 		.cu-tag,
 		.cu-btn {
 			min-width: 150rpx;

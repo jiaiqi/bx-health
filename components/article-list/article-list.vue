@@ -46,6 +46,15 @@
 						ruleType: 'like',
 						value: this.tabs[this.current].no
 					}],
+					order: [{
+							colName: 'seq',
+							orderType: "asc"
+						},
+						{
+							colName: "create_time",
+							orderType: "desc"
+						}
+					],
 					page: {
 						pageNo: 1,
 						rownumber: 5
@@ -146,7 +155,7 @@
 
 				.title-text {
 					margin-left: 20rpx;
-					width: calc(100% - 250rpx);
+					// width: calc(100% - 250rpx);
 					flex: 1;
 				}
 
@@ -161,7 +170,7 @@
 
 				.title-text {
 					margin-left: 0;
-					width: calc(100% - 250rpx);
+					// width: calc(100% - 250rpx);
 					flex: 1;
 				}
 

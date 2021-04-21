@@ -266,7 +266,12 @@
 						"navigationBarTextStyle": "black",
 						"enablePullDownRefresh": false
 					}
-
+				}, {
+					"path": "articleSelect/articleSelect",
+					"style": {
+						"navigationBarTitleText": "选择",
+						"enablePullDownRefresh": true
+					}
 				}
 			]
 		},

@@ -4,7 +4,7 @@
 			<block slot="content">用户管理</block>
 		</cu-custom>
 		<bx-filter ref="filter" :searchArg="searchArg" v-if="searchArg" :menuAgList="menuAgList" @toMessage="toMessage"
-		 @clickItem="toPages('patients', $event)" @click-add-item="clickAddItem"></bx-filter>
+			@clickItem="toPages('patients', $event)" @click-add-item="clickAddItem"></bx-filter>
 	</view>
 </template>
 
@@ -33,7 +33,7 @@
 		methods: {
 			onBack() {},
 			toMessage(e) {
-				if (e && e.userb_person_no&&e.row_no) {
+				if (e && e.userb_person_no && e.row_no) {
 					// type: 121 - 一对一
 					uni.navigateTo({
 						// url:'/personalPages/myDoctor/doctorChat?no='+e.userb_person_no
@@ -134,11 +134,11 @@
 			}
 		},
 		mounted() {
-			uni.$on('updateUnread',_=>{
-				this.$refs.filter.onRefresh();
+			uni.$on('updateUnread', _ => {
+				this.$refs.filter && this.$refs.filter.onRefresh();
 			})
 			uni.$on('backPage', () => {
-				this.$refs.filter.onRefresh();
+				this.$refs.filter && this.$refs.filter.onRefresh();
 			});
 			console.log('--mounted---');
 		}

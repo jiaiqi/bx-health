@@ -1,5 +1,5 @@
 <template>
-	<view>
+	<view class="list-wrap">
 		<view class="cu-list">
 			<view class="cu-item" v-for="(item,index) in sessionList" :key="item.session_no" @click="toChat(item)">
 				<view class="cu-avatar lg" v-if="!item.store_user_image&&!item.store_user_profile">
@@ -7,11 +7,17 @@
 					<view class="cu-tag badge" v-if="item.kefu_kefu_unread_msg">
 						{{item.kefu_kefu_unread_msg}}
 					</view>
+					<view class="cu-tag badge-left" v-if="item.kefu_kefu_unack_msg">
+						{{item.kefu_kefu_unack_msg}}
+					</view>
 				</view>
 				<view class="cu-avatar  lg" v-if="item.store_user_profile"
 					:style="[{backgroundImage:'url('+getImagePath(item.store_user_profile)+')'}]">
 					<view class="cu-tag badge" v-if="item.kefu_kefu_unread_msg">
 						{{item.kefu_kefu_unread_msg}}
+					</view>
+					<view class="cu-tag badge-left" v-if="item.kefu_kefu_unack_msg">
+						{{item.kefu_kefu_unack_msg}}
 					</view>
 				</view>
 				<view class="cu-avatar  lg" v-if="item.store_user_image"
@@ -19,13 +25,16 @@
 					<view class="cu-tag badge" v-if="item.kefu_kefu_unread_msg">
 						{{item.kefu_kefu_unread_msg}}
 					</view>
+					<view class="cu-tag badge-left" v-if="item.kefu_kefu_unack_msg">
+						{{item.kefu_kefu_unack_msg}}
+					</view>
 				</view>
 				<view class="content">
 					<view class="text-black">{{item.store_user_name||''}}</view>
 				</view>
 			</view>
 		</view>
-		<!-- <uni-load-more :status="more"></uni-load-more> -->
+		<uni-load-more :status="more"></uni-load-more>
 	</view>
 </template>
 
@@ -37,7 +46,7 @@
 				sessionList: [],
 				page: {
 					pageNo: 1,
-					rownumber: 30,
+					rownumber: 40,
 					total: 0
 				},
 				more: 'more', //more,loading,noMore
@@ -45,6 +54,7 @@
 		},
 		methods: {
 			toChat(e) {
+				this.page.pageNo = 1
 				// 跳转到聊天页面
 				uni.navigateTo({
 					url: `/personalPages/chat/chat?type=机构用户客服&identity=客服&storeNo=${this.storeNo}&session_no=${e.session_no}`
@@ -61,6 +71,15 @@
 						"colName": "store_no",
 						"ruleType": "eq",
 						"value": this.storeNo
+					},{
+						"colName":"msg_count",
+						ruleType:'gt',
+						value:0
+					}
+					],
+					order: [{
+						"colName": "last_msg_time",
+						"orderType": "desc" // asc升序  desc降序
 					}],
 					"page": {
 						"pageNo": this.page.pageNo,
@@ -77,7 +96,7 @@
 						if (res.page) {
 							this.page = res.page;
 						}
-						if (this.page.total && this.page.total > this.page.rownumber) {
+						if (this.page.total && this.page.total > this.page.rownumber*this.page.pageNo) {
 							this.more = 'more';
 						} else {
 							this.more = 'noMore';
@@ -100,6 +119,7 @@
 			}
 		},
 		onPullDownRefresh() {
+			this.page.pageNo = 1
 			if (this.storeNo) {
 				this.getStoreSession()
 			}
@@ -108,7 +128,7 @@
 			}, 1000)
 		},
 		onReachBottom() {
-			if (this.page.total && this.page.total > this.page.rownumber) {
+			if (this.more!=='noMore') {
 				// 加载更多
 				this.page.pageNo++;
 				this.more = 'loading';
@@ -122,11 +142,14 @@
 </script>
 
 <style lang="scss" scoped>
+	.list-wrap {
+		min-height: calc(100vh - var(--window-bottom) - var(--window-top) + 10px);
+		padding: 20rpx 0;
+	}
+
 	.cu-list {
 		display: flex;
 		flex-wrap: wrap;
-		padding: 20rpx 0;
-
 		.cu-item {
 			width: 25%;
 			margin-bottom: 10rpx;
@@ -135,17 +158,30 @@
 			justify-content: center;
 			align-items: center;
 
+			.badge-left {
+				position: absolute;
+				background-color: transparent;
+				background-color: #f37b1d;
+				border-radius: 100px;
+				top: -5px;
+				left: -10px;
+				font-size: 10px;
+				padding: 0px 5px;
+				height: 14px;
+				color: #FFFFFF;
+			}
 			.cu-avatar {
 				position: relative;
 				border-radius: 5px;
 			}
-
 			.content {
 				text-overflow: ellipsis;
 				white-space: nowrap;
 				overflow: hidden;
 				width: 90%;
 				text-align: center;
+				height: 20px;
+				overflow: hidden;
 			}
 		}
 	}

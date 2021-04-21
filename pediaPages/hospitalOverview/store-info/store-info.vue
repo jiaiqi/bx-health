@@ -81,7 +81,7 @@
 			}
 		},
 		methods: {
-		
+
 			makePhoneCall() {
 				uni.makePhoneCall({
 					phoneNumber: this.storeInfo && this.storeInfo.telephone ? this.storeInfo.telephone : '10086'
@@ -172,7 +172,7 @@
 			// max-height: 180rpx;
 			word-break: break-all;
 			display: -webkit-box;
-			-webkit-line-clamp: 6;
+			-webkit-line-clamp: 4;
 			/**指定行数*/
 			-webkit-box-orient: vertical;
 			overflow: hidden;

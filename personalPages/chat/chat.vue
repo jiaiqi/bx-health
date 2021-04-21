@@ -20,10 +20,11 @@
 				<view class="icon"><text class="cuIcon-settings"></text></view>
 			</view>
 		</view>
-		<chat :session-no="session_no" :identity="identity" page-type="session" @load-msg-complete="loadMsgComplete"
-			:groupInfo="groupInfo" :rowInfo="rowInfo" :storeInfo="storeInfo" :sessionType="sessionType"
-			:storeNo="storeNo" :topHeight="topHeight" :group-no="groupNo" :receiverInfo="receiverInfo"
-			:banSend="banSend" v-if="session_no" :storeUserInfo='storeUserInfo'></chat>
+		<chat ref="chatInstance" :session-no="session_no" :identity="identity" page-type="session"
+			@clickAvatar="clickAvatar" @load-msg-complete="loadMsgComplete" :groupInfo="groupInfo" :rowInfo="rowInfo"
+			:storeInfo="storeInfo" :sessionType="sessionType" :storeNo="storeNo" :topHeight="topHeight"
+			:group-no="groupNo" :receiverInfo="receiverInfo" :banSend="banSend" v-if="session_no"
+			:storeUserInfo='storeUserInfo' :queryOption="queryOption"></chat>
 	</view>
 </template>
 
@@ -39,7 +40,9 @@
 		computed: {
 			banSend() {
 				// 是否禁言
-				if (this.storeUserInfo && this.storeUserInfo.ban_send === '是' && this.sessionType === '店铺机构全员') {
+				if (this.userInfo && this.userInfo.ban_send === '是') {
+					return true
+				} else if (this.storeUserInfo && this.storeUserInfo.ban_send === '是' && this.sessionType === '店铺机构全员') {
 					return true
 				} else if (this.storeUser && this.storeUser.ban_send === '是' && this.sessionType === '群组圈子') {
 					return true
@@ -62,6 +65,8 @@
 		},
 		data() {
 			return {
+				queryOption: {},
+				articleList: [],
 				pageTitle: "", //页面标题
 				sessionType: '', // 会话类型
 				session_no: '', // 会话编号
@@ -70,7 +75,6 @@
 				receiver_person_no: '', // 客服会话 - 接收者用户编号
 				receiverInfo: {
 					// 接收者信息
-
 				},
 				storeInfo: {},
 				storeUserInfo: {}, // 当前登录用户在店铺成员列表中的信息
@@ -86,6 +90,49 @@
 			}
 		},
 		methods: {
+			clickAvatar(e) {
+				// 点击聊天记录中用户头像
+				if (this.storeUserInfo && this.storeUserInfo.user_role && e.sender_person_no) {
+					if (this.storeUserInfo.user_role.indexOf('管理员') !== -1 || this.storeUserInfo.user_role.indexOf(
+							'工作人员') !== -1 || this.storeUserInfo.user_role.indexOf('大夫') !== -1 || this.storeUserInfo
+						.user_role
+						.indexOf('客服') !== -1) {
+						let fieldsCond = [{
+							"column": "person_no",
+							"value": e.sender_person_no,
+							"display": false
+						}]
+						let hideColumn = [
+							"name",
+							"image",
+							"type",
+							"store_user_no",
+							"_store_no_disp",
+							"store_no",
+							"_person_no_disp",
+							"person_no",
+							"user_account",
+							"store_remark_person_name",
+							"kefu_kefu_unread_msg",
+							"invite_user_no",
+							"home_store_no",
+							"kefu_session_no",
+							"kefu_session_user_last_time",
+							"kefu_session_kefu_last_time",
+							"kefu_session_user_unread_msg",
+							"kefu_session_kefu_unread_msg",
+							"store_session_sign_in_time",
+							"store_session_user_unread_msg",
+							"add_url",
+							"create_time",
+							"create_user_disp"
+						]
+						uni.navigateTo({
+							url: `/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_store_user_select&fieldsCond=${JSON.stringify(fieldsCond)}&hideColumn=${JSON.stringify(hideColumn)}`
+						})
+					}
+				}
+			},
 			toPages(type) {
 				if (this.groupInfo.gc_no) {
 					uni.navigateTo({
@@ -295,13 +342,13 @@
 				}
 				return this.sessionInfo
 			},
-			getStoreUser() {
+			getStoreUser(no) {
 				// 店铺全员群聊 查找当前帐号在店铺人员列表中的数据
 				let req = {
 					"condition": [{
 						"colName": "store_no",
 						"ruleType": "eq",
-						"value": this.storeNo
+						"value": no || this.storeNo
 					}, {
 						"colName": "person_no",
 						"ruleType": "eq",
@@ -598,6 +645,30 @@
 			}
 		},
 		async onLoad(option) {
+			const self = this
+			if (option.articleList) {
+				try {
+					this.articleList = JSON.parse(option.articleList)
+					delete option.articleList
+				} catch (e) {
+					//TODO handle the exception
+				}
+			}
+			this.queryOption = option
+			if (Array.isArray(this.articleList) && this.articleList.length > 0) {
+				uni.showModal({
+					title: '发送文章',
+					content: `是否发送以下文章:${this.articleList.map(item=>item.title).toString()}`,
+					success(res) {
+						if (res.confirm) {
+							if (self.$refs.chatInstance) {
+								self.$refs.chatInstance.sendArticle && self.$refs.chatInstance.sendArticle(self
+									.articleList)
+							}
+						}
+					}
+				})
+			}
 			if (option.type) {
 				this.sessionType = option.type
 			}
@@ -618,7 +689,7 @@
 			if (option.storeNo) {
 				this.storeNo = option.storeNo
 				await this.getStore()
-				await this.getStoreUser()
+				await this.getStoreUser(option.storeNo)
 			}
 
 			if (this.session_no) {

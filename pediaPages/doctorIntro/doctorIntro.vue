@@ -3,7 +3,10 @@
 		<view class="top-intro">
 			<view class="person-info">
 				<view class="person-name">
-					{{storeInfo.name}}
+					<text> {{storeInfo.name}}</text>
+					<button class="cu-btn line-black sm margin-left round"
+						v-if="storeUserInfo&&storeUserInfo.id" @click="deleteFromStore">取消关注</button>
+					<button class="cu-btn line-black sm margin-left round" v-else @click="insertToStore">关注</button>
 				</view>
 				<view class="sub-title">
 					<view class="sub-title-item">
@@ -17,7 +20,9 @@
 					</view>
 				</view>
 			</view>
-			<image src="../static/img/ym.jpg" mode="aspectFill" class="person-image"></image>
+			<image :src="getImagePath(storeInfo.logo)" mode="aspectFill" class="person-image"
+				v-if="storeInfo&&storeInfo.logo"></image>
+			<image src="../static/img/ym.jpg" mode="aspectFill" class="person-image" v-else></image>
 		</view>
 		<view class="main-intro" :class="{'show-wrap':showIntroWrap}">
 			<view class="intro-item" :class="{'show-wrap':showIntroWrap}">
@@ -27,7 +32,7 @@
 				</text> -->
 				{{storeInfo.introduction}}
 			</view>
-	<!-- 		<view class="intro-item" :class="{'show-wrap':showIntroWrap}">
+			<!-- 		<view class="intro-item" :class="{'show-wrap':showIntroWrap}">
 				<text class="label">简介：</text>
 				<text>
 					张xx，女，主治医师，医学硕士，2008年开始从事生殖医学临床工作至今。擅长多囊卵巢综合症、盆腔炎症后遗症、复发性自然流产等不孕不育的诊断及治疗。曾参与国家自然科学基金项目，发表论文数篇。
@@ -39,7 +44,7 @@
 				<text class="cuIcon-unfold margin-left-xs" :class="{'show-wrap':showIntroWrap}"></text>
 			</view>
 		</view>
-	<!-- 	<page-item  v-for="pageItem in pageItemList" :key="pageItem.component_no"
+		<!-- 	<page-item  v-for="pageItem in pageItemList" :key="pageItem.component_no"
 			:pageItem="getConfig(pageItem)" :storeInfo="storeInfo" :userInfo="userInfo" 
 			ref="storeItem"></page-item> -->
 		<view class="other-intro">
@@ -158,6 +163,7 @@
 	export default {
 		computed: {
 			...mapState({
+				inviterInfo: state => state.app.inviterInfo,
 				userInfo: state => state.user.userInfo
 			})
 		},
@@ -167,13 +173,99 @@
 		data() {
 			return {
 				showIntroWrap: false,
-				storeInfo:{},
-				pageItemList:[],
-				store_no:"",
+				storeInfo: {},
+				storeUserInfo: {},
+				pageItemList: [],
+				store_no: "",
+				invite_user_no: ""
 			}
 		},
-		
+
 		methods: {
+			async deleteFromStore() {
+				if (this.storeUserInfo && this.storeUserInfo.id) {
+					let req = [{
+						"serviceName": "srvhealth_store_user_delete",
+						"condition": [{
+							"colName": "id",
+							"ruleType": "in",
+							"value": this.storeUserInfo.id
+						}]
+					}]
+					let url = this.getServiceUrl('health', 'srvhealth_store_user_delete', 'operate');
+					let res = await this.$http.post(url,req)
+					if(res.data.state==='SUCCESS'){
+						this.getStoreUser()
+						uni.showToast({
+							title:'已取消关注',
+							icon:'none'
+						})
+					}
+				}
+			},
+			async insertToStore(store_no, invite_user_no) {
+				// 添加用户到单位
+				let self = this;
+				if (!this.userInfo || !this.userInfo.no) {
+					await this.toAddPage()
+				}
+				if (this.storeUserInfo && this.storeUserInfo.id) {
+					return
+				}
+				let url = this.getServiceUrl('health', 'srvhealth_store_user_add', 'operate');
+				let req = [{
+					serviceName: 'srvhealth_store_user_add',
+					condition: [],
+					data: [{
+						nick_name: this.userInfo.nick_name ? this.userInfo.nick_name.replace(
+							/\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, "") : '',
+						profile_url: this.userInfo.profile_url,
+						sex: this.userInfo.sex,
+						user_account: this.userInfo.userno,
+						user_image: this.userInfo.user_image,
+						person_name: this.userInfo.name,
+						add_url: this.inviterInfo.add_url,
+						invite_user_no: this.inviterInfo.invite_user_no || invite_user_no || '',
+						store_no: this.store_no,
+						person_no: this.userInfo.no,
+						user_role: '用户',
+						image: this.storeInfo.image,
+						name: this.storeInfo.name,
+						type: null
+						// type: this.storeInfo.type
+					}]
+				}];
+				self.$http.post(url, req).then(res => {
+					if (res.data.state === 'SUCCESS') {
+						uni.showToast({
+							title: '关注成功'
+						})
+						this.getStoreUser()
+					}
+				})
+			},
+			async getStoreUser() {
+				// 查找用户在店铺中的信息
+				let url = this.getServiceUrl('health', 'srvhealth_store_user_select', 'select');
+				let req = {
+					serviceName: 'srvhealth_store_user_select',
+					colNames: ['*'],
+					condition: [{
+						colName: 'person_no',
+						ruleType: 'eq',
+						value: this.userInfo.no
+					}, {
+						colName: 'store_no',
+						ruleType: 'eq',
+						value: this.store_no
+					}]
+				};
+				let res = await this.$http.post(url, req);
+				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+					this.storeUserInfo = res.data.data[0]
+				}
+			},
+
 			getConfig(pageItem) {
 				if (pageItem && pageItem.type) {
 					let type = pageItem.type
@@ -188,7 +280,7 @@
 							break;
 						case '按钮组':
 							keys = ['show_subscribe', 'show_related_group', 'navigate_type', 'button_style',
-								'component_no','show_public_button','row_number'
+								'component_no', 'show_public_button', 'row_number'
 							]
 							break;
 						case '商品列表':
@@ -230,6 +322,7 @@
 				if (Array.isArray(res.data) && res.data.length > 0) {
 					this.storeInfo = res.data[0];
 					this.getPageItem()
+					this.getStoreUser()
 					uni.setNavigationBarTitle({
 						title: this.storeInfo.name
 					});
@@ -241,7 +334,7 @@
 							this.selectStoreInfo(times)
 						}
 					} else {
-						
+
 					}
 				}
 			},
@@ -264,7 +357,7 @@
 			},
 		},
 		onLoad(option) {
-			if(option.store_no){
+			if (option.store_no) {
 				this.store_no = option.store_no
 				this.selectStoreInfo()
 			}
@@ -497,6 +590,7 @@
 			.serve-list {
 				display: flex;
 				flex-wrap: wrap;
+
 				.serve-item {
 					display: flex;
 					flex-direction: column;
@@ -508,9 +602,11 @@
 					box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 					// flex: 1;
 					width: calc(33% - 40rpx/3);
-					&:nth-child(3n+1){
+
+					&:nth-child(3n+1) {
 						margin-left: 0;
 					}
+
 					.serve-image {
 						width: 100rpx;
 						height: 100rpx;

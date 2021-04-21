@@ -14,18 +14,24 @@
 			</view>
 		</view>
 		<view class="manager-view">
-			<text class="text-grey title">管理</text>
+			<text class="text-grey title">
+				<text class="margin-right">管理</text>
+				<text class="cuIcon-title text-orange margin-right">未回复</text>
+				<text class="cuIcon-title text-red ">未读</text>
+			</text>
 			<view class="manager-box">
 				<view class="box-item" v-for="item in list" @click="clickGrid(item)">
+					<view class="cu-tag amount text-blue" v-if="storeInfo[item.type]">
+						{{ storeInfo[item.type] | overDisplay }}
+					</view>
 					<view class="box-item-content">
-						<text class="cu-tag badge" v-if="item.num">{{item.num}}</text>
-						<view class="cu-tag amount text-blue" v-if="storeInfo[item.type]">
-							{{ storeInfo[item.type] | overDisplay }}
-						</view>
+						<text class="cu-tag badge" v-if="item.num">{{item.num||0}}</text>
+						<text class="cu-tag badge-left" v-if="item.unback">{{item.unback}}</text>
 						<image src="../static/links.png" class="icon" mode="" v-if="!item.icon"></image>
 						<text class="icon" v-else
 							:class="['cuIcon-' + item.icon, item.color ? 'text-' + item.color : '']"></text>
 						<view class="label">{{ item.label }}</view>
+						<!-- <text class="tit-label text-orange" v-if="item.unback">未回复：{{item.unback}}</text> -->
 					</view>
 				</view>
 			</view>
@@ -144,6 +150,7 @@
 				],
 				sessionList: [],
 				unreadNum: 0,
+				unreadNumber: 0,
 				websiteDetail: {}, //店铺关联站点信息
 				websiteColumn: [], //站点栏目
 			};
@@ -159,6 +166,7 @@
 				return this.gridList.map(item => {
 					if (item.type === 'message') {
 						item.num = this.unreadNum
+						item.unback = this.unreadNumber
 					}
 					return item
 				})
@@ -307,7 +315,8 @@
 						break;
 					case 'manual':
 						// 操作手册
-						url = `/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=CT2021041518560002`
+						url =
+							`/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=CT2021041518560002`
 						break;
 					case 'message':
 						url = '/otherPages/MessageCenter/MessageCenter?storeNo=' + this.storeNo
@@ -514,6 +523,7 @@
 				if (storeInfo.success && Array.isArray(storeInfo.data) && storeInfo.data.length > 0) {
 					// storeInfo = storeInfo.data[0];
 					this.unreadNum = storeInfo.data[0].kefu_unread_msg
+					this.unreadNumber = storeInfo.data[0].kefu_unack_msg
 					this.storeInfo = storeInfo.data[0];
 					this.getStoreArticleColumns()
 				}
@@ -598,6 +608,7 @@
 
 	.manager-view {
 		background-color: #fff;
+
 		.title {
 			display: inline-block;
 			padding: 20rpx 20rpx 20rpx;
@@ -615,20 +626,42 @@
 			box-sizing: border-box;
 			border: 1px solid #f1f1f1;
 			background-color: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			position: relative;
+
+			.amount {
+				position: absolute;
+				right: 0;
+				top: 0;
+			}
+
+			.badge-left {
+				position: absolute;
+				background-color: #f37b1d;
+				border-radius: 100px;
+				top: -10rpx;
+				left:-10rpx;
+				font-size: 10px;
+				padding: 0px 5px;
+				height: 14px;
+				color: #FFFFFF;
+			}
 
 			.box-item-content {
-				position: relative;
 				position: relative;
 				display: flex;
 				flex-direction: column;
 				justify-content: center;
 				align-items: center;
 
-				.amount {
+				.tit-label {
+					font-size: 12px;
 					position: absolute;
-					right: -5px;
-					top: -5px;
+					bottom: -20px;
 				}
+
 			}
 
 			.icon {

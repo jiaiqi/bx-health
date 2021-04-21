@@ -35,7 +35,7 @@
 						<view class="record-popover" :class="{show:item.showRecall === true}" @click.stop="">
 							<view class="pop-btn" @click="deleteRecord(item)">
 								<text class="cuIcon-repeal icon"></text>
-								<text>撤回</text>
+								<text>删除</text>
 							</view>
 						</view>
 						<view class="sender-info" v-if="item.sender_name||item.sender_group_role||item.identity">
@@ -45,7 +45,8 @@
 								v-else-if="item.identity&&item.identity!=='客户'">{{ item.identity }}</text>
 							<text class="sender-name" v-if="item.sender_name">{{ item.sender_name }}</text>
 						</view>
-						<view class="person-chat-item-left" @longpress.stop="remindSomeone(item)">
+						<view class="person-chat-item-left" @tap.stop="clickAvatar(item)"
+							@longpress.stop="remindSomeone(item)">
 							<image :src="storeInfo.log?getImagePath(storeInfo.logo):getImagePath(storeInfo.image)"
 								mode="aspectFill" v-if="identity==='客户'&&item.identity==='客服'"></image>
 							<image :src="getImagePath(item.sender_profile_url)" mode="aspectFit"
@@ -62,6 +63,11 @@
 							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url">
 							</u-image>
 							<!-- <chat-image :max="350" :src="item.img_url"></chat-image> -->
+						</view>
+						<view class="person-chat-item-right" v-else-if="item.msg_content_type === '文章'"
+							@click="toArticle(item)">
+							<text class="border-bottom">{{item.msg_content}} <text
+									class="cuIcon-text margin-right-xs"></text></text>
 						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
 							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
@@ -154,12 +160,18 @@
 							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url">
 							</u-image>
 						</view>
+						<view class="person-chat-item-right" v-else-if="item.msg_content_type === '文章'"
+							@click="toArticle(item)">
+							<text class="border-bottom">{{item.msg_content}} <text
+									class="cuIcon-text margin-right-xs"></text></text>
+						</view>
 						<view v-else-if="item.msg_content" @click="clickChatLink(item)" class="person-chat-item-right"
 							:class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<text class="remind-someone"
 								v-if="item.attribute&&item.attribute.type&&item.attribute.type==='remindPerson'">@{{item.attribute.name}}</text>
 							<text user-select selectable space="nbsp">{{ item.msg_content }}</text>
 						</view>
+
 						<view v-else-if="item.msg_link && item.msg_content_type === '链接'" @click="clickChatLink(item)"
 							class="person-chat-item-right" :class="item.msg_link ? 'person-chat-item-right-link' : ''">
 							<view class="link-left">
@@ -224,7 +236,8 @@
 								</view>
 							</view>
 						</view>
-						<view class="person-chat-item-left" @longpress="remindSomeone(item)">
+						<view class="person-chat-item-left" @tap.stop="clickAvatar(item)"
+							@longpress.stop="remindSomeone(item)">
 							<image :src="getImagePath(storeInfo.image)" mode="aspectFill" v-if="identity==='客服'">
 							</image>
 							<image
@@ -297,6 +310,12 @@
 						<image src="/personalPages/static/photo.png" mode=""></image>
 					</view>
 					<view class="person-chat-bot-bot-item-b"><text>图片</text></view>
+				</view>
+				<view @click="openMenuPoup('article')" class="person-chat-bot-bot-item">
+					<view class="person-chat-bot-bot-item-top">
+						<image src="/personalPages/static/article.png" mode=""></image>
+					</view>
+					<view class="person-chat-bot-bot-item-b"><text>文章</text></view>
 				</view>
 				<view @click="openMenuPoup('word')" class="person-chat-bot-bot-item">
 					<view class="person-chat-bot-bot-item-top">
@@ -400,6 +419,9 @@
 			banSend: {
 				type: [Boolean, String], //是否禁言
 				default: false
+			},
+			queryOption: {
+				type: Object
 			}
 		},
 		computed: {
@@ -408,13 +430,6 @@
 				globalTextFontSize: state => state.app['globalTextFontSize'],
 				currentUserInfo: state => state.user.userInfo
 			}),
-			inputText() {
-				if (this.remindPerson && this.remindPerson.no && this.remindPerson.name) {
-					return {
-
-					}
-				}
-			},
 			chartHeight() {
 				if (this.topHeight) {
 					return `calc(100vh   - ${this.topHeight}px - var(--window-top) - var(--window-bottom))`;
@@ -438,6 +453,7 @@
 		},
 		data() {
 			return {
+				sendArticleList: [],
 				focusInput: false,
 				holdKeyboard: true, //focus时，点击页面的时候不收起键盘
 				showKeyboard: false,
@@ -489,6 +505,9 @@
 		},
 
 		methods: {
+			clickAvatar(e) {
+				this.$emit('clickAvatar', e)
+			},
 			deleteRecord(item) {
 				let req = [{
 					"serviceName": "srvhealth_consultation_chat_record_delete",
@@ -863,6 +882,11 @@
 							self.sendMessageLanguageInfo('位置', res);
 						}
 					});
+				} else if (type == 'article') {
+					let option = this.queryOption
+					uni.navigateTo({
+						url: `/personalPages/articleSelect/articleSelect?queryOption=${JSON.stringify(option)}`
+					})
 				} else if (type == 'question' || type === 'bite') {
 					this.showBottom = true;
 					this.currentSendType = type;
@@ -1251,8 +1275,6 @@
 			},
 			/*点击发送后添加图片或语音数据**/
 			async sendMessageLanguageInfo(type, value, info) {
-
-				console.log('type----sendMessageLanguageInfo', type);
 				let serviceName = 'srvhealth_consultation_chat_record_add'
 				if (this.sessionType === '机构用户客服') {
 					if (this.identity === '客户') {
@@ -1412,6 +1434,8 @@
 						});
 						return;
 					}
+				} else if (type === '文章') {
+					req[0].data[0].attribute = JSON.stringify(data)
 				}
 				let data = this.deepClone(req[0].data[0])
 				if (type === '图片') {
@@ -1448,6 +1472,7 @@
 				data.msg_content_type = type
 				data.id = this.recordList.length > 0 ? (this.recordList[this.recordList.length - 1].id + 999) : 99
 				this.recordList.push(data)
+
 				this.toBottom()
 				let res = await this.$http.post(url, req);
 				uni.hideLoading();
@@ -1880,8 +1905,9 @@
 					}
 				}
 			},
-			setRefreshMessageTimer(second = 3 * 1000) {
+			setRefreshMessageTimer(second = 30000 * 1000) {
 				// 设置定时刷新消息的定时器
+				clearInterval(this.refreshMessageTimer)
 				this.refreshMessageTimer = setInterval(() => {
 					this.initMessageList('refresh')
 				}, second)
@@ -1944,13 +1970,179 @@
 					})
 					uni.setStorageSync('current_patient', this.userInfo);
 					this.initMessageList('refresh');
-					// this.setRefreshMessageTimer()
+					this.setRefreshMessageTimer()
 					return res.data.data[0];
 				} else {
 					uni.setStorageSync('current_patient', '');
 					uni.showToast({
 						title: '未找到用户信息',
 						icon: 'none'
+					});
+				}
+			},
+			async sendArticle(data) {
+				let serviceName = 'srvhealth_consultation_chat_record_add'
+				if (this.sessionType === '机构用户客服') {
+					if (this.identity === '客户') {
+						serviceName = 'srvhealth_consultation_chat_record_kefu_user_add'
+					} else {
+						serviceName = 'srvhealth_consultation_chat_record_kefu_kefu_add'
+					}
+				}
+				let url = this.getServiceUrl('health', serviceName, 'operate');
+				let req = [{
+					serviceName: serviceName,
+					colNames: ['*'],
+					data: []
+				}];
+				let reqData = data.map(item => {
+					let result = {}
+					const type = '文章'
+					if (this.pageType === 'groupChat') {
+						// 群组聊天
+						result = {
+							sender_account: this.currentUserInfo.userno,
+							sender_name: this.currentUserInfo.name,
+							sender_profile_url: this.currentUserInfo.profile_url,
+							sender_user_image: this.currentUserInfo.user_image,
+							sender_group_role: this.groupInfo.group_role,
+							rcv_group_no: this.groupInfo.gc_no,
+							receiver_account: this.groupInfo.gc_no,
+							receiver_person_no: this.groupInfo.gc_no,
+							sender_person_no: this.currentUserInfo.no,
+							msg_content_type: type,
+							identity: this.groupInfo.group_role
+						};
+						if (this.remindPerson && this.remindPerson.no) {
+							result.receiver_person_no = this.remindPerson.no
+							result.attribute = JSON.stringify(this.remindPerson)
+						}
+					} else if (this.pageType === 'session') {
+						// 会话聊天
+						result = {
+							sender_account: this.currentUserInfo.userno,
+							sender_name: this.currentUserInfo.name,
+							sender_person_no: this.currentUserInfo.no,
+							sender_profile_url: this.currentUserInfo.profile_url,
+							sender_user_image: this.currentUserInfo.user_image ? this.currentUserInfo
+								.user_image : this
+								.currentUserInfo.profile_url,
+							msg_content_type: type,
+							session_no: this.sessionNo,
+						};
+						if (this.rowInfo && this.rowInfo.row_no) {
+							let targetUserinfo = {}
+							if (this.identity === '患者') {
+								targetUserinfo = {
+									userno: this.rowInfo.userb_no,
+									person_no: this.rowInfo.userb_person_no,
+									name: this.rowInfo.userb_name,
+									profile_url: this.rowInfo.userb_profile_url,
+									user_image: this.rowInfo.userb_image,
+									identity: this.identity ? this.identity : '患者'
+								}
+							} else {
+								targetUserinfo = {
+									userno: this.rowInfo.usera_no,
+									person_no: this.rowInfo.usera_person_no,
+									name: this.rowInfo.usera_name,
+									profile_url: this.rowInfo.usera_profile_url,
+									user_image: this.rowInfo.usera_image,
+									identity: this.identity ? this.identity : '医生'
+								}
+							}
+							result.receiver_account = targetUserinfo.userno;
+							result.receiver_person_no = targetUserinfo.person_no;
+							result.identity = targetUserinfo.identity
+						}
+						if (this.receiverInfo) {
+							if (this.receiverInfo.person_no) {
+								result.receiver_person_no = this.receiverInfo.person_no;
+							}
+							if (this.receiverInfo.user_account) {
+								result.receiver_account = this.receiverInfo.user_account;
+							}
+						}
+						if (this.groupNo) {
+							result.rcv_group_no = this.groupNo
+						}
+						if (this.identity) {
+							result.identity = this.identity
+						}
+						if (this.remindPerson && this.remindPerson.no) {
+							result.receiver_person_no = this.remindPerson.no
+							result.attribute = JSON.stringify(this.remindPerson)
+						}
+						if (!this.sessionNo) {
+							uni.showModal({
+								title: '提示',
+								content: '会话不存在，即将返回上一页面',
+								showCancel: false,
+								success(res) {
+									if (res.confirm) {
+										uni.navigateBack({
+											animationType: 'fade-out'
+										})
+									}
+								}
+							})
+						}
+					} else {
+						// 一对一聊天
+						result = {
+							sender_account: this.currentUserInfo.userno,
+							sender_name: this.currentUserInfo.name,
+							sender_profile_url: this.currentUserInfo.profile_url,
+							sender_user_image: this.currentUserInfo.user_image,
+							receiver_account: this.doctor_info.usera_no ? this.doctor_info.usera_no : this
+								.userInfo
+								.userno,
+							receiver_person_no: this.doctor_info.usera_person_no ? this.doctor_info
+								.usera_person_no : this
+								.userInfo.no,
+							sender_person_no: this.currentUserInfo.no,
+							msg_content_type: type,
+							identity: this.pageType ? '患者' : '医生'
+						}
+					}
+					result.msg_content = item.title
+					result.attribute = JSON.stringify({
+						content_no: item.content_no
+					})
+					let data = this.deepClone(result)
+					data.msg_content_type = type
+					data.id = this.recordList.length > 0 ? (this.recordList[this.recordList.length - 1].id +
+							999) :
+						99
+					this.recordList.push(data)
+					return result
+				})
+				req[0].data = reqData
+				debugger
+				let res = await this.$http.post(url, req);
+				uni.hideLoading();
+				if (this.remindPerson && this.remindPerson.no) {
+					this.remindPerson = {}
+				}
+				this.isAll = false;
+				this.pageInfo.pageNo = 1;
+				this.initMessageList('refresh');
+				setTimeout(() => {
+					this.toBottom()
+				}, 200)
+			},
+			toArticle(e) {
+				if (e && e.attribute && e.attribute.content_no) {
+					let url =
+						`/publicPages/article/article?serviceName=srvdaq_cms_content_select&content_no=${e.attribute.content_no}`
+					if (this.storeInfo && this.storeInfo.name) {
+						url += `&store_name=${this.storeInfo.name}`
+					}
+					if (this.storeNo) {
+						url += `&store_no=${this.storeNo}`
+					}
+					uni.navigateTo({
+						url: url
 					});
 				}
 			},
@@ -2026,11 +2218,11 @@
 			} else if (this.groupInfo && this.groupInfo.gc_no) {
 				// 圈子聊天
 				this.initMessageList('refresh').then(_ => {
-					// this.setRefreshMessageTimer()
+					this.setRefreshMessageTimer()
 				});
 			} else if (this.sessionNo) {
 				this.initMessageList('refresh').then(_ => {
-					// this.setRefreshMessageTimer()
+					this.setRefreshMessageTimer()
 				});
 			}
 		}
@@ -2265,6 +2457,12 @@
 						align-items: center;
 						box-shadow: 2px 1px 2px rgba(26, 26, 26, 0.2);
 
+						.border-bottom {
+							display: inline-block;
+							padding-bottom: 5px;
+							border-bottom: 1px solid #333;
+						}
+
 						.link-left {
 							margin-right: 16rpx;
 
@@ -2478,8 +2676,14 @@
 						padding: 5px 10px;
 						font-size: var(--global-text-font-size);
 						position: relative;
+
 						// display: flex;
 						// align-items: center;
+						.border-bottom {
+							display: inline-block;
+							padding-bottom: 5px;
+							border-bottom: 1px solid #fff;
+						}
 
 						.link-left {
 							margin-right: 16rpx;

@@ -54,14 +54,10 @@
 				}
 				let req = {
 					condition: this.condition,
-					order: [
-						// {
-						// 	colName: "top_status",
-						// 	orderType: "desc"
-						// }, {
-						// 	colName: "other_status",
-						// 	orderType: "desc"
-						// },
+					order: [{
+							colName: 'seq',
+							orderType: "asc"
+						},
 						{
 							colName: "create_time",
 							orderType: "desc"
@@ -82,11 +78,11 @@
 					} else {
 						list = [...this.articleList, ...res.data]
 					}
-					let topList = list.filter(item=>item.top_status==='是')
-					let statusList = list.filter(item=>!!item.other_status&&item.top_status!=='是')
-					let normalList =  list.filter(item=>!item.other_status&&item.top_status!=='是')
-					this.articleList = [...topList,...statusList,...normalList]
-					
+					let topList = list.filter(item => item.top_status === '是')
+					let statusList = list.filter(item => !!item.other_status && item.top_status !== '是')
+					let normalList = list.filter(item => !item.other_status && item.top_status !== '是')
+					this.articleList = [...topList, ...statusList, ...normalList]
+
 					if (res.page) {
 						if (res.page.total > res.page.rownumber * res.page.pageNo) {
 							this.loadStatus = 'more'

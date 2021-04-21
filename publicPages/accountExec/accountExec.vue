@@ -705,6 +705,7 @@
 						data: [that.user]
 					}];
 				}
+				debugger
 				if (that.isInvalid(that.user.user_no) && that.isInvalid(this.user.pwd)) {
 					let response = await that.$http.post(url, req);
 					console.log('srvuser_login', response);
@@ -726,6 +727,7 @@
 						that.$store.commit('SET_LOGIN_STATE', true);
 						console.log('that.backUrl', that.backUrl);
 						let backUrl = uni.getStorageSync('backUrl');
+						debugger
 						if (backUrl && backUrl !== '/') {
 							backUrl = that.getDecodeUrl(backUrl);
 							if (backUrl && backUrl.lastIndexOf('backUrl=') !== -1) {
