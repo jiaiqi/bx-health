@@ -66,7 +66,7 @@ fly.interceptors.request.use(async (request) => {
 			// #ifdef MP-WEIXIN
 			let option = wx.getLaunchOptionsSync()
 			if (option && option.scene !== 1154) {
-				await Vue.prototype.toAddPage()
+				// await Vue.prototype.toAddPage()
 				// const result = await wx.login();
 				// if (result.code) {
 				// 	let res = await Vue.prototype.wxLogin({
@@ -156,8 +156,8 @@ fly.interceptors.response.use(
 			if (res.data.resultCode === "0011") { //未登录
 				uni.setStorageSync('isLogin', false)
 				uni.setStorageSync('stophttp', true)
-				if (Vue.prototype.$store && Vue.prototype.$store.commit) {
-					Vue.prototype.$store.commit('SET_LOGIN_STATE', false)
+				if (store && store.commit) {
+					store.commit('SET_LOGIN_STATE', false)
 				}
 				// 后端返回 无效登录时，需要进行的跳转处理
 				// if (uni.getStorageSync("isLogin")) {

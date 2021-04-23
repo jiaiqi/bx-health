@@ -1,6 +1,7 @@
 import store from '@/store'
 import api from '@/common/api.js'
 import _http from '@/common/http.js'
+
 import {
 	checkIsAttention,
 	wxVerifyLogin,
@@ -1121,7 +1122,7 @@ export default {
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
 				"data": [{
-					"app_no": "APPNO20201124160702",
+					"app_no": api.appNo.wxmp,
 					"nickname": userInfo.nickname,
 					"sex": userInfo.sex,
 					"country": userInfo.country,
@@ -1533,7 +1534,7 @@ export default {
 					let current_user_info = null
 					store.commit('SET_USERLIST', res.data.data);
 					let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
-					if (info&&info.no) {
+					if (info && info.no) {
 						store.commit("SET_USERINFO", info)
 					} else {
 						uni.setStorageSync('current_user_info', res.data.data[0]);
@@ -1587,47 +1588,47 @@ export default {
 					// console.log(store.state.app.inviterInfo)
 					// let pageInfo = Vue.prototype.getShareParams()
 					// 暂时去掉
-					let pageStack = getCurrentPages()
-					let currentPage = ''
-					if (Array.isArray(pageStack) && pageStack.length >= 1) {
-						currentPage = pageStack[pageStack.length - 1]?.$page?.fullPath
-					}
-					if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no && (!
-							currentPage || (currentPage && currentPage.indexOf(
-									'/pediaPages/hospitalOverview/hospitalOverview') == -1 && currentPage
-								.indexOf(
-									'/personalPages/chat/chat') == -1 && currentPage.indexOf(
-									'personalPages/gropDetail/gropDetail') == -1)) && pageStack.length ===
-						1) {
-						// 通过分享医院主页加入的用户
-						uni.redirectTo({
-							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
-								.state
-								.user.userInfo.home_store_no,
-							success() {
-								// 标记 已进入过医院主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					} else if (userInfo.home_store_type === '饭馆' && userInfo.home_store_no) {
-						// 通过分享餐馆主页加入的用户
-						uni.redirectTo({
-							url: '/otherPages/shop/shopHome?type=find&store_no=' + userInfo
-								.home_store_no,
-							success() {
-								// 标记 已进入过餐馆主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					} else if (userInfo.home_store_type === '医生') {
-						uni.redirectTo({
-							url: '/pediaPages/doctorIntro/doctorIntro',
-							success() {
-								// 标记 已进入过餐馆主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					}
+					// let pageStack = getCurrentPages()
+					// let currentPage = ''
+					// if (Array.isArray(pageStack) && pageStack.length >= 1) {
+					// 	currentPage = pageStack[pageStack.length - 1]?.$page?.fullPath
+					// }
+					// if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no && (!
+					// 		currentPage || (currentPage && currentPage.indexOf(
+					// 				'/pediaPages/hospitalOverview/hospitalOverview') == -1 && currentPage
+					// 			.indexOf(
+					// 				'/personalPages/chat/chat') == -1 && currentPage.indexOf(
+					// 				'personalPages/gropDetail/gropDetail') == -1)) && pageStack.length ===
+					// 	1) {
+					// 	// 通过分享医院主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
+					// 			.state
+					// 			.user.userInfo.home_store_no,
+					// 		success() {
+					// 			// 标记 已进入过医院主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// } else if (userInfo.home_store_type === '饭馆' && userInfo.home_store_no) {
+					// 	// 通过分享餐馆主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + userInfo
+					// 			.home_store_no,
+					// 		success() {
+					// 			// 标记 已进入过餐馆主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// } else if (userInfo.home_store_type === '医生') {
+					// 	uni.redirectTo({
+					// 		url: '/pediaPages/doctorIntro/doctorIntro',
+					// 		success() {
+					// 			// 标记 已进入过餐馆主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// }
 				}
 				return store.state.user.userInfo
 			}
@@ -1666,7 +1667,7 @@ export default {
 				uni.setStorageSync('current_user_info', res.data.data[0]);
 				uni.setStorageSync('current_user', res.data.data[0].name);
 				let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
-				if(info&&info.no){
+				if (info && info.no) {
 					store.commit('SET_USERINFO', info)
 					uni.setStorageSync('current_user_info', info);
 					uni.setStorageSync('current_user', info.name);
@@ -1682,46 +1683,46 @@ export default {
 						currentPage = pageStack[pageStack.length - 1]?.$page?.fullPath
 					}
 					// 暂时去掉
-					if (['诊所', '医院', '健康服务'].includes(store.state
-							.user.userInfo.home_store_type) && (!currentPage || (currentPage && currentPage
-							.indexOf(
-								'/pediaPages/hospitalOverview/hospitalOverview') == -1 && currentPage
-							.indexOf(
-								'/personalPages/chat/chat') == -1 && currentPage.indexOf(
-								'personalPages/gropDetail/gropDetail') == -1)) && pageStack.length ===
-						1) {
-						// 通过分享医院主页加入的用户
-						uni.redirectTo({
-							url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
-								.data
-								.data[0].home_store_no,
-							success() {
-								// 标记 已进入过医院主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					} else if ((['饭馆'].includes(store.state
-								.user.userInfo.home_store_type) && store.state.user
-							.userInfo.home_store_no)) {
-						// 通过分享饭馆主页加入的用户
-						uni.redirectTo({
-							url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state
-								.user
-								.userInfo.home_store_no,
-							success() {
-								// 标记 已进入过餐馆主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					} else if (userInfo.home_store_type === '医生') {
-						uni.redirectTo({
-							url: '/pediaPages/doctorIntro/doctorIntro',
-							success() {
-								// 标记 已进入过餐馆主页
-								store.commit('SET_INTO_HOSPITAL_STATUS', true)
-							}
-						})
-					}
+					// if (['诊所', '医院', '健康服务'].includes(store.state
+					// 		.user.userInfo.home_store_type) && (!currentPage || (currentPage && currentPage
+					// 		.indexOf(
+					// 			'/pediaPages/hospitalOverview/hospitalOverview') == -1 && currentPage
+					// 		.indexOf(
+					// 			'/personalPages/chat/chat') == -1 && currentPage.indexOf(
+					// 			'personalPages/gropDetail/gropDetail') == -1)) && pageStack.length ===
+					// 	1) {
+					// 	// 通过分享医院主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
+					// 			.data
+					// 			.data[0].home_store_no,
+					// 		success() {
+					// 			// 标记 已进入过医院主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// } else if ((['饭馆'].includes(store.state
+					// 			.user.userInfo.home_store_type) && store.state.user
+					// 		.userInfo.home_store_no)) {
+					// 	// 通过分享饭馆主页加入的用户
+					// 	uni.redirectTo({
+					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state
+					// 			.user
+					// 			.userInfo.home_store_no,
+					// 		success() {
+					// 			// 标记 已进入过餐馆主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// } else if (userInfo.home_store_type === '医生') {
+					// 	uni.redirectTo({
+					// 		url: '/pediaPages/doctorIntro/doctorIntro',
+					// 		success() {
+					// 			// 标记 已进入过餐馆主页
+					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
+					// 		}
+					// 	})
+					// }
 				}
 				// #endif
 				return res.data.data[0]
@@ -1861,35 +1862,39 @@ export default {
 			if (store && store.state && store.state.user) {
 				wxUserInfo = store.state.user.wxUserInfo
 			}
-			if ((wxUserInfo && (!wxUserInfo.nickname || wxUserInfo.nickname === '微信用户')) || !wxUserInfo) {
-				// 未授权获取用户信息
-				console.log(store.state.app.authBoxDisplay)
-				store.commit('SET_AUTH_USERINFO', false)
-				store.commit('SET_REGIST_STATUS', false)
-				return
-				// 未授权不进行注册
-			} else {
-				store.commit('SET_AUTH_USERINFO', true)
-				if (!store.state.app.authBoxDisplay) {
-					let data = await selectPersonInfo()
-					// let data = await Vue.prototype.selectBasicUserInfo()
-					if (data && data.no && data.nick_name && data.profile_url) {
-						// 已有用户信息
-						if (!store.state.app.subscsribeStatus) {
-							Vue.prototype.checkSubscribeStatus()
-						}
-						if (store.state.app.doctorInfo && store.state.app.doctorInfo.no) {
-							let result = await Vue.prototype.bindDoctorInfo(store.state.app.doctorInfo
-								.no)
-						}
-						// 自动更新头像昵称
-						Vue.prototype.updateUserInfo(wxUserInfo)
-						store.commit('SET_REGIST_STATUS', false)
-						return true
-					}
+			// if ((wxUserInfo && (!wxUserInfo.nickname || wxUserInfo.nickname === '微信用户')) || !wxUserInfo) {
+			// 	// 未授权获取用户信息
+			// 	debugger
+			// 	console.log(store.state.app.authBoxDisplay)
+			// 	store.commit('SET_AUTH_USERINFO', false)
+			// 	store.commit('SET_REGIST_STATUS', false)
+			// 	return
+			// 	// 未授权不进行注册
+			// } else {
+			store.commit('SET_AUTH_USERINFO', true)
+			// if (!store.state.app.authBoxDisplay) {
+			let data = await selectPersonInfo()
+			// let data = await Vue.prototype.selectBasicUserInfo()
+			if (data && data.no && data.nick_name && data.profile_url) {
+				// 已有用户信息
+				if (!store.state.app.subscsribeStatus) {
+					Vue.prototype.checkSubscribeStatus()
 				}
-				// store.commit('SET_AUTH_USERINFO', true)
+				if (store.state.app.doctorInfo && store.state.app.doctorInfo.no) {
+					let result = await Vue.prototype.bindDoctorInfo(store.state.app.doctorInfo
+						.no)
+				}
+				// 自动更新头像昵称
+				Vue.prototype.updateUserInfo(wxUserInfo)
+				store.commit('SET_AUTH_USERINFO', true)
+				store.commit('SET_REGIST_STATUS', false)
+				return true
+			} else {
+				store.commit('SET_AUTH_USERINFO', false)
 			}
+			// }
+			// store.commit('SET_AUTH_USERINFO', true)
+			// }
 			if (store.state.app.authBoxDisplay) {
 				store.commit('SET_REGIST_STATUS', false)
 				return

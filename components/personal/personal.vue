@@ -18,9 +18,9 @@
 				</view>
 			</view>
 		</view>
-		<view class="container-cen" :class="{ top90: type == 'shop' }">
-			<manage-bar :topGridList="topGridList" @toPages="toPages" v-if="type!=='shop'"></manage-bar>
-			<order-bar @toPages="toPages" @change="orderAmountChange"></order-bar>
+		<view class="container-cen top90" :class="{ top90: type == 'shop' }">
+<!-- 			<manage-bar :topGridList="topGridList" @toPages="toPages" v-if="type!=='shop'"></manage-bar>
+			<order-bar @toPages="toPages" @change="orderAmountChange"></order-bar> -->
 			<view class="container-bot">
 				<view class="cu-list menu sm-border">
 					<view @click="toPages('updateInfo')" class="cu-item arrow">

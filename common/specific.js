@@ -1,6 +1,7 @@
 import store from '@/store'
 import api from '@/common/api.js'
 import _http from '@/common/http.js'
+const mpAppNo = api.appNo.wxmp
 import {
 	checkIsAttention,
 	wxVerifyLogin
@@ -51,7 +52,7 @@ export default {
 				"condition": [{
 						"colName": "app_no",
 						"ruleType": "eq",
-						"value": 'APPNO20201124160702'
+						"value": mpAppNo
 					},
 					{
 						"colName": "wx_mch_id",
@@ -94,7 +95,7 @@ export default {
 			let req = [{
 				"serviceName": "srvwx_order",
 				"data": [{
-					"app_no": 'APPNO20201124160702',
+					"app_no": mpAppNo,
 					"wx_mch_id": "1485038452",
 					"out_trade_no": orderData ? orderData.order_no : new Date().getTime(),
 					"total_fee": total_fee, // 单位是分

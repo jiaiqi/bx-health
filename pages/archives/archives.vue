@@ -1,6 +1,6 @@
 <template>
 	<view class="health-archive-wrap"
-		v-if="(is_login &&!authBoxDisplay) || (is_login && client_env === 'h5')">
+		v-if="!authBoxDisplay||client_env === 'h5'">
 		<view class="top text-bold">
 			<view class="left">
 				<view class="avatar" @click="showUserListPopup = true">
@@ -167,7 +167,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="health-archive-item ">
+	<!-- 	<view class="health-archive-item ">
 			<view class="subtitle">
 				<text class="title-text">疾病风险提示</text>
 				<view class=""></view>
@@ -176,7 +176,6 @@
 				<view class="disease-item text-red">
 					<view class="disease-name">高血压</view>
 					<view class="number">
-						<!-- 风险: -->
 						<text class="digit">90</text>
 						%
 					</view>
@@ -184,13 +183,12 @@
 				<view class="disease-item text-orange">
 					<view class="disease-name">肥胖</view>
 					<view class="number">
-						<!-- 风险: -->
 						<text class="digit">75</text>
 						%
 					</view>
 				</view>
 			</view>
-		</view>
+		</view> -->
 		<view class="cu-modal bottom-modal" :class="{ show: showAddRecord }">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="inspect-record">

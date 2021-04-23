@@ -48,7 +48,7 @@ fly.interceptors.request.use(async (request) => {
 			request.cancel = true
 			// #endif
 			// #ifdef MP-WEIXIN
-			Vue.prototype.toAddPage()
+			// Vue.prototype.toAddPage()
 			// const result = await wx.login();
 			// if (result.code) {
 			// 	let res = await Vue.prototype.wxLogin({

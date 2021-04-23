@@ -194,6 +194,7 @@
 			},
 			async getGroupList() {
 				// 查找店铺关联群组
+				debugger
 				let req = {
 					condition: [{
 							"colName": "circle_visible",
@@ -246,6 +247,8 @@
 					}
 					this.groupList = groupList
 					return groupList
+				}else{
+					this.groupList = []
 				}
 			},
 			toPages(e) {

@@ -1,7 +1,7 @@
 <template>
 	<view class="page-wrap" :style="{
 			'--global-text-font-size': globalTextFontSize + 'px'
-		}" v-if="showPageContent">
+		}">
 		<view class="page-item" v-for="(pageItem,pageIndex) in pageItemList" :key="pageItem.item_no" :class="{
 				'swiper-view': pageItem.div_type === 'carousel',
 				'menu-view': pageItem.div_type === 'buttons',
@@ -89,9 +89,9 @@
 			</view>
 		</view>
 	</view>
-	<view class="page-wrap loading" v-else>
+	<!-- 	<view class="page-wrap loading" v-else>
 		<u-empty text="正在前往目标页面..." mode="search"></u-empty>
-	</view>
+	</view> -->
 </template>
 
 <script>
@@ -109,7 +109,7 @@
 		},
 		computed: {
 			...mapState({
-				env:state => state.app.env,
+				env: state => state.app.env,
 				authUserInfo: state => state.app.authUserInfo,
 				subscsribeStatus: state => state.app.subscsribeStatus,
 				loginUserInfo: state => state.user.loginUserInfo,
@@ -118,13 +118,13 @@
 				globalLabelFontSize: state => state.app.globalLabelFontSize,
 				hasIntoHospital: state => state.app.hasIntoHospital
 			}),
-			showPageContent() {
-				if (this.userInfo.add_store_no && !this.hasIntoHospital&&this.env!=='h5') {
-					return false
-				} else {
-					return true
-				}
-			},
+			// showPageContent() {
+			// 	if (this.userInfo.add_store_no && !this.hasIntoHospital&&this.env!=='h5') {
+			// 		return false
+			// 	} else {
+			// 		return true
+			// 	}
+			// },
 		},
 		methods: {
 			toFeedBack() {
@@ -164,10 +164,16 @@
 			},
 			toStoreHome(e) {
 				if (e.store_no) {
-					uni.redirectTo({
-						// url: '/pages/home/home?store_no=' + e.store_no
-						url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + e.store_no
+					// 跳转到百想首页
+					wx.navigateToMiniProgram({
+						appId: 'wxa3c50c8177ef6739',
+						path: 'pages/home/home?store_no=' + e.store_no,
+						envVersion: 'trial' // trial-体验版
 					})
+					// uni.redirectTo({
+					// 	// url: '/pages/home/home?store_no=' + e.store_no
+					// 	url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + e.store_no
+					// })
 				}
 			},
 			openLocation(e) {
@@ -188,9 +194,22 @@
 				});
 			},
 			async skip(item) {
-				let res = await this.toAddPage();
-				if (!res) {
-					return;
+				if (item.dest_page && item.dest_page.indexOf('/otherPages/dietSelect/dietSelect?') !== -1) {
+					let res = await this.toAddPage();
+					if (!res) {
+						uni.showModal({
+							title: '提示',
+							content: '当前跳转的页面需要访问您的用户信息才能正常使用，是否跳转到授权页面',
+							success(res) {
+								if (res.confirm) {
+									uni.navigateTo({
+										url: '/publicPages/accountExec/accountExec'
+									})
+								}
+							}
+						})
+						return;
+					}
 				}
 				let dest_page = '';
 				let self = this;
@@ -226,6 +245,10 @@
 												.dest_page)
 									});
 								}
+							} else if (err.errMsg && err.errMsg.indexOf('tabbar page') !== -1) {
+								uni.switchTab({
+									url: item.dest_page
+								})
 							}
 						}
 					});
@@ -441,11 +464,13 @@
 		background-color: #fff;
 		min-height: 100vh;
 		font-size: var(--global-text-font-size);
-		&.loading{
+
+		&.loading {
 			display: flex;
 			align-items: center;
 			justify-content: center;
 		}
+
 		.status_bar {
 			height: var(--status-bar-height);
 			width: 100%;
