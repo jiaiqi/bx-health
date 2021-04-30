@@ -22,8 +22,8 @@ let ENV = {
 	backEndAddress: "https://login.100xsys.cn", //后台管理系统地址
 	frontEndAddress: remoteAddress.frontEndAddress, //前端线上地址
 	appNo: {
-		wxmp: 'APPNO20210420103005', // 百想首页通
-		// wxmp: 'APPNO20201124160702', // 百想健康
+		wxmp: 'APPNO20210420103005', // 百想健康
+		// wxmp: 'APPNO20201124160702', // 百想首页
 		// wxmp: 'APPNO20200214122021', // 百想软件ai平台
 		// wxmp: 'APPNO20200731153421' //生活能力评估
 
@@ -31,8 +31,8 @@ let ENV = {
 	},
 	appID: {
 		// wxmp: 'wx8e6f993081f6e979', // 百想软件ai平台
-		wxmp: 'wxa8574a1e93d8e8d0', // 百想首页通
-		// wxmp: 'wxa3c50c8177ef6739', // 百想健康
+		wxmp: 'wxa8574a1e93d8e8d0', // 百想健康
+		// wxmp: 'wxa3c50c8177ef6739', // 百想首页
 		wxh5: 'wx78d1d4139f97ffca', //百想助理公众号
 		// wxmp: "wx08876efb5760ca75" //生活能力评估
 	},

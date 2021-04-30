@@ -100,6 +100,8 @@ fly.interceptors.request.use(async (request) => {
 	} else {
 		if (bxAuthTicket && request.url.indexOf('srvwx_app_login_verify') === -1) {
 			request.headers["bx_auth_ticket"] = bxAuthTicket
+		} else if (request.headers["bx_auth_ticket"]) {
+			delete request.headers["bx_auth_ticket"]
 		}
 	}
 	const outTime = uni.getStorageSync("expire_timestamp") //过期时间

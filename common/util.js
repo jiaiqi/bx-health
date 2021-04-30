@@ -2187,5 +2187,20 @@ export default {
 			}
 			return str
 		}
+
+		Vue.prototype.renderStr = (str, obj) => {
+			return str.replace(/\$\{(.*?)\}/g, (match, key) => {
+				key = key.trim()
+				let result = obj[key]
+				let arr = key.split('.')
+				if (arr.length > 1) {
+					result = obj
+					arr.forEach(item => {
+						result = result[item]
+					})
+				}
+				return result
+			})
+		}
 	}
 }

@@ -38,7 +38,8 @@ let ignoreServiceName = (url) => {
 fly.interceptors.request.use(async (request) => {
 	//给所有请求添加自定义header
 	console.log("request: ", request)
-	if (request.url && request.url.indexOf('srvwx_app_login_verify') == -1 && request.url.indexOf('rvuser_login') == -1) {
+	if (request.url && request.url.indexOf('srvwx_app_login_verify') == -1 && request.url.indexOf(
+			'rvuser_login') == -1) {
 		if (store && store.getters && store.getters.isLogin === false) {
 			// request.cancel = true
 			// #ifdef H5
@@ -82,14 +83,16 @@ fly.interceptors.request.use(async (request) => {
 	if (api.onTicket) {
 		request.headers["bx_auth_ticket"] = api.ticket
 	} else {
-		if (bxAuthTicket) {
+		if (bxAuthTicket && request.url.indexOf('srvwx_app_login_verify') === -1) {
 			request.headers["bx_auth_ticket"] = bxAuthTicket
+		} else if (request.headers["bx_auth_ticket"]) {
+			delete request.headers["bx_auth_ticket"]
 		}
 	}
-	if(request.url.indexOf('?openCode=')!==-1){
+	if (request.url.indexOf('?openCode=') !== -1) {
 		request.headers["bx_open_code"] = request.url.split('?openCode=')[1]
 		delete request.headers.bx_auth_ticket
-		
+
 	}
 	const outTime = uni.getStorageSync("expire_timestamp") //过期时间
 	const date = parseInt(new Date().getTime() / 1000)
