@@ -1349,11 +1349,12 @@ export default {
 						ruleType: 'like',
 						value: this.loginUserInfo.user_no
 					},
-					{
-						colName: 'user_name',
-						ruleType: 'like',
-						value: this.userInfo.name
-					}
+					{ colName: 'person_info_no', ruleType: 'like', value: this.vuex_userInfo.no },
+					// {
+					// 	colName: 'user_name',
+					// 	ruleType: 'like',
+					// 	value: this.userInfo.name
+					// }
 				],
 				page: { pageNo: 1, rownumber: 10 },
 				order: []
@@ -2179,11 +2180,12 @@ export default {
 						ruleType: 'like',
 						value: this.loginUserInfo.user_no
 					},
-					{
-						colName: 'user_name',
-						ruleType: 'like',
-						value: this.userInfo.name
-					},
+					// {
+					// 	colName: 'user_name',
+					// 	ruleType: 'like',
+					// 	value: this.userInfo.name
+					// },
+					{ colName: 'person_info_no', ruleType: 'like', value: this.vuex_userInfo.no },
 					{
 						colName: 'hdate',
 						ruleType: 'like',

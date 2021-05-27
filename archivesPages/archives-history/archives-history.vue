@@ -1352,7 +1352,8 @@ export default {
 					colNames: ['*'],
 					condition: [
 						{ colName: 'userno', ruleType: 'like', value: this.vuex_userInfo.userno },
-						{ colName: 'user_name', ruleType: 'like', value: this.vuex_userInfo.name },
+						// { colName: 'person_info_no', ruleType: 'like', value: this.vuex_userInfo.no },
+						// { colName: 'user_name', ruleType: 'like', value: this.vuex_userInfo.name },
 						{ colName: 'hdate', ruleType: 'gt', value: timeRange.start },
 						{ colName: 'hdate', ruleType: 'lt', value: timeRange.end }
 					]
@@ -1612,11 +1613,12 @@ export default {
 						ruleType: 'like',
 						value: this.loginUserInfo.user_no
 					},
-					{
-						colName: 'user_name',
-						ruleType: 'like',
-						value: this.vuex_userInfo.name
-					},
+					// {
+					// 	colName: 'user_name',
+					// 	ruleType: 'like',
+					// 	value: this.vuex_userInfo.name
+					// },
+					{ colName: 'person_info_no', ruleType: 'like', value: this.vuex_userInfo.no },
 					{
 						colName: 'hdate',
 						ruleType: 'like',

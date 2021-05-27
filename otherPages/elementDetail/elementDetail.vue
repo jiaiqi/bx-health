@@ -299,11 +299,12 @@ export default {
 				colNames: ['*'],
 				condition: [
 					{ colName: 'userno', ruleType: 'like', value: this.user_no },
-					{
-						colName: 'user_name',
-						ruleType: 'like',
-						value: uni.getStorageSync('current_user')
-					},
+					// {
+					// 	colName: 'user_name',
+					// 	ruleType: 'like',
+					// 	value: uni.getStorageSync('current_user')
+					// },
+					// { colName: 'person_info_no', ruleType: 'like', value: this.vuex_userInfo.no },
 					{ colName: 'hdate', ruleType: 'like', value: this.date.trim() }
 				]
 			};

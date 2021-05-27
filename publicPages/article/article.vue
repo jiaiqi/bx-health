@@ -23,7 +23,7 @@
 			<!-- 		<text class="store-name" @click="toStore"
 				v-if="storeInfo&&storeInfo.store_no&&storeInfo.name">{{storeInfo.name}}</text> -->
 			<text class="store-name" @click="toStore" v-if="storeName&&storeNo">{{storeName}}</text>
-			<text>{{ this.formateDate(articleData.create_time) }}</text>
+			<text>{{ $dayjs(articleData.create_time).format('YYYY-MM-DD') }}</text>
 		</view>
 
 		<view class="content">

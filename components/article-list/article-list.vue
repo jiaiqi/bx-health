@@ -17,7 +17,7 @@
 				</image>
 				<view class="content-box">
 					<text class="title-text">{{ item.title }}</text>
-					<text class="date">{{ formateDate(item.create_time) }}</text>
+					<text class="date">{{ $dayjs(item.create_time).format("YYYY-MM-DD") }}</text>
 				</view>
 			</view>
 		</view>

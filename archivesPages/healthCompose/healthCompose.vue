@@ -17,7 +17,8 @@
 			</view>
 			<view class="health-box">
 				<view class="health-item" @click="toQuestionnaire(item)" v-for="(item, index) in coupleData">
-					<text class="grade" :class="{ 'bg-blue': item.finished && item.grade, 'bg-gray': item.finished && !item.grade, 'bg-cyan': !item.finished }">
+					<text class="grade"
+						:class="{ 'bg-blue': item.finished && item.grade, 'bg-gray': item.finished && !item.grade, 'bg-cyan': !item.finished }">
 						{{ item.grade || item.grade === 0 ? item.grade+"分" : item.finished ? '暂无得分' : '点击评测' }}
 					</text>
 					<image class="image" :src="item.icon"></image>
@@ -32,15 +33,16 @@
 			<!-- 	<view class="text-center margin-tb-sm text-gray">
 				请在下方体质测试问卷选择一个问卷进行评测
 			</view> -->
-			<view class="text-center margin-tb-sm text-gray" v-if="corporeity.find(item=>item.grade>=40)&&corporeity.find(item=>item.grade>=40).name">
-				<text> 经评测您的体制为</text><text class="text-bold text-black">【{{corporeity.find(item=>item.grade>=40).name}}】</text>
+			<view class="text-center margin-tb-sm text-gray"
+				v-if="corporeity.find(item=>item.grade>=40)&&corporeity.find(item=>item.grade>=40).name">
+				<text> 经评测您的体制为</text><text
+					class="text-bold text-black">【{{corporeity.find(item=>item.grade>=40).name}}】</text>
 			</view>
 			<view class="more-couple-cen-wrap">
 				<view class="couple-cen more-couple-cen">
 					<view @click="clickItem(item)" v-for="(item, index) in corporeity" :key="index" :class="{
 							'couple-cen-item-active': item.name === currentItem.name && false
-						}"
-					 class="couple-cen-item ">
+						}" class="couple-cen-item ">
 						<view class="couple-cen-item-t">
 							<text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
 							<view class="unfilled" @click="toQuestionnaire(item)">
@@ -158,55 +160,55 @@
 						name: '阴虚质',
 						grade: null,
 						no: '20201112110542000192',
-						icon: '../static/icon/体质图标/阴虚质.jpg'
+						icon: require('../static/icon/体质图标/阴虚质.jpg')
 					},
 					{
 						name: '气郁质',
 						grade: null,
 						no: '20201112112218000193',
-						icon: '../static/icon/体质图标/气郁质.jpg'
+						icon: require('../static/icon/体质图标/气郁质.jpg')
 					},
 					{
 						name: '血瘀质',
 						grade: null,
 						no: '20201112113200000194',
-						icon: '../static/icon/体质图标/血瘀质.jpg'
+						icon: require('../static/icon/体质图标/血瘀质.jpg')
 					},
 					{
 						name: '痰湿质',
 						grade: null,
 						no: '20201112114401000195',
-						icon: '../static/icon/体质图标/痰湿质.jpg'
+						icon: require('../static/icon/体质图标/痰湿质.jpg')
 					},
 					{
 						name: '湿热质',
 						grade: null,
 						no: '20201112143740000196',
-						icon: '../static/icon/体质图标/湿热质.jpg'
+						icon: require('../static/icon/体质图标/湿热质.jpg')
 					},
 					{
 						name: '特禀质',
 						grade: null,
 						no: '20201112145435000197',
-						icon: '../static/icon/体质图标/特禀质.jpg'
+						icon: require('../static/icon/体质图标/特禀质.jpg')
 					},
 					{
 						name: '阳虚质',
 						grade: null,
 						no: '20201112105018000191',
-						icon: '../static/icon/体质图标/阳虚质.jpg'
+						icon: require('../static/icon/体质图标/阳虚质.jpg')
 					},
 					{
 						name: '气虚质',
 						grade: null,
 						no: '20201112104036000190',
-						icon: '../static/icon/体质图标/气虚质.jpg'
+						icon: require('../static/icon/体质图标/气虚质.jpg')
 					},
 					{
 						name: '平和质',
 						grade: null,
 						no: '20201112103143000189',
-						icon: '../static/icon/体质图标/平和质.jpg'
+						icon: require('../static/icon/体质图标/平和质.jpg')
 					}
 				],
 				scoreInfo: {},

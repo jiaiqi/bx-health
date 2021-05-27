@@ -419,11 +419,12 @@
 							ruleType: 'like',
 							value: this.vuex_userInfo.userno
 						},
-						{
-							colName: 'user_name',
-							ruleType: 'like',
-							value: this.vuex_userInfo.name
-						},
+						{ colName: 'person_info_no', ruleType: 'like', value: this.vuex_userInfo.no },
+						// {
+						// 	colName: 'user_name',
+						// 	ruleType: 'like',
+						// 	value: this.vuex_userInfo.name
+						// },
 						{
 							colName: 'hdate',
 							ruleType: 'like',

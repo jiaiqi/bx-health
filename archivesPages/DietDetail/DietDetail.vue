@@ -325,11 +325,12 @@ export default {
 					ruleType: 'like',
 					value: this.userInfo.userno
 				},
-				{
-					colName: 'user_name',
-					ruleType: 'like',
-					value: this.userInfo.name
-				},
+				// {
+				// 	colName: 'user_name',
+				// 	ruleType: 'like',
+				// 	value: this.userInfo.name
+				// },
+				{ colName: 'person_info_no', ruleType: 'like', value: this.userInfo.no },
 				{
 					colName: 'hdate',
 					ruleType: 'like',

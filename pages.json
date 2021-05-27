@@ -319,6 +319,12 @@
 					}
 				},
 				{
+					"path": "symptomSelect/symptomSelect",
+					"style": {
+						"navigationBarTitleText": "症状选择"
+					}
+				},
+				{
 					"path": "dietSelect/dietSelect",
 					"style": {}
 				},
