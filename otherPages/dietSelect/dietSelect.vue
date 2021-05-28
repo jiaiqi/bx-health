@@ -1588,7 +1588,7 @@ export default {
 				colNames: ['*'],
 				condition: [
 					{ colName: 'userno', ruleType: 'like', value: loginUserInfo.user_no },
-					{ colName: 'user_name', ruleType: 'like', value: userName },
+					// { colName: 'user_name', ruleType: 'like', value: userName },
 					{ colName: 'hdate', ruleType: 'like', value: this.selectDate.trim() }
 				]
 			};
