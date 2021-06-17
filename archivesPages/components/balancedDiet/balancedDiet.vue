@@ -2167,7 +2167,6 @@ export default {
 		},
 		async getDietRecord(chooseDate = null) {
 			//饮食记录
-			debugger
 			if (chooseDate) {
 				this.selectDate = chooseDate;
 			}

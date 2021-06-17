@@ -309,8 +309,6 @@
 							if (self.storeInfo && self.storeInfo.user_count) {
 								self.pageTitle =
 									`${ self.sessionInfo.session_name||self.storeInfo.name　}(${self.storeInfo.user_count})`
-							} else {
-								debugger
 							}
 							if (self.pageTitle) {
 								uni.setNavigationBarTitle({

@@ -2118,7 +2118,6 @@
 					return result
 				})
 				req[0].data = reqData
-				debugger
 				let res = await this.$http.post(url, req);
 				uni.hideLoading();
 				if (this.remindPerson && this.remindPerson.no) {

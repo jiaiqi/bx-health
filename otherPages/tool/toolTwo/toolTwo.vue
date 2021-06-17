@@ -246,7 +246,7 @@
 		background-color: #fff;
 		margin: 20rpx 0 50px;
 		border-radius: 20rpx;
-
+		justify-content: center;
 		.bmi-box-item {
 			flex: 1;
 			display: flex;

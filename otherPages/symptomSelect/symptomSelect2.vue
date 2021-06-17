@@ -3,10 +3,11 @@
 		<view class="symptopm-tops">
 			<Thetable :list="chooseArr" @delAlltabAllansw="delAlltabAllansw" ref="tabbox" @delHtml="deltab"></Thetable>
 		</view>
-		<view class="symptom-bot-wrap-main" v-if="symptomList.length && symptomList[0].children.length > 0 && !isSearch">
+		<view class="symptom-bot-wrap-main"
+			v-if="symptomList.length && symptomList[0].children.length > 0 && !isSearch">
 			<cascader-selector @clickTag="clickTag" hideButton :srvInfo="srvInfo"></cascader-selector>
 		</view>
-<!-- 		<view class="cu-modal bottom-modal" :class="{ show: showSymptomDateSelector }">
+		<!-- 		<view class="cu-modal bottom-modal" :class="{ show: showSymptomDateSelector }">
 			<view class="cu-dialog" @click.stop="">
 				<symptom-form @change="symptomFormChange" :form-type="from" :currentSymptom="currentSymptom"></symptom-form>
 			</view>
@@ -119,13 +120,29 @@
 			}
 		},
 		methods: {
-			symptomFormChange(e) {
+			async symptomFormChange(e) {
 				this.$refs.popup.close();
 				this.showSymptomDateSelector = false
 				if (e === false) {} else if (e.occur_time) {
 					this.currentSymptom.occur_time = e.occur_time
 					this.currentSymptom.symptoms_remark = e.symptoms_remark
 					this.getCascaderValue(this.currentSymptom)
+					if (this.from === 'symptom_record') {
+						let req = [{
+							"serviceName": "srvhealth_self_symptoms_record_add",
+							"condition": [],
+							"data": [{
+								"info_no":this.userInfo.no,
+								"user_account": this.userInfo.userno,
+								"occur_time":e.occur_time,
+								"symptoms_no": this.currentSymptom.no,
+								"symptoms_name": this.currentSymptom.name,
+								"symptoms_remark": e.symptoms_remark
+							}]
+						}]
+						this.$fetch('operate', 'srvhealth_self_symptoms_record_add', req, 'health')
+					}
+				
 				}
 			},
 			async addSymptom() {

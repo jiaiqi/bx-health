@@ -194,7 +194,6 @@
 			},
 			async getGroupList() {
 				// 查找店铺关联群组
-				debugger
 				let req = {
 					condition: [{
 							"colName": "circle_visible",

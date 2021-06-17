@@ -456,14 +456,16 @@
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false
 					}
-				}, {
-					"path": "personal/personal",
-					"style": {
-						"navigationBarTitleText": "我的",
-						"enablePullDownRefresh": false
-					}
-
 				}
+				// ,
+				// {
+				// 	"path": "personal/personal",
+				// 	"style": {
+				// 		"navigationBarTitleText": "我的",
+				// 		"enablePullDownRefresh": false
+				// 	}
+
+				// }
 				// ,
 				// {
 				// 	"path": "doctorIntro/doctorIntro",

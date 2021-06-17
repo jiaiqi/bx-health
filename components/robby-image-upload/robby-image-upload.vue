@@ -245,11 +245,18 @@ export default {
 		},
 		previewImage: function(e) {
 			var imageIndex = e.currentTarget.dataset.index;
+			console.log( this.imageListData[imageIndex])
+			const imageListData = this.imageListData.map(item=>{
+				if(item){
+					item = item.replace(/thumbnailType=fwsu_100/ig,'')
+				}
+				return item
+			})
 			uni.previewImage({
-				current: this.imageListData[imageIndex],
+				current: imageListData[imageIndex],
 				indicator: 'number',
 				loop: 'true',
-				urls: this.imageListData
+				urls: imageListData
 			});
 		},
 		initImageBasePos: function() {

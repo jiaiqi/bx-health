@@ -1,6 +1,5 @@
 <template>
-	<view class="health-archive-wrap"
-		v-if="!authBoxDisplay||client_env === 'h5'">
+	<view class="health-archive-wrap" v-if="!authBoxDisplay||client_env === 'h5'">
 		<view class="top text-bold">
 			<view class="left">
 				<view class="avatar" @click="showUserListPopup = true">
@@ -14,12 +13,12 @@
 			</view>
 			<view class="right" @click="showUserHealtManagePopup = true" v-if="selectedTags.length === 0">健康标签管理</view>
 		</view>
-		<view class="user-info-tip">
+		<!-- 		<view class="user-info-tip">
 			<text class="tips" @click="toPages('basic-info')">
 				<text class="cuIcon-info"></text>
 				<text class="text">信息完整度: 75%</text>
 			</text>
-		</view>
+		</view> -->
 		<view class="health-overall-score">
 			<view class="content">
 				<view class="score-item" @click="toPages('score-compose')">
@@ -88,13 +87,31 @@
 		</view>
 		<view class="health-archive-item health-score">
 			<view class="subtitle">
-				<text class="title-text">近日健康指数</text>
+				<text class="title-text">指标</text>
 				<view class="title-action" @click="navPages('history')">
 					<text class="cuIcon-time"></text>
 					<text class="see-histroy">查看历史</text>
 				</view>
 			</view>
 			<view class="content grid-layout">
+				<view class="grid-item" v-for="item in indicator" :key="item.key" @click="toPages(item.key)">
+					<view class="title">
+						{{item.label||''}}
+						<!-- <text class="ratio" v-if="item.ratio">[{{item.ratio}}]</text> -->
+					</view>
+					<!-- <view class="data" :class="[item.color?'text-'+item.color:'']" v-if="item.score">{{ item.score|| '0' }}</view>
+					<view class="data" :class="[item.color?'text-'+item.color:'']" v-else-if="item.key==='weight'">{{ weightScore|| '0' }}</view>
+					<view class="data" :class="[item.color?'text-'+item.color:'']" v-else>0</view> -->
+					<view class="data text-blue" :class="{'nodata-tip':item.lastData&&item.lastData.indexOf('暂无记录')!==-1}" v-if="item.lastData">
+						<!-- <view class="data"  :class="[item.color?'text-'+item.color:'']" v-if="item.lastData"> -->
+						{{item.lastData}}
+					</view>
+					<view class="data text-orange sm" v-if="item.lastData2">
+						{{item.lastData2}}
+					</view>
+					<view class="action"></view>
+				</view>
+				<!-- 
 				<view class="grid-item" @click="toPages('diet')">
 					<view class="title">
 						饮食
@@ -142,12 +159,12 @@
 					</view>
 					<view class="data text-orange">10</view>
 					<view class="action"></view>
-				</view>
+				</view> -->
 			</view>
 		</view>
 		<view class="health-archive-item ">
 			<view class="subtitle">
-				<text class="title-text">检查报告</text>
+				<text class="title-text"><text>检查报告</text></text>
 				<view class="title-action" @click="showAddRecordLayout">
 					<text class="cuIcon-add "></text>
 					<text class="see-histroy">添加</text>
@@ -163,11 +180,11 @@
 				</view>
 				<view class="empty-data" v-if="inspectReportRecord.length === 0 || !inspectReportRecord">
 					<view class="cu-load" :class="!isLoad ? 'loading' : ''"></view>
-					<view class="" v-if="isLoad">未找到您的检查报告</view>
+					<view class="text-blue" v-if="isLoad">请选择检查报告类型后,拍照上传检查报告</view>
 				</view>
 			</view>
 		</view>
-	<!-- 	<view class="health-archive-item ">
+		<!-- 	<view class="health-archive-item ">
 			<view class="subtitle">
 				<text class="title-text">疾病风险提示</text>
 				<view class=""></view>
@@ -189,29 +206,22 @@
 				</view>
 			</view>
 		</view> -->
-		<view class="cu-modal bottom-modal" :class="{ show: showAddRecord }">
+		<view class="cu-modal bottom-modal" :class="{ show: showAddRecord }" @click="hideAddRecord">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="inspect-record">
-					<view class="title">选择检查报告类型</view>
-					<view class="cu-bar search bg-white">
-						<view class="search-form round">
-							<text class="cuIcon-search"></text>
-							<input @blur="InputBlur" :adjust-position="false" type="text" placeholder="搜索检查报告类型"
-								confirm-type="search" />
-						</view>
-						<view class="action"><button class="cu-btn bg-green shadow-blur round">搜索</button></view>
+					<view class="title"><text class="cuIcon-close" @click="hideAddRecord"></text> <text>选择检查报告类型</text>
 					</view>
-					<tree-selector class="selector-wrap"
-						:srvInfo="isArray(configCols.option_list_v2) ? null : configCols.option_list_v2"
-						:treeData="treeSelectorData" :childNodeCol="'_childNode'"
-						:disColName="configCols && configCols.option_list_v2 && configCols.option_list_v2['key_disp_col'] ? configCols.option_list_v2['key_disp_col'] : ''"
-						:nodeKey="configCols.option_list_v2 && configCols.option_list_v2['refed_col'] ? configCols.option_list_v2['refed_col'] : 'no'"
-						@clickLastNode="confirmTree"></tree-selector>
+					<view class="tips text-blue">
+						选择检查报告类型后,拍照上传检查报告
+					</view>
+					<!-- <tree-selector-l :srvInfo="srvInfo" hideButton @confirm="clickTag"></tree-selector-l> -->
+					<cascader-selector class="cascader-selector" @clickTag="clickTag" insert hideButton
+						:srvInfo="srvInfo"></cascader-selector>
 					<view class="" v-if="showCustomAddRecord">
 						<text>未找到想要的报告类型？</text>
 						<text class="text-blue" @click="confirmTree">直接添加</text>
 					</view>
-					<view class="button-box"><button class="cu-btn bg-grey" @tap="showAddRecord = false">取消</button>
+					<view class="buttons-box"><button class="cu-btn bg-grey" @tap="hideAddRecord">取消</button>
 					</view>
 				</view>
 			</view>
@@ -261,6 +271,87 @@
 	export default {
 		data() {
 			return {
+				indicator: [{
+						key: 'step',
+						label: '步数',
+						ratio: '5%',
+						color: 'blue',
+						score: 0,
+						lastData: ''
+					},
+					{
+						key: 'weight',
+						label: '体重/BMI',
+						ratio: '5%',
+						color: 'orange',
+						score: 0,
+						lastData: ''
+					},
+					{
+						key: 'symptom',
+						label: '症状',
+						ratio: '5%',
+						color: 'red',
+						score: 0,
+						lastData: ''
+					},
+					{
+						key: 'bp',
+						label: '血压',
+						color: 'red',
+						ratio: '5%',
+						score: 0,
+						lastData: ''
+					},
+					{
+						key: 'bg',
+						color: 'red',
+						label: '血糖',
+						ratio: '5%',
+						score: 0,
+						lastData: ''
+					},
+					{
+						key: 'bf',
+						color: 'red',
+						label: '血脂',
+						ratio: '5%',
+						score: 0,
+						lastData: ''
+					},
+					{
+						key: 'sport',
+						label: '运动',
+						color: 'yellow',
+						ratio: '20%',
+						score: 0,
+						lastData: ''
+					},
+					{
+						key: 'diet',
+						label: '饮食',
+						color: 'green',
+						ratio: '50%',
+						score: 0,
+						lastData: ''
+					},
+					{
+						key: 'sleep',
+						label: '睡眠',
+						color: 'purple',
+						ratio: '10%',
+						score: 0,
+						lastData: ''
+					}
+				],
+				srvInfo: {
+					column: 'no',
+					showCol: 'name',
+					isTree: true,
+					serviceName: 'srvhealth_class_examination_select',
+					appNo: 'health',
+					key_disp_col: 'name'
+				},
 				isLogin: false,
 				showUserListPopup: false,
 				showUserHealtManagePopup: false,
@@ -307,7 +398,8 @@
 				planList: [],
 				isLoadPlan: false,
 				dietAdvice: '',
-				showAdvice: false
+				showAdvice: false,
+				selectReport: {}
 			};
 		},
 		filters: {
@@ -459,6 +551,7 @@
 			}
 		},
 		methods: {
+
 			editUserInfo(e) {
 				if (e.no) {
 					let fieldsCond = [{
@@ -630,6 +723,12 @@
 					}
 				}
 			},
+			clickTag(e) {
+				if (e && e.is_leaf === '是') {
+					// 叶子节点
+					this.confirmTree(e)
+				}
+			},
 			confirmTree(e) {
 				if (e.item && e.item.jy_no) {
 					let fieldsCond = [{
@@ -693,6 +792,73 @@
 						url =
 							`/questionnaire/index/index?formType=form&activity_no=${e.item.daq_survey_activity_no}&status=进行中&params=${encodeURIComponent(JSON.stringify(params))}`;
 					}
+					uni.navigateTo({
+						url: url
+					});
+				} else if (e && e.no) {
+					let fieldsCond = [
+						// {
+						// 	column: 'specimen',
+						// 	value: e.item.specimen
+						// }, //标本类型
+						{
+							column: 'examination_type',
+							// value: e.type,
+							display: false
+						}, //检查类别
+						{
+							column: 'jc_class_no',
+							display: false,
+							value: e.no
+						},
+						{
+							column: 'jc_class_name',
+							display: false,
+							value: e.name
+						},
+						{
+							column: 'examinate_person_no',
+							display: false,
+							value: this.vuex_userInfo.no
+						},
+						{
+							column: 'examinate_name',
+							display: false,
+							value: this.vuex_userInfo.name
+						},
+						{
+							column: 'examinate_account',
+							display: false,
+							value: this.vuex_userInfo.userno
+						},
+						{
+							column: 'examinate_date',
+							display: true,
+							value: dayjs().format('YYYY-MM-DD')
+						},
+						{
+							column: 'report_daq_survey_activity_no',
+							display: false
+						},
+						{
+							column: 'report_record',
+							display: false
+						},
+						{
+							column: 'report_daq_survey_ack_no',
+							display: false
+						},
+						{
+							column: 'sdr_no',
+							display: false
+						},
+						{
+							column: 'jy_no',
+							display: false
+						}
+					];
+					let url =
+						`/archivesPages/report/report?serviceName=srvhealth_examination_report_add&type=add&fieldsCond=${encodeURIComponent(JSON.stringify(fieldsCond))}`;
 					uni.navigateTo({
 						url: url
 					});
@@ -926,6 +1092,11 @@
 				let record = await this.getSleepRecord('sleep');
 				let result = 0;
 				if (record && record.id) {
+					this.indicator.forEach(item => {
+						if (item.key === 'sleep') {
+							item.lastData = record.sleep_time ? record.sleep_time.slice(0, 5) : '今日暂无记录'
+						}
+					})
 					let sleep_time = (new Date(record.getup_time) - new Date(record.retire_time)) / 1000; // 秒数
 					if (sleep_time > 25200) {
 						// 大于七小时;
@@ -950,6 +1121,15 @@
 				let result = 0;
 				if (item && item.no) {
 					// diastolic_pressure
+					this.indicator.forEach(data => {
+						if (data.key === 'bp') {
+							if (item.diastolic_pressure) {
+								data.lastData = item.diastolic_pressure + '/' + item.systolic_pressure
+							} else {
+								data.lastData = '暂无记录'
+							}
+						}
+					})
 					if (item.diastolic_pressure < 80) {
 						result += 2.5;
 					} else if (item.diastolic_pressure < 90 && item.diastolic_pressure >= 80) {
@@ -967,7 +1147,9 @@
 				let serviceObj = {
 					weight: 'srvhealth_body_fat_measurement_record_select', // 体重体脂
 					bloodPressure: 'srvhealth_blood_pressure_record_select', // 血压
-					sleep: 'srvhealth_sleep_record_select' //
+					sleep: 'srvhealth_sleep_record_select', //
+					bg: 'srvhealth_blood_glucose_measurement_record_select', //血糖
+					symptom: 'srvhealth_self_symptoms_record_select', //症状
 				};
 				let serviceName = serviceObj[type];
 				let url = this.getServiceUrl('health', serviceName, 'select');
@@ -1002,9 +1184,15 @@
 						ruleType: 'like',
 						value: this.vuex_userInfo.userno
 					}, {
-						colName: 'name',
+						colName: 'person_no',
 						ruleType: 'like',
-						value: this.vuex_userInfo.name
+						value: this.vuex_userInfo.no
+					}, ];
+				} else if (type === 'symptom') {
+					req.condition = [{
+						colName: "info_no",
+						ruleType: "eq",
+						value: this.vuex_userInfo.no
 					}];
 				}
 				let res = await this.$http.post(url, req);
@@ -1042,7 +1230,24 @@
 					}]
 				};
 				let res = await this.$http.post(url, req);
-				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+				if (res.data.state === 'SUCCESS' && Array.isArray(res.data.data)) {
+					this.indicator.forEach(item => {
+						if( res.data.data.length > 0){
+							if (item.key === 'sport') {
+								item.lastData = res.data.data[0].name
+							}
+							if (res.data.data.find(s => s.name === '手机计步')) {
+								if (item.key === 'step') {
+									item.lastData = res.data.data.find(s => s.name === '手机计步').amount + '步'
+								}
+							}
+						}else{
+							if (item.key === 'sport') {
+								item.lastData = '今日暂无记录'
+							}
+						}
+						
+					})
 					return res.data.data;
 				}
 			},
@@ -1058,12 +1263,11 @@
 							ruleType: 'like',
 							value: this.vuex_userInfo.userno
 						},
-						// {
-						// 	colName: 'user_name',
-						// 	ruleType: 'like',
-						// 	value: this.vuex_userInfo.name
-						// },
-						{ colName: 'person_info_no', ruleType: 'like', value: this.vuex_userInfo.no },
+						{
+							colName: 'person_info_no',
+							ruleType: 'like',
+							value: this.vuex_userInfo.no
+						},
 						{
 							colName: 'hdate',
 							ruleType: 'like',
@@ -1080,7 +1284,17 @@
 				let foodType = [];
 				if (Array.isArray(res.data.data)) {
 					dietRecord = res.data.data;
-					if (Array.isArray(dietRecord) && dietRecord.length > 0) {
+					if (Array.isArray(dietRecord)) {
+						this.indicator.forEach(item => {
+
+							if (item.key === 'diet') {
+								if (dietRecord.length > 0) {
+									item.lastData = dietRecord[0].name
+								} else {
+									item.lastData = '今日暂无记录'
+								}
+							}
+						})
 						foodType = await this.getFoodsDetail(dietRecord);
 					}
 				}
@@ -1255,11 +1469,13 @@
 				let condType = {};
 				let url = '';
 				switch (e) {
-					case 'diet':
-					case 'sport':
-					case 'sleep':
-					case 'weight':
-					case 'bp':
+					case 'diet': //饮食
+					case 'sport': //运动
+					case 'sleep': //睡眠
+					case 'weight': //体重
+					case 'bp': //血压
+					case 'bg': //血糖
+					case 'step': //步数
 					case 'symptom':
 						url = `/archivesPages/archives-history/archives-history?pageType=${e}`;
 						break;
@@ -1272,11 +1488,16 @@
 					case 'test':
 						url = '/pages/testPage/testPage';
 						break;
+
 				}
 				if (!url) {
 					// uni.navigateTo({
 					// 	url: '/otherPages/otherIndicator/otherIndicator?type=' + e
 					// });
+					uni.showToast({
+						title: '建设中，请关注',
+						icon: 'none'
+					})
 				} else {
 					uni.navigateTo({
 						url: url
@@ -1348,6 +1569,9 @@
 			},
 			checkboxchange(e) {
 				console.log(e);
+			},
+			hideAddRecord() {
+				this.showAddRecord = false
 			},
 			checkboxGroupChange(e) {
 				console.log(e);
@@ -1437,7 +1661,7 @@
 
 					this.$store.commit('SET_USERLIST', res.data.data);
 					let info = res.data.data.find(item => item.no === uni.getStorageSync('cur_user_no'))
-					if (info&&info.no) {
+					if (info && info.no) {
 						this.$store.commit('SET_USERINFO', info);
 					} else {
 						uni.setStorageSync('current_user_info', res.data.data[0]);
@@ -1487,20 +1711,6 @@
 			async initPage() {
 				let self = this;
 				let userInfo = uni.getStorageSync('login_user_info');
-				// #ifdef MP-WEIXIN
-				// let res = await wx.getSetting();
-				// if (!res.authSetting['scope.userInfo']) {
-				// 	this.$store.commit('SET_AUTH_SETTING', {
-				// 		type: 'userInfo',
-				// 		value: false
-				// 	});
-				// 	this.$store.commit('SET_AUTH_USERINFO', false);
-				// 	// 没有获取用户信息授权
-				// 	return;
-				// } else {
-				// 	this.updateUserInfo();
-				// }
-				// #endif
 				if (!userInfo || !uni.getStorageSync('isLogin')) {
 					// 未登录 h5跳转到登录页,小程序端进行静默登录
 					// #ifdef MP-WEIXIN
@@ -1533,6 +1743,7 @@
 					// }
 					if (!this.dietScore && this.dietScore !== 0) {
 						this.dietScore = await this.calcDietScore();
+
 					}
 					if (!this.sportScore) {
 						this.sportScore = await this.calcSportScore();
@@ -1543,6 +1754,45 @@
 					if (!this.BPScore) {
 						this.BPScore = await this.calcBPScore();
 					}
+					let bgRecord = await this.getSleepRecord('bg')
+					let symptomRecord = await this.getSleepRecord('symptom')
+					this.indicator = this.indicator.map(item => {
+						if (item.key === 'diet') {
+							item.score = this.dietScore
+						}
+						if (item.key === 'sport') {
+							item.score = this.sportScore
+						}
+						if (item.key === 'sleep') {
+							item.score = this.sleepScore
+						}
+						if (item.key === 'bp') {
+							item.score = this.BPScore
+						}
+						if (item.key === 'weight') {
+							if (this.vuex_userInfo?.weight) {
+								item.lastData = this.vuex_userInfo.weight + 'kg'
+								item.lastData2 = this.bmi
+							} else {
+								item.lastData = '暂无记录'
+							}
+						}
+						if (item.key === 'symptom') {
+							if (symptomRecord && symptomRecord.symptoms_name) {
+								item.lastData = symptomRecord.symptoms_name
+							} else {
+								item.lastData = '暂无记录'
+							}
+						}
+						if (item.key === 'bg') {
+							if (bgRecord.blood_glucose_val) {
+								item.lastData = bgRecord.blood_glucose_val + 'mmol/L'
+							} else {
+								item.lastData = '暂无记录'
+							}
+						}
+						return item
+					})
 					if (!this.isLoad) {
 						this.selectInspectionReport();
 					}
@@ -1828,7 +2078,7 @@
 
 			.content {
 				display: flex;
-				justify-content: center;
+				// justify-content: center;
 				align-items: center;
 				width: 100%;
 				overflow: hidden;
@@ -1993,7 +2243,7 @@
 				width: 100%;
 				min-height: 80rpx;
 				display: flex;
-				justify-content: center;
+				// justify-content: center;
 				align-items: center;
 				font-weight: bold;
 
@@ -2005,7 +2255,7 @@
 						width: calc(33% - 20rpx / 3);
 						margin-bottom: 10rpx;
 						margin-right: 10rpx;
-
+					
 						&:nth-child(3n) {
 							margin-right: 0;
 						}
@@ -2029,10 +2279,14 @@
 
 						.data {
 							flex: 1;
-							font-size: 60rpx;
+							font-size: 40rpx;
 							display: flex;
 							justify-content: center;
 							align-items: center;
+							&.nodata-tip{
+								font-size: 24rpx;
+								color: #666;
+							}
 						}
 
 						.action {
@@ -2361,7 +2615,21 @@
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		height: 80vh;
+		height: calc(90vh - var(--window-top) - var(--window-bottom));
+		margin-bottom: var(--window-bottom);
+
+		.cascader-selector {
+			// height: 100%;
+			flex: 1;
+			overflow-y: scroll;
+			padding: 0 20rpx;
+		}
+
+		.cuIcon-close {
+			position: absolute;
+			left: 20rpx;
+			font-size: 40rpx;
+		}
 
 		.selector-wrap {
 			overflow: scroll;
@@ -2376,11 +2644,17 @@
 			padding: 20rpx;
 		}
 
-		.button-box {
+		.cu-dialog {
+			margin-bottom: val(--window-bottom);
+		}
 
-			// position: absolute;
-			// bottom: 20rpx;
-			.cu-btn {
+		.buttons-box {
+			display: flex;
+			justify-content: center;
+			align-items: flex-end;
+			padding: 20rpx;
+
+			.cu-btn.bg-grey {
 				width: 45%;
 			}
 		}

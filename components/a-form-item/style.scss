@@ -165,7 +165,7 @@
 		font-size: var(--global-text-font-size);
 		overflow: hidden;
 		&.label-top {
-			// padding: 0 20rpx 10rpx;
+			padding: 0 20rpx 10rpx!important;
 			.form-item-content_value.checkbox-group {
 				margin-top: 10rpx;
 			}
@@ -312,7 +312,7 @@
 		font-size: 40rpx;
 	}
 	.tree-selector {
-		min-height: 300rpx;
+		min-height: 500rpx;
 		max-height: calc(90vh - var(--window-top) - var(--window-bottom));
 		overflow-y: scroll;
 		display: flex;

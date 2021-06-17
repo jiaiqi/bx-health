@@ -16,7 +16,7 @@
 				<view class="bx-item bx-text-yellow line-end" v-if="isShowSelect">请选择</view>
 			</view>
 			<view class="bx-tagbox">
-				<view v-if="showSelect"><cascaderItem :hideBorder="hideBorder" :insert="insert" :currentNo="currentNo" :showCol="showCol" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem></view>
+				<view v-if="showSelect"><cascaderItem :hideBorder="hideBorder" :column="column"  :insert="insert" :currentNo="currentNo" :showCol="showCol" @selectAreaItem="selectArea" :areaList="areaList"></cascaderItem></view>
 			</view>
 		</view>
 	</view>
@@ -89,7 +89,7 @@ export default {
 	},
 	props: {
 		currentNo: {
-			type: String
+			type: [String,Number]
 		},
 		// 是否显示‘请选择’提示
 		showSelect: {
@@ -151,8 +151,6 @@ export default {
 
 <style lang="scss">
 .cascader-content {
-	overflow: scroll;
-	flex: 1;
 	display: flex;
 	height: calc(90vh - 200rpx);
 	&.insert{
@@ -166,6 +164,8 @@ export default {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	flex: 1;
+	max-height: 90vh;
 	.bx-tagline {
 		display: flex;
 		flex-wrap: wrap;

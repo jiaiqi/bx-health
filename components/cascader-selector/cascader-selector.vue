@@ -57,7 +57,7 @@ export default {
 			if (this.parent_no) {
 				condition = [
 					{
-						colName: 'parent_no',
+						colName: this.srvInfo?.parentCol|| 'parent_no',
 						ruleType: 'eq',
 						value: this.parent_no
 					}
@@ -67,7 +67,7 @@ export default {
 			} else {
 				condition = [
 					{
-						colName: 'parent_no',
+						colName:  this.srvInfo?.parentCol|| 'parent_no',
 						ruleType: 'isnull'
 					}
 				];
@@ -79,7 +79,7 @@ export default {
 			let condition = [];
 			if (this.srvInfo.isTree) {
 				condition.push({
-					colName: 'parent_no',
+					colName:  this.srvInfo?.parentCol|| 'parent_no',
 					ruleType: this.parent_no ? 'eq' : 'isnull',
 					value: this.parent_no
 				});
@@ -112,7 +112,7 @@ export default {
 			} else {
 				condition = [
 					{
-						colName: 'parent_no',
+						colName:  this.srvInfo?.parentCol|| 'parent_no',
 						ruleType: 'isnull'
 					}
 				];
@@ -126,6 +126,9 @@ export default {
 					rownumber: this.page.rownumber
 				}
 			};
+			if(this.order){
+				req.order = this.order
+			}
 			const res = await this.$http.post(url, req);
 			if (res && res.data && res.data.state === 'SUCCESS') {
 				if (!defaultVal) {
@@ -156,39 +159,38 @@ export default {
 		},
 		clickTag(e) {
 			this.currentClick = e;
-			this.current_no = e.no;
+			this.current_no = e[this.srvInfo?.column||'no'];
 			if (this.srvInfo.isTree === false) {
 				this.$emit('getCascaderValue', e, 'sure');
 				this.areaList = [];
 				this.showSelect = false;
 				return;
 			}
-			if (e.no) {
-				if (this.parent_no && e.no === this.parent_no) {
+			if (e[this.srvInfo?.column||'no']) {
+				if (this.parent_no && e[this.srvInfo?.column||'no'] === this.parent_no) {
 					return;
 				}
-				if (e.parent_no === null) {
+				if (e[ this.srvInfo?.parentCol|| 'parent_no'] === null) {
 					this.lineDataDefault = [];
-				} else if (e.parent_no === this.outputData.parent_no) {
+				} else if (e[ this.srvInfo?.parentCol|| 'parent_no'] === this.outputData[ this.srvInfo?.parentCol|| 'parent_no']) {
 					// 同级
-					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no), 1);
-				} else if (this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no) !== -1) {
-					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no), this.lineDataDefault.length);
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item[ this.srvInfo?.parentCol|| 'parent_no'] === e[ this.srvInfo?.parentCol|| 'parent_no']), 1);
+				} else if (this.lineDataDefault.findIndex(item => item[ this.srvInfo?.parentCol|| 'parent_no'] === e[ this.srvInfo?.parentCol|| 'parent_no']) !== -1) {
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item[ this.srvInfo?.parentCol|| 'parent_no'] === e[ this.srvInfo?.parentCol|| 'parent_no']), this.lineDataDefault.length);
 				}
 				this.outputData = e;
 				this.$emit('clickTag', e);
 				this.page.pageNo = 1;
 				let condition = [
 					{
-						colName: 'parent_no',
+						colName:  this.srvInfo?.parentCol|| 'parent_no',
 						ruleType: 'eq',
-						value: e.no
+						value: e[this.srvInfo?.column||'no']
 					}
 				];
 				let lineDataDefault = [...this.lineDataDefault, e];
 				this.lineDataDefault = lineDataDefault;
-				this.parent_no = e.no;
-				console.log('parent_no', e);
+				this.parent_no = e[this.srvInfo?.column||'no'];
 				if (e.is_leaf === '是') {
 					// this.showSelect = false;
 				} else {
@@ -203,7 +205,7 @@ export default {
 		valuationChild(oldAreaList, child, e) {
 			if (oldAreaList.length > 0) {
 				oldAreaList.forEach(item => {
-					if (item.no === e.no) {
+					if (item[this.srvInfo?.column||'no'] === e[this.srvInfo?.column||'no']) {
 						this.$set(item, 'child', child);
 					}
 					if (item.child) {
@@ -218,26 +220,26 @@ export default {
 			if (index < this.lineDataDefault.length - 1) {
 				this.lineDataDefault = this.lineDataDefault.slice(0, index + 1);
 			}
-			if (e && e.no) {
-				if (e.parent_no === null) {
+			if (e && e[this.srvInfo?.column||'no']) {
+				if (e[this.srvInfo?.parentCol|| 'parent_no'] === null) {
 					this.lineDataDefault = this.lineDataDefault.slice(0, 1);
-				} else if (e.parent_no === this.outputData.parent_no) {
+				} else if (e[this.srvInfo?.parentCol|| 'parent_no'] === this.outputData[this.srvInfo?.parentCol|| 'parent_no']) {
 					// 同级
-					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no) + 1, 1);
-				} else if (this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no) !== -1) {
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item[this.srvInfo?.parentCol|| 'parent_no'] === e[this.srvInfo?.parentCol|| 'parent_no']) + 1, 1);
+				} else if (this.lineDataDefault.findIndex(item => item[this.srvInfo?.parentCol|| 'parent_no'] === e[this.srvInfo?.parentCol|| 'parent_no']) !== -1) {
 					// 父级
-					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item.parent_no === e.parent_no) + 1, this.lineDataDefault.length);
+					this.lineDataDefault.splice(this.lineDataDefault.findIndex(item => item[this.srvInfo?.parentCol|| 'parent_no'] === e[this.srvInfo?.parentCol|| 'parent_no']) + 1, this.lineDataDefault.length);
 				}
 				this.outputData = e;
 				this.$emit('clickLine', e);
 				let condition = [
 					{
-						colName: 'parent_no',
+						colName:this.srvInfo?.parentCol|| 'parent_no',
 						ruleType: 'eq',
-						value: e.no
+						value: e[this.srvInfo?.column||'no']
 					}
 				];
-				this.parent_no = e.no;
+				this.parent_no = e[this.srvInfo?.column||'no'];
 				this.getAreaData(condition).then(data => {
 					let oldAreaList = this.oldAreaList;
 					this.valuationChild(oldAreaList, data, e);
@@ -274,6 +276,9 @@ export default {
 		}
 	},
 	props: {
+		order:{
+			type:[Array,Object]
+		},
 		insert: {
 			type: Boolean,
 			default: false

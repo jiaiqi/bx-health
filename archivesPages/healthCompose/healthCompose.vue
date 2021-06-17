@@ -75,13 +75,22 @@
 				radarOption: {
 					option: {}
 				},
-				coupleData: [{
-						name: '身体数据',
-						grade: null,
-						fullMark: 25,
+				coupleData: [
+					// {
+					// 	name: '基本信息',
+					// 	grade: null,
+					// 	fullMark: 25,
+					// 	finished: false,
+					// 	icon: '/static/icon/body.png',
+					// 	detail: {}
+					// },
+					{
+						name: '健康素养',
 						finished: false,
-						icon: '/static/icon/body.png',
-						detail: {}
+						no: '20201109105128000186',
+						grade: null,
+						fullMark: 5,
+						icon: '/static/icon/health.png'
 					},
 					{
 						name: '家族史',
@@ -147,14 +156,7 @@
 						fullMark: 10,
 						icon: '/static/icon/mind.png'
 					},
-					{
-						name: '健康素养',
-						finished: false,
-						no: '20201109105128000186',
-						grade: null,
-						fullMark: 5,
-						icon: '/static/icon/health.png'
-					}
+					
 				],
 				corporeity: [{
 						name: '阴虚质',
@@ -364,7 +366,7 @@
 						url: `/questionnaire/index/index?formType=form&activity_no=${item.no}&status=进行中`
 					});
 				} else {
-					if (item && item.name === '身体数据') {
+					if (item && item.name === '基本信息') {
 						// if (item && (item.name !== '体重' || item.name !== '年龄')) {
 						let fieldsCond = Object.keys(this.userInfo)
 							.filter(key => key && key[0] !== '_')
@@ -524,7 +526,7 @@
 						case '年龄':
 							item.grade = this.getAgeScore();
 							break;
-						case '身体数据':
+						case '基本信息':
 							item.grade = this.getWeightScore() + this.getAgeScore();
 							break;
 						case '家族史':
