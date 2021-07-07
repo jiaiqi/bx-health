@@ -17,12 +17,12 @@ const state = {
 	globalTextFontSize: 16,
 	globalLabelFontSize: 16,
 	srvCol: [], // 组件共享的srv_col
-	isLogin: getItem('isLogin') ? getItem('isLogin') :false, //登录状态
+	isLogin: getItem('isLogin') ? getItem('isLogin') : false, //登录状态
 	bx_auth_ticket: getItem('bx_auth_ticket') ? getItem('bx_auth_ticket') : "", //登录token
 	backUrl: "", //当前页面的上一级页面
 	authSetting: {}, //微信授权信息
 	authUserInfo: getItem('authUserInfo') ? getItem('authUserInfo') : {}, //微信授权信息
-	authBoxDisplay: getItem('authBoxDisplay') ? getItem('authBoxDisplay') : false,
+	authBoxDisplay:  false,
 	sickItem: "",
 	symptomArr: [],
 	doctorInfo: {},
@@ -40,10 +40,29 @@ const state = {
 	xhrNum: 0, //正在发送的请求的数量
 	xhrTimestamp: 0,
 	previousPageUrl: "",
-	hasIntoHospital: false, //是否在初次打开app时进入过被邀请诊所的诊所主页
 }
 let persistData = {}; //持久化数据
 const mutations = {
+	$setState(state, payload) {
+		// 判断是否多层级调用，state中为对象存在的情况，诸如user.info.score = 1
+		let nameArr = payload.name.split('.');
+		let saveKey = '';
+		let len = nameArr.length;
+		if (len >= 2) {
+			let obj = state[nameArr[0]];
+			for (let i = 1; i < len - 1; i++) {
+				obj = obj[nameArr[i]];
+			}
+			obj[nameArr[len - 1]] = payload.value;
+			saveKey = nameArr[0];
+		} else {
+			// 单层级变量，在state就是一个普通变量的情况
+			state[payload.name] = payload.value;
+			saveKey = payload.name;
+		}
+		// 保存变量到本地，见顶部函数定义
+		// saveLifeData(saveKey, state[saveKey])
+	},
 	SET_HOME_PATH: (state, path) => {
 		state.homePath = path
 	},
@@ -69,16 +88,6 @@ const mutations = {
 		let fils = state.srvCol.filter(item => item.service_name !== data)
 		state.srvCol = fils
 	},
-	SET_AUTH_SETTING: (state, data) => {
-		if (data.type) {
-			state.authSetting[data.type] = data.value
-			if (data.value === true) {
-				state.authBoxDisplay = false // 不显示授权组件
-			} else if (data.value === false) {
-				state.authBoxDisplay = true //显示授权组件
-			}
-		}
-	},
 	SET_REGIST_STATUS: (state, status) => {
 		state.areRegistering = status
 	},
@@ -88,7 +97,7 @@ const mutations = {
 	SET_AUTH_USERINFO: (state, isAuth) => {
 		state.authUserInfo = isAuth
 		state.authBoxDisplay = !isAuth
-		if(uni.getStorageSync('client_env')==='web'){
+		if (uni.getStorageSync('client_env') === 'web') {
 			state.authBoxDisplay = false
 			state.authUserInfo = true
 		}
@@ -150,9 +159,6 @@ const mutations = {
 	SET_PRE_PAGE_URL: (state, previousPageUrl) => {
 		state.previousPageUrl = previousPageUrl
 	},
-	SET_INTO_HOSPITAL_STATUS: (state, status) => {
-		state.hasIntoHospital = status
-	}
 }
 
 const actions = {

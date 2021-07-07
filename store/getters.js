@@ -7,6 +7,7 @@ const getters = {
 	loginUserInfo: state => state.user.loginUserInfo,
 	authSetting:state=>state.app.authSetting,
 	env:state=>state.app.env,
-	authBoxDisplay:state=>state.app.authBoxDisplay
+	authBoxDisplay:state=>state.app.authBoxDisplay,
+	needOpenLogin:state=>state.user.needOpenLogin
 }
 export default getters

@@ -705,20 +705,6 @@
 			async initPage() {
 				let self = this;
 				let userInfo = uni.getStorageSync('login_user_info');
-				// #ifdef MP-WEIXIN
-				let res = await wx.getSetting();
-				if (!res.authSetting['scope.userInfo']) {
-					this.$store.commit('SET_AUTH_SETTING', {
-						type: 'userInfo',
-						value: false
-					});
-					this.$store.commit('SET_AUTH_USERINFO', false);
-					// 没有获取用户信息授权
-					return;
-				} else {
-					this.updateUserInfo();
-				}
-				// #endif
 				if (!userInfo || !uni.getStorageSync('isLogin')) {
 					// 未登录 h5跳转到登录页,小程序端进行静默登录
 					// #ifdef MP-WEIXIN
@@ -782,10 +768,6 @@
 					}
 				});
 				this.isAuthUserInfo = true;
-				this.$store.commit('SET_AUTH_SETTING', {
-					type: 'userInfo',
-					value: true
-				});
 				this.$store.commit('SET_AUTH_USERINFO', true);
 			},
 			toAddPages() {
@@ -832,10 +814,6 @@
 					};
 					this.setWxUserInfo(rawData);
 					this.$store.commit('SET_WX_USERINFO', rawData);
-					this.$store.commit('SET_AUTH_SETTING', {
-						type: 'userInfo',
-						value: true
-					});
 					this.$store.commit('SET_AUTH_USERINFO', true);
 					const result = await wx.login();
 					if (result.code) {

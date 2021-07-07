@@ -519,12 +519,6 @@
 						})
 					}
 					await this.toAddPage()
-					// let result = await wx.login()
-					// if (result.code) {
-					// 	await self.wxLogin({
-					// 		code: result.code
-					// 	})
-					// }
 				}
 
 				if (e.detail && e.detail.errMsg && e.detail.errMsg.indexOf('ok') !== -1) {
@@ -541,23 +535,6 @@
 						.length > 0 && res.data.response[0].response && res.data.response[0].response.phoneNumber) {
 						this.formModel.phone_xcx = res.data.response[0].response.phoneNumber
 						this.formModel.customer_phone = res.data.response[0].response.phoneNumber
-					} else {
-						// wx.checkSession({
-						// 	fail(err) {
-						// 		// session_key 已经失效， 需要重新执行登录流程
-						// 		wx.login({
-						// 			success(result) {
-						// 				if (result.code) {
-						// 					self.wxLogin({
-						// 						code: result.code
-						// 					}).then(_ => {
-						// 						self.decryptPhoneNumber(e)
-						// 					})
-						// 				}
-						// 			}
-						// 		})
-						// 	}
-						// })
 					}
 				}
 			},

@@ -116,15 +116,9 @@
 				userInfo: state => state.user.userInfo,
 				globalTextFontSize: state => state.app['globalTextFontSize'],
 				globalLabelFontSize: state => state.app.globalLabelFontSize,
-				hasIntoHospital: state => state.app.hasIntoHospital
+				needOpenLogin: state => state.user.needOpenLogin,
+				authBoxDisplay: state => state.app.authBoxDisplay
 			}),
-			// showPageContent() {
-			// 	if (this.userInfo.add_store_no && !this.hasIntoHospital&&this.env!=='h5') {
-			// 		return false
-			// 	} else {
-			// 		return true
-			// 	}
-			// },
 		},
 		methods: {
 			toFeedBack() {
@@ -194,23 +188,37 @@
 				});
 			},
 			async skip(item) {
-				if (item.dest_page && item.dest_page.indexOf('/otherPages/dietSelect/dietSelect?') !== -1) {
-					let res = await this.toAddPage();
-					if (!res) {
-						uni.showModal({
-							title: '提示',
-							content: '当前跳转的页面需要访问您的用户信息才能正常使用，是否跳转到授权页面',
-							success(res) {
-								if (res.confirm) {
-									uni.navigateTo({
-										url: '/publicPages/accountExec/accountExec'
-									})
-								}
+				if (this.authBoxDisplay) {
+					uni.showModal({
+						title: '提示',
+						content: '当前跳转的页面需要访问您的用户信息才能正常使用，是否跳转到授权页面',
+						success(res) {
+							if (res.confirm) {
+								uni.navigateTo({
+									url: '/publicPages/accountExec/accountExec'
+								})
 							}
-						})
-						return;
-					}
+						}
+					})
+					return
 				}
+				// if (item.dest_page && item.dest_page.indexOf('/otherPages/dietSelect/dietSelect?') !== -1) {
+				// 	let res = await this.toAddPage();
+				// 	if (!res) {
+				// 		uni.showModal({
+				// 			title: '提示',
+				// 			content: '当前跳转的页面需要访问您的用户信息才能正常使用，是否跳转到授权页面',
+				// 			success(res) {
+				// 				if (res.confirm) {
+				// 					uni.navigateTo({
+				// 						url: '/publicPages/accountExec/accountExec'
+				// 					})
+				// 				}
+				// 			}
+				// 		})
+				// 		return;
+				// 	}
+				// }
 				let dest_page = '';
 				let self = this;
 				if (item.dest_page && item.dest_page.indexOf('/pages/specific/health') !== -1) {
@@ -412,11 +420,12 @@
 			},
 			checkUserInfoParams() {
 				let self = this;
-				self.wxVerifyLogin(true).then(_ => {
-					self.selectBasicUserList().then(res => {
-						self.selectBasicUserInfo();
-					});
-				});
+				self.wxVerifyLogin()
+				// .then(_ => {
+				// self.selectBasicUserList().then(res => {
+				// 	self.selectBasicUserInfo();
+				// });
+				// });
 			},
 			openOfficialImage() {
 				uni.navigateTo({
@@ -444,7 +453,8 @@
 			};
 		},
 		onLoad(option) {
-			this.checkUserInfoParams();
+			this.wxVerifyLogin()
+			// this.checkUserInfoParams();
 			this.checkOptionParams(option);
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({

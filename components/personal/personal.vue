@@ -19,8 +19,6 @@
 			</view>
 		</view>
 		<view class="container-cen top90" :class="{ top90: type == 'shop' }">
-<!-- 			<manage-bar :topGridList="topGridList" @toPages="toPages" v-if="type!=='shop'"></manage-bar>
-			<order-bar @toPages="toPages" @change="orderAmountChange"></order-bar> -->
 			<view class="container-bot">
 				<view class="cu-list menu sm-border">
 					<view @click="toPages('updateInfo')" class="cu-item arrow">
@@ -550,10 +548,6 @@
 						headimgurl: user.userInfo.avatarUrl
 					};
 					this.toAddPage();
-					this.$store.commit('SET_AUTH_SETTING', {
-						type: 'userInfo',
-						value: true
-					});
 					this.$store.commit('SET_AUTH_USERINFO', true);
 				}
 				// #endif

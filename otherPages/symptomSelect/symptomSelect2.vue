@@ -342,7 +342,6 @@
 									uni.$emit('symptomSelect', self.chooseArr)
 								}
 								if (self.chooseArr.length > 0) {
-									// self.$store.commit('SET_SYMPTOM_ARR', self.chooseArr)
 									uni.navigateTo({
 										url: '/archivesPages/illnessDetaiList/illnessDetaiList'
 									})

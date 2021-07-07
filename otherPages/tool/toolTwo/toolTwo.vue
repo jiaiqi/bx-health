@@ -18,60 +18,6 @@
 		</view>
 		<view class="bmi-box">
 			<bmi-weight-bar :height="info.height" :weight="info.weight"></bmi-weight-bar>
-			<!-- <view class="bmi-bar-box">
-				<view class="bmi-bar">
-					<view class="bar1 bar-box">
-						<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi < 18.5">
-							<text class="cuIcon-locationfill text-blue">
-								<text class="tip-bmi">
-									{{ bmi }}
-								</text>
-							</text>
-						</view>
-						<view class="bar">偏瘦</view>
-					</view>
-					<view class="bar2 bar-box">
-						<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi >= 18.5 && bmi <= 24">
-							<text class="cuIcon-locationfill text-cyan">
-								<text class="tip-bmi">
-									{{ bmi }}
-								</text>
-							</text>
-						</view>
-						<view class="bar">正常</view>
-					</view>
-					<view class="bar3 bar-box">
-						<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi <= 28 && bmi > 24">
-							<text class="cuIcon-locationfill text-yellow">
-								<text class="tip-bmi">
-									{{ bmi }}
-								</text>
-							</text>
-						</view>
-						<view class="bar">超重</view>
-					</view>
-					<view class="bar4 bar-box">
-						<view class="scale" :style="{ left: bmiScale ? bmiScale : 0 }" v-if="bmi > 28">
-							<text class="cuIcon-locationfill text-orange">
-								<text class="tip-bmi">
-									{{ bmi }}
-								</text>
-							</text>
-						</view>
-						<view class="bar">肥胖</view>
-					</view>
-				</view>
-				<view class="bmi-label" v-if="isArray(weightForBmi)">
-					<view class="label text-bold">体重:</view>
-					<view class="value" v-for="item in weightForBmi" :key="item.bmi">
-						<text v-if="item.weight && isString(item.weight)">{{ item.weight }}</text>
-					</view>
-				</view>
-				<view class="bmi-label" v-if="isArray(weightForBmi)">
-					<view class="label text-bold">BMI:</view>
-					<view class="value" v-for="item in weightForBmi" :key="item.bmi">{{ item.bmi }}</view>
-				</view>
-			</view> -->
 		</view>
 		<view class="text-center text-cyan text-bold">请输入您的基本信息</view>
 		<view class="item-list">
@@ -102,7 +48,6 @@
 			<view class="item-list-top">
 				<text>*</text>
 				<text class="margin-right">性别</text>
-				<!-- <text class="margin-left-xs">{{ info.sex || '' }}</text> -->
 				<bx-radio-group v-model="info.sex" mode="button">
 					<bx-radio class="radio" color="#2979ff" v-for="(item, i) in ['男', '女']" :key="item" :name="item">{{ item }}</bx-radio>
 				</bx-radio-group>

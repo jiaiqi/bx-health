@@ -48,15 +48,6 @@ fly.interceptors.request.use(async (request) => {
 			});
 			request.cancel = true
 			// #endif
-			// #ifdef MP-WEIXIN
-			// Vue.prototype.toAddPage()
-			// const result = await wx.login();
-			// if (result.code) {
-			// 	let res = await Vue.prototype.wxLogin({
-			// 		code: result.code
-			// 	});
-			// }
-			// #endif
 		}
 	}
 	if (request.url && ignoreServiceName(request.url)) {
@@ -155,22 +146,9 @@ fly.interceptors.response.use(
 						// #endif
 						// #ifdef MP-WEIXIN
 						Vue.prototype.toAddPage()
-						// wx.login({
-						// 	success(res) {
-						// 		if (res.code) {
-						// 			//发起网络请求
-						// 			Vue.prototype.wxLogin({
-						// 				code: res.code
-						// 			});
-						// 		} else {
-						// 			console.log('登录失败！' + res.errMsg)
-						// 		}
-						// 	}
-						// })
 						// #endif
 					} catch (e) {
 						console.error('请求失败', e)
-						//TODO handle the exception
 					}
 				} else {
 					// #ifdef H5

@@ -66,13 +66,6 @@ fly.interceptors.request.use(async (request) => {
 			// #ifdef MP-WEIXIN
 			let option = wx.getLaunchOptionsSync()
 			if (option && option.scene !== 1154) {
-				// await Vue.prototype.toAddPage()
-				// const result = await wx.login();
-				// if (result.code) {
-				// 	let res = await Vue.prototype.wxLogin({
-				// 		code: result.code
-				// 	});
-				// }
 			}
 			// #endif
 		}
@@ -106,29 +99,7 @@ fly.interceptors.request.use(async (request) => {
 	}
 	const outTime = uni.getStorageSync("expire_timestamp") //过期时间
 	const date = parseInt(new Date().getTime() / 1000)
-	// if (request.url && request.url !== 'srvwx_app_login_verify') {
-	// 	// #ifdef MP-WEIXIN
-	// 	try {
-	// 		let sessionStatus = await wx.checkSession()
-	// 	} catch (err) {
-	// 		// session_key 已经失效 需要重新执行登录流程
-	// 		if (err) {
-	// 			uni.showToast({
-	// 				title: err,
-	// 				icon: false
-	// 			})
-	// 		}
-	// 		let result = await wx.login()
-	// 		if (result.code) {
-	// 			await Vue.prototype.wxLogin({
-	// 				code: result.code
-	// 			})
-	// 		}
-	// 	}
-	// 	// #endif
-	// }
-
-
+	
 	if (outTime) {
 		const isExpired = outTime < date
 		console.log('登录是否过期:', isExpired, '\n过期时间:', FormateDate(new Date(outTime * 1000)), outTime, date)
@@ -185,26 +156,6 @@ fly.interceptors.response.use(
 						uni.navigateTo({
 							url: '/publicPages/accountExec/accountExec'
 						});
-						// #endif
-						// #ifdef MP-WEIXIN
-						const result = await wx.login();
-						if (result.code) {
-							await Vue.prototype.wxLogin({
-								code: result.code
-							});
-						}
-						// wx.login({
-						// 	success(res) {
-						// 		if (res.code) {
-						// 			//发起网络请求
-						// 			Vue.prototype.wxLogin({
-						// 				code: res.code
-						// 			});
-						// 		} else {
-						// 			console.log('登录失败！' + res.errMsg)
-						// 		}
-						// 	}
-						// })
 						// #endif
 					} catch (e) {
 						console.error('请求失败', e)

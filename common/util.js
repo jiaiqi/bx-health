@@ -800,45 +800,6 @@ export default {
 				if (resData.login_user_info.data) {
 					uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
 				}
-				// // 获取用户信息
-				// let infoRes = await uni.getUserInfo({
-				// 	provider: 'weixin'
-				// })
-				// if (Array.isArray(infoRes) && infoRes.length >= 2 && infoRes[1].errMsg && infoRes[1].errMsg ===
-				// 	'getUserInfo:ok' &&
-				// 	infoRes[1].userInfo) {
-				// 	let rawData = {
-				// 		nickname: infoRes[1].userInfo.nickName,
-				// 		sex: infoRes[1].userInfo.gender,
-				// 		country: infoRes[1].userInfo.country,
-				// 		province: infoRes[1].userInfo.province,
-				// 		city: infoRes[1].userInfo.city,
-				// 		headimgurl: infoRes[1].userInfo.avatarUrl
-				// 	};
-				// 	store.commit('SET_WX_USERINFO', rawData);
-				// 	store.commit('SET_AUTH_USERINFO', true)
-				// 	await Vue.prototype.setWxUserInfo(rawData)
-				// 	Vue.prototype.updateUserInfo()
-				// 	return {
-				// 		status: 'success',
-				// 		response: resData
-				// 	};
-				// } else {
-				// 	if (store.state.app.currentPage.indexOf('publicPages/accountExec/accountExec') === -1) {
-				// 		// 跳转到授权页面
-				// 		store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
-				// 		let pageStack = getCurrentPages()
-				// 		if (Array.isArray(pageStack) && pageStack.length >= 1) {
-				// 			let currentPage = pageStack[pageStack.length - 1]
-				// 			store.commit('SET_PRE_PAGE_URL', currentPage.$page.fullPath)
-				// 		}
-				// 		// 
-				// 		// uni.reLaunch({
-				// 		// 	url: '/publicPages/accountExec/accountExec'
-				// 		// })
-				// 	}
-				// 	return false;
-				// }
 			} else {
 				// 登录失败，显示提示信息
 				uni.showToast({
@@ -1117,7 +1078,6 @@ export default {
 				//TODO handle the exception
 			}
 			let userInfo = e
-			console.log("setWxUserInfo", userInfo)
 			let url = Vue.prototype.getServiceUrl('wx', 'srvwx_basic_user_info_save', 'operate')
 			let req = [{
 				"serviceName": "srvwx_basic_user_info_save",
@@ -1548,30 +1508,15 @@ export default {
 					// 登录失效 进行静默登录
 					// #ifdef MP-WEIXIN
 					store.commit("SET_LOGIN_STATE", false)
-					// const result = await wx.login();
-					// if (result.code) {
-					// 
-					// await Vue.prototype.wxLogin({
-					// 	code: result.code
-					// });
-					// }
+					
 					// #endif
 				} else if (Array.isArray(res.data.data) && res.data.data.length === 0) {
 					return 0
 					// 没有角色 提示跳转到创建角色页面
 				}
 			} else {
-				// 没有user_no 跳转到登录页面
-				// #ifdef MP-WEIXIN
-				// const result = await wx.login();
-				// if (result.code) {
-				// 	await Vue.prototype.wxLogin({
-				// 		code: result.code
-				// 	});
-				// }
-				// #endif
+				
 				// #ifdef H5
-
 				uni.navigateTo({
 					url: '/publicPages/accountExec/accountExec'
 				});
@@ -1582,54 +1527,6 @@ export default {
 		Vue.prototype.selectBasicUserInfo = async () => {
 			let userInfo = store.state.user.userInfo
 			if (userInfo && userInfo.no) {
-				if (userInfo.home_store_no && !store.state.app.hasIntoHospital) {
-					// 有home_store 未进入过医院主页
-					let pageInfo = Vue.prototype.getShareParams()
-					// console.log(store.state.app.inviterInfo)
-					// let pageInfo = Vue.prototype.getShareParams()
-					// 暂时去掉
-					// let pageStack = getCurrentPages()
-					// let currentPage = ''
-					// if (Array.isArray(pageStack) && pageStack.length >= 1) {
-					// 	currentPage = pageStack[pageStack.length - 1]?.$page?.fullPath
-					// }
-					// if (['诊所', '医院', '健康服务'].includes(userInfo.home_store_type) && userInfo.home_store_no && (!
-					// 		currentPage || (currentPage && currentPage.indexOf(
-					// 				'/pediaPages/hospitalOverview/hospitalOverview') == -1 && currentPage
-					// 			.indexOf(
-					// 				'/personalPages/chat/chat') == -1 && currentPage.indexOf(
-					// 				'personalPages/gropDetail/gropDetail') == -1)) && pageStack.length ===
-					// 	1) {
-					// 	// 通过分享医院主页加入的用户
-					// 	uni.redirectTo({
-					// 		url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + store
-					// 			.state
-					// 			.user.userInfo.home_store_no,
-					// 		success() {
-					// 			// 标记 已进入过医院主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// } else if (userInfo.home_store_type === '饭馆' && userInfo.home_store_no) {
-					// 	// 通过分享餐馆主页加入的用户
-					// 	uni.redirectTo({
-					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + userInfo
-					// 			.home_store_no,
-					// 		success() {
-					// 			// 标记 已进入过餐馆主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// } else if (userInfo.home_store_type === '医生') {
-					// 	uni.redirectTo({
-					// 		url: '/pediaPages/doctorIntro/doctorIntro',
-					// 		success() {
-					// 			// 标记 已进入过餐馆主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// }
-				}
 				return store.state.user.userInfo
 			}
 
@@ -1672,59 +1569,6 @@ export default {
 					uni.setStorageSync('current_user_info', info);
 					uni.setStorageSync('current_user', info.name);
 				}
-				// #ifdef MP-WEIXIN
-				if (res.data.data[0].home_store_no && !store.state.app.hasIntoHospital) {
-					// 有home_store 此次打开小程序未进入过医院/餐馆主页
-					let pageInfo = Vue.prototype.getShareParams()
-					// console.log(store.state.app.inviterInfo)
-					let pageStack = getCurrentPages()
-					let currentPage = ''
-					if (Array.isArray(pageStack) && pageStack.length >= 1) {
-						currentPage = pageStack[pageStack.length - 1]?.$page?.fullPath
-					}
-					// 暂时去掉
-					// if (['诊所', '医院', '健康服务'].includes(store.state
-					// 		.user.userInfo.home_store_type) && (!currentPage || (currentPage && currentPage
-					// 		.indexOf(
-					// 			'/pediaPages/hospitalOverview/hospitalOverview') == -1 && currentPage
-					// 		.indexOf(
-					// 			'/personalPages/chat/chat') == -1 && currentPage.indexOf(
-					// 			'personalPages/gropDetail/gropDetail') == -1)) && pageStack.length ===
-					// 	1) {
-					// 	// 通过分享医院主页加入的用户
-					// 	uni.redirectTo({
-					// 		url: '/pediaPages/hospitalOverview/hospitalOverview?store_no=' + res
-					// 			.data
-					// 			.data[0].home_store_no,
-					// 		success() {
-					// 			// 标记 已进入过医院主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// } else if ((['饭馆'].includes(store.state
-					// 			.user.userInfo.home_store_type) && store.state.user
-					// 		.userInfo.home_store_no)) {
-					// 	// 通过分享饭馆主页加入的用户
-					// 	uni.redirectTo({
-					// 		url: '/otherPages/shop/shopHome?type=find&store_no=' + store.state
-					// 			.user
-					// 			.userInfo.home_store_no,
-					// 		success() {
-					// 			// 标记 已进入过餐馆主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// } else if (userInfo.home_store_type === '医生') {
-					// 	uni.redirectTo({
-					// 		url: '/pediaPages/doctorIntro/doctorIntro',
-					// 		success() {
-					// 			// 标记 已进入过餐馆主页
-					// 			store.commit('SET_INTO_HOSPITAL_STATUS', true)
-					// 		}
-					// 	})
-					// }
-				}
-				// #endif
 				return res.data.data[0]
 			} else {
 				return false
@@ -1744,18 +1588,7 @@ export default {
 				};
 				Vue.prototype.setWxUserInfo(rawData);
 				store.commit('SET_WX_USERINFO', rawData);
-				store.commit('SET_AUTH_SETTING', {
-					type: 'userInfo',
-					value: true
-				});
 				store.commit('SET_AUTH_USERINFO', true);
-				// const result = await wx.login();
-				// if (result.code) {
-				// 	this.wxLogin({
-				// 		code: result.code
-				// 	});
-				// 	// this.initPage();
-				// }
 			}
 			// #endif
 		}
@@ -1853,7 +1686,6 @@ export default {
 		Vue.prototype.toAddPage = async () => {
 			// 获取用户信息
 			// 自动更新头像昵称
-			console.log(store.state.app.authBoxDisplay)
 			let isLogin = await Vue.prototype.wxVerifyLogin()
 			// if (!isLogin) {
 			// 	return 'fail'
@@ -1862,19 +1694,9 @@ export default {
 			if (store && store.state && store.state.user) {
 				wxUserInfo = store.state.user.wxUserInfo
 			}
-			// if ((wxUserInfo && (!wxUserInfo.nickname || wxUserInfo.nickname === '微信用户')) || !wxUserInfo) {
-			// 	// 未授权获取用户信息
-			// 	debugger
-			// 	console.log(store.state.app.authBoxDisplay)
-			// 	store.commit('SET_AUTH_USERINFO', false)
-			// 	store.commit('SET_REGIST_STATUS', false)
-			// 	return
-			// 	// 未授权不进行注册
-			// } else {
+
 			store.commit('SET_AUTH_USERINFO', true)
-			// if (!store.state.app.authBoxDisplay) {
 			let data = await selectPersonInfo()
-			// let data = await Vue.prototype.selectBasicUserInfo()
 			if (data && data.no && data.nick_name && data.profile_url) {
 				// 已有用户信息
 				if (!store.state.app.subscsribeStatus) {
@@ -1892,12 +1714,8 @@ export default {
 			} else {
 				store.commit('SET_AUTH_USERINFO', false)
 			}
-			// }
-			// store.commit('SET_AUTH_USERINFO', true)
-			// }
 			if (store.state.app.authBoxDisplay) {
 				store.commit('SET_REGIST_STATUS', false)
-				return
 			}
 			let login_user_info = uni.getStorageSync('login_user_info')
 			let user_no = uni.getStorageSync('login_user_info').user_no
@@ -1986,6 +1804,7 @@ export default {
 					res.data.response[0].response.effect_data.length > 0
 				) {
 					store.commit('SET_USERINFO', res.data.response[0].response.effect_data[0])
+					store.commit('$setState',{name:"authBoxDisplay",value:false})
 				}
 				if (store.state.app.doctorInfo && store.state.app.doctorInfo.no) {
 					let result = await Vue.prototype.bindDoctorInfo(store.state.app.doctorInfo
@@ -2041,14 +1860,6 @@ export default {
 				})
 				if (res.data.resultCode === '0011') {
 					// 未登录
-					// #ifdef MP-WEIXIN
-					// const result = await wx.login();
-					// if (result && result.code) {
-					// 	let res = await Vue.prototype.wxLogin({
-					// 		code: result.code
-					// 	});
-					// }
-					// #endif
 					return false
 				}
 				return false

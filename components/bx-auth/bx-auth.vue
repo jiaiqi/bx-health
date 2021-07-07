@@ -5,7 +5,6 @@
 			<view class="label text-bold">百想健康</view>
 		</view>
 		<view class="tips">{{ tips }}</view>
-		<!-- <button type="primary" class="cu-btn bg-green" lang="zh_CN" :open-type="openType" @getuserinfo="getuserinfo">微信授权用户信息</button> -->
 		<button type="primary" class="cu-btn bg-green button" lang="zh_CN" @click="toAuthPage">打开授权页面</button>
 	</view>
 </template>
@@ -24,6 +23,7 @@
 		},
 		methods: {
 			toAuthPage(e) {
+				this.wxVerifyLogin()
 				this.$store.commit('SET_CURRENT_PAGE', 'publicPages/accountExec/accountExec')
 				let pageStack = getCurrentPages()
 				if (Array.isArray(pageStack) && pageStack.length >= 1) {

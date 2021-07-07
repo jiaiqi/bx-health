@@ -97,11 +97,7 @@
 				<view class="grid-item" v-for="item in indicator" :key="item.key" @click="toPages(item.key)">
 					<view class="title">
 						{{item.label||''}}
-						<!-- <text class="ratio" v-if="item.ratio">[{{item.ratio}}]</text> -->
 					</view>
-					<!-- <view class="data" :class="[item.color?'text-'+item.color:'']" v-if="item.score">{{ item.score|| '0' }}</view>
-					<view class="data" :class="[item.color?'text-'+item.color:'']" v-else-if="item.key==='weight'">{{ weightScore|| '0' }}</view>
-					<view class="data" :class="[item.color?'text-'+item.color:'']" v-else>0</view> -->
 					<view class="data text-blue" :class="{'nodata-tip':item.lastData&&item.lastData.indexOf('暂无记录')!==-1}" v-if="item.lastData">
 						<!-- <view class="data"  :class="[item.color?'text-'+item.color:'']" v-if="item.lastData"> -->
 						{{item.lastData}}
@@ -111,55 +107,6 @@
 					</view>
 					<view class="action"></view>
 				</view>
-				<!-- 
-				<view class="grid-item" @click="toPages('diet')">
-					<view class="title">
-						饮食
-						<text class="ratio">[50%]</text>
-					</view>
-					<view class="data text-green">{{ dietScore ? dietScore : '0' }}</view>
-					<view class="action"></view>
-				</view>
-				<view class="grid-item" @click="toPages('sport')">
-					<view class="title">
-						运动
-						<text class="ratio">[20%]</text>
-					</view>
-					<view class="data text-red">{{ sportScore ? sportScore : 0 }}</view>
-					<view class="action"></view>
-				</view>
-				<view class="grid-item" @click="toPages('weight')">
-					<view class="title">
-						体重
-						<text class="ratio">[5%]</text>
-					</view>
-					<view class="data text-gray">{{ weightScore ? weightScore : 0 }}</view>
-					<view class="action"></view>
-				</view>
-				<view class="grid-item" @click="toPages('bp')">
-					<view class="title">
-						血压
-						<text class="ratio">[5%]</text>
-					</view>
-					<view class="data text-gray">{{ BPScore ? BPScore : 0 }}</view>
-					<view class="action"></view>
-				</view>
-				<view class="grid-item" @click="toPages('sleep')">
-					<view class="title">
-						睡眠
-						<text class="ratio">[10%]</text>
-					</view>
-					<view class="data text-blue">{{ sleepScore ? sleepScore : 0 }}</view>
-					<view class="action"></view>
-				</view>
-				<view class="grid-item" @click="toPages('symptom')">
-					<view class="title">
-						症状
-						<text class="ratio">[10%]</text>
-					</view>
-					<view class="data text-orange">10</view>
-					<view class="action"></view>
-				</view> -->
 			</view>
 		</view>
 		<view class="health-archive-item ">
@@ -184,28 +131,7 @@
 				</view>
 			</view>
 		</view>
-		<!-- 	<view class="health-archive-item ">
-			<view class="subtitle">
-				<text class="title-text">疾病风险提示</text>
-				<view class=""></view>
-			</view>
-			<view class="content disease-risk">
-				<view class="disease-item text-red">
-					<view class="disease-name">高血压</view>
-					<view class="number">
-						<text class="digit">90</text>
-						%
-					</view>
-				</view>
-				<view class="disease-item text-orange">
-					<view class="disease-name">肥胖</view>
-					<view class="number">
-						<text class="digit">75</text>
-						%
-					</view>
-				</view>
-			</view>
-		</view> -->
+		
 		<view class="cu-modal bottom-modal" :class="{ show: showAddRecord }" @click="hideAddRecord">
 			<view class="cu-dialog" @tap.stop="">
 				<view class="inspect-record">
@@ -214,7 +140,6 @@
 					<view class="tips text-blue">
 						选择检查报告类型后,拍照上传检查报告
 					</view>
-					<!-- <tree-selector-l :srvInfo="srvInfo" hideButton @confirm="clickTag"></tree-selector-l> -->
 					<cascader-selector class="cascader-selector" @clickTag="clickTag" insert hideButton
 						:srvInfo="srvInfo"></cascader-selector>
 					<view class="" v-if="showCustomAddRecord">
@@ -413,12 +338,12 @@
 		},
 		computed: {
 			...mapState({
+				needOpenLogin:state=>state.user.needOpenLogin,
 				inviterInfo: state => state.app.inviterInfo,
 				vuex_userInfo: state => state.user.userInfo,
 				vuex_userList: state => state.user.userList
 			}),
 			...mapGetters({
-				authSetting: 'authSetting',
 				is_login: 'isLogin',
 				wxUserInfo: 'wxUserInfo',
 				login_user_info: 'loginUserInfo',
@@ -1443,8 +1368,8 @@
 						srv_cols
 					} = res.data.data;
 					if (Array.isArray(srv_cols) && srv_cols.length > 0) {
-						if (this.vuex_userInfo && this.vuex_userInfo.requirement) {
-							let requirement = this.vuex_userInfo.requirement.split(',');
+						if (this.vuex_userInfo) {
+							let requirement = this.vuex_userInfo?.requirement?this.vuex_userInfo.requirement.split(','):[];
 							console.log(requirement);
 							srv_cols.forEach(item => {
 								if (item.columns === 'requirement') {
@@ -1527,7 +1452,7 @@
 			async updataUserTags() {
 				let url = this.getServiceUrl('health', 'srvhealth_person_info_update', 'operate');
 				let requirement = this.selectedTags.map(item => item.value);
-				if (Array.isArray(requirement) && requirement.length > 0) {
+				if (Array.isArray(requirement)) {
 					let req = [{
 						serviceName: 'srvhealth_person_info_update',
 						condition: [{
@@ -1710,40 +1635,36 @@
 			},
 			async initPage() {
 				let self = this;
-				let userInfo = uni.getStorageSync('login_user_info');
-				if (!userInfo || !uni.getStorageSync('isLogin')) {
-					// 未登录 h5跳转到登录页,小程序端进行静默登录
-					// #ifdef MP-WEIXIN
-					const result = await wx.login();
-					if (result.code) {
-						this.code = result.code;
-						await this.wxLogin({
-							code: result.code
-						});
-						await this.initPage();
-					}
-					// #endif
-					// #ifdef H5
-					uni.navigateTo({
-						url: '/publicPages/accountExec/accountExec'
-					});
-					// #endif
-				} else {
-					this.$store.commit('SET_LOGIN_STATE', true);
-					this.isLogin = true;
-				}
-				if (userInfo) {
+				let userInfo = this.vuex_userInfo;
+				// if (!userInfo || !uni.getStorageSync('isLogin')) {
+				// 	// 未登录 h5跳转到登录页,小程序端进行静默登录
+				// 	// #ifdef MP-WEIXIN
+				// 	const result = await wx.login();
+				// 	if (result.code) {
+				// 		this.code = result.code;
+				// 		await this.wxLogin({
+				// 			code: result.code
+				// 		});
+				// 		await this.initPage();
+				// 	}
+				// 	// #endif
+				// 	// #ifdef H5
+				// 	uni.navigateTo({
+				// 		url: '/publicPages/accountExec/accountExec'
+				// 	});
+				// 	// #endif
+				// } else {
+				// 	this.$store.commit('SET_LOGIN_STATE', true);
+				// 	this.isLogin = true;
+				// }
+				
+				if (userInfo&&this.is_login&&userInfo.id) {
 					this.loginUserInfo = userInfo;
 					this.getplanList();
-					// if (!Array.isArray(this.checkboxList) || this.checkboxList.length === 0) {
 					await this.getCheckboxList();
-					// }
-					// if (!this.vuex_userInfo) {
 					await this.selectUserList();
-					// }
 					if (!this.dietScore && this.dietScore !== 0) {
 						this.dietScore = await this.calcDietScore();
-
 					}
 					if (!this.sportScore) {
 						this.sportScore = await this.calcSportScore();
@@ -1796,6 +1717,9 @@
 					if (!this.isLoad) {
 						this.selectInspectionReport();
 					}
+				}else{
+					// 没有用户信息 需要授权 然后创建用户信息
+					this.$store.commit('$setState',{name:"authBoxDisplay",value:true})
 				}
 			},
 			updateUserInfo() {
@@ -1825,10 +1749,6 @@
 					}
 				});
 				this.isAuthUserInfo = true;
-				this.$store.commit('SET_AUTH_SETTING', {
-					type: 'userInfo',
-					value: true
-				});
 				this.$store.commit('SET_AUTH_USERINFO', true);
 			},
 			toAddPages() {
@@ -1875,10 +1795,6 @@
 					};
 					this.setWxUserInfo(rawData);
 					this.$store.commit('SET_WX_USERINFO', rawData);
-					this.$store.commit('SET_AUTH_SETTING', {
-						type: 'userInfo',
-						value: true
-					});
 					this.$store.commit('SET_AUTH_USERINFO', true);
 					const result = await wx.login();
 					if (result.code) {
@@ -1936,7 +1852,7 @@
 			};
 		},
 		onShow() {
-			if (this.is_login) {
+			if (this.is_login&&!this.needOpenLogin) {
 				this.initPage();
 			}
 		}

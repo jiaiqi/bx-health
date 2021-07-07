@@ -62,7 +62,6 @@
 							class="person-chat-item-right person-chat-item-right-image">
 							<u-image :width=" item.imgWidth + 'px'" :height="item.imgHeight + 'px'" :src="item.img_url">
 							</u-image>
-							<!-- <chat-image :max="350" :src="item.img_url"></chat-image> -->
 						</view>
 						<view class="person-chat-item-right" v-else-if="item.msg_content_type === '文章'"
 							@click="toArticle(item)">

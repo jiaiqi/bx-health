@@ -826,7 +826,6 @@
 		},
 		async onLoad(option) {
 			uni.onKeyboardHeightChange(res => {
-				console.log(res.height)
 				if (res.height) {
 					this.pageHeight =
 						`calc(100vh - ${res.height}px - var(--window-top) - var(--window-bottom))`
@@ -835,7 +834,6 @@
 				}
 				this.keyboardHeight = res.height
 			})
-			await this.toAddPage();
 			this.checkOptionParams(option);
 			const destApp = option.destApp;
 			if (destApp) {

@@ -76,12 +76,19 @@
 	import {
 		mapState
 	} from 'vuex';
+	import wxOpenLogin from '@/common/api/login.js'
 	export default {
 		// 账号授权页面
 		name: 'AccountExec',
 		computed: {
 			...mapState({
-				previousPageUrl: state => state.app.previousPageUrl
+				userInfo: state => state.user.userInfo,
+				previousPageUrl: state => state.app.previousPageUrl,
+				inviterInfo: state => state.app.inviterInfo,
+				loginUserInfo: state => state.user.loginUserInfo,
+				needOpenLogin: state => state.user.needOpenLogin,
+				bx_open_code: state => state.user.bx_open_code,
+				profileInfo: state => state.user.profileInfo
 			})
 		},
 		data() {
@@ -333,6 +340,10 @@
 				let res = await wx.getUserProfile({
 					desc: '用于完善会员资料' // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
 				})
+				this.$store.commit('$setUserState', {
+					name: "profileInfo",
+					value: res
+				})
 				if (res.userInfo) {
 					return self.handleUserInfo(res)
 				}
@@ -348,6 +359,10 @@
 						city: res.userInfo.city,
 						headimgurl: res.userInfo.avatarUrl
 					};
+					this.$store.commit('$setUserState', {
+						name: "profileInfo",
+						value: res
+					})
 					self.$store.commit('SET_WX_USERINFO', rawData);
 					self.$store.commit('SET_AUTH_USERINFO', true);
 					await self.setWxUserInfo(rawData);
@@ -368,6 +383,16 @@
 						userInfo = await self.getUserProfile()
 					} else if (e && e.mp && e.mp.detail) {
 						userInfo = await self.handleUserInfo(e.mp.detail);
+					}
+					if (this.needOpenLogin) {
+						wxOpenLogin(this.profileInfo, this.bx_open_code)
+					}
+					this.$store.commit('$setUserState', {
+						name: "wxUserInfo",
+						value: userInfo
+					})
+					if (!this.userInfo || !this.userInfo.id) {
+						await this.toAddPage()
 					}
 					// const user = await this.getUserProfile()
 					const result = await self.wxVerifyLogin();
@@ -530,124 +555,6 @@
 
 					// #endif
 				}
-			},
-			getUserInfo: function(loginType, cb) {
-				let self = this;
-				wx.login({
-					success: function() {
-						wx.getUserInfo({
-							success: function(res) {
-								self.$store.commit('SET_AUTH_SETTING', {
-									type: 'userInfo',
-									value: true
-								});
-								self.$store.commit('SET_AUTH_USERINFO', true);
-								uni.setStorageSync('wxuserinfo', res.userInfo);
-								let rawData = {
-									nickname: res.userInfo.nickName,
-									sex: res.userInfo.gender,
-									country: res.userInfo.country,
-									province: res.userInfo.province,
-									city: res.userInfo.city,
-									headimgurl: res.userInfo.avatarUrl
-								};
-								uni.setStorageSync('wxUserInfo', rawData);
-								self.$store.commit('SET_WX_USERINFO', rawData);
-								rawData = JSON.stringify(rawData);
-								self.setWxUserInfo(rawData);
-								console.log(res);
-							},
-							fail: function() {
-								//3.授权友好提示
-								wx.showModal({
-									title: '提示',
-									content: '您还未授权登陆，部分功能将不能使用，是否重新授权？',
-									showCancel: true,
-									cancelText: '不用了',
-									confirmText: '是',
-									success: function(res) {
-										//4.确认授权调用wx.openSetting
-										if (res.confirm) {
-											if (wx.openSetting) {
-												//当前微信的版本 ，是否支持openSetting
-												wx.openSetting({
-													success: res => {
-														if (res
-															.authSetting[
-																'scope.userInfo'
-															]) {
-															//如果用户重新同意了授权登录
-															wx.getUserInfo({
-																success: function(
-																	res
-																) {
-																	uni.setStorageSync(
-																		'wxuserinfo',
-																		res
-																		.userInfo
-																	);
-																	console
-																		.log(
-																			res
-																		);
-																	let rawData = {
-																		nickname: res
-																			.userInfo
-																			.nickName,
-																		sex: res
-																			.userInfo
-																			.gender ===
-																			0 ?
-																			'男' :
-																			'女',
-																		country: res
-																			.userInfo
-																			.country,
-																		province: res
-																			.userInfo
-																			.province,
-																		city: res
-																			.userInfo
-																			.city,
-																		headimgurl: res
-																			.userInfo
-																			.avatarUrl
-																	};
-																	rawData
-																		=
-																		JSON
-																		.stringify(
-																			rawData
-																		);
-																	self.setWxUserInfo(
-																		rawData
-																	);
-																}
-															});
-														} else {
-															//用户还是拒绝
-															console
-																.log(
-																	res
-																);
-														}
-													},
-													fail: function() {
-														//调用失败，授权登录不成功
-													}
-												});
-											} else {
-												console.log(res);
-											}
-										} else {
-											console.log(res);
-										}
-									}
-								});
-							}
-						});
-					}
-				});
 			},
 			judgeClientEnviroment() {
 				let client_env = '';

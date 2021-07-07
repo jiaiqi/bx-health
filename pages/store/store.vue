@@ -107,29 +107,6 @@
 			}
 		},
 		methods: {
-			// async getuserinfo(e) {
-			// 	// #ifdef MP-WEIXIN
-			// 	const user = e.mp.detail;
-			// 	if (user && user.userInfo) {
-			// 		let rawData = {
-			// 			nickname: user.userInfo.nickName,
-			// 			sex: user.userInfo.gender,
-			// 			country: user.userInfo.country,
-			// 			province: user.userInfo.province,
-			// 			city: user.userInfo.city,
-			// 			headimgurl: user.userInfo.avatarUrl
-			// 		};
-			// 		this.setWxUserInfo(rawData);
-			// 		this.$store.commit('SET_WX_USERINFO', rawData);
-			// 		this.$store.commit('SET_AUTH_SETTING', {
-			// 			type: 'userInfo',
-			// 			value: true
-			// 		});
-			// 		this.$store.commit('SET_AUTH_USERINFO', true);
-			// 		this.toAddPage();
-			// 	}
-			// 	// #endif
-			// },
 			onRefresh() {
 				this.pageInfo.pageNo = 1;
 				this.$nextTick(() => {
@@ -225,10 +202,6 @@
 					};
 					this.setWxUserInfo(rawData);
 					this.$store.commit('SET_WX_USERINFO', rawData);
-					this.$store.commit('SET_AUTH_SETTING', {
-						type: 'userInfo',
-						value: true
-					});
 					this.$store.commit('SET_AUTH_USERINFO', true);
 					const result = await wx.login();
 					if (result.code) {
@@ -239,148 +212,7 @@
 					}
 				}
 				// #endif
-			},
-			// goSearch() {
-			// 	if (this.current_tit.type === 'shop') {
-			// 		this.getShopList('search', this.searchVal);
-			// 	} else if (this.current_tit.type === 'myShop') {
-			// 		this.getMyShopList('search', this.searchVal);
-			// 	}
-			// 	console.log('-=========>');
-			// },
-			/* 点击顶部切换商铺和我得商铺列表**/
-			// tapTitItem(item, i) {
-			// 	this.current_tit = item;
-			// 	this.sortIndex = i;
-			// 	this.onRefresh();
-			// 	console.log('点击顶部切换===》', item);
-			// },
-			/*跳转至商铺详情*/
-			// toShopDetail(item) {
-			// 	;
-			// 	uni.navigateTo({
-			// 		url: '/otherPages/shop/shopHome?type=' + this.current_tit.type + '&restaurantNo=' + item
-			// 			.restaurant_no
-			// 	});
-			// },
-			/* 获取商户列表**/
-			// async getShopList(type = null, search_val) {
-			// 	let self = this;
-			// 	let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
-			// 	let req = {
-			// 		serviceName: 'srvhealth_restaurant_mgmt_select',
-			// 		colNames: ['*'],
-			// 		condition: [],
-			// 		order: [],
-			// 		page: self.pageInfo
-			// 	};
-			// 	if (type && type === 'search') {
-			// 		req.condition = [{
-			// 			colName: 'name',
-			// 			ruleType: 'like',
-			// 			value: search_val
-			// 		}];
-			// 	}
-			// 	let res = await this.$http.post(url, req);
-			// 	if (res.data.resultCode === '0011') {
-			// 		this.isLogin = false;
-			// 		const result = await wx.login();
-			// 		if (result.code) {
-			// 			this.code = result.code;
-			// 			await this.wxLogin({
-			// 				code: result.code
-			// 			});
-			// 			this.isLogin = true;
-			// 			// await this.initPage();
-			// 		}
-			// 	} else {
-			// 		if (self.pageInfo.pageNo === 1) {
-			// 			self.storeList = [];
-			// 		}
-			// 		self.pageInfo.total = res.data.page.total;
-			// 		self.pageInfo.pageNo = res.data.page.pageNo;
-			// 		let page = self.pageInfo;
-			// 		if (page.rownumber * page.pageNo >= page.total) {
-			// 			// finish(boolean:是否显示finishText,默认显示)
-			// 			self.$refs.pullScroll.finish();
-			// 		} else {
-			// 			self.$refs.pullScroll.success();
-			// 		}
-			// 		if (res.data.state === 'SUCCESS') {
-			// 			console.log('商户列表-----', res.data.data);
-			// 			res.data.data.forEach(item => {
-			// 				if (item.image) {
-			// 					let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni
-			// 						.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
-			// 					this.$set(item, 'imgurl', urls);
-			// 				}
-			// 			});
-			// 			this.storeList = [...this.storeList, ...res.data.data];
-			// 		}
-			// 	}
-			// },
-			/* 获取当前登录人得商铺**/
-			// async getMyShopList(type = null, search_val) {
-			// 	let self = this;
-			// 	let url = this.getServiceUrl('health', 'srvhealth_restaurant_mgmt_select', 'select');
-			// 	let req = {
-			// 		serviceName: 'srvhealth_restaurant_mgmt_select',
-			// 		colNames: ['*'],
-			// 		condition: [{
-			// 			colName: 'create_user',
-			// 			ruleType: 'eq',
-			// 			value: uni.getStorageSync('login_user_info').user_no
-			// 		}],
-			// 		order: [],
-			// 		page: self.pageInfo
-			// 	};
-			// 	if (type && type === 'search') {
-			// 		let obj = {
-			// 			colName: 'name',
-			// 			ruleType: 'like',
-			// 			value: search_val
-			// 		};
-			// 		req.condition.push(obj);
-			// 	}
-			// 	let res = await this.$http.post(url, req);
-			// 	if (self.pageInfo.pageNo === 1) {
-			// 		self.myStoreList = [];
-			// 	}
-			// 	self.pageInfo.total = res.data.page.total;
-			// 	self.pageInfo.pageNo = res.data.page.pageNo;
-			// 	let page = self.pageInfo;
-			// 	if (page.rownumber * page.pageNo >= page.total) {
-			// 		// finish(boolean:是否显示finishText,默认显示)
-			// 		self.$refs.pullScroll.finish();
-			// 	} else {
-			// 		self.$refs.pullScroll.success();
-			// 	}
-
-			// 	if (res.data.state === 'SUCCESS') {
-			// 		console.log('我的商户列表-----', res.data.data);
-			// 		res.data.data.forEach(item => {
-			// 			if (item.image) {
-			// 				let urls = self.$api.downloadFile + item.image + '&bx_auth_ticket=' + uni
-			// 					.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
-			// 				this.$set(item, 'imgurl', urls);
-			// 			}
-			// 		});
-			// 		this.myStoreList = [...this.myStoreList, ...res.data.data];
-			// 		if (this.myStoreList.length == 0) {
-			// 			this.current_tit = {
-			// 				tit: '商户',
-			// 				type: 'shop'
-			// 			};
-			// 			this.getShopList();
-			// 		}
-			// 	}
-			// },
-			/*新增商铺**/
-			// addShop() {
-			// 	uni.navigateTo({
-			// 		url: '/publicPages/newForm/newForm?serviceName=srvhealth_restaurant_mgmt_add&type=add'
-			// 	});
-			// }
+			}
 		}
 	};
 </script>

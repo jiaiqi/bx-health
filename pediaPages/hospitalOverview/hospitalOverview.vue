@@ -281,16 +281,6 @@
 						if (times < 3) {
 							this.selectStoreInfo(times)
 						}
-						// const result = await wx.login();
-						// if (result.code) {
-						// 	await this.wxLogin({
-						// 		code: result.code
-						// 	});
-						// 	times++
-						// 	if (times < 3) {
-						// 		this.selectStoreInfo(times)
-						// 	}
-						// }
 					} else {
 						uni.showModal({
 							title: '未查找到机构信息',
@@ -486,25 +476,6 @@
 			},
 			async initPage() {
 				await this.toAddPage()
-				if (this.authBoxDisplay) {
-					// 未授权
-					// #ifdef MP-WEIXIN
-					let res = await wx.getSetting();
-					if (!res.authSetting['scope.userInfo']) {
-						this.$store.commit('SET_AUTH_SETTING', {
-							type: 'userInfo',
-							value: false
-						});
-						uni.showToast({
-							title: '未授权获取用户信息',
-							icon: 'none'
-						})
-						// 没有获取用户信息授权
-					} else {
-						this.$store.commit('SET_AUTH_USERINFO', true);
-					}
-					// #endif
-				}
 				if (!this.subscsribeStatus) {
 					// 检测是否已关注公众号
 					this.checkSubscribeStatus()
@@ -531,16 +502,6 @@
 			}, 1000)
 		},
 		async onShow() {
-			if (this.authBoxDisplay) {
-				// 未授权
-				// #ifdef MP-WEIXIN
-				let res = await wx.getSetting();
-				if (res.authSetting['scope.userInfo']) {
-					this.$store.commit('SET_AUTH_USERINFO', true);
-					// 没有获取用户信息授权
-				}
-				// #endif
-			}
 			if (!this.subscsribeStatus) {
 				// 检测是否已关注公众号
 				this.checkSubscribeStatus()
@@ -581,7 +542,6 @@
 			if (Array.isArray(pageInfo) && pageInfo.length === 1) {
 				this.showHomeBtn = true
 			}
-			this.$store.commit('SET_INTO_HOSPITAL_STATUS', true)
 			// #ifdef MP-WEIXIN
 			wx.showShareMenu({
 				withShareTicket: true,

@@ -30,35 +30,14 @@ export default {
 				};
 				this.setWxUserInfo(rawData);
 				this.$store.commit('SET_WX_USERINFO', rawData);
-				this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: true });
 				this.$store.commit('SET_AUTH_USERINFO', true);
 				this.toAddPage();
 			}
 			// #endif
 		}
 	},
-	async created() {
-		// #ifdef MP-WEIXIN
-		// let res = await wx.getSetting();
-		// if (!res.authSetting['scope.userInfo']) {
-		// 	this.$store.commit('SET_AUTH_SETTING', { type: 'userInfo', value: false });
-		// 	this.$store.commit('SET_AUTH_USERINFO', false);
-		// 	// 没有获取用户信息授权
-		// 	return;
-		// } else {
-		// 	// this.updateUserInfo();
-		// }
-		// #endif
-	},
-	onPullDownRefresh() {
-		this.$refs.personal.selectMyGroup();
-		setTimeout(() => {
-			uni.stopPullDownRefresh();
-		}, 500);
-	},
 	onLoad(option) {
 		this.checkOptionParams(option);
-		// this.toAddPage();
 	}
 };
 </script>
