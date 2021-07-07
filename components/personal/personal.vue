@@ -709,9 +709,9 @@
 		},
 		
 		async mounted() {
-			uni.$on('updateUnread',_=>{
-				this.updateUnreadAmount();
-			})
+			// uni.$on('updateUnread',_=>{
+			// 	this.updateUnreadAmount();
+			// })
 			if (this.vuex_userInfo && this.vuex_userInfo.hasOwnProperty('manager_type')) {
 				this.manager_type = this.vuex_userInfo.manager_type;
 			}
@@ -723,7 +723,7 @@
 					this.getBindhzDoctor(res.dt_no);
 				}
 			});
-			this.updateUnreadAmount()
+			// this.updateUnreadAmount()
 		},
 		onShareAppMessage() {
 			let path = `/pages/personal/personal?from=share&invite_user_no=${this.vuex_userInfo.userno}`;

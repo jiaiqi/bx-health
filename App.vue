@@ -43,6 +43,7 @@
 					// #endif
 				}
 			});
+			// this.checkSubscribeStatus()
 		},
 		methods: {
 			checkUpdate() {

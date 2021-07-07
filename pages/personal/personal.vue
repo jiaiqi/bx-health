@@ -36,6 +36,10 @@ export default {
 			// #endif
 		}
 	},
+	onShow() {
+		// 检测是否关注公众号
+		this.checkSubscribeStatus()
+	},
 	onLoad(option) {
 		this.checkOptionParams(option);
 	}

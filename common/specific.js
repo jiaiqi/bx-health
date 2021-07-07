@@ -9,7 +9,7 @@ import {
 export default {
 	install(Vue, options) {
 		Vue.prototype.wxVerifyLogin = wxVerifyLogin
-		Vue.prototype.checkSubscribeStatus = async (userInfo) => {
+		Vue.prototype.checkSubscribeStatus = async () => {
 			// 检查是否关注过公众号
 			let result = await checkIsAttention()
 			store.commit('SET_SUBSCRIBE_STATUS', result)

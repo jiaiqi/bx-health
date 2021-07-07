@@ -23,12 +23,6 @@ export default {
 		}else{
 			this.webUrl ='https://wx2.100xsys.cn/pages/specific/testPage/testPage'
 		}
-		// if(option.doctor_no){
-		// 	this.doctor_no = decodeURIComponent(option.doctor_no)
-		// }
-		// if(option.userno){
-		// 	this.userno = decodeURIComponent(option.userno)
-		// }
 	}
 	
 };
