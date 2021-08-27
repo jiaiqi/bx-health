@@ -10,6 +10,10 @@
 			if (options.scene === 1154) {
 				return
 			}
+			if(options?.query?.bx_auth_ticket){
+				uni.setStorageSync('bx_auth_ticket',options.query.bx_auth_ticket)
+				uni.setStorageSync('isLogin',true)
+			}
 			this.checkUpdate()
 			this.checkOptionParams(options)
 			console.log("launch", options)
