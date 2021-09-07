@@ -13,13 +13,13 @@
 				"enablePullDownRefresh": true
 			}
 		},
-		// {
-		// 	"path": "pages/store/store",
-		// 	"style": {
-		// 		"navigationBarTitleText": "健康生活",
-		// 		"navigationBarBackgroundColor": "#0bc99d"
-		// 	}
-		// },
+		{
+			"path": "pages/store/store",
+			"style": {
+				"navigationBarTitleText": "健康生活",
+				"navigationBarBackgroundColor": "#0bc99d"
+			}
+		},
 		{
 			"path": "pages/personal/personal",
 			"style": {
@@ -200,7 +200,7 @@
 						"enablePullDownRefresh": false
 					}
 				}
-				// ,
+				,
 				// {
 				// 	"path": "chatGroup/chatGroup",
 				// 	"style": {
@@ -214,48 +214,51 @@
 				// 		"enablePullDownRefresh": true
 				// 	}
 				// },
+				{
+					"path": "StoreList/StoreList",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "StoreDetail/StoreDetail",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false
+					}
+				}
+				,
 				// {
-				// 	"path": "StoreList/StoreList",
-				// 	"style": {
-				// 		"navigationBarTitleText": "",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// },
-				// {
-				// 	"path": "StoreDetail/StoreDetail",
-				// 	"style": {
-				// 		"navigationBarTitleText": "",
-				// 		"enablePullDownRefresh": false
-				// 	}
-				// }, {
 				// 	"path": "DoctorDetail/DoctorDetail",
 				// 	"style": {
 				// 		"navigationBarTitleText": "",
 				// 		"enablePullDownRefresh": false
 				// 	}
 				// },
-				// {
-				// 	"path": "OrderList/OrderList",
-				// 	"style": {
-				// 		"navigationBarTitleText": "",
-				// 		"enablePullDownRefresh": true
-				// 	}
-				// }, {
-				// 	"path": "payOrder/payOrder",
-				// 	"style": {
-				// 		"navigationBarTitleText": "确认订单",
-				// 		"enablePullDownRefresh": false,
-				// 		"navigationBarBackgroundColor": "#F1F1F1",
-				// 		"navigationBarTextStyle": "black"
-				// 	}
-				// }, {
-				// 	"path": "successPay/successPay",
-				// 	"style": {
-				// 		"navigationBarTextStyle": "black",
-				// 		"enablePullDownRefresh": false,
-				// 		"navigationBarBackgroundColor": "#fff"
-				// 	}
-				// },
+				{
+					"path": "OrderList/OrderList",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": true
+					}
+				}, {
+					"path": "payOrder/payOrder",
+					"style": {
+						"navigationBarTitleText": "确认订单",
+						"enablePullDownRefresh": false,
+						"navigationBarBackgroundColor": "#F1F1F1",
+						"navigationBarTextStyle": "black"
+					}
+				}, {
+					"path": "successPay/successPay",
+					"style": {
+						"navigationBarTextStyle": "black",
+						"enablePullDownRefresh": false,
+						"navigationBarBackgroundColor": "#fff"
+					}
+				}
+				// ,
 				// {
 				// 	"path": "StoreManager/StoreManager",
 				// 	"style": {
@@ -328,23 +331,23 @@
 					"path": "dietSelect/dietSelect",
 					"style": {}
 				},
-				// {
-				// 	"path": "shop/shopHome",
-				// 	"style": {}
-				// },
-				// {
-				// 	"path": "shop/shopDetail",
-				// 	"style": {
-				// 		"navigationBarBackgroundColor": "#fff",
-				// 		"navigationBarTextStyle": "black"
-				// 	}
-				// },
-				// {
-				// 	"path": "shop/shopCarList",
-				// 	"style": {
-				// 		"navigationBarTitleText": "购物车"
-				// 	}
-				// },
+				{
+					"path": "shop/shopHome",
+					"style": {}
+				},
+				{
+					"path": "shop/shopDetail",
+					"style": {
+						"navigationBarBackgroundColor": "#fff",
+						"navigationBarTextStyle": "black"
+					}
+				},
+				{
+					"path": "shop/shopCarList",
+					"style": {
+						"navigationBarTitleText": "购物车"
+					}
+				},
 				{
 					"path": "shop/foodMaterial",
 					"style": {}
@@ -584,12 +587,12 @@
 				"selectedIconPath": "static/icon/geren_selected.png",
 				"text": "个人"
 			},
-			// {
-			// 	"pagePath": "pages/store/store",
-			// 	"iconPath": "/static/icon/shenghuo.png",
-			// 	"selectedIconPath": "static/icon/shenghuo_selected.png",
-			// 	"text": "生活"
-			// },
+			{
+				"pagePath": "pages/store/store",
+				"iconPath": "/static/icon/shenghuo.png",
+				"selectedIconPath": "static/icon/shenghuo_selected.png",
+				"text": "生活"
+			},
 			{
 				"pagePath": "pages/personal/personal",
 				"iconPath": "/static/icon/wode.png",

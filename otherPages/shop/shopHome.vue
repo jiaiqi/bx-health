@@ -297,39 +297,11 @@ export default {
 			if (res.data.state === 'SUCCESS') {
 				let resData = [...this.deepClone(this.shopList), ...this.deepClone(res.data.data)];
 				this.shopList = this.sortData(resData);
-				// if (Array.isArray(self.order) && self.order.length > 0) {
-				// 	let order = self.order[0].colName;
-				// 	resData = resData.sort((a, b) => {
-				// 		if (!a[order]) {
-				// 			a[order] = 0;
-				// 		}
-				// 		if (!b[order]) {
-				// 			b[order] = 0;
-				// 		}
-				// 		a[order] = Number(a[order]);
-				// 		b[order] = Number(b[order]);
-				// 		return b[order] - a[order];
-				// 	});
-				// }
-				// resData = this.deepClone(resData)
-				// let data1 = resData.reduce((pre, cur, cIdx, arr) => {
-				// 	if (cIdx % 2 === 0) {
-				// 		pre.push(cur);
-				// 	}
-				// 	return pre;
-				// }, []);
-				// let data2 = resData.reduce((pre, cur, cIdx, arr) => {
-				// 	if (cIdx % 2 !== 0) {
-				// 		pre.push(cur);
-				// 	}
-				// 	return pre;
-				// }, []);
-				// this.shopList = [...data1, ...data2];
-				// this.shopList = [...this.shopList, ...data];
 				this.shopList.forEach((item, index) => {
 					if (item.image) {
 						self.getFilePath(item.image).then(url => {
-							let urls = self.$api.getFilePath + url[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket') + '&thumbnailType=fwsu_100';
+							let urls = self.$api.getFilePath + url[0].fileurl + '&bx_auth_ticket=' + uni.getStorageSync('bx_auth_ticket')
+							 // + '&thumbnailType=fwsu_100';
 							self.$set(self.shopList[index], 'imgurl', urls);
 							if (!url) {
 								url = '/otherPages/static/img/none.png';
