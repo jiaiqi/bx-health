@@ -188,8 +188,15 @@
 				let list = []
 				if (Array.isArray(this.groupList)) {
 					let groupList = this.groupList.map(item => {
+            let icon = null
+            if(item.icon){
+             icon = require(`@/otherPages/static/icon/${item.icon}.png`) 
+            }
+            if(item.icon_file_no){
+              icon = this.getImagePath(item.icon_file_no, true
+            }
 						return {
-							icon: this.getImagePath(item.icon, true),
+							icon: icon,
 							iconType: 'image',
 							label: item.name,
 							eventType: 'toGroup',

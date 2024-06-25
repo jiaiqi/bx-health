@@ -4,7 +4,7 @@ let remoteAddress = {
 	ssourl: 'http://www.100xsys.cn', // 微信登陆sso 端口
 	ssoAddress: 'http://sso.100xsys.cn',
 	// serviceAddress: 'https://192.168.0.155:8106', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
-	serviceAddress: 'https://srvms.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
+	serviceAddress: 'https://api.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	// serviceAddress: 'http://192.168.0.121:8101', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	// serviceAddress: 'https://srvms.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	frontEndAddress: 'https://wx2.100xsys.cn',
@@ -19,7 +19,7 @@ let remoteAddress = {
 	homePath: "/pages/pedia/pedia", // 首页路径，配置完整路径
 }
 let ENV = {
-	backEndAddress: "https://login.100xsys.cn", //后台管理系统地址
+	backEndAddress: "https://saas.100xsys.cn", //后台管理系统地址
 	frontEndAddress: remoteAddress.frontEndAddress, //前端线上地址
 	appNo: {
 		wxmp: 'APPNO20210420103005', // 百想健康

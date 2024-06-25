@@ -5,7 +5,7 @@ import store from '@/store/index.js'
 
 const fly = request({
 	timeout: 20 * 1000,
-	baseURL: 'https://srvms.100xsys.cn'
+	baseURL: 'https://api.100xsys.cn'
 })
 let FormateDate = function(date) {
 	let o = {

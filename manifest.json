@@ -1,6 +1,6 @@
 {
     "name" : "百想健康助手",
-    "appid" : "__UNI__F72B202",
+    "appid" : "__UNI__5210306",
     "description" : "",
     "versionName" : "1.0.0",
     "versionCode" : "100",
@@ -55,7 +55,6 @@
     "quickapp" : {},
     /* 快应用特有相关 */
     "mp-weixin" : {
-        /* 小程序特有相关 */
         "appid" : "wxa8574a1e93d8e8d0",
         "setting" : {
             "urlCheck" : true,

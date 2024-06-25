@@ -35,7 +35,7 @@
 			src: {
 				immediate: true,
 				handler(newVal, oldVal) {
-					if (newVal.indexOf('srvms.100xsys.cn') !== -1) {
+					if (newVal.indexOf('api.100xsys.cn') !== -1) {
 						this.status = 'loading'
 					}
 				}
