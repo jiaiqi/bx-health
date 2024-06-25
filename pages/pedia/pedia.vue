@@ -422,6 +422,61 @@
           }
         }
       },
+      initLogin() {
+        const that = this
+        let req = [{
+          data: [{
+            code: that.$route.query.code,
+            app_no: that.$api.appNo.wxh5
+          }],
+          serviceName: 'srvwx_app_login_verify'
+        }];
+        that.$http.post(url, req).then(response => {
+          if (response.data.resultCode === 'SUCCESS' && response.data.response[0].response) {
+            console.log('授权成功', response);
+            let resData = response.data.response[0].response;
+            let loginMsg = {
+              bx_auth_ticket: resData.bx_auth_ticket,
+              expire_time: resData.expire_time
+            };
+            uni.setStorageSync('isLogin', true);
+            console.log('登录成功', uni.getStorageSync('isLogin'), resData);
+            let expire_timestamp = parseInt(new Date().getTime() / 1000) + loginMsg
+              .expire_time; //过期时间的时间戳(秒)
+            uni.setStorageSync('expire_time', resData.expire_time); // 有效时间
+            uni.setStorageSync('bx_auth_ticket', resData.bx_auth_ticket);
+            uni.setStorageSync('expire_timestamp', expire_timestamp); // 过期时间
+
+            if (resData.login_user_info && resData.login_user_info.user_no) {
+              uni.setStorageSync('login_user_info', resData.login_user_info);
+              console.log('resData.login_user_info', resData.login_user_info);
+            }
+            if (resData.login_user_info && resData.login_user_info.data) {
+              uni.setStorageSync('visiter_user_info', resData.login_user_info.data[0]);
+            }
+            // 获取回调前记录的url 并再回调后 再次进入该url，没有该url时 进入 home
+            let url = uni.getStorageSync('backUrl');
+            console.log('that.backUrl', that.backUrl, '===', url);
+            uni.hideToast();
+            uni.hideLoading();
+            if (url && url !== '/') {
+              url = that.getDecodeUrl(url);
+              // alert("2::" + url + uni.getStorageSync('bx_auth_ticket'))
+              if (url && url.lastIndexOf('backUrl=') !== -1) {
+                url = url.substring(url.lastIndexOf('backUrl=') + 8, url.length);
+                // console.log("授权成功，准备返回用户界面url",url)
+              }
+              uni.reLaunch({
+                url: url
+              });
+            } else {
+              uni.reLaunch({
+                url: that.$api.homePath
+              });
+            }
+          }
+        })
+      },
       checkUserInfoParams() {
         let self = this;
         self.wxVerifyLogin()
@@ -457,6 +512,10 @@
       };
     },
     onLoad(option) {
+      if (this.$route.query.code) {
+        this.initLogin()
+        return
+      }
       this.wxVerifyLogin()
       // this.checkUserInfoParams();
       this.checkOptionParams(option);
@@ -572,8 +631,9 @@
 
         .swiper-item {
           width: 100%;
-          display: flex;
-          flex-wrap: wrap;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10rpx;
 
           // padding: 0 calc((100% - 680rpx) / 2);
           .image {
@@ -582,17 +642,19 @@
           }
 
           .swiper-button {
-            width: calc(25% - 60rpx / 4);
+            // width: calc(25% - 60rpx / 4);
             // background-color: #fff;
             // width: 150rpx;
+            width: 100%;
+            overflow: hidden;
             height: 150rpx;
             display: inline-flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             border-radius: 8rpx;
-            margin-right: 20rpx;
-            margin-bottom: 20rpx;
+            // margin-right: 20rpx;
+            // margin-bottom: 20rpx;
 
             // box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1) ;
             &:nth-child(4n) {
@@ -600,10 +662,12 @@
             }
 
             .btn-name {
+              width: 100%;
               padding: 10rpx 0;
               overflow: hidden;
               white-space: nowrap;
               text-overflow: ellipsis;
+              text-align: center;
             }
           }
         }

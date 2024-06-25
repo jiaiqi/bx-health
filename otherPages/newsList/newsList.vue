@@ -88,7 +88,7 @@
             "rownumber": this.pageSize
           }
         }
-        if (this.classify === '') {
+        if (this.classify === '中医历史与文化') {
           req.condition.push({
             "colName": "parent_no",
             "value": "KN2406210001",

@@ -61,7 +61,7 @@
 				showFilter: false, //是否显示筛选弹框
 				appName: '',
 				serviceName: '',
-				pageType: '',
+				pageType: 'list',
 				placeholder: '输入搜索关键词',
 				listConfig: {},
 				customTemp: false, //使用代码中写的自定义字段显示配置
@@ -214,9 +214,9 @@
 			if (query.showRowButton) {
 				this.showRowButton = query.showRowButton;
 			}
-			if (query.serviceName && query.pageType) {
+			if (query.serviceName) {
 				this.serviceName = query.serviceName;
-				this.pageType = query.pageType;
+				this.pageType = query.pageType || this.pageType;
 				if (query.params) {
 					let params = {};
 					if (typeof query.params === 'string') {
@@ -336,6 +336,7 @@
 			},
 			serachBarBlur(e) {
 				console.log('serachBarBlur:', e);
+        this.toSearch()
 			},
 			listChange(e) {
 				console.log('listChange:', e);

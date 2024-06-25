@@ -1,736 +1,763 @@
 <template>
-	<view class="list-item-wrap bg-white" :class="{ 'grid-layout-item': layout === 'grid' }">
-		<view class="list-item flex" v-if="viewType === 'normal'">
-			<view class="main-image" v-if="itemData[viewTemp['img']]">
-				<image class="image" :src="getImagePath(itemData[viewTemp['img']])" @click.stop="listItemClick"
-					mode="aspectFill"></image>
-			</view>
-			<view class="main-image" v-else-if="viewTemp['img']">
-				<text class="cuIcon-pic text"></text>
-			</view>
-			<view class="content-box flex-twice" v-if="listType === 'proc' && pageType === 'proc'">
-				<view class="content-header">
-					<view class="title" @click.stop="listItemClick">{{ itemData[viewTemp.title] }}</view>
-					<view class="status" v-if="itemData.proc_status" @click.stop="listItemClick">
-						<text class="bg-red text">{{ itemData.proc_status }}</text>
-					</view>
-				</view>
-				<view class="title-tip" v-if="itemData['executor_user']" @click.stop="listItemClick">
-					<view class="lable">责任人：</view>
-					<view class="value">{{ itemData['executor_user'] }}</view>
-				</view>
-				<view class="content proc-content" @click.stop="listItemClick">
-					<view class="content-item">
-						<view class="label">创建时间：</view>
-						<view class="value">{{ itemData.create_time.slice(0, 10) }}</view>
-					</view>
-					<view class="content-item">
-						<view class="label">创建人：</view>
-						<view class="value">{{ itemData.create_user_disp }}</view>
-					</view>
-					<view class="content-item">
-						<view class="label">修改时间：</view>
-						<view class="value">{{ itemData.modify_time.slice(0, 10) }}</view>
-					</view>
-				</view>
-				<view class="footer" v-if="rowButton.length > 0">
-					<view class="footer-btn" v-if="showFootBtn">
-						<text v-if="deRowButDisplay(itemData, item) && !detailList"
-							class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
-							v-for="item in theRowbutton" :key="item.id" @click.stop="footBtnClick(item)">
-							{{ item.button_name }}
-						</text>
-					</view>
-				</view>
-			</view>
-			<view class="content-box flex-twice"
-				v-else-if="listType === 'list' && pageType === 'proc' && (itemData.issue_name || itemData.task_name)">
-				<view class="content-header">
-					<view class="title" @click.stop="listItemClick">{{ itemData[viewTemp.title] }}</view>
-					<view class="status" v-if="itemData.proc_status" @click.stop="listItemClick">
-						<text class="bg-red text">{{ itemData.proc_status }}</text>
-					</view>
-				</view>
-				<view class="title-tip" v-if="itemData['executor_user']" @click.stop="listItemClick">
-					<view class="lable">责任人：</view>
-					<view class="value">{{ itemData['executor_user'] }}</view>
-				</view>
-				<view class="content proc-content" @click.stop="listItemClick">
-					<view class="content-item">
-						<view class="label">创建时间：</view>
-						<view class="value">{{ itemData.create_time.slice(0, 10) }}</view>
-					</view>
-					<view class="content-item">
-						<view class="label">创建人：</view>
-						<view class="value">{{ itemData.create_user_disp }}</view>
-					</view>
-					<view class="content-item">
-						<view class="label">修改时间：</view>
-						<view class="value">{{ itemData.modify_time.slice(0, 10) }}</view>
-					</view>
-				</view>
-				<view class="footer" v-if="rowButton.length > 0 && showFootBtn">
-					<view class="footer-btn" v-if="showFootBtn">
-						<text v-if="deRowButDisplay(itemData, item) && !detailList"
-							class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
-							v-for="item in theRowbutton" :key="item.id" @click.stop="footBtnClick(item)">
-							{{ item.button_name }}
-						</text>
-					</view>
-				</view>
-			</view>
-			<view class="content-box flex-twice" v-else>
-				<view class="title" v-if="goodsData.title" @click.stop="listItemClick">
-					<text class="label" v-if="showLabel['title']">
-						{{showLabel['title']}}:
-					</text>
-					{{ goodsData.title|html2text}}
-				</view>
-				<view class="title-tip" v-if="goodsData.tip" @click.stop="listItemClick">
-					<text class="label" v-if="showLabel['tip']">
-						{{showLabel['tip']}}:
-					</text>
-					{{ goodsData.tip|html2text }}
-				</view>
-				<view class="content" @click.stop="listItemClick">
-					<view class="numbers" v-if="viewTemp&&viewTemp.price">
-						<text class="label" v-if="showLabel['price']">
-							{{showLabel['price']}}:
-						</text>
-						<text class="unit"
-							v-if="!isNaN(Number(goodsData.price)) &&viewTemp.price&& viewTemp.price.indexOf('price') !== -1">￥</text>
-						<text v-if="viewTemp.price">
-							{{ goodsData.price||0 }}
-						</text>
-					</view>
-					<view class="tags"></view>
-				</view>
-				<view class="footer">
-					<text class="foot-name" v-if="goodsData.footer||goodsData.footer===0" @click.stop="listItemClick">
-						<text class="label" v-if="showLabel['footer']">
-							{{showLabel['footer']}}:
-						</text>
-						{{ goodsData.footer|html2text }}</text>
-					<view class="foot-button" v-if="showFootBtn">
-						<view class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
-							v-for="item in theRowbutton" :key="item.id" @click.stop="footBtnClick(item)">
-							<text v-if="deRowButDisplay(itemData, item) && !detailList">{{ item.button_name }}</text>
-						</view>
-						<text v-if="detailList" class="text-gray" :class="'cuIcon-more'"></text>
-					</view>
-				</view>
-			</view>
-		</view>
-	</view>
+  <view class="list-item-wrap bg-white" :class="{ 'grid-layout-item': layout === 'grid' }">
+    <view class="col-list" v-if="setListCols&&setListCols.length" @click.stop="listItemClick">
+      <view class="col-item" v-for="column in setListCols" v-if="itemData[column.columns]">
+        {{column.label}}: {{itemData[column.columns]||''}}
+      </view>
+    </view>
+    <view class="list-item flex" v-else-if="viewType === 'normal'">
+      <view class="main-image" v-if="itemData[viewTemp['img']]">
+        <image class="image" :src="getImagePath(itemData[viewTemp['img']])" @click.stop="listItemClick"
+          mode="aspectFill"></image>
+      </view>
+      <view class="main-image" v-else-if="viewTemp['img']">
+        <text class="cuIcon-pic text"></text>
+      </view>
+      <view class="content-box flex-twice" v-if="listType === 'proc' && pageType === 'proc'">
+        <view class="content-header">
+          <view class="title" @click.stop="listItemClick">{{ itemData[viewTemp.title] }}</view>
+          <view class="status" v-if="itemData.proc_status" @click.stop="listItemClick">
+            <text class="bg-red text">{{ itemData.proc_status }}</text>
+          </view>
+        </view>
+        <view class="title-tip" v-if="itemData['executor_user']" @click.stop="listItemClick">
+          <view class="lable">责任人：</view>
+          <view class="value">{{ itemData['executor_user'] }}</view>
+        </view>
+        <view class="content proc-content" @click.stop="listItemClick">
+          <view class="content-item">
+            <view class="label">创建时间：</view>
+            <view class="value">{{ itemData.create_time.slice(0, 10) }}</view>
+          </view>
+          <view class="content-item">
+            <view class="label">创建人：</view>
+            <view class="value">{{ itemData.create_user_disp }}</view>
+          </view>
+          <view class="content-item">
+            <view class="label">修改时间：</view>
+            <view class="value">{{ itemData.modify_time.slice(0, 10) }}</view>
+          </view>
+        </view>
+        <view class="footer" v-if="rowButton.length > 0">
+          <view class="footer-btn" v-if="showFootBtn">
+            <text v-if="deRowButDisplay(itemData, item) && !detailList" class="cu-btn round sm text-blue line-blue"
+              :class="'cuIcon-' + item.button_type" v-for="item in theRowbutton" :key="item.id"
+              @click.stop="footBtnClick(item)">
+              {{ item.button_name }}
+            </text>
+          </view>
+        </view>
+      </view>
+      <view class="content-box flex-twice"
+        v-else-if="listType === 'list' && pageType === 'proc' && (itemData.issue_name || itemData.task_name)">
+        <view class="content-header">
+          <view class="title" @click.stop="listItemClick">{{ itemData[viewTemp.title] }}</view>
+          <view class="status" v-if="itemData.proc_status" @click.stop="listItemClick">
+            <text class="bg-red text">{{ itemData.proc_status }}</text>
+          </view>
+        </view>
+        <view class="title-tip" v-if="itemData['executor_user']" @click.stop="listItemClick">
+          <view class="lable">责任人：</view>
+          <view class="value">{{ itemData['executor_user'] }}</view>
+        </view>
+        <view class="content proc-content" @click.stop="listItemClick">
+          <view class="content-item">
+            <view class="label">创建时间：</view>
+            <view class="value">{{ itemData.create_time.slice(0, 10) }}</view>
+          </view>
+          <view class="content-item">
+            <view class="label">创建人：</view>
+            <view class="value">{{ itemData.create_user_disp }}</view>
+          </view>
+          <view class="content-item">
+            <view class="label">修改时间：</view>
+            <view class="value">{{ itemData.modify_time.slice(0, 10) }}</view>
+          </view>
+        </view>
+        <view class="footer" v-if="rowButton.length > 0 && showFootBtn">
+          <view class="footer-btn" v-if="showFootBtn">
+            <text v-if="deRowButDisplay(itemData, item) && !detailList" class="cu-btn round sm text-blue line-blue"
+              :class="'cuIcon-' + item.button_type" v-for="item in theRowbutton" :key="item.id"
+              @click.stop="footBtnClick(item)">
+              {{ item.button_name }}
+            </text>
+          </view>
+        </view>
+      </view>
+      <view class="content-box flex-twice" v-else>
+        <view class="title" v-if="goodsData.title" @click.stop="listItemClick">
+          <text class="label" v-if="showLabel['title']">
+            {{showLabel['title']}}:
+          </text>
+          {{ goodsData.title|html2text}}
+        </view>
+        <view class="title-tip" v-if="goodsData.tip" @click.stop="listItemClick">
+          <text class="label" v-if="showLabel['tip']">
+            {{showLabel['tip']}}:
+          </text>
+          {{ goodsData.tip|html2text }}
+        </view>
+        <view class="content" @click.stop="listItemClick">
+          <view class="numbers" v-if="viewTemp&&viewTemp.price">
+            <text class="label" v-if="showLabel['price']">
+              {{showLabel['price']}}:
+            </text>
+            <text class="unit"
+              v-if="!isNaN(Number(goodsData.price)) &&viewTemp.price&& viewTemp.price.indexOf('price') !== -1">￥</text>
+            <text v-if="viewTemp.price">
+              {{ goodsData.price||0 }}
+            </text>
+          </view>
+          <view class="tags"></view>
+        </view>
+        <view class="footer">
+          <text class="foot-name" v-if="goodsData.footer||goodsData.footer===0" @click.stop="listItemClick">
+            <text class="label" v-if="showLabel['footer']">
+              {{showLabel['footer']}}:
+            </text>
+            {{ goodsData.footer|html2text }}</text>
+          <view class="foot-button" v-if="showFootBtn">
+            <view class="cu-btn round sm text-blue line-blue" :class="'cuIcon-' + item.button_type"
+              v-for="item in theRowbutton" :key="item.id" @click.stop="footBtnClick(item)">
+              <text v-if="deRowButDisplay(itemData, item) && !detailList">{{ item.button_name }}</text>
+            </view>
+            <text v-if="detailList" class="text-gray" :class="'cuIcon-more'"></text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script>
-	export default {
-		name: 'ListItem',
-		filters: {
-			html2text: function(value) {
-				if (value && typeof value === 'string') {
-					return value
-						.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi, '')
-						.replace(/<[^>]+?>/g, '')
-						.replace(/\s+/g, ' ')
-						.replace(/ /g, ' ')
-						.replace(/&nbsp;/g, ' ')
-						.replace(/>/g, ' ');
-				} else {
-					if(value===0){
-						return value 
-					}
-					return value || ''
-				}
-			},
-		},
-		computed: {
-			theRowbutton() {
-				if (Array.isArray(this.rowButton) && this.rowButton.length > 0) {
-					return this.rowButton.filter(button => {
-						let reg = /^data\..*$/
-						if (button.disp_exps && reg.test(button.disp_exps)) {
-							let disp_exps = button.disp_exps.replace(/\'|\s/g, '')
-							let keys = disp_exps.split('data.')[1].split('==')[0]
-							let value = disp_exps.split('data.')[1].split('==')[1]
-							if (this.itemData[keys] === value) {
-								return true
-							} else {
-								return false
-							}
-						} else {
-							return true
-						}
-					})
-				}
-			}
-		},
-		data() {
-			return {
-				picUrl: '',
-				goodsData: {
-					title: '',
-					tip: '',
-					img: '',
-					price: '',
-					footer: ''
-				},
-				showLabel: {
-					title: '',
-					tip: '',
-					img: '',
-					price: '',
-					footer: ''
-				},
-				user: uni.getStorageSync('login_user_info').user_no
-			};
-		},
-		methods: {
-			listItemClick() {
-				this.$emit('click-list-item', this.itemData);
-			},
-			footBtnClick(btn) {
-				this.$emit('click-foot-btn', {
-					button: btn,
-					row: this.itemData
-				});
-			},
-			async getPicture(file_no) {
-				const serviceName = 'srvfile_attachment_select';
-				const url = this.getServiceUrl('file', serviceName, 'select');
-				const req = {
-					serviceName: serviceName,
-					colNames: ['*'],
-					condition: [{
-						colName: 'file_no',
-						value: file_no,
-						ruleType: 'eq'
-					}]
-				};
-				if (file_no !== null && file_no !== '' && file_no !== undefined) {
-					let res = await this.$http.post(url, req);
-					if (res.data.state === 'SUCCESS') {
-						const data = res.data.data[0];
-						if (data) {
-							const fileurl = this.$api.srvHost + '/file/download?filePath=' + data.fileurl;
-							// const fileurl = this.$api.srvHost + '/file/download?filePath=' + data.fileurl + '&thumbnailType=' + this.$api.imgThumbnailType;
-							return fileurl;
-						}
-					}
-				}
-			},
-			deRowButDisplay: function(item, button) {
-				if (item && button.hasOwnProperty('isShow') && button['isShow'].length > 0) {
-					let isShow = [];
-					for (let key in button['isShow']) {
-						switch (button['isShow'][key].ruleType) {
-							case 'eq':
-								if (item[button['isShow'][key].colName] === button['isShow'][key].value) {
-									isShow.push(true);
-								}
-								break;
-							case 'nq':
-								if (item[button['isShow'][key].colName] !== button['isShow'][key].value) {
-									isShow.push(true);
-								}
-								break;
-							default:
-								break;
-						}
-					}
-					if (isShow.length === button['isShow'].length) {
-						return true;
-					} else {
-						return false;
-					}
-				} else {
-					// let reg = /^data\..*$/ 
-					// if(button.disp_exps&&reg.test(button.disp_exps)){
-					// 	let disp_exps = button.disp_exps.replace(/\'|\s/g,'')
-					// 	let keys = disp_exps.split('data.')[1].split('==')[0]
-					// 	let value =  disp_exps.split('data.')[1].split('==')[1]
-					// 	if(item[keys]===value){
-					// 		return true
-					// 	}else {
-					// 		return false
-					// 	}
-					// }
-					return true;
-				}
-			}
-		},
-		props: {
-			//是否是详情列表
-			detailList: {
-				type: Boolean,
-				default: false
-			},
-			viewType: {
-				type: String,
-				default: 'normal'
-			},
-			viewTemp: {
-				type: Object,
-				default: () => {}
-			},
-			imageNum: {
-				type: Number,
-				default: 1
-			},
-			gridRowNum: {
-				type: Number,
-				default: 2
-			},
-			rowKey: {
-				type: String,
-				default: 'id'
-			},
-			serviceName: {
-				type: String,
-				default: ''
-			},
-			condition: {
-				type: Array,
-				default: () => {
-					[];
-				}
-			},
-			rownumber: {
-				type: Number,
-				default: 10
-			},
-			order: {
-				type: Array,
-				default: () => {
-					[];
-				}
-			},
-			showSearchBar: {
-				type: Boolean,
-				default: false
-			},
-			rowButton: {
-				type: Array,
-				default: () => {
-					[];
-				}
-			},
-			srv_cols: {
-				type: Array,
-				default: () => {
-					[];
-				}
-			},
-			itemData: {
-				type: Object,
-				default: () => {
-					return {};
-				}
-			},
-			listType: {
-				type: String, //列表类型 list||proc
-				default: 'list'
-			},
-			pageType: {
-				type: String, //列表类型 list||proc
-				default: 'list'
-			},
-			showFootBtn: {
-				type: Boolean, //是否显示底部按钮
-				default: true
-			},
-			layout: {
-				type: String, //布局 normal-普通列表 grid-宫格
-				default: 'normal'
-			},
-			labels: { //要显示label的字段
-				type: Array
-			}
-		},
-		watch: {
-			srv_cols: {
-				deep: true,
-				immediate: true,
-				handler(newVal) {
-					let arr = Object.values(this.viewTemp);
-					if (arr.length === 0 && this.srv_cols && this.srv_cols.length > 0) {
-						let arr2 = this.srv_cols.map(item => item.columns);
-						Object.keys(this.goodsData).forEach((item, index) => {
-							this.goodsData[item] = this.itemData[arr2[index]];
-						});
-						this.goodsData['img'] = '';
-					}
-				}
-			},
-			itemData: {
-				deep: true,
-				immediate: true,
-				handler(newValue, oldValue) {
-					let self = this
-					if (Array.isArray(this.labels) && this.labels.length > 0 && Array.isArray(this.srv_cols)) {
-						let cols = self.srv_cols.filter(item => self.labels.includes(item.columns))
-						cols.forEach(col => {
-							if (col && col.columns) {
-								Object.keys(self.viewTemp).forEach(key => {
-									if (Array.isArray(self.viewTemp[key])) {
-										if (self.viewTemp[key].includes(col.columns)) {
-											self.showLabel[key] = col.label
-										}
-									} else {
-										if (self.viewTemp[key] === col.columns) {
-											self.showLabel[key] = col.label
-										}
-									}
-								})
-							}
-						})
-					}
+  export default {
+    name: 'ListItem',
+    filters: {
+      html2text: function(value) {
+        if (value && typeof value === 'string') {
+          return value
+            .replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi, '')
+            .replace(/<[^>]+?>/g, '')
+            .replace(/\s+/g, ' ')
+            .replace(/ /g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/>/g, ' ');
+        } else {
+          if (value === 0) {
+            return value
+          }
+          return value || ''
+        }
+      },
+    },
+    computed: {
+      setListCols() {
+        if (!this.viewTemp || (typeof this.viewTemp === 'object' && Object.keys(this.viewTemp).length === 0)) {
+          if (Array.isArray(this.srv_cols) && this.srv_cols.length) {
+            const cols = this.srv_cols.filter(item => item.in_list === 1)
+            return cols
+          }
+        }
+      },
+      theRowbutton() {
+        if (Array.isArray(this.rowButton) && this.rowButton.length > 0) {
+          return this.rowButton.filter(button => {
+            let reg = /^data\..*$/
+            if (button.disp_exps && reg.test(button.disp_exps)) {
+              let disp_exps = button.disp_exps.replace(/\'|\s/g, '')
+              let keys = disp_exps.split('data.')[1].split('==')[0]
+              let value = disp_exps.split('data.')[1].split('==')[1]
+              if (this.itemData[keys] === value) {
+                return true
+              } else {
+                return false
+              }
+            } else {
+              return true
+            }
+          })
+        }
+      }
+    },
+    data() {
+      return {
+        picUrl: '',
+        goodsData: {
+          title: '',
+          tip: '',
+          img: '',
+          price: '',
+          footer: ''
+        },
+        showLabel: {
+          title: '',
+          tip: '',
+          img: '',
+          price: '',
+          footer: ''
+        },
+        user: uni.getStorageSync('login_user_info').user_no
+      };
+    },
+    methods: {
+      listItemClick() {
+        this.$emit('click-list-item', this.itemData);
+      },
+      footBtnClick(btn) {
+        this.$emit('click-foot-btn', {
+          button: btn,
+          row: this.itemData
+        });
+      },
+      async getPicture(file_no) {
+        const serviceName = 'srvfile_attachment_select';
+        const url = this.getServiceUrl('file', serviceName, 'select');
+        const req = {
+          serviceName: serviceName,
+          colNames: ['*'],
+          condition: [{
+            colName: 'file_no',
+            value: file_no,
+            ruleType: 'eq'
+          }]
+        };
+        if (file_no !== null && file_no !== '' && file_no !== undefined) {
+          let res = await this.$http.post(url, req);
+          if (res.data.state === 'SUCCESS') {
+            const data = res.data.data[0];
+            if (data) {
+              const fileurl = this.$api.srvHost + '/file/download?filePath=' + data.fileurl;
+              // const fileurl = this.$api.srvHost + '/file/download?filePath=' + data.fileurl + '&thumbnailType=' + this.$api.imgThumbnailType;
+              return fileurl;
+            }
+          }
+        }
+      },
+      deRowButDisplay: function(item, button) {
+        if (item && button.hasOwnProperty('isShow') && button['isShow'].length > 0) {
+          let isShow = [];
+          for (let key in button['isShow']) {
+            switch (button['isShow'][key].ruleType) {
+              case 'eq':
+                if (item[button['isShow'][key].colName] === button['isShow'][key].value) {
+                  isShow.push(true);
+                }
+                break;
+              case 'nq':
+                if (item[button['isShow'][key].colName] !== button['isShow'][key].value) {
+                  isShow.push(true);
+                }
+                break;
+              default:
+                break;
+            }
+          }
+          if (isShow.length === button['isShow'].length) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          // let reg = /^data\..*$/ 
+          // if(button.disp_exps&&reg.test(button.disp_exps)){
+          // 	let disp_exps = button.disp_exps.replace(/\'|\s/g,'')
+          // 	let keys = disp_exps.split('data.')[1].split('==')[0]
+          // 	let value =  disp_exps.split('data.')[1].split('==')[1]
+          // 	if(item[keys]===value){
+          // 		return true
+          // 	}else {
+          // 		return false
+          // 	}
+          // }
+          return true;
+        }
+      }
+    },
+    props: {
+      //是否是详情列表
+      detailList: {
+        type: Boolean,
+        default: false
+      },
+      viewType: {
+        type: String,
+        default: 'normal'
+      },
+      viewTemp: {
+        type: Object
+      },
+      imageNum: {
+        type: Number,
+        default: 1
+      },
+      gridRowNum: {
+        type: Number,
+        default: 2
+      },
+      rowKey: {
+        type: String,
+        default: 'id'
+      },
+      serviceName: {
+        type: String,
+        default: ''
+      },
+      condition: {
+        type: Array,
+        default: () => {
+          [];
+        }
+      },
+      rownumber: {
+        type: Number,
+        default: 10
+      },
+      order: {
+        type: Array,
+        default: () => {
+          [];
+        }
+      },
+      showSearchBar: {
+        type: Boolean,
+        default: false
+      },
+      rowButton: {
+        type: Array,
+        default: () => {
+          [];
+        }
+      },
+      srv_cols: {
+        type: Array,
+        default: () => {
+          [];
+        }
+      },
+      itemData: {
+        type: Object,
+        default: () => {
+          return {};
+        }
+      },
+      listType: {
+        type: String, //列表类型 list||proc
+        default: 'list'
+      },
+      pageType: {
+        type: String, //列表类型 list||proc
+        default: 'list'
+      },
+      showFootBtn: {
+        type: Boolean, //是否显示底部按钮
+        default: true
+      },
+      layout: {
+        type: String, //布局 normal-普通列表 grid-宫格
+        default: 'normal'
+      },
+      labels: { //要显示label的字段
+        type: Array
+      }
+    },
+    watch: {
+      srv_cols: {
+        deep: true,
+        immediate: true,
+        handler(newVal) {
+          let arr = Object.values(this.viewTemp);
+          if (arr.length === 0 && this.srv_cols && this.srv_cols.length > 0) {
+            let arr2 = this.srv_cols.map(item => item.columns);
+            Object.keys(this.goodsData).forEach((item, index) => {
+              this.goodsData[item] = this.itemData[arr2[index]];
+            });
+            this.goodsData['img'] = '';
+          }
+        }
+      },
+      itemData: {
+        deep: true,
+        immediate: true,
+        handler(newValue, oldValue) {
+          let self = this
+          if (Array.isArray(this.labels) && this.labels.length > 0 && Array.isArray(this.srv_cols)) {
+            let cols = self.srv_cols.filter(item => self.labels.includes(item.columns))
+            cols.forEach(col => {
+              if (col && col.columns) {
+                Object.keys(self.viewTemp).forEach(key => {
+                  if (Array.isArray(self.viewTemp[key])) {
+                    if (self.viewTemp[key].includes(col.columns)) {
+                      self.showLabel[key] = col.label
+                    }
+                  } else {
+                    if (self.viewTemp[key] === col.columns) {
+                      self.showLabel[key] = col.label
+                    }
+                  }
+                })
+              }
+            })
+          }
 
-					if (newValue[self.viewTemp.img]) {
-						this.goodsData.img = this.getImagePath(newValue[this.viewTemp.img]);
-					}
+          if (newValue[self.viewTemp.img]) {
+            this.goodsData.img = this.getImagePath(newValue[this.viewTemp.img]);
+          }
 
-					if (this.viewTemp.title && this.viewTemp.title.indexOf('||') !== -1 && Array.isArray(this.viewTemp
-							.title.split('||'))) {
-						let arr = this.viewTemp.title.split('||')
-						if (arr.length > 0) {
-							arr = arr.reverse()
-							arr.forEach(key => {
-								if (newValue[key]) {
-									this.goodsData.title = newValue[key]
-								}
-							})
-						}
-					} else {
-						if (newValue[this.viewTemp.title]) {
-							this.goodsData.title = newValue[this.viewTemp.title];
-						}
-					}
-					if (Array.isArray(this.viewTemp.tip)) {
-						this.goodsData.tip = this.viewTemp.tip.reduce((pre, cur) => {
-							let val = cur
-							if (![':', ' ', '', '-'].includes(cur) && newValue[cur]) {
-								val = newValue[cur]
-							}
-							if (pre) {
-								return pre + ' ' + val
-							} else {
-								return val
-							}
-						}, '')
-					} else {
-						if (newValue[this.viewTemp.tip]) {
-							this.goodsData.tip = newValue[this.viewTemp.tip];
-						}
-					}
-					if (newValue[this.viewTemp.price]) {
-						this.goodsData.price = newValue[this.viewTemp.price];
-					}
-					if (Array.isArray(this.viewTemp.footer)) {
-						this.goodsData.footer = this.viewTemp.footer.reduce((pre, cur) => {
-							let val = cur
-							if (![':', ' ', '', '-'].includes(cur) && newValue[cur]) {
-								val = newValue[cur]
-							}
-							if (pre) {
-								return pre + ' ' + val
-							} else {
-								return val
-							}
-						}, '')
-					} else {
-						if (newValue[this.viewTemp.footer] || newValue[this.viewTemp.footer] === 0) {
-							this.goodsData.footer = newValue[this.viewTemp.footer];
-						}
-					}
+          if (this.viewTemp.title && this.viewTemp.title.indexOf('||') !== -1 && Array.isArray(this.viewTemp
+              .title.split('||'))) {
+            let arr = this.viewTemp.title.split('||')
+            if (arr.length > 0) {
+              arr = arr.reverse()
+              arr.forEach(key => {
+                if (newValue[key]) {
+                  this.goodsData.title = newValue[key]
+                }
+              })
+            }
+          } else {
+            if (newValue[this.viewTemp.title]) {
+              this.goodsData.title = newValue[this.viewTemp.title];
+            }
+          }
+          if (Array.isArray(this.viewTemp.tip)) {
+            this.goodsData.tip = this.viewTemp.tip.reduce((pre, cur) => {
+              let val = cur
+              if (![':', ' ', '', '-'].includes(cur) && newValue[cur]) {
+                val = newValue[cur]
+              }
+              if (pre) {
+                return pre + ' ' + val
+              } else {
+                return val
+              }
+            }, '')
+          } else {
+            if (newValue[this.viewTemp.tip]) {
+              this.goodsData.tip = newValue[this.viewTemp.tip];
+            }
+          }
+          if (newValue[this.viewTemp.price]) {
+            this.goodsData.price = newValue[this.viewTemp.price];
+          }
+          if (Array.isArray(this.viewTemp.footer)) {
+            this.goodsData.footer = this.viewTemp.footer.reduce((pre, cur) => {
+              let val = cur
+              if (![':', ' ', '', '-'].includes(cur) && newValue[cur]) {
+                val = newValue[cur]
+              }
+              if (pre) {
+                return pre + ' ' + val
+              } else {
+                return val
+              }
+            }, '')
+          } else {
+            if (newValue[this.viewTemp.footer] || newValue[this.viewTemp.footer] === 0) {
+              this.goodsData.footer = newValue[this.viewTemp.footer];
+            }
+          }
 
-				}
-			}
-		}
-	};
+        }
+      }
+    }
+  };
 </script>
 
 <style lang="scss">
-	.list-item-wrap {
-		width: auto;
-		margin: 10rpx 0;
-		box-sizing: border-box;
+  .list-item-wrap {
+    width: auto;
+    margin: 10rpx;
+    box-sizing: border-box;
+    border-radius: 10rpx;
+    overflow: hidden;
 
-		.list-item {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 10upx;
-			box-sizing: border-box;
+    .col-list {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 10rpx;
 
-			.main-image {
-				width: 180rpx;
-				height: 180rpx;
-				border-radius: 5upx 5rpx;
-				margin-right: 20upx;
-				border-radius: 10rpx;
-				overflow: hidden;
-				// flex: 1;
-				text-align: center;
-				border: 1px solid #f1f1f1;
+      .col-item {
+        padding-right: 20rpx;
+        box-sizing: border-box;
+        min-width: 50%;
+      }
 
-				.text {
-					font-size: 50px;
-					line-height: 180rpx;
-					font-weight: 200;
-				}
+    }
 
-				.image {
-					width: 100%;
-					height: 100%;
-				}
-			}
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10upx;
+      box-sizing: border-box;
 
-			.content-box {
-				transition: all 1s ease-out;
-				box-sizing: border-box;
-				max-width: 100%;
-				flex: 2;
-				overflow: hidden;
-				color: #666;
+      .main-image {
+        width: 180rpx;
+        height: 180rpx;
+        border-radius: 5upx 5rpx;
+        margin-right: 20upx;
+        border-radius: 10rpx;
+        overflow: hidden;
+        // flex: 1;
+        text-align: center;
+        border: 1px solid #f1f1f1;
 
-				.title {
-					width: 60%;
-					line-height: 40upx;
-					color: #333;
-					font-weight: bold;
-					font-size: 34upx;
-					margin-bottom: 10upx;
-					overflow: hidden;
-					text-overflow: ellipsis;
-					white-space: nowrap;
-					display: inline-flex;
-				}
+        .text {
+          font-size: 50px;
+          line-height: 180rpx;
+          font-weight: 200;
+        }
 
-				.content-header {
-					display: flex;
-					justify-content: space-between;
+        .image {
+          width: 100%;
+          height: 100%;
+        }
+      }
 
-					.title {
-						width: 60%;
-						line-height: 40upx;
-						color: #333;
-						font-weight: bold;
-						margin-bottom: 10upx;
-						overflow: hidden;
-						text-overflow: ellipsis;
-						white-space: nowrap;
-					}
+      .content-box {
+        transition: all 1s ease-out;
+        box-sizing: border-box;
+        max-width: 100%;
+        flex: 2;
+        overflow: hidden;
+        color: #666;
 
-					.status {
-						width: 35%;
-						text-align: right;
+        .title {
+          width: 60%;
+          line-height: 40upx;
+          color: #333;
+          font-weight: bold;
+          font-size: 34upx;
+          margin-bottom: 10upx;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          display: inline-flex;
+        }
 
-						.text {
-							padding: 5upx 10upx;
-							border-radius: 5upx;
-						}
-					}
-				}
+        .content-header {
+          display: flex;
+          justify-content: space-between;
 
-				.lable {
-					font-weight: normal;
-					font-size: 28upx;
-					color: #333;
-				}
+          .title {
+            width: 60%;
+            line-height: 40upx;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 10upx;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
 
-				.title-tip {
-					font-size: 24upx;
-					overflow: hidden;
-					text-overflow: ellipsis;
-					white-space: nowrap;
-					display: inline-block;
-				}
+          .status {
+            width: 35%;
+            text-align: right;
 
-				.content {
-					.numbers {
-						color: #e93b3d;
-						line-height: 40upx;
-						margin-top: 20upx;
-						font-size: 36upx;
+            .text {
+              padding: 5upx 10upx;
+              border-radius: 5upx;
+            }
+          }
+        }
 
-						.label {
-							color: #333;
-							font-size: 14px;
-						}
-					}
+        .lable {
+          font-weight: normal;
+          font-size: 28upx;
+          color: #333;
+        }
 
-					.unit {
-						font-size: 30upx;
-					}
+        .title-tip {
+          font-size: 24upx;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          display: inline-block;
+        }
 
-					&.proc-content {
-						display: flex;
-						justify-content: space-between;
-						flex-wrap: wrap;
+        .content {
+          .numbers {
+            color: #e93b3d;
+            line-height: 40upx;
+            margin-top: 20upx;
+            font-size: 36upx;
 
-						.content-item {
-							max-width: 50%;
-							min-width: 45%;
-							display: flex;
-							min-height: 50upx;
-							align-items: center;
-							box-sizing: border-box;
-							overflow: hidden;
-							text-overflow: ellipsis;
-							white-space: nowrap;
+            .label {
+              color: #333;
+              font-size: 14px;
+            }
+          }
 
-							&:last-child {
-								// justify-content: flex-end;
-							}
+          .unit {
+            font-size: 30upx;
+          }
 
-							.label {
-								font-weight: normal;
-								font-size: 28upx;
-								color: #333;
-							}
+          &.proc-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
 
-							.value {
-								overflow: hidden;
-								text-overflow: ellipsis;
-								white-space: nowrap;
-							}
-						}
-					}
-				}
+            .content-item {
+              max-width: 50%;
+              min-width: 45%;
+              display: flex;
+              min-height: 50upx;
+              align-items: center;
+              box-sizing: border-box;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
 
-				.footer {
-					display: flex;
-					justify-content: space-between;
-					min-height: 40upx;
-					flex-direction: column;
-					overflow: hidden;
-					text-overflow: ellipsis;
-					white-space: nowrap;
+              &:last-child {
+                // justify-content: flex-end;
+              }
 
-					.foot-name {
-						max-width: 95%;
-						position: relative;
-						display: inline-block;
-						padding-right: 28upx;
-						line-height: 44upx;
-						overflow: hidden;
-						text-overflow: ellipsis;
-						white-space: nowrap;
+              .label {
+                font-weight: normal;
+                font-size: 28upx;
+                color: #333;
+              }
 
-						&::after {
-							content: '';
-							display: block;
-							width: 8px;
-							height: 8px;
-							border-top: 1px solid #999;
-							border-left: 1px solid #999;
-							transform-origin: 50%;
-							transform: rotate(135deg);
-							position: absolute;
-							width: 6px;
-							height: 6px;
-							right: 5px;
-							top: 50%;
-							margin-top: -3px;
-						}
-					}
+              .value {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+            }
+          }
+        }
 
-					.foot-button {
-						width: 100%;
-						display: flex;
-						font-size: 40upx;
-						justify-content: flex-end;
-						flex-wrap: wrap;
+        .footer {
+          display: flex;
+          justify-content: space-between;
+          min-height: 40upx;
+          flex-direction: column;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
 
-						.cu-btn {
-							margin-right: 10rpx;
-							margin-bottom: 10rpx;
-						}
-					}
+          .foot-name {
+            max-width: 95%;
+            position: relative;
+            display: inline-block;
+            padding-right: 28upx;
+            line-height: 44upx;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
 
-					.footer-btn {
-						width: 100%;
-						display: flex;
-						justify-content: flex-end;
-					}
-				}
-			}
-		}
-	}
+            &::after {
+              content: '';
+              display: block;
+              width: 8px;
+              height: 8px;
+              border-top: 1px solid #999;
+              border-left: 1px solid #999;
+              transform-origin: 50%;
+              transform: rotate(135deg);
+              position: absolute;
+              width: 6px;
+              height: 6px;
+              right: 5px;
+              top: 50%;
+              margin-top: -3px;
+            }
+          }
 
-	.list-item-wrap.grid-layout-item {
-		margin: 10rpx 0 0;
-		padding: 0;
-		border-radius: 10rpx;
-		box-shadow: 6px 5px 13px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-		overflow: hidden;
-		display: flex;
-		flex-direction: column;
+          .foot-button {
+            width: 100%;
+            display: flex;
+            font-size: 40upx;
+            justify-content: flex-end;
+            flex-wrap: wrap;
 
-		.cu-btn.sm {
-			padding: 0 2px;
-		}
+            .cu-btn {
+              margin-right: 10rpx;
+              margin-bottom: 10rpx;
+            }
+          }
 
-		/deep/ .list-item {
-			margin: 0;
-			padding: 0;
-			display: flex;
-			flex-direction: column;
+          .footer-btn {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+          }
+        }
+      }
+    }
+  }
 
-			.main-image {
-				width: 100% !important;
-				border-radius: 5rpx 5rpx 0 0 !important;
-				margin: 0;
-				border-radius: 10rpx;
-				overflow: hidden;
-				height: 100rpx !important;
-				border-bottom: 1rpx solid #f1f1f1;
-				flex: auto;
+  .list-item-wrap.grid-layout-item {
+    margin: 10rpx 0 0;
+    padding: 0;
+    border-radius: 10rpx;
+    box-shadow: 6px 5px 13px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
-				.text {
-					font-size: 85rpx;
-					line-height: 100rpx;
-				}
-			}
+    .cu-btn.sm {
+      padding: 0 2px;
+    }
 
-			.content-box {
-				min-height: 50rpx;
-				display: flex;
-				flex-wrap: wrap;
+    /deep/ .list-item {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
 
-				.title {
-					margin: 0;
-					text-overflow: clip;
-					width: 100%;
-					font-size: 24rpx;
-					flex: 1;
-					padding: 4rpx 8rpx;
-					font-weight: normal;
-				}
+      .main-image {
+        width: 100% !important;
+        border-radius: 5rpx 5rpx 0 0 !important;
+        margin: 0;
+        border-radius: 10rpx;
+        overflow: hidden;
+        height: 100rpx !important;
+        border-bottom: 1rpx solid #f1f1f1;
+        flex: auto;
 
-				.footer {
-					align-items: flex-end;
-					justify-content: flex-end;
-					min-height: 0;
-					margin-bottom: 10rpx;
+        .text {
+          font-size: 85rpx;
+          line-height: 100rpx;
+        }
+      }
 
-					.foot-button {
-						flex-wrap: wrap;
-						justify-content: space-between;
+      .content-box {
+        min-height: 50rpx;
+        display: flex;
+        flex-wrap: wrap;
 
-						.cu-btn {
-							margin-right: 0;
+        .title {
+          margin: 0;
+          text-overflow: clip;
+          width: 100%;
+          font-size: 24rpx;
+          flex: 1;
+          padding: 4rpx 8rpx;
+          font-weight: normal;
+        }
 
-							// padding:0 10rpx;
-							&[class*='line']::after {
-								content: none;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+        .footer {
+          align-items: flex-end;
+          justify-content: flex-end;
+          min-height: 0;
+          margin-bottom: 10rpx;
+
+          .foot-button {
+            flex-wrap: wrap;
+            justify-content: space-between;
+
+            .cu-btn {
+              margin-right: 0;
+
+              // padding:0 10rpx;
+              &[class*='line']::after {
+                content: none;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 </style>

@@ -144,9 +144,11 @@
 			finalSearchColumn() {
 				if (this.moreConfig && this.moreConfig.searchColumn) {
 					return this.moreConfig.searchColumn
-				} else {
+				} else if(this.searchCol){
 					return this.searchCol
-				}
+				}else if(this.srv_cols?.length){
+          return this.srv_cols.filter(item=>item.in_list===1).map(item=>item.columns)
+        }
 			},
 			onlyShowTitle() {
 				if (this.finalViewTemp) {

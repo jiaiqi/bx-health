@@ -3,12 +3,12 @@
 			'--global-text-font-size': globalTextFontSize + 'px',
 			'--page-height':pageHeight
 		}">
-		<view class="button-box" v-if="colsV2Data._formButtons.filter(item=>item.button_type==='edit').length>0&&srvType==='detail'">
+<!-- 		<view class="button-box" v-if="colsV2Data._formButtons.filter(item=>item.button_type==='edit').length>0&&srvType==='detail'">
 			<button class="cu-btn bg-blue" type="primary" v-if="isArray(fields) && fields.length > 0"
 				v-for="(btn,btnIndex) in colsV2Data._formButtons.filter(item=>item.button_type==='edit')" :key="btnIndex" @click="onButton(btn)">
 				{{ btn.button_name }}
 			</button>
-		</view>
+		</view> -->
 		<scroll-view scroll-y="true">
 			<view>
 				<a-form v-if="colsV2Data && isArray(fields)" :fields="fields" :pageType="srvType" :formType="use_type"

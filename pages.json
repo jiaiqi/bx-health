@@ -377,6 +377,13 @@
 				  {
 				    "navigationBarTitleText" : ""
 				  }
+				},
+				{
+				  "path" : "dietList/dietList",
+				  "style" : 
+				  {
+				    "navigationBarTitleText" : ""
+				  }
 				}
 				// ,
 				// {
