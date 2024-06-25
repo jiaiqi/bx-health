@@ -363,6 +363,20 @@
 				{
 					"path": "chooseFood/myFoodsInfo",
 					"style": {}
+				},
+				{
+				  "path" : "newsList/newsList",
+				  "style" : 
+				  {
+				    "navigationBarTitleText" : ""
+				  }
+				},
+				{
+				  "path" : "details/details",
+				  "style" : 
+				  {
+				    "navigationBarTitleText" : ""
+				  }
 				}
 				// ,
 				// {
