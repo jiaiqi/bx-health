@@ -38,11 +38,11 @@
       return {
         menus: [{
           name: '中医健康科普',
-          bg:'a',
+          bg: 'a',
           url: '/otherPages/newsList/newsList?classifyName=中医历史与文化'
         }, {
           name: '中医科普专家',
-          bg:'b',
+          bg: 'b',
           url: '/otherPages/newsList/newsList?classifyName=中医健康科普专家'
         }]
       }
@@ -60,14 +60,15 @@
 </script>
 
 <style lang="scss" scoped>
-  .box{
+  .box {
     display: flex;
     justify-content: center;
     align-items: center;
     // flex-direction: column;
     gap: 50px;
     padding-top: 50px;
-    &-item{
+
+    &-item {
       // width: 300px;
       // height: 200px;
       border-radius: 8px;
@@ -80,28 +81,42 @@
       height: 372rpx;
       overflow: hidden;
       cursor: pointer;
-      box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
       border: 1px solid #ebeef5;
       transition: all 0.3s;
-      &:active{
-        transform: translate(1px,1px);
+
+      &:active {
+        transform: translate(1px, 1px);
       }
-      &:hover .bg{
-        transform: scale(1.1);
+
+      &:hover {
+        .bg {
+          transform: scale(1.1);
+
+        }
+
+        .name {
+          font-weight: bold;
+        }
       }
-      .bg{
+
+      .bg {
         width: 800rpx;
         height: 372rpx;
         position: absolute;
         left: 0;
         right: 0;
         transition: all 0.3s;
-        uni-image,.uni-image{
+
+        uni-image,
+        .uni-image {
           width: 100%;
           height: 100%;
         }
       }
-      .name{
+
+      .name {
+        transition: all 0.3s;
         font-size: 24px;
         height: 40px;
         line-height: 40px;
@@ -116,6 +131,7 @@
       }
     }
   }
+
   .menu-box {
     display: flex;
 

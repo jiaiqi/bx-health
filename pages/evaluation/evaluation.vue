@@ -43,6 +43,9 @@
               name: '婴幼儿发育评估',
               url: '/questionnaire/index/index?formType=form&activity_no=20240625175248000001&status=进行中'
             }, {
+              name: '中医九种体质评估',
+              url: '/archivesPages/healthCompose/healthCompose'
+            }, {
               name: '抑郁评估',
               url: '/questionnaire/index/index?formType=form&activity_no=20201116145316000198&status=进行中'
             }, {
