@@ -1,5 +1,5 @@
 <template>
-	<view class="article-wrap">
+	<view class="article-wrap page-main">
 		<view class="hospital-top" v-if="storeInfo&&storeInfo.store_no" @click="toStore">
 			<image class="logo" :src="getImagePath(storeInfo.logo)" v-if="storeInfo.logo"></image>
 			<view class="logo" v-else-if="storeInfo.name">{{ storeInfo.name.slice(0, 1) }}</view>

@@ -82,17 +82,22 @@
     onLoad(e) {
       this.classify = e.classifyName
       this.getList()
-    },
-    onReady() {
       uni.setNavigationBarTitle({
         title: this.classify
       })
+      if (this.classify === '中医历史与文化') {
+        uni.setNavigationBarTitle({
+          title: '中医健康科普'
+        })
+      }
     },
+    onReady() {},
     methods: {
       getList() {
         const serviceMap = {
           '中医健康科普专家': 'srvhealth_chinese_medicine_expert_select',
-          '中医历史与文化': 'srvhealth_knowledge_node_select'
+          '中医历史与文化': 'srvhealth_knowledge_node_select',
+          '中医健康科普': 'srvhealth_knowledge_node_select',
         }
         const service = serviceMap[this.classify]
         const url = this.getServiceUrl('health', service, 'select');
@@ -105,7 +110,7 @@
             "rownumber": this.pageSize
           }
         }
-        if (this.classify === '中医历史与文化') {
+        if (['中医历史与文化', '中医健康科普'].includes(this.classify)) {
           req.condition.push({
             "colName": "parent_no",
             "value": "KN2406210001",
@@ -153,16 +158,37 @@
 </script>
 
 <style lang="scss" scoped>
-  html{
+  html {
     background-color: #f7f7f7;
   }
-  .page-main{
-    &.is-pc{
+
+  .page-main {
+    &.is-pc {
       width: 100%;
       background-color: #fff;
-      
+
+      .list-view {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        padding: 20px;
+        gap: 20px;
+        .list-item{
+          min-height: 100px;
+          box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+          cursor: pointer;
+          width: unset;
+          min-width: 200px;
+          transition: all 0.3s;
+          overflow: hidden;
+          border-radius: 8rpx;
+          &:hover{
+            transform: scale(1.1);
+          }
+        }
+      }
     }
   }
+
   page {
     background: white;
     display: flex;
@@ -249,7 +275,7 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-
+        overflow: hidden;
         .title {
           width: 480rpx;
           color: #666666;

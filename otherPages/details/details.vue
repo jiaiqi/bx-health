@@ -1,5 +1,5 @@
 <template>
-  <view class="details-view">
+  <view class="details-view page-main">
     <view class="details-tit">
       {{detailsForm.node_name||detailsForm.expert_name||''}}
       <text class="circle-btn" @click="toSpeech">听</text>
@@ -244,7 +244,7 @@
 <style scoped lang="scss">
   .details-view {
     padding: 50rpx 20rpx;
-
+    background-color: #f9faf6;
     .details-tit {
       text-align: center;
       font-size: 40rpx;

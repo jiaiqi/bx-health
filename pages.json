@@ -392,6 +392,7 @@
           "path": "details/details",
           "style": {
             "navigationBarTitleText": ""
+            // "navigationStyle": "custom"
           }
         },
         {

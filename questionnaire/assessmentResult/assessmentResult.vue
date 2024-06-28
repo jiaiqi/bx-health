@@ -1,6 +1,6 @@
 <template>
-	<view>
-		<view class="padding-xl assessment-wrap">
+	<view class="page-main">
+		<view class="padding-xl assessment-wrap ">
 			<view class="cu-bar justify-start">
 				<view class="action sub-title">
 					<text class="text-xl text-bold text-blue">评估报告</text>
@@ -11,9 +11,9 @@
 				<view class="padding-sm  assessment-item margin-top shadow" v-for="(item, index) in assessmentReport" :key="index">{{ item.sug_desc }}</view>
 			</view>
 			<view class="contact-us">
-				<p>您好:</p>
-				<p style="text-indent: 40upx;">如果您需要我们与您联系,帮助您进一步分析原因和给出建议,请您点击下面按钮提交您的联系方式</p>
-				<button class="cu-btn bg-blue" @click="toContcat">反馈联系方式</button>
+				<!-- <p>您好:</p>
+				<p style="text-indent: 40upx;">如果您需要我们与您联系,帮助您进一步分析原因和给出建议,请您点击下面按钮提交您的联系方式</p> -->
+				<!-- <button class="cu-btn bg-blue" @click="toContcat">反馈联系方式</button> -->
 			</view>
 		</view>
 	</view>
