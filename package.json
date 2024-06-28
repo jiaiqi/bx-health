@@ -8,7 +8,9 @@
 	},
 	"author": "",
 	"license": "ISC",
-	"dependencies": {},
+	"dependencies": {
+		"speak-tts": "^2.0.8"
+	},
 	"uni-app": {
 		"scripts": {
 			"h5-weixin": {

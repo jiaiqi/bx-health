@@ -1,5 +1,5 @@
 <template>
-	<view class="form" :style="{
+	<view class="form" :class="{'is-pc':isPC}" :style="{
 			'--global-text-font-size': globalTextFontSize + 'px',
 			'--page-height':pageHeight
 		}">
@@ -61,6 +61,18 @@
 			};
 		},
 		computed: {
+      isPC() {
+        // #ifdef H5
+        if (window.navigator.userAgent.match(
+            /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+          )) {
+          return false; // 移动端
+        } else {
+          return true; // PC端
+        }
+        // #endif
+        return false
+      },
 			childService() {
 				if (this.showChildService !== 'false' && this.showChildService !== false && this.colsV2Data && Array
 					.isArray(this.colsV2Data.child_service)) {

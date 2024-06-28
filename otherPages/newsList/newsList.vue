@@ -1,9 +1,12 @@
 <template>
-  <view>
+  <view class="page-main" :class="{'is-pc':isPC}">
     <view class="list-view">
       <view class="list-item" v-for="item in list" :key="item.uid" @click="goDetails(item)">
         <view class="left" v-if="item.node_image">
           <image :src="getImagePath(item.node_image)"></image>
+        </view>
+        <view class="left avatar" v-if="item.expert_pic">
+          <image mode="aspectFill" :src="getImagePath(item.expert_pic)"></image>
         </view>
         <view class="right">
           <view class="title">
@@ -24,6 +27,20 @@
 
 <script>
   export default {
+    computed: {
+      isPC() {
+        // #ifdef H5
+        if (window.navigator.userAgent.match(
+            /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+          )) {
+          return false; // 移动端
+        } else {
+          return true; // PC端
+        }
+        // #endif
+        return false
+      },
+    },
     data() {
       return {
         tabSelected: "最新",
@@ -31,7 +48,7 @@
           columnRecommendation: '是'
         },
         pageIndex: 1,
-        pageSize: 10,
+        pageSize: 20,
         total: 0,
         isOver: false,
         overText: '---我是有底线的---',
@@ -68,7 +85,7 @@
     },
     onReady() {
       uni.setNavigationBarTitle({
-        title: this.classify + '列表'
+        title: this.classify
       })
     },
     methods: {
@@ -136,6 +153,16 @@
 </script>
 
 <style lang="scss" scoped>
+  html{
+    background-color: #f7f7f7;
+  }
+  .page-main{
+    &.is-pc{
+      width: 100%;
+      background-color: #fff;
+      
+    }
+  }
   page {
     background: white;
     display: flex;
@@ -206,6 +233,12 @@
         image {
           width: 180rpx;
           height: 135rpx;
+          border-radius: 16rpx;
+        }
+
+        &.avatar image {
+          width: 100rpx;
+          height: 150rpx;
           border-radius: 16rpx;
         }
       }

@@ -261,11 +261,10 @@
       },
       getMenuImagePath(btn) {
         let icon = ''
-        if (btn.icon) {
-          icon = this.$api.backEndAddress + '/main/images/appicon/' + btn.icon
-        }
         if (btn.icon_file_no) {
           icon = this.getImagePath(btn.icon_file_no, true)
+        }else if (btn.icon&&btn.icon!==null) {
+          icon = this.$api.backEndAddress + '/main/images/appicon/' + btn.icon
         }
         return icon;
       },

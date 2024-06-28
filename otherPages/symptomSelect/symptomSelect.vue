@@ -1,6 +1,6 @@
 <template>
-	<view class="symptoomSelectWrap">
-		<view class="symptopm-tops">
+	<view class="symptoomSelectWrap page-main">
+		<view class="symptopm-tops" v-if="isPC!==true">
 			<cu-custom bgColor="bg-blue" :isBack="!serBtn">
 				<block slot="backText" v-if="!serBtn">返回</block>
 				<block slot="content">病症选择</block>
@@ -115,6 +115,20 @@ export default {
 		cascaderSelector,
 		// dataPicker
 	},
+  computed: {
+   isPC() {
+     // #ifdef H5
+     if (window.navigator.userAgent.match(
+         /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+       )) {
+       return false; // 移动端
+     } else {
+       return true; // PC端
+     }
+     // #endif
+     return false
+   },
+  },
 	data() {
 		return {
 			searchValue: '',
@@ -861,7 +875,7 @@ export default {
 	justify-content: center;
 }
 .boxbtn {
-	width: 100vw;
+	width: 100%;
 }
 
 .btns {

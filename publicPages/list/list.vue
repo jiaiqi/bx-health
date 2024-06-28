@@ -1,5 +1,5 @@
 <template>
-	<view class="page-wrap">
+	<view class="page-wrap " :class="{'is-pc':isPC}">
 		<view class="search-bar" v-if="showSearchBar">
 			<view class="bg-white cu-bar search">
 				<view class="search-form round">
@@ -21,7 +21,7 @@
 			</view>
 			<!-- <view style="height: 100upx;width: 100%;"></view> -->
 		</view>
-		<bx-list ref="bxList" :serviceName="serviceName" :condition="condition" :order="order"
+		<bx-list class="page-main" ref="bxList" :serviceName="serviceName" :condition="condition" :order="order"
 			:relation_condition="relation_condition" :pageType="pageType" :listType="'list'" :labels="labels"
 			:srvApp="appName" :rowButtons="listConfig && listConfig.rowButton ? listConfig.rowButton : []"
 			:showTab="false" :viewTemp="viewTemp" :listConfig="listConfig" :showButton="showRowButton" :fixed="true"
@@ -51,6 +51,18 @@
 			bxList
 		},
 		computed: {
+      isPC() {
+          // #ifdef H5
+          if (window.navigator.userAgent.match(
+              /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+            )) {
+            return false; // 移动端
+          } else {
+            return true; // PC端
+          }
+          // #endif
+          return false
+      },
 			...mapState({
 				doctorInfo: state => state.user.userInfo,
 				patientInfo: state => state.user.patientInfo

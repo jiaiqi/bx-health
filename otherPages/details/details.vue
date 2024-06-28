@@ -2,12 +2,13 @@
   <view class="details-view">
     <view class="details-tit">
       {{detailsForm.node_name||detailsForm.expert_name||''}}
+      <text class="circle-btn" @click="toSpeech">听</text>
     </view>
     <view class="details-msg">
       <view class="author" v-if="detailsForm.author">
         作者：<text>{{detailsForm.author || '-'}}</text>
       </view>
-  <!--    <view class="author" v-if="detailsForm.expert_name">
+      <!--    <view class="author" v-if="detailsForm.expert_name">
         姓名：<text>{{detailsForm.expert_name || '-'}}</text>
       </view> -->
       <view class="publish" v-if="detailsForm.author">
@@ -18,12 +19,12 @@
       </view>
     </view>
     <view class="padding-tb" v-if="detailsForm.expert_expertise">
-       <textarea style="width: 100%;" :value="detailsForm.expert_expertise" disabled placeholder="" />
+      <div style="width: 100%;" v-html="detailsForm.expert_expertise" disabled placeholder="" />
     </view>
-    <view class="richText" v-if="detailsForm.node_desc">
+    <div class="richText" v-if="detailsForm.node_desc" ref="richText">
       <!-- <rich-text :nodes="detailsForm.contents"></rich-text> -->
       <u-parse :html="detailsForm.node_desc" :selectable="true" :tag-style="style"></u-parse>
-    </view>
+    </div>
     <view class="richText" v-else>
       <!-- <rich-text :nodes="detailsForm.contents"></rich-text> -->
       <image :src="detailsForm.coverFileName" mode=""></image>
@@ -85,6 +86,7 @@
   import uParse from '@/components/u-parse/u-parse.vue'
   // import * as topNewsList from '../../common/api/topNewsList.js'
   // import * as me from '../../common/api/me.js'
+  import Speech from "speak-tts";
   export default {
     components: {
       uParse
@@ -102,15 +104,58 @@
           img: 'display: block;',
           video: 'display: block;width:670rpx;'
         },
-        sc: 1
+        sc: 1,
+        speech: null,
       };
     },
     onLoad(e) {
       this.classify = e.classifyName
       // this.uid = e.uid
       this.getData(e.id)
+      this.SpeechInit()
     },
     methods: {
+      SpeechInit() {
+        this.speech = new Speech();
+        this.speech.setLanguage("zh-CN");
+        this.speech.init().then(() => {});
+      },
+      //播放按钮
+      play(data) {
+        this.speech
+          .speak({
+            text: data,
+            listeners: {
+              //开始播放
+              onstart: () => {
+                console.log("Start utterance");
+              },
+              //判断播放是否完毕
+              onend: () => {
+                console.log("End utterance");
+              },
+              //恢复播放
+              onresume: () => {
+                console.log("Resume utterance");
+              },
+            },
+          })
+          .then(() => {
+            console.log("读取成功");
+          });
+      },
+      //暂停
+      paused() {
+        this.speech.pause();
+      },
+      //从暂停处继续播放
+      goahead() {
+        this.speech.resume();
+      },
+      //点击播放按钮
+      setdefaultWordData(data) {
+        this.play(data)
+      },
       // 收藏或已收藏
       // scang(type){
       // 	let param = {}
@@ -133,6 +178,21 @@
       // 		}
       // 	})
       // },
+      toSpeech() {
+        const richText = this.$refs.richText;
+        let text = richText.innerText;
+        // let textArr = text.split('。')
+        // this.setdefaultWordData('微信到账100元')
+        const synth = window.speechSynthesis;
+        synth.getVoices();
+        const utterance = new SpeechSynthesisUtterance(text);
+        synth.speak(utterance);
+        // setTimeout(()=>{
+        //   const utterance = new SpeechSynthesisUtterance(text);
+        //   synth.speak(utterance);
+        // },300)
+    
+      },
       getData(id) {
         const serviceMap = {
           '中医健康科普专家': 'srvhealth_chinese_medicine_expert_select',
@@ -159,7 +219,7 @@
               this.detailsForm = res.data.data[0]
               if (this.detailsForm.node_name || this.detailsForm.expert_name) {
                 uni.setNavigationBarTitle({
-                  title: this.detailsForm.node_name|| this.detailsForm.expert_name
+                  title: this.detailsForm.node_name || this.detailsForm.expert_name
                 })
               }
             }
@@ -187,7 +247,25 @@
 
     .details-tit {
       text-align: center;
-      font-size: 40rpx
+      font-size: 40rpx;
+      position: relative;
+
+      .circle-btn {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        border-radius: 24px;
+        border: 1px solid #333;
+        font-size: 12px;
+        text-align: center;
+        line-height: 24px;
+        right: 24px;
+        cursor: pointer;
+
+        &:active {
+          transform: translate(1px, 1px);
+        }
+      }
     }
 
     .details-msg {
@@ -304,8 +382,9 @@
   }
 
   .richText {
-    margin: 20rpx;
-    width: 670rpx;
+    margin: 20rpx auto;
+    // width: 670rpx;
+    padding: 0 20rpx;
   }
 
   video {

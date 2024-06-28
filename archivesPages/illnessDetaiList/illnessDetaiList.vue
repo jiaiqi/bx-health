@@ -1,5 +1,5 @@
 <template>
-	<view class="content">
+	<view class="content page-main">
 		<view v-if="symptomSkillList.length > 0" class="listBox" v-for="(item,index) in symptomSkillList" :key="index">
 			<view class="topbox">
 				<!-- <image class="bgImg" :src="item.img"  mode=""></image> -->

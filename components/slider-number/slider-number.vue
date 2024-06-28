@@ -12,7 +12,7 @@
 		 @touchend="longpressNumEnd" v-if="step === 1 || step === 0.1">
 			-1
 		</button>
-		<slider class="uni-slider" @changing="changeSlider" :step="sliderStep" :min="min" :max="max" :value="bindValue"
+		<slider class="uni-slider" @changing="changeSlider" @change="changeSlider" :step="sliderStep" :min="min" :max="max" :value="bindValue"
 		 :show-value="showValue" />
 		<button class="operate cu-btn" hover-class="active" @click="numberChange('add')" @longpress="longpressNumChange('add')"
 		 @touchend="longpressNumEnd" v-if="step === 1 || step === 0.1">
