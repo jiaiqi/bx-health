@@ -1,5 +1,5 @@
 <template>
-  <view class="page-wrap page-top">
+  <view class="page-wrap page-top bg-white">
     <view class="page-bg">
       <view class="title">
         中医科普

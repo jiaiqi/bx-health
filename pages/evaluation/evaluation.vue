@@ -1,5 +1,5 @@
 <template>
-  <view class="page-wrap page-top">
+  <view class="page-wrap page-top bg-white">
     <view class="page-bg">
       <view class="title">
         健康评测
@@ -57,22 +57,28 @@
             name: '慢病风险评估',
             children: [{
               name: '冠心病评估',
-              url: '/publicPages/list/list?serviceName=srvhealth_store_report_coronary_disease_select'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240703091153000002&status=进行中'
+              // url: '/publicPages/list/list?serviceName=srvhealth_store_report_coronary_disease_select'
             }, {
               name: '脑卒中评估',
-              url: '/publicPages/list/list?serviceName=srvhealth_store_report_apoplexy_select'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240703092217000003&status=进行中'
+              // url: '/publicPages/list/list?serviceName=srvhealth_store_report_apoplexy_select'
             }, {
               name: '高血压评估',
+              url: '/questionnaire/index/index?formType=form&activity_no=20240703092255000004&status=进行中'
               url: '/publicPages/list/list?serviceName=srvhealth_store_report_hypertension_select'
             }, {
               name: '糖尿病评估',
-              url: '/publicPages/list/list?serviceName=srvhealth_store_report_diabetes_select'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240703092326000005&status=进行中'
+              // url: '/publicPages/list/list?serviceName=srvhealth_store_report_diabetes_select'
             }, {
               name: '代谢综合征评估',
-              url: '/publicPages/list/list?serviceName=srvhealth_store_report_metabolize_select'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240703092406000006&status=进行中'
+              // url: '/publicPages/list/list?serviceName=srvhealth_store_report_metabolize_select'
             }, {
               name: '肺癌评估',
-              url: '/publicPages/list/list?serviceName=srvhealth_store_report_lung_cancer_select'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240703083854000001&status=进行中'
+              // url: '/publicPages/list/list?serviceName=srvhealth_store_report_lung_cancer_select'
             }]
           }, {
             name: '食品药品指引',

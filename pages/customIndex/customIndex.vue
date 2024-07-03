@@ -135,7 +135,8 @@
         } else if (e.mini_program_url) {
           if (e.mini_program_url?.indexOf('http') === 0) {
             // #ifdef H5
-            window.open(`${e.mini_program_url}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`)
+            window.location.href = `${e.mini_program_url}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`
+            // window.open(`${e.mini_program_url}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`)
             // #endif
             return
           }
@@ -171,7 +172,8 @@
               if (err.errMsg && err.errMsg.indexOf('is not found') !== -1) {
                 // #ifdef H5
                 if (dest_page?.indexOf('http') === 0) {
-                  window.open(`${dest_pagel}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`)
+                  window.location.href = `${dest_pagel}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`
+                  // window.open(`${dest_pagel}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`)
                   return
                 }
                 // #endif
