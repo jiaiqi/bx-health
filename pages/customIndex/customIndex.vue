@@ -133,6 +133,12 @@
             url: '/publicPages/article/article?content_no=' + e.content_no
           });
         } else if (e.mini_program_url) {
+          if (e.mini_program_url?.indexOf('http') === 0) {
+            // #ifdef H5
+            window.open(`${e.mini_program_url}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`)
+            // #endif
+            return
+          }
           uni.navigateTo({
             url: e.mini_program_url
           });
@@ -146,7 +152,7 @@
           dest_page = '/otherPages' + item.dest_page.slice(22);
           console.log(item.dest_page);
         }
-        if(dest_page){
+        if (dest_page) {
           dest_page = dest_page.trim()
         }
         if (dest_page && typeof dest_page === 'string' && dest_page.indexOf('/pages/') !== -1) {
@@ -163,6 +169,12 @@
             url: dest_page,
             fail(err) {
               if (err.errMsg && err.errMsg.indexOf('is not found') !== -1) {
+                // #ifdef H5
+                if (dest_page?.indexOf('http') === 0) {
+                  window.open(`${dest_pagel}&bx_auth_ticket=${uni.getStorageSync('bx_auth_ticket')}`)
+                  return
+                }
+                // #endif
                 // 通过webview展示h5页面
                 if (dest_page.indexOf(self.$api.frontEndAddress) !== -1) {
                   uni.navigateTo({
@@ -445,6 +457,7 @@
     align-items: center;
     padding: 0;
     font-size: 24rpx;
+    display: none;
 
     .icon {
       font-size: 70rpx;

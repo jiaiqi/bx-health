@@ -29,7 +29,8 @@
     </view>
     <view class="button-box"
       v-if="formType === 'form' && configCols && configCols.length > 0 && (formData['user_state'] === '未完成' || formData['answer_times'] === '多次')">
-      <button class="button" type="" @click="submitForm()">提交</button>
+      <button class="button" type="" @click="submitForm()"> <text
+          v-if="formData&&formData.submit_label">{{formData.submit_label}}</text><text v-else>提交</text></button>
     </view>
     <view class="button-box"
       v-if="formType === 'detail' && configCols && configCols.length > 0 && formData.info_collect_type === '评估' && formData.user_state === '完成' && fill_batch_no">
@@ -230,10 +231,141 @@
           });
         }
       },
-      submitForm() {
+      async submitForm() {
         let self = this;
         let itemData = self.$refs.bxform.getFieldModel();
         if (itemData !== false) {
+          if (this.formData.act_option?.includes('提交确认')) {
+            const confirm = await new Promise(resolve => {
+              uni.showModal({
+                title: '提示',
+                content: '确认提交问卷?',
+                success: function(res) {
+                  resolve(res.confirm)
+                }
+              })
+            })
+            if (confirm !== true) {
+              return
+            }
+          }
+          if (self.status !== '进行中') {
+            uni.showToast({
+              title: '状态非进行中的问卷不支持提交',
+              icon: 'none'
+            });
+          } else {
+            console.log('itemData', itemData);
+            let resultData = [];
+            Object.keys(itemData).forEach(item => {
+              let obj = {
+                item_no: item,
+                option_data: [itemData[item]]
+              };
+              if (Array.isArray(itemData[item])) {
+                obj.option_data = itemData[item].filter(i => i && i);
+              }
+              if (itemData[item]) {
+                resultData.push(obj);
+              }
+            });
+            let serviceName = 'srvdaq_activity_result_submit';
+            const url = self.getServiceUrl(self.appName ? self.appName : 'daq',
+              serviceName, 'operate');
+            let req = [{
+              serviceName: serviceName,
+              data: [{
+                fill_batch_no: self.fill_batch_no,
+                activity_no: self.activity_no,
+                item_data: resultData
+              }]
+            }];
+            console.log('resultData', resultData);
+            self.$http.post(url, req).then(res => {
+              if (res.data.state === 'SUCCESS') {
+                if (res.data.resultCode === 'SUCCESS') {
+                  uni.showToast({
+                    title: '提交成功',
+                    icon: 'none'
+                  });
+
+                  self.formType = 'detail';
+                  self.getQuestionnaireData(self.formData);
+                  if (Array.isArray(res.data.response) && res.data
+                    .response.length > 0 && res.data.response[0]
+                    .response && res.data.response[0].response
+                    .fill_batch_no) {
+                    self.params.fill_batch_no = res.data.response[0]
+                      .response.fill_batch_no;
+                  }
+                  if (self.params.to && self.params.fill_batch_no) {
+                    self.showNextBtn = true;
+                  } else if (self.target && self.target === 'health') {
+                    let data = {
+                      from: '饮食',
+                      data: req[0].data[0],
+                      result: {
+                        origin: self.$route.query.origin,
+                        scope: 10,
+                        remark: '饮食习惯良好'
+                      }
+                    };
+                    uni.redirectTo({
+                      url: '/pages/specific/health/home/home?result=' +
+                        JSON.stringify(data)
+                    });
+                  } else {
+                    if (self.params.fill_batch_no) {
+                      // const url =
+                      //   `/questionnaire/index/index?formType=detail&activity_no=${self.activity_no}&status=完成&fill_batch_no=${self.params.fill_batch_no}`
+                      // uni.redirectTo({
+                      //   url
+                      // })
+                      self.fill_batch_no = self.params.fill_batch_no
+                      self.formType = 'detail';
+                      self.questionData = {
+                        fill_batch_no: self.params.fill_batch_no,
+                        activity_no: self.activity_no
+                      };
+
+                      if (self.formData.info_collect_type === '评估') {
+                        const url =
+                          `/questionnaire/assessmentResult/assessmentResult?activity_no=${self.activity_no}&fill_batch_no=${self.fill_batch_no}`
+                        uni.redirectTo({
+                          url
+                        })
+                        return
+                      }else if(self.formData.info_collect_type === '自测' && self.fill_batch_no){
+                        self.seeScore()
+                        return
+                      }
+
+                      self.getQuestionnaireData(self.questionData);
+                      return
+                    }
+
+                    uni.showModal({
+                      title: '提示',
+                      content: '您的测评信息已提交，我们将会由专业人员为您评估！',
+                      showCancel: false,
+                      success(res) {
+                        if (res.confirm) {
+                          // uni.navigateBack()
+                        }
+                      }
+                    })
+                  }
+                }
+              } else {
+                uni.showToast({
+                  title: res.data.resultMessage,
+                  icon: 'none'
+                });
+              }
+              console.log(res);
+            });
+          }
+          return
           uni.showModal({
             title: '提示',
             content: '确认提交问卷?',

@@ -603,6 +603,13 @@
             "navigationBarTitleText": "",
             "enablePullDownRefresh": true
           }
+        },
+        {
+          "path" : "prettyForm/prettyForm",
+          "style" : 
+          {
+            "navigationBarTitleText" : ""
+          }
         }
       ]
     }

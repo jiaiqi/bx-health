@@ -97,7 +97,7 @@
             "disableHostCheck" : true,
             "https" : false
         },
-        "template" : "",
+        "template" : "template.html",
         "optimization" : {
             "subPackages" : true, // HBuilderX 2.7.12+ 支持
             "treeShaking" : {

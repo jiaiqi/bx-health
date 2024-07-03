@@ -115,13 +115,13 @@
   #app,
   uni-page-body,
   uni-page-wrapper {
-    background: #fff !important;
+    background: #f1f1f1 !important;
   }
 
   html,
   body {
     height: auto;
-    background: #fff !important;
+    background: #f1f1f1 !important;
   }
 
   uni-page-body>uni-view {

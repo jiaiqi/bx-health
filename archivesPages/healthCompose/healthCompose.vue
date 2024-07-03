@@ -209,7 +209,7 @@
             name: '平和质',
             grade: null,
             no: '20201112103143000189',
-            icon: require('../static/icon/体质图标/平和质.jpg')
+            icon: require('../static/icon/体质图标/平和质1.jpg')
           }
         ],
         scoreInfo: {},

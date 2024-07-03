@@ -18,12 +18,12 @@
         职称/标签：<text>{{detailsForm.expert_title}}</text>
       </view>
     </view>
-    <view class="padding-tb" v-if="detailsForm.expert_expertise">
+<!--    <view class="padding-tb" v-if="detailsForm.expert_expertise">
       <div style="width: 100%;" v-html="detailsForm.expert_expertise" disabled placeholder="" />
-    </view>
-    <div class="richText" v-if="detailsForm.node_desc" ref="richText">
+    </view> -->
+    <div class="richText" v-if="detailsForm.node_desc||detailsForm.expert_expertise" ref="richText">
       <!-- <rich-text :nodes="detailsForm.contents"></rich-text> -->
-      <u-parse :html="detailsForm.node_desc" :selectable="true" :tag-style="style"></u-parse>
+      <u-parse :html="detailsForm.node_desc||detailsForm.expert_expertise" :selectable="true" :tag-style="style"></u-parse>
     </div>
     <view class="richText" v-else>
       <!-- <rich-text :nodes="detailsForm.contents"></rich-text> -->

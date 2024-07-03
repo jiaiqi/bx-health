@@ -1,5 +1,5 @@
 <template>
-  <view class="page-wrap" :style="{
+  <view class="page-wrap page-main" :style="{
 			'--global-text-font-size': globalTextFontSize + 'px'
 		}">
     <view class="page-item" v-for="(pageItem,pageIndex) in pageItemList" :key="pageItem.item_no" :class="{
@@ -696,7 +696,7 @@
     align-items: center;
     padding: 0;
     font-size: 24rpx;
-
+    display: none;
     .icon {
       font-size: 70rpx;
     }
