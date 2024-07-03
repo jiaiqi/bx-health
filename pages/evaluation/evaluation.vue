@@ -66,7 +66,7 @@
             }, {
               name: '高血压评估',
               url: '/questionnaire/index/index?formType=form&activity_no=20240703092255000004&status=进行中'
-              url: '/publicPages/list/list?serviceName=srvhealth_store_report_hypertension_select'
+              // url: '/publicPages/list/list?serviceName=srvhealth_store_report_hypertension_select'
             }, {
               name: '糖尿病评估',
               url: '/questionnaire/index/index?formType=form&activity_no=20240703092326000005&status=进行中'
