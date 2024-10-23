@@ -2,7 +2,7 @@
   <view class="details-view page-main">
     <view class="details-tit">
       {{detailsForm.node_name||detailsForm.expert_name||''}}
-      <text class="circle-btn" @click="toSpeech">听</text>
+      <text class="circle-btn" @click="switchSpeech">听</text>
     </view>
     <view class="details-msg">
       <view class="author" v-if="detailsForm.author">
@@ -18,12 +18,13 @@
         职称/标签：<text>{{detailsForm.expert_title}}</text>
       </view>
     </view>
-<!--    <view class="padding-tb" v-if="detailsForm.expert_expertise">
+    <!--    <view class="padding-tb" v-if="detailsForm.expert_expertise">
       <div style="width: 100%;" v-html="detailsForm.expert_expertise" disabled placeholder="" />
     </view> -->
     <div class="richText" v-if="detailsForm.node_desc||detailsForm.expert_expertise" ref="richText">
       <!-- <rich-text :nodes="detailsForm.contents"></rich-text> -->
-      <u-parse :html="detailsForm.node_desc||detailsForm.expert_expertise" :selectable="true" :tag-style="style"></u-parse>
+      <u-parse :html="detailsForm.node_desc||detailsForm.expert_expertise" :selectable="true"
+        :tag-style="style"></u-parse>
     </div>
     <view class="richText" v-else>
       <!-- <rich-text :nodes="detailsForm.contents"></rich-text> -->
@@ -106,6 +107,7 @@
         },
         sc: 1,
         speech: null,
+        synthInstance: null
       };
     },
     onLoad(e) {
@@ -178,20 +180,28 @@
       // 		}
       // 	})
       // },
-      toSpeech() {
+      switchSpeech() {
+        if (this.synthInstance) {
+          // 暂停
+          if (this.synthInstance.paused === false) {
+            // 未处于暂停状态 点击暂停
+            this.synthInstance?.pause?.()
+          }else{
+            // 暂停状态 点击后继续播放
+            this.synthInstance?.resume?.()
+          }
+          return
+        }
         const richText = this.$refs.richText;
         let text = richText.innerText;
-        // let textArr = text.split('。')
-        // this.setdefaultWordData('微信到账100元')
-        const synth = window.speechSynthesis;
-        synth.getVoices();
+        this.synthInstance = window.speechSynthesis;
+        this.synthInstance.getVoices();
         const utterance = new SpeechSynthesisUtterance(text);
-        synth.speak(utterance);
+        this.synthInstance.speak(utterance);
         // setTimeout(()=>{
         //   const utterance = new SpeechSynthesisUtterance(text);
         //   synth.speak(utterance);
         // },300)
-    
       },
       getData(id) {
         const serviceMap = {
@@ -245,6 +255,7 @@
   .details-view {
     padding: 50rpx 20rpx;
     background-color: #f9faf6;
+
     .details-tit {
       text-align: center;
       font-size: 40rpx;

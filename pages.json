@@ -54,7 +54,8 @@
           "path": "index/index",
           "style": {
             "navigationBarTitleText": "问卷",
-            "enablePullDownRefresh": false
+            "enablePullDownRefresh": false,
+            "navigationStyle": "custom"
           }
         },
         {
@@ -98,7 +99,8 @@
           "path": "healthCompose/healthCompose",
           "style": {
             "navigationBarTitleText": "",
-            "enablePullDownRefresh": false
+            "enablePullDownRefresh": false,
+            "navigationStyle": "custom"
           }
         }, {
           "path": "DrugPlan/DrugPlan",
@@ -164,6 +166,14 @@
           "style": {
             "navigationBarTitleText": "运动项目列表",
             "enablePullDownRefresh": true
+          }
+        },
+        {
+          "path" : "corporeity/corporeity",
+          "style" : 
+          {
+            "navigationBarTitleText" : "",
+            "navigationStyle": "custom"
           }
         }
       ]

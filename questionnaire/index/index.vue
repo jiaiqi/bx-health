@@ -2,7 +2,7 @@
   <view class="page-wrap" :style="{
 			'--global-text-font-size': globalTextFontSize + 'px',
 		}">
-    <view class="to-history" v-if="configCols && configCols.length > 0" @click="toHistory">点击查看历史提交</view>
+    <view class="to-history" v-if="!inFrame && configCols && configCols.length > 0" @click="toHistory">点击查看历史提交</view>
     <view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
       <view class="desc" style="text-align: justify;">
         <view class="text-content-text text-black">
@@ -76,13 +76,13 @@
           remark: '', //欢迎语
           end_remark: '' //结束语
         },
-        // userInfo: {}, // 登录用户信息
         wxUserInfo: {}, // 微信用户信息
         questionData: {},
         fill_batch_no: '', //活动批次编号
         scoreInfo: {}, // 得分情况
         params: {},
-        showNextBtn: false
+        showNextBtn: false,
+        inFrame:false
       };
     },
     props: {
@@ -99,7 +99,7 @@
       ...mapState({
         userInfo: state => state.user.userInfo,
         globalTextFontSize: state => state.app['globalTextFontSize']
-      })
+      }),
     },
     watch: {
       activityNo(newValue, oldValue) {
@@ -873,6 +873,9 @@
       };
     },
     onLoad(option) {
+      if(option.inFrame){
+        this.inFrame = true
+      }
       // #ifdef MP-WEIXIN
       wx.showShareMenu({
         withShareTicket: true,
@@ -945,7 +948,7 @@
     background-color: #fff;
     overflow: scroll;
     max-width: 800px;
-    margin: 0 auto;
+    margin: 20px auto 50px;
   }
 
   .content {

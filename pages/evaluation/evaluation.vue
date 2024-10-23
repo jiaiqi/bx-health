@@ -38,7 +38,7 @@
               url: '/questionnaire/index/index?formType=form&activity_no=20240627213526000001&status=进行中'
             }, {
               name: '孕期体重评估',
-              url: '/otherPages/tool/toolTwo/toolTwo'
+              url: '/publicPages/prettyForm/prettyForm?type=add&service=srvhealth_evaluate_pregnant_add&app=health&resultColumn=result'
             }, {
               name: '婴幼儿发育评估',
               url: '/questionnaire/index/index?formType=form&activity_no=20240625175248000001&status=进行中'

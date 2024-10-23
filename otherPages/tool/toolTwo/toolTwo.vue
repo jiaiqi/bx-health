@@ -1,7 +1,7 @@
 <template>
-  <view class="wrap page-main">
+  <view class="wrap page-main ">
     <!-- #ifdef H5 -->
-    <view class="page-wrap page-top" v-if="!isMobile">
+<!--    <view class="page-wrap page-top" v-if="!isMobile">
       <view class="page-bg">
         <view class="title">
           BMI计算
@@ -10,64 +10,66 @@
 
         </view>
       </view>
-    </view>
+    </view> -->
     <!-- #endif -->
-    <view class="result-box">
-      <view class="result-item">
-        <view class="label">BMI:</view>
-        <view class="value"
-          :class="{ 'text-blue': bmi <= 18.5, 'text-cyan': bmi > 18.5 && bmi < 24, 'text-orange': bmi >= 24 && bmi < 28, 'text-red': bmi >= 28 }">
-          {{ bmi || 0 }}
-        </view>
-      </view>
-      <view class="result-item">
-        <view class="label">基础代谢:</view>
-        <view class="value"
-          :class="{ 'text-blue': bmi <= 18.5, 'text-cyan': bmi > 18.5 && bmi < 24, 'text-orange': bmi >= 24 && bmi < 28, 'text-red': bmi >= 28 }">
-          <text v-if="basicOut">{{ basicOut}}</text>
-          <text class="unit" v-if="basicOut">千卡</text>
-          <text v-else class="tipText">待完善信息</text>
-        </view>
-      </view>
-    </view>
-    <view class="bmi-box">
-      <bmi-weight-bar :height="info.height" :weight="info.weight"></bmi-weight-bar>
-    </view>
-    <view class="text-center text-cyan text-bold">请输入您的基本信息</view>
-    <view class="item-list">
-      <view class="item-list-top">
-        <text>*</text>
-        <text>体重(千克)</text>
-        <text class="margin-left-xs">{{ info.weight }}kg</text>
-      </view>
-      <slider-number v-model="info.weight" :max="200" :min="0" :step="0.1"></slider-number>
-    </view>
-    <view class="item-list">
-      <view class="item-list-top">
-        <text>*</text>
-        <text>身高(厘米)</text>
-        <text class="margin-left-xs">{{ info.height }}cm</text>
-      </view>
-      <slider-number v-model="info.height" :max="250" :min="0" :step="0.1"></slider-number>
-    </view>
-    <view class="item-list">
-      <view class="item-list-top">
-        <text>*</text>
-        <text>年龄</text>
-        <text class="margin-left-xs">{{ info.age }}</text>
-      </view>
-      <slider-number v-model="info.age" :max="100" :min="0" :step="[1, 10]"></slider-number>
-    </view>
-    <view class="item-list">
-      <view class="item-list-top">
-        <text>*</text>
-        <text class="margin-right">性别</text>
-        <bx-radio-group v-model="info.sex" mode="button">
-          <bx-radio class="radio" color="#2979ff" v-for="(item, i) in ['男', '女']" :key="item"
-            :name="item">{{ item }}</bx-radio>
-        </bx-radio-group>
-      </view>
-    </view>
+   <view class="page-main bg-white">
+     <view class="result-box ">
+       <view class="result-item">
+         <view class="label">BMI:</view>
+         <view class="value"
+           :class="{ 'text-blue': bmi <= 18.5, 'text-cyan': bmi > 18.5 && bmi < 24, 'text-orange': bmi >= 24 && bmi < 28, 'text-red': bmi >= 28 }">
+           {{ bmi || 0 }}
+         </view>
+       </view>
+       <view class="result-item">
+         <view class="label">基础代谢:</view>
+         <view class="value"
+           :class="{ 'text-blue': bmi <= 18.5, 'text-cyan': bmi > 18.5 && bmi < 24, 'text-orange': bmi >= 24 && bmi < 28, 'text-red': bmi >= 28 }">
+           <text v-if="basicOut">{{ basicOut}}</text>
+           <text class="unit" v-if="basicOut">千卡</text>
+           <text v-else class="tipText">待完善信息</text>
+         </view>
+       </view>
+     </view>
+     <view class="bmi-box">
+       <bmi-weight-bar :height="info.height" :weight="info.weight"></bmi-weight-bar>
+     </view>
+     <view class="text-center text-cyan text-bold">请输入您的基本信息</view>
+     <view class="item-list">
+       <view class="item-list-top">
+         <text>*</text>
+         <text>体重(千克)</text>
+         <text class="margin-left-xs">{{ info.weight }}kg</text>
+       </view>
+       <slider-number v-model="info.weight" :max="200" :min="0" :step="0.1"></slider-number>
+     </view>
+     <view class="item-list">
+       <view class="item-list-top">
+         <text>*</text>
+         <text>身高(厘米)</text>
+         <text class="margin-left-xs">{{ info.height }}cm</text>
+       </view>
+       <slider-number v-model="info.height" :max="250" :min="0" :step="0.1"></slider-number>
+     </view>
+     <view class="item-list">
+       <view class="item-list-top">
+         <text>*</text>
+         <text>年龄</text>
+         <text class="margin-left-xs">{{ info.age }}</text>
+       </view>
+       <slider-number v-model="info.age" :max="100" :min="0" :step="[1, 10]"></slider-number>
+     </view>
+     <view class="item-list">
+       <view class="item-list-top">
+         <text>*</text>
+         <text class="margin-right">性别</text>
+         <bx-radio-group v-model="info.sex" mode="button">
+           <bx-radio class="radio" color="#2979ff" v-for="(item, i) in ['男', '女']" :key="item"
+             :name="item">{{ item }}</bx-radio>
+         </bx-radio-group>
+       </view>
+     </view>
+   </view>
   </view>
 </template>
 

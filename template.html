@@ -103,25 +103,26 @@
       }
     </style>
     <script>
-      window.onload = function() {
-        const button = document.createElement('div')
-        button.classList.add('float-button')
-        document.body.appendChild(button)
-        button.addEventListener('click', () => {
-          window.open(
-            'https://dh.360.cn/chat?robot_id=a5f1f043372540e1a3895a3ba63586fd&Token=0fa4bd8246897a0f2b8b35005eeda5a7&nologin=true&health=true'
-          )
-        })
-        const closeBtn = document.createElement('div')
-        closeBtn.classList.add('close-button')
-        closeBtn.innerHTML = 'x'
-        closeBtn.title = '关闭'
-        closeBtn.addEventListener('click', (e) => {
-          e.stopPropagation()
-          button.style.display = 'none'
-        })
-        button.appendChild(closeBtn)
-      }
+      // window.onload = function() {
+      //   const button = document.createElement('div')
+      //   button.classList.add('float-button')
+      //   document.body.appendChild(button)
+      //   // button.addEventListener('click', () => {
+          
+      //   //   window.open(
+      //   //     'https://dh.360.cn/chat?robot_id=a5f1f043372540e1a3895a3ba63586fd&Token=0fa4bd8246897a0f2b8b35005eeda5a7&nologin=true&health=true'
+      //   //   )
+      //   // })
+      //   const closeBtn = document.createElement('div')
+      //   closeBtn.classList.add('close-button')
+      //   closeBtn.innerHTML = 'x'
+      //   closeBtn.title = '关闭'
+      //   closeBtn.addEventListener('click', (e) => {
+      //     e.stopPropagation()
+      //     button.style.display = 'none'
+      //   })
+      //   button.appendChild(closeBtn)
+      // }
     </script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
