@@ -4,7 +4,8 @@ let remoteAddress = {
 	ssourl: 'http://www.100xsys.cn', // 微信登陆sso 端口
 	ssoAddress: 'http://sso.100xsys.cn',
 	// serviceAddress: 'https://192.168.0.155:8106', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
-	serviceAddress: 'http://192.168.0.154:8104', // 健康环境
+	serviceAddress: 'http://139.196.111.15:1810', // 健康环境外网
+	// serviceAddress: 'http://192.168.0.154:8104', // 健康环境
 	// serviceAddress: 'https://api.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	// serviceAddress: 'http://192.168.0.121:8101', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	// serviceAddress: 'https://srvms.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn

@@ -82,7 +82,7 @@
         scoreInfo: {}, // 得分情况
         params: {},
         showNextBtn: false,
-        inFrame:false
+        inFrame: false
       };
     },
     props: {
@@ -335,7 +335,7 @@
                           url
                         })
                         return
-                      }else if(self.formData.info_collect_type === '自测' && self.fill_batch_no){
+                      } else if (self.formData.info_collect_type === '自测' && self.fill_batch_no) {
                         self.seeScore()
                         return
                       }
@@ -765,6 +765,42 @@
             config.type = 'images';
             config['fileNum'] = e.item_type_attr['fileNum'];
             break;
+          case '单选':
+            config.type = 'radioFk'
+            config.options = e.option_data.map((item, optIndex) => {
+              item.color = '#0bc99d';
+              item.value = item.option_value;
+              item.showimg = false;
+              item.checked = false
+              item.label = item.option_value;
+              if (item.option_view_no) {
+                item.serialChar = item.option_view_no;
+              } else if (item.option_seq) {
+                item.serialChar = item.option_seq;
+              } else {
+                item.serialChar = optIndex;
+              }
+              return item;
+            });
+            break;
+          case '多选':
+            config.type = 'checkboxFk'
+            config.options = e.option_data.map((item, optIndex) => {
+              item.color = '#0bc99d';
+              item.value = item.option_value;
+              item.showimg = false;
+              item.checked = false
+              item.label = item.option_value;
+              if (item.option_view_no) {
+                item.serialChar = item.option_view_no;
+              } else if (item.option_seq) {
+                item.serialChar = item.option_seq;
+              } else {
+                item.serialChar = optIndex;
+              }
+              return item;
+            });
+            break;
           case '选项':
             config.type = e.item_type_attr.radioType && e.item_type_attr.radioType === 'multi' ? 'checkboxFk' :
               'radioFk';
@@ -873,7 +909,7 @@
       };
     },
     onLoad(option) {
-      if(option.inFrame){
+      if (option.inFrame) {
         this.inFrame = true
       }
       // #ifdef MP-WEIXIN

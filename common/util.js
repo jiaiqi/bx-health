@@ -845,6 +845,12 @@ export default {
             'multi' : '',
             console.log(cnCol.item_type_attr['radioType'])
           break;
+        case "单选":
+          cnCol.item_type_attr['radioType'] = 'single'
+          break;
+        case "多选":
+          cnCol.item_type_attr['radioType'] = 'multi'
+          break;
         case "时间日期":
           cnCol.item_type_attr['dateType'] = e.format
           break;
@@ -918,7 +924,6 @@ export default {
             break;
           case "checkbox":
             if (item.item_type_attr.hasOwnProperty("option_type")) {
-
               if (item.item_type_attr.option_type === "单选") {
                 inputData.type = "radio"
                 inputData.itemArray = item.option_data.map((item, index) => {
