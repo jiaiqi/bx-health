@@ -57,27 +57,27 @@
             name: '慢病风险评估',
             children: [{
               name: '冠心病评估',
-              url: '/questionnaire/index/index?formType=form&activity_no=20240703091153000002&status=进行中'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240911085346000001&status=进行中'
               // url: '/publicPages/list/list?serviceName=srvhealth_store_report_coronary_disease_select'
             }, {
               name: '脑卒中评估',
-              url: '/questionnaire/index/index?formType=form&activity_no=20240703092217000003&status=进行中'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240911095221000002&status=进行中'
               // url: '/publicPages/list/list?serviceName=srvhealth_store_report_apoplexy_select'
             }, {
               name: '高血压评估',
-              url: '/questionnaire/index/index?formType=form&activity_no=20240703092255000004&status=进行中'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240911150101000006&status=进行中'
               // url: '/publicPages/list/list?serviceName=srvhealth_store_report_hypertension_select'
             }, {
               name: '糖尿病评估',
-              url: '/questionnaire/index/index?formType=form&activity_no=20240703092326000005&status=进行中'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240911102000000003&status=进行中'
               // url: '/publicPages/list/list?serviceName=srvhealth_store_report_diabetes_select'
             }, {
               name: '代谢综合征评估',
-              url: '/questionnaire/index/index?formType=form&activity_no=20240703092406000006&status=进行中'
+              url: '/questionnaire/index/index?formType=form&activity_no=20240911110735000004&status=进行中'
               // url: '/publicPages/list/list?serviceName=srvhealth_store_report_metabolize_select'
             }, {
-              name: '肺癌评估',
-              url: '/questionnaire/index/index?formType=form&activity_no=20240703083854000001&status=进行中'
+              name: '癌症风险评估',
+              url: '/questionnaire/index/index?formType=form&activity_no=20240911114109000005&status=进行中'
               // url: '/publicPages/list/list?serviceName=srvhealth_store_report_lung_cancer_select'
             }]
           }, {
@@ -87,28 +87,28 @@
               url: '/otherPages/dietSelect/dietSelect?condType=%257B%2522type%2522%253A%2522food%2522%252C%2522serviceName%2522%253A%2522srvhealth_diet_contents_select%2522%252C%2522colName%2522%253A%2522name%2522%252C%2522imgCol%2522%253A%2522image%2522%252C%2522wordKey%2522%253A%257B%2522title%2522%253A%2522name%2522%252C%2522unit%2522%253A%2522unit%2522%252C%2522energy%2522%253A%2522unit_energy%2522%257D%252C%2522pagetType%2522%253A%2522detail%2522%257D'
             }, {
               name: '孕育营养',
-              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS202102011156120004%2522%252C%2522display%2522%253Afalse%257D%255D'
+              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&disabled=true&destApp=health&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS202102011156120004%2522%252C%2522display%2522%253Afalse%257D%255D'
             }, {
               name: '学龄儿童',
-              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS202101231933360001%2522%252C%2522display%2522%253Afalse%257D%255D'
+              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&disabled=true&destApp=health&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS202101231933360001%2522%252C%2522display%2522%253Afalse%257D%255D'
             }, {
               name: '办公室人群',
-              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS202101242003140003%2522%252C%2522display%2522%253Afalse%257D%255D'
+              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&disabled=true&destApp=health&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS202101242003140003%2522%252C%2522display%2522%253Afalse%257D%255D'
             }, {
               name: '老年人',
-              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS202101231935060002%2522%252C%2522display%2522%253Afalse%257D%255D'
+              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&disabled=true&destApp=health&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS202101231935060002%2522%252C%2522display%2522%253Afalse%257D%255D'
             }, {
               name: '糖尿病',
-              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS2406251701030001%2522%252C%2522display%2522%253Afalse%257D%255D'
+              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&disabled=true&destApp=health&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS2406251701030001%2522%252C%2522display%2522%253Afalse%257D%255D'
             }, {
               name: '高血压',
-              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS2406251701160002%2522%252C%2522display%2522%253Afalse%257D%255D'
+              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&disabled=true&destApp=health&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS2406251701160002%2522%252C%2522display%2522%253Afalse%257D%255D'
             }, {
               name: '痛风',
-              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS2406251701260003%2522%252C%2522display%2522%253Afalse%257D%255D'
+              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&disabled=true&destApp=health&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS2406251701260003%2522%252C%2522display%2522%253Afalse%257D%255D'
             }, {
               name: '肥胖',
-              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS2406251701390004%2522%252C%2522display%2522%253Afalse%257D%255D'
+              url: '/publicPages/newForm/newForm?type=detail&serviceName=srvhealth_diet_scheme_select&disabled=true&destApp=health&fieldsCond=%255B%257B%2522column%2522%253A%2522diet_scheme_no%2522%252C%2522value%2522%253A%2522DS2406251701390004%2522%252C%2522display%2522%253Afalse%257D%255D'
             }]
           },
           {

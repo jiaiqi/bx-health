@@ -15,7 +15,7 @@
           ref="bxForm" :showResult="showResult" @value-blur="valueChange"></a-form>
       </view>
     </scroll-view>
-    <view class="button-box"　v-if="ui!=='pretty'">
+    <view class="button-box" 　v-if="disabled!==true && ui!=='pretty'">
       <button class="cu-btn bg-blue" type="primary" v-if="isArray(fields) && fields.length > 0"
         v-for="(btn,btnIndex) in colsV2Data._formButtons" :key="btnIndex" @click="onButton(btn)">
         {{ btn.button_name }}
@@ -38,6 +38,7 @@
 
     data() {
       return {
+        disabled: false,
         appName: '',
         service: '', //自定义按钮的服务
         serviceName: '',
@@ -59,7 +60,7 @@
         submitAction: '', //提交后要进行的emit操作
         keyboardHeight: 0,
         pageHeight: `calc(100vh - var(--window-top) - var(--window-bottom))`,
-        showResult:false,//显示表内计算结果
+        showResult: false, //显示表内计算结果
       };
     },
     props: {
@@ -75,8 +76,8 @@
         type: String,
         default: ''
       },
-      ui:String,
-      resultColumn:String
+      ui: String,
+      resultColumn: String
     },
     computed: {
       setService() {
@@ -329,9 +330,9 @@
           this.$http.post(url, req);
         }
       },
-      seeResult(button,column){
+      seeResult(button, column) {
         this.showResult = true
-        if(button){
+        if (button) {
           this.onButton(button)
         }
       },
@@ -477,7 +478,7 @@
               let app = this.appName || uni.getStorageSync('activeApp');
               let url = this.getServiceUrl(app, e.service_name, 'add');
               let res = await this.$http.post(url, req);
-       
+
               if (res.data.state === 'SUCCESS') {
                 if (
                   Array.isArray(res.data.response) &&
@@ -493,8 +494,8 @@
                     self.addPersonToStore(this.params.submitData);
                   }
                 }
-                if(self.ui==='pretty' || self.ui==='popupSelector'){
-                  self.$emit('on-submit',self.params.submitData)
+                if (self.ui === 'pretty' || self.ui === 'popupSelector') {
+                  self.$emit('on-submit', self.params.submitData)
                   return
                 }
                 uni.showModal({
@@ -708,7 +709,7 @@
         let colVs = await self.getServiceV2(self.serviceName, self.srvType, self.use_type, app);
         let defaultVal = self.defaultVal;
         self.colsV2Data = colVs;
-        this.$emit('v2-loaded',colVs)
+        this.$emit('v2-loaded', colVs)
         colVs = self.deepClone(colVs);
         if (colVs && colVs.service_view_name) {
           uni.setNavigationBarTitle({
@@ -900,6 +901,9 @@
       const destApp = option.destApp;
       if (destApp) {
         uni.setStorageSync('activeApp', destApp);
+      }
+      if (option.disabled) {
+        this.disabled = true
       }
       if (option.appName) {
         this.appName = option.appName

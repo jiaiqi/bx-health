@@ -20,13 +20,39 @@
         return false
       },
     },
+    mounted() {
+      this.$nextTick(()=>{
+        setTimeout(()=>{
+          const {
+            client_env
+          } = this.judgeClientEnviroment();
+          if(client_env=='web'){
+            // #ifdef H5
+            console.log(document.querySelector('uni-page-head'), '11111111111111111111111111');
+            document.querySelector('uni-page-head')?.setAttribute?.('style','display:none;')
+            // #endif
+          }
+        },500)
+      })
+      
+    },
     onLaunch(options) {
+      console.log('onLaunchonLaunchonLaunchonLaunchonLaunch');
       if (options.scene === 1154) {
         return
       }
       if (options?.query?.bx_auth_ticket) {
         uni.setStorageSync('bx_auth_ticket', options.query.bx_auth_ticket)
         uni.setStorageSync('isLogin', true)
+        if (options?.query?.login_user_info) {
+          try {
+            let login_user_info = JSON.parse(options?.query?.login_user_info)
+            if (login_user_info?.user_no) {
+              uni.setStorageSync('login_user_info', login_user_info)
+            }
+          } catch (err) {
+          }
+        }
       }
       this.checkUpdate()
       this.checkOptionParams(options)
@@ -36,7 +62,7 @@
         console.log('onMemoryWarningReceive', e)
       });
       // #endif
-      this.judgeClientEnviroment();
+
       uni.getSystemInfo({
         success: function(e) {
           // #ifndef MP
@@ -170,17 +196,19 @@
   }
 
   .page-main,
-  .uni-scroll-view ,.form.is-pc{
+  .uni-scroll-view,
+  .form.is-pc {
     overflow: scroll;
     max-width: 800px;
     margin: 0 auto;
     position: relative;
-    
+
   }
 
-  .is-pc .search-bar{
-    position: relative!important;
-    .cu-bar.search{
+  .is-pc .search-bar {
+    position: relative !important;
+
+    .cu-bar.search {
       background-color: #fff;
       overflow: scroll;
       max-width: 800px;

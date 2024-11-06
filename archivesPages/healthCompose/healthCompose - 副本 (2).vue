@@ -1,32 +1,46 @@
 <template>
-  <view class="couple-wrap page-main">
-    <view class="couple-more-wrap">
-      <view class="couple-more-top">
-        <text></text>
-        <text>体质健康评测</text>
+  <view class="full-page">
+    <view class="page-wrap">
+      <view class="total-score ">
+        <view class="">
+          综合得分:
+        </view>
+        <view class="score">
+          {{ totalScore | fixed1 }}
+          <text class="unit">分</text>
+        </view>
       </view>
-      <uni-echarts class="uni-ec-canvas" canvas-id="nutrients-canvas" :ec="radarOption"></uni-echarts>
-      <view class="text-center margin-tb-sm text-gray"
-        v-if="corporeity.find(item=>item.grade>=40)&&corporeity.find(item=>item.grade>=40).name">
-        <text> 经评测您的体制为</text><text class="text-bold text-black">【{{corporeity.find(item=>item.grade>=40).name}}】</text>
+      <view class="sub-title">
+        健康评测
       </view>
-      <view class="more-couple-cen-wrap">
-        <view class="couple-cen more-couple-cen">
-          <view @click="clickItem(item)" v-for="(item, index) in corporeity" :key="index" :class="{
-							'couple-cen-item-active': item.name === currentItem.name && false
-						}" class="couple-cen-item ">
-            <view class="couple-cen-item-t">
-              <text v-if="item.finished && !item.grade && item.grade !== 0" class="text">暂无得分</text>
-              <view class="unfilled" @click="toQuestionnaire(item)">
-              </view>
+      <view class="survey-list">
+        <view class="survey-item" v-for="item in coupleData" @click="toQuestionnaire(item)">
+          <image src="../../static/icon/surveyBg.png" mode="" style="width: 60px;height: 60px;"></image>
+          <view class="right">
+            <view class="">
+              {{item.name}}
             </view>
-            <view class="icon" @click="toQuestionnaire(item)">
-              <view class="bg-cyan cu-tag pl" v-if="item.grade>=40">符合</view>
-              <view class="bg-blue cu-tag badge" v-if="item.grade">{{ item.grade}}分</view>
-              <image class="image" :src="item.icon" mode="aspectFill"></image>
+            <view class="survey-btn">
+              点击评测
             </view>
-            <view class="couple-cen-item-b">
-              <text>{{ item.name }}</text>
+          </view>
+        </view>
+      </view>
+      <view class="sub-title">
+        体质评测
+      </view>
+      <view class="bg-white" style="padding:0 20px;">
+        <uni-echarts class="uni-ec-canvas" canvas-id="nutrients-canvas" :ec="radarOption"></uni-echarts>
+      </view>
+      <view class="survey-list">
+        <view class="survey-item" v-for="item in corporeity" @click="toQuestionnaire(item)">
+          <image src="../../static/icon/surveyBg.png" mode="" style="width: 60px;height: 60px;"></image>
+          <view class="right">
+            <view class="">
+              {{item.name}}
+            </view>
+            <view class="survey-btn">
+              点击评测
             </view>
           </view>
         </view>
@@ -34,6 +48,7 @@
     </view>
   </view>
 </template>
+
 <script>
   import uniEcharts from '@/components/uni-ec-canvas/uni-echart.vue';
   export default {
@@ -47,6 +62,14 @@
           option: {}
         },
         coupleData: [
+          // {
+          // 	name: '基本信息',
+          // 	grade: null,
+          // 	fullMark: 25,
+          // 	finished: false,
+          // 	icon: '/static/icon/body.png',
+          // 	detail: {}
+          // },
           {
             name: '健康素养',
             finished: false,
@@ -201,6 +224,12 @@
           let age = new Date().getFullYear() - new Date(this.userInfo.birthday).getFullYear();
           return age;
         }
+      },
+      totalScore() {
+        let result = this.coupleData.map(a => (a.grade ? a.grade : 0)).reduce((a, b) => a + b, 0);
+        uni.$emit('healthTotalScoreChanged', result);
+        uni.setStorageSync('healthTotalScore', result);
+        return result;
       },
       weightAdvice() {
         let score = this.getWeightScore();
@@ -550,13 +579,13 @@
       let userInfo = await this.selectBasicUserList();
       if (userInfo && userInfo.userno) {
         this.userInfo = userInfo;
-        // this.getScoreInfo();
+        this.getScoreInfo();
         this.getCorporeityScore();
       }
     },
     onShow() {
       if (this.userInfo && this.userInfo.userno) {
-        // this.getScoreInfo();
+        this.getScoreInfo();
         this.getCorporeityScore();
       }
     }
@@ -564,287 +593,93 @@
 </script>
 
 <style lang="scss" scoped>
-  .couple-wrap {
-    background-color: white;
-    min-height: 100vh;
-    padding-top: 20rpx;
-
-    .tips {
-      padding: 20rpx;
-      color: #67c23a;
-      background: #f0f9eb;
-      border-color: #c2e7b0;
-      margin: 20rpx;
-    }
+  .full-page{
+    background-color: #F8F8F8;
+  }
+  .page-wrap {
+    max-width: 800px;
+    margin: 0 auto;
 
     .total-score {
-      width: 50%;
-      margin: 0 auto 0;
-      text-align: center;
-      padding: 40rpx 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-      font-size: 80rpx;
-      border-radius: 100rpx;
+      height: 80px;
+      line-height: 80px;
+      padding: 0 30px;
+      background: linear-gradient(88.92deg, rgba(195, 228, 214, 0.22) 1.07%, rgba(92, 224, 168, 0.41) 99.94%);
+      justify-content: space-between;
+      display: flex;
+      color: #000;
 
-      .unit {
-        font-size: 28rpx;
+      .score {
+        color: rgba(14, 148, 114, 1);
+        font-size: 28px;
+
+        .unit {
+          font-size: 14px;
+          color: #000;
+          margin-left: 10px;
+        }
       }
     }
 
-    .couple-cen {
-      position: relative;
-      transition: all 1s;
+    .sub-title {
+      color: rgba(14, 148, 114, 1);
+      font-size: 16px;
+      padding: 0 20px;
+      line-height: 40px;
+      font-weight: bold;
+      &:before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+        background-color: rgba(14, 148, 114, 1);
+        margin-right: 10px;
+      }
+    }
+
+    .survey-list {
       display: flex;
       flex-wrap: wrap;
-      margin: 0 20rpx;
-      padding-bottom: 20rpx;
+      background-color: #fff;
+      padding: 20px;
+    }
 
-      .couple-cen-item {
-        width: 33%;
-        max-width: 200px;
-        box-sizing: border-box;
-        min-height: 150rpx;
+    .survey-item {
+      display: flex;
+      width: 50%;
+      margin-bottom: 10px;
+
+      .right {
         display: flex;
         flex-direction: column;
-        align-items: center;
+        margin-left: 20px;
         justify-content: center;
-        padding: 10rpx;
-        border: 1px solid #f1f1f1;
-        position: relative;
-        border-top: none;
-        transition: all 0.3s ease;
-        background-color: #fff;
 
-        &:hover {
-          transform: scale(1.1);
-          cursor: pointer;
-        }
-
-        &:nth-child(1),
-        &:nth-child(2),
-        &:nth-child(3) {
-          border-top: 1px solid #f1f1f1;
-        }
-
-        .couple-cen-item-t {
-          position: relative;
-          font-size: 72rpx;
-          color: #ccc;
-          font-weight: 600;
-          display: flex;
-          width: 100%;
-          flex: 1;
-          justify-content: center;
-          align-items: flex-end;
-          z-index: 2;
-
-          .score-detail {
-            position: relative;
-
-            .unit {
-              font-size: 24rpx;
-              font-weight: normal;
-              position: absolute;
-              bottom: 0;
-            }
-          }
-
-          .text {
-            font-size: 14rpx;
-          }
-
-          .unfilled {
-            font-size: 24rpx;
-            color: #999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-weight: normal;
-
-            .text-icon {
-              font-size: 48rpx;
-            }
-          }
-        }
-
-        .risk {
-          color: #e54d42;
-        }
-
-        .normal {
-          color: #39b54a;
-        }
-
-        .icon {
-          width: 150rpx;
-          height: 150rpx;
-          position: relative;
-
-          .badge {
-            z-index: 2;
-            right: -20px;
-            border-radius: 0;
-          }
-
-          .pl {
-            position: absolute;
-            left: -15px;
-            top: calc(50% - 10px);
-            z-index: 2;
-            border-radius: 20px;
-            margin: 0;
-            padding: 5px;
-            height: auto;
-            font-size: 12px;
-            width: 20px;
-            white-space: break-spaces;
-
-          }
-
-          .image {
-            width: 150rpx;
-            height: 150rpx;
-          }
-        }
-
-        .couple-cen-item-b {
-          font-size: 30rpx;
-          font-weight: 700;
-          position: relative;
+        .survey-btn {
+          margin-top: 10px;
+          line-height: 20px;
+          border-radius: 4px;
+          background: linear-gradient(162.97deg, rgba(206, 234, 158, 1) -40.39%, rgba(53, 179, 137, 1) 91.07%);
+          color: rgba(255, 255, 255, 1);
+          font-size: 14px;
           text-align: center;
-          margin-top: 10rpx;
-          width: 100%;
-
-          .ratio {
-            font-weight: normal;
-            font-size: 24rpx;
-            color: #999;
-          }
-        }
-
-        .item-total-score {
-          font-weight: normal;
-          font-size: 24rpx;
-          color: #999;
-        }
-      }
-
-      .couple-cen-item-active {
-        height: 300rpx;
-        z-index: 10;
-        background-color: #fff;
-        grid-column-start: 1;
-        grid-column-end: 4;
-        grid-row-start: 1;
-        animation: 1s overview;
-      }
-    }
-
-    @keyframes overview {
-      0% {
-        transform: scale(0);
-      }
-
-      100% {
-        transform: scale(1);
-      }
-    }
-
-    .couple-more-wrap {
-      .couple-more-top {
-        padding: 15px;
-        font-size: 16px;
-        font-weight: 800;
-        display: flex;
-        align-items: center;
-
-        text {
-          &:first-child {
-            width: 8rpx;
-            height: 32rpx;
-            background-color: #0081ff;
-            border-radius: 8rpx;
-            margin-right: 10rpx;
-          }
-        }
-      }
-
-      .health-box {
-        display: flex;
-        flex-wrap: wrap;
-        padding: 0 20rpx;
-
-        .health-item {
-          width: 33.33%;
-          height: calc((100vw - 150rpx) / 3);
-          max-width: 200px;
-          max-height: 200px;
-          box-sizing: border-box;
-          padding-top: 20rpx;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          flex-direction: column;
-          border-right: 1px solid #f1f1f1;
-          border-bottom: 1px solid #f1f1f1;
-          position: relative;
-
-          &:hover {
-           .image{
-             transform: scale(1.5);
-             cursor: pointer;
-           }
-          }
+          padding: 0 10px;
+          cursor: pointer;
 
           &:active {
-            background-color: #f1f1f1;
-          }
-
-          &:nth-child(3n + 1) {
-            border-left: 1px solid #f1f1f1;
-          }
-
-          &:nth-child(1),
-          &:nth-child(2),
-          &:nth-child(3) {
-            border-top: 1px solid #f1f1f1;
-          }
-
-          .grade {
-            font-size: 12px;
-            display: inline-block;
-            padding: 2px 0;
-            position: absolute;
-            width: 150rpx;
-            left: calc(50% - 75rpx);
-            text-align: center;
-            top: 0;
-          }
-
-          .image {
-            padding: 10rpx;
-            width: 40px;
-            height: 40px;
-            transition: all 0.3s ease;
+            transform: translate(1px, 1px);
           }
         }
       }
     }
+
   }
+
 
   .uni-ec-canvas {
     width: calc(100% - 40rpx);
     height: 500rpx;
     padding: 0 20rpx 20rpx 20rpx;
     display: block;
-  }
-  @media screen and (min-width:600px) {
-    .mobile{
-      display: none!important;
-    }
-    .couple-cen.more-couple-cen{
-      justify-content: center;
-      margin-top: 50px;
-    }
   }
 </style>

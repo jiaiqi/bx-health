@@ -69,12 +69,37 @@
           "path": "assessmentResult/assessmentResult",
           "style": {
             "navigationBarTitleText": "",
-            "enablePullDownRefresh": false
+            "enablePullDownRefresh": false,
+            "navigationStyle": "custom"
           }
         },
         {
           "path": "couple/couple",
           "style": {}
+        },
+        {
+          "path" : "survey/survey",
+          "style" : 
+          {
+            "navigationBarTitleText" : "",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path" : "survey/result",
+          "style" : 
+          {
+            "navigationBarTitleText" : "",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path" : "survey/history",
+          "style" : 
+          {
+            "navigationBarTitleText" : "",
+            "navigationStyle": "custom"
+          }
         }
       ]
     },
