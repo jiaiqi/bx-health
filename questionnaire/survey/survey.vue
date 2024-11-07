@@ -102,6 +102,22 @@
       }),
     },
     watch: {
+      configCols: {
+        deep: true,
+        handler(newValue, oldValue) {
+          this.$nextTick(() => {
+            // 当页面加载完成后，发送消息给父窗口
+              // 获取页面的实际高度
+              var height = document.documentElement.scrollHeight || document.body.scrollHeight;
+              console.error('parentHeight:',height)
+              // 使用 postMessage 发送高度信息给父窗口
+              window.parent.postMessage({
+                type: 'height',
+                value: height
+              }, '*'); // '*' 表示可以向任何源发送消息
+          })
+        }
+      },
       activityNo(newValue, oldValue) {
         if (this.activityNo) {
           this.emptyText = '正在请求问卷配置数据';
@@ -637,7 +653,7 @@
               }
             });
             this.configCols = configCols;
-            this.getUserInfo();
+            // this.getUserInfo();
           } else if (res.data.resultCode === '0011') {
             uni.showToast({
               title: '未登录',
@@ -1043,6 +1059,7 @@
     justify-content: center;
     padding: 30rpx;
     margin-top: 50px;
+
     .button {
       color: #fff;
       height: 40px;

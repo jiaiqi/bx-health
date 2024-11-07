@@ -273,7 +273,8 @@
           </svg>
         </view>
         <view class="padding-sm  assessment-item  shadow" v-for="(item, index) in assessmentReport" :key="index">
-          {{ item.sug_desc }}</view>
+          {{ item.sug_desc }}
+        </view>
 
 
       </view>
@@ -290,6 +291,24 @@
         activity_no: '',
         fill_batch_no: ''
       };
+    },
+    watch: {
+      assessmentReport: {
+        deep: true,
+        handler(newValue, oldValue) {
+          this.$nextTick(() => {
+            // 当页面加载完成后，发送消息给父窗口
+            // 获取页面的实际高度
+            var height = document.documentElement.scrollHeight || document.body.scrollHeight;
+            console.error('parentHeight:', height)
+            // 使用 postMessage 发送高度信息给父窗口
+            window.parent.postMessage({
+              type: 'height',
+              value: height
+            }, '*'); // '*' 表示可以向任何源发送消息
+          })
+        }
+      }
     },
     methods: {
       toContcat() {
@@ -350,6 +369,7 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
+
     .title {
       border-radius: 10px 10px 0px 0px;
       background: linear-gradient(159.97deg, rgba(206, 234, 158, 1) -140.78%, rgba(53, 179, 137, 1) 89.45%);
@@ -370,7 +390,8 @@
     background-repeat: no-repeat;
     background-position: center;
     position: relative;
-    flex:1;
+    flex: 1;
+
     .content-bg {
       position: absolute;
       top: 10%;
