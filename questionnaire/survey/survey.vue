@@ -2,7 +2,7 @@
   <view class="page-wrap" :style="{
 			'--global-text-font-size': globalTextFontSize + 'px',
 		}">
-    <view class="to-history" v-if="!inFrame && configCols && configCols.length > 0" @click="toHistory">点击查看历史提交</view>
+    <!-- <view class="to-history" v-if="!inFrame && configCols && configCols.length > 0" @click="toHistory">点击查看历史提交</view> -->
     <view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
       <view class="desc" style="text-align: justify;">
         <view class="text-content-text text-black">
