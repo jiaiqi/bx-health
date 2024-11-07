@@ -1,15 +1,11 @@
 <template>
-  <view class="couple-wrap page-main">
+  <view class="couple-wrap ">
     <view class="couple-more-wrap">
-      <view class="couple-more-top">
+<!--      <view class="couple-more-top">
         <text></text>
         <text>体质健康评测</text>
-      </view>
-      <uni-echarts class="uni-ec-canvas" canvas-id="nutrients-canvas" :ec="radarOption"></uni-echarts>
-      <view class="text-center margin-tb-sm text-gray"
-        v-if="corporeity.find(item=>item.grade>=40)&&corporeity.find(item=>item.grade>=40).name">
-        <text> 经评测您的体制为</text><text class="text-bold text-black">【{{corporeity.find(item=>item.grade>=40).name}}】</text>
-      </view>
+      </view> -->
+      
       <view class="more-couple-cen-wrap">
         <view class="couple-cen more-couple-cen">
           <view @click="clickItem(item)" v-for="(item, index) in corporeity" :key="index" :class="{
@@ -30,6 +26,11 @@
             </view>
           </view>
         </view>
+      </view>
+      <uni-echarts class="uni-ec-canvas" canvas-id="nutrients-canvas" :ec="radarOption"></uni-echarts>
+      <view class="text-center margin-tb-sm text-gray"
+        v-if="corporeity.find(item=>item.grade>=40)&&corporeity.find(item=>item.grade>=40).name">
+        <text> 经评测您的体制为</text><text class="text-bold text-black">【{{corporeity.find(item=>item.grade>=40).name}}】</text>
       </view>
     </view>
   </view>
@@ -320,7 +321,7 @@
       toQuestionnaire(item) {
         if (item && item.no) {
           uni.navigateTo({
-            url: `/questionnaire/index/index?formType=form&activity_no=${item.no}&status=进行中`
+            url: `/questionnaire/survey/survey?formType=form&activity_no=${item.no}&status=进行中`
           });
         } else {
           if (item && item.name === '基本信息') {
@@ -547,12 +548,12 @@
       }
     },
     async created() {
-      let userInfo = await this.selectBasicUserList();
-      if (userInfo && userInfo.userno) {
-        this.userInfo = userInfo;
-        // this.getScoreInfo();
-        this.getCorporeityScore();
-      }
+      // let userInfo = await this.selectBasicUserList();
+      // if (userInfo && userInfo.userno) {
+      //   this.userInfo = userInfo;
+      //   // this.getScoreInfo();
+      //   this.getCorporeityScore();
+      // }
     },
     onShow() {
       if (this.userInfo && this.userInfo.userno) {
@@ -594,16 +595,18 @@
     .couple-cen {
       position: relative;
       transition: all 1s;
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+      grid-gap: 20px;
       flex-wrap: wrap;
-      margin: 0 20rpx;
-      padding-bottom: 20rpx;
+      margin:0 40rpx;
+      padding: 20rpx;
 
       .couple-cen-item {
-        width: 33%;
-        max-width: 200px;
+        width:100%;
+        width: 200px;
         box-sizing: border-box;
-        min-height: 150rpx;
+        min-height: 150px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -611,20 +614,20 @@
         padding: 10rpx;
         border: 1px solid #f1f1f1;
         position: relative;
-        border-top: none;
+        // border-top: none;
         transition: all 0.3s ease;
         background-color: #fff;
-
+        
         &:hover {
           transform: scale(1.1);
           cursor: pointer;
         }
 
-        &:nth-child(1),
-        &:nth-child(2),
-        &:nth-child(3) {
-          border-top: 1px solid #f1f1f1;
-        }
+        // &:nth-child(1),
+        // &:nth-child(2),
+        // &:nth-child(3) {
+        //   border-top: 1px solid #f1f1f1;
+        // }
 
         .couple-cen-item-t {
           position: relative;
@@ -841,10 +844,6 @@
   @media screen and (min-width:600px) {
     .mobile{
       display: none!important;
-    }
-    .couple-cen.more-couple-cen{
-      justify-content: center;
-      margin-top: 50px;
     }
   }
 </style>
