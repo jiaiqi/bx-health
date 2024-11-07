@@ -32,9 +32,8 @@
             document.querySelector('uni-page-head')?.setAttribute?.('style','display:none;')
             // #endif
           }
-        },500)
+        },100)
       })
-      
     },
     onLaunch(options) {
       console.log('onLaunchonLaunchonLaunchonLaunchonLaunch');
