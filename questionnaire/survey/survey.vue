@@ -304,7 +304,6 @@
                     title: '提交成功',
                     icon: 'none'
                   });
-
                   self.formType = 'detail';
                   self.getQuestionnaireData(self.formData);
                   if (Array.isArray(res.data.response) && res.data
