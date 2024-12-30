@@ -141,6 +141,8 @@ fly.interceptors.response.use(
 				// } else {
 				// 确认未登录时再进行自动跳转到登录页面
 				let requestUrl = decodeURIComponent(res.request.headers.requrl)
+        console.log('(res.request.headers:',res.request.headers);
+        savePreviousPage()
 				if (requestUrl) {
 					console.log('请求失败::', requestUrl)
 					if (requestUrl && requestUrl !== '/' && requestUrl.indexOf("code") ===
@@ -148,6 +150,11 @@ fly.interceptors.response.use(
 						//  过滤无效的url
 						let index = requestUrl.indexOf('/pages/')
 						requestUrl = requestUrl.slice(index)
+            console.log('requestUrl1:',requestUrl);
+            if(requestUrl?.includes('bx_auth_ticket')){
+              requestUrl = removeQueryParamManual(requestUrl, 'bx_auth_ticket')
+            }
+            console.log('requestUrl2:',requestUrl);
 						uni.setStorageSync("backUrl", requestUrl)
 					}
 					try {
@@ -193,4 +200,50 @@ fly.interceptors.response.use(
 			}
 		}
 )
+// 记录路由地址
+const savePreviousPage = () => {
+	let routes = getCurrentPages(); // 获取当前打开过的页面路由数组
+	let curRoute = routes[routes.length - 1].route //获取当前页面路由
+	let curParam = routes[routes.length - 1].options; //获取路由参数
+	// 拼接参数
+	let param = ''
+	for (let key in curParam) {
+    if(key !== 'bx_auth_ticket'){
+      if (!param) {
+      	param += key + '=' + curParam[key]
+      } else {
+      	param += '&' + key + '=' + curParam[key]
+      }
+    }
+	}	
+	if (curRoute === 'pages/login/login') return
+	if (param) {
+		uni.setStorageSync('redirect_page', '/' + curRoute + '?' + param)
+	} else {
+		uni.setStorageSync('redirect_page', '/' + curRoute)
+	}
+}
+
+export function removeQueryParamManual(url, paramToRemove) {
+  // 解析基础 URL 和查询字符串
+  const urlParts = url.split('?');
+  let baseUrl = urlParts[0];
+  let queryString = urlParts[1] || '';
+
+  // 如果没有查询字符串，则直接返回原始 URL
+  if (!queryString) return url;
+
+  // 将查询字符串分割成键值对数组
+  const paramsArray = queryString.split('&').filter(pair => {
+    const [key] = pair.split('=');
+    return key !== paramToRemove;
+  });
+
+  // 重构查询字符串
+  const newQueryString = paramsArray.length > 0 ? '?' + paramsArray.join('&') : '';
+
+  // 返回修改后的完整 URL
+  return baseUrl + newQueryString;
+}
+
 export default fly

@@ -47,6 +47,7 @@
     </view>
     <view class="button-box" v-if="showNextBtn"><button class="button cu-btn" @click="toNextPages">下一步</button>
     </view>
+    <wxOfficialLogin></wxOfficialLogin>
   </view>
 </template>
 

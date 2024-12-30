@@ -239,7 +239,7 @@
 		display: flex;
 		margin: 10rpx;
 		align-items: center;
-
+    max-width: 100%;
 		.bx-checkbox-icon {
 			border: 1rpx solid #c8c9cc;
 			width: 40rpx;
@@ -252,7 +252,8 @@
 			font-size: 24rpx;
 
 			&.checked {
-				background-color: #0081ff;
+				background-color: #0bc99d;
+				// background-color: #0081ff;
 				color: #fff;
 				border-color: #fff;
 				// color: #0081FF;

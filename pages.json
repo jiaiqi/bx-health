@@ -1,5 +1,11 @@
 {
   "pages": [{
+      "path" : "pages/login/login",
+      "style" : 
+      {
+        "navigationBarTitleText" : ""
+      }
+    },{
       "path": "pages/pedia/pedia",
       "style": {
         "navigationBarTitleText": "健康宝典",
@@ -46,6 +52,7 @@
         "navigationStyle": "custom"
       }
     }
+    
   ],
   "subPackages": [{
       // 问卷

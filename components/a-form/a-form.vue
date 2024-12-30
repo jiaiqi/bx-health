@@ -73,26 +73,34 @@
           }
         });
         if (valid === showsNum) {
-          console.log('表单校验通过', showsNum, valid, this.fieldModel);
+          let fieldModel = this.fieldModel
+          this.allField.forEach(item=>{
+            if(item.type.includes('checkbox')){
+              if(fieldModel[item.column].includes(',')){
+                fieldModel[item.column] = fieldModel[item.column].split(',')
+              }
+            }
+          })
+          console.log('表单校验通过', showsNum, valid, fieldModel);
           let model = {};
           switch (this.pageType) {
             case 'update':
-              for (let key in this.fieldModel) {
-                if (this.oldFieldModel[key] !== this.fieldModel[key]) {
-                  model[key] = this.fieldModel[key];
+              for (let key in fieldModel) {
+                if (this.oldFieldModel[key] !== fieldModel[key]) {
+                  model[key] = fieldModel[key];
                 }
               }
               break;
             case 'add':
-              for (let key in this.fieldModel) {
-                if (this.fieldModel[key] === '' && key !== 'openid') {
-                  delete this.fieldModel[key];
+              for (let key in fieldModel) {
+                if (fieldModel[key] === '' && key !== 'openid') {
+                  delete fieldModel[key];
                 }
               }
-              model = this.fieldModel;
+              model = fieldModel;
               break;
             default:
-              model = this.fieldModel;
+              model = fieldModel;
               break;
           }
           if (Object.keys(model).length > 0) {
@@ -105,7 +113,7 @@
             return false;
           }
         } else {
-          console.log('表单校验失败', showsNum, valid, this.fieldModel);
+          console.log('表单校验失败', showsNum, valid, fieldModel);
           uni.showToast({
             title: '请填写完信息后，再尝试提交',
             icon: 'none'

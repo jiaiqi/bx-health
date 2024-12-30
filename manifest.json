@@ -90,7 +90,7 @@
         "title" : "百想健康",
         "domain" : "wx2.100xsys.cn",
         "router" : {
-            "mode" : "hash",
+            "mode" : "history",
             "base" : "/health/"
         },
         "devServer" : {

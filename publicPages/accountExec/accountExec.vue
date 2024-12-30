@@ -119,9 +119,9 @@
 			// #endif
 		},
 		onLoad(option) {
-			if (wx.canIUse('getUserProfile')) {
-				this.canIUseGetUserProfile = true
-			}
+			// if (wx.canIUse('getUserProfile')) {
+			// 	this.canIUseGetUserProfile = true
+			// }
 			this.judgeClientEnviroment();
 			let self = this;
 			if (uni.getStorageSync('isLogin')) {
