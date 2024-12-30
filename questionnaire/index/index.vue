@@ -200,6 +200,12 @@
               option_data: e.value
             }];
           }
+          if (e.type === 'checkboxFk' || e.type === 'radioFk') {
+            itemData = [{
+              item_no: e.column,
+              option_data: e.value
+            }];
+          }
           if (Array.isArray(e.value)) {
             itemData = [{
               item_no: e.column,
@@ -235,6 +241,10 @@
       async submitForm() {
         let self = this;
         let itemData = self.$refs.bxform.getFieldModel();
+        const configColsMap = this.configCols.reduce((res, cur) => {
+          res[cur.column] = cur;
+          return res
+        }, {})
         if (itemData !== false) {
           if (this.formData.act_option?.includes('提交确认')) {
             const confirm = await new Promise(resolve => {
@@ -258,15 +268,32 @@
           } else {
             console.log('itemData', itemData);
             let resultData = [];
-            Object.keys(itemData).forEach(item => {
+            Object.keys(itemData).forEach(key => {
               let obj = {
-                item_no: item,
-                option_data: [itemData[item]]
+                item_no: key,
+                option_data: []
               };
-              if (Array.isArray(itemData[item])) {
-                obj.option_data = itemData[item].filter(i => i && i);
+              if (Array.isArray(configColsMap[key]?.options)) {
+                // 单选、多选
+                if (Array.isArray(itemData[key])) {
+                  const checkedList = configColsMap[key].options.filter(data => data['option_no'] && itemData[key]
+                    .includes(data['option_no']))
+                  if (Array.isArray(checkedList)) {
+                    obj.option_data = checkedList.map(item => item.option_value)
+                    obj.option_flag = checkedList.map(item => item.option_view_no)
+                  }
+                } else if (itemData[key]) {
+                  const checkedItem = configColsMap[key].options.find(data => data['option_no'] && itemData[key]
+                    .includes(data['option_no']))
+                  obj.option_data = [checkedItem.option_value]
+                  if (checkedItem.option_view_no) {
+                    obj.option_flag = [checkedItem.option_view_no]
+                  }
+                }
+              } else {
+                obj.option_data = itemData[key]
               }
-              if (itemData[item]) {
+              if (Array.isArray(obj.option_data) && obj.option_data.length) {
                 resultData.push(obj);
               }
             });
@@ -590,21 +617,38 @@
                     op.checked = false
                     return op
                   })
+                  const options = item.options
                   data.user_data.forEach(items => {
                     if (item.column === items.item_no) {
                       if (item.item_type_attr && item.item_type_attr
                         .radioType === 'multi') {
-                        item.value = items.option_data ? items.option_data
-                          .toString() : '';
-                        item.options = item.options.map(op => {
-                          if (item.value.indexOf(op.value) !== -
-                            1) {
-                            op.checked = true
+                        if (items.option_data?.length && Array.isArray(options) && options.length) {
+                          let checked = items.option_data
+                          let value = []
+                          item.options = options.map(op => {
+                            if (checked.includes(op.option_value)) {
+                              value.push(op.option_no)
+                              op.checked = true
+                            }
+                            return op
+                          })
+                          if (value?.length) {
+                            item.value = value.toString()
                           }
-                          return op
-                        })
-                      } else {
-                        item.value = items.option_data[0];
+                        }
+                        // item.value = items.option_data ? items.option_data
+                        //   .toString() : '';
+                        // item.options = item.options.map(op => {
+                        //   if (item.value.indexOf(op.value) !== -
+                        //     1) {
+                        //     op.checked = true
+                        //   }
+                        //   return op
+                        // })
+                      } else if (Array.isArray(items.option_data) && items.option_data.length) {
+                        item.value = options.find(a => a.option_value === items.option_data[0])?.option_no;
+                      } else if (items.option_data.length) {
+                        item.value = items.option_data[0]
                       }
                     }
                   });
@@ -770,10 +814,10 @@
             config.type = 'radioFk'
             config.options = e.option_data.map((item, optIndex) => {
               item.color = '#0bc99d';
-              item.value = item.option_value;
               item.showimg = false;
               item.checked = false
               item.label = item.option_value;
+              item.value = item.option_no;
               if (item.option_view_no) {
                 item.serialChar = item.option_view_no;
               } else if (item.option_seq) {
@@ -788,10 +832,10 @@
             config.type = 'checkboxFk'
             config.options = e.option_data.map((item, optIndex) => {
               item.color = '#0bc99d';
-              item.value = item.option_value;
               item.showimg = false;
               item.checked = false
               item.label = item.option_value;
+              item.value = item.option_no;
               if (item.option_view_no) {
                 item.serialChar = item.option_view_no;
               } else if (item.option_seq) {
@@ -807,10 +851,10 @@
               'radioFk';
             config.options = e.option_data.map((item, optIndex) => {
               item.color = '#0bc99d';
-              item.value = item.option_value;
               item.showimg = false;
               item.checked = false
               item.label = item.option_value;
+              item.value = item.option_no;
               if (item.option_view_no) {
                 item.serialChar = item.option_view_no;
               } else if (item.option_seq) {

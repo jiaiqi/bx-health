@@ -243,6 +243,7 @@
 		.bx-checkbox-icon {
 			border: 1rpx solid #c8c9cc;
 			width: 40rpx;
+			min-width: 40rpx;
 			height: 40rpx;
 			justify-content: center;
 			align-items: center;

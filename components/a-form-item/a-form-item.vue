@@ -52,7 +52,7 @@
       <bx-checkbox-group :mode="optionMode" v-model="fieldData.value" class="form-item-content_value checkbox-group"
         v-else-if="fieldData.type === 'checkboxFk'" :disabled="fieldData.disabled ? fieldData.disabled : false"
         @change="onBlur()">
-        <bx-checkbox v-model="item.checked" v-for="item in radioOptions" :key="item.value" :name="item.label">
+        <bx-checkbox v-model="item.checked" v-for="item in radioOptions" :key="item.value" :name="item.value">
           {{ item.label }}
         </bx-checkbox>
       </bx-checkbox-group>
