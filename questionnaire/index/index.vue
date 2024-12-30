@@ -636,15 +636,6 @@
                             item.value = value.toString()
                           }
                         }
-                        // item.value = items.option_data ? items.option_data
-                        //   .toString() : '';
-                        // item.options = item.options.map(op => {
-                        //   if (item.value.indexOf(op.value) !== -
-                        //     1) {
-                        //     op.checked = true
-                        //   }
-                        //   return op
-                        // })
                       } else if (Array.isArray(items.option_data) && items.option_data.length) {
                         item.value = options.find(a => a.option_value === items.option_data[0])?.option_no;
                       } else if (items.option_data.length) {
