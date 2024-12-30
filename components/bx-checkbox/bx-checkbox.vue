@@ -237,20 +237,21 @@
 <style lang="scss" scoped>
 	.bx-checkbox {
 		display: flex;
-		margin: 10rpx;
+		margin: 5px;
 		align-items: center;
     max-width: 100%;
 		.bx-checkbox-icon {
 			border: 1rpx solid #c8c9cc;
-			width: 40rpx;
-			min-width: 40rpx;
-			height: 40rpx;
+			width: 20px;
+			min-width: 20px;
+			height: 20px;
+			min-height: 20px;
 			justify-content: center;
 			align-items: center;
 			display: flex;
-			border-radius: 10rpx;
-			margin-right: 10rpx;
-			font-size: 24rpx;
+			border-radius: 5px;
+			margin-right: 5px;
+			font-size: 12px;
 
 			&.checked {
 				background-color: #0bc99d;
@@ -282,8 +283,8 @@
 				color: #333;
 				background-color: #f1f1f1;
 				border: 1px solid #f1f1f1;
-				padding: 5rpx 30rpx;
-				border-radius: 50rpx;
+				padding: 2.5px 15px;
+				border-radius: 25px;
 				letter-spacing: 1px;
 				transition: all 0.5s;
 

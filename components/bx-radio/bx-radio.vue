@@ -220,18 +220,18 @@ export default {
 .bx-radio {
 	display: flex;
 	align-items: center;
-	padding: 10rpx;
+	padding: 5px;
 	.bx-radio-icon {
-		width: 40rpx;
-		height: 40rpx;
-		border-radius: 60rpx;
+		width: 20px;
+		height: 20px;
+		border-radius: 20px;
 		border: 2rpx solid #c8c9cc;
 		color: #888;
-		margin-right: 10rpx;
+		margin-right: 5px;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		font-size: 24rpx;
+		font-size: 12px;
 		&.checked.has-char {
 			border: none;
 			background-color: #0bc99d;
@@ -242,15 +242,15 @@ export default {
 			border-width: 4rpx;
 			.bx-radio-checked {
 				display: inline-block;
-				width: 12rpx;
-				height: 12rpx;
-				border-radius: 12rpx;
+				width: 6px;
+				height: 6px;
+				border-radius: 6px;
 				background-color: #0bc99d;
 			}
 		}
 	}
 	.bx-radio__label {
-		padding-right: 50rpx;
+		padding-right: 25px;
 		position: relative;
 		flex: 1;
 		&::before {
@@ -263,8 +263,8 @@ export default {
 		}
 	}
 	&.button-mode {
-		margin-right:20rpx;
-		margin-bottom: 20rpx;
+		margin-right:10px;
+		margin-bottom: 10px;
 		padding: 0;
 		.bx-radio-icon {
 			display: none;
@@ -273,8 +273,8 @@ export default {
 			color: #333;
 			background-color: #f1f1f1;
 			border: 1px solid #f1f1f1;
-			padding: 5rpx 30rpx;
-			border-radius: 50rpx;
+			padding: 2.5px 15px;
+			border-radius: 25px;
 			letter-spacing: 1px;
 			transition: all 0.5s;
 			&.active {
