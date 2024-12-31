@@ -10,6 +10,11 @@ view{
 	/* font-size:28rpx; */
 	/* line-height:1.8; */
 }
+*{
+  padding: 0;
+  margin: 0;
+  text-indent: 0;
+}
 progress, checkbox-group{
 	width: 100%;
 }

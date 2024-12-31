@@ -1,14 +1,26 @@
 <template>
-  <view class="form-item" v-if="fieldData.display"
+  <view class="section" v-if="fieldData.type==='分节符'">
+    <text style="background-color: #fff;color: #00A481;width: 20px;height: 20px;border-radius: 20px;">
+      <icon-quill-pen-fill></icon-quill-pen-fill>
+    </text>
+    <text> {{ fieldData.label}} </text>
+    <icon-quill-pen-fill style="opacity: 0;width: 20px;"></icon-quill-pen-fill>
+  </view>
+  <view class="form-item" v-else-if="fieldData.display"
     :class="{'hideComputedResult':hideComputedResult, 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'flex-column': labelPosition === 'top' || label_width === '100%' }">
+
     <label :for="fieldData.column" class="form-item-label"
       :class="{ 'form-detail': pageType === 'detail', valid_error: !valid.valid, 'label-top': labelPosition === 'top' || label_width === '100%' }"
       :style="{ width: label_width, 'align-items': labelAlign ? labelAlign : 'left', 'background-color': labelPosition === 'left' ? '' : '' }">
-      <text class="label" :for="fieldData.column">
-        <text class="cuIcon-titles text-cyan" v-if="ui!=='pretty'"></text>
-        <text class="text-red is-required" v-if="fieldData.isRequire">{{ fieldData.isRequire ? '*' : '' }}</text>
-        <text>{{ fieldData.label }}</text>
-      </text>
+      <view class="label" :for="fieldData.column">
+        <span class="cuIcon-titles text-cyan" v-if="ui!=='pretty'"></span>
+        <span class="text-red is-required" v-if="fieldData.isRequire">{{ fieldData.isRequire ? '*' : '' }}</span>
+        <!-- <view class="" style="flex: 1;"> -->
+        <span>
+          {{ fieldData.label }}
+        </span>
+        <!-- </view> -->
+      </view>
       <view class="cu-btn sm bg-green radius button" v-if="addService" @click="showModal('addForm')">
         +
       </view>
@@ -198,7 +210,8 @@
     <view class="cu-modal bottom-modal" :class="{ show: modalName === 'addForm' }" @tap="hideModal">
       <view class="cu-dialog" style="overflow-y: auto;" @tap.stop="" v-if="modalName === 'addForm'">
         <div style="max-height: 60vh;">
-          <bx-form :form-app="addApp" ui="popupSelector" :form-service="addService" form-type="add" @on-submit="onFormSubmit"></bx-form>
+          <bx-form :form-app="addApp" ui="popupSelector" :form-service="addService" form-type="add"
+            @on-submit="onFormSubmit"></bx-form>
         </div>
       </view>
     </view>
@@ -306,8 +319,8 @@
       showResult: Boolean, //显示表内计算结果
     },
     computed: {
-      hideComputedResult(){
-        return this.field?.redundant?.func&&this.showResult===false
+      hideComputedResult() {
+        return this.field?.redundant?.func && this.showResult === false
       },
       optionListV2() {
         return this.fieldData?.option_list_v2;
@@ -684,9 +697,9 @@
         // this.onInput();
         this.onBlur()
       },
-      onFormSubmit(data){
+      onFormSubmit(data) {
         let optionData = data
-        if(data){
+        if (data) {
           this.fieldData.value = optionData[this.fieldData.option_list_v2.refed_col]
           this.fkFieldLabel = optionData[this.fieldData.option_list_v2.key_disp_col];
         }
@@ -1078,14 +1091,16 @@
   @import './style.scss';
 
   .form-item {
-    &.hideComputedResult{
+    &.hideComputedResult {
+
       // 隐藏表内计算结果
-      /deep/ .form-item-content_value{
-        .uni-textarea-wrapper{
+      /deep/ .form-item-content_value {
+        .uni-textarea-wrapper {
           display: none;
         }
       }
     }
+
     .form-item-label {
       display: flex;
       justify-content: space-between;
@@ -1094,6 +1109,19 @@
         background-color: #0bc99d;
       }
     }
+  }
 
+  .section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 99px;
+    background: linear-gradient(97.06deg, rgba(184, 236, 217, 0.5) 8.94%, rgba(184, 236, 217, 1) 53.43%, rgba(221, 245, 245, 0.5) 96.15%);
+    color: rgba(16, 16, 16, 1);
+    font-size: 14px;
+    text-align: center;
+    font-family: PingFangSC-regular;
+    margin: 0 10px;
+    padding: 5px 10px;
   }
 </style>

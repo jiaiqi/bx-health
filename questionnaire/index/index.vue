@@ -2,19 +2,36 @@
   <view class="page-wrap" :style="{
 			'--global-text-font-size': globalTextFontSize + 'px',
 		}">
-    <view class="to-history" v-if="!inFrame && configCols && configCols.length > 0" @click="toHistory">点击查看历史提交</view>
-    <view class="content" style="padding:30upx 30upx 0;" v-if="formData.remark">
-      <view class="desc" style="text-align: justify;">
-        <view class="text-content-text text-black">
-          <view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))">
+    <!-- <view class="to-history" v-if="!inFrame && configCols && configCols.length > 0" @click="toHistory">点击查看历史提交</view> -->
+    <view class="title-box">
+      <view class="flex justify-between align-center">
+        <view class="title" v-if="formData">
+          {{formData.title}}
+        </view>
+        <view class="button margin-right" @click="toHistory">
+          <text class="cuIcon-time"></text>
+          答题记录
+        </view>
+      </view>
+      <u-read-more ref="uReadMore" :toggle="true" show-height="300" color="#4AC299" close-text="查看全部">
+        <view class="padding-lr">
+          <u-parse :html="formData.remark"
+            @load="parseLoaded"></u-parse>
+        </view>
+      </u-read-more>
+      <!--      <u-read-more>
+      		<rich-text :nodes="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))"></rich-text>
+      	</u-read-more> -->
+      <!--    <view class="content" v-if="formData.remark">
+        <view class="desc" style="text-align: justify;">
+          <view class="text-content-text text-black">
+            <view v-html="JSON.parse(JSON.stringify(formData.remark).replace(/\<img/gi, '<img width=100%  '))">
+            </view>
           </view>
         </view>
-        <!-- 	<view class="date-box">
-					<text v-if="formData.start_time">开始时间：{{ formData.start_time.slice(0, 10) }}</text>
-					<text v-if="formData.end_time">结束时间：{{ formData.end_time.slice(0, 10) }}</text>
-				</view> -->
-      </view>
+      </view> -->
     </view>
+
     <view class="content form-wrap" style="box-sizing: border-box;">
       <bxform ref="bxform" :fields="configCols" label-position="top" option-mode="normal" pageType="add"
         @value-blur="saveValue"></bxform>
@@ -117,6 +134,9 @@
       }
     },
     methods: {
+      parseLoaded() {
+        this.$refs.uReadMore.init();
+      },
       toNextPages() {
         let params = this.deepClone(this.params);
         let fieldsCond = params.fieldsCond;
@@ -273,7 +293,7 @@
                 item_no: key,
                 option_data: []
               };
-              if (Array.isArray(configColsMap[key]?.options)) {
+              if (['radioFk', 'checkboxFk'].includes(configColsMap[key]?.type)) {
                 // 单选、多选
                 if (Array.isArray(itemData[key])) {
                   const checkedList = configColsMap[key].options.filter(data => data['option_no'] && itemData[key]
@@ -290,7 +310,7 @@
                     obj.option_flag = [checkedItem.option_view_no]
                   }
                 }
-              } else {
+              } else if (!['分节符'].includes(configColsMap[key]?.type)) {
                 obj.option_data = itemData[key]
               }
               if (Array.isArray(obj.option_data) && obj.option_data.length) {
@@ -595,6 +615,7 @@
         this.$http.post(url, req).then(res => {
           if (res.data.state === 'SUCCESS') {
             const data = res.data.data[0];
+            this.status = data.status
             this.activity_no = data.activity_no;
             let configCols = [];
             data.item_data.forEach(item => {
@@ -660,7 +681,10 @@
               item.itemIndex = index + 1;
               if (item.label && item.label.slice(0, 1) != (index + 1).toString() && item
                 .label.slice(0, 2) != (index + 1).toString()) {
-                item.label = (index + 1).toString() + '.' + item.label;
+                if (item.item_seq && item.type !== '分节符') {
+                  item.label = item.item_seq + '.' + item.label;
+                }
+                // item.label = (index + 1).toString() + '.' + item.label;
               }
               if (item.type === 'digit' && item.item_type_attr.decimal && item.value) {
                 item.value = Number(item.value).toFixed(item.item_type_attr.decimal);
@@ -778,7 +802,7 @@
           },
           value: e.value,
           type: e.item_type,
-          isRequire: e.is_require === '是' ? true : false,
+          isRequire: e.is_require === '是' && e.type !== '分节符' ? true : false,
           isShowExp: [],
           options: [],
           item_type_attr: e.item_type_attr,
@@ -786,8 +810,9 @@
           points: e.points,
           answer: e.answer,
           option_img_explain: e.option_img_explain,
-          _rawData: e,
-          option_list_v2: e.option_list_v2
+          _rawData: JSON.parse(JSON.stringify(e)),
+          option_list_v2: e.option_list_v2,
+          item_seq: e.item_seq
         };
         if (this.formType === 'detail') {
           config.disabled = true;
@@ -1016,15 +1041,47 @@
 </script>
 
 <style lang="scss" scoped>
+
   .page-wrap {
     background-color: #fff;
     overflow: scroll;
     max-width: 800px;
     margin: 20px auto 50px;
+
+    .title-box {
+      background-image: url(../static/topbg.png);
+      min-height: 175px;
+      overflow: hidden;
+      background-size: cover;
+
+      .button {
+        background: linear-gradient(162.97deg, rgba(108, 220, 180, 1) -40.39%, rgba(53, 179, 137, 1) 91.07%);
+        padding: 5px 10px;
+        border-radius: 50px;
+        color: #fff;
+      }
+
+      .title {
+        font-weight: bold;
+        font-family: '黑体';
+        font-style: italic;
+        line-height: 24px;
+        font-size: 18px;
+        padding: 20px;
+        flex: 1;
+      }
+
+      .content {
+        overflow-y: auto;
+        height: 100%;
+    
+      }
+    }
   }
 
   .content {
     width: 100%;
+    padding: 10px 0;
 
     .desc {
       width: 100%;
@@ -1074,9 +1131,10 @@
     .button {
       color: #fff;
       background-color: #0bc99d;
-      height: 60rpx;
-      line-height: 60rpx;
-      min-width: 45%;
+      height: 50px;
+      line-height: 50px;
+      min-width: 80%;
+      border-radius: 0;
     }
   }
 
@@ -1115,10 +1173,10 @@
     display: flex;
     flex-direction: column;
     color: #666;
-    padding: 20rpx;
-    border-left: 4px solid #cbcbcb;
-    background-color: #f8f8f8;
-    font-size: 30rpx;
+    // padding: 20rpx;
+    // border-left: 4px solid #cbcbcb;
+    // background-color: #f8f8f8;
+    font-size: 16px;
     color: #666;
   }
 

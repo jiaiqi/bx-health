@@ -632,7 +632,7 @@
 						uni.setStorageSync('isLogin', true);
 						that.$store.commit('SET_LOGIN_STATE', true);
 						console.log('that.backUrl', that.backUrl);
-						let backUrl = uni.getStorageSync('backUrl');
+						let backUrl = uni.getStorageSync('backUrl') || uni.getStorageSync('redirect_page');
 						if (backUrl && backUrl !== '/') {
 							backUrl = that.getDecodeUrl(backUrl);
 							if (backUrl && backUrl.lastIndexOf('backUrl=') !== -1) {

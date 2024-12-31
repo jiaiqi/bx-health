@@ -111,8 +111,9 @@
 	.valid_msg {
 		width: 100%;
 		color: #f76260;
-		text-indent: 220rpx;
+		text-indent: 50px;
 		font-size: 24rpx;
+    
 	}
 	&::after {
 		position: absolute;
@@ -151,6 +152,10 @@
 			align-items: center;
 			width: 20rpx;
 		}
+    .label{
+      // display: inline-flex;
+      float: left;
+    }
 	}
 	.form-item-content_value.checkbox-group {
 		margin-top: 50rpx;
