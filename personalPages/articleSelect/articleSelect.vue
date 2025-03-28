@@ -209,7 +209,7 @@
 			align-items: center;
 			flex-wrap: wrap;
 
-			/deep/ .bx-checkbox__label {
+			::v-deep .bx-checkbox__label {
 				flex: 1;
 				margin-left: 20px;
 			}

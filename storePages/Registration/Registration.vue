@@ -208,7 +208,7 @@
 
 <style scoped lang="scss">
 	.calendar {
-		/deep/.head {
+		::v-deep.head {
 			// background-color: #0BC99D;
 			// color: #fff;
 			height: 30px;

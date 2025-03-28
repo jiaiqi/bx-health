@@ -1,6 +1,6 @@
 .page-wrap {
 	background-color: #f1f1f1;
-	/deep/ swiper.rectangle-dot{
+	::v-deep swiper.rectangle-dot{
 		.wx-swiper-dot,.a-swiper-dot,.uni-swiper-dot{
 			width: 30upx;
 			background-color: #ffffff;

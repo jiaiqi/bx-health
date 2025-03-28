@@ -203,7 +203,7 @@
 			// border-bottom: 1px solid #e4e7ed;
 			
 			color: #606266;
-			/deep/ .u-form-item--left{
+			::v-deep .u-form-item--left{
 				flex: initial!important;
 				width: inherit!important;
 			}
@@ -252,10 +252,10 @@
 	.date-bottom{
 		position: relative;
 	}
-	.date-bottom /deep/ .u-input__input{
+	.date-bottom ::v-deep .u-input__input{
 		min-height: 64upx!important;
 	}
-	.date-bottom /deep/ .u-form-item--right__content__icon{
+	.date-bottom ::v-deep .u-form-item--right__content__icon{
 		position: absolute;
 		right: 20upx!important;
 	}
@@ -264,7 +264,7 @@
 		// flex-wrap: wrap;
 		align-items: center;
 		justify-content: center;
-		/deep/ input {
+		::v-deep input {
 			border: 1px solid #ccc;
 			width: 100rpx !important;
 			height: 58rpx;

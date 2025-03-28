@@ -1096,7 +1096,7 @@
 							display: flex;
 							align-items: center;
 
-							/deep/ .uni-radio-input {
+							::v-deep .uni-radio-input {
 								transform: scale(0.8);
 
 								.uni-radio-input-checked {

@@ -472,7 +472,7 @@
 				margin-bottom: 5rpx;
 				padding: 0;
 
-				/deep/.bx-radio__label {
+				::v-deep.bx-radio__label {
 					padding: 5rpx 20rpx;
 					border: 1px solid #999;
 					color: #999;

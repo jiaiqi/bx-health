@@ -1531,7 +1531,7 @@ export default {
 			}
 			.cate-active {
 				color: red;
-				/deep/ .u-icon {
+				::v-deep .u-icon {
 					display: flex;
 					padding-bottom: 8upx;
 					padding-left: 2upx;
@@ -1649,7 +1649,7 @@ export default {
 				height: 100upx;
 				border-radius: 8upx;
 			}
-			/deep/ .u-image__image {
+			::v-deep .u-image__image {
 				div {
 					background-size: 100% 100% !important;
 				}
@@ -1703,7 +1703,7 @@ export default {
 	// flex-wrap: wrap;
 	align-items: center;
 	justify-content: center;
-	/deep/ input {
+	::v-deep input {
 		width: 65upx !important;
 		text-align: center;
 	}
@@ -1868,7 +1868,7 @@ export default {
 .foods-move {
 	width: 130upx !important;
 }
-.contentList /deep/ .move-cur {
+.contentList ::v-deep .move-cur {
 	transform: translateX(-130upx) !important;
 }
 .ele-text-wrap {
@@ -1922,7 +1922,7 @@ export default {
 	display: flex;
 	align-items: center;
 }
-.radio-modal /deep/ uni-radio::before {
+.radio-modal ::v-deep uni-radio::before {
 	right: 20upx;
 }
 .change-tab {
@@ -1930,7 +1930,7 @@ export default {
 	margin: 0 0 0 auto;
 	margin-top: -20px;
 }
-.change-tab /deep/ .u-tab-item {
+.change-tab ::v-deep .u-tab-item {
 	padding: 0 10rpx;
 }
 .calculate {

@@ -3042,7 +3042,7 @@
 		}
 
 		.audio {
-			/deep/ .uni-audio-default {
+			::v-deep .uni-audio-default {
 				height: 0 !important;
 				border: none;
 			}

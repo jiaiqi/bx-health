@@ -527,7 +527,7 @@
 		}
 	}
 
-	/deep/.cu-dialog {
+	::v-deep.cu-dialog {
 		overflow: initial;
 	}
 

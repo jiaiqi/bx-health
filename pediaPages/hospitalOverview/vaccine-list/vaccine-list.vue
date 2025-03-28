@@ -743,7 +743,7 @@
 </script>
 
 <style lang="scss" scoped>
-	/deep/ swiper.rectangle-dot {
+	::v-deep swiper.rectangle-dot {
 		height: 200px;
 	}
 

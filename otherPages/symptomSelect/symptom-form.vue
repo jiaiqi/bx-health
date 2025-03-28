@@ -376,7 +376,7 @@
 			max-height: calc(100vh - var(--window-top) - 200px);
 		}
 
-		/deep/ .form-item .form-item-content.label-top {
+		::v-deep .form-item .form-item-content.label-top {
 			padding: 0;
 		}
 
@@ -484,7 +484,7 @@
 					display: flex;
 					align-items: center;
 
-					/deep/ .uni-radio-input {
+					::v-deep .uni-radio-input {
 						transform: scale(0.8);
 
 						.uni-radio-input-checked {

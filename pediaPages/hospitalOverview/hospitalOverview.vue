@@ -649,7 +649,7 @@
 <style lang="scss" scoped>
 	@import './style.scss';
 
-	/deep/ .u-flex {
+	::v-deep .u-flex {
 		display: flex;
 		z-index: 100000;
 	}
@@ -663,7 +663,7 @@
 		}
 	}
 
-	/deep/ .nav-bar {
+	::v-deep .nav-bar {
 		display: flex;
 		// justify-content: center;
 		align-items: center;

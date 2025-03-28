@@ -2628,7 +2628,7 @@ export default {
 	overflow-y: auto;
 	background-color: #f1f1f1;
 	position: relative;
-	/deep/ .u-navbar {
+	::v-deep .u-navbar {
 		border-bottom: 1px solid #f1f1f1;
 	}
 	&.component-page {
@@ -3438,7 +3438,7 @@ export default {
 		height: 15vh;
 	}
 }
-.radioModal /deep/ uni-radio::before,
+.radioModal ::v-deep uni-radio::before,
 uni-checkbox::before {
 	right: 9px;
 }

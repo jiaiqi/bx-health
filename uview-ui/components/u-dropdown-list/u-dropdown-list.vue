@@ -232,7 +232,7 @@ export default {
   > text {
     margin-right: 10rpx;
   }
-  /deep/ {
+  ::v-deep {
     .uicon {
       position: relative;
       top: -2rpx;

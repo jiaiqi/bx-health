@@ -1,7 +1,7 @@
 <template>
   <view class="wrap page-main ">
     <!-- #ifdef H5 -->
-<!--    <view class="page-wrap page-top" v-if="!isMobile">
+    <!--    <view class="page-wrap page-top" v-if="!isMobile">
       <view class="page-bg">
         <view class="title">
           BMI计算
@@ -12,64 +12,100 @@
       </view>
     </view> -->
     <!-- #endif -->
-   <view class="page-main bg-white">
-     <view class="result-box ">
-       <view class="result-item">
-         <view class="label">BMI:</view>
-         <view class="value"
-           :class="{ 'text-blue': bmi <= 18.5, 'text-cyan': bmi > 18.5 && bmi < 24, 'text-orange': bmi >= 24 && bmi < 28, 'text-red': bmi >= 28 }">
-           {{ bmi || 0 }}
-         </view>
-       </view>
-       <view class="result-item">
-         <view class="label">基础代谢:</view>
-         <view class="value"
-           :class="{ 'text-blue': bmi <= 18.5, 'text-cyan': bmi > 18.5 && bmi < 24, 'text-orange': bmi >= 24 && bmi < 28, 'text-red': bmi >= 28 }">
-           <text v-if="basicOut">{{ basicOut}}</text>
-           <text class="unit" v-if="basicOut">千卡</text>
-           <text v-else class="tipText">待完善信息</text>
-         </view>
-       </view>
-     </view>
-     <view class="bmi-box">
-       <bmi-weight-bar :height="info.height" :weight="info.weight"></bmi-weight-bar>
-     </view>
-     <view class="text-center text-cyan text-bold">请输入您的基本信息</view>
-     <view class="item-list">
-       <view class="item-list-top">
-         <text>*</text>
-         <text>体重(千克)</text>
-         <text class="margin-left-xs">{{ info.weight }}kg</text>
-       </view>
-       <slider-number v-model="info.weight" :max="200" :min="0" :step="0.1"></slider-number>
-     </view>
-     <view class="item-list">
-       <view class="item-list-top">
-         <text>*</text>
-         <text>身高(厘米)</text>
-         <text class="margin-left-xs">{{ info.height }}cm</text>
-       </view>
-       <slider-number v-model="info.height" :max="250" :min="0" :step="0.1"></slider-number>
-     </view>
-     <view class="item-list">
-       <view class="item-list-top">
-         <text>*</text>
-         <text>年龄</text>
-         <text class="margin-left-xs">{{ info.age }}</text>
-       </view>
-       <slider-number v-model="info.age" :max="100" :min="0" :step="[1, 10]"></slider-number>
-     </view>
-     <view class="item-list">
-       <view class="item-list-top">
-         <text>*</text>
-         <text class="margin-right">性别</text>
-         <bx-radio-group v-model="info.sex" mode="button">
-           <bx-radio class="radio" color="#2979ff" v-for="(item, i) in ['男', '女']" :key="item"
-             :name="item">{{ item }}</bx-radio>
-         </bx-radio-group>
-       </view>
-     </view>
-   </view>
+    <view class="page-main bg-white">
+      <view class="result-box ">
+        <view class="result-item">
+          <view class="label">BMI:</view>
+          <view class="value"
+            :class="{ 'text-blue': bmi <= 18.5, 'text-cyan': bmi > 18.5 && bmi < 24, 'text-orange': bmi >= 24 && bmi < 28, 'text-red': bmi >= 28 }">
+            {{ bmi || 0 }}
+          </view>
+        </view>
+        <view class="result-item">
+          <view class="label">基础代谢:</view>
+          <view class="value"
+            :class="{ 'text-blue': bmi <= 18.5, 'text-cyan': bmi > 18.5 && bmi < 24, 'text-orange': bmi >= 24 && bmi < 28, 'text-red': bmi >= 28 }">
+            <text v-if="basicOut">{{ basicOut}}</text>
+            <text class="unit" v-if="basicOut">千卡</text>
+            <text v-else class="tipText">待完善信息</text>
+          </view>
+        </view>
+      </view>
+      <view class="bmi-box">
+        <bmi-weight-bar :height="info.height" :weight="info.weight"></bmi-weight-bar>
+      </view>
+      <view class="text-center text-cyan text-bold">请输入您的基本信息</view>
+      <view class="item-list">
+        <view class="item-list-top">
+          <text>*</text>
+          <text>体重(千克)</text>
+          <text class="margin-left-xs">{{ info.weight }}kg</text>
+        </view>
+        <slider-number show-input :show-value="false" v-model="info.weight" :max="200" :min="0"
+          :step="0.1"></slider-number>
+      </view>
+      <view class="item-list">
+        <view class="item-list-top">
+          <text>*</text>
+          <text>身高(厘米)</text>
+          <text class="margin-left-xs">{{ info.height }}cm</text>
+        </view>
+        <slider-number show-input :show-value="false" v-model="info.height" :max="250" :min="0"
+          :step="0.1"></slider-number>
+      </view>
+      <view class="item-list">
+        <view class="item-list-top">
+          <text>*</text>
+          <text>年龄</text>
+          <text class="margin-left-xs">{{ info.age }}</text>
+        </view>
+        <slider-number show-input :show-value="false" v-model="info.age" :max="100" :min="0"
+          :step="[1, 10]"></slider-number>
+      </view>
+      <view class="item-list">
+        <view class="item-list-top">
+          <text>*</text>
+          <text class="margin-right">性别</text>
+          <bx-radio-group v-model="info.sex" mode="button">
+            <bx-radio class="radio" color="#2979ff" v-for="(item, i) in ['男', '女']" :key="item"
+              :name="item">{{ item }}</bx-radio>
+          </bx-radio-group>
+        </view>
+      </view>
+      <view class="desc-box margin-top-lg" v-if="bmiResult&&bmi">
+        <view class="padding-tb-sm text-center" v-if="bmiResult.msg">
+          <text :class="[bmiResult.class]" class="text-bold text-lg">{{bmiResult.msg}}</text>
+        </view>
+        <view class="padding-tb-sm" v-if="bmiResult.target">
+          <text class="text-bold">
+            运动目的:
+          </text>
+          <text>
+            {{bmiResult.target}}
+          </text>
+        </view>
+        <view class="padding-tb-sm" v-if="bmiResult.way">
+          <text class="text-bold">
+            运动方式:
+          </text>
+          <text>
+            {{bmiResult.way}}
+          </text>
+        </view>
+        <view class="padding-tb-sm" v-if="bmiResult.strength">
+          <text class="text-bold">
+            运动强度:
+          </text>
+          <text>
+            {{bmiResult.strength}}
+          </text>
+        </view>
+        <view class="text-center padding-tb-sm text-gray" v-if="bmi&&bmiResult.target">
+          来源：体重管理指导原则（2024年版）—国家卫生健康委办公厅印发
+        </view>
+      </view>
+    </view>
+
   </view>
 </template>
 
@@ -119,6 +155,45 @@
           result = 100;
         }
         return `${result}rpx`;
+      },
+      bmiResult() {
+        let val = this.bmi
+        if (val < 18.5) {
+          return {
+            "key": "BMI<18.5kg/m2",
+            "msg": "体重过低 ",
+            "target": '增加瘦体重而不是体脂。',
+            "way": "推荐抗阻运动。",
+            "strength": "建议重量选取为该肌群 一次最大重量（1RM）6的65%~85%，每组练习重复次数6~12次，重复3~5组，组间间歇休息2分钟；每次持续运动 60分钟；每周至少 3 次；每个肌肉群 每周可训练1~2次（后续可增至3次），同一肌肉群训练间隔在48 小时以上。",
+            "class":"text-green"
+          }
+        } else if (val >= 18.5 && val < 24) {
+          return {
+            "msg": "🎉BMI维持的很棒，请继续坚持！",
+            "class":"text-cyan"
+          }
+        } else if (val >= 24 && val < 37.5) {
+          return {
+            "key": "24kg/m2≤BMI<37.5kg/m2",
+            "msg": "超重、轻中度肥胖",
+            "target": '增加瘦体重而不是体脂。',
+            "way": "推荐抗阻运动。",
+            "strength": "建议重量选取为该肌群 一次最大重量（1RM）6的65%~85%，每组练习重复次数6~12次，重复3~5组，组间间歇休息2分钟；每次持续运动 60分钟；每周至少 3 次；每个肌肉群 每周可训练1~2次（后续可增至3次），同一肌肉群训练间隔在48 小时以上。",
+            "class":"text-orange"
+          }
+        } else if (val >= 37.5) {
+          return {
+            "key": "24kg/m2≤BMI<37.5kg/m2",
+            "msg": "⚠️重度肥胖",
+            "target": '降低体脂肪含量。另外，应重视根据个人兴趣选取运动形式，提高依从性，并进行生活方式干预，矫正引发过度进食或身体活动不足的行为习惯。',
+            "way": "注意减少久坐时间，增加日常身体活动消耗量。建议以有氧运动作为减重主要运动方式。如果有关节活动障碍，需先进行功能康复训练或治疗，待症状消失后再开始减脂训练。",
+            "strength": "建议根据个体体能基础，从低强度有氧运动开始，循序渐进地增加身体活 动量（频率、强度、持续时间）。初始阶段应避免剧烈运动，在有监督的环境下开始低强度有氧运动，最佳强度为最大脂肪氧化强度运动，持续训练 时间从 30 分钟开始，逐渐增加至60~120 分钟。随着体能的提高，可增 加抗阻运动，甚至高强度有氧运动。 但重度肥胖患者在开始高强度运动前应进行全面的医学评估，以帮助确定是否存在参与高强度运动的禁忌证。",
+            "class":"text-red"
+          }
+        }
+        return {
+
+        }
       },
       weightForBmi() {
         let bmiList = [18.5, 24, 28];
@@ -427,7 +502,7 @@
         }
       }
 
-      /deep/ .bx-radio.button-mode {
+      ::v-deep .bx-radio.button-mode {
         margin-bottom: 0;
       }
 
@@ -456,7 +531,7 @@
         display: flex;
         align-items: center;
 
-        /deep/ .uni-radio-input {
+        ::v-deep .uni-radio-input {
           transform: scale(0.8);
 
           .uni-radio-input-checked {
@@ -469,5 +544,10 @@
         }
       }
     }
+  }
+  .desc-box{
+    // border: 1px solid #f1f1f1;
+    padding: 20rpx;
+    border-radius: 16rpx;
   }
 </style>

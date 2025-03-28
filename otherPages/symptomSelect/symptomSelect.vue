@@ -650,7 +650,7 @@ export default {
 		height: calc(100vh - 360rpx);
 		flex: 1;
 		overflow-y: scroll;
-		/deep/ .u-tab-item{
+		::v-deep .u-tab-item{
 			padding: 0 20upx;
 		}		
 		.symptom-bot-wrap-main{

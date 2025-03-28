@@ -56,7 +56,7 @@
 }
 .total-title {
 	padding: 20rpx 20rpx 0;
-	/deep/ .cu-form-group {
+	::v-deep .cu-form-group {
 		margin: 0;
 		padding: 0;
 	}

@@ -316,11 +316,11 @@ export default {
 				align-items: center;
 				.item-left {
 					.radio {
-						/deep/ .uni-radio-input {
+						::v-deep .uni-radio-input {
 							width: 40upx;
 							height: 40upx;
 						}
-						/deep/ uni-radio::before {
+						::v-deep uni-radio::before {
 							right: 6upx;
 						}
 					}
@@ -393,11 +393,11 @@ export default {
 			margin-right: 30upx;
 			.radio {
 				margin-right: 10upx;
-				/deep/ .uni-radio-input {
+				::v-deep .uni-radio-input {
 					width: 40upx;
 					height: 40upx;
 				}
-				/deep/ uni-radio::before {
+				::v-deep uni-radio::before {
 					right: 6upx;
 				}
 			}

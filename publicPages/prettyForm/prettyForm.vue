@@ -74,11 +74,11 @@
       padding: 40px 0;
     }
 
-    /deep/ .form {
+    ::v-deep .form {
       --page-height: auto !important;
     }
 
-    /deep/ .form-item {
+    ::v-deep .form-item {
       .form-item-content .form-item-content_value .textarea-content {
         height: unset !important;
         min-height: 200rpx;

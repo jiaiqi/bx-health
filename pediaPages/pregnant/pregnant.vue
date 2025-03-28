@@ -1979,7 +1979,7 @@ export default {
 					display: flex;
 					// justify-content: center;
 					white-space: nowrap;
-					/deep/ text {
+					::v-deep text {
 						display: inline-block;
 						background-color: #ededed;
 						color: #000;
@@ -2032,7 +2032,7 @@ export default {
 					flex-direction: column;
 				}
 			}
-			/deep/ .fetus-top {
+			::v-deep .fetus-top {
 				margin-top: 30upx;
 				.fetus-top-tit {
 					color: #000;
@@ -2195,7 +2195,7 @@ export default {
 			}
 		}
 		.matter-wrap {
-			/deep/ .content {
+			::v-deep .content {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
@@ -2207,7 +2207,7 @@ export default {
 					flex-direction: column;
 				}
 			}
-			/deep/ .matter-wrap-main {
+			::v-deep .matter-wrap-main {
 				margin-top: 20upx;
 				.pre-chunk-top-notice {
 					font-size: 16px;
@@ -2247,7 +2247,7 @@ export default {
 			}
 		}
 		.symptom_wrap {
-			/deep/ .content {
+			::v-deep .content {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
@@ -2300,7 +2300,7 @@ export default {
 			.inspect-bg {
 				background-color: rgba(110, 220, 94, 0.7);
 			}
-			/deep/ .inspect_wrap_top_left {
+			::v-deep .inspect_wrap_top_left {
 				.inspect_wrap_top_left_t {
 					font-size: 16px;
 					font-weight: 700;
@@ -2321,7 +2321,7 @@ export default {
 			.inspect_wrap_top_rig {
 			}
 		}
-		// /deep/ .u-collapse-body{
+		// ::v-deep .u-collapse-body{
 		// 	height: 750upx!important;
 		// }
 	}

@@ -159,7 +159,7 @@ export default {
 						height: 100upx;
 						border-radius: 8upx;
 					}
-					/deep/ .u-image__image {
+					::v-deep .u-image__image {
 						div {
 							background-size: 100% 100% !important;
 						}

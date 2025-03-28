@@ -515,7 +515,7 @@ export default {
 	flex-direction: column;
 	padding: 20rpx;
 	position: relative;
-	/deep/ .bx-checkbox-group .bx-checkbox .bx-checkbox__label {
+	::v-deep .bx-checkbox-group .bx-checkbox .bx-checkbox__label {
 		padding: 5rpx 20rpx;
 	}
 	.cuIcon-delete.icon {

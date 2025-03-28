@@ -700,7 +700,7 @@
       padding: 0 2px;
     }
 
-    /deep/ .list-item {
+    ::v-deep .list-item {
       margin: 0;
       padding: 0;
       display: flex;

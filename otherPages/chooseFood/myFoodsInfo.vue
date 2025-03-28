@@ -403,11 +403,11 @@ export default {
 		}
 	}
 	.info-item-bot-radio {
-		/deep/ uni-radio::before,
+		::v-deep uni-radio::before,
 		uni-checkbox::before {
 			right: 90rpx;
 		}
-		/deep/ .uni-radio-wrapper {
+		::v-deep .uni-radio-wrapper {
 			margin-right: 50rpx;
 		}
 	}

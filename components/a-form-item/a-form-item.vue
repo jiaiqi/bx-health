@@ -1094,7 +1094,7 @@
     &.hideComputedResult {
 
       // 隐藏表内计算结果
-      /deep/ .form-item-content_value {
+      ::v-deep .form-item-content_value {
         .uni-textarea-wrapper {
           display: none;
         }
