@@ -140,13 +140,14 @@
   #app,
   uni-page-body,
   uni-page-wrapper {
-    background: #f1f1f1 !important;
+    // background: #f1f1f1 !important;
+    background-color: #fff;
   }
 
   html,
   body {
     height: auto;
-    background: #f1f1f1 !important;
+    // background: #f1f1f1 !important;
   }
 
   uni-page-body>uni-view {

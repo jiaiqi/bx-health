@@ -5,9 +5,11 @@ let remoteAddress = {
 	ssoAddress: 'http://sso.100xsys.cn',
 	// serviceAddress: 'https://192.168.0.155:8106', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	// serviceAddress: 'http://139.196.111.15:1810', // 健康环境外网
-	// serviceAddress: 'https://admin.bxjkw.cn/bxapi', // 健康环境外网
+	serviceAddress: 'https://admin.bxjkw.cn/bxapi', // 健康环境外网
+	serviceAddress: 'https://admin.sxjgrd.cn/bxapi', // 健康环境外网-new
 	// serviceAddress: 'http://192.168.0.154:8104', // 健康环境
-	serviceAddress: 'https://api.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
+	// serviceAddress: 'http://192.168.0.28:8104', // 园区环境
+	// serviceAddress: 'https://api.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	// serviceAddress: 'http://192.168.0.121:8101', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	// serviceAddress: 'https://srvms.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn
 	// frontEndAddress: 'https://admin.bxjkw.cn/health',
@@ -22,6 +24,22 @@ let remoteAddress = {
 	// homePath:"/pages/home/home", // 首页路径， 配置完整路径
 	homePath: "/pages/pedia/pedia", // 首页路径，配置完整路径
 }
+
+// #ifdef H5
+if (sessionStorage.pathConfig && window.self === window.top) {
+  try {
+    top.pathConfig = JSON.parse(sessionStorage.pathConfig)
+  } catch (error) {
+    //TODO handle the exception
+  }
+}
+if (top?.window?.pathConfig?.gateway) {
+  remoteAddress.serviceAddress = top?.window?.pathConfig?.gateway
+  remoteAddress.fileSrv = top?.window?.pathConfig?.gateway
+}
+// #endif
+
+
 let ENV = {
 	backEndAddress: "https://saas.100xsys.cn", //后台管理系统地址
 	frontEndAddress: remoteAddress.frontEndAddress, //前端线上地址

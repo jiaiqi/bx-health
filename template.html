@@ -140,6 +140,9 @@
 
 
   <body>
+    <% if (process.env.NODE_ENV === 'production') { %>
+    <script src="/js/server.js"></script>
+    <% } %>
     <noscript>
       <strong>Please enable JavaScript to continue.</strong>
     </noscript>
