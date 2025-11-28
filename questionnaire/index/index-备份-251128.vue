@@ -8,10 +8,10 @@
         <view class="title" v-if="formData">
           {{formData.title}}
         </view>
-    <!--    <view class="button margin-right" @click="toHistory">
+       <view class="button margin-right" @click="toHistory">
           <text class="cuIcon-time"></text>
           答题记录
-        </view> -->
+        </view>
       </view>
       <u-read-more ref="uReadMore" :toggle="true" show-height="300" color="#4AC299" close-text="查看全部">
         <view class="padding-lr">
