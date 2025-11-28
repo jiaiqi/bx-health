@@ -75,6 +75,14 @@
           }
         },
         {
+          "path": "index/result",
+          "style": {
+            "navigationBarTitleText": "结果",
+            "enablePullDownRefresh": false,
+            "navigationStyle": "custom"
+          }
+        },
+        {
           "path": "history/history",
           "style": {
             "navigationBarBackgroundColor": "#5494ff",

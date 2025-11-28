@@ -433,10 +433,14 @@ export default {
                   self.params.fill_batch_no = res.data.response[0]
                     .response.fill_batch_no;
                 }
-                if (self.formData?.classify_name == '互动问答-评估' && self.params.fill_batch_no) {
-                  // 跳转到结果页面
-                  return
-                }
+                // 延安行项目，直接跳到结果页面
+                return uni.navigateTo({
+                  url: `/questionnaire/index/result?activity_no=${self.activity_no}&fill_batch_no=${self.params.fill_batch_no}`
+                })
+                // if (self.formData?.classify_name == '互动问答-评估' && self.params.fill_batch_no) {
+                //   // 跳转到结果页面
+                //   return
+                // }
                 if (self.params.to && self.params.fill_batch_no) {
                   self.showNextBtn = true;
                 } else if (self.target && self.target === 'health') {
