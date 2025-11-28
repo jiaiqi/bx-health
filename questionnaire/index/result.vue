@@ -10,10 +10,10 @@
           :src="customTitleImage"
           mode="scaleToFill"
         />
-        <view
+        <!-- <view
           class="title"
-          v-if="formData"
-        >{{ formData.title }}</view>
+          v-if="questionInfo"
+        >{{ questionInfo.title }}</view> -->
       </view>
       <view
         v-else
