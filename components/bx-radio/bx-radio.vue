@@ -234,18 +234,18 @@ export default {
 		font-size: 12px;
 		&.checked.has-char {
 			border: none;
-			background-color: #0bc99d;
+			background-color: var(--primary-color,#0bc99d);
 			color: #fff;
 		}
 		&.checked.no-char {
-			border-color: #0bc99d;
+			border-color: var(--primary-color,#0bc99d);
 			border-width: 4rpx;
 			.bx-radio-checked {
 				display: inline-block;
 				width: 6px;
 				height: 6px;
 				border-radius: 6px;
-				background-color: #0bc99d;
+				background-color: var(--primary-color,#0bc99d);
 			}
 		}
 	}
@@ -281,8 +281,8 @@ export default {
 				transform: scale(1.1);
 			}
 			&.checked {
-				border-color: #0bc99d;
-				color: #0bc99d;
+				border-color: var(--primary-color,#0bc99d);
+				color: var(--primary-color,#0bc99d);
 				background-color: rgba(11, 201, 157, 0.1);
 			}
 			&.disabled {

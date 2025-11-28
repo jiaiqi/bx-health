@@ -57,7 +57,16 @@
   "subPackages": [{
       // 问卷
       "root": "questionnaire",
-      "pages": [{
+      "pages": [
+        { // 所属单位、姓名、联系电话信息登记
+          "path": "index/submitInfo",
+          "style": {
+            "navigationBarTitleText": "",
+            "enablePullDownRefresh": false,
+            "navigationStyle": "custom"
+          }
+        },
+        {
           "path": "index/index",
           "style": {
             "navigationBarTitleText": "问卷",
