@@ -1157,21 +1157,25 @@ export default {
 
     image {
       width: 100%;
+      max-height: 300rpx;
+      object-fit: cover;
     }
 
     .title {
       padding: 20rpx 40rpx;
+      text-align: center;
     }
   }
 
   .title {
     font-weight: bold;
     font-family: '黑体';
-    font-style: italic;
+    /* font-style: italic; */
     line-height: 24px;
     font-size: 18px;
     padding: 20px;
     flex: 1;
+    /* color: #E92327; */
   }
 
   .title-box {

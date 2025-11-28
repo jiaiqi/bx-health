@@ -1,8 +1,7 @@
 <template>
   <view class="result-container">
+    <!-- 顶部横幅区域 -->
     <view class="header">
-      <!-- <view class="title">峥嵘岁月 光辉历程</view>
-      <view class="subtitle">红色延安的故事</view> -->
       <view
         v-if="customTitleImage"
         class="title-image"
@@ -14,23 +13,33 @@
         <view
           class="title"
           v-if="formData"
-        >
-          {{ formData.title }}
-        </view>
+        >{{ formData.title }}</view>
+      </view>
+      <view
+        v-else
+        class="default-header"
+      >
+        <view class="title">您的答题结果已生成</view>
+        <view class="subtitle">感谢参与本次问卷调查</view>
       </view>
     </view>
 
     <view class="content">
+      <!-- 活动标题 -->
       <view class="activity-title">
         {{ questionInfo.title || '' }}
-        <!-- 云长征"互动答题"追寻长征足迹 共绘青春华章"第二届新时代青年"重走长征路"徒步活动 -->
       </view>
 
+      <!-- 得分/完成状态区域 -->
       <view class="score-section">
+        <view class="completion-message">
+          恭喜您完成了本次问卷！
+        </view>
         <view class="score">{{ correctScore }}</view>
         <view class="total-score">总分{{ totalScore }}</view>
       </view>
 
+      <!-- 答题概况 -->
       <view class="answer-summary">
         <view class="summary-item">
           <view class="summary-label">答对</view>
@@ -39,64 +48,108 @@
         </view>
       </view>
 
+      <!-- 答题详情展示区 -->
       <view class="answer-detail">
         <view
           class="question-item"
-          v-for="item in questionList"
+          v-for="(item, index) in questionList"
+          :key="item.item_no"
         >
           <view class="question-header">
-            <view class="question-number">{{ item.item_seq }}.</view>
+            <view class="question-number">Q{{ item.item_seq }}:</view>
             <view class="question-title">{{ item.item_title }}</view>
           </view>
 
           <view class="options">
             <view
-              class="option "
+              class="option"
               v-for="op in item.option_data"
+              :key="op.option_value"
               :class="{
-                correct: op.answer === '是' && op.option_value === resultListMap[item.item_no].svalue,
-                wrong: op.answer !== '是' && op.option_value === resultListMap[item.item_no].svalue,
+                'correct': op.answer === '是',
+                'selected': op.option_value === resultListMap[item.item_no].svalue,
+                'wrong-selected': op.answer !== '是' && op.option_value === resultListMap[item.item_no].svalue
               }"
             >
               <view class="option-marker">
                 <view
                   class="checkbox"
                   :class="{
-                    'checked':
-                      resultListMap[item.item_no].svalue === op.option_value,
-                    'wrong': op.answer !== '是'
+                    'un-checked': op.option_value !== resultListMap[item.item_no].svalue,
+                    'checked': op.option_value === resultListMap[item.item_no].svalue,
+                    'correct': op.answer === '是',
+                    'wrong': op.answer !== '是' && op.option_value === resultListMap[item.item_no].svalue
                   }"
-                ></view>
+                >
+                  <template v-if="op.option_value === resultListMap[item.item_no].svalue">
+                    <!-- {{ isRight(item) ? '' : '❌' }} -->
+                    <text
+                      class="cuIcon-check"
+                      v-if="isRight(item)"
+                    ></text>
+                    <text
+                      class="cuIcon-close"
+                      v-else
+                    ></text>
+                  </template>
+                </view>
               </view>
-              <view class="option-text">{{ op.option_view_no || '' }}. {{ op.option_value }}</view>
+              <view class="option-text">
+                {{ op.option_view_no || '' }}. {{ op.option_value }}
+              </view>
             </view>
           </view>
 
-          <view class="answer-result wrong">
-            <view
-              class="result-icon"
-              :class="{
-                'correct-icon': isRight(item),
-                'wrong-icon': !isRight(item),
-              }"
-            >
-              {{ isRight(item) ? '✓' : '✘' }}
+          <view
+            class="answer-result"
+            :class="isRight(item) ? 'correct' : 'wrong'"
+          >
+            <view class="result-icon">
+              <text
+                class="cuIcon-check"
+                v-if="isRight(item)"
+              ></text>
+              <text
+                class="cuIcon-close"
+                v-else
+              ></text>
+              <!-- {{ isRight(item) ? '✅' : '❌' }} -->
             </view>
-            <view class="result-text">回答{{ isRight(item) ? '正确' : '错误' }}
+            <view class="result-text">
+              回答{{ isRight(item) ? '正确' : '错误' }}
             </view>
-            <view class="score-change">+{{ isRight(item) ? item.points + '分' : '0分' }}</view>
+            <view class="score-change">
+              +{{ isRight(item) ? item.points + '分' : '0分' }}
+            </view>
           </view>
 
           <view class="correct-answer">
             <view class="correct-label">正确答案：</view>
             <view class="correct-value">
-              {{ getRightOption(item).option_view_no || '' }}
-              :
-              {{ getRightOption(item).option_value || '' }}
+              {{ getRightOption(item).option_view_no || '' }}. {{ getRightOption(item).option_value || '' }}
+            </view>
+            <view
+              class="explanation"
+              v-if="item.explanation"
+            >
+              {{ item.explanation }}
             </view>
           </view>
+
+          <!-- 视觉分隔线 -->
+          <view
+            class="divider"
+            v-if="index < questionList.length - 1"
+          ></view>
         </view>
       </view>
+
+      <!-- 底部操作区 -->
+      <!-- <view class="bottom-actions">
+        <button class="action-button primary" @click="goHome">返回首页</button>
+        <button class="action-button secondary" @click="restart">重新测试</button>
+        <button class="action-button secondary" @click="share">分享结果</button>
+      </view> -->
     </view>
   </view>
 </template>
@@ -205,6 +258,25 @@ export default {
         })
       }
     },
+    // 返回首页
+    goHome() {
+      uni.switchTab({
+        url: '/pages/home/home'
+      })
+    },
+    // 重新测试
+    restart() {
+      uni.navigateTo({
+        url: `/questionnaire/index/index?activity_no=${this.activity_no}`
+      })
+    },
+    // 分享结果
+    share() {
+      uni.showShareMenu({
+        withShareTicket: true,
+        menus: ['shareAppMessage', 'shareTimeline']
+      })
+    }
   }
 };
 </script>
@@ -213,148 +285,199 @@ export default {
   lang="scss"
   scoped
 >
+/* 整体容器 */
 .result-container {
   min-height: 100vh;
-  background-color: #f5f5f5;
-  padding: 20rpx;
+  background-color: #f8f9fa;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-
+/* 顶部横幅区域 */
 .header {
   text-align: center;
-  /* background: linear-gradient(135deg, #e63946 0%, #c1121f 100%); */
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
-  border-radius: 10rpx;
+  /* padding: 40rpx 20rpx; */
+  margin-bottom: 0;
   overflow: hidden;
-  margin-bottom: 30rpx;
+
+  .default-header {
+    padding: 20rpx 0;
+  }
 
   .title-image {
     width: 100%;
-    min-height: 200rpx;
     display: flex;
+    flex-direction: column;
+    align-items: center;
 
     image {
       width: 100%;
+      max-height: 300rpx;
+      object-fit: cover;
     }
 
     .title {
       padding: 20rpx 40rpx;
+      font-size: 36rpx;
+      font-weight: bold;
     }
+  }
+
+  .title {
+    font-size: 36rpx;
+    font-weight: bold;
+    margin-bottom: 10rpx;
+    color: white;
+  }
+
+  .subtitle {
+    font-size: 28rpx;
+    opacity: 0.9;
   }
 }
 
-.title {
-  font-size: 36rpx;
-  font-weight: bold;
-  margin-bottom: 10rpx;
-}
-
-.subtitle {
-  font-size: 28rpx;
-}
-
+/* 内容区域 */
 .content {
   background-color: white;
-  border-radius: 10rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+  padding: 30rpx 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  min-height: calc(100vh - 200rpx);
 }
 
+/* 活动标题 */
 .activity-title {
   font-size: 28rpx;
   color: #333;
   text-align: center;
-  margin-bottom: 40rpx;
+  margin-bottom: 30rpx;
   line-height: 1.5;
-  color: #e63946;
-  font-size: 34rpx;
-
+  color: #333;
+  font-weight: 600;
+  padding: 0 20rpx;
 }
 
+/* 得分/完成状态区域 */
 .score-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 30rpx;
+  padding: 30rpx 0;
+  background-color: #f1f5f9;
+  border: 1rpx solid #e2e8f0;
+  border-radius: 15rpx;
+  color: #334155;
+  margin: 0 20rpx 30rpx;
+
+  .completion-message {
+    font-size: 28rpx;
+    margin-bottom: 15rpx;
+    color: #64748b;
+  }
+
+  .score {
+    font-size: 96rpx;
+    font-weight: bold;
+    color: #334155;
+    color: #FF9110;
+    text-shadow: none;
+  }
+
+  .total-score {
+    font-size: 28rpx;
+    color: #64748b;
+    margin-top: 10rpx;
+    /* background-color: rgba(148, 163, 184, 0.2); */
+    padding: 8rpx 20rpx;
+    border-radius: 25rpx;
+    backdrop-filter: none;
+    background-color: #FEF3BE;
+  }
 }
 
-.score {
-  font-size: 80rpx;
-  font-weight: bold;
-  /* color: #e63946; */
-  color: #FF8D07;
-}
-
-.total-score {
-  font-size: 28rpx;
-  color: #C95555;
-  margin-top: 10rpx;
-  background-color: #FEF3BE;
-  padding: 5rpx 15rpx;
-  border-radius: 20rpx;
-}
-
+/* 答题概况 */
 .answer-summary {
   display: flex;
   justify-content: center;
-  margin-bottom: 40rpx;
+  margin-bottom: 30rpx;
+  padding: 0 20rpx;
 }
 
 .summary-item {
   display: flex;
   align-items: baseline;
   gap: 10rpx;
+  background-color: #f0f9ff;
+  padding: 20rpx 30rpx;
+  border-radius: 10rpx;
+  border: 1rpx solid #bae6fd;
 }
 
 .summary-label {
   font-size: 28rpx;
-  color: #666;
+  color: #0284c7;
+  font-weight: 600;
 }
 
 .summary-value {
   font-size: 48rpx;
   font-weight: bold;
-  color: #333;
+  color: #0369a1;
 }
 
 .summary-total {
   font-size: 28rpx;
-  color: #888;
+  color: #64748b;
 }
 
+/* 答题详情展示区 */
 .answer-detail {
   display: flex;
   flex-direction: column;
-  gap: 30rpx;
+  gap: 0;
+  padding: 0 20rpx;
 }
 
+/* 问题项 */
 .question-item {
-  border-bottom: 1rpx solid #e0e0e0;
-  padding-bottom: 30rpx;
+  border-bottom: 1rpx solid #e2e8f0;
+  padding: 30rpx 0;
+  background-color: white;
+  position: relative;
 }
 
 .question-item:last-child {
   border-bottom: none;
 }
 
+/* 问题头部 */
 .question-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 20rpx;
+  gap: 10rpx;
 }
 
 .question-number {
   font-size: 28rpx;
   font-weight: bold;
-  color: #333;
-  margin-right: 10rpx;
+  color: #334155;
+  min-width: 50rpx;
+  flex-shrink: 0;
 }
 
 .question-title {
   font-size: 28rpx;
-  color: #333;
+  color: #334155;
+  font-weight: 600;
+  flex: 1;
+  line-height: 1.5;
 }
 
+/* 选项容器 */
 .options {
   display: flex;
   flex-direction: column;
@@ -362,131 +485,307 @@ export default {
   margin-bottom: 20rpx;
 }
 
+/* 选项样式 */
 .option {
   display: flex;
   align-items: center;
   gap: 15rpx;
-  padding: 15rpx;
-  background-color: #f9f9f9;
-  border-radius: 5rpx;
+  padding: 20rpx;
+  background-color: #f8fafc;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 10rpx;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f1f5f9;
+  }
+
+  &.correct {
+    background-color: #f0fdf4;
+    border-color: #22c55e;
+    color: #22c55e;
+  }
+
+  /* &.selected {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+  } */
+
+  &.wrong-selected {
+    background-color: #fef2f2;
+    border-color: #ef4444;
+    color: #ef4444;
+  }
 }
 
-.option.correct {
-  background-color: #f0f9eb;
-  border: 1rpx solid #c2e7b0;
-}
-
-.option.wrong {
-  background-color: #fff2f0;
-  border: 1rpx solid #ff4d4f;
-}
-
+/* 选项标记 */
 .option-marker {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
+/* 复选框样式 */
 .checkbox {
-  width: 32rpx;
-  height: 32rpx;
-  border: 2rpx solid #d9d9d9;
-  /* border-radius: 50%; */
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 8rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* background-color: white; */
+  background-color: #F6F6F6;
+  transition: all 0.2s ease;
+
+  border: 2rpx solid #cbd5e1;
+  color: #fff;
+
+  &.checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+  }
+
+  &.checked.correct {
+    background-color: #22c55e;
+    border-color: #22c55e;
+  }
+
+  &.checked.wrong {
+    background-color: #ef4444;
+    border-color: #ef4444;
+  }
+
+  text {
+    font-size: 24rpx;
+    font-weight: bold;
+  }
 }
 
-.checkbox.checked {
-  background-color: #52c41a;
-  border-color: #52c41a;
-}
-
-.checkbox.checked.wrong {
-  background-color: #ff4d4f;
-  border-color: #ff4d4f;
-}
-
-.checkbox.checked::after {
-  content: '✓';
-  color: white;
-  font-size: 20rpx;
-  font-weight: bold;
-}
-
+/* 选项文本 */
 .option-text {
   font-size: 26rpx;
-  color: #333;
+  color: #475569;
+  flex: 1;
+  line-height: 1.5;
 }
 
+/* 答题结果 */
 .answer-result {
   display: flex;
   align-items: center;
-  gap: 10rpx;
+  gap: 15rpx;
   margin-bottom: 20rpx;
-  padding: 10rpx 0;
+  padding: 15rpx 0;
+  font-size: 28rpx;
+  font-weight: 600;
+  background-color: #f0f9ff;
+  padding: 20rpx 20rpx;
+  border-radius: 10rpx;
+
+  &.correct {
+    /* color: #16a34a; */
+    .result-icon{
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    }
+  }
+
+  &.wrong {
+    /* color: #dc2626; */
+    .result-icon{
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+  }
+
+  .result-icon {
+    width: 40rpx;
+    height: 40rpx;
+    line-height: 40rpx;
+    text-align: center;
+    font-size: 28rpx;
+    border-radius: 50%;
+    color: #fff;
+  }
+
+  .result-text {
+    flex: 1;
+  }
+
+  .score-change {
+    font-size: 26rpx;
+    font-weight: 600;
+    color: #f59e0b;
+  }
 }
 
-.result-icon {
-  width: 32rpx;
-  height: 32rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20rpx;
-  font-weight: bold;
-}
-
-.correct-icon {
-  background-color: #f0f9eb;
-  color: #52c41a;
-}
-
-.wrong-icon {
-  background-color: #fff2f0;
-  color: #ff4d4f;
-}
-
-.result-text {
-  font-size: 26rpx;
-  font-weight: bold;
-}
-
-.result-text.correct {
-  color: #52c41a;
-}
-
-.result-text.wrong {
-  color: #ff4d4f;
-}
-
-.score-change {
-  font-size: 26rpx;
-  color: #fa8c16;
-  margin-left: auto;
-}
-
+/* 正确答案 */
 .correct-answer {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 10rpx;
-  padding: 15rpx 30rpx;
-  /* background-color: #f0f5ff; */
-  background-color: #F6F6F6;
-  border-radius: 8rpx;
+  padding: 20rpx;
+  background-color: #f8fafc;
+  /* border: 1rpx solid #e2e8f0; */
+  border-radius: 10rpx;
   margin-top: 10rpx;
+
+  .correct-label {
+    font-size: 26rpx;
+    color: #059669;
+    font-weight: bold;
+  }
+
+  .correct-value {
+    font-size: 26rpx;
+    color: #374151;
+    font-weight: 600;
+  }
+
+  .explanation {
+    font-size: 24rpx;
+    color: #64748b;
+    line-height: 1.5;
+    margin-top: 10rpx;
+    padding-top: 10rpx;
+    border-top: 1rpx dashed #cbd5e1;
+  }
 }
 
-.correct-label {
-  font-size: 26rpx;
-  color: #52c41a;
-  font-weight: bold;
+/* 视觉分隔线 */
+.divider {
+  height: 1rpx;
+  background-color: #e2e8f0;
+  margin: 0;
+  width: 100%;
 }
 
-.correct-value {
-  font-size: 26rpx;
-  /* color: #1890ff; */
+/* 底部操作区 */
+.bottom-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-top: 40rpx;
+  padding: 20rpx;
+  background-color: white;
+  border-top: 1rpx solid #e2e8f0;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+
+  .action-button {
+    height: 80rpx;
+    border: none;
+    border-radius: 10rpx;
+    font-size: 32rpx;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &.primary {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+    }
+
+    &.secondary {
+      background-color: #f1f5f9;
+      color: #334155;
+      border: 2rpx solid #e2e8f0;
+
+      &:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 375rpx) {
+  .header {
+    padding: 30rpx 15rpx;
+  }
+
+  .title {
+    font-size: 32rpx;
+  }
+
+  .subtitle {
+    font-size: 24rpx;
+  }
+
+  .score {
+    font-size: 72rpx;
+  }
+
+  .options {
+    padding-left: 40rpx;
+  }
+
+  .option {
+    padding: 15rpx;
+  }
+
+  .question-number {
+    font-size: 24rpx;
+  }
+
+  .question-title {
+    font-size: 24rpx;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .result-container {
+    background-color: #1e293b;
+  }
+
+  .content {
+    background-color: #334155;
+    color: #f8fafc;
+  }
+
+  .question-item {
+    background-color: #334155;
+    border-bottom-color: #475569;
+  }
+
+  .question-title {
+    color: #f8fafc;
+  }
+
+  .option {
+    background-color: #475569;
+    border-color: #64748b;
+    color: #f8fafc;
+
+    &.correct {
+      background-color: #166534;
+      border-color: #22c55e;
+    }
+
+    &.wrong-selected {
+      background-color: #7f1d1d;
+      border-color: #ef4444;
+    }
+  }
+
+  .option-text {
+    color: #f8fafc;
+  }
+
+  .correct-answer {
+    background-color: #475569;
+    border-color: #64748b;
+  }
 }
 </style>

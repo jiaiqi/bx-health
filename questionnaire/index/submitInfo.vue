@@ -73,7 +73,8 @@ export default {
       formData: {
         company: '',
         user_name: '',
-        user_phone: ''
+        user_phone: '',
+        nickname: ''
       }
     };
   },
@@ -94,6 +95,7 @@ export default {
         });
         return;
       }
+      this.formData.nickname = this.formData.user_name
       if (!this.formData.user_phone) {
         uni.showToast({
           title: '请输入联系电话',
