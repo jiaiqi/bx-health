@@ -288,6 +288,8 @@ export default {
 /* 整体容器 */
 .result-container {
   min-height: 100vh;
+  max-width: 750rpx;
+  margin: 0 auto;
   background-color: #f8f9fa;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -585,15 +587,17 @@ export default {
   border-radius: 10rpx;
 
   &.correct {
+
     /* color: #16a34a; */
-    .result-icon{
+    .result-icon {
       background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     }
   }
 
   &.wrong {
+
     /* color: #dc2626; */
-    .result-icon{
+    .result-icon {
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     }
   }

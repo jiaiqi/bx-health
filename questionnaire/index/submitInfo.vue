@@ -1,10 +1,18 @@
 <template>
   <view class="submit-info-container">
-    <view class="header">
+    <!-- <view class="header">
       <view class="title">峥嵘岁月 光辉历程</view>
       <view class="subtitle">红色延安的故事</view>
+    </view> -->
+    <view
+      v-if="customTitleImage"
+      class="title-image"
+    >
+      <image
+        :src="customTitleImage"
+        mode="scaleToFill"
+      />
     </view>
-
     <view class="content">
       <view class="activity-title">
         云长征"互动答题"追寻长征足迹 共绘青春华章"第二届时代青年"重走长征路"徒步活动
@@ -24,10 +32,9 @@
           />
         </view>
 
-        <view class="form-item">
+        <!-- <view class="form-item">
           <view class="label">
             姓名
-            <span class="required">*</span>
           </view>
           <input
             class="input"
@@ -40,7 +47,6 @@
         <view class="form-item">
           <view class="label">
             联系电话
-            <span class="required">*</span>
           </view>
           <input
             class="input"
@@ -48,7 +54,7 @@
             placeholder="请输入"
             v-model="formData.user_phone"
           />
-        </view>
+        </view> -->
       </view>
 
       <view
@@ -70,6 +76,7 @@ export default {
     return {
       activity_no: '',
       options: {},
+      questionnaireData: null,
       formData: {
         company: '',
         user_name: '',
@@ -78,7 +85,48 @@ export default {
       }
     };
   },
+  computed: {
+    customTitleImage() {
+      if (this.questionnaireData?.activity_image) {
+        return this.getImagePath(this.questionnaireData.activity_image, true)
+      }
+    },
+  },
   methods: {
+    getActivityInfo() {
+      const serviceName = 'srvdaq_init_view_select';
+      const url = this.getServiceUrl(this.appName ? this.appName : 'daq', serviceName, 'select');
+      const req = {
+        serviceName: serviceName,
+        colNames: ['*'],
+        condition: [
+          {
+            colName: 'activity_no',
+            ruleType: 'eq',
+            value: this.activity_no
+          },
+        ],
+        page: {
+          pageNo: 1,
+          rownumber: 1
+        }
+      };
+      this.$http.post(url, req).then(res => {
+        if (res.data.state === 'SUCCESS') {
+          this.questionnaireData = res.data.data?.[0] || null
+        } else {
+          uni.showToast({
+            title: res.data.resultMessage || '获取问卷信息失败',
+            icon: 'none'
+          });
+        }
+      }).catch(err => {
+        uni.showToast({
+          title: err.message || '获取问卷信息失败',
+          icon: 'none'
+        });
+      });
+    },
     handleNext() {
       // 验证表单
       if (!this.formData.company) {
@@ -88,24 +136,24 @@ export default {
         });
         return;
       }
-      if (!this.formData.user_name) {
-        uni.showToast({
-          title: '请输入姓名',
-          icon: 'none'
-        });
-        return;
-      }
-      this.formData.nickname = this.formData.user_name
-      if (!this.formData.user_phone) {
-        uni.showToast({
-          title: '请输入联系电话',
-          icon: 'none'
-        });
-        return;
-      }
+      // if (!this.formData.user_name) {
+      //   uni.showToast({
+      //     title: '请输入姓名',
+      //     icon: 'none'
+      //   });
+      //   return;
+      // }
+      // this.formData.nickname = this.formData.user_name
+      // if (!this.formData.user_phone) {
+      //   uni.showToast({
+      //     title: '请输入联系电话',
+      //     icon: 'none'
+      //   });
+      //   return;
+      // }
       // 验证电话号码格式
       const phoneReg = /^1[3-9]\d{9}$/;
-      if (!phoneReg.test(this.formData.user_phone)) {
+      if (this.formData.user_phone && !phoneReg.test(this.formData.user_phone)) {
         uni.showToast({
           title: '请输入正确的手机号码',
           icon: 'none'
@@ -126,6 +174,9 @@ export default {
   onLoad(options) {
     this.activity_no = options.activity_no;
     this.options = options;
+    if (this.activity_no) {
+      this.getActivityInfo()
+    }
   }
 }
 </script>
@@ -137,9 +188,26 @@ export default {
 .submit-info-container {
   min-height: 100vh;
   background-color: #f5f5f5;
-  padding: 20rpx;
   display: flex;
   flex-direction: column;
+  max-width: 750rpx;
+  margin: 0 auto;
+}
+
+.title-image {
+  width: 100%;
+  min-height: 200rpx;
+
+  image {
+    width: 100%;
+    max-height: 300rpx;
+    object-fit: cover;
+  }
+
+  .title {
+    padding: 20rpx 40rpx;
+    text-align: center;
+  }
 }
 
 .header {
@@ -163,7 +231,7 @@ export default {
 
 .content {
   background-color: white;
-  border-radius: 10rpx;
+  /* border-radius: 10rpx; */
   padding: 30rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
   flex: 1;

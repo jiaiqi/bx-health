@@ -8,6 +8,7 @@ let remoteAddress = {
   // serviceAddress: 'https://admin.bxjkw.cn/bxapi', // 健康环境外网
   // serviceAddress: 'https://admin.sxjgrd.cn/bxapi', // 健康环境外网-new
   serviceAddress: 'https://yax.100xsys.cn/bxapi', // 延安行环境外网
+  // serviceAddress: 'http://192.168.0.196/bxapi', // 延安行环境内网
   // serviceAddress: 'http://192.168.0.154:8104', // 健康环境
   // serviceAddress: 'http://192.168.0.28:8104', // 园区环境
   // serviceAddress: 'https://api.100xsys.cn', // http://login.100xsys.cn 接口地址srvms.100xsys.cn

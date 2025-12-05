@@ -26,7 +26,7 @@
     </view>
     <view
       class="title-box"
-      v-else
+      v-else-if="false"
     >
       <view class="flex justify-between align-center">
         <view
@@ -1147,8 +1147,8 @@ export default {
 .page-wrap {
   background-color: #fff;
   overflow: scroll;
-  max-width: 800px;
-  margin: 0 auto 50px;
+  max-width: 750rpx;
+  margin: 0 auto;
   --title-bg: url(../static/topbg.png);
 
   .title-image {
